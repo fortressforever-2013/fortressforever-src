@@ -46,6 +46,7 @@ public:
 	DECLARE_SERVERCLASS();
 
 	virtual void SetModel( const char *szModelName );
+	virtual void SetSkin( int iSkin ) { m_nSkin = iSkin; }
 	virtual void Activate();
 	virtual void Spawn();
 	virtual void Precache();

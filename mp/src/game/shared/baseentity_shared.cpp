@@ -19,9 +19,13 @@
 #include "debugoverlay_shared.h"
 #include "coordsize.h"
 #include "vphysics/performance.h"
+#include "filesystem.h"
+#include "networkvar.h"
 
 #ifdef CLIENT_DLL
 	#include "c_te_effect_dispatch.h"
+	// not ideal but I need this to be able to do ToFFPlayer for the team blood stuff
+	#include "c_ff_player.h"
 #else
 	#include "te_effect_dispatch.h"
 	#include "soundent.h"
@@ -29,6 +33,9 @@
 	#include "player_pickup.h"
 	#include "waterbullet.h"
 	#include "func_break.h"
+
+	// not ideal but I need this to be able to do ToFFPlayer for the team blood stuff
+	#include "ff_player.h"
 
 #ifdef HL2MP
 	#include "te_hl2mp_shotgun_shot.h"
@@ -312,6 +319,28 @@ void CBaseEntity::ParseMapData( CEntityMapData *mapData )
 		} 
 		while ( mapData->GetNextKey(keyName, value) );
 	}
+
+#ifdef GAME_DLL
+	// setup the event action for the output
+	// this is necessary for routing the ouputs to lua
+	for (datamap_t* dmap = GetDataDescMap(); dmap != NULL; dmap = dmap->baseMap)
+	{
+		// search through all the actions in the data description, looking for a match
+		for (int i = 0; i < dmap->dataNumFields; i++)
+		{
+			if (dmap->dataDesc[i].flags & FTYPEDESC_OUTPUT)
+			{
+				const char* szEntName = STRING(GetEntityName());
+				COutputEvent* pEvent = (COutputEvent*)(((int)this) + dmap->dataDesc[i].fieldOffset[TD_OFFSET_NORMAL]);
+
+				char szEvent[2048];
+				Q_snprintf(szEvent, sizeof(szEvent), "%s,%s", szEntName, dmap->dataDesc[i].externalName);
+				pEvent->ParseEventAction(szEvent);
+			}
+		}
+	}
+#endif
+
 }
 
 //-----------------------------------------------------------------------------
@@ -653,8 +682,17 @@ void CBaseEntity::SetPredictionRandomSeed( const CUserCmd *cmd )
 //------------------------------------------------------------------------------
 // Purpose : Base implimentation for entity handling decals
 //------------------------------------------------------------------------------
+ConVar	ffdev_disableentitydecals("ffdev_disableentitydecals", "1", FCVAR_CHEAT | FCVAR_REPLICATED);
+
 void CBaseEntity::DecalTrace( trace_t *pTrace, char const *decalName )
 {
+
+	if (ffdev_disableentitydecals.GetBool())
+	{
+		if (Classify() != CLASS_NONE && Classify() < NUM_AI_CLASSES)
+			return;
+	}
+
 	int index = decalsystem->GetDecalIndexForName( decalName );
 	if ( index < 0 )
 		return;
@@ -1607,6 +1645,8 @@ void CBaseEntity::FireBullets( const FireBulletsInfo_t &info )
 	CAmmoDef*	pAmmoDef	= GetAmmoDef();
 	int			nDamageType	= pAmmoDef->DamageType(info.m_iAmmoType);
 	int			nAmmoFlags	= pAmmoDef->Flags(info.m_iAmmoType);
+
+	float		flDmg = (info.m_iShots ? info.m_flDamage / info.m_iShots : info.m_flDamage);	// |-- Mirv: Split damage up into shots
 	
 	bool bDoServerEffects = true;
 
@@ -1662,9 +1702,11 @@ void CBaseEntity::FireBullets( const FireBulletsInfo_t &info )
 	Vector vecEnd;
 	
 	// Skip multiple entities when tracing
-	CBulletsTraceFilter traceFilter( COLLISION_GROUP_NONE );
+	//CBulletsTraceFilter traceFilter( COLLISION_GROUP_NONE );
+	//Testing if this is what makes sentryguns not damage players with projectile clipping -Green Mushy
+	CTraceFilterSkipTwoEntities traceFilter(this, info.m_pAdditionalIgnoreEnt, COLLISION_GROUP_NONE /*COLLISION_GROUP_PROJECTILE*/);	// |-- Mirv: Count bullets as projectiles so they don't hit weapon bags
 	traceFilter.SetPassEntity( this ); // Standard pass entity for THIS so that it can be easily removed from the list after passing through a portal
-	traceFilter.AddEntityToIgnore( info.m_pAdditionalIgnoreEnt );
+	//traceFilter.AddEntityToIgnore( info.m_pAdditionalIgnoreEnt );
 
 #if defined( HL2_EPISODIC ) && defined( GAME_DLL )
 	// FIXME: We need to emulate this same behavior on the client as well -- jdw
@@ -1830,7 +1872,8 @@ void CBaseEntity::FireBullets( const FireBulletsInfo_t &info )
 
 		// Now hit all triggers along the ray that respond to shots...
 		// Clip the ray to the first collided solid returned from traceline
-		CTakeDamageInfo triggerInfo( pAttacker, pAttacker, info.m_flDamage, nDamageType );
+		//CTakeDamageInfo triggerInfo( pAttacker, pAttacker, info.m_flDamage, nDamageType );
+		CTakeDamageInfo triggerInfo(this, pAttacker, /*info.m_flDamage*/flDmg, nDamageType); // |-- Mirv: Split damage into shots
 		CalculateBulletDamageForce( &triggerInfo, info.m_iAmmoType, vecDir, tr.endpos );
 		triggerInfo.ScaleDamageForce( info.m_flDamageForceScale );
 		triggerInfo.SetAmmoType( info.m_iAmmoType );
@@ -1865,7 +1908,7 @@ void CBaseEntity::FireBullets( const FireBulletsInfo_t &info )
 				bHitWater = HandleShotImpactingWater( info, vecEnd, &traceFilter, &vecTracerDest );
 			}
 
-			float flActualDamage = info.m_flDamage;
+			float flActualDamage = /*info.m_flDamage*/ flDmg;	// |-- Mirv: Split damage into shots
 
 			// If we hit a player, and we have player damage specified, use that instead
 			// Adrian: Make sure to use the currect value if we hit a vehicle the player is currently driving.
@@ -1904,6 +1947,14 @@ void CBaseEntity::FireBullets( const FireBulletsInfo_t &info )
 				CalculateBulletDamageForce( &dmgInfo, info.m_iAmmoType, vecDir, tr.endpos );
 				dmgInfo.ScaleDamageForce( info.m_flDamageForceScale );
 				dmgInfo.SetAmmoType( info.m_iAmmoType );
+
+				// --> Mirv: Quick hack, fix this tomorrow
+				if (tr.m_pEnt->IsPlayer())
+				{
+					dmgInfo.ScaleDamageForce(0.01f);
+				}
+				// <-- Mirv
+
 				tr.m_pEnt->DispatchTraceAttack( dmgInfo, vecDir, &tr );
 			
 				if ( ToBaseCombatCharacter( tr.m_pEnt ) )
@@ -2147,8 +2198,15 @@ void CBaseEntity::TraceAttack( const CTakeDamageInfo &info, const Vector &vecDir
 		
 		if ( blood != DONT_BLEED )
 		{
-			SpawnBlood( vecOrigin, vecDir, blood, info.GetDamage() );// a little surface blood.
-			TraceBleed( info.GetDamage(), vecDir, ptr, info.GetDamageType() );
+			//SpawnBlood( vecOrigin, vecDir, blood, info.GetDamage() );// a little surface blood.
+			//TraceBleed( info.GetDamage(), vecDir, ptr, info.GetDamageType() );
+			// 
+			// Fix blood showing for teammates when FF is off.
+			if (IsPlayer() && g_pGameRules->FCanTakeDamage(ToFFPlayer(this), info.GetAttacker()))
+			{
+				SpawnBlood(vecOrigin, vecDir, blood, info.GetDamage());// a little surface blood.
+				TraceBleed(info.GetDamage(), vecDir, ptr, info.GetDamageType());
+			}
 		}
 	}
 }
@@ -2572,3 +2630,34 @@ bool CBaseEntity::IsToolRecording() const
 #endif
 }
 #endif
+
+#ifdef CLIENT_DLL
+ConVar dump_deletes_cl("dump_deletes_cl", "0");
+ConVar dump_deletes_flush("dump_deletes_flush", "0");
+#endif
+
+
+void CBaseEntity::PrintDeleteInfo()
+{
+	static FileHandle_t m_hClassNameFile = NULL;
+
+#ifdef CLIENT_DLL
+	if (dump_deletes_cl.GetBool())
+	{
+		if (!m_hClassNameFile)
+		{
+			m_hClassNameFile = filesystem->Open("classdump_client.txt", "wt", "MOD");
+		}
+		if (m_hClassNameFile)
+		{
+			const char* classname = GetClassname();
+			char buffer[1024] = {};
+			V_snprintf(buffer, 1024, "%.2f deleted %s, index %d\n",
+				gpGlobals->curtime, classname ? classname : "unknown", entindex());
+			filesystem->Write(buffer, V_strlen(buffer), m_hClassNameFile);
+			if (dump_deletes_flush.GetBool())
+				filesystem->Flush(m_hClassNameFile);
+		}
+	}
+#endif
+}

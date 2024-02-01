@@ -52,6 +52,11 @@
 #define FTENT_USEFASTCOLLISIONS		0x10000000	// Use fast collisions (cl_fasttempentcollision).
 #define FTENT_COLLIDEPROPS			0x20000000	// Collide with the world and props
 
+// --> Mirv: New FF projectile temp entity
+#define	FTENT_FFPROJECTILE		0x04000000	// This is a FF projectile (most likely nail)
+#define FTENT_FFOPTEFFECT		0x08000000	// This projectile's effect is optional
+// <-- Mirv
+
 class C_LocalTempEntity;
 
 typedef int (*pfnDrawHelper)( C_LocalTempEntity *entity, int flags );

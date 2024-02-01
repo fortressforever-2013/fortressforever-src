@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -12,13 +12,10 @@
 #endif
 
 #include <vgui/IScheme.h>
-#include <vgui/KeyCode.h>
+#include <vgui/keycode.h>
 #include <vgui_controls/Frame.h>
-#include <vgui_controls/EditablePanel.h>
 #include <vgui_controls/Button.h>
 #include <vgui_controls/ComboBox.h>
-#include <igameevents.h>
-#include "GameEventListener.h"
 
 #include <game/client/iviewport.h>
 
@@ -40,9 +37,9 @@ class IBaseFileSystem;
 //-----------------------------------------------------------------------------
 // Purpose: Spectator UI
 //-----------------------------------------------------------------------------
-class CSpectatorGUI : public vgui::EditablePanel, public IViewPortPanel
+class CSpectatorGUI : public vgui::Frame, public IViewPortPanel
 {
-	DECLARE_CLASS_SIMPLE( CSpectatorGUI, vgui::EditablePanel );
+	DECLARE_CLASS_SIMPLE( CSpectatorGUI, vgui::Frame );
 
 public:
 	CSpectatorGUI( IViewPort *pViewPort );
@@ -58,7 +55,7 @@ public:
 	
 	// both vgui::Frame and IViewPortPanel define these, so explicitly define them here as passthroughs to vgui
 	vgui::VPANEL GetVPanel( void ) { return BaseClass::GetVPanel(); }
-	virtual bool IsVisible() { return BaseClass::IsVisible(); }
+	virtual bool IsVisible();
 	virtual void SetParent(vgui::VPANEL parent) { BaseClass::SetParent(parent); }
 	virtual void OnThink();
 
@@ -66,10 +63,6 @@ public:
 	virtual int GetBottomBarHeight() { return m_pBottomBarBlank->GetTall(); }
 	
 	virtual bool ShouldShowPlayerLabel( int specmode );
-
-	virtual Color GetBlackBarColor( void ) { return BLACK_BAR_COLOR; }
-
-	virtual const char *GetResFile( void ) { return "Resource/UI/Spectator.res"; }
 	
 protected:
 
@@ -78,8 +71,9 @@ protected:
 	void MoveLabelToFront(const char *textEntryName);
 	void UpdateTimer();
 	void SetLogoImage(const char *image);
+	void UpdateScores( void );
 
-protected:	
+private:	
 	enum { INSET_OFFSET = 2 } ; 
 
 	// vgui overrides
@@ -102,10 +96,10 @@ protected:
 
 
 //-----------------------------------------------------------------------------
-// Purpose: the bottom bar panel, this is a separate panel because it
+// Purpose: the bottom bar panel, this is a seperate panel because it
 // wants mouse input and the main window doesn't
 //----------------------------------------------------------------------------
-class CSpectatorMenu : public vgui::Frame, public IViewPortPanel, public CGameEventListener
+class CSpectatorMenu : public vgui::Frame, public IViewPortPanel
 {
 	DECLARE_CLASS_SIMPLE(  CSpectatorMenu, vgui::Frame );
 
@@ -120,10 +114,10 @@ public:
 	virtual bool NeedsUpdate( void ) { return false; }
 	virtual bool HasInputElements( void ) { return true; }
 	virtual void ShowPanel( bool bShow );
-	virtual void FireGameEvent( IGameEvent *event );
+	virtual void OnThink();
 
 	// both vgui::Frame and IViewPortPanel define these, so explicitly define them here as passthroughs to vgui
-	virtual bool IsVisible() { return BaseClass::IsVisible(); }
+	virtual bool IsVisible();
 	vgui::VPANEL GetVPanel( void ) { return BaseClass::GetVPanel(); }
 	virtual void SetParent(vgui::VPANEL parent) { BaseClass::SetParent(parent); }
 
@@ -136,7 +130,9 @@ private:
 	virtual void PerformLayout();
 
 	void SetViewModeText( const char *text ) { m_pViewOptions->SetText( text ); }
+	void SetPlayerNameText(const wchar_t *text ); 
 	void SetPlayerFgColor( Color c1 ) { m_pPlayerList->SetFgColor(c1); }
+	int  PlayerAddItem( int itemID, wchar_t *name, KeyValues *kv );
 
 	vgui::ComboBox *m_pPlayerList;
 	vgui::ComboBox *m_pViewOptions;
@@ -146,7 +142,7 @@ private:
 	vgui::Button *m_pRightButton;
 
 	IViewPort *m_pViewPort;
-	ButtonCode_t m_iDuckKey;
+	int m_iDuckKey;
 };
 
 extern CSpectatorGUI * g_pSpectatorGUI;

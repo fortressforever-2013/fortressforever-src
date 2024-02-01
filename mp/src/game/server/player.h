@@ -193,6 +193,7 @@ public:
 	virtual int			GetTeamIndex();
 	virtual void		ChangeTeam( int iTeamNum );
 	virtual int			GetFragCount();
+	virtual int			GetFortPointsCount();
 	virtual int			GetDeathCount();
 	virtual bool		IsConnected();
 	virtual int			GetArmorValue();
@@ -223,6 +224,7 @@ public:
 	virtual void SetLocalAngles( const QAngle& angles );
 	virtual const QAngle GetLocalAngles( void );
 	virtual bool IsEFlagSet( int nEFlagMask );
+	virtual void PostClientMessagesSent(void);
 
 	virtual void RunPlayerMove( CBotCmd *ucmd );
 	virtual void SetLastUserCommand( const CBotCmd &cmd );
@@ -240,7 +242,9 @@ public:
 	DECLARE_CLASS( CBasePlayer, CBaseCombatCharacter );
 protected:
 	// HACK FOR BOTS
+#ifdef _DEBUG
 	friend class CBotManager;
+#endif
 	static edict_t *s_PlayerEdict; // must be set before calling constructor
 public:
 	DECLARE_DATADESC();
@@ -451,7 +455,7 @@ public:
 
 	virtual void			OnEmitFootstepSound( const CSoundParameters& params, const Vector& vecOrigin, float fVolume ) {}
 
-	Class_T					Classify ( void );
+	Class_T					Classify(void) { return CLASS_PLAYER; }
 	virtual void			SetAnimation( PLAYER_ANIM playerAnim );
 	void					SetWeaponAnimType( const char *szExtention );
 
@@ -508,6 +512,7 @@ public:
 	bool					UsingStandardWeaponsInVehicle( void );
 	
 	void					AddPoints( int score, bool bAllowNegativeScore );
+	void					AddFortPoints(int score, const char* szDescription);
 	void					AddPointsToTeam( int score, bool bAllowNegativeScore );
 	virtual bool			BumpWeapon( CBaseCombatWeapon *pWeapon );
 	bool					RemovePlayerItem( CBaseCombatWeapon *pItem );
@@ -542,6 +547,8 @@ public:
 	virtual bool			IsUseableEntity( CBaseEntity *pEntity, unsigned int requiredCaps );
 	bool					ClearUseEntity();
 	CBaseEntity				*DoubleCheckUseNPC( CBaseEntity *pNPC, const Vector &vecSrc, const Vector &vecDir );
+
+	CBasePlayer*			MyCharacterPointer(void) { return this; }
 
 
 	// physics interactions
@@ -661,7 +668,9 @@ public:
 
 	// Accessor methods
 	int		FragCount() const		{ return m_iFrags; }
-	int		DeathCount() const		{ return m_iDeaths;}
+	int		FortPointsCount() const { return m_iFortPoints; }
+	int		DeathCount() const		{ return m_iDeaths; }
+	int		AssistsCount() const	{ return m_iAssists; }
 	bool	IsConnected() const		{ return m_iConnected != PlayerDisconnected; }
 	bool	IsDisconnecting() const	{ return m_iConnected == PlayerDisconnecting; }
 	bool	IsSuitEquipped() const	{ return m_Local.m_bWearingSuit; }
@@ -692,6 +701,12 @@ public:
 
 	void	ResetDeathCount();
 	void	IncrementDeathCount( int nCount );
+
+	void	ResetFortPointsCount();
+	void	IncrementFortPointsCount(int nCount);
+
+	void	ResetAsisstsCount();
+	void	IncrementAssistsCount(int nCount);
 
 	void	SetArmorValue( int value );
 	void	IncrementArmorValue( int nCount, int nMaxValue = -1 );
@@ -867,8 +882,9 @@ public:
 	IMPLEMENT_NETWORK_VAR_FOR_DERIVED( m_nNextThinkTick );
 	IMPLEMENT_NETWORK_VAR_FOR_DERIVED( m_vecVelocity );
 	IMPLEMENT_NETWORK_VAR_FOR_DERIVED( m_nWaterLevel );
+	CNetworkVarForDerived(int, m_nButtons);
 	
-	int						m_nButtons;
+	//int						m_nButtons;
 	int						m_afButtonPressed;
 	int						m_afButtonReleased;
 	int						m_afButtonLast;
@@ -885,6 +901,8 @@ public:
 	bool					m_bPredictWeapons; //  user has client side predicted weapons
 	
 	float		GetDeathTime( void ) { return m_flDeathTime; }
+
+	float		m_flNextSpawnDelay; // Mulch: used for kill & force spawning after spawning for first time
 
 	void		ClearZoomOwner( void );
 
@@ -1037,7 +1055,9 @@ private:
 	int						m_lastx, m_lasty;	// These are the previous update's crosshair angles, DON"T SAVE/RESTORE
 
 	int						m_iFrags;
+	int						m_iFortPoints;
 	int						m_iDeaths;
+	int						m_iAssists;
 
 	float					m_flNextDecalTime;// next time this player can spray a decal
 
@@ -1123,6 +1143,7 @@ private:
 
 	float					m_flOldPlayerZ;
 	float					m_flOldPlayerViewOffsetZ;
+	bool					m_bSmoothStair;					// |-- Mirv
 
 	bool					m_bPlayerUnderwater;
 
@@ -1151,6 +1172,14 @@ protected:
 	friend class CHL2GameMovement;
 	friend class CDODGameMovement;
 	friend class CPortalGameMovement;
+	// --> billdoor: allow access to private member variables from our player movement code
+	friend class CFFGameMovement;
+	// <-- billdoor: allow access to private member variables from our player movement code
+
+	// --> Mirv: this was put in by billdoor to access the maxspeed variable
+	friend class CFFPlayer;
+	// <-- Mirv: this was put in by billdoor to access the maxspeed variable
+	friend class CDODGameMovement;
 	
 	// Accessors for gamemovement
 	bool IsDucked( void ) const { return m_Local.m_bDucked; }

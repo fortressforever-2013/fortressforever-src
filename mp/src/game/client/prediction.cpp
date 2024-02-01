@@ -21,6 +21,9 @@
 #include "hud_pdump.h"
 #include "datacache/imdlcache.h"
 
+#include "debugoverlay_shared.h"
+#include "c_ff_player.h"
+
 #ifdef HL2_CLIENT_DLL
 #include "c_basehlplayer.h"
 #endif
@@ -194,6 +197,12 @@ void CPrediction::CheckError( int commands_acknowledged )
 				np.time_to_live = 2.0f;
 
 				engine->Con_NXPrintf( &np, "pred error %6.3f units (%6.3f %6.3f %6.3f)", len, delta.x, delta.y, delta.z );
+
+				// --> Mirv: Draw it on now too
+				int b = clamp((len / 32.0f) * 255, 0, 255);
+				debugoverlay->AddLineOverlay(predicted_origin + Vector(0, 0, 5), origin, b, b, b, false, 5.0f);
+				debugoverlay->AddLineOverlay(predicted_origin - Vector(0, 0, 5), origin, b, b, b, false, 5.0f);
+				// <-- Mirv
 			}
 		}
 	}
@@ -618,6 +627,14 @@ void CPrediction::SetupMove( C_BasePlayer *player, CUserCmd *ucmd, IMoveHelper *
 	move->m_vecOldAngles	= move->m_vecAngles;
 	move->m_nOldButtons		= player->m_Local.m_nOldButtons;
 	move->m_flClientMaxSpeed = player->m_flMaxspeed;
+
+	CFFPlayer* pPlayer = ToFFPlayer(player);
+
+	// Update client max speed if there are speed modifiers active
+	if (pPlayer)
+	{
+		move->m_flClientMaxSpeed *= pPlayer->m_flSpeedModifier;
+	}
 
 	move->m_vecAngles		= ucmd->viewangles;
 	move->m_vecViewAngles	= ucmd->viewangles;

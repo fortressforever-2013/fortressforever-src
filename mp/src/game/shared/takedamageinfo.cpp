@@ -9,6 +9,11 @@
 #include "takedamageinfo.h"
 #include "ammodef.h"
 
+#ifdef GAME_DLL
+#include "ff_entity_system.h"
+#include "ff_lualib_constants.h"
+#endif
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -319,8 +324,9 @@ void CalculateExplosiveDamageForce( CTakeDamageInfo *info, const Vector &vecDir,
 	Vector vecForce = vecDir;
 	VectorNormalize( vecForce );
 	vecForce *= flForceScale;
-	vecForce *= phys_pushscale.GetFloat();
-	vecForce *= flScale;
+	/*vecForce *= phys_pushscale.GetFloat();
+	vecForce *= flScale;*/
+	vecForce *= 10.0f * phys_pushscale.GetFloat();	// |-- Mirv: Keep us consistent with hl2 & other mods
 	info->SetDamageForce( vecForce );
 }
 
@@ -347,7 +353,7 @@ void CalculateMeleeDamageForce( CTakeDamageInfo *info, const Vector &vecMeleeDir
 	info->SetDamagePosition( vecForceOrigin );
 
 	// Calculate an impulse large enough to push a 75kg man 4 in/sec per point of damage
-	float flForceScale = info->GetBaseDamage() * ImpulseScale( 75, 4 );
+	float flForceScale = info->GetBaseDamage() * ImpulseScale( 75, .2 ); // 4 -> .2
 	Vector vecForce = vecMeleeDir;
 	VectorNormalize( vecForce );
 	vecForce *= flForceScale;
@@ -494,3 +500,13 @@ void CTakeDamageInfo::DebugGetDamageTypeString(unsigned int damageType, char *ou
 #define DMG_DIRECT			(1<<28)
 #define DMG_BUCKSHOT		(1<<29)		// not quite a bullet. Little, rounder, different.
 */
+
+#ifdef GAME_DLL
+//-----------------------------------------------------------------------------
+// Purpose: Convert ammo type to lua range
+//-----------------------------------------------------------------------------
+int CTakeDamageInfo::GetAmmoTypeLua(void)
+{
+	return LookupAmmoLua(GetAmmoType());
+}
+#endif

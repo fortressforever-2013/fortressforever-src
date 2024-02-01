@@ -72,6 +72,7 @@ void CEnvHudHint::Precache( void )
 //-----------------------------------------------------------------------------
 void CEnvHudHint::InputShowHudHint( inputdata_t &inputdata )
 {
+#ifdef HL2MP
 	if ( AllPlayers() )
 	{
 		CReliableBroadcastRecipientFilter user;
@@ -102,12 +103,14 @@ void CEnvHudHint::InputShowHudHint( inputdata_t &inputdata )
 			WRITE_STRING( STRING(m_iszMessage) );
 		MessageEnd();
 	}
+#endif
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void CEnvHudHint::InputHideHudHint( inputdata_t &inputdata )
 {
+#ifdef HL2MP
 	if ( AllPlayers() )
 	{
 		CReliableBroadcastRecipientFilter user;
@@ -139,4 +142,5 @@ void CEnvHudHint::InputHideHudHint( inputdata_t &inputdata )
 		WRITE_STRING( STRING(NULL_STRING) );
 		MessageEnd();
 	}
+#endif
 }

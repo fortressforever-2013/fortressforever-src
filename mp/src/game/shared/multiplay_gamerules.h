@@ -136,7 +136,7 @@ public:
 
 // Client damage rules
 	virtual float FlPlayerFallDamage( CBasePlayer *pPlayer );
-	virtual bool  FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker, const CTakeDamageInfo &info );
+	virtual bool  FCanTakeDamage( CBaseEntity *pVictim, CBaseEntity *pAttacker, const CTakeDamageInfo &info );
 	virtual bool AllowDamage( CBaseEntity *pVictim, const CTakeDamageInfo &info );
 
 // Client spawn/respawn control
@@ -256,12 +256,16 @@ protected:
 public:
 	virtual void ChangeLevel( void );
 
-protected:
-	virtual void GoToIntermission( void );
-	virtual void LoadMapCycleFile( void );
-	void ChangeLevelToMap( const char *pszMap );
+	// moving to public so we can use changelevel/gotointermission in lua
+	//===============================
+	virtual void GoToIntermission(void);
+	virtual void LoadMapCycleFile(void);
+	void ChangeLevelToMap(const char* pszMap);
 
 	float m_flIntermissionEndTime;
+	//===============================
+
+protected:
 	static int m_nMapCycleTimeStamp;
 	static int m_nMapCycleindex;
 	static CUtlVector<char*> m_MapList;

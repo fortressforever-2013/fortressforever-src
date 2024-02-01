@@ -51,7 +51,7 @@ ConVar	sv_specnoclip	( "sv_specnoclip", "1", FCVAR_ARCHIVE | FCVAR_NOTIFY | FCVA
 #if defined( CSTRIKE_DLL ) || defined( HL1MP_DLL )
 ConVar	sv_maxspeed		( "sv_maxspeed", "320", FCVAR_NOTIFY | FCVAR_REPLICATED);
 #else
-ConVar	sv_maxspeed		( "sv_maxspeed", "320", FCVAR_NOTIFY | FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY);
+ConVar	sv_maxspeed		("sv_maxspeed", "600", FCVAR_NOTIFY | FCVAR_REPLICATED/* | FCVAR_DEVELOPMENTONLY*/);	// |-- Mirv: A more sane max speed
 #endif // CSTRIKE_DLL
 
 #ifdef _XBOX
@@ -61,7 +61,7 @@ ConVar	sv_maxspeed		( "sv_maxspeed", "320", FCVAR_NOTIFY | FCVAR_REPLICATED | FC
 #if defined( CSTRIKE_DLL ) || defined( HL1MP_DLL )
 	ConVar	sv_accelerate	( "sv_accelerate", "10", FCVAR_NOTIFY | FCVAR_REPLICATED);
 #else
-	ConVar	sv_accelerate	( "sv_accelerate", "10", FCVAR_NOTIFY | FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY);
+	ConVar	sv_accelerate	( "sv_accelerate", "14", FCVAR_NOTIFY | FCVAR_REPLICATED/* | FCVAR_DEVELOPMENTONLY*/);
 #endif // CSTRIKE_DLL
 	
 #endif//_XBOX
@@ -85,7 +85,7 @@ ConVar	sv_rollangle	( "sv_rollangle", "0", FCVAR_NOTIFY | FCVAR_REPLICATED | FCV
 #if defined( DOD_DLL ) || defined( CSTRIKE_DLL ) || defined( HL1MP_DLL )
 ConVar	sv_friction		( "sv_friction","4", FCVAR_NOTIFY | FCVAR_REPLICATED, "World friction." );
 #else
-ConVar	sv_friction		( "sv_friction","4", FCVAR_NOTIFY | FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "World friction." );
+ConVar	sv_friction		( "sv_friction","5", FCVAR_NOTIFY | FCVAR_REPLICATED/* | FCVAR_DEVELOPMENTONLY*/, "World friction." );
 #endif // DOD_DLL || CSTRIKE_DLL
 
 #if defined( CSTRIKE_DLL ) || defined( HL1MP_DLL )

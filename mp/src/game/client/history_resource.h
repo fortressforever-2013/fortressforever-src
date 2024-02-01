@@ -14,7 +14,7 @@
 
 #include <vgui_controls/Panel.h>
 
-enum 
+enum
 {
 	HISTSLOT_EMPTY,
 	HISTSLOT_AMMO,
@@ -35,15 +35,15 @@ class C_BaseCombatWeapon;
 //-----------------------------------------------------------------------------
 class CHudHistoryResource : public CHudElement, public vgui::Panel
 {
-	DECLARE_CLASS_SIMPLE( CHudHistoryResource, vgui::Panel );
+	DECLARE_CLASS_SIMPLE(CHudHistoryResource, vgui::Panel);
 private:
-	struct HIST_ITEM 
+	struct HIST_ITEM
 	{
-		HIST_ITEM() 
-		{ 
+		HIST_ITEM()
+		{
 			// init this here, because the code that overwrites previous history items will use this
 			// to check to see if the item is empty
-			DisplayTime = 0.0f; 
+			DisplayTime = 0.0f;
 		}
 		int type;
 		float DisplayTime;  // the time at which this item should be removed from the history
@@ -51,32 +51,32 @@ private:
 		int iId;
 		CHandle< C_BaseCombatWeapon > m_hWeapon;
 
-		CHudTexture *icon;
+		CHudTexture* icon;
 	};
 
 	CUtlVector<HIST_ITEM> m_PickupHistory;
 
 public:
 
-	CHudHistoryResource( const char *pElementName );
+	CHudHistoryResource(const char* pElementName);
 
 	// CHudElement overrides
-	virtual void Init( void );
-	virtual void Reset( void );
-	virtual bool ShouldDraw( void );
-	virtual void Paint( void );
+	virtual void Init(void);
+	virtual void Reset(void);
+	virtual bool ShouldDraw(void);
+	virtual void Paint(void);
 
-	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
+	virtual void ApplySchemeSettings(vgui::IScheme* pScheme);
 
-	void	AddToHistory( int iType, int iId, int iCount = 0 );
-	void	AddToHistory( int iType, const char *szName, int iCount = 0 );
-	void	AddToHistory( C_BaseCombatWeapon *weapon );
-	void	MsgFunc_ItemPickup( bf_read &msg );
-	void	MsgFunc_AmmoDenied( bf_read &msg );
-	
-	void	CheckClearHistory( void );
-	void	SetHistoryGap( int iNewHistoryGap );
-	void	AddIconToHistory( int iType, int iId, C_BaseCombatWeapon *weapon, int iCount, CHudTexture *icon );
+	void	AddToHistory(int iType, int iId, int iCount = 0);
+	void	AddToHistory(int iType, const char* szName, int iCount = 0);
+	void	AddToHistory(C_BaseCombatWeapon* weapon);
+	void	MsgFunc_ItemPickup(bf_read& msg);
+	void	MsgFunc_AmmoDenied(bf_read& msg);
+
+	void	CheckClearHistory(void);
+	void	SetHistoryGap(int iNewHistoryGap);
+	void	AddIconToHistory(int iType, int iId, C_BaseCombatWeapon* weapon, int iCount, CHudTexture* icon);
 
 private:
 	// these vars are for hl1-port compatibility
@@ -86,11 +86,18 @@ private:
 	wchar_t m_wcsAmmoFullMsg[16];
 	bool	m_bNeedsDraw;
 
-	CPanelAnimationVarAliasType( float, m_flHistoryGap, "history_gap", "42", "proportional_float" );
-	CPanelAnimationVarAliasType( float, m_flIconInset, "icon_inset", "28", "proportional_float" );
-	CPanelAnimationVarAliasType( float, m_flTextInset, "text_inset", "26", "proportional_float" );
-	CPanelAnimationVar( vgui::HFont, m_hNumberFont, "NumberFont", "HudNumbersSmall" );
-	CPanelAnimationVar( vgui::HFont, m_hTextFont, "TextFont", "Default" );
+	CHudTexture* m_pHudAmmoTypes[MAX_AMMO_TYPES];	// |-- Mirv: Generic ammo icons
+
+	CPanelAnimationVarAliasType(float, m_flHistoryGap, "history_gap", "42", "proportional_float");
+	CPanelAnimationVarAliasType(float, m_flIconInset, "icon_inset", "28", "proportional_float");
+	CPanelAnimationVarAliasType(float, m_flTextInset, "text_inset", "26", "proportional_float");
+	CPanelAnimationVar(vgui::HFont, m_hNumberFont, "NumberFont", "HudNumbersSmall");
+	CPanelAnimationVar(vgui::HFont, m_hTextFont, "TextFont", "Default");
+
+	// --> Mirv: Added for icons
+	CPanelAnimationVarAliasType(float, m_iIconHeight, "icon_height", "20", "proportional_float");
+	CPanelAnimationVarAliasType(float, m_iIconWidth, "icon_width", "20", "proportional_float");
+	// <-- Mirv: Added for icons
 };
 
 #endif // HISTORY_RESOURCE_H

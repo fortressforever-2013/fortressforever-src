@@ -10,6 +10,7 @@
 #pragma once
 #endif
 
+#include "locksounds.h"
 
 class CBaseButton : public CBaseToggle
 {
@@ -23,6 +24,14 @@ public:
 	void RotSpawn( void );
 	bool KeyValue( const char *szKeyName, const char *szValue );
 	int DrawDebugTextOverlays();
+
+	// moved from protected to public
+	// Input handlers
+	void InputLock(inputdata_t& inputdata);
+	void InputUnlock(inputdata_t& inputdata);
+	void InputPress(inputdata_t& inputdata);
+	void InputPressIn(inputdata_t& inputdata);
+	void InputPressOut(inputdata_t& inputdata);
 
 protected:
 
@@ -40,13 +49,6 @@ protected:
 
 	virtual void Lock();
 	virtual void Unlock();
-
-	// Input handlers
-	void InputLock( inputdata_t &inputdata );
-	void InputUnlock( inputdata_t &inputdata );
-	void InputPress( inputdata_t &inputdata );
-	void InputPressIn( inputdata_t &inputdata );
-	void InputPressOut( inputdata_t &inputdata );
 
 	virtual int OnTakeDamage( const CTakeDamageInfo &info );
 	

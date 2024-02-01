@@ -23,7 +23,7 @@ public:
 
 	// Called each frame to determine which players are allowed to hear each other.	This overrides
 	// whatever squelch settings players have.
-	virtual bool		CanPlayerHearPlayer(CBasePlayer *pListener, CBasePlayer *pTalker, bool &bProximity ) = 0;
+	virtual bool		CanPlayerHearPlayer(CBasePlayer* pListener, CBasePlayer* pTalker, bool& bProximity ) = 0;
 };
 
 

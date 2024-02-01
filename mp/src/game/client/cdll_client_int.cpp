@@ -151,7 +151,24 @@
 #include "fbxsystem/fbxsystem.h"
 #endif
 
+// BEG: Added by Mulchman for team menu at level start up
+#include <game\client\iviewport.h>
+// END: Added by Mulchman for team menu at level start up
+
+// <-- FF
+#include "ff_cdll_client_int.h"
+extern CFFClient gFFClient;
+#include "ff_vieweffects.h"
+// --> FF
+
+#include "ff_discordman.h"
+
+// to solve the conflicts at line 411 and 420
+#undef CreateEvent
+
 extern vgui::IInputInternal *g_InputInternal;
+
+extern ConVar sv_motd_enable;
 
 //=============================================================================
 // HPE_BEGIN
@@ -344,6 +361,13 @@ static ConVar s_cl_load_hl1_content("cl_load_hl1_content", "0", FCVAR_ARCHIVE, "
 bool g_bLevelInitialized;
 bool g_bTextMode = false;
 class IClientPurchaseInterfaceV2 *g_pClientPurchaseInterface = (class IClientPurchaseInterfaceV2 *)(&g_bTextMode + 156);
+
+// --> Mirv: For the hud hints loading/saving & effects control
+extern void HudHintLoad(const char* pMapName);
+extern void HudHintSave();
+
+extern void ClearAllowedEffects();
+// <-- Mirv
 
 static ConVar *g_pcv_ThreadMode = NULL;
 
@@ -608,158 +632,12 @@ void DisplayBoneSetupEnts()
 #endif
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: engine to client .dll interface
-//-----------------------------------------------------------------------------
-class CHLClient : public IBaseClientDLL
-{
-public:
-	CHLClient();
-
-	virtual int						Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physicsFactory, CGlobalVarsBase *pGlobals );
-
-	virtual void					PostInit();
-	virtual void					Shutdown( void );
-
-	virtual bool					ReplayInit( CreateInterfaceFn fnReplayFactory );
-	virtual bool					ReplayPostInit();
-
-	virtual void					LevelInitPreEntity( const char *pMapName );
-	virtual void					LevelInitPostEntity();
-	virtual void					LevelShutdown( void );
-
-	virtual ClientClass				*GetAllClasses( void );
-
-	virtual int						HudVidInit( void );
-	virtual void					HudProcessInput( bool bActive );
-	virtual void					HudUpdate( bool bActive );
-	virtual void					HudReset( void );
-	virtual void					HudText( const char * message );
-
-	// Mouse Input Interfaces
-	virtual void					IN_ActivateMouse( void );
-	virtual void					IN_DeactivateMouse( void );
-	virtual void					IN_Accumulate( void );
-	virtual void					IN_ClearStates( void );
-	virtual bool					IN_IsKeyDown( const char *name, bool& isdown );
-	virtual void					IN_OnMouseWheeled( int nDelta );
-	// Raw signal
-	virtual int						IN_KeyEvent( int eventcode, ButtonCode_t keynum, const char *pszCurrentBinding );
-	virtual void					IN_SetSampleTime( float frametime );
-	// Create movement command
-	virtual void					CreateMove ( int sequence_number, float input_sample_frametime, bool active );
-	virtual void					ExtraMouseSample( float frametime, bool active );
-	virtual bool					WriteUsercmdDeltaToBuffer( bf_write *buf, int from, int to, bool isnewcommand );	
-	virtual void					EncodeUserCmdToBuffer( bf_write& buf, int slot );
-	virtual void					DecodeUserCmdFromBuffer( bf_read& buf, int slot );
-
-
-	virtual void					View_Render( vrect_t *rect );
-	virtual void					RenderView( const CViewSetup &view, int nClearFlags, int whatToDraw );
-	virtual void					View_Fade( ScreenFade_t *pSF );
-	
-	virtual void					SetCrosshairAngle( const QAngle& angle );
-
-	virtual void					InitSprite( CEngineSprite *pSprite, const char *loadname );
-	virtual void					ShutdownSprite( CEngineSprite *pSprite );
-
-	virtual int						GetSpriteSize( void ) const;
-
-	virtual void					VoiceStatus( int entindex, qboolean bTalking );
-
-	virtual void					InstallStringTableCallback( const char *tableName );
-
-	virtual void					FrameStageNotify( ClientFrameStage_t curStage );
-
-	virtual bool					DispatchUserMessage( int msg_type, bf_read &msg_data );
-
-	// Save/restore system hooks
-	virtual CSaveRestoreData  *SaveInit( int size );
-	virtual void			SaveWriteFields( CSaveRestoreData *, const char *, void *, datamap_t *, typedescription_t *, int );
-	virtual void			SaveReadFields( CSaveRestoreData *, const char *, void *, datamap_t *, typedescription_t *, int );
-	virtual void			PreSave( CSaveRestoreData * );
-	virtual void			Save( CSaveRestoreData * );
-	virtual void			WriteSaveHeaders( CSaveRestoreData * );
-	virtual void			ReadRestoreHeaders( CSaveRestoreData * );
-	virtual void			Restore( CSaveRestoreData *, bool );
-	virtual void			DispatchOnRestore();
-	virtual void			WriteSaveGameScreenshot( const char *pFilename );
-
-	// Given a list of "S(wavname) S(wavname2)" tokens, look up the localized text and emit
-	//  the appropriate close caption if running with closecaption = 1
-	virtual void			EmitSentenceCloseCaption( char const *tokenstream );
-	virtual void			EmitCloseCaption( char const *captionname, float duration );
-
-	virtual CStandardRecvProxies* GetStandardRecvProxies();
-
-	virtual bool			CanRecordDemo( char *errorMsg, int length ) const;
-
-	virtual void			OnDemoRecordStart( char const* pDemoBaseName );
-	virtual void			OnDemoRecordStop();
-	virtual void			OnDemoPlaybackStart( char const* pDemoBaseName );
-	virtual void			OnDemoPlaybackStop();
-
-	virtual bool			ShouldDrawDropdownConsole();
-
-	// Get client screen dimensions
-	virtual int				GetScreenWidth();
-	virtual int				GetScreenHeight();
-
-	// save game screenshot writing
-	virtual void			WriteSaveGameScreenshotOfSize( const char *pFilename, int width, int height, bool bCreatePowerOf2Padded/*=false*/, bool bWriteVTF/*=false*/ );
-
-	// Gets the location of the player viewpoint
-	virtual bool			GetPlayerView( CViewSetup &playerView );
-
-	// Matchmaking
-	virtual void			SetupGameProperties( CUtlVector< XUSER_CONTEXT > &contexts, CUtlVector< XUSER_PROPERTY > &properties );
-	virtual uint			GetPresenceID( const char *pIDName );
-	virtual const char		*GetPropertyIdString( const uint id );
-	virtual void			GetPropertyDisplayString( uint id, uint value, char *pOutput, int nBytes );
-	virtual void			StartStatsReporting( HANDLE handle, bool bArbitrated );
-
-	virtual void			InvalidateMdlCache();
-
-	virtual void			ReloadFilesInList( IFileList *pFilesToReload );
-
-	// Let the client handle UI toggle - if this function returns false, the UI will toggle, otherwise it will not.
-	virtual bool			HandleUiToggle();
-
-	// Allow the console to be shown?
-	virtual bool			ShouldAllowConsole();
-
-	// Get renamed recv tables
-	virtual CRenamedRecvTableInfo	*GetRenamedRecvTableInfos();
-
-	// Get the mouthinfo for the sound being played inside UI panels
-	virtual CMouthInfo		*GetClientUIMouthInfo();
-
-	// Notify the client that a file has been received from the game server
-	virtual void			FileReceived( const char * fileName, unsigned int transferID );
-
-	virtual const char* TranslateEffectForVisionFilter( const char *pchEffectType, const char *pchEffectName );
-	
-	virtual void			ClientAdjustStartSoundParams( struct StartSoundParams_t& params );
-	
-	// Returns true if the disconnect command has been handled by the client
-	virtual bool DisconnectAttempt( void );
-public:
-	void PrecacheMaterial( const char *pMaterialName );
-
-	virtual bool IsConnectedUserInfoChangeAllowed( IConVar *pCvar );
-
-private:
-	void UncacheAllMaterials( );
-	void ResetStringTablePointers();
-
-	CUtlVector< IMaterial * > m_CachedMaterials;
-};
-
-
-CHLClient gHLClient;
-IBaseClientDLL *clientdll = &gHLClient;
-
-EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CHLClient, IBaseClientDLL, CLIENT_DLL_INTERFACE_VERSION, gHLClient );
+// Class definition moved to cdll_client_int.h, so that we can inherit from it
+// FF sets its own version of these variables
+//CHLClient gHLClient;
+//IBaseClientDLL *clientdll = &gHLClient;
+//
+//EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CHLClient, IBaseClientDLL, CLIENT_DLL_INTERFACE_VERSION, gHLClient );
 
 
 //-----------------------------------------------------------------------------
@@ -767,7 +645,7 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CHLClient, IBaseClientDLL, CLIENT_DLL_INTERFA
 //-----------------------------------------------------------------------------
 void PrecacheMaterial( const char *pMaterialName )
 {
-	gHLClient.PrecacheMaterial( pMaterialName );
+	gFFClient.PrecacheMaterial( pMaterialName );
 }
 
 //-----------------------------------------------------------------------------
@@ -851,6 +729,7 @@ bool IsEngineThreaded()
 	}
 	return false;
 }
+
 
 //-----------------------------------------------------------------------------
 // Constructor
@@ -1004,6 +883,18 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 	if (!Initializer::InitializeAllObjects())
 		return false;
 
+	// --> Mirv: Default value for cl_updaterate up to 33
+	ConVar* cl_updaterate = cvar->FindVar("cl_updaterate");
+	ConVar* cl_cmdrate = cvar->FindVar("cl_cmdrate");
+	cl_updaterate->SetValue(66);
+	cl_cmdrate->SetValue(66);
+
+	// Turn off r_dynamic until our wrapper sets it
+	// ConVar *r_dynamic = cvar->FindVar("r_dynamic");
+	// r_dynamic->SetValue(0);
+	// <-- Mirv
+	// there are lots of dlight options now, so nevermind -- Jon
+
 	if (!ParticleMgr()->Init(MAX_TOTAL_PARTICLES, materials))
 		return false;
 
@@ -1070,6 +961,7 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 
 	view->Init();
 	vieweffects->Init();
+	ffvieweffects->Init();	// |-- Mirv
 
 	C_BaseTempEntity::PrecacheTempEnts();
 
@@ -1233,6 +1125,7 @@ void CHLClient::Shutdown( void )
 	DisconnectDataModel();
 	ShutdownFbx();
 #endif
+
 	
 	// This call disconnects the VGui libraries which we rely on later in the shutdown path, so don't do it
 //	DisconnectTier3Libraries( );
@@ -1304,6 +1197,12 @@ void CHLClient::HudUpdate( bool bActive )
 	// I don't think this is necessary any longer, but I will leave it until
 	// I can check into this further.
 	C_BaseTempEntity::CheckDynamicTempEnts();
+
+	// FF: added discord frame run so we can initialize discord sitting
+	// at the main menu. otherwise it will not initialize until we join a 
+	// server , breaking join-from-discord functionality. this might
+	// be better in a game system
+	_discord.RunFrame();
 
 #ifdef SIXENSE
 	// If we're not connected, update sixense so we can move the mouse cursor when in the menus
@@ -1599,6 +1498,13 @@ void CHLClient::LevelInitPreEntity( char const* pMapName )
 	input->LevelInit();
 
 	vieweffects->LevelInit();
+
+	ffvieweffects->LevelInit();	// |-- Mirv
+
+	// --> Mirv: Initialise hud hints & clear effect data
+	HudHintLoad(pMapName);
+	ClearAllowedEffects();
+	// <-- Mirv
 	
 	//Tony; loadup per-map manifests.
 	ParseParticleEffectsMap( pMapName, true );
@@ -1669,6 +1575,26 @@ void CHLClient::LevelInitPostEntity( )
 	IGameSystem::LevelInitPostEntityAllSystems();
 	C_PhysPropClientside::RecreateAll();
 	internalCenterPrint->Clear();
+
+	if (!engine->IsHLTV())
+	{
+		// BEG: Added by Mulchman for team menu
+		// Show the team menu selection every time we start a level
+		gViewPortInterface->ShowPanel(PANEL_TEAM, true);
+	}
+	// Show the class menu selection every time we start a level
+	//gViewPortInterface->ShowPanel( PANEL_CLASS, true );
+	if (!engine->IsHLTV() || (engine->IsHLTV() && !engine->IsPlayingDemo()))
+	{
+		if (sv_motd_enable.GetBool())
+			gViewPortInterface->ShowPanel(PANEL_INFO, true);
+		// Pop the info panel back up above the team change menu
+		// --> Mirv: Don't show this panel anymore
+		//IViewPortPanel *pPanel = gViewPortInterface->FindPanelByName( PANEL_INFO );
+		//if( pPanel )
+		//   pPanel->ShowPanel( true );
+		// <-- Mirv
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1737,6 +1663,17 @@ void CHLClient::LevelShutdown( void )
 
 	gHUD.LevelShutdown();
 
+	// --> Mirv: Initialise hud hints
+	HudHintSave();
+	// <-- Mirv
+
+	//-- Added by L0ki --
+	// Hide these panels so the game doesnt crash on us
+	gViewPortInterface->ShowPanel(PANEL_INFO, false);
+	gViewPortInterface->ShowPanel(PANEL_TEAM, false);
+	gViewPortInterface->ShowPanel(PANEL_CLASS, false);
+	gViewPortInterface->ShowPanel(PANEL_MAP, false);
+
 	internalCenterPrint->Clear();
 
 	messagechars->Clear();
@@ -1751,6 +1688,9 @@ void CHLClient::LevelShutdown( void )
 #ifdef _XBOX
 	ReleaseRenderTargets();
 #endif
+
+	// FF: reset discord state since we're no longer in a map
+	_discord.Reset();
 
 	// string tables are cleared on disconnect from a server, so reset our global pointers to NULL
 	ResetStringTablePointers();
@@ -1828,7 +1768,7 @@ void CHLClient::VoiceStatus( int entindex, qboolean bTalking )
 void OnMaterialStringTableChanged( void *object, INetworkStringTable *stringTable, int stringNumber, const char *newString, void const *newData )
 {
 	// Make sure this puppy is precached
-	gHLClient.PrecacheMaterial( newString );
+	gFFClient.PrecacheMaterial( newString );
 	RequestCacheUsedMaterials();
 }
 
@@ -2646,3 +2586,14 @@ CSteamID GetSteamIDForPlayerIndex( int iPlayerIndex )
 }
 
 #endif
+
+// Wrapper CVAR for an archiveable r_dynamic
+void FF_Dynamic_Callback(IConVar* var, const char* pOldValue, float flOldValue)
+{
+	ConVarRef r_dynamic_ff(var->GetName());
+	ConVar* c = cvar->FindVar("r_dynamic");
+	if (c)
+		c->SetValue(r_dynamic_ff.GetString());
+}
+
+ConVar r_dynamic_ff("r_dynamic_ff", "1", FCVAR_ARCHIVE, "", FF_Dynamic_Callback);

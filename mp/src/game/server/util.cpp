@@ -37,6 +37,12 @@
 #include "util.h"
 #include "cdll_int.h"
 
+#include "networkstringtable_gamedll.h"
+
+#include "ff_scriptman.h"
+#include "ff_luacontext.h"
+
+
 #ifdef PORTAL
 #include "PortalSimulation.h"
 //#include "Portal_PhysicsEnvironmentMgr.h"
@@ -591,6 +597,33 @@ CBasePlayer *UTIL_PlayerBySteamID( const CSteamID &steamID )
 	return NULL;
 }
 
+CBasePlayer* UTIL_PlayerBySteamID(const char *steamID)
+{
+	if (!steamID || !steamID[0])
+		return NULL;
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBasePlayer* pPlayer = UTIL_PlayerByIndex(i);
+
+		if (!pPlayer)
+			continue;
+
+		if (!pPlayer->IsConnected())
+			continue;
+
+		if (!engine)
+			continue;
+
+		if (Q_stricmp(engine->GetPlayerNetworkIDString(pPlayer->edict()), steamID) == 0)
+		{
+			return pPlayer;
+		}
+	}
+
+	return NULL;
+}
+
 CBasePlayer* UTIL_PlayerByName( const char *name )
 {
 	if ( !name || !name[0] )
@@ -1092,6 +1125,7 @@ void UTIL_HudMessageAll( const hudtextparms_t &textparms, const char *pMessage )
 
 void UTIL_HudHintText( CBaseEntity *pEntity, const char *pMessage )
 {
+#ifdef HL2MP
 	if ( !pEntity )
 		return;
 
@@ -1101,6 +1135,7 @@ void UTIL_HudHintText( CBaseEntity *pEntity, const char *pMessage )
 		WRITE_BYTE( 1 );	// one string
 		WRITE_STRING( pMessage );
 	MessageEnd();
+#endif
 }
 
 void UTIL_ClientPrintFilter( IRecipientFilter& filter, int msg_dest, const char *msg_name, const char *param1, const char *param2, const char *param3, const char *param4 )
@@ -3271,6 +3306,8 @@ void CC_CollisionTest( const CCommand &args )
 	partition->ReportStats( "" );
 	int i;
 	CBaseEntity *pSpot = gEntList.FindEntityByClassname( NULL, "info_player_start");
+	if (!pSpot)
+		return;
 	Vector start = pSpot->GetAbsOrigin();
 	static Vector *targets = NULL;
 	static bool first = true;
@@ -3366,6 +3403,26 @@ void CC_CollisionTest( const CCommand &args )
 }
 static ConCommand collision_test("collision_test", CC_CollisionTest, "Tests collision system", FCVAR_CHEAT );
 
+bool Util_AddDownload(const char* pszFile)
+{
+	INetworkStringTable* pDownloadablesTable = networkstringtable->FindTable("downloadables");
 
+	bool bSuccess = false;
+	if (pDownloadablesTable)
+	{
+		bool bSave = engine->LockNetworkStringTables(false);
+
+		//Don't add duplicates.
+		if (pDownloadablesTable->FindStringIndex(pszFile) == INVALID_STRING_INDEX)
+		{
+			// 2013-CHANGELATER
+			// NOTES: change later if needed
+			pDownloadablesTable->AddString(engine->IsDedicatedServer(), pszFile, strlen(pszFile) + 1);
+			bSuccess = true;
+		}
+		engine->LockNetworkStringTables(bSave);
+	}
+	return bSuccess;
+}
 
 

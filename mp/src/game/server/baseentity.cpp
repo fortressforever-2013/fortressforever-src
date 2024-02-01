@@ -63,6 +63,11 @@
 #include "tier1/utlstring.h"
 #include "utlhashtable.h"
 
+#include "SpriteTrail.h"
+
+#include "ff_luacontext.h" // FF
+#include "ff_scriptman.h" // FF
+
 #if defined( TF_DLL )
 #include "tf_gamerules.h"
 #endif
@@ -283,6 +288,7 @@ IMPLEMENT_SERVERCLASS_ST_NOBASE( CBaseEntity, DT_BaseEntity )
 	SendPropEHandle (SENDINFO(m_hEffectEntity)),
 	SendPropEHandle (SENDINFO_NAME(m_hMoveParent, moveparent)),
 	SendPropInt		(SENDINFO(m_iParentAttachment), NUM_PARENTATTACHMENT_BITS, SPROP_UNSIGNED),
+	SendPropInt		(SENDINFO(m_takedamage), 3, SPROP_UNSIGNED),
 
 	SendPropInt		(SENDINFO_NAME( m_MoveType, movetype ), MOVETYPE_MAX_BITS, SPROP_UNSIGNED ),
 	SendPropInt		(SENDINFO_NAME( m_MoveCollide, movecollide ), MOVECOLLIDE_MAX_BITS, SPROP_UNSIGNED ),
@@ -1492,14 +1498,16 @@ int CBaseEntity::TakeDamage( const CTakeDamageInfo &inputInfo )
 	{
 		CTakeDamageInfo info = inputInfo;
 		
+		// --> Mirv: No scaling
 		// Scale the damage by the attacker's modifier.
-		if ( info.GetAttacker() )
+		/*if ( info.GetAttacker() )
 		{
 			info.ScaleDamage( info.GetAttacker()->GetAttackDamageScale( this ) );
-		}
+		}*/
 
 		// Scale the damage by my own modifiers
-		info.ScaleDamage( GetReceivedDamageScale( info.GetAttacker() ) );
+		//info.ScaleDamage( GetReceivedDamageScale( info.GetAttacker() ) );
+		// <-- Mirv: No scaling
 
 		//Msg("%s took %.2f Damage, at %.2f\n", GetClassname(), info.GetDamage(), gpGlobals->curtime );
 
@@ -2624,6 +2632,8 @@ void CBaseEntity::PhysicsRelinkChildren( float dt )
 
 void CBaseEntity::PhysicsTouchTriggers( const Vector *pPrevAbsOrigin )
 {
+	CollisionProp()->SetSurroundingBoundsType(USE_OBB_COLLISION_BOUNDS);	// |-- Mirv: Use correct bbox for physics
+
 	edict_t *pEdict = edict();
 	if ( pEdict && !IsWorld() )
 	{
@@ -2653,6 +2663,22 @@ void CBaseEntity::PhysicsTouchTriggers( const Vector *pPrevAbsOrigin )
 			engine->TriggerMoved( pEdict, sm_bAccurateTriggerBboxChecks );
 		}
 	}
+
+	//Vector(-16, -16, -18 ),         // m_vDuckHullMin
+	//Vector( 16,  16,  18 ),         // m_vDuckHullMax
+	//Vector( 0, 0, 12 ),            // m_vDuckView         
+
+	// --> Mirv: Fix for player going out of bbox when crouching
+	// If ducked then inflate to roughly twice crouching bbox
+	if (GetFlags() & FL_DUCKING)
+	{
+		Vector absMin = Vector(-32, -32, -18);
+		Vector absMax = Vector(32, 32, 36);
+
+		CollisionProp()->SetSurroundingBoundsType(USE_SPECIFIED_BOUNDS, &absMin, &absMax);
+	}
+	// <-- Mirv
+
 }
 
 void CBaseEntity::VPhysicsShadowCollision( int index, gamevcollisionevent_t *pEvent )
@@ -2942,12 +2968,6 @@ void CC_AI_LOS_Debug( IConVar *var, const char *pOldString, float flOldValue )
 	}
 }
 ConVar ai_debug_los("ai_debug_los", "0", FCVAR_CHEAT, "NPC Line-Of-Sight debug mode. If 1, solid entities that block NPC LOC will be highlighted with white bounding boxes. If 2, it'll show non-solid entities that would do it if they were solid.", CC_AI_LOS_Debug );
-
-
-Class_T CBaseEntity::Classify ( void )
-{ 
-	return CLASS_NONE;
-}
 
 float CBaseEntity::GetAutoAimRadius()
 {
@@ -3539,6 +3559,12 @@ int	CBaseEntity::SetTransmitState( int nFlag)
 
 int CBaseEntity::UpdateTransmitState()
 {
+	// --> FF
+	// always transmit if you're an objective
+	if (m_ObjectivePlayerRefs.Count() > 0)
+		return SetTransmitState(FL_EDICT_ALWAYS);
+	// <-- FF
+	// 
 	// If you get this assert, you should be calling DispatchUpdateTransmitState
 	// instead of UpdateTransmitState.
 	Assert( g_nInsideDispatchUpdateTransmitState > 0 );
@@ -3896,6 +3922,17 @@ ConVar ent_messages_draw( "ent_messages_draw", "0", FCVAR_CHEAT, "Visualizes all
 //-----------------------------------------------------------------------------
 bool CBaseEntity::AcceptInput( const char *szInputName, CBaseEntity *pActivator, CBaseEntity *pCaller, variant_t Value, int outputID )
 {
+	// pass the event to script
+	CFFLuaSC hInput;
+	if (pActivator) // just in case
+		hInput.Push(pActivator);
+	if (pCaller) // just in case
+		hInput.Push(pCaller);
+	char buf[512];
+	Q_strncpy(buf, szInputName, sizeof(buf));
+	Q_strlower(buf);
+	_scriptman.RunPredicates_LUA(this, &hInput, buf);
+
 	if ( ent_messages_draw.GetBool() )
 	{
 		if ( pCaller != NULL )
@@ -3968,6 +4005,13 @@ bool CBaseEntity::AcceptInput( const char *szInputName, CBaseEntity *pActivator,
 						data.nOutputID = outputID;
 
 						(this->*pfnInput)( data );
+
+						//// pass the event to script
+						//CFFLuaSC sc;
+						//sc.Push(pActivator);
+						//sc.Push(pCaller);
+						//sc.CallFunction(this, szInputName);
+
 					}
 					else if ( dmap->dataDesc[i].flags & FTYPEDESC_KEY )
 					{
@@ -3987,6 +4031,15 @@ bool CBaseEntity::AcceptInput( const char *szInputName, CBaseEntity *pActivator,
 					return true;
 				}
 			}
+			else if (dmap->dataDesc[i].flags & FTYPEDESC_OUTPUT)
+			{
+				// pass the event to script
+				/*CFFLuaSC sc;
+				sc.Push(pActivator);
+				sc.Push(pCaller);
+				sc.CallFunction(this, szInputName);*/
+			}
+
 		}
 	}
 
@@ -4322,6 +4375,22 @@ void CBaseEntity::SetModel( const char *szModelName )
 		Msg( "Setting CBaseEntity to non-brush model %s\n", szModelName );
 	}
 	UTIL_SetModel( this, szModelName );
+}
+
+void CBaseEntity::SetModel(const char* szModelName, int iSkin)
+{
+	SetModel(szModelName);
+	SetSkin(iSkin);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Called once per frame after the server frame loop has finished and after all messages being
+//  sent to clients have been sent.  NOTE: Only called if scheduled via AddPostClientMessageEntity() !
+//-----------------------------------------------------------------------------
+void CBaseEntity::PostClientMessagesSent(void)
+{
+	// Remove nointerp flags from entity after every frame
+	RemoveEffects(EF_NOINTERP);
 }
 
 //------------------------------------------------------------------------------
@@ -6998,6 +7067,14 @@ QAngle CBaseEntity::GetStepAngles( void ) const
 	return GetLocalAngles();
 }
 
+Vector CBaseEntity::GetAbsFacing() const
+{
+	QAngle angles = GetAbsAngles();
+	Vector fwd;
+	AngleVectors(angles, &fwd);
+	return fwd;
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: For each client who appears to be a valid recipient, checks the client has disabled CC and if so, removes them from 
 //  the recipient list.
@@ -7109,6 +7186,11 @@ bool CLogicalEntity::KeyValue( const char *szKeyName, const char *szValue )
 	return BaseClass::KeyValue( szKeyName, szValue );
 }
 
+void CBaseEntity::PlaySound(const char* soundname)
+{
+	CPASAttenuationFilter sndFilter(this);
+	EmitSound(sndFilter, entindex(), soundname);
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Sets the entity invisible, and makes it remove itself on the next frame
@@ -7500,6 +7582,60 @@ void CC_Ent_Orient( const CCommand& args )
 
 		pEnt->SetAbsAngles( vecEntAngles );
 	}
+}
+
+//------------------------------------------------------------------------------
+// Purpose: Start a trail which the object leaves behind as it moves, e.g. for flag trails
+//------------------------------------------------------------------------------
+void CBaseEntity::StartTrail(int teamId)
+{
+	// Defaults: start width 20, end 3, last for 0.7 seconds
+	StartTrail(teamId, 20, 3, 0.7);
+}
+
+void CBaseEntity::StartTrail(int teamId, float startWidth, float endWidth, float lifetime)
+{
+	m_pSpriteTrail = CSpriteTrail::SpriteTrailCreate("sprites/ff_trail.vmt", GetLocalOrigin(), false);
+
+	if (m_pSpriteTrail != NULL)
+	{
+		m_pSpriteTrail->FollowEntity(this);
+		m_pSpriteTrail->SetAttachment(this, 0);
+
+		if (teamId == TEAM_BLUE)
+		{
+			m_pSpriteTrail->SetTransparency(kRenderTransAdd, 85, 95, 205, 255, kRenderFxNone);
+		}
+		else if (teamId == TEAM_RED)
+		{
+			m_pSpriteTrail->SetTransparency(kRenderTransAdd, 205, 95, 85, 255, kRenderFxNone);
+		}
+		else if (teamId == TEAM_GREEN)
+		{
+			m_pSpriteTrail->SetTransparency(kRenderTransAdd, 85, 205, 85, 255, kRenderFxNone);
+		}
+		else if (teamId == TEAM_YELLOW)
+		{
+			m_pSpriteTrail->SetTransparency(kRenderTransAdd, 205, 205, 85, 255, kRenderFxNone);
+		}
+		else
+		{
+			m_pSpriteTrail->SetTransparency(kRenderTransAdd, 255, 255, 255, 255, kRenderFxNone);
+		}
+
+		m_pSpriteTrail->SetStartWidth(startWidth);
+		m_pSpriteTrail->SetEndWidth(endWidth);
+		m_pSpriteTrail->SetLifeTime(lifetime);
+	}
+}
+
+void CBaseEntity::StopTrail()
+{
+	if (m_pSpriteTrail == NULL)
+		return;
+
+	m_pSpriteTrail->StopFollowingEntity();
+	m_pSpriteTrail->FadeAndDie(1.5f); // Can't take longer unfortuntely
 }
 
 static ConCommand ent_orient("ent_orient", CC_Ent_Orient, "Orient the specified entity to match the player's angles. By default, only orients target entity's YAW. Use the 'allangles' option to orient on all axis.\n\tFormat: ent_orient <entity name> <optional: allangles>", FCVAR_CHEAT);

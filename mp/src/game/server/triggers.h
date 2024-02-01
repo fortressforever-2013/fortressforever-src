@@ -27,12 +27,18 @@ enum
 	SF_TRIGGER_ONLY_PLAYER_ALLY_NPCS		= 0x10,		// *if* NPCs can fire this trigger, this flag means only player allies do so
 	SF_TRIGGER_ONLY_CLIENTS_IN_VEHICLES		= 0x20,		// *if* Players can fire this trigger, this flag means only players inside vehicles can 
 	SF_TRIGGER_ALLOW_ALL					= 0x40,		// Everything can fire this trigger EXCEPT DEBRIS!
-	SF_TRIGGER_ONLY_CLIENTS_OUT_OF_VEHICLES	= 0x200,	// *if* Players can fire this trigger, this flag means only players outside vehicles can 
 	SF_TRIG_PUSH_ONCE						= 0x80,		// trigger_push removes itself after firing once
 	SF_TRIG_PUSH_AFFECT_PLAYER_ON_LADDER	= 0x100,	// if pushed object is player on a ladder, then this disengages them from the ladder (HL2only)
+	SF_TRIGGER_ONLY_CLIENTS_OUT_OF_VEHICLES = 0x200,	// *if* Players can fire this trigger, this flag means only players outside vehicles can 
 	SF_TRIG_TOUCH_DEBRIS 					= 0x400,	// Will touch physics debris objects
 	SF_TRIGGER_ONLY_NPCS_IN_VEHICLES		= 0X800,	// *if* NPCs can fire this trigger, only NPCs in vehicles do so (respects player ally flag too)
 	SF_TRIGGER_DISALLOW_BOTS                = 0x1000,   // Bots are not allowed to fire this trigger
+
+	// New FF stuff.  Be careful not to add too many or we'll run out of bits
+	// Also, there's already a #define SF_VPHYSICS_MOTION_MOVEABLE	0x1000 ... and also 0x800 is skipped; possibly reserved?
+	SF_TRIGGER_ALLOW_FF_GRENADES = 0x2000,	// Allow grenades
+	SF_TRIGGER_ALLOW_FF_BUILDABLES = 0x4000,	// Allow buildables
+	//SF_TRIGGER_ALLOW_FF_INFOSCRIPTS			= 0x8000,	// info_ff_scripts
 };
 
 // DVS TODO: get rid of CBaseToggle
@@ -224,5 +230,50 @@ public:
 };
 
 bool IsTakingTriggerHurtDamageAtPoint( const Vector &vecPoint );
+
+// ##################################################################################
+//	>> func_ff_script
+// ##################################################################################
+class CFuncFFScript : public CTriggerMultiple
+{
+	DECLARE_CLASS(CFuncFFScript, CTriggerMultiple);
+
+	// Goal States:
+	enum { GS_INACTIVE = 0, GS_ACTIVE = 1, GS_REMOVED = -1 };
+
+public:
+	CFuncFFScript();
+
+	virtual bool	IsActive(void) const { return m_iGoalState == GS_ACTIVE; }
+	virtual bool	IsInactive(void) const { return m_iGoalState == GS_INACTIVE; }
+	virtual bool	IsRemoved(void) const { return m_iGoalState == GS_REMOVED; }
+
+	virtual void	Spawn(void);
+	virtual int		UpdateTransmitState(void);
+
+	void SetBotGoalInfo(int _type, int _team);
+
+	virtual void	LuaRestore(void) { SetRestored(); SetInactive(); Enable(); }
+	virtual void	LuaRemove(void) { SetRemoved(); Disable(); }
+	virtual void	LuaSetLocation();
+
+	virtual Class_T Classify(void) { return CLASS_TRIGGERSCRIPT; }
+
+	virtual void	SetActive(void);
+	virtual void	SetInactive(void);
+	virtual void	SetRemoved(void);
+	virtual void	SetRestored(void);
+
+	// bot info accessors
+	int GetBotTeamFlags() const { return m_BotTeamFlags; }
+	int GetBotGoalType() const { return m_BotGoalType; }
+protected:
+	int	m_iGoalState;
+	int m_iClipMask;
+
+	// cached information for bot use
+	int		m_BotTeamFlags;
+	int		m_BotGoalType;
+};
 
 #endif // TRIGGERS_H

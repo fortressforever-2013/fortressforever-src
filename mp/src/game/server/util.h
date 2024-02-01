@@ -228,6 +228,9 @@ float		UTIL_GetSimulationInterval();
 CBasePlayer	*UTIL_PlayerByIndex( int playerIndex );
 CBasePlayer *UTIL_PlayerBySteamID( const CSteamID &steamID );
 
+
+CBasePlayer* UTIL_PlayerBySteamID(const char* steamid); // not case sensitive
+
 // NOTENOTE: Use this instead of UTIL_PlayerByIndex IF you're in single player
 // and you want the player.
 // not useable in multiplayer - see UTIL_GetListenServerHost()
@@ -356,7 +359,7 @@ int			UTIL_EntityInSolid( CBaseEntity *ent );
 
 bool		UTIL_IsMasterTriggered	(string_t sMaster, CBaseEntity *pActivator);
 void		UTIL_BloodStream( const Vector &origin, const Vector &direction, int color, int amount );
-void		UTIL_BloodSpray( const Vector &pos, const Vector &dir, int color, int amount, int flags );
+//void		UTIL_BloodSpray( const Vector &pos, const Vector &dir, int color, int amount, int flags );
 Vector		UTIL_RandomBloodVector( void );
 void		UTIL_ImpactTrace( trace_t *pTrace, int iDamageType, const char *pCustomImpactName = NULL );
 void		UTIL_PlayerDecalTrace( trace_t *pTrace, int playernum );
@@ -637,4 +640,5 @@ bool UTIL_LoadAndSpawnEntitiesFromScript( CUtlVector <CBaseEntity*> &entities, c
 // Given a vector, clamps the scalar axes to MAX_COORD_FLOAT ranges from worldsize.h
 void UTIL_BoundToWorldSize( Vector *pVecPos );
 
+bool Util_AddDownload(const char* pszFile);
 #endif // UTIL_H

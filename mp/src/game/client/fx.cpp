@@ -157,6 +157,13 @@ bool FX_GetAttachmentTransform( ClientEntityHandle_t hEntity, int attachmentInde
 	return false;
 }
 
+// --> FF
+extern ConVar muzzleflash_light;
+
+// dlight scale
+extern ConVar cl_ffdlight_muzzle;
+// <-- FF
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Input  : entityIndex - 
@@ -250,6 +257,32 @@ void FX_MuzzleEffect(
 		pParticle->m_flRoll			= random->RandomInt( 0, 360 );
 		pParticle->m_flRollDelta	= 0.0f;
 	}
+
+	// --> FF
+	if (muzzleflash_light.GetBool())
+	{
+		// dlight scale
+		float flDLightScale = cl_ffdlight_muzzle.GetFloat();
+
+		dlight_t* dl = NULL;
+		if (flDLightScale > 0.0f)
+			// Make a dlight (that's a "D" for dynamic so everything lights up, YAAAAYYYYY!)
+			//dl = effects->CL_AllocDlight( LIGHT_INDEX_MUZZLEFLASH + index );
+			dl = effects->CL_AllocDlight(0); // 0 allows multiple dynamic lights at the same time
+
+		if (dl) // I'm scared, daddy...of NULL pointers.
+		{
+			dl->origin = origin;
+			dl->radius = random->RandomFloat(56, 72) * flDLightScale; // sorta small radius for muzzle flash
+			dl->die = gpGlobals->curtime + 0.05; // die = current time + life
+			dl->decay = dl->radius / 0.05; // radius / life = good fade
+			dl->color.r = 255;
+			dl->color.g = 192;
+			dl->color.b = 64;
+			dl->color.exponent = 5; // essentially the brightness...also determines the gradient, basically
+		}
+	}
+	// <-- FF
 
 	//
 	// Smoke
@@ -373,6 +406,31 @@ void FX_MuzzleEffectAttached(
 		pParticle->m_flRollDelta	= 0.0f;
 	}
 
+	// --> FF
+	if (muzzleflash_light.GetBool())
+	{
+		// dlight scale
+		float flDLightScale = cl_ffdlight_muzzle.GetFloat();
+
+		dlight_t* dl = NULL;
+		if (flDLightScale > 0.0f)
+			// Make a dlight (that's a "D" for dynamic so everything lights up, YAAAAYYYYY!)
+			//dl = effects->CL_AllocDlight( LIGHT_INDEX_MUZZLEFLASH + index );
+			dl = effects->CL_AllocDlight(0); // 0 allows multiple dynamic lights at the same time
+
+		if (dl) // I'm scared, daddy...of NULL pointers.
+		{
+			dl->origin = pSimple->GetSortOrigin();
+			dl->radius = random->RandomFloat(56, 72) * flDLightScale; // sorta small radius for muzzle flash
+			dl->die = gpGlobals->curtime + 0.05; // die = current time + life
+			dl->decay = dl->radius / 0.05; // radius / life = good fade
+			dl->color.r = 255;
+			dl->color.g = 192;
+			dl->color.b = 64;
+			dl->color.exponent = 5; // essentially the brightness...also determines the gradient, basically
+		}
+	}
+	// <-- FF
 
 	if ( !ToolsEnabled() )
 		return;
@@ -475,7 +533,11 @@ void MuzzleFlashCallback( const CEffectData &data )
 		if ( data.m_nAttachmentIndex )
 		{
 			//FIXME: We also need to allocate these particles into an attachment space setup
-			pRenderable->GetAttachment( data.m_nAttachmentIndex, vecOrigin, vecAngles );
+			//pRenderable->GetAttachment( data.m_nAttachmentIndex, vecOrigin, vecAngles );
+
+			// Mirv: Fix for SG muzzleflashes
+			tempents->MuzzleFlash(data.m_fFlags & (~MUZZLEFLASH_FIRSTPERSON), data.m_hEntity, data.m_nAttachmentIndex, (data.m_fFlags & MUZZLEFLASH_FIRSTPERSON) != 0);
+			return;
 		}
 		else
 		{
@@ -872,9 +934,11 @@ void FX_GunshipTracer( Vector& start, Vector& end, int velocity, bool makeWhiz )
 	VectorSubtract( end, start, shotDir );
 	totalDist = VectorNormalize( shotDir );
 
+	// --> Mirv: No do make small tracers
 	//Don't make small tracers
-	if ( totalDist <= 256 )
-		return;
+	//if ( totalDist <= 256 )
+	//	return;
+	// <--
 
 	float length = random->RandomFloat( 128.0f, 256.0f );
 	float life = ( totalDist + length ) / velocity;	//NOTENOTE: We want the tail to finish its run as well

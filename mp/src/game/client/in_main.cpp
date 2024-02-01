@@ -44,6 +44,11 @@ extern ConVar cam_idealyaw;
 // For showing/hiding the scoreboard
 #include <game/client/iviewport.h>
 
+#include "c_ff_player.h"			// |-- Mirv: Needed for ScaleMovements
+#include "ff_hud_menu_medengy.h"	// |-- Mulch: for g_pMedEngyHudMenu
+#include "ff_hud_HintCenter.h"		// Jiggles: for g_pHintCenter
+#include "mapscreen.h"				// Jiggles: for g_pMapScreen
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -53,36 +58,36 @@ int g_iAlive = 1;
 static int s_ClearInputState = 0;
 
 // Defined in pm_math.c
-float anglemod( float a );
+float anglemod(float a);
 
 // FIXME void V_Init( void );
 static int in_impulse = 0;
 static int in_cancel = 0;
 
-ConVar cl_anglespeedkey( "cl_anglespeedkey", "0.67", 0 );
-ConVar cl_yawspeed( "cl_yawspeed", "210", FCVAR_NONE, "Client yaw speed.", true, -100000, true, 100000 );
-ConVar cl_pitchspeed( "cl_pitchspeed", "225", FCVAR_NONE, "Client pitch speed.", true, -100000, true, 100000 );
-ConVar cl_pitchdown( "cl_pitchdown", "89", FCVAR_CHEAT );
-ConVar cl_pitchup( "cl_pitchup", "89", FCVAR_CHEAT );
+ConVar cl_anglespeedkey("cl_anglespeedkey", "0.67", 0);
+ConVar cl_yawspeed("cl_yawspeed", "210", FCVAR_NONE, "Client yaw speed.", true, -100000, true, 100000);
+ConVar cl_pitchspeed("cl_pitchspeed", "225", FCVAR_NONE, "Client pitch speed.", true, -100000, true, 100000);
+ConVar cl_pitchdown("cl_pitchdown", "89", FCVAR_CHEAT);
+ConVar cl_pitchup("cl_pitchup", "89", FCVAR_CHEAT);
 #if defined( CSTRIKE_DLL )
-ConVar cl_sidespeed( "cl_sidespeed", "400", FCVAR_CHEAT );
-ConVar cl_upspeed( "cl_upspeed", "320", FCVAR_ARCHIVE|FCVAR_CHEAT );
-ConVar cl_forwardspeed( "cl_forwardspeed", "400", FCVAR_ARCHIVE|FCVAR_CHEAT );
-ConVar cl_backspeed( "cl_backspeed", "400", FCVAR_ARCHIVE|FCVAR_CHEAT );
+ConVar cl_sidespeed("cl_sidespeed", "400", FCVAR_CHEAT);
+ConVar cl_upspeed("cl_upspeed", "320", FCVAR_ARCHIVE | FCVAR_CHEAT);
+ConVar cl_forwardspeed("cl_forwardspeed", "400", FCVAR_ARCHIVE | FCVAR_CHEAT);
+ConVar cl_backspeed("cl_backspeed", "400", FCVAR_ARCHIVE | FCVAR_CHEAT);
 #else
-ConVar cl_sidespeed( "cl_sidespeed", "450", FCVAR_REPLICATED | FCVAR_CHEAT );
-ConVar cl_upspeed( "cl_upspeed", "320", FCVAR_REPLICATED | FCVAR_CHEAT );
-ConVar cl_forwardspeed( "cl_forwardspeed", "450", FCVAR_REPLICATED | FCVAR_CHEAT );
-ConVar cl_backspeed( "cl_backspeed", "450", FCVAR_REPLICATED | FCVAR_CHEAT );
+ConVar cl_sidespeed("cl_sidespeed", "1000", FCVAR_REPLICATED | FCVAR_CHEAT);
+ConVar cl_upspeed("cl_upspeed", "1000", FCVAR_REPLICATED | FCVAR_CHEAT);
+ConVar cl_forwardspeed("cl_forwardspeed", "1000", FCVAR_REPLICATED | FCVAR_CHEAT);
+ConVar cl_backspeed("cl_backspeed", "1000", FCVAR_REPLICATED | FCVAR_CHEAT);
 #endif // CSTRIKE_DLL
-ConVar lookspring( "lookspring", "0", FCVAR_ARCHIVE );
-ConVar lookstrafe( "lookstrafe", "0", FCVAR_ARCHIVE );
-ConVar in_joystick( "joystick","0", FCVAR_ARCHIVE );
+ConVar lookspring("lookspring", "0", FCVAR_ARCHIVE);
+ConVar lookstrafe("lookstrafe", "0", FCVAR_ARCHIVE);
+ConVar in_joystick("joystick", "0", FCVAR_ARCHIVE);
 
-ConVar thirdperson_platformer( "thirdperson_platformer", "0", 0, "Player will aim in the direction they are moving." );
-ConVar thirdperson_screenspace( "thirdperson_screenspace", "0", 0, "Movement will be relative to the camera, eg: left means screen-left" );
+ConVar thirdperson_platformer("thirdperson_platformer", "0", 0, "Player will aim in the direction they are moving.");
+ConVar thirdperson_screenspace("thirdperson_screenspace", "0", 0, "Movement will be relative to the camera, eg: left means screen-left");
 
-ConVar sv_noclipduringpause( "sv_noclipduringpause", "0", FCVAR_REPLICATED | FCVAR_CHEAT, "If cheats are enabled, then you can noclip with the game paused (for doing screenshots, etc.)." );
+ConVar sv_noclipduringpause("sv_noclipduringpause", "0", FCVAR_REPLICATED | FCVAR_CHEAT, "If cheats are enabled, then you can noclip with the game paused (for doing screenshots, etc.).");
 
 extern ConVar cl_mouselook;
 
@@ -119,7 +124,7 @@ kbutton_t	in_back;
 kbutton_t	in_moveleft;
 kbutton_t	in_moveright;
 // Display the netgraph
-kbutton_t	in_graph;  
+kbutton_t	in_graph;
 kbutton_t	in_joyspeed;		// auto-speed key from the joystick (only works for player movement, not vehicles)
 
 static	kbutton_t	in_klook;
@@ -140,8 +145,7 @@ static	kbutton_t	in_alt2;
 static	kbutton_t	in_score;
 static	kbutton_t	in_break;
 static	kbutton_t	in_zoom;
-static  kbutton_t   in_grenade1;
-static  kbutton_t   in_grenade2;
+
 static	kbutton_t	in_attack3;
 kbutton_t	in_ducktoggle;
 
@@ -150,17 +154,17 @@ kbutton_t	in_ducktoggle;
 IN_CenterView_f
 ===========
 */
-void IN_CenterView_f (void)
+void IN_CenterView_f(void)
 {
 	QAngle viewangles;
 
-	if ( UsingMouselook() == false )
+	if (UsingMouselook() == false)
 	{
-		if ( !::input->CAM_InterceptingMouse() )
+		if (!::input->CAM_InterceptingMouse())
 		{
-			engine->GetViewAngles( viewangles );
+			engine->GetViewAngles(viewangles);
 			viewangles[PITCH] = 0;
-			engine->SetViewAngles( viewangles );
+			engine->SetViewAngles(viewangles);
 		}
 	}
 }
@@ -170,7 +174,7 @@ void IN_CenterView_f (void)
 IN_Joystick_Advanced_f
 ===========
 */
-void IN_Joystick_Advanced_f (void)
+void IN_Joystick_Advanced_f(void)
 {
 	::input->Joystick_Advanced();
 }
@@ -184,56 +188,56 @@ Removes references to +use and replaces them with the keyname in the output stri
 NOTE:  Only works for text with +word in it.
 ============
 */
-int KB_ConvertString( char *in, char **ppout )
+int KB_ConvertString(char* in, char** ppout)
 {
-	char sz[ 4096 ];
-	char binding[ 64 ];
-	char *p;
-	char *pOut;
-	char *pEnd;
-	const char *pBinding;
+	char sz[4096];
+	char binding[64];
+	char* p;
+	char* pOut;
+	char* pEnd;
+	const char* pBinding;
 
-	if ( !ppout )
+	if (!ppout)
 		return 0;
 
 	*ppout = NULL;
 	p = in;
 	pOut = sz;
-	while ( *p )
+	while (*p)
 	{
-		if ( *p == '+' )
+		if (*p == '+')
 		{
 			pEnd = binding;
-			while ( *p && ( V_isalnum( *p ) || ( pEnd == binding ) ) && ( ( pEnd - binding ) < 63 ) )
+			while (*p && (V_isalnum(*p) || (pEnd == binding)) && ((pEnd - binding) < 63))
 			{
 				*pEnd++ = *p++;
 			}
 
-			*pEnd =  '\0';
+			*pEnd = '\0';
 
 			pBinding = NULL;
-			if ( strlen( binding + 1 ) > 0 )
+			if (strlen(binding + 1) > 0)
 			{
 				// See if there is a binding for binding?
-				pBinding = engine->Key_LookupBinding( binding + 1 );
+				pBinding = engine->Key_LookupBinding(binding + 1);
 			}
 
-			if ( pBinding )
+			if (pBinding)
 			{
 				*pOut++ = '[';
-				pEnd = (char *)pBinding;
+				pEnd = (char*)pBinding;
 			}
 			else
 			{
 				pEnd = binding;
 			}
 
-			while ( *pEnd )
+			while (*pEnd)
 			{
 				*pOut++ = *pEnd++;
 			}
 
-			if ( pBinding )
+			if (pBinding)
 			{
 				*pOut++ = ']';
 			}
@@ -246,9 +250,9 @@ int KB_ConvertString( char *in, char **ppout )
 
 	*pOut = '\0';
 
-	int maxlen = strlen( sz ) + 1;
-	pOut = ( char * )malloc( maxlen );
-	Q_strncpy( pOut, sz, maxlen );
+	int maxlen = strlen(sz) + 1;
+	pOut = (char*)malloc(maxlen);
+	Q_strncpy(pOut, sz, maxlen);
 	*ppout = pOut;
 
 	return 1;
@@ -261,13 +265,13 @@ FindKey
 Allows the engine to request a kbutton handler by name, if the key exists.
 ==============================
 */
-kbutton_t *CInput::FindKey( const char *name )
+kbutton_t* CInput::FindKey(const char* name)
 {
-	CKeyboardKey *p;
+	CKeyboardKey* p;
 	p = m_pKeys;
-	while ( p )
+	while (p)
 	{
-		if ( !Q_stricmp( name, p->name ) )
+		if (!Q_stricmp(name, p->name))
 		{
 			return p->pkey;
 		}
@@ -284,19 +288,19 @@ AddKeyButton
 Add a kbutton_t * to the list of pointers the engine can retrieve via KB_Find
 ============
 */
-void CInput::AddKeyButton( const char *name, kbutton_t *pkb )
+void CInput::AddKeyButton(const char* name, kbutton_t* pkb)
 {
-	CKeyboardKey *p;	
-	kbutton_t *kb;
+	CKeyboardKey* p;
+	kbutton_t* kb;
 
-	kb = FindKey( name );
-	
-	if ( kb )
+	kb = FindKey(name);
+
+	if (kb)
 		return;
 
 	p = new CKeyboardKey;
 
-	Q_strncpy( p->name, name, sizeof( p->name ) );
+	Q_strncpy(p->name, name, sizeof(p->name));
 	p->pkey = pkb;
 
 	p->next = m_pKeys;
@@ -306,7 +310,7 @@ void CInput::AddKeyButton( const char *name, kbutton_t *pkb )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-CInput::CInput( void )
+CInput::CInput(void)
 {
 	m_pCommands = NULL;
 	m_pCameraThirdData = NULL;
@@ -316,7 +320,7 @@ CInput::CInput( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-CInput::~CInput( void )
+CInput::~CInput(void)
 {
 }
 
@@ -327,12 +331,12 @@ Init_Keyboard
 Add kbutton_t definitions that the engine can query if needed
 ============
 */
-void CInput::Init_Keyboard( void )
+void CInput::Init_Keyboard(void)
 {
 	m_pKeys = NULL;
 
-	AddKeyButton( "in_graph", &in_graph );
-	AddKeyButton( "in_jlook", &in_jlook );
+	AddKeyButton("in_graph", &in_graph);
+	AddKeyButton("in_jlook", &in_jlook);
 }
 
 /*
@@ -342,11 +346,11 @@ Shutdown_Keyboard
 Clear kblist
 ============
 */
-void CInput::Shutdown_Keyboard( void )
+void CInput::Shutdown_Keyboard(void)
 {
-	CKeyboardKey *p, *n;
+	CKeyboardKey* p, * n;
 	p = m_pKeys;
-	while ( p )
+	while (p)
 	{
 		n = p->next;
 		delete p;
@@ -360,30 +364,30 @@ void CInput::Shutdown_Keyboard( void )
 KeyDown
 ============
 */
-void KeyDown( kbutton_t *b, const char *c )
+void KeyDown(kbutton_t* b, const char* c)
 {
 	int		k = -1;
-	if ( c && c[0] )
+	if (c && c[0])
 	{
 		k = atoi(c);
 	}
 
 	if (k == b->down[0] || k == b->down[1])
 		return;		// repeating key
-	
+
 	if (!b->down[0])
 		b->down[0] = k;
 	else if (!b->down[1])
 		b->down[1] = k;
 	else
 	{
-		if ( c[0] )
+		if (c[0])
 		{
-			DevMsg( 1,"Three keys down for a button '%c' '%c' '%c'!\n", b->down[0], b->down[1], c[0]);
+			DevMsg(1, "Three keys down for a button '%c' '%c' '%c'!\n", b->down[0], b->down[1], c[0]);
 		}
 		return;
 	}
-	
+
 	if (b->state & 1)
 		return;		// still down
 	b->state |= 1 + 2;	// down + impulse down
@@ -394,9 +398,9 @@ void KeyDown( kbutton_t *b, const char *c )
 KeyUp
 ============
 */
-void KeyUp( kbutton_t *b, const char *c )
-{	
-	if ( !c || !c[0] )
+void KeyUp(kbutton_t* b, const char* c)
+{
+	if (!c || !c[0])
 	{
 		b->down[0] = b->down[1] = 0;
 		b->state = 4;	// impulse up
@@ -425,125 +429,219 @@ void KeyUp( kbutton_t *b, const char *c )
 	b->state |= 4; 		// impulse up
 }
 
-void IN_CommanderMouseMoveDown( const CCommand &args ) {KeyDown(&in_commandermousemove, args[1] );}
-void IN_CommanderMouseMoveUp( const CCommand &args ) {KeyUp(&in_commandermousemove, args[1] );}
-void IN_BreakDown( const CCommand &args ) { KeyDown( &in_break , args[1] );}
-void IN_BreakUp( const CCommand &args )
-{ 
-	KeyUp( &in_break, args[1] ); 
+void IN_CommanderMouseMoveDown(const CCommand& args) { KeyDown(&in_commandermousemove, args[1]); }
+void IN_CommanderMouseMoveUp(const CCommand& args) { KeyUp(&in_commandermousemove, args[1]); }
+void IN_BreakDown(const CCommand& args) { KeyDown(&in_break, args[1]); }
+void IN_BreakUp(const CCommand& args)
+{
+	KeyUp(&in_break, args[1]);
 #if defined( _DEBUG )
 	DebuggerBreak();
 #endif
 };
-void IN_KLookDown ( const CCommand &args ) {KeyDown(&in_klook, args[1] );}
-void IN_KLookUp ( const CCommand &args ) {KeyUp(&in_klook, args[1] );}
-void IN_JLookDown ( const CCommand &args ) {KeyDown(&in_jlook, args[1] );}
-void IN_JLookUp ( const CCommand &args ) {KeyUp(&in_jlook, args[1] );}
-void IN_UpDown( const CCommand &args ) {KeyDown(&in_up, args[1] );}
-void IN_UpUp( const CCommand &args ) {KeyUp(&in_up, args[1] );}
-void IN_DownDown( const CCommand &args ) {KeyDown(&in_down, args[1] );}
-void IN_DownUp( const CCommand &args ) {KeyUp(&in_down, args[1] );}
-void IN_LeftDown( const CCommand &args ) {KeyDown(&in_left, args[1] );}
-void IN_LeftUp( const CCommand &args ) {KeyUp(&in_left, args[1] );}
-void IN_RightDown( const CCommand &args ) {KeyDown(&in_right, args[1] );}
-void IN_RightUp( const CCommand &args ) {KeyUp(&in_right, args[1] );}
-void IN_ForwardDown( const CCommand &args ) {KeyDown(&in_forward, args[1] );}
-void IN_ForwardUp( const CCommand &args ) {KeyUp(&in_forward, args[1] );}
-void IN_BackDown( const CCommand &args ) {KeyDown(&in_back, args[1] );}
-void IN_BackUp( const CCommand &args ) {KeyUp(&in_back, args[1] );}
-void IN_LookupDown( const CCommand &args ) {KeyDown(&in_lookup, args[1] );}
-void IN_LookupUp( const CCommand &args ) {KeyUp(&in_lookup, args[1] );}
-void IN_LookdownDown( const CCommand &args ) {KeyDown(&in_lookdown, args[1] );}
-void IN_LookdownUp( const CCommand &args ) {KeyUp(&in_lookdown, args[1] );}
-void IN_MoveleftDown( const CCommand &args ) {KeyDown(&in_moveleft, args[1] );}
-void IN_MoveleftUp( const CCommand &args ) {KeyUp(&in_moveleft, args[1] );}
-void IN_MoverightDown( const CCommand &args ) {KeyDown(&in_moveright, args[1] );}
-void IN_MoverightUp( const CCommand &args ) {KeyUp(&in_moveright, args[1] );}
-void IN_WalkDown( const CCommand &args ) {KeyDown(&in_walk, args[1] );}
-void IN_WalkUp( const CCommand &args ) {KeyUp(&in_walk, args[1] );}
-void IN_SpeedDown( const CCommand &args ) {KeyDown(&in_speed, args[1] );}
-void IN_SpeedUp( const CCommand &args ) {KeyUp(&in_speed, args[1] );}
-void IN_StrafeDown( const CCommand &args ) {KeyDown(&in_strafe, args[1] );}
-void IN_StrafeUp( const CCommand &args ) {KeyUp(&in_strafe, args[1] );}
-void IN_Attack2Down( const CCommand &args ) { KeyDown(&in_attack2, args[1] );}
-void IN_Attack2Up( const CCommand &args ) {KeyUp(&in_attack2, args[1] );}
-void IN_UseDown ( const CCommand &args ) {KeyDown(&in_use, args[1] );}
-void IN_UseUp ( const CCommand &args ) {KeyUp(&in_use, args[1] );}
-void IN_JumpDown ( const CCommand &args ) {KeyDown(&in_jump, args[1] );}
-void IN_JumpUp ( const CCommand &args ) {KeyUp(&in_jump, args[1] );}
-void IN_DuckDown( const CCommand &args ) {KeyDown(&in_duck, args[1] );}
-void IN_DuckUp( const CCommand &args ) {KeyUp(&in_duck, args[1] );}
-void IN_ReloadDown( const CCommand &args ) {KeyDown(&in_reload, args[1] );}
-void IN_ReloadUp( const CCommand &args ) {KeyUp(&in_reload, args[1] );}
-void IN_Alt1Down( const CCommand &args ) {KeyDown(&in_alt1, args[1] );}
-void IN_Alt1Up( const CCommand &args ) {KeyUp(&in_alt1, args[1] );}
-void IN_Alt2Down( const CCommand &args ) {KeyDown(&in_alt2, args[1] );}
-void IN_Alt2Up( const CCommand &args ) {KeyUp(&in_alt2, args[1] );}
-void IN_GraphDown( const CCommand &args ) {KeyDown(&in_graph, args[1] );}
-void IN_GraphUp( const CCommand &args ) {KeyUp(&in_graph, args[1] );}
-void IN_ZoomDown( const CCommand &args ) {KeyDown(&in_zoom, args[1] );}
-void IN_ZoomUp( const CCommand &args ) {KeyUp(&in_zoom, args[1] );}
-void IN_Grenade1Up( const CCommand &args ) { KeyUp( &in_grenade1, args[1] ); }
-void IN_Grenade1Down( const CCommand &args ) { KeyDown( &in_grenade1, args[1] ); }
-void IN_Grenade2Up( const CCommand &args ) { KeyUp( &in_grenade2, args[1] ); }
-void IN_Grenade2Down( const CCommand &args ) { KeyDown( &in_grenade2, args[1] ); }
-void IN_XboxStub( const CCommand &args ) { /*do nothing*/ }
-void IN_Attack3Down( const CCommand &args ) { KeyDown(&in_attack3, args[1] );}
-void IN_Attack3Up( const CCommand &args ) { KeyUp(&in_attack3, args[1] );}
+void IN_KLookDown(const CCommand& args) { KeyDown(&in_klook, args[1]); }
+void IN_KLookUp(const CCommand& args) { KeyUp(&in_klook, args[1]); }
+void IN_JLookDown(const CCommand& args) { KeyDown(&in_jlook, args[1]); }
+void IN_JLookUp(const CCommand& args) { KeyUp(&in_jlook, args[1]); }
+void IN_UpDown(const CCommand& args) { KeyDown(&in_up, args[1]); }
+void IN_UpUp(const CCommand& args) { KeyUp(&in_up, args[1]); }
+void IN_DownDown(const CCommand& args) { KeyDown(&in_down, args[1]); }
+void IN_DownUp(const CCommand& args) { KeyUp(&in_down, args[1]); }
+void IN_LeftDown(const CCommand& args) { KeyDown(&in_left, args[1]); }
+void IN_LeftUp(const CCommand& args) { KeyUp(&in_left, args[1]); }
+void IN_RightDown(const CCommand& args) { KeyDown(&in_right, args[1]); }
+void IN_RightUp(const CCommand& args) { KeyUp(&in_right, args[1]); }
+void IN_ForwardDown(const CCommand& args) { KeyDown(&in_forward, args[1]); }
+void IN_ForwardUp(const CCommand& args) { KeyUp(&in_forward, args[1]); }
+void IN_BackDown(const CCommand& args) { KeyDown(&in_back, args[1]); }
+void IN_BackUp(const CCommand& args) { KeyUp(&in_back, args[1]); }
+void IN_LookupDown(const CCommand& args) { KeyDown(&in_lookup, args[1]); }
+void IN_LookupUp(const CCommand& args) { KeyUp(&in_lookup, args[1]); }
+void IN_LookdownDown(const CCommand& args) { KeyDown(&in_lookdown, args[1]); }
+void IN_LookdownUp(const CCommand& args) { KeyUp(&in_lookdown, args[1]); }
+void IN_MoveleftDown(const CCommand& args) { KeyDown(&in_moveleft, args[1]); }
+void IN_MoveleftUp(const CCommand& args) { KeyUp(&in_moveleft, args[1]); }
+void IN_MoverightDown(const CCommand& args) { KeyDown(&in_moveright, args[1]); }
+void IN_MoverightUp(const CCommand& args) { KeyUp(&in_moveright, args[1]); }
+void IN_WalkDown(const CCommand& args) { KeyDown(&in_walk, args[1]); }
+void IN_WalkUp(const CCommand& args) { KeyUp(&in_walk, args[1]); }
+void IN_SpeedDown(const CCommand& args) { KeyDown(&in_speed, args[1]); }
+void IN_SpeedUp(const CCommand& args) { KeyUp(&in_speed, args[1]); }
+void IN_StrafeDown(const CCommand& args) { KeyDown(&in_strafe, args[1]); }
+void IN_StrafeUp(const CCommand& args) { KeyUp(&in_strafe, args[1]); }
+void IN_Attack2Down(const CCommand& args) { KeyDown(&in_attack2, args[1]); }
+void IN_Attack2Up(const CCommand& args) { KeyUp(&in_attack2, args[1]); }
+void IN_UseDown(const CCommand& args) { KeyDown(&in_use, args[1]); }
+void IN_UseUp(const CCommand& args) { KeyUp(&in_use, args[1]); }
+void IN_JumpDown(const CCommand& args) { KeyDown(&in_jump, args[1]); }
+void IN_JumpUp(const CCommand& args) { KeyUp(&in_jump, args[1]); }
+void IN_DuckDown(const CCommand& args) { KeyDown(&in_duck, args[1]); }
+void IN_DuckUp(const CCommand& args) { KeyUp(&in_duck, args[1]); }
+void IN_ReloadDown(const CCommand& args) { KeyDown(&in_reload, args[1]); }
+void IN_ReloadUp(const CCommand& args) { KeyUp(&in_reload, args[1]); }
+void IN_Alt1Down(const CCommand& args) { KeyDown(&in_alt1, args[1]); }
+void IN_Alt1Up(const CCommand& args) { KeyUp(&in_alt1, args[1]); }
+void IN_Alt2Down(const CCommand& args) { KeyDown(&in_alt2, args[1]); }
+void IN_Alt2Up(const CCommand& args) { KeyUp(&in_alt2, args[1]); }
+void IN_GraphDown(const CCommand& args) { KeyDown(&in_graph, args[1]); }
+void IN_GraphUp(const CCommand& args) { KeyUp(&in_graph, args[1]); }
+void IN_ZoomDown(const CCommand& args) { KeyDown(&in_zoom, args[1]); }
+void IN_ZoomUp(const CCommand& args) { KeyUp(&in_zoom, args[1]); }
 
-void IN_DuckToggle( const CCommand &args ) 
-{ 
-	if ( ::input->KeyState(&in_ducktoggle) )
+void IN_XboxStub(const CCommand& args) { /*do nothing*/ }
+void IN_Attack3Down(const CCommand& args) { KeyDown(&in_attack3, args[1]); }
+void IN_Attack3Up(const CCommand& args) { KeyUp(&in_attack3, args[1]); }
+
+void IN_DuckToggle(const CCommand& args)
+{
+	if (::input->KeyState(&in_ducktoggle))
 	{
-		KeyUp( &in_ducktoggle, args[1] ); 
+		KeyUp(&in_ducktoggle, args[1]);
 	}
 	else
 	{
-		KeyDown( &in_ducktoggle, args[1] ); 
+		KeyDown(&in_ducktoggle, args[1]);
 	}
 }
 
-void IN_AttackDown( const CCommand &args )
+void IN_AttackDown(const CCommand& args)
 {
-	KeyDown( &in_attack, args[1] );
+	KeyDown(&in_attack, args[1]);
 }
 
-void IN_AttackUp( const CCommand &args )
+void IN_AttackUp(const CCommand& args)
 {
-	KeyUp( &in_attack, args[1] );
+	KeyUp(&in_attack, args[1]);
 	in_cancel = 0;
 }
 
 // Special handling
-void IN_Cancel( const CCommand &args )
+void IN_Cancel(const CCommand& args)
 {
 	in_cancel = 1;
 }
 
-void IN_Impulse( const CCommand &args )
+void IN_Impulse(const CCommand& args)
 {
-	in_impulse = atoi( args[1] );
+	in_impulse = atoi(args[1]);
 }
 
-void IN_ScoreDown( const CCommand &args )
+void IN_ScoreDown(const CCommand& args)
 {
-	KeyDown( &in_score, args[1] );
-	if ( gViewPortInterface )
+	KeyDown(&in_score, args[1]);
+	if (gViewPortInterface)
 	{
-		gViewPortInterface->ShowPanel( PANEL_SCOREBOARD, true );
+		gViewPortInterface->ShowPanel(PANEL_SCOREBOARD, true);
 	}
 }
 
-void IN_ScoreUp( const CCommand &args )
+void IN_ScoreUp(const CCommand& args)
 {
-	KeyUp( &in_score, args[1] );
-	if ( gViewPortInterface )
+	KeyUp(&in_score, args[1]);
+	if (gViewPortInterface)
 	{
-		gViewPortInterface->ShowPanel( PANEL_SCOREBOARD, false );
+		gViewPortInterface->ShowPanel(PANEL_SCOREBOARD, false);
 		GetClientVoiceMgr()->StopSquelchMode();
 	}
 }
 
+// BEGIN: Jiggles: For display of the Map Screenshot
+void IN_MapShotDown(void)
+{
+	if (gViewPortInterface)
+	{
+		if (g_pMapScreen)
+			g_pMapScreen->KeyDown();
+	}
+}
+void IN_MapShotUp(void)
+{
+	if (gViewPortInterface)
+	{
+		if (g_pMapScreen)
+			g_pMapScreen->KeyUp();
+	}
+}
+// END: Jiggles: For display of the Map Screenshot
+
+// BEG: Added by Mulchman for team change & class change
+void IN_ChangeTeam(void)
+{
+	if (gViewPortInterface)
+	{
+		IViewPortPanel* pPanel = gViewPortInterface->FindPanelByName(PANEL_TEAM);
+		if (pPanel)
+			gViewPortInterface->ShowPanel(PANEL_TEAM, true);
+	}
+}
+
+void IN_ChangeClass(void)
+{
+	// --> Mirv: Select team first bud
+	C_BasePlayer* player = C_BasePlayer::GetLocalPlayer();
+
+	if (player && player->GetTeamNumber() < TEAM_BLUE)
+	{
+		IN_ChangeTeam();
+		return;
+	}
+	// <-- Mirv: Select team first bud
+
+	if (gViewPortInterface)
+	{
+		IViewPortPanel* pPanel = gViewPortInterface->FindPanelByName(PANEL_CLASS);
+		if (pPanel)
+			gViewPortInterface->ShowPanel(PANEL_CLASS, true);
+	}
+}
+// END: Added by Mulchman for team change & class change
+
+void IN_ServerInfo(void)
+{
+	if (gViewPortInterface)
+	{
+		IViewPortPanel* pPanel = gViewPortInterface->FindPanelByName(PANEL_INFO);
+		if (pPanel)
+			gViewPortInterface->ShowPanel(PANEL_INFO, true);
+	}
+}
+
+extern void HudContextShowCalls(bool visible);
+
+// BEG: Mulch: For medic & engy hud radial style menu
+void IN_MedEngyMenuDown(void)
+{
+	//if( g_pMedEngyHudMenu )
+	//	g_pMedEngyHudMenu->KeyDown();
+
+	HudContextShowCalls(true);
+}
+
+void IN_MedEngyMenuUp(void)
+{
+	//if( g_pMedEngyHudMenu )
+	//	g_pMedEngyHudMenu->KeyUp();
+
+	HudContextShowCalls(false);
+}
+// END: Mulch: For medic & engy hud radial style menu
+
+
+// BEGIN: Jiggles: For displaying the Hint Center
+void IN_HintCenterDown(void)
+{
+	if (g_pHintCenter)
+		g_pHintCenter->KeyDown();
+}
+
+void IN_HintCenterUp(void)
+{
+	if (g_pHintCenter)
+		g_pHintCenter->KeyUp();
+}
+// END: Jiggles: For displaying the Hint Center
+
+extern int HudContextMenuInput(int down, int keynum, const char* pszCurrentBinding);
 
 /*
 ============
@@ -552,16 +650,16 @@ KeyEvent
 Return 1 to allow engine to process the key, otherwise, act on it as needed
 ============
 */
-int CInput::KeyEvent( int down, ButtonCode_t code, const char *pszCurrentBinding )
+int CInput::KeyEvent(int down, ButtonCode_t code, const char* pszCurrentBinding)
 {
 	// Deal with camera intercepting the mouse
-	if ( ( code == MOUSE_LEFT ) || ( code == MOUSE_RIGHT ) )
+	if ((code == MOUSE_LEFT) || (code == MOUSE_RIGHT))
 	{
-		if ( m_fCameraInterceptingMouse )
+		if (m_fCameraInterceptingMouse)
 			return 0;
 	}
 
-	if ( g_pClientMode )
+	if (g_pClientMode)
 		return g_pClientMode->KeyInput(down, code, pszCurrentBinding);
 
 	return 1;
@@ -579,53 +677,53 @@ Returns 0.25 if a key was pressed and released during the frame,
 1.0 if held for the entire time
 ===============
 */
-float CInput::KeyState ( kbutton_t *key )
+float CInput::KeyState(kbutton_t* key)
 {
 	float		val = 0.0;
 	int			impulsedown, impulseup, down;
-	
+
 	impulsedown = key->state & 2;
-	impulseup	= key->state & 4;
-	down		= key->state & 1;
-	
-	if ( impulsedown && !impulseup )
+	impulseup = key->state & 4;
+	down = key->state & 1;
+
+	if (impulsedown && !impulseup)
 	{
 		// pressed and held this frame?
 		val = down ? 0.5 : 0.0;
 	}
 
-	if ( impulseup && !impulsedown )
+	if (impulseup && !impulsedown)
 	{
 		// released this frame?
 		val = down ? 0.0 : 0.0;
 	}
 
-	if ( !impulsedown && !impulseup )
+	if (!impulsedown && !impulseup)
 	{
 		// held the entire frame?
 		val = down ? 1.0 : 0.0;
 	}
 
-	if ( impulsedown && impulseup )
+	if (impulsedown && impulseup)
 	{
-		if ( down )
+		if (down)
 		{
 			// released and re-pressed this frame
-			val = 0.75;	
+			val = 0.75;
 		}
 		else
 		{
 			// pressed and released this frame
-			val = 0.25;	
+			val = 0.25;
 		}
 	}
 
 	// clear impulses
-	key->state &= 1;		
+	key->state &= 1;
 	return val;
 }
 
-void CInput::IN_SetSampleTime( float frametime )
+void CInput::IN_SetSampleTime(float frametime)
 {
 	m_flKeyboardSampleTime = frametime;
 }
@@ -636,25 +734,25 @@ DetermineKeySpeed
 
 ==============================
 */
-static ConVar in_usekeyboardsampletime( "in_usekeyboardsampletime", "1", 0, "Use keyboard sample time smoothing." );
+static ConVar in_usekeyboardsampletime("in_usekeyboardsampletime", "1", 0, "Use keyboard sample time smoothing.");
 
-float CInput::DetermineKeySpeed( float frametime )
+float CInput::DetermineKeySpeed(float frametime)
 {
 
-	if ( in_usekeyboardsampletime.GetBool() )
+	if (in_usekeyboardsampletime.GetBool())
 	{
-		if ( m_flKeyboardSampleTime <= 0 )
+		if (m_flKeyboardSampleTime <= 0)
 			return 0.0f;
-	
-		frametime = MIN( m_flKeyboardSampleTime, frametime );
+
+		frametime = MIN(m_flKeyboardSampleTime, frametime);
 		m_flKeyboardSampleTime -= frametime;
 	}
-	
+
 	float speed;
 
 	speed = frametime;
 
-	if ( in_speed.state & 1 )
+	if (in_speed.state & 1)
 	{
 		speed *= cl_anglespeedkey.GetFloat();
 	}
@@ -668,28 +766,28 @@ AdjustYaw
 
 ==============================
 */
-void CInput::AdjustYaw( float speed, QAngle& viewangles )
+void CInput::AdjustYaw(float speed, QAngle& viewangles)
 {
-	if ( !(in_strafe.state & 1) )
+	if (!(in_strafe.state & 1))
 	{
-		viewangles[YAW] -= speed*cl_yawspeed.GetFloat() * KeyState (&in_right);
-		viewangles[YAW] += speed*cl_yawspeed.GetFloat() * KeyState (&in_left);
+		viewangles[YAW] -= speed * cl_yawspeed.GetFloat() * KeyState(&in_right);
+		viewangles[YAW] += speed * cl_yawspeed.GetFloat() * KeyState(&in_left);
 	}
 
 	// thirdperson platformer mode
 	// use movement keys to aim the player relative to the thirdperson camera
-	if ( CAM_IsThirdPerson() && thirdperson_platformer.GetInt() )
+	if (CAM_IsThirdPerson() && thirdperson_platformer.GetInt())
 	{
 		float side = KeyState(&in_moveleft) - KeyState(&in_moveright);
 		float forward = KeyState(&in_forward) - KeyState(&in_back);
 
-		if ( side || forward )
+		if (side || forward)
 		{
-			viewangles[YAW] = RAD2DEG(atan2(side, forward)) + g_ThirdPersonManager.GetCameraOffsetAngles()[ YAW ];
+			viewangles[YAW] = RAD2DEG(atan2(side, forward)) + g_ThirdPersonManager.GetCameraOffsetAngles()[YAW];
 		}
-		if ( side || forward || KeyState (&in_right) || KeyState (&in_left) )
+		if (side || forward || KeyState(&in_right) || KeyState(&in_left))
 		{
-			cam_idealyaw.SetValue( g_ThirdPersonManager.GetCameraOffsetAngles()[ YAW ] - viewangles[ YAW ] );
+			cam_idealyaw.SetValue(g_ThirdPersonManager.GetCameraOffsetAngles()[YAW] - viewangles[YAW]);
 		}
 	}
 }
@@ -700,31 +798,31 @@ AdjustPitch
 
 ==============================
 */
-void CInput::AdjustPitch( float speed, QAngle& viewangles )
+void CInput::AdjustPitch(float speed, QAngle& viewangles)
 {
 	// only allow keyboard looking if mouse look is disabled
-	if ( UsingMouselook() == false )
+	if (UsingMouselook() == false)
 	{
 		float	up, down;
 
-		if ( in_klook.state & 1 )
+		if (in_klook.state & 1)
 		{
-			view->StopPitchDrift ();
-			viewangles[PITCH] -= speed*cl_pitchspeed.GetFloat() * KeyState (&in_forward);
-			viewangles[PITCH] += speed*cl_pitchspeed.GetFloat() * KeyState (&in_back);
+			view->StopPitchDrift();
+			viewangles[PITCH] -= speed * cl_pitchspeed.GetFloat() * KeyState(&in_forward);
+			viewangles[PITCH] += speed * cl_pitchspeed.GetFloat() * KeyState(&in_back);
 		}
 
-		up		= KeyState ( &in_lookup );
-		down	= KeyState ( &in_lookdown );
-		
-		viewangles[PITCH] -= speed*cl_pitchspeed.GetFloat() * up;
-		viewangles[PITCH] += speed*cl_pitchspeed.GetFloat() * down;
+		up = KeyState(&in_lookup);
+		down = KeyState(&in_lookdown);
 
-		if ( up || down )
+		viewangles[PITCH] -= speed * cl_pitchspeed.GetFloat() * up;
+		viewangles[PITCH] += speed * cl_pitchspeed.GetFloat() * down;
+
+		if (up || down)
 		{
-			view->StopPitchDrift ();
+			view->StopPitchDrift();
 		}
-	}	
+	}
 }
 
 /*
@@ -733,23 +831,23 @@ ClampAngles
 
 ==============================
 */
-void CInput::ClampAngles( QAngle& viewangles )
+void CInput::ClampAngles(QAngle& viewangles)
 {
-	if ( viewangles[PITCH] > cl_pitchdown.GetFloat() )
+	if (viewangles[PITCH] > cl_pitchdown.GetFloat())
 	{
 		viewangles[PITCH] = cl_pitchdown.GetFloat();
 	}
-	if ( viewangles[PITCH] < -cl_pitchup.GetFloat() )
+	if (viewangles[PITCH] < -cl_pitchup.GetFloat())
 	{
 		viewangles[PITCH] = -cl_pitchup.GetFloat();
 	}
 
 #ifndef PORTAL	// Don't constrain Roll in Portal because the player can be upside down! -Jeep
-	if ( viewangles[ROLL] > 50 )
+	if (viewangles[ROLL] > 50)
 	{
 		viewangles[ROLL] = 50;
 	}
-	if ( viewangles[ROLL] < -50 )
+	if (viewangles[ROLL] < -50)
 	{
 		viewangles[ROLL] = -50;
 	}
@@ -763,32 +861,32 @@ AdjustAngles
 Moves the local angle positions
 ================
 */
-void CInput::AdjustAngles ( float frametime )
+void CInput::AdjustAngles(float frametime)
 {
 	float	speed;
 	QAngle viewangles;
-	
+
 	// Determine control scaling factor ( multiplies time )
-	speed = DetermineKeySpeed( frametime );
-	if ( speed <= 0.0f )
+	speed = DetermineKeySpeed(frametime);
+	if (speed <= 0.0f)
 	{
 		return;
 	}
 
 	// Retrieve latest view direction from engine
-	engine->GetViewAngles( viewangles );
+	engine->GetViewAngles(viewangles);
 
 	// Adjust YAW
-	AdjustYaw( speed, viewangles );
+	AdjustYaw(speed, viewangles);
 
 	// Adjust PITCH if keyboard looking
-	AdjustPitch( speed, viewangles );
-	
+	AdjustPitch(speed, viewangles);
+
 	// Make sure values are legitimate
-	ClampAngles( viewangles );
+	ClampAngles(viewangles);
 
 	// Store new view angles into engine view direction
-	engine->SetViewAngles( viewangles );
+	engine->SetViewAngles(viewangles);
 }
 
 /*
@@ -797,26 +895,26 @@ ComputeSideMove
 
 ==============================
 */
-void CInput::ComputeSideMove( CUserCmd *cmd )
+void CInput::ComputeSideMove(CUserCmd* cmd)
 {
 	// thirdperson platformer movement
-	if ( CAM_IsThirdPerson() && thirdperson_platformer.GetInt() )
+	if (CAM_IsThirdPerson() && thirdperson_platformer.GetInt())
 	{
 		// no sideways movement in this mode
 		return;
 	}
 
 	// thirdperson screenspace movement
-	if ( CAM_IsThirdPerson() && thirdperson_screenspace.GetInt() )
+	if (CAM_IsThirdPerson() && thirdperson_screenspace.GetInt())
 	{
 		float ideal_yaw = cam_idealyaw.GetFloat();
 		float ideal_sin = sin(DEG2RAD(ideal_yaw));
 		float ideal_cos = cos(DEG2RAD(ideal_yaw));
-		
-		float movement = ideal_cos*KeyState(&in_moveright)
-			+  ideal_sin*KeyState(&in_back)
-			+ -ideal_cos*KeyState(&in_moveleft)
-			+ -ideal_sin*KeyState(&in_forward);
+
+		float movement = ideal_cos * KeyState(&in_moveright)
+			+ ideal_sin * KeyState(&in_back)
+			+ -ideal_cos * KeyState(&in_moveleft)
+			+ -ideal_sin * KeyState(&in_forward);
 
 		cmd->sidemove += cl_sidespeed.GetFloat() * movement;
 
@@ -824,15 +922,15 @@ void CInput::ComputeSideMove( CUserCmd *cmd )
 	}
 
 	// If strafing, check left and right keys and act like moveleft and moveright keys
-	if ( in_strafe.state & 1 )
+	if (in_strafe.state & 1)
 	{
-		cmd->sidemove += cl_sidespeed.GetFloat() * KeyState (&in_right);
-		cmd->sidemove -= cl_sidespeed.GetFloat() * KeyState (&in_left);
+		cmd->sidemove += cl_sidespeed.GetFloat() * KeyState(&in_right);
+		cmd->sidemove -= cl_sidespeed.GetFloat() * KeyState(&in_left);
 	}
 
 	// Otherwise, check strafe keys
-	cmd->sidemove += cl_sidespeed.GetFloat() * KeyState (&in_moveright);
-	cmd->sidemove -= cl_sidespeed.GetFloat() * KeyState (&in_moveleft);
+	cmd->sidemove += cl_sidespeed.GetFloat() * KeyState(&in_moveright);
+	cmd->sidemove -= cl_sidespeed.GetFloat() * KeyState(&in_moveleft);
 }
 
 /*
@@ -841,10 +939,10 @@ ComputeUpwardMove
 
 ==============================
 */
-void CInput::ComputeUpwardMove( CUserCmd *cmd )
+void CInput::ComputeUpwardMove(CUserCmd* cmd)
 {
-	cmd->upmove += cl_upspeed.GetFloat() * KeyState (&in_up);
-	cmd->upmove -= cl_upspeed.GetFloat() * KeyState (&in_down);
+	cmd->upmove += cl_upspeed.GetFloat() * KeyState(&in_up);
+	cmd->upmove -= cl_upspeed.GetFloat() * KeyState(&in_down);
 }
 
 /*
@@ -853,10 +951,10 @@ ComputeForwardMove
 
 ==============================
 */
-void CInput::ComputeForwardMove( CUserCmd *cmd )
+void CInput::ComputeForwardMove(CUserCmd* cmd)
 {
 	// thirdperson platformer movement
-	if ( CAM_IsThirdPerson() && thirdperson_platformer.GetInt() )
+	if (CAM_IsThirdPerson() && thirdperson_platformer.GetInt())
 	{
 		// movement is always forward in this mode
 		float movement = KeyState(&in_forward)
@@ -870,28 +968,31 @@ void CInput::ComputeForwardMove( CUserCmd *cmd )
 	}
 
 	// thirdperson screenspace movement
-	if ( CAM_IsThirdPerson() && thirdperson_screenspace.GetInt() )
+	if (CAM_IsThirdPerson() && thirdperson_screenspace.GetInt())
 	{
 		float ideal_yaw = cam_idealyaw.GetFloat();
 		float ideal_sin = sin(DEG2RAD(ideal_yaw));
 		float ideal_cos = cos(DEG2RAD(ideal_yaw));
-		
-		float movement = ideal_cos*KeyState(&in_forward)
-			+  ideal_sin*KeyState(&in_moveright)
-			+ -ideal_cos*KeyState(&in_back)
-			+ -ideal_sin*KeyState(&in_moveleft);
+
+		float movement = ideal_cos * KeyState(&in_forward)
+			+ ideal_sin * KeyState(&in_moveright)
+			+ -ideal_cos * KeyState(&in_back)
+			+ -ideal_sin * KeyState(&in_moveleft);
 
 		cmd->forwardmove += cl_forwardspeed.GetFloat() * movement;
 
 		return;
 	}
 
-	if ( !(in_klook.state & 1 ) )
-	{	
-		cmd->forwardmove += cl_forwardspeed.GetFloat() * KeyState (&in_forward);
-		cmd->forwardmove -= cl_backspeed.GetFloat() * KeyState (&in_back);
-	}	
+	if (!(in_klook.state & 1))
+	{
+		cmd->forwardmove += cl_forwardspeed.GetFloat() * KeyState(&in_forward);
+		cmd->forwardmove -= cl_backspeed.GetFloat() * KeyState(&in_back);
+	}
 }
+
+extern bool Client_IsIntermission();
+extern void ForceScoreboard();
 
 /*
 ==============================
@@ -899,12 +1000,61 @@ ScaleMovements
 
 ==============================
 */
-void CInput::ScaleMovements( CUserCmd *cmd )
+void CInput::ScaleMovements(CUserCmd* cmd)
 {
 	// float spd;
 
 	// clip to maxspeed
 	// FIXME FIXME:  This doesn't work
+	// --> Mirv: FIXED FIXED
+	if (Client_IsIntermission())
+	{
+		cmd->forwardmove = 0.0f;
+		cmd->sidemove = 0.0f;
+		cmd->upmove = 0.0f;
+
+		ForceScoreboard();
+	}
+
+	// We have to scale speeds this early on.
+	// This way we don't tell the server that we're trying to move faster than we
+	// know we're allowed. This reduces jerkiness when the max speed is changing, since
+	// if the client maxspeed is temporarily slower than the server, it'll still be
+	// telling the server to move at its own maxspeed and the client/server movements
+	// won't diverge.
+
+	C_FFPlayer* pPlayer = ToFFPlayer(CBasePlayer::GetLocalPlayer());
+
+	if (!pPlayer)
+		return;
+
+	float flSpeed = sqrt((cmd->forwardmove * cmd->forwardmove) +
+		(cmd->sidemove * cmd->sidemove) +
+		(cmd->upmove * cmd->upmove));
+
+	float flMaxSpeed = pPlayer->MaxSpeed() * pPlayer->m_flSpeedModifier;
+
+	// SourceTV clients' maxspeed is set to zero, which made it impossible to move in freelook
+	// the commented code below (original SDK code?) has this if check -squeek
+	if (pPlayer->IsHLTV() && flMaxSpeed == 0)
+		return;
+
+	if (flSpeed > flMaxSpeed)
+	{
+		float fRatio = flMaxSpeed / flSpeed;
+		cmd->forwardmove *= fRatio;
+		cmd->sidemove *= fRatio;
+		cmd->upmove *= fRatio;
+	}
+
+	// Oh gawd.
+	// These are transmitted in a way that the decimal part gets lost. This causes the
+	// client to end up slightly faster sometimes and therefore warp around as the server
+	// drags it back. Therefore lop off the fraction now.
+	cmd->forwardmove = (int)cmd->forwardmove;
+	cmd->sidemove = (int)cmd->sidemove;
+
+	// <-- Mirv
 	return;
 
 	/*
@@ -919,7 +1069,7 @@ void CInput::ScaleMovements( CUserCmd *cmd )
 	{
 		float fratio = spd / fmov;
 
-		if ( !IsNoClipping() ) 
+		if ( !IsNoClipping() )
 		{
 			cmd->forwardmove	*= fratio;
 			cmd->sidemove		*= fratio;
@@ -935,22 +1085,22 @@ void CInput::ScaleMovements( CUserCmd *cmd )
 ControllerMove
 ===========
 */
-void CInput::ControllerMove( float frametime, CUserCmd *cmd )
+void CInput::ControllerMove(float frametime, CUserCmd* cmd)
 {
-	if ( IsPC() )
+	if (IsPC())
 	{
-		if ( !m_fCameraInterceptingMouse && m_fMouseActive )
+		if (!m_fCameraInterceptingMouse && m_fMouseActive)
 		{
-			MouseMove( cmd);
+			MouseMove(cmd);
 		}
 	}
 
-	JoyStickMove( frametime, cmd);
+	JoyStickMove(frametime, cmd);
 
 	// NVNT if we have a haptic device..
-	if(haptics && haptics->HasDevice())
+	if (haptics && haptics->HasDevice())
 	{
-		if(engine->IsPaused() || engine->IsLevelMainMenuBackground() || vgui::surface()->IsCursorVisible() || !engine->IsInGame())
+		if (engine->IsPaused() || engine->IsLevelMainMenuBackground() || vgui::surface()->IsCursorVisible() || !engine->IsInGame())
 		{
 			// NVNT send a menu process to the haptics system.
 			haptics->MenuProcess();
@@ -958,8 +1108,8 @@ void CInput::ControllerMove( float frametime, CUserCmd *cmd )
 		}
 #ifdef CSTRIKE_DLL
 		// NVNT cstrike fov grabing.
-		C_BasePlayer *player = C_BasePlayer::GetLocalPlayer();
-		if(player){
+		C_BasePlayer* player = C_BasePlayer::GetLocalPlayer();
+		if (player) {
 			haptics->UpdatePlayerFOV(player->GetFOV());
 		}
 #endif
@@ -980,7 +1130,7 @@ void CInput::ControllerMove( float frametime, CUserCmd *cmd )
 // Purpose: 
 // Input  : *weapon - 
 //-----------------------------------------------------------------------------
-void CInput::MakeWeaponSelection( C_BaseCombatWeapon *weapon )
+void CInput::MakeWeaponSelection(C_BaseCombatWeapon* weapon)
 {
 	m_hSelectedWeapon = weapon;
 }
@@ -995,117 +1145,117 @@ if active == 1 then we are 1) not playing back demos ( where our commands are ig
 ================
 */
 
-void CInput::ExtraMouseSample( float frametime, bool active )
+void CInput::ExtraMouseSample(float frametime, bool active)
 {
 	CUserCmd dummy;
-	CUserCmd *cmd = &dummy;
+	CUserCmd* cmd = &dummy;
 
 	cmd->Reset();
 
 
 	QAngle viewangles;
-	engine->GetViewAngles( viewangles );
+	engine->GetViewAngles(viewangles);
 	QAngle originalViewangles = viewangles;
 
-	if ( active )
+	if (active)
 	{
 		// Determine view angles
-		AdjustAngles ( frametime );
+		AdjustAngles(frametime);
 
 		// Determine sideways movement
-		ComputeSideMove( cmd );
+		ComputeSideMove(cmd);
 
 		// Determine vertical movement
-		ComputeUpwardMove( cmd );
+		ComputeUpwardMove(cmd);
 
 		// Determine forward movement
-		ComputeForwardMove( cmd );
+		ComputeForwardMove(cmd);
 
 		// Scale based on holding speed key or having too fast of a velocity based on client maximum
 		//  speed.
-		ScaleMovements( cmd );
+		ScaleMovements(cmd);
 
 		// Allow mice and other controllers to add their inputs
-		ControllerMove( frametime, cmd );
+		ControllerMove(frametime, cmd);
 #ifdef SIXENSE
-		g_pSixenseInput->SixenseFrame( frametime, cmd ); 
+		g_pSixenseInput->SixenseFrame(frametime, cmd);
 
-		if( g_pSixenseInput->IsEnabled() )
+		if (g_pSixenseInput->IsEnabled())
 		{
-			g_pSixenseInput->SetView( frametime, cmd );
+			g_pSixenseInput->SetView(frametime, cmd);
 		}
 #endif
 	}
 
 	// Retreive view angles from engine ( could have been set in IN_AdjustAngles above )
-	engine->GetViewAngles( viewangles );
+	engine->GetViewAngles(viewangles);
 
 	// Set button and flag bits, don't blow away state
 #ifdef SIXENSE
-	if( g_pSixenseInput->IsEnabled() )
+	if (g_pSixenseInput->IsEnabled())
 	{
 		// Some buttons were set in SixenseUpdateKeys, so or in any real keypresses
-		cmd->buttons |= GetButtonBits( 0 );
+		cmd->buttons |= GetButtonBits(0);
 	}
 	else
 	{
-		cmd->buttons = GetButtonBits( 0 );
+		cmd->buttons = GetButtonBits(0);
 	}
 #else
-	cmd->buttons = GetButtonBits( 0 );
+	cmd->buttons = GetButtonBits(0);
 #endif
 
 	// Use new view angles if alive, otherwise user last angles we stored off.
-	if ( g_iAlive )
+	if (g_iAlive)
 	{
-		VectorCopy( viewangles, cmd->viewangles );
-		VectorCopy( viewangles, m_angPreviousViewAngles );
+		VectorCopy(viewangles, cmd->viewangles);
+		VectorCopy(viewangles, m_angPreviousViewAngles);
 	}
 	else
 	{
-		VectorCopy( m_angPreviousViewAngles, cmd->viewangles );
+		VectorCopy(m_angPreviousViewAngles, cmd->viewangles);
 	}
 
 	// Let the move manager override anything it wants to.
-	if ( g_pClientMode->CreateMove( frametime, cmd ) )
+	if (g_pClientMode->CreateMove(frametime, cmd))
 	{
 		// Get current view angles after the client mode tweaks with it
-		engine->SetViewAngles( cmd->viewangles );
-		prediction->SetLocalViewAngles( cmd->viewangles );
+		engine->SetViewAngles(cmd->viewangles);
+		prediction->SetLocalViewAngles(cmd->viewangles);
 	}
 
 	// Let the headtracker override the view at the very end of the process so
 	// that vehicles and other stuff in g_pClientMode->CreateMove can override 
 	// first
-	if ( active && UseVR() )
+	if (active && UseVR())
 	{
-		C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
-		if( pPlayer && !pPlayer->GetVehicle() )
+		C_BasePlayer* pPlayer = C_BasePlayer::GetLocalPlayer();
+		if (pPlayer && !pPlayer->GetVehicle())
 		{
 			QAngle curViewangles, newViewangles;
 			Vector curMotion, newMotion;
-			engine->GetViewAngles( curViewangles );
-			curMotion.Init ( 
+			engine->GetViewAngles(curViewangles);
+			curMotion.Init(
 				cmd->forwardmove,
 				cmd->sidemove,
-				cmd->upmove );
-			g_ClientVirtualReality.OverridePlayerMotion ( frametime, originalViewangles, curViewangles, curMotion, &newViewangles, &newMotion );
-			engine->SetViewAngles( newViewangles );
+				cmd->upmove);
+			g_ClientVirtualReality.OverridePlayerMotion(frametime, originalViewangles, curViewangles, curMotion, &newViewangles, &newMotion);
+			engine->SetViewAngles(newViewangles);
 			cmd->forwardmove = newMotion[0];
 			cmd->sidemove = newMotion[1];
 			cmd->upmove = newMotion[2];
 
 			cmd->viewangles = newViewangles;
-			prediction->SetLocalViewAngles( cmd->viewangles );
+			prediction->SetLocalViewAngles(cmd->viewangles);
 		}
 	}
 
 }
 
-void CInput::CreateMove ( int sequence_number, float input_sample_frametime, bool active )
-{	
-	CUserCmd *cmd = &m_pCommands[ sequence_number % MULTIPLAYER_BACKUP ];
-	CVerifiedUserCmd *pVerified = &m_pVerifiedCommands[ sequence_number % MULTIPLAYER_BACKUP ];
+void CInput::CreateMove(int sequence_number, float input_sample_frametime, bool active)
+{
+	CUserCmd* cmd = &m_pCommands[sequence_number % MULTIPLAYER_BACKUP];
+	CVerifiedUserCmd* pVerified = &m_pVerifiedCommands[sequence_number % MULTIPLAYER_BACKUP];
 
 	cmd->Reset();
 
@@ -1113,59 +1263,59 @@ void CInput::CreateMove ( int sequence_number, float input_sample_frametime, boo
 	cmd->tick_count = gpGlobals->tickcount;
 
 	QAngle viewangles;
-	engine->GetViewAngles( viewangles );
+	engine->GetViewAngles(viewangles);
 	QAngle originalViewangles = viewangles;
 
-	if ( active || sv_noclipduringpause.GetInt() )
+	if (active || sv_noclipduringpause.GetInt())
 	{
 		// Determine view angles
-		AdjustAngles ( input_sample_frametime );
+		AdjustAngles(input_sample_frametime);
 
 		// Determine sideways movement
-		ComputeSideMove( cmd );
+		ComputeSideMove(cmd);
 
 		// Determine vertical movement
-		ComputeUpwardMove( cmd );
+		ComputeUpwardMove(cmd);
 
 		// Determine forward movement
-		ComputeForwardMove( cmd );
+		ComputeForwardMove(cmd);
 
 		// Scale based on holding speed key or having too fast of a velocity based on client maximum
 		//  speed.
-		ScaleMovements( cmd );
+		ScaleMovements(cmd);
 
 		// Allow mice and other controllers to add their inputs
-		ControllerMove( input_sample_frametime, cmd );
+		ControllerMove(input_sample_frametime, cmd);
 #ifdef SIXENSE
-		g_pSixenseInput->SixenseFrame( input_sample_frametime, cmd ); 
+		g_pSixenseInput->SixenseFrame(input_sample_frametime, cmd);
 
-		if( g_pSixenseInput->IsEnabled() )
+		if (g_pSixenseInput->IsEnabled())
 		{
-			g_pSixenseInput->SetView( input_sample_frametime, cmd );
+			g_pSixenseInput->SetView(input_sample_frametime, cmd);
 		}
 #endif
 	}
 	else
 	{
 		// need to run and reset mouse input so that there is no view pop when unpausing
-		if ( !m_fCameraInterceptingMouse && m_fMouseActive )
+		if (!m_fCameraInterceptingMouse && m_fMouseActive)
 		{
 			float mx, my;
-			GetAccumulatedMouseDeltasAndResetAccumulators( &mx, &my );
+			GetAccumulatedMouseDeltasAndResetAccumulators(&mx, &my);
 			ResetMouse();
 		}
 	}
 	// Retreive view angles from engine ( could have been set in IN_AdjustAngles above )
-	engine->GetViewAngles( viewangles );
+	engine->GetViewAngles(viewangles);
 
 	// Latch and clear impulse
 	cmd->impulse = in_impulse;
 	in_impulse = 0;
 
 	// Latch and clear weapon selection
-	if ( m_hSelectedWeapon != NULL )
+	if (m_hSelectedWeapon != NULL)
 	{
-		C_BaseCombatWeapon *weapon = m_hSelectedWeapon;
+		C_BaseCombatWeapon* weapon = m_hSelectedWeapon;
 
 		cmd->weaponselect = weapon->entindex();
 		cmd->weaponsubtype = weapon->GetSubType();
@@ -1176,77 +1326,77 @@ void CInput::CreateMove ( int sequence_number, float input_sample_frametime, boo
 
 	// Set button and flag bits
 #ifdef SIXENSE
-	if( g_pSixenseInput->IsEnabled() )
+	if (g_pSixenseInput->IsEnabled())
 	{
 		// Some buttons were set in SixenseUpdateKeys, so or in any real keypresses
-		cmd->buttons |= GetButtonBits( 1 );
+		cmd->buttons |= GetButtonBits(1);
 	}
 	else
 	{
-		cmd->buttons = GetButtonBits( 1 );
+		cmd->buttons = GetButtonBits(1);
 	}
 #else
 	// Set button and flag bits
-	cmd->buttons = GetButtonBits( 1 );
+	cmd->buttons = GetButtonBits(1);
 #endif
 
 	// Using joystick?
 #ifdef SIXENSE
-	if ( in_joystick.GetInt() || g_pSixenseInput->IsEnabled() )
+	if (in_joystick.GetInt() || g_pSixenseInput->IsEnabled())
 #else
-	if ( in_joystick.GetInt() )
+	if (in_joystick.GetInt())
 #endif
 	{
-		if ( cmd->forwardmove > 0 )
+		if (cmd->forwardmove > 0)
 		{
 			cmd->buttons |= IN_FORWARD;
 		}
-		else if ( cmd->forwardmove < 0 )
+		else if (cmd->forwardmove < 0)
 		{
 			cmd->buttons |= IN_BACK;
 		}
 	}
 
 	// Use new view angles if alive, otherwise user last angles we stored off.
-	if ( g_iAlive )
+	if (g_iAlive)
 	{
-		VectorCopy( viewangles, cmd->viewangles );
-		VectorCopy( viewangles, m_angPreviousViewAngles );
+		VectorCopy(viewangles, cmd->viewangles);
+		VectorCopy(viewangles, m_angPreviousViewAngles);
 	}
 	else
 	{
-		VectorCopy( m_angPreviousViewAngles, cmd->viewangles );
+		VectorCopy(m_angPreviousViewAngles, cmd->viewangles);
 	}
 
 	// Let the move manager override anything it wants to.
-	if ( g_pClientMode->CreateMove( input_sample_frametime, cmd ) )
+	if (g_pClientMode->CreateMove(input_sample_frametime, cmd))
 	{
 		// Get current view angles after the client mode tweaks with it
 #ifdef SIXENSE
 		// Only set the engine angles if sixense is not enabled. It is done in SixenseInput::SetView otherwise.
-		if( !g_pSixenseInput->IsEnabled() )
+		if (!g_pSixenseInput->IsEnabled())
 		{
-			engine->SetViewAngles( cmd->viewangles );
+			engine->SetViewAngles(cmd->viewangles);
 		}
 #else
-		engine->SetViewAngles( cmd->viewangles );
+		engine->SetViewAngles(cmd->viewangles);
 
 #endif
 
-		if ( UseVR() )
+		if (UseVR())
 		{
-			C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
-			if( pPlayer && !pPlayer->GetVehicle() )
+			C_BasePlayer* pPlayer = C_BasePlayer::GetLocalPlayer();
+			if (pPlayer && !pPlayer->GetVehicle())
 			{
 				QAngle curViewangles, newViewangles;
 				Vector curMotion, newMotion;
-				engine->GetViewAngles( curViewangles );
-				curMotion.Init ( 
+				engine->GetViewAngles(curViewangles);
+				curMotion.Init(
 					cmd->forwardmove,
 					cmd->sidemove,
-					cmd->upmove );
-				g_ClientVirtualReality.OverridePlayerMotion ( input_sample_frametime, originalViewangles, curViewangles, curMotion, &newViewangles, &newMotion );
-				engine->SetViewAngles( newViewangles );
+					cmd->upmove);
+				g_ClientVirtualReality.OverridePlayerMotion(input_sample_frametime, originalViewangles, curViewangles, curMotion, &newViewangles, &newMotion);
+				engine->SetViewAngles(newViewangles);
 				cmd->forwardmove = newMotion[0];
 				cmd->sidemove = newMotion[1];
 				cmd->upmove = newMotion[2];
@@ -1255,19 +1405,19 @@ void CInput::CreateMove ( int sequence_number, float input_sample_frametime, boo
 			else
 			{
 				Vector vPos;
-				g_ClientVirtualReality.GetTorsoRelativeAim( &vPos, &cmd->viewangles );
-				engine->SetViewAngles( cmd->viewangles );
+				g_ClientVirtualReality.GetTorsoRelativeAim(&vPos, &cmd->viewangles);
+				engine->SetViewAngles(cmd->viewangles);
 			}
 		}
 	}
 
 	m_flLastForwardMove = cmd->forwardmove;
 
-	cmd->random_seed = MD5_PseudoRandom( sequence_number ) & 0x7fffffff;
+	cmd->random_seed = MD5_PseudoRandom(sequence_number) & 0x7fffffff;
 
-	HLTVCamera()->CreateMove( cmd );
+	HLTVCamera()->CreateMove(cmd);
 #if defined( REPLAY_ENABLED )
-	ReplayCamera()->CreateMove( cmd );
+	ReplayCamera()->CreateMove(cmd);
 #endif
 
 #if defined( HL2_CLIENT_DLL )
@@ -1275,7 +1425,7 @@ void CInput::CreateMove ( int sequence_number, float input_sample_frametime, boo
 	int i;
 	for (i = 0; i < m_EntityGroundContact.Count(); i++)
 	{
-		cmd->entitygroundcontact.AddToTail( m_EntityGroundContact[i] );
+		cmd->entitygroundcontact.AddToTail(m_EntityGroundContact[i]);
 	}
 	m_EntityGroundContact.RemoveAll();
 #endif
@@ -1290,12 +1440,12 @@ void CInput::CreateMove ( int sequence_number, float input_sample_frametime, boo
 //			buffersize - 
 //			slot - 
 //-----------------------------------------------------------------------------
-void CInput::EncodeUserCmdToBuffer( bf_write& buf, int sequence_number )
+void CInput::EncodeUserCmdToBuffer(bf_write& buf, int sequence_number)
 {
 	CUserCmd nullcmd;
-	CUserCmd *cmd = GetUserCmd( sequence_number);
+	CUserCmd* cmd = GetUserCmd(sequence_number);
 
-	WriteUsercmd( &buf, cmd, &nullcmd );
+	WriteUsercmd(&buf, cmd, &nullcmd);
 }
 
 //-----------------------------------------------------------------------------
@@ -1304,21 +1454,21 @@ void CInput::EncodeUserCmdToBuffer( bf_write& buf, int sequence_number )
 //			buffersize - 
 //			slot - 
 //-----------------------------------------------------------------------------
-void CInput::DecodeUserCmdFromBuffer( bf_read& buf, int sequence_number )
+void CInput::DecodeUserCmdFromBuffer(bf_read& buf, int sequence_number)
 {
 	CUserCmd nullcmd;
-	CUserCmd *cmd = &m_pCommands[ sequence_number % MULTIPLAYER_BACKUP];
+	CUserCmd* cmd = &m_pCommands[sequence_number % MULTIPLAYER_BACKUP];
 
-	ReadUsercmd( &buf, cmd, &nullcmd );
+	ReadUsercmd(&buf, cmd, &nullcmd);
 }
 
-void CInput::ValidateUserCmd( CUserCmd *usercmd, int sequence_number )
+void CInput::ValidateUserCmd(CUserCmd* usercmd, int sequence_number)
 {
 	// Validate that the usercmd hasn't been changed
 	CRC32_t crc = usercmd->GetChecksum();
-	if ( crc != m_pVerifiedCommands[ sequence_number % MULTIPLAYER_BACKUP ].m_crc )
+	if (crc != m_pVerifiedCommands[sequence_number % MULTIPLAYER_BACKUP].m_crc)
 	{
-		*usercmd = m_pVerifiedCommands[ sequence_number % MULTIPLAYER_BACKUP ].m_cmd;
+		*usercmd = m_pVerifiedCommands[sequence_number % MULTIPLAYER_BACKUP].m_cmd;
 	}
 }
 
@@ -1328,56 +1478,56 @@ void CInput::ValidateUserCmd( CUserCmd *usercmd, int sequence_number )
 //			from - 
 //			to - 
 //-----------------------------------------------------------------------------
-bool CInput::WriteUsercmdDeltaToBuffer( bf_write *buf, int from, int to, bool isnewcommand )
+bool CInput::WriteUsercmdDeltaToBuffer(bf_write* buf, int from, int to, bool isnewcommand)
 {
-	Assert( m_pCommands );
+	Assert(m_pCommands);
 
 	CUserCmd nullcmd;
 
-	CUserCmd *f, *t;
+	CUserCmd* f, * t;
 
 	int startbit = buf->GetNumBitsWritten();
 
-	if ( from == -1 )
+	if (from == -1)
 	{
 		f = &nullcmd;
 	}
 	else
 	{
-		f = GetUserCmd( from );
+		f = GetUserCmd(from);
 
-		if ( !f )
+		if (!f)
 		{
 			// DevMsg( "WARNING! User command delta too old (from %i, to %i)\n", from, to );
 			f = &nullcmd;
 		}
 		else
 		{
-			ValidateUserCmd( f, from );
+			ValidateUserCmd(f, from);
 		}
 	}
 
-	t = GetUserCmd( to );
+	t = GetUserCmd(to);
 
-	if ( !t )
+	if (!t)
 	{
 		// DevMsg( "WARNING! User command too old (from %i, to %i)\n", from, to );
 		t = &nullcmd;
 	}
 	else
 	{
-		ValidateUserCmd( t, to );
+		ValidateUserCmd(t, to);
 	}
 
 	// Write it into the buffer
-	WriteUsercmd( buf, t, f );
+	WriteUsercmd(buf, t, f);
 
-	if ( buf->IsOverflowed() )
+	if (buf->IsOverflowed())
 	{
 		int endbit = buf->GetNumBitsWritten();
 
-		Msg( "WARNING! User command buffer overflow(%i %i), last cmd was %i bits long\n",
-			from, to,  endbit - startbit );
+		Msg("WARNING! User command buffer overflow(%i %i), last cmd was %i bits long\n",
+			from, to, endbit - startbit);
 
 		return false;
 	}
@@ -1390,13 +1540,13 @@ bool CInput::WriteUsercmdDeltaToBuffer( bf_write *buf, int from, int to, bool is
 // Input  : slot - 
 // Output : CUserCmd
 //-----------------------------------------------------------------------------
-CUserCmd *CInput::GetUserCmd( int sequence_number )
+CUserCmd* CInput::GetUserCmd(int sequence_number)
 {
-	Assert( m_pCommands );
+	Assert(m_pCommands);
 
-	CUserCmd *usercmd = &m_pCommands[ sequence_number % MULTIPLAYER_BACKUP ];
+	CUserCmd* usercmd = &m_pCommands[sequence_number % MULTIPLAYER_BACKUP];
 
-	if ( usercmd->command_number != sequence_number )
+	if (usercmd->command_number != sequence_number)
 	{
 		return NULL;	// usercmd was overwritten by newer command
 	}
@@ -1413,16 +1563,16 @@ CUserCmd *CInput::GetUserCmd( int sequence_number )
 //			reset - 
 // Output : static void
 //-----------------------------------------------------------------------------
-static void CalcButtonBits( int& bits, int in_button, int in_ignore, kbutton_t *button, bool reset )
+static void CalcButtonBits(int& bits, int in_button, int in_ignore, kbutton_t* button, bool reset)
 {
 	// Down or still down?
-	if ( button->state & 3 )
+	if (button->state & 3)
 	{
 		bits |= in_button;
 	}
 
 	int clearmask = ~2;
-	if ( in_ignore & in_button )
+	if (in_ignore & in_button)
 	{
 		// This gets taken care of below in the GetButtonBits code
 		//bits &= ~in_button;
@@ -1430,7 +1580,7 @@ static void CalcButtonBits( int& bits, int in_button, int in_ignore, kbutton_t *
 		clearmask = ~3;
 	}
 
-	if ( reset )
+	if (reset)
 	{
 		button->state &= clearmask;
 	}
@@ -1444,33 +1594,32 @@ Returns appropriate button info for keyboard and mouse state
 Set bResetState to 1 to clear old state info
 ============
 */
-int CInput::GetButtonBits( int bResetState )
+int CInput::GetButtonBits(int bResetState)
 {
 	int bits = 0;
 
-	CalcButtonBits( bits, IN_SPEED, s_ClearInputState, &in_speed, bResetState );
-	CalcButtonBits( bits, IN_WALK, s_ClearInputState, &in_walk, bResetState );
-	CalcButtonBits( bits, IN_ATTACK, s_ClearInputState, &in_attack, bResetState );
-	CalcButtonBits( bits, IN_DUCK, s_ClearInputState, &in_duck, bResetState );
-	CalcButtonBits( bits, IN_JUMP, s_ClearInputState, &in_jump, bResetState );
-	CalcButtonBits( bits, IN_FORWARD, s_ClearInputState, &in_forward, bResetState );
-	CalcButtonBits( bits, IN_BACK, s_ClearInputState, &in_back, bResetState );
-	CalcButtonBits( bits, IN_USE, s_ClearInputState, &in_use, bResetState );
-	CalcButtonBits( bits, IN_LEFT, s_ClearInputState, &in_left, bResetState );
-	CalcButtonBits( bits, IN_RIGHT, s_ClearInputState, &in_right, bResetState );
-	CalcButtonBits( bits, IN_MOVELEFT, s_ClearInputState, &in_moveleft, bResetState );
-	CalcButtonBits( bits, IN_MOVERIGHT, s_ClearInputState, &in_moveright, bResetState );
-	CalcButtonBits( bits, IN_ATTACK2, s_ClearInputState, &in_attack2, bResetState );
-	CalcButtonBits( bits, IN_RELOAD, s_ClearInputState, &in_reload, bResetState );
-	CalcButtonBits( bits, IN_ALT1, s_ClearInputState, &in_alt1, bResetState );
-	CalcButtonBits( bits, IN_ALT2, s_ClearInputState, &in_alt2, bResetState );
-	CalcButtonBits( bits, IN_SCORE, s_ClearInputState, &in_score, bResetState );
-	CalcButtonBits( bits, IN_ZOOM, s_ClearInputState, &in_zoom, bResetState );
-	CalcButtonBits( bits, IN_GRENADE1, s_ClearInputState, &in_grenade1, bResetState );
-	CalcButtonBits( bits, IN_GRENADE2, s_ClearInputState, &in_grenade2, bResetState );
-	CalcButtonBits( bits, IN_ATTACK3, s_ClearInputState, &in_attack3, bResetState );
+	CalcButtonBits(bits, IN_SPEED, s_ClearInputState, &in_speed, bResetState);
+	CalcButtonBits(bits, IN_WALK, s_ClearInputState, &in_walk, bResetState);
+	CalcButtonBits(bits, IN_ATTACK, s_ClearInputState, &in_attack, bResetState);
+	CalcButtonBits(bits, IN_DUCK, s_ClearInputState, &in_duck, bResetState);
+	CalcButtonBits(bits, IN_JUMP, s_ClearInputState, &in_jump, bResetState);
+	CalcButtonBits(bits, IN_FORWARD, s_ClearInputState, &in_forward, bResetState);
+	CalcButtonBits(bits, IN_BACK, s_ClearInputState, &in_back, bResetState);
+	CalcButtonBits(bits, IN_USE, s_ClearInputState, &in_use, bResetState);
+	CalcButtonBits(bits, IN_LEFT, s_ClearInputState, &in_left, bResetState);
+	CalcButtonBits(bits, IN_RIGHT, s_ClearInputState, &in_right, bResetState);
+	CalcButtonBits(bits, IN_MOVELEFT, s_ClearInputState, &in_moveleft, bResetState);
+	CalcButtonBits(bits, IN_MOVERIGHT, s_ClearInputState, &in_moveright, bResetState);
+	CalcButtonBits(bits, IN_ATTACK2, s_ClearInputState, &in_attack2, bResetState);
+	CalcButtonBits(bits, IN_RELOAD, s_ClearInputState, &in_reload, bResetState);
+	CalcButtonBits(bits, IN_ALT1, s_ClearInputState, &in_alt1, bResetState);
+	CalcButtonBits(bits, IN_ALT2, s_ClearInputState, &in_alt2, bResetState);
+	CalcButtonBits(bits, IN_SCORE, s_ClearInputState, &in_score, bResetState);
+	CalcButtonBits(bits, IN_ZOOM, s_ClearInputState, &in_zoom, bResetState);
 
-	if ( KeyState(&in_ducktoggle) )
+	CalcButtonBits(bits, IN_ATTACK3, s_ClearInputState, &in_attack3, bResetState);
+
+	if (KeyState(&in_ducktoggle))
 	{
 		bits |= IN_DUCK;
 	}
@@ -1481,12 +1630,12 @@ int CInput::GetButtonBits( int bResetState )
 		bits |= IN_CANCEL;
 	}
 
-	if ( gHUD.m_iKeyBits & IN_WEAPON1 )
+	if (gHUD.m_iKeyBits & IN_WEAPON1)
 	{
 		bits |= IN_WEAPON1;
 	}
 
-	if ( gHUD.m_iKeyBits & IN_WEAPON2 )
+	if (gHUD.m_iKeyBits & IN_WEAPON2)
 	{
 		bits |= IN_WEAPON2;
 	}
@@ -1494,7 +1643,7 @@ int CInput::GetButtonBits( int bResetState )
 	// Clear out any residual
 	bits &= ~s_ClearInputState;
 
-	if ( bResetState )
+	if (bResetState)
 	{
 		s_ClearInputState = 0;
 	}
@@ -1506,7 +1655,7 @@ int CInput::GetButtonBits( int bResetState )
 //-----------------------------------------------------------------------------
 // Causes an input to have to be re-pressed to become active
 //-----------------------------------------------------------------------------
-void CInput::ClearInputButton( int bits )
+void CInput::ClearInputButton(int bits)
 {
 	s_ClearInputState |= bits;
 }
@@ -1518,7 +1667,7 @@ GetLookSpring
 
 ==============================
 */
-float CInput::GetLookSpring( void )
+float CInput::GetLookSpring(void)
 {
 	return lookspring.GetInt();
 }
@@ -1527,7 +1676,7 @@ float CInput::GetLookSpring( void )
 // Purpose: 
 // Output : float
 //-----------------------------------------------------------------------------
-float CInput::GetLastForwardMove( void )
+float CInput::GetLastForwardMove(void)
 {
 	return m_flLastForwardMove;
 }
@@ -1539,7 +1688,7 @@ float CInput::GetLastForwardMove( void )
 // Output :
 //-----------------------------------------------------------------------------
 
-void CInput::AddIKGroundContactInfo( int entindex, float minheight, float maxheight )
+void CInput::AddIKGroundContactInfo(int entindex, float minheight, float maxheight)
 {
 	CEntityGroundContact data;
 	data.entindex = entindex;
@@ -1554,25 +1703,25 @@ void CInput::AddIKGroundContactInfo( int entindex, float minheight, float maxhei
 		return;
 	}
 
-	m_EntityGroundContact.AddToTail( data );
+	m_EntityGroundContact.AddToTail(data);
 }
 #endif
 
 
 static ConCommand startcommandermousemove("+commandermousemove", IN_CommanderMouseMoveDown);
 static ConCommand endcommandermousemove("-commandermousemove", IN_CommanderMouseMoveUp);
-static ConCommand startmoveup("+moveup",IN_UpDown);
-static ConCommand endmoveup("-moveup",IN_UpUp);
-static ConCommand startmovedown("+movedown",IN_DownDown);
-static ConCommand endmovedown("-movedown",IN_DownUp);
-static ConCommand startleft("+left",IN_LeftDown);
-static ConCommand endleft("-left",IN_LeftUp);
-static ConCommand startright("+right",IN_RightDown);
-static ConCommand endright("-right",IN_RightUp);
-static ConCommand startforward("+forward",IN_ForwardDown);
-static ConCommand endforward("-forward",IN_ForwardUp);
-static ConCommand startback("+back",IN_BackDown);
-static ConCommand endback("-back",IN_BackUp);
+static ConCommand startmoveup("+moveup", IN_UpDown);
+static ConCommand endmoveup("-moveup", IN_UpUp);
+static ConCommand startmovedown("+movedown", IN_DownDown);
+static ConCommand endmovedown("-movedown", IN_DownUp);
+static ConCommand startleft("+left", IN_LeftDown);
+static ConCommand endleft("-left", IN_LeftUp);
+static ConCommand startright("+right", IN_RightDown);
+static ConCommand endright("-right", IN_RightUp);
+static ConCommand startforward("+forward", IN_ForwardDown);
+static ConCommand endforward("-forward", IN_ForwardUp);
+static ConCommand startback("+back", IN_BackDown);
+static ConCommand endback("-back", IN_BackUp);
 static ConCommand startlookup("+lookup", IN_LookupDown);
 static ConCommand endlookup("-lookup", IN_LookupUp);
 static ConCommand startlookdown("+lookdown", IN_LookdownDown);
@@ -1614,21 +1763,41 @@ static ConCommand startshowscores("+showscores", IN_ScoreDown);
 static ConCommand endshowscores("-showscores", IN_ScoreUp);
 static ConCommand startgraph("+graph", IN_GraphDown);
 static ConCommand endgraph("-graph", IN_GraphUp);
-static ConCommand startbreak("+break",IN_BreakDown);
-static ConCommand endbreak("-break",IN_BreakUp);
+static ConCommand startbreak("+break", IN_BreakDown);
+static ConCommand endbreak("-break", IN_BreakUp);
 static ConCommand force_centerview("force_centerview", IN_CenterView_f);
 static ConCommand joyadvancedupdate("joyadvancedupdate", IN_Joystick_Advanced_f, "", FCVAR_CLIENTCMD_CAN_EXECUTE);
 static ConCommand startzoom("+zoom", IN_ZoomDown);
 static ConCommand endzoom("-zoom", IN_ZoomUp);
-static ConCommand endgrenade1( "-grenade1", IN_Grenade1Up );
-static ConCommand startgrenade1( "+grenade1", IN_Grenade1Down );
-static ConCommand endgrenade2( "-grenade2", IN_Grenade2Up );
-static ConCommand startgrenade2( "+grenade2", IN_Grenade2Down );
+
 static ConCommand startattack3("+attack3", IN_Attack3Down);
 static ConCommand endattack3("-attack3", IN_Attack3Up);
 
+// BEG: Added by Mulchman for team & class changing
+static ConCommand changeteam("changeteam", IN_ChangeTeam);
+static ConCommand changeclass("changeclass", IN_ChangeClass);
+// END: Added by Mulchman for team & class changing
+
+static ConCommand serverinfo("serverinfo", IN_ServerInfo);
+
+// BEG: Mulch: For medic & engy hud radial style menu
+static ConCommand startMedEngyMenu("+medengymenu", IN_MedEngyMenuDown);
+static ConCommand endMedEngymenu("-medengymenu", IN_MedEngyMenuUp);
+// END: Mulch: For medic & engy hud radial style menu
+
+// BEGIN: Jiggles: For display of the Hint Center
+static ConCommand startHintCenter("+hintcenter", IN_HintCenterDown);
+static ConCommand endHintCenter("-hintcenter", IN_HintCenterUp);
+// END: Jiggles: For display of the Hint Center
+
+// BEGIN: Jiggles: For display of the Map Screenshot
+static ConCommand startMapShot("+mapshot", IN_MapShotDown);
+static ConCommand endMapShot("-mapshot", IN_MapShotUp);
+// END: Jiggles: For display of the Map Screenshot
+
+
 #ifdef TF_CLIENT_DLL
-static ConCommand toggle_duck( "toggle_duck", IN_DuckToggle );
+static ConCommand toggle_duck("toggle_duck", IN_DuckToggle);
 #endif
 
 // Xbox 360 stub commands
@@ -1640,35 +1809,35 @@ static ConCommand xboxlook("xlook", IN_XboxStub);
 Init_All
 ============
 */
-void CInput::Init_All (void)
+void CInput::Init_All(void)
 {
-	Assert( !m_pCommands );
-	m_pCommands = new CUserCmd[ MULTIPLAYER_BACKUP ];
-	m_pVerifiedCommands = new CVerifiedUserCmd[ MULTIPLAYER_BACKUP ];
+	Assert(!m_pCommands);
+	m_pCommands = new CUserCmd[MULTIPLAYER_BACKUP];
+	m_pVerifiedCommands = new CVerifiedUserCmd[MULTIPLAYER_BACKUP];
 
-	m_fMouseInitialized	= false;
-	m_fRestoreSPI		= false;
-	m_fMouseActive		= false;
-	Q_memset( m_rgOrigMouseParms, 0, sizeof( m_rgOrigMouseParms ) );
-	Q_memset( m_rgNewMouseParms, 0, sizeof( m_rgNewMouseParms ) );
-	Q_memset( m_rgCheckMouseParam, 0, sizeof( m_rgCheckMouseParam ) );
+	m_fMouseInitialized = false;
+	m_fRestoreSPI = false;
+	m_fMouseActive = false;
+	Q_memset(m_rgOrigMouseParms, 0, sizeof(m_rgOrigMouseParms));
+	Q_memset(m_rgNewMouseParms, 0, sizeof(m_rgNewMouseParms));
+	Q_memset(m_rgCheckMouseParam, 0, sizeof(m_rgCheckMouseParam));
 
-	m_rgNewMouseParms[ MOUSE_ACCEL_THRESHHOLD1 ] = 0;	// no 2x
-	m_rgNewMouseParms[ MOUSE_ACCEL_THRESHHOLD2 ] = 0;	// no 4x
-	m_rgNewMouseParms[ MOUSE_SPEED_FACTOR ] = 1;		// 0 = disabled, 1 = threshold 1 enabled, 2 = threshold 2 enabled
+	m_rgNewMouseParms[MOUSE_ACCEL_THRESHHOLD1] = 0;	// no 2x
+	m_rgNewMouseParms[MOUSE_ACCEL_THRESHHOLD2] = 0;	// no 4x
+	m_rgNewMouseParms[MOUSE_SPEED_FACTOR] = 1;		// 0 = disabled, 1 = threshold 1 enabled, 2 = threshold 2 enabled
 
-	m_fMouseParmsValid	= false;
+	m_fMouseParmsValid = false;
 	m_fJoystickAdvancedInit = false;
 	m_fHadJoysticks = false;
 	m_flLastForwardMove = 0.0;
 
 	// Initialize inputs
-	if ( IsPC() )
+	if (IsPC())
 	{
-		Init_Mouse ();
+		Init_Mouse();
 		Init_Keyboard();
 	}
-		
+
 	// Initialize third person camera controls.
 	Init_Camera();
 }
@@ -1690,11 +1859,10 @@ void CInput::Shutdown_All(void)
 	m_pVerifiedCommands = NULL;
 }
 
-void CInput::LevelInit( void )
+void CInput::LevelInit(void)
 {
 #if defined( HL2_CLIENT_DLL )
 	// Remove any IK information
 	m_EntityGroundContact.RemoveAll();
 #endif
 }
-

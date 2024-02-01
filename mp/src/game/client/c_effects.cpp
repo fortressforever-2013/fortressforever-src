@@ -1342,6 +1342,7 @@ protected:
 	TimedEvent			m_tParticleSpawn;
 	CSmartPtr<CEmberEmitter> m_pEmitter;
 
+	bool	m_bNeedToSetOrigin;	// |-- Mirv
 };
 
 //Receive datatable
@@ -1404,6 +1405,11 @@ void C_Embers::AddEntity( void )
 {
 	if ( m_bEmit == false )
 		return;
+
+	// --> Mirv: Moved here from the constructor
+	if (m_bNeedToSetOrigin)
+		m_pEmitter->SetSortOrigin(GetAbsOrigin());
+	// <-- Mirv
 
 	float tempDelta = gpGlobals->frametime;
 

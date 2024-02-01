@@ -63,6 +63,7 @@ private:
 	bool			m_bMenuDisplayed;
 	int				m_bitsValidSlots;
 	float			m_flShutoffTime;
+	float			m_flExpireTime;
 	int				m_fWaitingForMore;
 	int				m_nSelectedItem;
 	bool			m_bMenuTakesInput;
@@ -72,18 +73,18 @@ private:
 	CPanelAnimationVar( float, m_flOpenCloseTime, "OpenCloseTime", "1" );
 
 	CPanelAnimationVar( float, m_flBlur, "Blur", "0" );
-	CPanelAnimationVar( float, m_flTextScan, "TextScane", "1" );
+	CPanelAnimationVar( float, m_flTextScan, "TextScan", "1" );
 
 	CPanelAnimationVar( float, m_flAlphaOverride, "Alpha", "255.0" );
 	CPanelAnimationVar( float, m_flSelectionAlphaOverride, "SelectionAlpha", "255.0" );
 
-	CPanelAnimationVar( vgui::HFont, m_hTextFont, "TextFont", "MenuTextFont" );
-	CPanelAnimationVar( vgui::HFont, m_hItemFont, "ItemFont", "MenuItemFont" );
-	CPanelAnimationVar( vgui::HFont, m_hItemFontPulsing, "ItemFontPulsing", "MenuItemFontPulsing" );
+	CPanelAnimationVar( vgui::HFont, m_hTextFont, "TextFont", "Default" );
+	CPanelAnimationVar( vgui::HFont, m_hItemFont, "ItemFont", "Default" );
+	CPanelAnimationVar( vgui::HFont, m_hItemFontPulsing, "ItemFontPulsing", "Default" );
 
-	CPanelAnimationVar( Color, m_MenuColor, "MenuColor", "MenuColor" );
-	CPanelAnimationVar( Color, m_ItemColor, "MenuItemColor", "ItemColor" );
-	CPanelAnimationVar( Color, m_BoxColor, "MenuBoxColor", "MenuBoxBg" );
+	CPanelAnimationVar( Color, m_MenuColor, "MenuColor", "255 255 255 255" );
+	CPanelAnimationVar( Color, m_ItemColor, "ItemColor", "200 200 200 255" );
+	CPanelAnimationVar( Color, m_BoxColor, "MenuBoxColor", "0 0 0 25" );
 };
 
 #endif // HUD_MENU_H

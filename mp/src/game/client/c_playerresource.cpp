@@ -6,8 +6,10 @@
 //=============================================================================//
 #include "cbase.h"
 #include "c_playerresource.h"
-#include "c_team.h"
+#include "c_ff_team.h"
 #include "gamestringpool.h"
+
+#include "ff_shareddefs.h"
 
 #ifdef HL2MP
 #include "hl2mp_gamerules.h"
@@ -21,11 +23,17 @@ const float PLAYER_RESOURCE_THINK_INTERVAL = 0.2f;
 IMPLEMENT_CLIENTCLASS_DT_NOBASE(C_PlayerResource, DT_PlayerResource, CPlayerResource)
 	RecvPropArray3( RECVINFO_ARRAY(m_iPing), RecvPropInt( RECVINFO(m_iPing[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iScore), RecvPropInt( RECVINFO(m_iScore[0]))),
+	RecvPropArray3( RECVINFO_ARRAY(m_iFortPoints), RecvPropInt( RECVINFO(m_iFortPoints[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iDeaths), RecvPropInt( RECVINFO(m_iDeaths[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_bConnected), RecvPropInt( RECVINFO(m_bConnected[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iTeam), RecvPropInt( RECVINFO(m_iTeam[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_bAlive), RecvPropInt( RECVINFO(m_bAlive[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iHealth), RecvPropInt( RECVINFO(m_iHealth[0]))),
+	RecvPropArray3( RECVINFO_ARRAY(m_iArmor), RecvPropInt(RECVINFO(m_iArmor[0]))),
+	RecvPropArray3( RECVINFO_ARRAY(m_iClass), RecvPropInt(RECVINFO(m_iClass[0]))), // |-- Mirv: Current class
+	RecvPropArray3( RECVINFO_ARRAY(m_iChannel), RecvPropInt(RECVINFO(m_iChannel[0]))), // |-- Mirv: Channel information
+	RecvPropArray3( RECVINFO_ARRAY(m_iAssists), RecvPropInt(RECVINFO(m_iAssists[0]))),
+	RecvPropBool( RECVINFO(m_bIsIntermission)),
 END_RECV_TABLE()
 
 BEGIN_PREDICTION_DATA( C_PlayerResource )
@@ -33,11 +41,16 @@ BEGIN_PREDICTION_DATA( C_PlayerResource )
 	DEFINE_PRED_ARRAY( m_szName, FIELD_STRING, MAX_PLAYERS+1, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_iPing, FIELD_INTEGER, MAX_PLAYERS+1, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_iScore, FIELD_INTEGER, MAX_PLAYERS+1, FTYPEDESC_PRIVATE ),
+	DEFINE_PRED_ARRAY( m_iFortPoints, FIELD_INTEGER, MAX_PLAYERS+1, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_iDeaths, FIELD_INTEGER, MAX_PLAYERS+1, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_bConnected, FIELD_BOOLEAN, MAX_PLAYERS+1, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_iTeam, FIELD_INTEGER, MAX_PLAYERS+1, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_bAlive, FIELD_BOOLEAN, MAX_PLAYERS+1, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_iHealth, FIELD_INTEGER, MAX_PLAYERS+1, FTYPEDESC_PRIVATE ),
+	DEFINE_PRED_ARRAY( m_iArmor, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE),
+	DEFINE_PRED_ARRAY( m_iClass, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE),
+	DEFINE_PRED_ARRAY( m_iChannel, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE),
+	DEFINE_PRED_ARRAY( m_iAssists, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE),
 
 END_PREDICTION_DATA()	
 
@@ -50,14 +63,23 @@ IGameResources * GameResources( void ) { return g_PR; }
 //-----------------------------------------------------------------------------
 C_PlayerResource::C_PlayerResource()
 {
+	memset( m_szName, 0, sizeof(m_szName) );
 	memset( m_iPing, 0, sizeof( m_iPing ) );
 //	memset( m_iPacketloss, 0, sizeof( m_iPacketloss ) );
 	memset( m_iScore, 0, sizeof( m_iScore ) );
+	memset( m_iFortPoints, 0, sizeof(m_iFortPoints) );
 	memset( m_iDeaths, 0, sizeof( m_iDeaths ) );
 	memset( m_bConnected, 0, sizeof( m_bConnected ) );
 	memset( m_iTeam, 0, sizeof( m_iTeam ) );
 	memset( m_bAlive, 0, sizeof( m_bAlive ) );
 	memset( m_iHealth, 0, sizeof( m_iHealth ) );
+	memset( m_iArmor, 0, sizeof(m_iArmor) );
+	memset( m_iClass, 0, sizeof(m_iClass) );	// |-- Mirv: Current class
+
+	memset( m_iChannel, 0, sizeof(m_iChannel) ); // |-- Mirv: Channel information
+
+	memset( m_iAssists, 0, sizeof(m_iAssists) );
+
 	m_szUnconnectedName = 0;
 	
 	for ( int i=0; i<MAX_TEAMS; i++ )
@@ -65,11 +87,11 @@ C_PlayerResource::C_PlayerResource()
 		m_Colors[i] = COLOR_GREY;
 	}
 
-#ifdef HL2MP
-	m_Colors[TEAM_COMBINE] = COLOR_BLUE;
-	m_Colors[TEAM_REBELS] = COLOR_RED;
-	m_Colors[TEAM_UNASSIGNED] = COLOR_YELLOW;
-#endif
+	m_Colors[TEAM_SPECTATOR] = TEAM_COLOR_SPECTATOR;
+	m_Colors[TEAM_BLUE]		 = TEAM_COLOR_BLUE;
+	m_Colors[TEAM_RED]		 = TEAM_COLOR_RED;
+	m_Colors[TEAM_YELLOW]	 = TEAM_COLOR_YELLOW;
+	m_Colors[TEAM_GREEN]	 = TEAM_COLOR_GREEN;
 
 	g_PR = this;
 }
@@ -187,9 +209,67 @@ int C_PlayerResource::GetTeamScore(int index)
 	return team->Get_Score();
 }
 
+int C_PlayerResource::GetTeamFortPoints(int index)
+{
+	C_Team* team = GetGlobalTeam(index);
+
+	if (!team)
+		return 0;
+
+	return team->Get_FortPoints();
+}
+
+float C_PlayerResource::GetTeamScoreTime(int index)
+{
+	C_Team* pTeam = GetGlobalTeam(index);
+
+	if (!pTeam)
+		return 0.0f;
+
+	return pTeam->Get_ScoreTime();
+}
+
+int C_PlayerResource::GetTeamDeaths(int index)
+{
+	C_Team* team = GetGlobalTeam(index);
+
+	if (!team)
+		return 0;
+
+	return team->Get_Deaths();
+}
+
+// --> Mirv: So menus can show correct limits
+int C_PlayerResource::GetTeamClassLimits(int index, int classindex)
+{
+	C_FFTeam* team = (C_FFTeam*)GetGlobalTeam(index);
+
+	if (!team)
+		return 0;
+
+	return team->Get_Classes(classindex);
+}
+
+int C_PlayerResource::GetTeamLimits(int index)
+{
+	C_FFTeam* team = (C_FFTeam*)GetGlobalTeam(index);
+
+	if (!team)
+		return -1;
+
+	return team->Get_Teams();
+}
+// <-- Mirv: So menus can show correct limits
+
 int C_PlayerResource::GetFrags(int index )
 {
-	return 666;
+	//return 666;
+	// BEG: Added by Mulchman
+	if (!IsConnected(index))
+		return 0;
+
+	return m_iScore[index];
+	// END: Added by Mulchman
 }
 
 bool C_PlayerResource::IsLocalPlayer(int index)
@@ -289,6 +369,17 @@ int	C_PlayerResource::GetPlayerScore( int iIndex )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+int	C_PlayerResource::GetFortPoints(int iIndex)
+{
+	if (!IsConnected(iIndex))
+		return 0;
+
+	return m_iFortPoints[iIndex];
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 int	C_PlayerResource::GetDeaths( int iIndex )
 {
 	if ( !IsConnected( iIndex ) )
@@ -308,9 +399,30 @@ int	C_PlayerResource::GetHealth( int iIndex )
 	return m_iHealth[iIndex];
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+int	C_PlayerResource::GetArmor(int iIndex)
+{
+	if (!IsConnected(iIndex))
+		return 0;
+
+	return m_iArmor[iIndex];
+}
+
+// --> Mirv: Get the player's class
+int	C_PlayerResource::GetClass(int iIndex)
+{
+	if (!IsConnected(iIndex))
+		return 0;
+
+	return m_iClass[iIndex];
+}
+// <-- Mirv: Get the player's class
+
 const Color &C_PlayerResource::GetTeamColor(int index )
 {
-	if ( index < 0 || index >= MAX_TEAMS )
+	if ( index < 1 || index >= MAX_TEAMS )
 	{
 		Assert( false );
 		static Color blah;
@@ -331,4 +443,41 @@ bool C_PlayerResource::IsConnected( int iIndex )
 		return false;
 	else
 		return m_bConnected[iIndex];
+}
+
+// --> Mirv: Channel info
+//-----------------------------------------------------------------------------
+// Purpose: Return the voice channel that this player is using
+//-----------------------------------------------------------------------------
+int C_PlayerResource::GetChannel(int iIndex)
+{
+	if (iIndex < 1 || iIndex > MAX_PLAYERS)
+	{
+		Assert(0);
+		return 0;
+	}
+	else
+		return m_iChannel[iIndex];
+}
+// <-- Mirv: Channel info
+
+#ifdef CLIENT_DLL
+bool Client_IsIntermission()
+{
+	C_PlayerResource* pr = dynamic_cast <C_PlayerResource*> (GameResources());
+	if (!pr)
+		return false;
+	return pr->m_bIsIntermission;
+}
+#endif
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+int	C_PlayerResource::GetAssists(int iIndex)
+{
+	if (!IsConnected(iIndex))
+		return 0;
+
+	return m_iAssists[iIndex];
 }

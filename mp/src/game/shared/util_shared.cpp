@@ -34,12 +34,36 @@
 bool NPC_CheckBrushExclude( CBaseEntity *pEntity, CBaseEntity *pBrush );
 #endif
 
+#include "ff_triggerclip.h"
+#include "ff_gamerules.h"
+
+#ifdef CLIENT_DLL
+#include "c_ff_team.h"
+#include "c_ff_player.h"
+#include "c_te_effect_dispatch.h"
+#else
+#include "ff_team.h"
+#include "ff_player.h"
+#include "te_effect_dispatch.h"
+#include "ff_item_flag.h"
+
+//bool NPC_CheckBrushExclude(CBaseEntity* pEntity, CBaseEntity* pBrush);
+#endif
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 ConVar r_visualizetraces( "r_visualizetraces", "0", FCVAR_CHEAT );
 ConVar developer("developer", "0", 0, "Set developer message level" ); // developer mode
+
+//Adding ConVars to toggle grenades/pipes colliding with the enemy
+//ConVar ffdev_grenade_collidewithenemy("ffdev_grenade_collidewithenemy", "1", FCVAR_FF_FFDEV_REPLICATED, "If set to 0, grenades pass through enemies" );
+#define GRENADE_COLLIDEWITHENEMY true
+//ConVar ffdev_softclip_alwaysclippercent("ffdev_softclip_alwaysclippercent", "1.25", FCVAR_FF_FFDEV_REPLICATED, "Above this percentage of max class speed, teammates will always clip (as opposed to being able to stand on a teammates head)");
+#define SOFTCLIP_ALWAYSCLIPPERCENT 1.25f
+//ConVar ffdev_softclip_asdisguisedteam("ffdev_softclip_asdisguisedteam", "0", FCVAR_FF_FFDEV_REPLICATED, "If set to 1, spies soft clip as though they were on their disguised team");
+#define SOFTCLIP_ASDISGUISEDTEAM false
+
 
 float UTIL_VecToYaw( const Vector &vec )
 {
@@ -224,8 +248,14 @@ bool PassServerEntityFilter( const IHandleEntity *pTouch, const IHandleEntity *p
 		return false;
 	
 	// don't clip against owner
-	if ( pEntPass->GetOwnerEntity() == pEntTouch )
-		return false;	
+	if (!pEntPass->CanClipOwnerEntity())
+	{
+		if (pEntPass->GetOwnerEntity() == pEntTouch)
+			return false;
+	}
+
+	if (!pEntPass->CanClipPlayer() && pEntTouch->IsPlayer())
+		return false;
 
 
 	return true;
@@ -284,24 +314,316 @@ CTraceFilterSimple::CTraceFilterSimple( const IHandleEntity *passedict, int coll
 //-----------------------------------------------------------------------------
 bool CTraceFilterSimple::ShouldHitEntity( IHandleEntity *pHandleEntity, int contentsMask )
 {
+
+	CBaseEntity* pHandle = EntityFromEntityHandle(pHandleEntity);
+
+	const CBaseEntity* pPassEnt = NULL;
+	if (m_pPassEnt)
+		pPassEnt = EntityFromEntityHandle(m_pPassEnt);
+
+	// --> hlstriker: No team collisions
+	if (pPassEnt && pHandle)
+	{
+		if (pHandle->IsPlayer())
+		{
+			////Team orient this collision group.  Includes things like rockets, and blue pipes -Green Mushy
+			////Confusing: these projectiles use the interactive collision group, not the projectile collision group
+			////they are things like rockets/blue pipes, or other entities that will collide with most anything
+			//if( m_collisionGroup == COLLISION_GROUP_INTERACTIVE )
+			//{
+			//	//Make sure u dont collide the object with the owner
+			//	if( ToFFPlayer(pHandle) == ToFFPlayer(pPassEnt->GetOwnerEntity()) )
+			//	{
+			//		return false;
+			//	}
+			//	//Now dont collide if the team numbers are the same
+			//	else if( ToFFPlayer(pHandle)->GetTeamNumber() == ToFFPlayer(pPassEnt->GetOwnerEntity())->GetTeamNumber())
+			//	{
+			//		return false;
+			//	}
+			//	//Now collide normally after the owner and teammate checks are over
+			//	else
+			//	{
+			//		//Do checks here for other exceptions and return true for collision
+			//		return true;
+			//	}
+			//}
+
+			//This collision group is for grenades and yellow pipes even though its called "projectile" 
+			//They pass through the player collision group normally
+			//adding an exception to collide with enemies here -Green Mushy
+			if (m_collisionGroup == COLLISION_GROUP_PROJECTILE)
+			{
+				//Make sure u dont collide with the owner
+				if (ToFFPlayer(pHandle) == ToFFPlayer(pPassEnt->GetOwnerEntity()))
+				{
+					return false;
+				}
+				//Now check teams and dont collide if the team numbers are the same
+				else if (ToFFPlayer(pHandle)->GetTeamNumber() == ToFFPlayer(pPassEnt->GetOwnerEntity())->GetTeamNumber())
+				{
+					return false;
+				}
+				//Now collide normally after the owner and teammate checks are over
+				else
+				{
+					//Utilize the convar to toggle enemy collisions
+					if (GRENADE_COLLIDEWITHENEMY)
+						return true;
+					else
+						return false;
+				}
+			}
+
+			// need to also check for IsPlayer for things that don't send a collision group (like moveable brushes/doors)
+			if (m_collisionGroup == COLLISION_GROUP_PLAYER_MOVEMENT || (pPassEnt->IsPlayer() && contentsMask == MASK_PLAYERSOLID && m_collisionGroup == COLLISION_GROUP_PLAYER))
+			{
+				if (pPassEnt == pHandle)
+					return false;
+
+				// This allows players to pass through any team object (another player or entity), includes allies
+				int iPassTeam = pPassEnt->GetTeamNumber();
+				int iHandleTeam = pHandle->GetTeamNumber();
+
+				// get disguised team if we should
+				if (SOFTCLIP_ASDISGUISEDTEAM)
+				{
+					if (pPassEnt->IsPlayer())
+					{
+						CFFPlayer* pPassPlayer = static_cast<CFFPlayer*>(const_cast<CBaseEntity*>(pPassEnt));
+
+						if (pPassPlayer && pPassPlayer->IsDisguised())
+							iPassTeam = pPassPlayer->GetDisguisedTeam();
+					}
+
+					if (pHandle->IsPlayer())
+					{
+						CFFPlayer* pHandlePlayer = ToFFPlayer(pHandle);
+
+						if (pHandlePlayer && pHandlePlayer->IsDisguised())
+							iHandleTeam = pHandlePlayer->GetDisguisedTeam();
+					}
+				}
+
+				if (pHandle->IsPlayer() && FFGameRules()->IsTeam1AlliedToTeam2(iPassTeam, iHandleTeam) == GR_TEAMMATE)
+				{
+					// If either of the entities are moving fast enough, then just ignore teammates entirely
+					if (pPassEnt->IsPlayer())
+					{
+						CFFPlayer* pPlayer = ToFFPlayer(const_cast<CBaseEntity*>(pPassEnt));
+						if (pPlayer)
+						{
+							float speed = pPlayer->GetMovementSpeed();
+							if (speed > pPlayer->MaxSpeed() * SOFTCLIP_ALWAYSCLIPPERCENT)
+								return false;
+						}
+					}
+					if (pHandle->IsPlayer())
+					{
+						CFFPlayer* pPlayer = ToFFPlayer(const_cast<CBaseEntity*>(pPassEnt));
+						if (pPlayer)
+						{
+							float speed = pPlayer->GetMovementSpeed();
+							if (speed > pPlayer->MaxSpeed() * SOFTCLIP_ALWAYSCLIPPERCENT)
+								return false;
+						}
+					}
+
+					// If player lands on top of a team entity make sure they hit
+					Vector vecOrigin = pPassEnt->GetAbsOrigin();
+					Vector vecTeamOrigin = pHandle->GetAbsOrigin();
+
+					Vector vecMin;
+					if (pPassEnt->IsPlayer())
+					{
+						CFFPlayer* pPlayer = static_cast<CFFPlayer*>(const_cast<CBaseEntity*>(pPassEnt));
+						vecMin = pPlayer->GetPlayerMins();
+					}
+					else
+						vecMin = pPassEnt->WorldAlignMins();
+
+					Vector vecTeamMax;
+					if (pHandle->IsPlayer())
+					{
+						CFFPlayer* pPlayer = static_cast<CFFPlayer*>(pHandle);
+						vecTeamMax = pPlayer->GetPlayerMaxs();
+					}
+					else
+						vecTeamMax = pHandle->WorldAlignMaxs();
+
+					float fMinZ = vecMin[2];
+					VectorAdd(vecMin, vecOrigin, vecMin);
+					VectorAdd(vecTeamMax, vecTeamOrigin, vecTeamMax);
+
+					// If players mins are greater than teams maxs - 2
+					if (vecMin[2] >= vecTeamMax[2])
+						return true;
+					if (vecMin[2] > vecTeamMax[2] - 5.0f)
+					{
+						// If a player is jumping through an entity to the top make sure they don't get stuck
+						CBaseEntity* pEnt = const_cast<CBaseEntity*>(pPassEnt);
+						pEnt->SetAbsOrigin(Vector(vecOrigin[0], vecOrigin[1], vecTeamMax[2] - fMinZ));
+					}
+
+					return false;
+				}
+			}
+		}
+	}
+	// <--
+
+	if (pHandle)
+	{
+		if (pHandle->Classify() == CLASS_TRIGGER_CLIP)
+		{
+#ifdef _DEBUG
+			Assert(dynamic_cast<CFFTriggerClip*>(pHandle) != 0);
+#endif
+			CFFTriggerClip* pTriggerClip = static_cast<CFFTriggerClip*>(pHandle);
+			if (pTriggerClip && pTriggerClip->GetClipMask())
+			{
+				if (pPassEnt)
+				{
+					// Players
+					if (pPassEnt->IsPlayer())
+					{
+						// Bullets from players
+						if (contentsMask == MASK_SHOT)
+						{
+							return ShouldFFTriggerClipBlock(pTriggerClip, pPassEnt->GetTeamNumber(),
+								LUA_CLIP_FLAG_BULLETS, LUA_CLIP_FLAG_NONPLAYERS,
+								LUA_CLIP_FLAG_BULLETSBYTEAM | LUA_CLIP_FLAG_NONPLAYERSBYTEAM);
+						}
+						// Buildables trying to be built
+						else if (m_collisionGroup == COLLISION_GROUP_BUILDABLE_BUILDING)
+						{
+							return ShouldFFTriggerClipBlock(pTriggerClip, pPassEnt->GetTeamNumber(),
+								LUA_CLIP_FLAG_BUILDABLES, LUA_CLIP_FLAG_NONPLAYERS,
+								LUA_CLIP_FLAG_BUILDABLESBYTEAM | LUA_CLIP_FLAG_NONPLAYERSBYTEAM);
+						}
+
+						// Players themselves
+						return ShouldFFTriggerClipBlock(pTriggerClip, pPassEnt->GetTeamNumber(),
+							LUA_CLIP_FLAG_PLAYERS,
+							LUA_CLIP_FLAG_PLAYERSBYTEAM);
+					}
+					// Buildables
+					else if (FF_IsBuildableObject(const_cast<CBaseEntity*>(pPassEnt)))
+					{
+						CFFBuildableObject* pBuildable = FF_ToBuildableObject(const_cast<CBaseEntity*>(pPassEnt));
+						if (!pBuildable)
+							return false;
+
+						// Bullets from buildables
+						if (contentsMask == MASK_SHOT)
+						{
+							return ShouldFFTriggerClipBlock(pTriggerClip, pBuildable->GetTeamNumber(),
+								LUA_CLIP_FLAG_BUILDABLEWEAPONS, LUA_CLIP_FLAG_NONPLAYERS,
+								LUA_CLIP_FLAG_BUILDABLEWEAPONSBYTEAM | LUA_CLIP_FLAG_NONPLAYERSBYTEAM);
+						}
+
+						// Buildables getting built don't send a buildable pointer (they send a player), so
+						// any buildable getting sent is assumed to be doing damage of some sort
+						// For sure, though, detpacks trace with MASK_SOLID for their explosion damage
+						return ShouldFFTriggerClipBlock(pTriggerClip, pBuildable->GetTeamNumber(),
+							LUA_CLIP_FLAG_BUILDABLEWEAPONS, LUA_CLIP_FLAG_NONPLAYERS,
+							LUA_CLIP_FLAG_BUILDABLEWEAPONSBYTEAM | LUA_CLIP_FLAG_NONPLAYERSBYTEAM);
+					}
+					// Grenades
+					else if (pPassEnt->GetFlags() & FL_GRENADE)
+					{
+						// Get owner so we can get its team number
+						CBaseEntity* pOwner = pPassEnt->GetOwnerEntity();
+						if (!pOwner)
+							return false;
+
+						return ShouldFFTriggerClipBlock(pTriggerClip, pOwner->GetTeamNumber(),
+							LUA_CLIP_FLAG_GRENADES, LUA_CLIP_FLAG_NONPLAYERS,
+							LUA_CLIP_FLAG_GRENADESBYTEAM | LUA_CLIP_FLAG_NONPLAYERSBYTEAM);
+					}
+					// Backpacks
+					else if (const_cast<CBaseEntity*>(pPassEnt)->Classify() == CLASS_BACKPACK)
+					{
+						// Get owner so we can get its team number
+						CBaseEntity* pOwner = pPassEnt->GetOwnerEntity();
+						if (!pOwner)
+							return false;
+
+						// exploding backpack from an EMP
+						if (contentsMask == MASK_SHOT)
+						{
+							return ShouldFFTriggerClipBlock(pTriggerClip, pOwner->GetTeamNumber(),
+								LUA_CLIP_FLAG_GRENADES, LUA_CLIP_FLAG_NONPLAYERS,
+								LUA_CLIP_FLAG_GRENADESBYTEAM | LUA_CLIP_FLAG_NONPLAYERSBYTEAM);
+						}
+
+						return ShouldFFTriggerClipBlock(pTriggerClip, pOwner->GetTeamNumber(),
+							LUA_CLIP_FLAG_BACKPACKS, LUA_CLIP_FLAG_NONPLAYERS,
+							LUA_CLIP_FLAG_BACKPACKSBYTEAM | LUA_CLIP_FLAG_NONPLAYERSBYTEAM);
+					}
+					// Info_ff_scripts
+					else if (const_cast<CBaseEntity*>(pPassEnt)->Classify() == CLASS_INFOSCRIPT)
+					{
+						// Info scripts by team is a complicated mess that I can't be bothered to
+						// deal with right now, so it's all-or-nothing for now - squeek
+						// TODO: Block info_ff_scripts by team
+						return ShouldFFTriggerClipBlock(pTriggerClip, 0,
+							LUA_CLIP_FLAG_INFOSCRIPTS, LUA_CLIP_FLAG_NONPLAYERS,
+							0 /*LUA_CLIP_FLAG_INFOSCRIPTSBYTEAM | LUA_CLIP_FLAG_NONPLAYERSBYTEAM*/);
+					}
+					// Respawn turrets
+					else if (const_cast<CBaseEntity*>(pPassEnt)->Classify() == CLASS_TURRET)
+					{
+						return ShouldFFTriggerClipBlock(pTriggerClip, pPassEnt->GetTeamNumber(),
+							LUA_CLIP_FLAG_SPAWNTURRETS, LUA_CLIP_FLAG_NONPLAYERS,
+							LUA_CLIP_FLAG_SPAWNTURRETSBYTEAM | LUA_CLIP_FLAG_NONPLAYERSBYTEAM);
+					}
+					// Projectiles or any other player-owned entities
+					else
+					{
+						// Get owner so we can get its team number
+						CBaseEntity* pOwner = pPassEnt->GetOwnerEntity();
+						if (!pOwner)
+							return false;
+
+						// Projectiles from players
+						if (pOwner->IsPlayer())
+						{
+							return ShouldFFTriggerClipBlock(pTriggerClip, pOwner->GetTeamNumber(),
+								LUA_CLIP_FLAG_PROJECTILES, LUA_CLIP_FLAG_NONPLAYERS,
+								LUA_CLIP_FLAG_PROJECTILESBYTEAM | LUA_CLIP_FLAG_NONPLAYERSBYTEAM);
+						}
+						// Projectiles from buildables
+						else if (FF_IsBuildableObject(pOwner))
+						{
+							return ShouldFFTriggerClipBlock(pTriggerClip, pOwner->GetTeamNumber(),
+								LUA_CLIP_FLAG_BUILDABLEWEAPONS, LUA_CLIP_FLAG_NONPLAYERS,
+								LUA_CLIP_FLAG_BUILDABLEWEAPONSBYTEAM | LUA_CLIP_FLAG_NONPLAYERSBYTEAM);
+						}
+					}
+
+					return false;
+				}
+			}
+		}
+	}
+
 	if ( !StandardFilterRules( pHandleEntity, contentsMask ) )
 		return false;
 
 	if ( m_pPassEnt )
 	{
 		if ( !PassServerEntityFilter( pHandleEntity, m_pPassEnt ) )
-		{
 			return false;
-		}
 	}
 
 	// Don't test if the game code tells us we should ignore this collision...
-	CBaseEntity *pEntity = EntityFromEntityHandle( pHandleEntity );
-	if ( !pEntity )
+	//CBaseEntity *pEntity = EntityFromEntityHandle( pHandleEntity );
+	if ( !pHandle )
 		return false;
-	if ( !pEntity->ShouldCollide( m_collisionGroup, contentsMask ) )
+	if ( !pHandle->ShouldCollide( m_collisionGroup, contentsMask ) )
 		return false;
-	if ( pEntity && !g_pGameRules->ShouldCollide( m_collisionGroup, pEntity->GetCollisionGroup() ) )
+	if (pHandle && !g_pGameRules->ShouldCollide( m_collisionGroup, pHandle->GetCollisionGroup() ) )
 		return false;
 	if ( m_pExtraShouldHitCheckFunction &&
 		(! ( m_pExtraShouldHitCheckFunction( pHandleEntity, contentsMask ) ) ) )
@@ -513,6 +835,34 @@ bool CTraceFilterChain::ShouldHitEntity( IHandleEntity *pHandleEntity, int conte
 	return ( bResult1 && bResult2 );
 }
 
+//// Just something handy for testing
+//class CTraceFilterInfoScriptEntity : public CTraceFilterSimple
+//{
+//	DECLARE_CLASS( CTraceFilterEntity, CTraceFilterSimple );
+//
+//public:
+//	CTraceFilterInfoScriptEntity( CBaseEntity *pEntity, int nCollisionGroup )
+//		: CTraceFilterSimple( pEntity, nCollisionGroup )
+//	{
+//		m_pEntity = pEntity;
+//	}
+//
+//	bool ShouldHitEntity( IHandleEntity *pHandleEntity, int contentsMask )
+//	{
+//#ifdef GAME_DLL
+//		Assert( dynamic_cast<CBaseEntity *>( pHandleEntity ) );
+//		CBaseEntity *pTestEntity = static_cast<CBaseEntity *>( pHandleEntity );
+//
+//		DevMsg( "Info Script hitting: %s\n", pTestEntity->GetClassname() );
+//#endif
+//
+//		return BaseClass::ShouldHitEntity( pHandleEntity, contentsMask );
+//	}
+//
+//private:
+//	CBaseEntity *m_pEntity;
+//};
+
 //-----------------------------------------------------------------------------
 // Sweeps against a particular model, using collision rules 
 //-----------------------------------------------------------------------------
@@ -629,6 +979,32 @@ void UTIL_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, const Ve
 	// Adding this assertion here so game code catches it, but really the assertion belongs in the engine
 	// because one day, rotated collideables will work!
 	Assert( pCollision->GetCollisionAngles() == vec3_angle );
+
+	if (pEntity->Classify() == CLASS_INFOSCRIPT)
+	{
+		//// Hey, this is some cool shit and shows just how often the shit is tested
+		//#ifdef GAME_DLL
+		//#include "ndebugoverlay.h"
+		//		static bool bFlipFlop = false;
+		//		if( bFlipFlop )
+		//			NDebugOverlay::Line( vecAbsStart, vecAbsEnd, 255, 0, 0, true, 60.0f );
+		//		else
+		//			NDebugOverlay::Line( vecAbsStart, vecAbsEnd, 0, 0, 255, true, 60.0f );
+		//		bFlipFlop = !bFlipFlop;
+		//#endif
+
+		mask |= CONTENTS_PLAYERCLIP;
+
+		//		CTraceFilterInfoScriptEntity traceFilter( pEntity, iCollisionGroup );
+		//		enginetrace->SweepCollideable( pCollision, vecAbsStart, vecAbsEnd, pCollision->GetCollisionAngles(), mask, &traceFilter, ptr );
+
+		//#ifdef GAME_DLL
+		//		if( ptr && ptr->m_pEnt )
+		//		{
+		//			DevMsg( "Collide Ent: %s\n", ptr->m_pEnt->GetClassname() );
+		//		}
+		//#endif
+	}
 
 	CTraceFilterEntity traceFilter( pEntity, pCollision->GetCollisionGroup() );
 
@@ -899,6 +1275,25 @@ void UTIL_BloodImpact( const Vector &pos, const Vector &dir, int color, int amou
 	data.m_nColor = (unsigned char)color;
 
 	DispatchEffect( "bloodimpact", data );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void UTIL_BloodSpray(const Vector& pos, const Vector& dir, int color, int amount, int flags)
+{
+	if (color == DONT_BLEED)
+		return;
+
+	CEffectData	data;
+
+	data.m_vOrigin = pos;
+	data.m_vNormal = dir;
+	data.m_flScale = (float)amount;
+	data.m_fFlags = flags;
+	data.m_nColor = /*(unsigned char)*/color;
+
+	DispatchEffect("bloodspray", data);
 }
 
 bool UTIL_IsSpaceEmpty( CBaseEntity *pMainEnt, const Vector &vMin, const Vector &vMax )

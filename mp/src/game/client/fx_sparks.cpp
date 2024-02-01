@@ -38,6 +38,10 @@ CLIENTEFFECT_REGISTER_END()
 
 PMaterialHandle g_Material_Spark = NULL;
 
+// dlight scale
+extern ConVar cl_ffdlight_explosion;
+extern ConVar cl_ffdlight_generic;
+
 static ConVar fx_drawmetalspark( "fx_drawmetalspark", "1", FCVAR_DEVELOPMENTONLY, "Draw metal spark effects." );
 
 //-----------------------------------------------------------------------------
@@ -1369,13 +1373,20 @@ void FX_ConcussiveExplosion( Vector &origin, Vector &normal )
 	// Dlight
 	//
 
-	dlight_t *dl= effects->CL_AllocDlight ( 0 );
+	// dlight scale
+	float flDLightScale = cl_ffdlight_explosion.GetFloat();
 
-	dl->origin	= offset;
-	dl->color.r = dl->color.g = dl->color.b = 64;
-	dl->radius	= random->RandomFloat(128,256);
-	dl->die		= gpGlobals->curtime + 0.1;
+	dlight_t* dl = NULL;
+	if (flDLightScale > 0.0f)
+		dl = effects->CL_AllocDlight(0);
 
+	if (dl)
+	{
+		dl->origin = offset;
+		dl->color.r = dl->color.g = dl->color.b = 64;
+		dl->radius = random->RandomFloat(112, 144) * flDLightScale;
+		dl->die = gpGlobals->curtime + 0.1;
+	}
 
 	//
 	// Moving lines

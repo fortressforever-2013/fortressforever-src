@@ -39,7 +39,7 @@ public:
 
 	PMaterialHandle		GetPMaterial(const char *name);
 	
-	Particle*			AddParticle( unsigned int particleSize, PMaterialHandle material, const Vector &origin );
+	Particle* AddParticle(unsigned int particleSize, PMaterialHandle material, const Vector& origin, int iMaxParticleSizeOverride = 0);
 
 	CParticleEffectBinding&	GetBinding()	{ return m_ParticleEffect; }
 
@@ -173,6 +173,7 @@ public:
 	virtual void	RenderParticles( CParticleRenderIterator *pIterator );
 
 	void			SetNearClip( float nearClipMin, float nearClipMax );
+	void			SetFarClip(float farClipMin, float farClipMax);
 
 	void			SetDrawBeforeViewModel( bool state = true );
 
@@ -191,6 +192,9 @@ protected:
 
 	float			m_flNearClipMin;
 	float			m_flNearClipMax;
+
+	float			m_flFarClipMin;
+	float			m_flFarClipMax;
 
 private:
 	CSimpleEmitter( const CSimpleEmitter & ); // not defined, not accessible

@@ -29,11 +29,17 @@ inline float LoopingLerp( float flPercent, float flFrom, float flTo )
 			flTo += 1.0f;
 	}
 
-	float s = flTo * flPercent + flFrom * (1.0f - flPercent);
+	/*float s = flTo * flPercent + flFrom * (1.0f - flPercent);
 
 	s = s - (int)(s);
 	if (s < 0.0f)
-		s = s + 1.0f;
+		s = s + 1.0f;*/
+
+	// Modified by Mulch - 6/6/2006
+	float s = flFrom + ((flTo - flFrom) * flPercent);
+
+	if (s >= 1.0f)
+		s -= 1.0f;
 
 	return s;
 }
@@ -129,6 +135,10 @@ inline float LoopingLerp_Hermite( float t, float p0, float p1, float p2 )
 		if ( p1 < p2 )
 		{
 			p1 += 1.0f;
+
+			// Added by Mulch - 6/6/2006
+			/*if (p0 < 1.0f)
+				p0 += 1.0f;*/
 
 			// see if we need to fix up p0
 			// important for vars that are decreasing from p0->p1->p2 where

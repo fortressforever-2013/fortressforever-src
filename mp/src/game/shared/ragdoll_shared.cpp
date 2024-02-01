@@ -214,7 +214,7 @@ static void RagdollAddSolid( IPhysicsEnvironment *pPhysEnv, ragdoll_t &ragdoll, 
 		}
 		else
 		{
-			Msg( "CRagdollProp::CreateObjects:  Couldn't Lookup Bone %s\n", solid.name );
+			//Msg( "CRagdollProp::CreateObjects:  Couldn't Lookup Bone %s\n", solid.name );
 		}
 	}
 }
@@ -322,9 +322,14 @@ static void RagdollCreateObjects( IPhysicsEnvironment *pPhysEnv, ragdoll_t &ragd
 
 void RagdollSetupCollisions( ragdoll_t &ragdoll, vcollide_t *pCollide, int modelIndex )
 {
-	Assert(pCollide);
+	//Assert(pCollide);
 	if (!pCollide)
+	{
+		// 7/3/2006 - Mulchman:
+		// Commented out because people are tired of getting this assert!
+		Warning("[RagdollSetupCollisions] Assert( pCollide )\n");
 		return;
+	}
 
 	IPhysicsCollisionSet *pSet = physics->FindCollisionSet( modelIndex );
 	if ( !pSet )
@@ -1184,7 +1189,11 @@ void C_BaseAnimating::IgniteRagdoll( C_BaseAnimating *pSource )
 	if ( pChild )
 	{
 		C_EntityFlame *pFireChild = dynamic_cast<C_EntityFlame *>( pChild );
-		C_ClientRagdoll *pRagdoll = dynamic_cast< C_ClientRagdoll * > ( this );
+
+		// --> Mirv: Use anim overlay instead
+		//C_ClientRagdoll *pRagdoll = dynamic_cast< C_ClientRagdoll * > ( this );
+		C_BaseAnimatingOverlay* pRagdoll = dynamic_cast<C_BaseAnimatingOverlay*> (this);
+		// <-- Mirv
 
 		if ( pFireChild )
 		{

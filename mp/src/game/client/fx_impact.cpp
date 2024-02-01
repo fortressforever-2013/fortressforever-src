@@ -20,7 +20,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-static ConVar  r_drawflecks( "r_drawflecks", "1" );
+static ConVar  r_drawflecks("r_drawflecks", "1", FCVAR_ARCHIVE);
 extern ConVar r_drawmodeldecals;
 
 ImpactSoundRouteFn g_pImpactSoundRouteFn = NULL;
@@ -98,6 +98,9 @@ DECLARE_CLIENT_EFFECT( "RagdollImpact", RagdollImpactCallback );
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+
+extern ConVar	ffdev_disableentitydecals;
+
 bool Impact( Vector &vecOrigin, Vector &vecStart, int iMaterial, int iDamageType, int iHitbox, C_BaseEntity *pEntity, trace_t &tr, int nFlags, int maxLODToDecal )
 {
 	VPROF( "Impact" );
@@ -152,7 +155,15 @@ bool Impact( Vector &vecOrigin, Vector &vecStart, int iMaterial, int iDamageType
 			else if ( pEntity )
 			{
 				// Here we deal with decals on entities.
-				pEntity->AddDecal( vecStart, traceExt, vecOrigin, iHitbox, decalNumber, true, tr, maxLODToDecal );
+				//pEntity->AddDecal( vecStart, traceExt, vecOrigin, iHitbox, decalNumber, true, tr, maxLODToDecal );
+				bool bDraw = true;
+				if (ffdev_disableentitydecals.GetBool())
+				{
+					if (pEntity->Classify() != CLASS_NONE && pEntity->Classify() < NUM_AI_CLASSES)
+						bDraw = false;
+				}
+				if (bDraw)
+					pEntity->AddDecal(vecStart, traceExt, vecOrigin, iHitbox, decalNumber, true, tr, maxLODToDecal);
 			}
 		}
 	}

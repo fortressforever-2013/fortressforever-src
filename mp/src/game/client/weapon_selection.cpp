@@ -14,13 +14,16 @@
 #include "filesystem.h"
 #include "iinput.h"
 
+#include "c_ff_hint_timers.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 #define HISTORY_DRAW_TIME	"5"
 
-ConVar hud_drawhistory_time( "hud_drawhistory_time", HISTORY_DRAW_TIME, 0 );
-ConVar hud_fastswitch( "hud_fastswitch", "0", FCVAR_ARCHIVE | FCVAR_ARCHIVE_XBOX );
+ConVar hud_drawhistory_time("hud_drawhistory_time", HISTORY_DRAW_TIME, FCVAR_ARCHIVE);
+ConVar hud_fastswitch("hud_fastswitch", "1", FCVAR_ARCHIVE, "0 = none | 1 = keyboard & mouse | 2 = keyboard only (old HL/TFC style)");
+ConVar hud_weaponselect("hud_weaponselect", "1", FCVAR_ARCHIVE, "Briefly shows the weapon select menu whenever switching weapons when hud_fastswitch is enabled");
 
 //-----------------------------------------------------------------------------
 // Purpose: Weapon Selection commands
@@ -41,29 +44,29 @@ DECLARE_HUD_COMMAND_NAME(CBaseHudWeaponSelection, NextWeapon, "CHudWeaponSelecti
 DECLARE_HUD_COMMAND_NAME(CBaseHudWeaponSelection, PrevWeapon, "CHudWeaponSelection");
 DECLARE_HUD_COMMAND_NAME(CBaseHudWeaponSelection, LastWeapon, "CHudWeaponSelection");
 
-HOOK_COMMAND( slot1, Slot1 );
-HOOK_COMMAND( slot2, Slot2 );
-HOOK_COMMAND( slot3, Slot3 );
-HOOK_COMMAND( slot4, Slot4 );
-HOOK_COMMAND( slot5, Slot5 );
-HOOK_COMMAND( slot6, Slot6 );
-HOOK_COMMAND( slot7, Slot7 );
-HOOK_COMMAND( slot8, Slot8 );
-HOOK_COMMAND( slot9, Slot9 );
-HOOK_COMMAND( slot0, Slot0 );
-HOOK_COMMAND( slot10, Slot10 );
-HOOK_COMMAND( cancelselect, Close );
-HOOK_COMMAND( invnext, NextWeapon );
-HOOK_COMMAND( invprev, PrevWeapon );
-HOOK_COMMAND( lastinv, LastWeapon );
+HOOK_COMMAND(slot1, Slot1);
+HOOK_COMMAND(slot2, Slot2);
+HOOK_COMMAND(slot3, Slot3);
+HOOK_COMMAND(slot4, Slot4);
+HOOK_COMMAND(slot5, Slot5);
+HOOK_COMMAND(slot6, Slot6);
+HOOK_COMMAND(slot7, Slot7);
+HOOK_COMMAND(slot8, Slot8);
+HOOK_COMMAND(slot9, Slot9);
+HOOK_COMMAND(slot0, Slot0);
+HOOK_COMMAND(slot10, Slot10);
+HOOK_COMMAND(cancelselect, Close);
+HOOK_COMMAND(invnext, NextWeapon);
+HOOK_COMMAND(invprev, PrevWeapon);
+HOOK_COMMAND(lastinv, LastWeapon);
 
 // instance info
-CBaseHudWeaponSelection *CBaseHudWeaponSelection::s_pInstance = NULL;
-CBaseHudWeaponSelection *CBaseHudWeaponSelection::GetInstance()
+CBaseHudWeaponSelection* CBaseHudWeaponSelection::s_pInstance = NULL;
+CBaseHudWeaponSelection* CBaseHudWeaponSelection::GetInstance()
 {
 	return s_pInstance;
 }
-CBaseHudWeaponSelection *GetHudWeaponSelection()
+CBaseHudWeaponSelection* GetHudWeaponSelection()
 {
 	return CBaseHudWeaponSelection::GetInstance();
 }
@@ -71,11 +74,11 @@ CBaseHudWeaponSelection *GetHudWeaponSelection()
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CBaseHudWeaponSelection::CBaseHudWeaponSelection( const char *pElementName ) : CHudElement( pElementName )
+CBaseHudWeaponSelection::CBaseHudWeaponSelection(const char* pElementName) : CHudElement(pElementName)
 {
 	s_pInstance = this;
-	
-	SetHiddenBits( HIDEHUD_WEAPONSELECTION | HIDEHUD_NEEDSUIT | HIDEHUD_PLAYERDEAD | HIDEHUD_INVEHICLE );
+
+	SetHiddenBits(HIDEHUD_WEAPONSELECTION | HIDEHUD_NEEDSUIT | HIDEHUD_PLAYERDEAD | HIDEHUD_INVEHICLE);
 }
 
 //-----------------------------------------------------------------------------
@@ -88,7 +91,7 @@ void CBaseHudWeaponSelection::Init(void)
 	// Initialise the weapons resource
 	gWR.Init();
 
-	m_flSelectionTime = gpGlobals->curtime;
+	m_flSelectionTime = gpGlobals->curtime - 10.0f;	// |-- Mirv: Make sure starts in past
 }
 
 //-----------------------------------------------------------------------------
@@ -100,16 +103,22 @@ void CBaseHudWeaponSelection::Reset(void)
 
 	// Start hidden
 	m_bSelectionVisible = false;
-	m_flSelectionTime = gpGlobals->curtime;
-	gHUD.UnlockRenderGroup( gHUD.LookupRenderGroupIndexByName( "weapon_selection" ) );
+	m_flSelectionTime = gpGlobals->curtime - 10.0f;	// |-- Mirv: Make sure starts in past
+	gHUD.UnlockRenderGroup(gHUD.LookupRenderGroupIndexByName("weapon_selection"));
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CBaseHudWeaponSelection::UpdateSelectionTime( void )
+void CBaseHudWeaponSelection::UpdateSelectionTime(void)
 {
 	m_flSelectionTime = gpGlobals->curtime;
+}
+
+void CBaseHudWeaponSelection::QuicklyFadeOut(void)
+{
+	ShowSelection();
+	m_flSelectionTime = gpGlobals->curtime - 4.0f;
 }
 
 //-----------------------------------------------------------------------------
@@ -121,10 +130,10 @@ void CBaseHudWeaponSelection::VidInit(void)
 	gWR.LoadAllWeaponSprites();
 
 	// set spacing of pickup history
-	CHudHistoryResource *pHudHR = GET_HUDELEMENT( CHudHistoryResource );
-	if( pHudHR )
+	CHudHistoryResource* pHudHR = GET_HUDELEMENT(CHudHistoryResource);
+	if (pHudHR)
 	{
-		pHudHR->SetHistoryGap( 21 );
+		pHudHR->SetHistoryGap(21);
 	}
 
 	Reset();
@@ -133,17 +142,17 @@ void CBaseHudWeaponSelection::VidInit(void)
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CBaseHudWeaponSelection::OnThink( void )
+void CBaseHudWeaponSelection::OnThink(void)
 {
-	// Don't allow weapon selection if we're frozen in place
-	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
-	if ( pPlayer->GetFlags() & FL_FROZEN || pPlayer->IsPlayerDead() )
-	{
-		if ( IsInSelectionMode() )
-		{
-			CancelWeaponSelection();
-		}
-	}
+	//// Don't allow weapon selection if we're frozen in place
+	//C_BasePlayer* pPlayer = C_BasePlayer::GetLocalPlayer();
+	//if (pPlayer->GetFlags() & FL_FROZEN || pPlayer->IsPlayerDead())
+	//{
+	//	if (IsInSelectionMode())
+	//	{
+	//		CancelWeaponSelection();
+	//	}
+	//}
 }
 
 //-----------------------------------------------------------------------------
@@ -151,41 +160,47 @@ void CBaseHudWeaponSelection::OnThink( void )
 //-----------------------------------------------------------------------------
 void CBaseHudWeaponSelection::ProcessInput()
 {
-	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
-	if ( !pPlayer )
+	C_BasePlayer* pPlayer = C_BasePlayer::GetLocalPlayer();
+	if (!pPlayer)
 		return;
 
 	// Check to see if the player is in VGUI mode...
-	if ( pPlayer->IsInVGuiInputMode() && !pPlayer->IsInViewModelVGuiInputMode() )
+	if (pPlayer->IsInVGuiInputMode() && !pPlayer->IsInViewModelVGuiInputMode())
 	{
-		// If so, close weapon selection when they press fire
-		if ( gHUD.m_iKeyBits & IN_ATTACK )
-		{
-			if ( HUDTYPE_PLUS != hud_fastswitch.GetInt() )
-			{
-				// Swallow the button
-				gHUD.m_iKeyBits &= ~IN_ATTACK;
-				input->ClearInputButton( IN_ATTACK );
-			}
+		//// If so, close weapon selection when they press fire
+		//if (gHUD.m_iKeyBits & IN_ATTACK)
+		//{
+		//	if (HUDTYPE_PLUS != hud_fastswitch.GetInt())
+		//	{
+		//		// Swallow the button
+		//		gHUD.m_iKeyBits &= ~IN_ATTACK;
+		//		input->ClearInputButton(IN_ATTACK);
+		//	}
 
-			engine->ClientCmd( "cancelselect\n" );
-		}
+		//	engine->ClientCmd("cancelselect\n");
+		//}
+
+		// Swallow the button
+		gHUD.m_iKeyBits &= ~IN_ATTACK;
+		input->ClearInputButton(IN_ATTACK);
+
+		engine->ClientCmd("cancelselect\n");
 		return;
 	}
 
 	// Has the player selected a weapon?
-	if ( gHUD.m_iKeyBits & (IN_ATTACK | IN_ATTACK2) )
+	if (gHUD.m_iKeyBits & (IN_ATTACK | IN_ATTACK2))
 	{
-		if ( IsWeaponSelectable() )
+		if (IsWeaponSelectable())
 		{
 #ifndef TF_CLIENT_DLL
-			if ( HUDTYPE_PLUS != hud_fastswitch.GetInt() )
+			if (HUDTYPE_PLUS != hud_fastswitch.GetInt())
 #endif
 			{
 				// Swallow the button
 				gHUD.m_iKeyBits &= ~(IN_ATTACK | IN_ATTACK2);
-				input->ClearInputButton( IN_ATTACK );
-				input->ClearInputButton( IN_ATTACK2 );
+				input->ClearInputButton(IN_ATTACK);
+				input->ClearInputButton(IN_ATTACK2);
 			}
 
 			// select weapon
@@ -205,45 +220,50 @@ bool CBaseHudWeaponSelection::IsInSelectionMode()
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CBaseHudWeaponSelection::OpenSelection( void )
+void CBaseHudWeaponSelection::OpenSelection(void)
 {
 	m_bSelectionVisible = true;
-	gHUD.LockRenderGroup( gHUD.LookupRenderGroupIndexByName( "weapon_selection" ) );
+	gHUD.LockRenderGroup(gHUD.LookupRenderGroupIndexByName("weapon_selection"));
+	ShowSelection();
+}
+
+void CBaseHudWeaponSelection::ShowSelection(void)
+{
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CBaseHudWeaponSelection::HideSelection( void )
+void CBaseHudWeaponSelection::HideSelection(void)
 {
 	m_bSelectionVisible = false;
-	gHUD.UnlockRenderGroup( gHUD.LookupRenderGroupIndexByName( "weapon_selection" ) );
+	gHUD.UnlockRenderGroup(gHUD.LookupRenderGroupIndexByName("weapon_selection"));
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Returns whether a weapon can be selected in the HUD, based on hud type
-//-----------------------------------------------------------------------------
-bool CBaseHudWeaponSelection::CanBeSelectedInHUD( C_BaseCombatWeapon *pWeapon )
-{
-	// Xbox: In plus type, weapons without ammo can still be selected in the HUD
-	if( HUDTYPE_PLUS == hud_fastswitch.GetInt() )
-	{
-		return pWeapon->VisibleInWeaponSelection();
-	}
-
-	if ( !pWeapon->VisibleInWeaponSelection() )
-	{
-		return false;
-	}
-
-	// All other current hud types
-	return pWeapon->CanBeSelected();
-}
+////-----------------------------------------------------------------------------
+//// Purpose: Returns whether a weapon can be selected in the HUD, based on hud type
+////-----------------------------------------------------------------------------
+//bool CBaseHudWeaponSelection::CanBeSelectedInHUD(C_BaseCombatWeapon* pWeapon)
+//{
+//	// Xbox: In plus type, weapons without ammo can still be selected in the HUD
+//	if (HUDTYPE_PLUS == hud_fastswitch.GetInt())
+//	{
+//		return pWeapon->VisibleInWeaponSelection();
+//	}
+//
+//	if (!pWeapon->VisibleInWeaponSelection())
+//	{
+//		return false;
+//	}
+//
+//	// All other current hud types
+//	return pWeapon->CanBeSelected();
+//}
 
 //-----------------------------------------------------------------------------
 // Purpose: handles keyboard input
 //-----------------------------------------------------------------------------
-int	CBaseHudWeaponSelection::KeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding ) 
+int	CBaseHudWeaponSelection::KeyInput(int down, ButtonCode_t keynum, const char* pszCurrentBinding)
 {
 	if (IsInSelectionMode() && pszCurrentBinding && !stricmp(pszCurrentBinding, "cancelselect"))
 	{
@@ -252,9 +272,9 @@ int	CBaseHudWeaponSelection::KeyInput( int down, ButtonCode_t keynum, const char
 		return 0;
 	}
 
-	if ( down >= 1 && keynum >= KEY_1 && keynum <= KEY_9 )
+	if (down >= 1 && keynum >= KEY_1 && keynum <= KEY_9)
 	{
-		if ( HandleHudMenuInput( keynum - KEY_0 ) )
+		if (HandleHudMenuInput(keynum - KEY_0))
 			return 0;
 	}
 
@@ -266,14 +286,14 @@ int	CBaseHudWeaponSelection::KeyInput( int down, ButtonCode_t keynum, const char
 //-----------------------------------------------------------------------------
 // Purpose: called when a weapon has been picked up
 //-----------------------------------------------------------------------------
-void CBaseHudWeaponSelection::OnWeaponPickup( C_BaseCombatWeapon *pWeapon )
+void CBaseHudWeaponSelection::OnWeaponPickup(C_BaseCombatWeapon* pWeapon)
 {
 	// add to pickup history
-	CHudHistoryResource *pHudHR = GET_HUDELEMENT( CHudHistoryResource );
-	
-	if ( pHudHR )
+	CHudHistoryResource* pHudHR = GET_HUDELEMENT(CHudHistoryResource);
+
+	if (pHudHR)
 	{
-		pHudHR->AddToHistory( pWeapon );
+		pHudHR->AddToHistory(pWeapon);
 	}
 }
 
@@ -282,85 +302,89 @@ void CBaseHudWeaponSelection::OnWeaponPickup( C_BaseCombatWeapon *pWeapon )
 //------------------------------------------------------------------------
 void CBaseHudWeaponSelection::UserCmd_Slot1(void)
 {
-	if( HUDTYPE_CAROUSEL == hud_fastswitch.GetInt() )
+	/*if (HUDTYPE_CAROUSEL == hud_fastswitch.GetInt())
 	{
 		UserCmd_LastWeapon();
 	}
 	else
 	{
-		SelectSlot( 1 );
-	}
+		SelectSlot(1);
+	}*/
+	SelectSlot(1);
 }
 
 void CBaseHudWeaponSelection::UserCmd_Slot2(void)
 {
-	if( HUDTYPE_CAROUSEL == hud_fastswitch.GetInt() )
+	/*if (HUDTYPE_CAROUSEL == hud_fastswitch.GetInt())
 	{
 		UserCmd_NextWeapon();
 	}
 	else
 	{
-		SelectSlot( 2 );
-	}
+		SelectSlot(2);
+	}*/
+	SelectSlot(2);
 }
 
 void CBaseHudWeaponSelection::UserCmd_Slot3(void)
 {
-	if( HUDTYPE_CAROUSEL == hud_fastswitch.GetInt() )
+	/*if (HUDTYPE_CAROUSEL == hud_fastswitch.GetInt())
 	{
-		engine->ClientCmd( "phys_swap" );
+		engine->ClientCmd("phys_swap");
 	}
 	else
 	{
-		SelectSlot( 3 );
-	}
+		SelectSlot(3);
+	}*/
+	SelectSlot(3);
 }
 
 void CBaseHudWeaponSelection::UserCmd_Slot4(void)
 {
-	if( HUDTYPE_CAROUSEL == hud_fastswitch.GetInt() )
+	/*if (HUDTYPE_CAROUSEL == hud_fastswitch.GetInt())
 	{
 		UserCmd_PrevWeapon();
 	}
 	else
 	{
-		SelectSlot( 4 );
-	}
+		SelectSlot(4);
+	}*/
+	SelectSlot(4);
 }
 
 void CBaseHudWeaponSelection::UserCmd_Slot5(void)
 {
-	SelectSlot( 5 );
+	SelectSlot(5);
 }
 
 void CBaseHudWeaponSelection::UserCmd_Slot6(void)
 {
-	SelectSlot( 6 );
+	SelectSlot(6);
 }
 
 void CBaseHudWeaponSelection::UserCmd_Slot7(void)
 {
-	SelectSlot( 7 );
+	SelectSlot(7);
 }
 
 void CBaseHudWeaponSelection::UserCmd_Slot8(void)
 {
-	SelectSlot( 8 );
+	SelectSlot(8);
 }
 
 void CBaseHudWeaponSelection::UserCmd_Slot9(void)
 {
-	SelectSlot( 9 );
+	SelectSlot(9);
 }
 
 void CBaseHudWeaponSelection::UserCmd_Slot0(void)
 {
-	SelectSlot( 0 );
+	SelectSlot(0);
 }
 
 void CBaseHudWeaponSelection::UserCmd_Slot10(void)
 {
-	SelectSlot( 10 );
+	SelectSlot(10);
 }
 
 //-----------------------------------------------------------------------------
@@ -368,20 +392,20 @@ void CBaseHudWeaponSelection::UserCmd_Slot10(void)
 //-----------------------------------------------------------------------------
 bool CBaseHudWeaponSelection::IsHudMenuTakingInput()
 {
-	CHudMenu *pHudMenu = GET_HUDELEMENT( CHudMenu );
-	return ( pHudMenu && pHudMenu->IsMenuOpen() );
+	CHudMenu* pHudMenu = GET_HUDELEMENT(CHudMenu);
+	return (pHudMenu && pHudMenu->IsMenuOpen());
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: returns true if the CHudMenu handles the slot command
 //-----------------------------------------------------------------------------
-bool CBaseHudWeaponSelection::HandleHudMenuInput( int iSlot )
+bool CBaseHudWeaponSelection::HandleHudMenuInput(int iSlot)
 {
-	CHudMenu *pHudMenu = GET_HUDELEMENT( CHudMenu );
-	if ( !pHudMenu || !pHudMenu->IsMenuOpen() )
+	CHudMenu* pHudMenu = GET_HUDELEMENT(CHudMenu);
+	if (!pHudMenu || !pHudMenu->IsMenuOpen())
 		return false;
 
-	pHudMenu->SelectMenuItem( iSlot );
+	pHudMenu->SelectMenuItem(iSlot);
 
 	return true;
 }
@@ -392,33 +416,33 @@ bool CBaseHudWeaponSelection::HandleHudMenuInput( int iSlot )
 //-----------------------------------------------------------------------------
 bool CBaseHudWeaponSelection::IsHudMenuPreventingWeaponSelection()
 {
-	// Don't allow weapon selection if we're frozen in place
-	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
-	if ( pPlayer->GetFlags() & FL_FROZEN || pPlayer->IsPlayerDead() )
-		return true;
-
 	return IsHudMenuTakingInput();
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Menu Selection Code
 //-----------------------------------------------------------------------------
-void CBaseHudWeaponSelection::SelectSlot( int iSlot )
+void CBaseHudWeaponSelection::SelectSlot(int iSlot)
 {
 	// A menu may be overriding weapon selection commands
-	if ( HandleHudMenuInput( iSlot ) )
+	if (HandleHudMenuInput(iSlot))
 	{
 		return;
 	}
 
 	// If we're not allowed to draw, ignore weapon selections
-	if ( !BaseClass::ShouldDraw() )
+	if (!BaseClass::ShouldDraw())
 	{
 		return;
 	}
 
-	UpdateSelectionTime();
-	SelectWeaponSlot( iSlot );
+	//UpdateSelectionTime();
+	SelectWeaponSlot(iSlot);
+
+	if (hud_fastswitch.GetInt() == 0)
+		UpdateSelectionTime();
+	else if (hud_weaponselect.GetBool())
+		QuicklyFadeOut();
 }
 
 //-----------------------------------------------------------------------------
@@ -435,14 +459,28 @@ void CBaseHudWeaponSelection::UserCmd_Close(void)
 void CBaseHudWeaponSelection::UserCmd_NextWeapon(void)
 {
 	// If we're not allowed to draw, ignore weapon selections
-	if ( !BaseClass::ShouldDraw() )
+	if (!BaseClass::ShouldDraw())
 		return;
 
+	// --> Mirv: Not while dead
+	C_BasePlayer* player = C_BasePlayer::GetLocalPlayer();
+
+	if (!player || !player->IsAlive() || player->GetTeamNumber() < TEAM_BLUE)
+		return;
+	// <-- Mirv: Not while dead
+
 	CycleToNextWeapon();
-	if( hud_fastswitch.GetInt() > 0 )
+	
+// --> Mirv: hud_fastswitch 1 will automatically change on prev/next
+	if (hud_fastswitch.GetInt() == 1)
 	{
 		SelectWeapon();
+
+		if (hud_weaponselect.GetBool())
+			QuicklyFadeOut();
 	}
+	else
+// <-- Mirv
 	UpdateSelectionTime();
 }
 
@@ -452,16 +490,28 @@ void CBaseHudWeaponSelection::UserCmd_NextWeapon(void)
 void CBaseHudWeaponSelection::UserCmd_PrevWeapon(void)
 {
 	// If we're not allowed to draw, ignore weapon selections
-	if ( !BaseClass::ShouldDraw() )
+	if (!BaseClass::ShouldDraw())
 		return;
 
 	CycleToPrevWeapon();
 
-	if( hud_fastswitch.GetInt() > 0 )
+	// --> Mirv: Not while dead
+	C_BasePlayer* player = C_BasePlayer::GetLocalPlayer();
+
+	if (!player || !player->IsAlive() || player->GetTeamNumber() < TEAM_BLUE)
+		return;
+	// <-- Mirv: Not while dead
+
+// --> Mirv: hud_fastswitch 1 will automatically change on prev/next
+	if (hud_fastswitch.GetInt() == 1)
 	{
 		SelectWeapon();
-	}
 
+		if (hud_weaponselect.GetBool())
+			QuicklyFadeOut();
+	}
+	else
+// <-- Mirv
 	UpdateSelectionTime();
 }
 
@@ -471,12 +521,12 @@ void CBaseHudWeaponSelection::UserCmd_PrevWeapon(void)
 void CBaseHudWeaponSelection::UserCmd_LastWeapon(void)
 {
 	// If we're not allowed to draw, ignore weapon selections
-	if ( !BaseClass::ShouldDraw() )
+	if (!BaseClass::ShouldDraw())
 		return;
 
 	/*
-	if ( IsHudMenuPreventingWeaponSelection() )	
-	{ 
+	if ( IsHudMenuPreventingWeaponSelection() )
+	{
 		return;
 	}
 	*/
@@ -487,80 +537,91 @@ void CBaseHudWeaponSelection::UserCmd_LastWeapon(void)
 //-----------------------------------------------------------------------------
 // Purpose: Switches the last weapon the player was using
 //-----------------------------------------------------------------------------
-void CBaseHudWeaponSelection::SwitchToLastWeapon( void )
+void CBaseHudWeaponSelection::SwitchToLastWeapon(void)
 {
 	// Get the player's last weapon
-	C_BasePlayer *player = C_BasePlayer::GetLocalPlayer();
-	if ( !player )
-		return;
+	C_BasePlayer* player = C_BasePlayer::GetLocalPlayer();
+	//if (!player)
+	//	return;
 
-	input->MakeWeaponSelection( player->GetLastWeapon() );
+	// --> Mirv: Don't select while dead
+	if (!player || !player->IsAlive() || player->GetTeamNumber() < TEAM_BLUE)
+		return;
+	// <-- Mirv: Don't select while dead
+
+	input->MakeWeaponSelection(player->GetLastWeapon());
+
+	//  Jiggles: The player used the Last Inventory key!  Good for them!
+	g_FFHintTimers.DeleteTimer("LI");
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CBaseHudWeaponSelection::SetWeaponSelected( void )
+void CBaseHudWeaponSelection::SetWeaponSelected(void)
 {
-	Assert( GetSelectedWeapon() );
+	Assert(GetSelectedWeapon());
 	// Mark selection so that it's placed into next CUserCmd created
-	input->MakeWeaponSelection( GetSelectedWeapon() );
+	input->MakeWeaponSelection(GetSelectedWeapon());
 }
 
 
 //-----------------------------------------------------------------------------
 // Purpose: Player has chosen to draw the currently selected weapon
 //-----------------------------------------------------------------------------
-void CBaseHudWeaponSelection::SelectWeapon( void )
+void CBaseHudWeaponSelection::SelectWeapon(void)
 {
-	if ( !GetSelectedWeapon() )
+	if (!GetSelectedWeapon())
 	{
-		engine->ClientCmd( "cancelselect\n" );
+		engine->ClientCmd("cancelselect\n");
 		return;
 	}
 
-	C_BasePlayer *player = C_BasePlayer::GetLocalPlayer();
-	if ( !player )
+	// --> Mirv: Not while dead
+	C_BasePlayer* player = C_BasePlayer::GetLocalPlayer();
+
+	if (!player || !player->IsAlive() || player->GetTeamNumber() < TEAM_BLUE)
 		return;
+	// <-- Mirv: Not while dead
 
 	// Don't allow selections of weapons that can't be selected (out of ammo, etc)
-	if ( !GetSelectedWeapon()->CanBeSelected() )
+	if (!GetSelectedWeapon()->CanBeSelected())
 	{
-		player->EmitSound( "Player.DenyWeaponSelection" );
+		player->EmitSound("Player.DenyWeaponSelection");
 	}
 	else
 	{
 		SetWeaponSelected();
-	
+
 		m_hSelectedWeapon = NULL;
-	
-		engine->ClientCmd( "cancelselect\n" );
+
+		engine->ClientCmd("cancelselect\n");
 
 		// Play the "weapon selected" sound
-		player->EmitSound( "Player.WeaponSelected" );
+		player->EmitSound("Player.WeaponSelected");
 	}
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Abort selecting a weapon
 //-----------------------------------------------------------------------------
-void CBaseHudWeaponSelection::CancelWeaponSelection( void )
+void CBaseHudWeaponSelection::CancelWeaponSelection(void)
 {
-	C_BasePlayer *player = C_BasePlayer::GetLocalPlayer();
-	if ( !player )
+	C_BasePlayer* player = C_BasePlayer::GetLocalPlayer();
+	if (!player)
 		return;
 
 	// Fastswitches happen in a single frame, so the Weapon Selection HUD Element isn't visible
 	// yet, but it's going to be next frame. We need to ask it if it thinks it's going to draw,
 	// instead of checking it's IsActive flag.
-	if ( ShouldDraw() )
+	if (ShouldDraw())
 	{
 		HideSelection();
 
 		m_hSelectedWeapon = NULL;
 
 		// Play the "close weapon selection" sound
-		player->EmitSound( "Player.WeaponSelectionClose" );
+		player->EmitSound("Player.WeaponSelectionClose");
 	}
 	else
 	{
@@ -571,25 +632,25 @@ void CBaseHudWeaponSelection::CancelWeaponSelection( void )
 //-----------------------------------------------------------------------------
 // Purpose: Returns the first weapon for a given slot.
 //-----------------------------------------------------------------------------
-C_BaseCombatWeapon *CBaseHudWeaponSelection::GetFirstPos( int iSlot )
+C_BaseCombatWeapon* CBaseHudWeaponSelection::GetFirstPos(int iSlot)
 {
 	int iLowestPosition = MAX_WEAPON_POSITIONS;
-	C_BaseCombatWeapon *pFirstWeapon = NULL;
+	C_BaseCombatWeapon* pFirstWeapon = NULL;
 
-	C_BasePlayer *player = C_BasePlayer::GetLocalPlayer();
-	if ( !player )
+	C_BasePlayer* player = C_BasePlayer::GetLocalPlayer();
+	if (!player)
 		return NULL;
 
-	for ( int i = 0; i < MAX_WEAPONS; i++ )
+	for (int i = 0; i < MAX_WEAPONS; i++)
 	{
-		C_BaseCombatWeapon *pWeapon = player->GetWeapon( i );
-		if ( !pWeapon )
+		C_BaseCombatWeapon* pWeapon = player->GetWeapon(i);
+		if (!pWeapon)
 			continue;
 
-		if ( ( pWeapon->GetSlot() == iSlot ) && (pWeapon->VisibleInWeaponSelection()) )
+		if ((pWeapon->GetSlot() == iSlot) && (pWeapon->VisibleInWeaponSelection()))
 		{
 			// If this weapon is lower in the slot than the current lowest, it's our new winner
-			if ( pWeapon->GetPosition() <= iLowestPosition )
+			if (pWeapon->GetPosition() <= iLowestPosition)
 			{
 				iLowestPosition = pWeapon->GetPosition();
 				pFirstWeapon = pWeapon;
@@ -603,27 +664,27 @@ C_BaseCombatWeapon *CBaseHudWeaponSelection::GetFirstPos( int iSlot )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-C_BaseCombatWeapon *CBaseHudWeaponSelection::GetNextActivePos( int iSlot, int iSlotPos )
+C_BaseCombatWeapon* CBaseHudWeaponSelection::GetNextActivePos(int iSlot, int iSlotPos)
 {
-	if ( iSlotPos >= MAX_WEAPON_POSITIONS || iSlot >= MAX_WEAPON_SLOTS )
+	if (iSlotPos >= MAX_WEAPON_POSITIONS || iSlot >= MAX_WEAPON_SLOTS)
 		return NULL;
 
 	int iLowestPosition = MAX_WEAPON_POSITIONS;
-	C_BaseCombatWeapon *pNextWeapon = NULL;
+	C_BaseCombatWeapon* pNextWeapon = NULL;
 
-	C_BasePlayer *player = C_BasePlayer::GetLocalPlayer();
-	if ( !player )
+	C_BasePlayer* player = C_BasePlayer::GetLocalPlayer();
+	if (!player)
 		return NULL;
-	for ( int i = 0; i < MAX_WEAPONS; i++ )
+	for (int i = 0; i < MAX_WEAPONS; i++)
 	{
-		C_BaseCombatWeapon *pWeapon = player->GetWeapon( i );
-		if ( !pWeapon )
+		C_BaseCombatWeapon* pWeapon = player->GetWeapon(i);
+		if (!pWeapon)
 			continue;
 
-		if ( CanBeSelectedInHUD( pWeapon ) && pWeapon->GetSlot() == iSlot )
+		if (pWeapon->CanBeSelected()/*CanBeSelectedInHUD(pWeapon)*/ && pWeapon->GetSlot() == iSlot)
 		{
 			// If this weapon is lower in the slot than the current lowest, and above our desired position, it's our new winner
-			if ( pWeapon->GetPosition() <= iLowestPosition && pWeapon->GetPosition() >= iSlotPos )
+			if (pWeapon->GetPosition() <= iLowestPosition && pWeapon->GetPosition() >= iSlotPos)
 			{
 				iLowestPosition = pWeapon->GetPosition();
 				pNextWeapon = pWeapon;

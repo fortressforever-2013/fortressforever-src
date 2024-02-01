@@ -262,7 +262,7 @@ void CRagdoll::PhysForceRagdollToSleep()
 }
 
 #define RAGDOLL_SLEEP_TOLERANCE	1.0f
-static ConVar ragdoll_sleepaftertime( "ragdoll_sleepaftertime", "5.0f", 0, "After this many seconds of being basically stationary, the ragdoll will go to sleep." );
+static ConVar ragdoll_sleepaftertime( "ragdoll_sleepaftertime", "5.0f", FCVAR_ARCHIVE, "After this many seconds of being basically stationary, the ragdoll will go to sleep." );
 
 void CRagdoll::CheckSettleStationaryRagdoll()
 {
@@ -360,7 +360,7 @@ CRagdoll *CreateRagdoll(
 
 	if ( !pRagdoll->IsValid() )
 	{
-		Msg("Bad ragdoll for %s\n", pstudiohdr->pszName() );
+		//Msg("Bad ragdoll for %s\n", pstudiohdr->pszName() );
 		delete pRagdoll;
 		pRagdoll = NULL;
 	}

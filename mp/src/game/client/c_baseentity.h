@@ -69,11 +69,58 @@ typedef unsigned int			AimEntsListHandle_t;
 extern void RecvProxy_IntToColor32( const CRecvProxyData *pData, void *pStruct, void *pOut );
 extern void RecvProxy_LocalVelocity( const CRecvProxyData *pData, void *pStruct, void *pOut );
 
+// BEG: Added by Mulchman
+enum Class_T
+{
+	CLASS_NONE = 0,
+	CLASS_PLAYER,
+	CLASS_PLAYER_ALLY,
+
+	// BEG: Added by Mulchman
+	CLASS_DISPENSER,
+	CLASS_SENTRYGUN,
+	CLASS_DETPACK,
+	CLASS_MANCANNON,
+	CLASS_GREN,			// Normal gren
+	CLASS_GREN_EMP,		// Emp greande
+	CLASS_GREN_NAIL,	// Nail grenade
+	CLASS_GREN_MIRV,	// Mirv grenade
+	CLASS_GREN_MIRVLET,	// Mirvlet (from mirv gren)
+	CLASS_GREN_NAPALM,	// Napalm grenade
+	CLASS_GREN_GAS,		// Gas grenade
+	CLASS_GREN_CONC,	// Conc grenade
+	CLASS_GREN_LASER,
+	CLASS_GREN_SLOWFIELD,
+	// END: Added by Mulchman
+
+	//-- Added by L0ki --
+	CLASS_PIPEBOMB,
+	CLASS_GLGRENADE,
+	//------------------- 
+
+	// 0000936
+	CLASS_IC_ROCKET,
+	CLASS_RAIL_PROJECTILE,
+	CLASS_ROCKET,
+	CLASS_TURRET,
+	CLASS_BACKPACK,
+	CLASS_INFOSCRIPT,
+	CLASS_TRIGGER_CLIP,
+	CLASS_TRIGGERSCRIPT,
+	CLASS_TEAMSPAWN,
+
+	NUM_AI_CLASSES
+};
+// END: Added by Mulchman
+
 enum CollideType_t
 {
 	ENTITY_SHOULD_NOT_COLLIDE = 0,
 	ENTITY_SHOULD_COLLIDE,
-	ENTITY_SHOULD_RESPOND
+	ENTITY_SHOULD_RESPOND,
+
+	// HACKHACK: Fix to allow laser beam to shine off ragdolls
+	ENTITY_SHOULD_COLLIDE_RESPOND
 };
 
 class VarMapEntry_t
@@ -185,8 +232,12 @@ public:
 	DECLARE_CLIENTCLASS();
 	DECLARE_PREDICTABLE();
 
+	void PrintDeleteInfo();
+
 									C_BaseEntity();
 	virtual							~C_BaseEntity();
+
+	virtual Class_T					Classify(void) { return CLASS_NONE; }
 
 	static C_BaseEntity				*CreatePredictedEntityByName( const char *classname, const char *module, int line, bool persist = false );
 	
@@ -324,6 +375,10 @@ public:
 
 	C_BaseEntity					*GetEffectEntity( void ) const;
 	void							SetEffectEntity( C_BaseEntity *pEffectEnt );
+
+	// specifies if this entity can collide with its owner entity
+	virtual bool					CanClipOwnerEntity() const { return false; }
+	virtual bool					CanClipPlayer() const { return true; }
 
 	// This function returns a value that scales all damage done by this entity.
 	// Use CDamageModifier to hook in damage modifiers on a guy.
@@ -587,9 +642,11 @@ public:
 	virtual void ModifyEmitSoundParams( EmitSound_t &params );
 
 	void	EmitSound( const char *soundname, float soundtime = 0.0f, float *duration = NULL );  // Override for doing the general case of CPASAttenuationFilter( this ), and EmitSound( filter, entindex(), etc. );
+	void	EmitSoundShared(const char* soundname, float soundtime = 0.0f, float* duration = NULL);  // Override for doing the general case of CPASAttenuationFilter( this ), and EmitSound( filter, entindex(), etc. );
 	void	EmitSound( const char *soundname, HSOUNDSCRIPTHANDLE& handle, float soundtime = 0.0f, float *duration = NULL );  // Override for doing the general case of CPASAttenuationFilter( this ), and EmitSound( filter, entindex(), etc. );
 	void	StopSound( const char *soundname );
 	void	StopSound( const char *soundname, HSOUNDSCRIPTHANDLE& handle );
+	void	StopSoundInChannel(const char* soundname, HSOUNDSCRIPTHANDLE& handle, const int channel); // Jon: for AC stuff
 	void	GenderExpandString( char const *in, char *out, int maxlen );
 
 	static float GetSoundDuration( const char *soundname, char const *actormodel );
@@ -600,6 +657,7 @@ public:
 	static void EmitSound( IRecipientFilter& filter, int iEntIndex, const char *soundname, const Vector *pOrigin = NULL, float soundtime = 0.0f, float *duration = NULL );
 	static void EmitSound( IRecipientFilter& filter, int iEntIndex, const char *soundname, HSOUNDSCRIPTHANDLE& handle, const Vector *pOrigin = NULL, float soundtime = 0.0f, float *duration = NULL );
 	static void StopSound( int iEntIndex, const char *soundname );
+	static void StopSoundInChannel(int iEntIndex, const char* soundname, const int channel); // Jon: for AC stuff
 	static soundlevel_t LookupSoundLevel( const char *soundname );
 	static soundlevel_t LookupSoundLevel( const char *soundname, HSOUNDSCRIPTHANDLE& handle );
 
@@ -1035,6 +1093,7 @@ public:
 
 	// Sets physics parameters
 	void				SetFriction( float flFriction );
+	float				GetFriction(void) const;
 
 	void				SetGravity( float flGravity );
 	float				GetGravity( void ) const;
@@ -1338,10 +1397,17 @@ public:
 	int								m_nModelIndexOverrides[MAX_VISION_MODES];
 #endif
 
-	char							m_takedamage;
+	//char							m_takedamage;
+	unsigned char					m_takedamage;
 	char							m_lifeState;
 
 	int								m_iHealth;
+
+	// BEG: Added by Mulchman
+	int								m_iMaxHealth;
+	int								m_iArmor;
+	int								m_iMaxArmor;
+	// END: Added by Mulchman
 
 	// was pev->speed
 	float							m_flSpeed;
@@ -1984,6 +2050,11 @@ inline void	C_BaseEntity::SetBaseVelocity( const Vector& v )
 inline void C_BaseEntity::SetFriction( float flFriction ) 
 { 
 	m_flFriction = flFriction; 
+}
+
+inline float C_BaseEntity::GetFriction() const
+{
+	return m_flFriction;
 }
 
 inline void C_BaseEntity::SetGravity( float flGravity ) 

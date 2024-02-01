@@ -327,6 +327,10 @@ void CInput::ResetMouse( void )
 	SetMousePos( x, y );	
 }
 
+extern bool ActivateScoreboard();	// |-- Mirv: For scoreboard mouse activation
+extern bool CanStealMouseForAimSentry(); // |-- Mulch: For stealing mouse button to do aimsentry post radial menu
+extern void SetStealMouseForAimSentry(bool bValue);
+//extern bool CanStealMouseForCloak(); // |-- Mulch: For stealing mouse button to do cloak
 
 //-----------------------------------------------------------------------------
 // Purpose: GetAccumulatedMouse -- the mouse can be sampled multiple times per frame and

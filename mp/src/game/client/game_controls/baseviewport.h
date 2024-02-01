@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -14,11 +14,11 @@
 #include <utlqueue.h> // a vector based queue template to manage our VGUI menu queue
 #include <vgui_controls/Frame.h>
 #include "vguitextwindow.h"
-#include "vgui/ISurface.h"
+#include "vgui/isurface.h"
 #include "commandmenu.h"
 #include <igameevents.h>
 
-using namespace vgui;
+//using namespace vgui;
 
 class IBaseFileSystem;
 class IGameUIFuncs;
@@ -36,14 +36,14 @@ public:
 	virtual IViewPortPanel* CreatePanelByName(const char *szPanelName);
 	virtual IViewPortPanel* FindPanelByName(const char *szPanelName);
 	virtual IViewPortPanel* GetActivePanel( void );
+	virtual IViewPortPanel* GetLastActivePanel( void );
 	virtual void RemoveAllPanels( void);
 
 	virtual void ShowPanel( const char *pName, bool state );
 	virtual void ShowPanel( IViewPortPanel* pPanel, bool state );
-	virtual bool AddNewPanel( IViewPortPanel* pPanel, char const *pchDebugName );
+	virtual bool AddNewPanel( IViewPortPanel* pPanel );
 	virtual void CreateDefaultPanels( void );
 	virtual void UpdateAllPanels( void );
-	virtual void PostMessageToPanel( const char *pName, KeyValues *pKeyValues );
 
 	virtual void Start( IGameUIFuncs *pGameUIFuncs, IGameEventManager2 *pGameEventManager );
 	virtual void SetParent(vgui::VPANEL parent);
@@ -55,9 +55,9 @@ public:
 	
 #ifndef _XBOX
 	virtual int GetViewPortScheme() { return m_pBackGround->GetScheme(); }
-	virtual VPANEL GetViewPortPanel() { return m_pBackGround->GetVParent(); }
+	virtual vgui::VPANEL GetViewPortPanel() { return m_pBackGround->GetVParent(); }
 #endif
-	virtual AnimationController *GetAnimationController() { return m_pAnimController; }
+	virtual vgui::AnimationController *GetAnimationController() { return m_pAnimController; }
 
 	virtual void ShowBackGround(bool bShow) 
 	{ 
@@ -75,9 +75,6 @@ public: // IGameEventListener:
 
 
 protected:
-
-	bool LoadHudAnimations( void );
-
 #ifndef _XBOX
 	class CBackGroundPanel : public vgui::Frame
 	{
@@ -95,7 +92,7 @@ protected:
 		}
 	private:
 
-		virtual void ApplySchemeSettings(IScheme *pScheme)
+		virtual void ApplySchemeSettings( vgui::IScheme *pScheme)
 		{
 			BaseClass::ApplySchemeSettings(pScheme);
 			SetBgColor(pScheme->GetColor("ViewportBG", Color( 0,0,0,0 ) )); 
@@ -112,10 +109,10 @@ protected:
 			BaseClass::PerformLayout();
 		}
 
-		virtual void OnMousePressed(MouseCode code) { }// don't respond to mouse clicks
+		virtual void OnMousePressed( vgui::MouseCode code) { }// don't respond to mouse clicks
 		virtual vgui::VPANEL IsWithinTraverse( int x, int y, bool traversePopups )
 		{
-			return ( vgui::VPANEL )0;
+			return NULL;
 		}
 
 	};
@@ -125,7 +122,6 @@ protected:
 	virtual void Paint();
 	virtual void OnThink(); 
 	virtual void OnScreenSizeChanged(int iOldWide, int iOldTall);
-	void PostMessageToPanel( IViewPortPanel* pPanel, KeyValues *pKeyValues );
 
 protected:
 	IGameUIFuncs*		m_GameuiFuncs; // for key binding details
@@ -139,6 +135,7 @@ protected:
 	bool				m_bInitialized;
 	IViewPortPanel		*m_pActivePanel;
 	IViewPortPanel		*m_pLastActivePanel;
+	CUtlStack< IViewPortPanel * >	m_LastActivePanelStack;
 	vgui::HCursor		m_hCursorNone;
 	vgui::AnimationController *m_pAnimController;
 	int					m_OldSize[2];

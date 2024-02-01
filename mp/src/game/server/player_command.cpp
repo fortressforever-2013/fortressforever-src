@@ -15,6 +15,8 @@
 #include "iservervehicle.h"
 #include "tier0/vprof.h"
 
+#include "ff_player.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -176,7 +178,24 @@ void CPlayerMove::SetupMove( CBasePlayer *player, CUserCmd *ucmd, IMoveHelper *p
 	}
 
 	// Prepare remaining fields
+	// --> Mirv: 
+
+	// We're delaying the max speed for the server so that the client
+	// has time to catch up. This will stop a lot of warping that occurs when the
+	// max speed changes.
+	// m_flMaxspeedChangeTime is set to curtime + the client's latency
+
 	move->m_flClientMaxSpeed		= player->m_flMaxspeed;
+
+	CFFPlayer* pPlayer = ToFFPlayer(player);
+
+	// Don't do this if not yet ready to apply the new speed modifier
+	if (pPlayer && pPlayer->m_flSpeedModifierChangeTime <= gpGlobals->curtime)
+	{
+		move->m_flClientMaxSpeed *= pPlayer->m_flSpeedModifier;
+	}
+	// <-- Mirv
+
 	move->m_nOldButtons			= player->m_Local.m_nOldButtons;
 	move->m_vecAngles			= player->pl.v_angle;
 

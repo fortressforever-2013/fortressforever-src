@@ -8,6 +8,7 @@
 #include "cbase.h"
 #include "hud_basechat.h"
 
+#include <string>
 #include <vgui/IScheme.h>
 #include <vgui/IVGui.h>
 #include "iclientmode.h"
@@ -27,13 +28,17 @@
 #include "voice_status.h"
 
 
+#include "game/client/iviewport.h"
+
+#include "c_ff_player.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 #define CHAT_WIDTH_PERCENTAGE 0.6f
 
 #ifndef _XBOX
-ConVar hud_saytext_time( "hud_saytext_time", "12", 0 );
+ConVar hud_saytext_time("hud_saytext_time", "12", FCVAR_ARCHIVE);
 ConVar cl_showtextmsg( "cl_showtextmsg", "1", 0, "Enable/disable text messages printing on the screen." );
 ConVar cl_chatfilters( "cl_chatfilters", "63", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Stores the chat filter settings " );
 ConVar cl_chatfilter_version( "cl_chatfilter_version", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE | FCVAR_HIDDEN, "Stores the chat filter version" );
@@ -424,6 +429,11 @@ void CBaseHudChatInputLine::SetPrompt( const wchar_t *prompt )
 	Assert( m_pPrompt );
 	m_pPrompt->SetText( prompt );
 	InvalidateLayout();
+}
+
+void CBaseHudChatInputLine::GetPrompt(wchar_t* buffer, int buffersizebytes)
+{
+	m_pPrompt->GetText(buffer, buffersizebytes);
 }
 
 void CBaseHudChatInputLine::ClearEntry( void )
@@ -1176,10 +1186,12 @@ void CBaseHudChat::StartMessageMode( int iMessageModeType )
 		{
 			m_pChatInput->SetPrompt( L"Say :" );
 		}
-		else
+		else if (m_nMessageMode == MM_SAY_TEAM)
 		{
 			m_pChatInput->SetPrompt( L"Say (TEAM) :" );
 		}
+		else
+			m_pChatInput->SetPrompt(L"");
 	}
 	
 	if ( GetChatHistory() )
@@ -1200,6 +1212,9 @@ void CBaseHudChat::StartMessageMode( int iMessageModeType )
 	m_pChatInput->RequestFocus();
 	m_pChatInput->SetPaintBorderEnabled( true );
 	m_pChatInput->SetMouseInputEnabled( true );
+
+	// Mirv: Remove the scoreboard if it is showing
+	gViewPortInterface->ShowPanel(PANEL_SCOREBOARD, false);
 
 	//Place the mouse cursor near the text so people notice it.
 	int x, y, w, h;
@@ -1838,4 +1853,19 @@ void CBaseHudChat::FireGameEvent( IGameEvent *event )
 		ChatPrintf( player->entindex(), CHAT_FILTER_NONE, "(SourceTV) %s", event->GetString( "text" ) );
 	}
 #endif
+}
+
+void CBaseHudChat::StartInputMessage(const char* _msg)
+{
+	if (m_pChatInput)
+	{
+		if (_msg)
+		{
+			wchar_t wBuffer[1024];
+			g_pVGuiLocalize->ConvertANSIToUnicode(_msg, wBuffer, 1024);
+			//m_pChatInput->SetEntry(wBuffer);
+			m_pChatInput->SetPrompt(wBuffer);
+			m_pChatInput->GetChatEntryInput()->GotoEndOfLine();
+		}
+	}
 }

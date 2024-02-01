@@ -45,6 +45,10 @@
 #include "weapon_physcannon.h"
 #endif
 
+#include "ff_player.h"
+#include "ff_scriptman.h"
+#include "ff_luacontext.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -56,6 +60,300 @@ extern CBaseEntity*	FindPickerEntity( CBasePlayer* pPlayer );
 extern bool IsInCommentaryMode( void );
 
 ConVar  *sv_cheats = NULL;
+
+// Parse out % commands.
+// return the number of command chars used, 1 or 2
+inline int FF_ParsePercentCommand(edict_t* pEdict, const char* cCommand, char* pszText, int iDestLen)
+{
+	// Current % Commands:
+	// %h = health
+	// %a = armor
+	// %c = class
+	// %l = location
+	// %d = disguised team class
+	// %i = if you add this do it clientside to use the hud_crosshairinfo stuff so it's consistant
+	// %sh - sentry health
+	// %sa - sentry ammo
+	// %sl - sentry location
+	// %sv - sentry level
+
+	// %dh - dispenser health
+	// %da - dispenser ammo
+	// %dl - dispenser location
+	// %df - detpack fuse time
+
+	CFFPlayer* pPlayer = ToFFPlayer(((CBasePlayer*)CBaseEntity::Instance(pEdict)));
+	if (!pPlayer)
+		return false;
+
+	switch (cCommand[0])
+	{
+	case 'h':
+	case 'H':
+	{
+		if (pPlayer->IsGassed()) // Jiggles: Don't want players finding out their true health when gassed
+		{
+			V_strncpy(pszText, "LOL", sizeof(pszText));
+			return 1;
+		}
+		else
+		{
+			Q_snprintf(pszText, iDestLen, "%i", pPlayer->GetHealth());
+			return 1;
+		}
+	}
+	break;
+
+	case 'a':
+	case 'A':
+	{
+		if (pPlayer->IsGassed())  // Jiggles: Don't want players finding out their true armor when gassed
+		{
+			V_strncpy(pszText, "LOL", sizeof(pszText));
+			return 1;
+		}
+		else
+		{
+			Q_snprintf(pszText, iDestLen, "%i", pPlayer->GetArmor());
+			return 1;
+		}
+	}
+	break;
+
+	case 'c':
+	case 'C':
+	{
+		Q_snprintf(pszText, iDestLen, "%s", pPlayer->GetFFClassData().m_szPrintName);
+		return 1;
+	}
+	break;
+
+	case 'l':
+	case 'L':
+	{
+		Q_snprintf(pszText, iDestLen, "%s", g_pGameRules->GetChatLocation(true, pPlayer));
+		return 1;
+	}
+	break;
+
+	case 'd':
+	case 'D':
+	{
+		//////////////////////////////////////////////////////////////////////////
+		// Dispenser info
+		switch (cCommand[1])
+		{
+		case 'h':
+		case 'H':
+		{
+			CFFDispenser* pDispenser = pPlayer->GetDispenser();
+			if (pDispenser)
+			{
+				if (pDispenser->IsBuilt())
+					Q_snprintf(pszText, iDestLen, "%d", pDispenser->GetHealthPercent());
+				else
+					Q_snprintf(pszText, iDestLen, "0");
+			}
+			return 2;
+		}
+		case 'a':
+		case 'A':
+		{
+			CFFDispenser* pDispenser = pPlayer->GetDispenser();
+			if (pDispenser)
+			{
+				if (pDispenser->IsBuilt())
+					Q_snprintf(pszText, iDestLen, "%d", (int)pDispenser->m_iAmmoPercent);
+				else
+					Q_snprintf(pszText, iDestLen, "0");
+			}
+			return 2;
+		}
+		case 'l':
+		case 'L':
+		{
+			CFFDispenser* pDispenser = pPlayer->GetDispenser();
+			if (pDispenser)
+			{
+				Q_snprintf(pszText, iDestLen, "%s", pDispenser->GetLocation());
+			}
+			return 2;
+		}
+		default:
+			break;
+		}
+		//////////////////////////////////////////////////////////////////////////
+
+		int iDisguiseClass = pPlayer->GetClassSlot();
+		int iDisguiseTeam = pPlayer->GetTeamNumber();
+		if (pPlayer->IsDisguised())
+		{
+			iDisguiseTeam = pPlayer->GetDisguisedTeam();
+			iDisguiseClass = pPlayer->GetDisguisedClass();
+		}
+
+		const char* pClassName = "Spy";
+		const char* pTeamName = "";
+
+		const char COLOR_CHAR = '^';
+		const bool bInColor = (cCommand[1] == COLOR_CHAR);
+
+		switch (iDisguiseTeam)
+		{
+		case TEAM_BLUE:
+			pTeamName = bInColor ? "^1Blue" : "Blue";
+			break;
+		case TEAM_RED:
+			pTeamName = bInColor ? "^2Red" : "Red";
+			break;
+		case TEAM_YELLOW:
+			pTeamName = bInColor ? "^3Yellow" : "Yellow";
+			break;
+		case TEAM_GREEN:
+			pTeamName = bInColor ? "^4Green" : "Green";
+			break;
+		default:
+			pTeamName = "LOL";
+			break;
+		}
+
+		switch (iDisguiseClass)
+		{
+		case 1: pClassName = "Scout"; break;
+		case 2: pClassName = "Sniper"; break;
+		case 3: pClassName = "Soldier"; break;
+		case 4: pClassName = "Demoman"; break;
+		case 5: pClassName = "Medic"; break;
+		case 6: pClassName = "Hwguy"; break;
+		case 7: pClassName = "Pyro"; break;
+		case 8: pClassName = "Spy"; break;
+		case 9: pClassName = "Engineer"; break;
+		case 10: pClassName = "Civilian"; break;
+		default: pClassName = "LOL"; break;
+		}
+
+		Q_snprintf(pszText, iDestLen, "%s %s", pTeamName, pClassName);
+		return  1;
+	}
+	break;
+	case 's':
+	case 'S':
+	{
+		//////////////////////////////////////////////////////////////////////////
+		switch (cCommand[1])
+		{
+		case 'h':
+		case 'H':
+		{
+			CFFSentryGun* pSentry = pPlayer->GetSentryGun();
+			if (pSentry)
+			{
+				if (pSentry->IsBuilt())
+					Q_snprintf(pszText, iDestLen, "%d", pSentry->GetHealthPercent());
+				else
+					Q_snprintf(pszText, iDestLen, "0");
+			}
+			return 2;
+		}
+		case 'a':
+		case 'A':
+		{
+			CFFSentryGun* pSentry = pPlayer->GetSentryGun();
+			if (pSentry)
+			{
+				if (pSentry->IsBuilt())
+					Q_snprintf(pszText, iDestLen, "%d", (int)pSentry->m_iAmmoPercent);
+				else
+					Q_snprintf(pszText, iDestLen, "0");
+			}
+			return 2;
+		}
+		case 'v':
+		case 'V':
+		{
+			CFFSentryGun* pSentry = pPlayer->GetSentryGun();
+			if (pSentry)
+			{
+				if (pSentry->IsBuilt())
+					Q_snprintf(pszText, iDestLen, "%d", pSentry->GetLevel());
+				else
+					Q_snprintf(pszText, iDestLen, "1");
+			}
+			return 2;
+		}
+		case 'l':
+		case 'L':
+		{
+			CFFSentryGun* pSentry = pPlayer->GetSentryGun();
+			if (pSentry)
+			{
+				Q_snprintf(pszText, iDestLen, "%s", pSentry->GetLocation());
+			}
+			return 2;
+		}
+		default:
+			break;
+		}
+		//////////////////////////////////////////////////////////////////////////
+		break;
+	}
+
+	case 'p':
+	case 'P':
+	{
+		switch (cCommand[1])
+		{
+		case 'f':
+		case 'F':
+		{
+			CFFDetpack* pDetpack = pPlayer->GetDetpack();
+			if (pDetpack)
+			{
+				if (pDetpack->IsBuilt())
+					Q_snprintf(pszText, iDestLen, "%d", (int)(pDetpack->m_flDetonateTime - gpGlobals->curtime + 0.5f));
+				else
+				{
+					float flBuildTimeLeft = pPlayer->GetBuildTime() - gpGlobals->curtime;
+					Q_snprintf(pszText, iDestLen, "%d", (int)(pDetpack->m_iFuseTime + flBuildTimeLeft + 0.5f));
+				}
+			}
+			else
+			{
+				Q_snprintf(pszText, iDestLen, "-");
+			}
+			return 2;
+		}
+		case 's':
+		case 'S':
+		{
+			CFFDetpack* pDetpack = pPlayer->GetDetpack();
+			if (pDetpack)
+			{
+				Q_snprintf(pszText, iDestLen, "%d", pDetpack->m_iFuseTime);
+			}
+			else
+			{
+				Q_snprintf(pszText, iDestLen, "-");
+			}
+			return 2;
+		}
+		case 'l':
+		case 'L':
+		{
+			CFFDetpack* pDetpack = pPlayer->GetDetpack();
+			if (pDetpack)
+			{
+				Q_snprintf(pszText, iDestLen, "%s", pDetpack->GetLocation());
+			}
+			return 2;
+		}
+		}
+		break;
+	}
+	}
+
+	return 0;
+}
 
 enum eAllowPointServerCommand {
 	eAllowNever,
@@ -115,6 +413,20 @@ void ClientKill( edict_t *pEdict, const Vector &vecForce, bool bExplode = false 
 {
 	CBasePlayer *pPlayer = static_cast<CBasePlayer*>( GetContainingEntity( pEdict ) );
 	pPlayer->CommitSuicide( vecForce, bExplode );
+}
+
+/*
+============
+ClientKill
+
+Player entered the suicide command
+
+============
+*/
+void ClientKill(edict_t* pEdict)
+{
+	CBasePlayer* pl = (CBasePlayer*)GetContainingEntity(pEdict);
+	pl->CommitSuicide();
 }
 
 char * CheckChatText( CBasePlayer *pPlayer, char *text )
@@ -205,6 +517,101 @@ void Host_Say( edict_t *pEdict, const CCommand &args, bool teamonly )
 	if ( !p )
 		return;
 
+	// Parse out % commands. Doing it here so it will
+	// get sent out to clients correctly especially
+	// if the location is a resource a resource string
+	// since that localization is done client side in
+	// ff_hud_chat.cpp
+
+	// Current % Commands:
+	// %h = health
+	// %a = armor
+	// %c = class
+	// %l = location
+
+
+	// Want to look in buf for any localized strings
+	// and convert them to resource strings if possible
+	char* pBeg = p;
+	int iAdjust = 1;
+	char szBuffer[4096], szText[4096];
+	bool bAddChar = true;
+
+	Q_strcpy(szBuffer, "\0");
+	Q_strcpy(szText, "\0");
+	int iPos = 0;
+
+	while (pBeg[0])
+	{
+		iAdjust = 1;
+		bAddChar = true;
+
+		// Found a possible % command
+		if ((pBeg[0] == '%') && pBeg[1])
+		{
+			// If there's stuff in our buffer, dump it first
+			if (iPos)
+			{
+				// Copy buffer to text
+				Q_strncat(szText, szBuffer, sizeof(szText));
+				// Clear buffer
+				Q_strncpy(szBuffer, "\0", sizeof(szBuffer));
+				// Reset
+				iPos = 0;
+			}
+
+			// Parse the % command and get what 
+			// should be in its place
+			char szTempText[1024 + 1] = { 0 };	// for location + \0
+			int iChars = FF_ParsePercentCommand(pEdict, &pBeg[1], szTempText, 1025);
+			if (iChars > 0)
+			{
+				// Add to text
+				Q_strncat(szText, szTempText, sizeof(szText));
+
+				// % commands are 2 characters long (for now)
+				iAdjust = 1 + iChars;
+
+				// Don't add char as per normal
+				bAddChar = false;
+			}
+		}
+
+		// Add this character to the buffer
+		if (bAddChar)
+		{
+			// Add a character to our buffer
+			char ch = pBeg[0];
+			szBuffer[iPos++] = ch;
+			if (iPos == 4096)
+				szBuffer[--iPos] = '\0';
+			else
+				szBuffer[iPos] = '\0';
+		}
+
+		pBeg += iAdjust;
+	}
+
+	// If there's stuff in our buffer, dump it
+	if (iPos)
+	{
+		// Copy buffer to text
+		Q_strncat(szText, szBuffer, sizeof(szText));
+		// Clear buffer
+		Q_strncpy(szBuffer, "\0", sizeof(szBuffer));
+		// Reset
+		iPos = 0;
+	}
+
+	// Point p to our modified text
+	p = szText;
+
+	// Check again (will truncate if string too long)
+	p = CheckChatText(pPlayer, p);
+
+	if (!p)
+		return;
+
 	if ( pEdict )
 	{
 		if ( !pPlayer->CanSpeak() )
@@ -237,14 +644,15 @@ void Host_Say( edict_t *pEdict, const CCommand &args, bool teamonly )
 
 	if ( pszPrefix && strlen( pszPrefix ) > 0 )
 	{
-		if ( pszLocation && strlen( pszLocation ) )
-		{
-			Q_snprintf( text, sizeof(text), "%s %s @ %s: ", pszPrefix, pszPlayerName, pszLocation );
-		}
-		else
-		{
+		// Mulch: don't do CS:S style locations
+		//if ( pszLocation && strlen( pszLocation ) )
+		//{
+		//	Q_snprintf( text, sizeof(text), "%s %s @ %s: ", pszPrefix, pszPlayerName, pszLocation );
+		//}
+		//else
+		//{
 			Q_snprintf( text, sizeof(text), "%s %s: ", pszPrefix, pszPlayerName );
-		}
+		//}
 	}
 	else
 	{
@@ -257,99 +665,116 @@ void Host_Say( edict_t *pEdict, const CCommand &args, bool teamonly )
 
 	Q_strncat( text, p, sizeof( text ), COPY_ALL_CHARACTERS );
 	Q_strncat( text, "\n", sizeof( text ), COPY_ALL_CHARACTERS );
- 
-	// loop through all players
-	// Start with the first player.
-	// This may return the world in single player if the client types something between levels or during spawn
-	// so check it, or it will infinite loop
 
-	client = NULL;
-	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
+	// if lua doesn't have a player_onchat function, always allow the message
+	bool bMessageAllowed = true;
+
+	// send to lua
+	CFFLuaSC hContext(0);
+	hContext.Push(pPlayer);
+	hContext.Push(text);
+
+	// let lua decide if the message should go through, if a player_onchat function exists
+	if (_scriptman.RunPredicates_LUA(NULL, &hContext, "player_onchat"))
 	{
-		client = ToBaseMultiplayerPlayer( UTIL_PlayerByIndex( i ) );
-		if ( !client || !client->edict() )
-			continue;
-		
-		if ( client->edict() == pEdict )
-			continue;
+		bMessageAllowed = hContext.GetBool();
+	}
 
-		if ( !(client->IsNetClient()) )	// Not a client ? (should never be true)
-			continue;
-
-		if ( teamonly && g_pGameRules->PlayerCanHearChat( client, pPlayer ) != GR_TEAMMATE )
-			continue;
-
-		if ( pPlayer && !client->CanHearAndReadChatFrom( pPlayer ) )
-			continue;
-
-		if ( pPlayer && GetVoiceGameMgr() && GetVoiceGameMgr()->IsPlayerIgnoringPlayer( pPlayer->entindex(), i ) )
-			continue;
-
-		CSingleUserRecipientFilter user( client );
-		user.MakeReliable();
-
-		if ( pszFormat )
+	if (bMessageAllowed)
+	{
+		client = NULL;
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
 		{
-			UTIL_SayText2Filter( user, pPlayer, true, pszFormat, pszPlayerName, p, pszLocation );
+			// loop through all players
+			// Start with the first player.
+			// This may return the world in single player if the client types something between levels or during spawn
+			// so check it, or it will infinite loop
+
+			client = ToBaseMultiplayerPlayer(UTIL_PlayerByIndex(i));
+			if (!client || !client->edict())
+				continue;
+
+			if (client->edict() == pEdict)
+				continue;
+
+			if (!(client->IsNetClient()))	// Not a client ? (should never be true)
+				continue;
+
+			if (teamonly && g_pGameRules->PlayerCanHearChat(client, pPlayer) != GR_TEAMMATE)
+				continue;
+
+			if (pPlayer && !client->CanHearAndReadChatFrom(pPlayer))
+				continue;
+
+			if (pPlayer && GetVoiceGameMgr() && GetVoiceGameMgr()->IsPlayerIgnoringPlayer(pPlayer->entindex(), i))
+				continue;
+
+			CSingleUserRecipientFilter user(client);
+			user.MakeReliable();
+
+			if (pszFormat)
+			{
+				UTIL_SayText2Filter(user, pPlayer, true, pszFormat, pszPlayerName, p, pszLocation);
+			}
+			else
+			{
+				UTIL_SayTextFilter(user, text, pPlayer, true);
+			}
 		}
+
+		if (pPlayer)
+		{
+			// print to the sending client
+			CSingleUserRecipientFilter user(pPlayer);
+			user.MakeReliable();
+
+			if (pszFormat)
+			{
+				UTIL_SayText2Filter(user, pPlayer, true, pszFormat, pszPlayerName, p, pszLocation);
+			}
+			else
+			{
+				UTIL_SayTextFilter(user, text, pPlayer, true);
+			}
+		}
+
+		// echo to server console
+		// Adrian: Only do this if we're running a dedicated server since we already print to console on the client.
+		if (engine->IsDedicatedServer())
+			Msg("%s", text);
+
+		Assert(p);
+
+		int userid = 0;
+		const char* networkID = "Console";
+		const char* playerName = "Console";
+		const char* playerTeam = "Console";
+		if (pPlayer)
+		{
+			userid = pPlayer->GetUserID();
+			networkID = pPlayer->GetNetworkIDString();
+			playerName = pPlayer->GetPlayerName();
+			CTeam* team = pPlayer->GetTeam();
+			if (team)
+			{
+				playerTeam = team->GetName();
+			}
+		}
+
+		if (teamonly)
+			UTIL_LogPrintf("\"%s<%i><%s><%s>\" say_team \"%s\"\n", playerName, userid, networkID, playerTeam, p);
 		else
+			UTIL_LogPrintf("\"%s<%i><%s><%s>\" say \"%s\"\n", playerName, userid, networkID, playerTeam, p);
+
+		IGameEvent* event = gameeventmanager->CreateEvent( ( teamonly ? "player_sayteam" : "player_say" ), true);
+
+		if (event) // will be null if there are no listeners!
 		{
-			UTIL_SayTextFilter( user, text, pPlayer, true );
+			event->SetInt("userid", userid);
+			event->SetString("text", p);
+			event->SetInt("priority", 1);	// HLTV event priority, not transmitted
+			gameeventmanager->FireEvent(event/*, true*/);
 		}
-	}
-
-	if ( pPlayer )
-	{
-		// print to the sending client
-		CSingleUserRecipientFilter user( pPlayer );
-		user.MakeReliable();
-
-		if ( pszFormat )
-		{
-			UTIL_SayText2Filter( user, pPlayer, true, pszFormat, pszPlayerName, p, pszLocation );
-		}
-		else
-		{
-			UTIL_SayTextFilter( user, text, pPlayer, true );
-		}
-	}
-
-	// echo to server console
-	// Adrian: Only do this if we're running a dedicated server since we already print to console on the client.
-	if ( engine->IsDedicatedServer() )
-		 Msg( "%s", text );
-
-	Assert( p );
-
-	int userid = 0;
-	const char *networkID = "Console";
-	const char *playerName = "Console";
-	const char *playerTeam = "Console";
-	if ( pPlayer )
-	{
-		userid = pPlayer->GetUserID();
-		networkID = pPlayer->GetNetworkIDString();
-		playerName = pPlayer->GetPlayerName();
-		CTeam *team = pPlayer->GetTeam();
-		if ( team )
-		{
-			playerTeam = team->GetName();
-		}
-	}
-		
-	if ( teamonly )
-		UTIL_LogPrintf( "\"%s<%i><%s><%s>\" say_team \"%s\"\n", playerName, userid, networkID, playerTeam, p );
-	else
-		UTIL_LogPrintf( "\"%s<%i><%s><%s>\" say \"%s\"\n", playerName, userid, networkID, playerTeam, p );
-
-	IGameEvent * event = gameeventmanager->CreateEvent( "player_say", true );
-
-	if ( event )
-	{
-		event->SetInt("userid", userid );
-		event->SetString("text", p );
-		event->SetInt("priority", 1 );	// HLTV event priority, not transmitted
-		gameeventmanager->FireEvent( event, true );
 	}
 }
 
@@ -623,6 +1048,11 @@ void CPointServerCommand::InputCommand( inputdata_t& inputdata )
 	if ( !inputdata.value.String()[0] )
 		return;
 
+	// deny any string that includes rcon_password
+		// can't just check for the start because ' rcon_password blah' and 'dummy; rcon_password blah' are also valid
+	if (Q_stristr(inputdata.value.String(), "rcon_password"))
+		return;
+
 	bool bAllowed = ( sAllowPointServerCommand == eAllowAlways );
 #ifdef TF_DLL
 	if ( sAllowPointServerCommand == eAllowOfficial )
@@ -719,6 +1149,10 @@ void kill_helper( const CCommand &args, bool bExplode )
 			{
 				if ( Q_strstr( pPlayer->GetPlayerName(), args[1] ) )
 				{
+					// Bug #0000578: Suiciding using /kill doesn't cause a respawn delay
+					if (pPlayer->IsAlive())
+						pPlayer->m_flNextSpawnDelay = 5.0f;
+
 					pPlayer->CommitSuicide( bExplode );
 				}
 			}
@@ -729,6 +1163,10 @@ void kill_helper( const CCommand &args, bool bExplode )
 		CBasePlayer *pPlayer = UTIL_GetCommandClient();
 		if ( pPlayer )
 		{
+			// Bug #0000578: Suiciding using /kill doesn't cause a respawn delay
+			if (pPlayer->IsAlive())
+				pPlayer->m_flNextSpawnDelay = 5.0f;
+
 			pPlayer->CommitSuicide( bExplode );
 		}
 	}
@@ -900,15 +1338,21 @@ CON_COMMAND( give, "Give item to player.\n\tArguments: <item_name>" )
 
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
+// Bug #0000310: fov doesn't reset |-- Mulch
 CON_COMMAND( fov, "Change players FOV" )
 {
 	CBasePlayer *pPlayer = ToBasePlayer( UTIL_GetCommandClient() );
-	if ( pPlayer && sv_cheats->GetBool() )
+	if ( pPlayer/* && sv_cheats->GetBool()*/ )
 	{
 		if ( args.ArgC() > 1 )
 		{
 			int nFOV = atoi( args[1] );
-			pPlayer->SetDefaultFOV( nFOV );
+			// Bug #0000310: fov doesn't reset |-- Mulch
+			if (nFOV != 0)	// |-- Mirv: Allow for 0 too in order to reset.
+				nFOV = clamp(nFOV, 80, 120);
+
+			//pPlayer->SetDefaultFOV( FOV );
+			pPlayer->SetFOV(pPlayer, nFOV);
 		}
 		else
 		{

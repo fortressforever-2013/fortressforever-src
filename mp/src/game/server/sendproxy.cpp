@@ -103,6 +103,55 @@ void* SendProxy_OnlyToTeam( const SendProp *pProp, const void *pStruct, const vo
 }
 REGISTER_SEND_PROXY_NON_MODIFIED_POINTER( SendProxy_OnlyToTeam );
 
+//-----------------------------------------------------------------------------
+// Purpose: Proxy that only sends data to observers of the entity
+// Input  : *pStruct - 
+//			*pData - 
+//			*pOut - 
+//			objectID - 
+// Output : Returns true on success, false on failure.
+//-----------------------------------------------------------------------------
+void* SendProxy_OnlyToObservers(const SendProp* pProp, const void* pStruct, const void* pVarData, CSendProxyRecipients* pRecipients, int objectID)
+{
+	CBaseEntity* pEntity = (CBaseEntity*)pStruct;
+	if (pEntity)
+	{
+		pRecipients->ClearAllRecipients();
+
+		CBasePlayer* pRecipient = NULL;
+
+		if (pEntity->IsPlayer())
+			pRecipient = ToBasePlayer(pEntity);
+		else if (pEntity->GetOwnerEntity())
+		{
+			CBaseEntity* pOwner = pEntity->GetOwnerEntity();
+			if (pOwner->IsPlayer())
+				pRecipient = ToBasePlayer(pOwner);
+		}
+		// send to the ent if its a player
+		if (pRecipient)
+			pRecipients->SetRecipient(pRecipient->GetClientIndex());
+		else
+			return NULL;
+
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			CBasePlayer* pPlayer = UTIL_PlayerByIndex(i);
+			if (pPlayer)
+			{
+				bool isHLTV = pPlayer->IsHLTV();
+				bool isObserverOfTarget = pPlayer->IsObserver() && pPlayer->GetObserverTarget() == pRecipient;
+				if (isHLTV || isObserverOfTarget)
+					pRecipients->SetRecipient(pPlayer->GetClientIndex());
+			}
+		}
+		return (void*)pVarData;
+	}
+
+	return NULL;
+}
+REGISTER_SEND_PROXY_NON_MODIFIED_POINTER(SendProxy_OnlyToObservers);
+
 #define TIME_BITS 24
 
 // This table encodes edict data.

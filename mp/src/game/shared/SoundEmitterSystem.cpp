@@ -497,6 +497,12 @@ public:
 			params.volume = ep.m_flVolume;
 		}
 
+		// needed for ac rev sound to play at the same time as ac loop shot sound - Jon
+		if (ep.m_nFlags & SND_CHANGE_CHAN)
+		{
+			params.channel = ep.m_nChannel;
+		}
+
 #if !defined( CLIENT_DLL )
 		bool bSwallowed = CEnvMicrophone::OnSoundPlayed( 
 			entindex, 
@@ -552,7 +558,7 @@ public:
 
 
 		// Don't caption modulations to the sound
-		if ( !( ep.m_nFlags & ( SND_CHANGE_PITCH | SND_CHANGE_VOL ) ) )
+		if ( !( ep.m_nFlags & ( SND_CHANGE_PITCH | SND_CHANGE_VOL | SND_CHANGE_CHAN ) ) )
 		{
 			EmitCloseCaption( filter, entindex, params, ep );
 		}
@@ -905,6 +911,55 @@ public:
 		}
 	}
 
+	// Jon: so we can stop sounds in a specific channel that's different from what the script defines
+	void StopSoundInChannelByHandle(int entindex, const char* soundname, HSOUNDSCRIPTHANDLE& handle, const int channel)
+	{
+		if (handle == SOUNDEMITTER_INVALID_HANDLE)
+		{
+			handle = (HSOUNDSCRIPTHANDLE)soundemitterbase->GetSoundIndex(soundname);
+		}
+
+		if (handle == SOUNDEMITTER_INVALID_HANDLE)
+			return;
+
+		CSoundParametersInternal* params;
+
+		params = soundemitterbase->InternalGetParametersForSound((int)handle);
+		if (!params)
+		{
+			return;
+		}
+
+		// HACK:  we have to stop all sounds if there are > 1 in the rndwave section...
+		int c = params->NumSoundNames();
+		for (int i = 0; i < c; ++i)
+		{
+			char const* wavename = soundemitterbase->GetWaveName(params->GetSoundNames()[i].symbol);
+			Assert(wavename);
+
+			enginesound->StopSound(
+				entindex,
+				channel,
+				wavename);
+
+			TraceEmitSound("StopSound:  '%s' stopped as '%s' (ent %i)\n",
+				soundname, wavename, entindex);
+		}
+	}
+
+	// Jon: so we can stop sounds in a specific channel that's different from what the script defines
+	void StopSoundInChannel(int entindex, const char* soundname, const int channel)
+	{
+		int soundindex = soundemitterbase->GetSoundIndex(soundname);
+		if (soundindex == -1)
+		{
+			return;
+		}
+
+		StopSoundInChannelByHandle(entindex, soundname, (HSOUNDSCRIPTHANDLE&)soundindex, channel);
+	}
+
+
 	void StopSound( int entindex, const char *soundname )
 	{
 		HSOUNDSCRIPTHANDLE handle = (HSOUNDSCRIPTHANDLE)soundemitterbase->GetSoundIndex( soundname );
@@ -1021,9 +1076,9 @@ void S_SoundEmitterSystemFlush( void )
 }
 
 #if defined( CLIENT_DLL )
-CON_COMMAND_F( cl_soundemitter_flush, "Flushes the sounds.txt system (client only)", FCVAR_CHEAT )
+CON_COMMAND_F( cl_soundemitter_flush, "Flushes the sounds.txt system (client only)", /*FCVAR_CHEAT*/ FCVAR_CLIENTDLL ) // not enough args so added FCVAR_CLIENTDLL
 #else
-CON_COMMAND_F( sv_soundemitter_flush, "Flushes the sounds.txt system (server only)", FCVAR_DEVELOPMENTONLY )
+CON_COMMAND_F( sv_soundemitter_flush, "Flushes the sounds.txt system (server only)", FCVAR_CHEAT)
 #endif
 {
 	S_SoundEmitterSystemFlush( );
@@ -1035,7 +1090,7 @@ CON_COMMAND_F( sv_soundemitter_flush, "Flushes the sounds.txt system (server onl
 
 #if !defined( _XBOX )
 
-CON_COMMAND_F( sv_soundemitter_filecheck, "Report missing wave files for sounds and game_sounds files.", FCVAR_DEVELOPMENTONLY )
+CON_COMMAND_F( sv_soundemitter_filecheck, "Report missing wave files for sounds and game_sounds files.", /*FCVAR_DEVELOPMENTONLY*/ FCVAR_CHEAT )
 {
 	if ( !UTIL_IsCommandIssuedByServerAdmin() )
 		return;
@@ -1044,7 +1099,7 @@ CON_COMMAND_F( sv_soundemitter_filecheck, "Report missing wave files for sounds 
 	DevMsg( "---------------------------\nTotal missing files %i\n", missing );
 }
 
-CON_COMMAND_F( sv_findsoundname, "Find sound names which reference the specified wave files.", FCVAR_DEVELOPMENTONLY )
+CON_COMMAND_F( sv_findsoundname, "Find sound names which reference the specified wave files.", /*FCVAR_DEVELOPMENTONLY*/ FCVAR_CHEAT)
 {
 	if ( !UTIL_IsCommandIssuedByServerAdmin() )
 		return;
@@ -1152,6 +1207,36 @@ static ConCommand Command_Playgamesound( "playgamesound", Playgamesound_f, "Play
 #endif
 
 #endif
+
+//-----------------------------------------------------------------------------
+// Purpose:  Non-static override for doing the general case of CPASAttenuationFilter( this ), and EmitSound( filter, entindex(), etc. );
+// Input  : *soundname - 
+//-----------------------------------------------------------------------------
+void CBaseEntity::EmitSoundShared(const char* soundname, float soundtime /*= 0.0f*/, float* duration /*=NULL*/)
+{
+	//VPROF( "CBaseEntity::EmitSound" );
+	VPROF_BUDGET("CBaseEntity::EmitSound", _T("CBaseEntity::EmitSound"));
+
+	CPASAttenuationFilter filter(this, soundname);
+
+#ifdef GAME_DLL
+	// FF: AfterShock: Don't send to self. This fixes clientside prediction on sounds and means we can just do 1 shared EmitSound(bla)
+	if (gpGlobals->maxClients > 1)
+	{
+		CBasePlayer* pPlayer = ToBasePlayer(this);
+		if (pPlayer)
+			filter.RemoveRecipient(pPlayer);
+	}
+#endif
+
+	EmitSound_t params;
+	params.m_pSoundName = soundname;
+	params.m_flSoundTime = soundtime;
+	params.m_pflSoundDuration = duration;
+	params.m_bWarnOnDirectWaveReference = true;
+
+	EmitSound(filter, entindex(), params);
+}
 
 //-----------------------------------------------------------------------------
 // Purpose:  Non-static override for doing the general case of CPASAttenuationFilter( this ), and EmitSound( filter, entindex(), etc. );
@@ -1339,6 +1424,28 @@ void CBaseEntity::StopSound( int iEntIndex, const char *soundname )
 void CBaseEntity::StopSound( int iEntIndex, int iChannel, const char *pSample )
 {
 	g_SoundEmitterSystem.StopSound( iEntIndex, iChannel, pSample );
+}
+
+
+// Jon: so we can stop sounds in a specific channel that's different from what the script defines
+void CBaseEntity::StopSoundInChannel(const char* soundname, HSOUNDSCRIPTHANDLE& handle, const int channel)
+{
+#if defined( CLIENT_DLL )
+	if (entindex() == -1)
+	{
+		// If we're a clientside entity, we need to use the soundsourceindex instead of the entindex
+		StopSoundInChannel(GetSoundSourceIndex(), soundname, channel);
+		return;
+	}
+#endif
+
+	g_SoundEmitterSystem.StopSoundInChannelByHandle(entindex(), soundname, handle, channel);
+}
+
+// Jon: so we can stop sounds in a specific channel that's different from what the script defines
+void CBaseEntity::StopSoundInChannel(int iEntIndex, const char* soundname, const int channel)
+{
+	g_SoundEmitterSystem.StopSoundInChannel(iEntIndex, soundname, channel);
 }
 
 soundlevel_t CBaseEntity::LookupSoundLevel( const char *soundname )

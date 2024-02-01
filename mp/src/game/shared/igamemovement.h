@@ -75,8 +75,10 @@ public:
 	void			SetAbsOrigin( const Vector &vec );
 	const Vector	&GetAbsOrigin() const;
 
-private:
+public: // YoYo178: changed from private
 	Vector			m_vecAbsOrigin;		// edict::origin
+	//friend class CFFGameMovement; // allow CFFGameMovement to access the variable above (m_vecAbsOrigin)
+									// could also make the variable public instead
 };
 
 inline const Vector &CMoveData::GetAbsOrigin() const

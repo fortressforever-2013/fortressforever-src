@@ -13,6 +13,16 @@
 #include "tier1/strtools.h"
 #include "buttons.h"
 #include "eventqueue.h"
+#include "omnibot_interface.h"
+
+// --> Mirv: Temp test for triggers
+#include "ff_scriptman.h"
+//#include "ff_luaobject_wrapper.h"
+#include "ff_luacontext.h"
+// <-- Mirv: Temp test for triggers
+
+#undef MINMAX_H
+#include "minmax.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -300,6 +310,17 @@ void CBaseButton::InputPressOut( inputdata_t &inputdata )
 //-----------------------------------------------------------------------------
 int CBaseButton::OnTakeDamage( const CTakeDamageInfo &info )
 {
+	CTakeDamageInfo mutableInfo = info;
+
+	// check to see if the trepids allow this button to do what it wants to
+	CFFLuaSC hOnDamage;
+	hOnDamage.PushRef(mutableInfo);
+	_scriptman.RunPredicates_LUA(this, &hOnDamage, "ondamage");
+
+	// lua can cancel the effects of the damage by setting it to 0
+	if (mutableInfo.GetDamage() <= 0.0)
+		return 0;
+
 	m_OnDamaged.FireOutput(m_hActivator, this);
 
 	// dvsents2: remove obselete health keyvalue from func_button
@@ -313,7 +334,7 @@ int CBaseButton::OnTakeDamage( const CTakeDamageInfo &info )
 	if ( code == BUTTON_NOTHING )
 		return 0;
 
-	m_hActivator = info.GetAttacker();
+	m_hActivator = /*info.GetAttacker();*/ mutableInfo.GetAttacker();
 
 	// dvsents2: why would activator be NULL here?
 	if ( m_hActivator == NULL )
@@ -537,6 +558,17 @@ void CBaseButton::ButtonUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 		//
 		if ( HasSpawnFlags(SF_BUTTON_TOGGLE))
 		{
+			// double check that it's allowed to toggle
+			//CFFLuaObjectWrapper hAllowed;
+			CFFLuaSC hAllowed(1, pActivator);
+			if (_scriptman.RunPredicates_LUA(this, &hAllowed, "allowed"))
+			{
+				if (!hAllowed.GetBool())
+				{
+					_scriptman.RunPredicates_LUA(this, &hAllowed, "onfailuse");
+					return;
+				}
+			}
 			if ( m_sNoise != NULL_STRING )
 			{
 				CPASAttenuationFilter filter( this );
@@ -550,12 +582,28 @@ void CBaseButton::ButtonUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 				EmitSound( filter, entindex(), ep );
 			}
 
+			_scriptman.RunPredicates_LUA(this, &hAllowed, "onuse");
+
 			m_OnPressed.FireOutput(m_hActivator, this);
 			ButtonReturn();
 		}
 	}
 	else
 	{
+		// check with entsys to make sure it is allowed to activate
+		//CFFLuaObjectWrapper hAllowed;
+		CFFLuaSC hAllowed(1, pActivator);
+		if (_scriptman.RunPredicates_LUA(this, &hAllowed, "allowed"))
+		{
+			if (!hAllowed.GetBool())
+			{
+				_scriptman.RunPredicates_LUA(this, &hAllowed, "onfailuse");
+				return;
+			}
+		}
+
+		_scriptman.RunPredicates_LUA(this, &hAllowed, "onuse");
+
 		m_OnPressed.FireOutput(m_hActivator, this);
 		ButtonActivate( );
 	}
@@ -601,6 +649,17 @@ void CBaseButton::ButtonTouch( CBaseEntity *pOther )
 	if ( !pOther->IsPlayer() )
 		return;
 
+	//CFFLuaObjectWrapper hButtonTouch;
+	CFFLuaSC hAllowed(1, pOther);
+	if (_scriptman.RunPredicates_LUA(this, &hAllowed, "allowed"))
+	{
+		if (!hAllowed.GetBool())
+		{
+			_scriptman.RunPredicates_LUA(this, &hAllowed, "onfailtouch");
+			return;
+		}
+	}
+
 	m_hActivator = pOther;
 
 	BUTTON_CODE code = ButtonResponseToTouch();
@@ -614,6 +673,8 @@ void CBaseButton::ButtonTouch( CBaseEntity *pOther )
 		PlayLockSounds(this, &m_ls, TRUE, TRUE);
 		return;
 	}
+
+	_scriptman.RunPredicates_LUA(this, &hAllowed, "ontouch");
 
 	// Temporarily disable the touch function, until movement is finished.
 	SetTouch( NULL );
@@ -684,6 +745,12 @@ void CBaseButton::ButtonActivate( void )
 		LinearMove( m_vecPosition2, m_flSpeed);
 	else
 		AngularMove( m_vecAngle2, m_flSpeed);
+	{
+		// Omnibot notification
+		const char* n = GetName();
+		if (!n) n = UTIL_VarArgs("button_%d", entindex());
+		Omnibot::omnibot_interface::Trigger(this, m_hActivator.Get(), n, "button_activate");
+	}
 }
 
 
@@ -790,6 +857,13 @@ void CBaseButton::ButtonBackHome( void )
 	{
 		SetThink ( &CBaseButton::ButtonSpark );
 		SetNextThink( gpGlobals->curtime + 0.5f );// no hurry
+	}
+
+	{
+		// Omnibot notification
+		const char* n = GetName();
+		if (!n) n = UTIL_VarArgs("button_%d", entindex());
+		Omnibot::omnibot_interface::Trigger(this, NULL, n, "button_reset");
 	}
 }
 

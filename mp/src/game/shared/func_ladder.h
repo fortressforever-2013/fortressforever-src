@@ -76,6 +76,10 @@ public:
 	void FindNearbyDismountPoints( const Vector& origin, float radius, CUtlVector< CInfoLadderDismountHandle >& list );
 	const char *GetSurfacePropName();
 
+	// FF
+	Vector mins;
+	Vector maxs;
+
 private:
 
 

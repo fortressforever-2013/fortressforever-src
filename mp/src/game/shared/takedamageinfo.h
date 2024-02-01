@@ -76,6 +76,8 @@ public:
 	int				GetDamageType() const;
 	void			SetDamageType( int bitsDamageType );
 	void			AddDamageType( int bitsDamageType );
+	int				GetCustomKill() const;
+	void			SetCustomKill(int iKillType);
 	int				GetDamageCustom( void ) const;
 	void			SetDamageCustom( int iDamageCustom );
 	int				GetDamageStats( void ) const;
@@ -101,6 +103,10 @@ public:
 	void			AdjustPlayerDamageInflictedForSkillLevel();
 	void			AdjustPlayerDamageTakenForSkillLevel();
 
+#ifdef GAME_DLL
+	int				GetAmmoTypeLua(void);
+#endif
+
 	// Given a damage type (composed of the #defines above), fill out a string with the appropriate text.
 	// For designer debug output.
 	static void		DebugGetDamageTypeString(unsigned int DamageType, char *outbuf, int outbuflength );
@@ -122,6 +128,7 @@ protected:
 	float			m_flMaxDamage;
 	float			m_flBaseDamage;			// The damage amount before skill leve adjustments are made. Used to get uniform damage forces.
 	int				m_bitsDamageType;
+	int				m_iCustomKillType;
 	int				m_iDamageCustom;
 	int				m_iDamageStats;
 	int				m_iAmmoType;			// AmmoType of the weapon used to cause this damage, if any
@@ -339,6 +346,16 @@ inline int CTakeDamageInfo::GetDamageType() const
 inline void	CTakeDamageInfo::AddDamageType( int bitsDamageType )
 {
 	m_bitsDamageType |= bitsDamageType;
+}
+
+inline int	CTakeDamageInfo::GetCustomKill() const
+{
+	return m_iCustomKillType;
+}
+
+inline void CTakeDamageInfo::SetCustomKill(int iKillType)
+{
+	m_iCustomKillType = iKillType;
 }
 
 inline int CTakeDamageInfo::GetDamageCustom() const

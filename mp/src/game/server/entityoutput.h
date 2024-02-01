@@ -83,7 +83,7 @@ protected:
 	CEventAction *m_ActionList;
 	DECLARE_SIMPLE_DATADESC();
 
-	CBaseEntityOutput() {} // this class cannot be created, only it's children
+	CBaseEntityOutput() { m_ActionList = NULL; } // this class cannot be created, only it's children
 
 private:
 	CBaseEntityOutput( CBaseEntityOutput& ); // protect from accidental copying

@@ -57,6 +57,8 @@
 // NVNT haptics system interface
 #include "haptics/ihaptics.h"
 
+#include "baseviewport.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -280,6 +282,11 @@ END_RECV_TABLE()
 		RecvPropEHandle( RECVINFO(m_hUseEntity) ),
 
 		RecvPropInt		(RECVINFO(m_iHealth)),
+		// Added by Mulchman
+		RecvPropInt		(RECVINFO(m_iMaxHealth)),
+		RecvPropInt		(RECVINFO(m_iArmor)),
+		RecvPropInt		(RECVINFO(m_iMaxArmor)),
+		// Added by Mulchman
 		RecvPropInt		(RECVINFO(m_lifeState)),
 
 		RecvPropInt		(RECVINFO(m_iBonusProgress)),
@@ -288,6 +295,7 @@ END_RECV_TABLE()
 		RecvPropFloat	(RECVINFO(m_flMaxspeed)),
 		RecvPropInt		(RECVINFO(m_fFlags)),
 
+		RecvPropArray3	(RECVINFO_ARRAY(m_iAmmo), RecvPropInt(RECVINFO(m_iAmmo[0]))),
 
 		RecvPropInt		(RECVINFO(m_iObserverMode), 0, RecvProxy_ObserverMode ),
 		RecvPropEHandle	(RECVINFO(m_hObserverTarget), RecvProxy_ObserverTarget ),
@@ -359,6 +367,11 @@ BEGIN_PREDICTION_DATA( C_BasePlayer )
 	DEFINE_PRED_FIELD( m_hVehicle, FIELD_EHANDLE, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD_TOL( m_flMaxspeed, FIELD_FLOAT, FTYPEDESC_INSENDTABLE, 0.5f ),
 	DEFINE_PRED_FIELD( m_iHealth, FIELD_INTEGER, FTYPEDESC_INSENDTABLE ),
+	// Added by Mulch for testing
+	DEFINE_PRED_FIELD(m_iMaxHealth, FIELD_INTEGER, FTYPEDESC_INSENDTABLE),
+	DEFINE_PRED_FIELD(m_iArmor, FIELD_INTEGER, FTYPEDESC_INSENDTABLE),
+	DEFINE_PRED_FIELD(m_iMaxArmor, FIELD_INTEGER, FTYPEDESC_INSENDTABLE),
+	// Added by Mulch for testing
 	DEFINE_PRED_FIELD( m_iBonusProgress, FIELD_INTEGER, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_iBonusChallenge, FIELD_INTEGER, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_fOnTarget, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
@@ -371,7 +384,7 @@ BEGIN_PREDICTION_DATA( C_BasePlayer )
 	DEFINE_FIELD( m_nButtons, FIELD_INTEGER ),
 	DEFINE_FIELD( m_flWaterJumpTime, FIELD_FLOAT ),
 	DEFINE_FIELD( m_nImpulse, FIELD_INTEGER ),
-	DEFINE_FIELD( m_flStepSoundTime, FIELD_FLOAT ),
+	//DEFINE_FIELD( m_flStepSoundTime, FIELD_FLOAT ), |-- Mirv: Removed to fix footsteps
 	DEFINE_FIELD( m_flSwimSoundTime, FIELD_FLOAT ),
 	DEFINE_FIELD( m_vecLadderNormal, FIELD_VECTOR ),
 	DEFINE_FIELD( m_flPhysics, FIELD_INTEGER ),
@@ -589,6 +602,14 @@ void C_BasePlayer::SetObserverTarget( EHANDLE hObserverTarget )
 		{
 			ResetToneMapping(1.0);
 		}
+
+		//AfterShock: update spectator name when you change target
+		IViewPortPanel* spectator = gViewPortInterface->FindPanelByName(PANEL_SPECGUI);
+		if (spectator && spectator->IsVisible())
+		{
+			spectator->Update();
+		}
+
 		// NVNT notify haptics of changed player
 		if ( haptics )
 			haptics->OnPlayerChanged();
@@ -960,9 +981,9 @@ void C_BasePlayer::OnRestore()
 	if ( IsLocalPlayer() )
 	{
 		// debounce the attack key, for if it was used for restore
-		input->ClearInputButton( IN_ATTACK | IN_ATTACK2 );
+		::input->ClearInputButton( IN_ATTACK | IN_ATTACK2 );
 		// GetButtonBits() has to be called for the above to take effect
-		input->GetButtonBits( 0 );
+		::input->GetButtonBits( 0 );
 	}
 
 	// For ammo history icons to current value so they don't flash on level transtions
@@ -1165,7 +1186,7 @@ bool C_BasePlayer::CreateMove( float flInputSampleTime, CUserCmd *pCmd )
 		if ( joy_autosprint.GetBool() )
 #endif
 		{
-			if ( input->KeyState( &in_joyspeed ) != 0.0f )
+			if ( ::input->KeyState( &in_joyspeed ) != 0.0f )
 			{
 				pCmd->buttons |= IN_SPEED;
 			}
@@ -1471,16 +1492,39 @@ void C_BasePlayer::CalcChaseCamView(Vector& eyeOrigin, QAngle& eyeAngles, float&
 
 	// QAngle tmpangles;
 
-	Vector forward, viewpoint;
+	Vector forward, viewpoint, origin;
 
-	// GetObserverCamOrigin() returns ragdoll pos if player is ragdolled
-	Vector origin = target->GetObserverCamOrigin();
+	if (target->IsPlayer())
+	{
+		// GetObserverCamOrigin() returns ragdoll pos if player is ragdolled
+		Vector origin = target->GetObserverCamOrigin();
 
-	VectorAdd( origin, GetChaseCamViewOffset( target ), origin );
+		C_BasePlayer* player = ToBasePlayer(target);
+
+		if (player && player->IsAlive())
+		{
+			if (player->GetFlags() & FL_DUCKING)
+			{
+				VectorAdd(origin, VEC_DUCK_VIEW, origin);
+			}
+			else
+			{
+				VectorAdd(origin, VEC_VIEW, origin);
+			}
+		}
+		else
+		{
+			// assume it's the players ragdoll
+			VectorAdd(origin, VEC_DEAD_VIEWHEIGHT, origin);
+		}
+	}
+	else
+		origin = target->WorldSpaceCenter();
+	//VectorAdd( origin, GetChaseCamViewOffset( target ), origin );
 
 	QAngle viewangles;
 
-	if ( GetObserverMode() == OBS_MODE_IN_EYE )
+	if ( GetObserverMode() == OBS_MODE_IN_EYE && target->IsPlayer() )
 	{
 		viewangles = eyeAngles;
 	}
@@ -1899,7 +1943,7 @@ void C_BasePlayer::ThirdPersonSwitch( bool bThirdperson )
 	int ObserverMode = pLocalPlayer->GetObserverMode();
 	if ( ( ObserverMode == OBS_MODE_NONE ) || ( ObserverMode == OBS_MODE_IN_EYE ) )
 	{
-		return !input->CAM_IsThirdPerson() && ( !ToolsEnabled() || !ToolFramework_IsThirdPersonCamera() );
+		return !::input->CAM_IsThirdPerson() && ( !ToolsEnabled() || !ToolFramework_IsThirdPersonCamera() );
 	}
 
 	// Not looking at the local player, e.g. in a replay in third person mode or freelook.
@@ -2331,7 +2375,8 @@ void C_BasePlayer::PhysicsSimulate( void )
 		ctx->cmd.forwardmove = 0;
 		ctx->cmd.sidemove = 0;
 		ctx->cmd.upmove = 0;
-		ctx->cmd.buttons = 0;
+		// Jiggles: Don't block the USE key b/c we need it for squeek's training map (but still block everything else)
+		ctx->cmd.buttons &= IN_USE;
 		ctx->cmd.impulse = 0;
 		//VectorCopy ( pl.v_angle, ctx->cmd.viewangles );
 	}
@@ -2587,7 +2632,8 @@ float C_BasePlayer::GetMinFOV()	const
 	}
 	else
 	{
-		return 75;
+		//return 75;
+		return 20;		// |-- Mirv: BUG #0000040: Sniper Rifle & Radio Tag zoom sensitivity is not consistent with other HL2 stuff
 	}
 }
 

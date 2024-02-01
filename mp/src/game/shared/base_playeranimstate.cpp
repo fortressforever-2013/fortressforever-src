@@ -51,6 +51,10 @@ ConVar mp_facefronttime(
 
 ConVar mp_ik( "mp_ik", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Use IK on in-place turns." );
 
+#ifdef CLIENT_DLL
+extern ConVar cl_jimmyleg_mode;
+#endif
+
 // Pose parameters stored for debugging.
 float g_flLastBodyPitch, g_flLastBodyYaw, m_flLastMoveYaw;
 
@@ -431,7 +435,7 @@ bool CBasePlayerAnimState::ShouldBlendAimSequenceToIdle()
 {
 	Activity act = GetCurrentMainSequenceActivity();
 
-	return (act == ACT_RUN || act == ACT_WALK || act == ACT_RUNTOIDLE || act == ACT_RUN_CROUCH);
+	return (act == ACT_RUN || act == ACT_WALK || act == ACT_RUNTOIDLE || act == ACT_RUN_CROUCH || act == ACT_HOP); // FF: added ACT_HOP
 }
 
 void CBasePlayerAnimState::ComputeAimSequence()
@@ -544,6 +548,20 @@ bool CBasePlayerAnimState::CanThePlayerMove()
 void CBasePlayerAnimState::ComputePlaybackRate()
 {
 	VPROF( "CBasePlayerAnimState::ComputePlaybackRate" );
+#ifdef CLIENT_DLL
+	if (cl_jimmyleg_mode.GetInt() == 2 && m_AnimConfig.m_LegAnimType != LEGANIM_8WAY)
+	{
+		// When using a 9-way blend, playback rate is always 1 and we just scale the pose params
+		// to speed up or slow down the animation.
+		bool bIsMoving;
+		float flRate = CalcMovementPlaybackRate(&bIsMoving);
+		if (bIsMoving)
+			GetOuter()->SetPlaybackRate(flRate);
+		else
+			GetOuter()->SetPlaybackRate(1);
+	}
+#endif
+
 	if ( m_AnimConfig.m_LegAnimType != LEGANIM_9WAY && m_AnimConfig.m_LegAnimType != LEGANIM_8WAY )
 	{
 		// When using a 9-way blend, playback rate is always 1 and we just scale the pose params
@@ -660,6 +678,11 @@ void CBasePlayerAnimState::ComputePoseParam_MoveYaw( CStudioHdr *pStudioHdr )
 		{
 			vCurMovePose.x = cos( DEG2RAD( flYaw ) ) * flPlaybackRate;
 			vCurMovePose.y = -sin( DEG2RAD( flYaw ) ) * flPlaybackRate;
+			// AfterShock - player animations can be tweaked using these values
+			//				but the clamp is at 1.0f so base animation must be fast
+			//				cos we can only slow it down, not speed it up.
+			//vCurMovePose.x = cos( DEG2RAD( flYaw ) ) * 1.0f;
+			//vCurMovePose.y = -sin( DEG2RAD( flYaw ) ) * 1.0f;
 		}
 
 		GetOuter()->SetPoseParameter( pStudioHdr, iMoveX, vCurMovePose.x );

@@ -157,6 +157,12 @@ public:
 	CBaseEntity *FindEntityClassNearestFacing( const Vector &origin, const Vector &facing, float threshold, char *classname);
 
 	CBaseEntity *FindEntityProcedural( const char *szName, CBaseEntity *pSearchingEntity = NULL, CBaseEntity *pActivator = NULL, CBaseEntity *pCaller = NULL );
+
+	// FF
+	CBaseEntity* FindEntityByOwner(CBaseEntity* pStartEntity, const CBaseEntity* pOwner);	// |-- Mirv: Useful method
+	CBaseEntity* FindEntityByClassT(CBaseEntity* pStartEntity, int szClassT);	// |-- Mulch
+	CBaseEntity* FindEntityByOwnerAndClassname(CBaseEntity* pStartEntity, const CBaseEntity* pOwner, const char* szClassname); // |- Mulch
+	CBaseEntity* FindEntityByOwnerAndClassT(CBaseEntity* pStartEntity, const CBaseEntity* pOwner, int szClassT); // |- Mulch
 	
 	CGlobalEntityList();
 

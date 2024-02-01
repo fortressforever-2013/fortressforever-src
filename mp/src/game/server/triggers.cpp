@@ -35,6 +35,16 @@
 #include "gameinterface.h"
 #include "ilagcompensationmanager.h"
 
+#include "omnibot_interface.h"
+
+// --> Mirv: Temp test for triggers
+#include "ff_scriptman.h"
+#include "ff_luacontext.h"
+// <-- Mirv: Temp test for triggers
+
+#undef MINMAX_H
+#include "minmax.h"	
+
 #ifdef HL2_DLL
 #include "hl2_player.h"
 #endif
@@ -356,12 +366,23 @@ void CBaseTrigger::InitTrigger( )
 //-----------------------------------------------------------------------------
 bool CBaseTrigger::PassesTriggerFilters(CBaseEntity *pOther)
 {
+	// Check for removed state here
+	if (Classify() == CLASS_TRIGGERSCRIPT)
+	{
+		CFuncFFScript* pScript = dynamic_cast<CFuncFFScript*>(this);
+		if (pScript && pScript->IsRemoved())
+			return false;
+	}
+
 	// First test spawn flag filters
 	if ( HasSpawnFlags(SF_TRIGGER_ALLOW_ALL) ||
 		(HasSpawnFlags(SF_TRIGGER_ALLOW_CLIENTS) && (pOther->GetFlags() & FL_CLIENT)) ||
 		(HasSpawnFlags(SF_TRIGGER_ALLOW_NPCS) && (pOther->GetFlags() & FL_NPC)) ||
 		(HasSpawnFlags(SF_TRIGGER_ALLOW_PUSHABLES) && FClassnameIs(pOther, "func_pushable")) ||
-		(HasSpawnFlags(SF_TRIGGER_ALLOW_PHYSICS) && pOther->GetMoveType() == MOVETYPE_VPHYSICS) 
+		(HasSpawnFlags(SF_TRIGGER_ALLOW_PHYSICS) && pOther->GetMoveType() == MOVETYPE_VPHYSICS) ||
+		(HasSpawnFlags(SF_TRIGGER_ALLOW_FF_GRENADES) && (pOther->GetFlags() & FL_GRENADE)) ||
+		(HasSpawnFlags(SF_TRIGGER_ALLOW_FF_BUILDABLES) && ((pOther->Classify() == CLASS_SENTRYGUN) || (pOther->Classify() == CLASS_DISPENSER)))
+		//(HasSpawnFlags(SF_TRIGGER_ALLOW_FF_INFOSCRIPTS) && ((pOther->Classify() == CLASS_INFOSCRIPT)))
 #if defined( HL2_EPISODIC ) || defined( TF_DLL )		
 		||
 		(	HasSpawnFlags(SF_TRIG_TOUCH_DEBRIS) && 
@@ -372,6 +393,107 @@ bool CBaseTrigger::PassesTriggerFilters(CBaseEntity *pOther)
 #endif
 		)
 	{
+		// This is needed as CBaseTrigger::StartTouch can fail
+		// but the superclass (like a push or teleporter) will
+		// still call it's individual Touch function - when it
+		// shouldn't. A better solution would be when StartTouch
+		// doesn't finish (like allowed is false) the super class
+		// touch function never gets called - but I don't know
+		// where that code is...
+
+		// If we're set to check all entities
+		if (HasSpawnFlags(SF_TRIGGER_ALLOW_ALL))
+		{
+			// If the entity sys allowed func returns false then 
+			// bail. If true, run these other checks.
+			CFFLuaSC hAllowed(1, pOther);
+			if (_scriptman.RunPredicates_LUA(this, &hAllowed, "allowed"))
+			{
+				if (!hAllowed.GetBool())
+				{
+					_scriptman.RunPredicates_LUA(this, &hAllowed, "onfailtouch");
+					return false;
+				}
+			}
+		}
+		else
+		{
+			// Always check players... Doing this double check
+			// as most allowed functions are only set up to check
+			// a player_id and not an ent_id (so I don't want
+			// to crash anybody's script)
+			if (pOther->IsPlayer())
+			{
+				// If the entity sys allowed func returns false then 
+				// bail. If true, run these other checks.
+				CFFLuaSC hAllowed(1, pOther);
+				if (_scriptman.RunPredicates_LUA(this, &hAllowed, "allowed"))
+				{
+					if (!hAllowed.GetBool())
+					{
+						_scriptman.RunPredicates_LUA(this, &hAllowed, "onfailtouch");
+						return false;
+					}
+				}
+			}
+		}
+
+		if (HasSpawnFlags(SF_TRIGGER_ALLOW_FF_GRENADES))
+		{
+			if (pOther->GetFlags() & FL_GRENADE)
+			{
+				// If the entity sys allowed func returns false then 
+				// bail. If true, run these other checks.
+				CFFLuaSC hAllowed(1, pOther);
+				if (_scriptman.RunPredicates_LUA(this, &hAllowed, "allowed"))
+				{
+					if (!hAllowed.GetBool())
+					{
+						_scriptman.RunPredicates_LUA(this, &hAllowed, "onfailtouch");
+						return false;
+					}
+				}
+			}
+		}
+
+		if (HasSpawnFlags(SF_TRIGGER_ALLOW_FF_BUILDABLES))
+		{
+			if ((pOther->Classify() == CLASS_SENTRYGUN) || (pOther->Classify() == CLASS_DISPENSER))
+			{
+				// If the entity sys allowed func returns false then 
+				// bail. If true, run these other checks.
+				CFFLuaSC hAllowed(1, pOther);
+				if (_scriptman.RunPredicates_LUA(this, &hAllowed, "allowed"))
+				{
+					if (!hAllowed.GetBool())
+					{
+						_scriptman.RunPredicates_LUA(this, &hAllowed, "onfailtouch");
+						return false;
+					}
+				}
+			}
+		}
+
+		/*
+		if( HasSpawnFlags( SF_TRIGGER_ALLOW_FF_INFOSCRIPTS ))
+		{
+			if( pOther->Classify() == CLASS_INFOSCRIPT )
+			{
+				// If the entity sys allowed func returns false then
+				// bail. If true, run these other checks.
+				CFFLuaSC hAllowed( 1, pOther );
+				if( _scriptman.RunPredicates_LUA( this, &hAllowed, "allowed" ) )
+				{
+					if( !hAllowed.GetBool() )
+					{
+						_scriptman.RunPredicates_LUA( this, &hAllowed, "onfailtouch" );
+						return false;
+					}
+				}
+			}
+		}
+		*/
+
 		if ( pOther->GetFlags() & FL_NPC )
 		{
 			CAI_BaseNPC *pNPC = pOther->MyNPCPointer();
@@ -471,6 +593,35 @@ void CBaseTrigger::StartTouch(CBaseEntity *pOther)
 
 		m_OnStartTouch.FireOutput(pOther, this);
 
+		// Fire the lua output
+		CFFLuaSC hTouch(1, pOther);
+		_scriptman.RunPredicates_LUA(this, &hTouch, "ontouch");
+
+		// Got a trigger_ff_script - do special stuff
+		if (Classify() == CLASS_TRIGGERSCRIPT)
+		{
+			// Add this trigger to m_hActiveScripts
+			int iEntIndex = entindex();
+			if (iEntIndex)
+			{
+				// Don't want dups
+				bool bFound = false;
+				for (int i = 0; (i < pOther->m_hActiveScripts.Count()) && !bFound; i++)
+					if (pOther->m_hActiveScripts[i] == iEntIndex)
+						bFound = true;
+
+				if (!bFound)
+				{
+					pOther->m_hActiveScripts.AddToTail(iEntIndex);
+				}
+			}
+
+			// Change our goal state
+			CFuncFFScript* pScript = dynamic_cast<CFuncFFScript*>(this);
+			if (pScript)
+				pScript->SetActive();
+		}
+
 		if ( bAdded && ( m_hTouchingEntities.Count() == 1 ) )
 		{
 			// First entity to touch us that passes our filters
@@ -492,11 +643,24 @@ void CBaseTrigger::EndTouch(CBaseEntity *pOther)
 		EHANDLE hOther;
 		hOther = pOther;
 		m_hTouchingEntities.FindAndRemove( hOther );
+
+		// Do this to clear the entry. Don't care if we're not allowed
+		// to touch this trigger still.
+		// Remove this trigger from m_hActiveScripts. Want to do this even
+		// if we're removed so we don't leave entries in.
+		int iEntIndex = entindex();
+		if (iEntIndex)
+		{
+			for (int i = 0; i < pOther->m_hActiveScripts.Count(); i++)
+				if (pOther->m_hActiveScripts[i] == iEntIndex)
+					pOther->m_hActiveScripts.Remove(i);
+		}
 		
 		//FIXME: Without this, triggers fire their EndTouch outputs when they are disabled!
 		//if ( !m_bDisabled )
 		//{
-			m_OnEndTouch.FireOutput(pOther, this);
+			// squeek: moved this line down below so it only gets fired if Lua allows it	
+			//m_OnEndTouch.FireOutput(pOther, this);
 		//}
 
 		// If there are no more entities touching this trigger, fire the lost all touches
@@ -535,6 +699,31 @@ void CBaseTrigger::EndTouch(CBaseEntity *pOther)
 		{
 			m_OnEndTouchAll.FireOutput(pOther, this);
 			EndTouchAll();
+		}
+
+		if (Classify() == CLASS_TRIGGERSCRIPT)
+		{
+			CFuncFFScript* pScript = dynamic_cast<CFuncFFScript*>(this);
+			if (pScript)
+			{
+				if (!bFoundOtherTouchee)
+					pScript->SetInactive();
+
+				if (pScript->IsRemoved())
+					return;
+			}
+		}
+
+		// Tell lua we're not touching this thing anymore. Run allowed
+		// just to make sure we're allowed to still be touching it.
+		CFFLuaSC hAllowed(1, pOther);
+		if (_scriptman.RunPredicates_LUA(this, &hAllowed, "allowed"))
+		{
+			if (hAllowed.GetBool())
+			{
+				// Fire the output
+				m_OnEndTouch.FireOutput(pOther, this);
+			}
 		}
 	}
 }
@@ -963,6 +1152,10 @@ void CTriggerMultiple::ActivateMultiTrigger(CBaseEntity *pActivator)
 
 	m_hActivator = pActivator;
 
+	// Run lua trigger event
+	CFFLuaSC hOnTrigger(1, pActivator);
+	_scriptman.RunPredicates_LUA(this, &hOnTrigger, "ontrigger");
+
 	m_OnTrigger.FireOutput(m_hActivator, this);
 
 	if (m_flWait > 0)
@@ -987,6 +1180,128 @@ void CTriggerMultiple::ActivateMultiTrigger(CBaseEntity *pActivator)
 void CTriggerMultiple::MultiWaitOver( void )
 {
 	SetThink( NULL );
+}
+
+// ##################################################################################
+//	>> func_ff_script
+// ##################################################################################
+LINK_ENTITY_TO_CLASS(trigger_ff_script, CFuncFFScript);
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+CFuncFFScript::CFuncFFScript()
+{
+	m_iGoalState = GS_INACTIVE;
+
+	// bot info
+	m_BotTeamFlags = 0;
+	m_BotGoalType = Omnibot::kNone;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CFuncFFScript::SetActive(void)
+{
+	m_iGoalState = GS_ACTIVE;
+	DispatchUpdateTransmitState();
+
+	CFFLuaSC hContext;
+	_scriptman.RunPredicates_LUA(this, &hContext, "onactive");
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CFuncFFScript::SetInactive(void)
+{
+	m_iGoalState = GS_INACTIVE;
+	DispatchUpdateTransmitState();
+
+	CFFLuaSC hContext;
+	_scriptman.RunPredicates_LUA(this, &hContext, "oninactive");
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CFuncFFScript::SetRemoved(void)
+{
+	m_iGoalState = GS_REMOVED;
+	DispatchUpdateTransmitState();
+
+	CFFLuaSC hContext;
+	_scriptman.RunPredicates_LUA(this, &hContext, "onremoved");
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CFuncFFScript::SetRestored(void)
+{
+	CFFLuaSC hContext;
+	_scriptman.RunPredicates_LUA(this, &hContext, "onrestored");
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CFuncFFScript::Spawn(void)
+{
+	BaseClass::Spawn();
+
+	CFFLuaSC hContext;
+	_scriptman.RunPredicates_LUA(this, &hContext, "spawn");
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+int	CFuncFFScript::UpdateTransmitState()
+{
+	if (IsRemoved())
+		return SetTransmitState(FL_EDICT_DONTSEND);
+
+	return BaseClass::UpdateTransmitState();
+}
+
+void CFuncFFScript::LuaSetLocation()
+{
+
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CFuncFFScript::SetBotGoalInfo(int _type, int _team)
+{
+	m_BotGoalType = _type;
+	m_BotTeamFlags = 0;
+	const int iAllTeams =
+		(1 << Omnibot::TF_TEAM_BLUE) |
+		(1 << Omnibot::TF_TEAM_RED) |
+		(1 << Omnibot::TF_TEAM_YELLOW) |
+		(1 << Omnibot::TF_TEAM_GREEN);
+	switch (_team)
+	{
+	case 0:
+		m_BotTeamFlags = iAllTeams;
+		break;
+	case TEAM_BLUE:
+		m_BotTeamFlags = iAllTeams & ~(1 << Omnibot::TF_TEAM_BLUE);
+		break;
+	case TEAM_RED:
+		m_BotTeamFlags = iAllTeams & ~(1 << Omnibot::TF_TEAM_RED);
+		break;
+	case TEAM_YELLOW:
+		m_BotTeamFlags = iAllTeams & ~(1 << Omnibot::TF_TEAM_YELLOW);
+		break;
+	case TEAM_GREEN:
+		m_BotTeamFlags = iAllTeams & ~(1 << Omnibot::TF_TEAM_GREEN);
+		break;
+	}
+	Omnibot::Notify_GoalInfo(this, m_BotGoalType, m_BotTeamFlags);
 }
 
 // ##################################################################################
@@ -2972,6 +3287,14 @@ void CTriggerCamera::Spawn( void )
 
 int CTriggerCamera::UpdateTransmitState()
 {
+	// --> FF
+#ifdef GAME_DLL
+	// always transmit if you're an objective
+	if (m_ObjectivePlayerRefs.Count() > 0)
+		return SetTransmitState(FL_EDICT_ALWAYS);
+#endif // GAME_DLL
+	// <-- FF
+
 	// always tranmit if currently used by a monitor
 	if ( m_state == USE_ON )
 	{
@@ -4454,6 +4777,20 @@ bool CBaseVPhysicsTrigger::PassesTriggerFilters( CBaseEntity *pOther )
 {
 	if ( pOther->GetMoveType() != MOVETYPE_VPHYSICS && !pOther->IsPlayer() )
 		return false;
+
+	// Removing this for now...  what is a CBaseVPhysicsTrigger
+	// anyway and when is it used? Also, we never fire a
+	// ontouch/ontrigger with anything but a CBaseTrigger so 
+	// CBaseVPhysicsTrigger should be set up fully and not half
+	// assed like it currently is.
+	/*
+	CFFLuaSC hAllowed( 1, pOther );
+	if( _scriptman.RunPredicates_LUA( this, &hAllowed, "allowed" ) )
+	{
+		if( !hAllowed.GetBool() )
+			return false;
+	}
+	*/
 
 	// First test spawn flag filters
 	if ( HasSpawnFlags(SF_TRIGGER_ALLOW_ALL) ||

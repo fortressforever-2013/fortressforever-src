@@ -38,6 +38,7 @@
 #define MAX_TEAMS			32
 
 #define TEAMPLAY_TEAMLISTLENGTH		MAX_TEAMS*MAX_TEAMNAME_LENGTH
+#define TEAMPLAY_GAMEDESCLENGTH		32
 
 
 class CTeamplayRules : public CMultiplayRules
@@ -67,7 +68,7 @@ public:
 	virtual bool ClientCommand( CBaseEntity *pEdict, const CCommand &args );
 	virtual void ClientSettingsChanged( CBasePlayer *pPlayer );
 	virtual bool IsTeamplay( void );
-	virtual bool FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker, const CTakeDamageInfo &info );
+	virtual bool FCanTakeDamage( CBaseEntity *pVictim, CBaseEntity *pAttacker, const CTakeDamageInfo &info );
 	virtual int PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarget );
 	virtual bool PlayerCanHearChat( CBasePlayer *pListener, CBasePlayer *pSpeaker );
 	virtual const char *GetTeamID( CBaseEntity *pEntity );
@@ -75,7 +76,8 @@ public:
 	virtual int IPointsForKill( CBasePlayer *pAttacker, CBasePlayer *pKilled );
 	virtual void InitHUD( CBasePlayer *pl );
 	virtual void DeathNotice( CBasePlayer *pVictim, const CTakeDamageInfo &info );
-	virtual const char *GetGameDescription( void ) { return "Teamplay"; }  // this is the game name that gets seen in the server browser
+	virtual const char* GetGameDescription(void) { if (*m_szGameDescription) { return m_szGameDescription; } else { return "Fortress Forever"; } }  // this is the game name that gets seen in the server browser
+	virtual void SetGameDescription(const char* szGameDescription) { Q_snprintf(m_szGameDescription, sizeof(m_szGameDescription), "FF %s", szGameDescription); }  // this is the game name that gets seen in the server browser
 	virtual void PlayerKilled( CBasePlayer *pVictim, const CTakeDamageInfo &info );
 	virtual void Think ( void );
 	virtual int GetTeamIndex( const char *pTeamName );
@@ -112,6 +114,7 @@ private:
 	bool m_DisableDeathPenalty;
 	bool m_teamLimit;				// This means the server set only some teams as valid
 	char m_szTeamList[TEAMPLAY_TEAMLISTLENGTH];
+	char m_szGameDescription[TEAMPLAY_GAMEDESCLENGTH];
 	bool m_bSwitchTeams;
 	bool m_bScrambleTeams;
 

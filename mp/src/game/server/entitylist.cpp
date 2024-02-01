@@ -499,6 +499,116 @@ CBaseEntity *CGlobalEntityList::FindEntityByClassname( CBaseEntity *pStartEntity
 	return NULL;
 }
 
+// --> Mirv: New useful method
+//-----------------------------------------------------------------------------
+// Purpose: Iterates through the entities for ones with the same target
+// Input  : pStartEntity - Last entity found, NULL to start a new iteration.
+//			pOwner - Owner to compare with
+//-----------------------------------------------------------------------------
+CBaseEntity* CGlobalEntityList::FindEntityByOwner(CBaseEntity* pStartEntity, const CBaseEntity* pOwner)
+{
+	const CEntInfo* pInfo = pStartEntity ? GetEntInfoPtr(pStartEntity->GetRefEHandle())->m_pNext : FirstEntInfo();
+
+	for (; pInfo; pInfo = pInfo->m_pNext)
+	{
+		CBaseEntity* pEntity = (CBaseEntity*)pInfo->m_pEntity;
+
+		if (!pEntity)
+		{
+			DevWarning("NULL entity in global entity list!\n");
+			continue;
+		}
+
+		if (pEntity->GetOwnerEntity() == pOwner)
+			return pEntity;
+	}
+
+	return NULL;
+}
+// <-- Mirv: New useful method
+
+// --> Mulch
+//-----------------------------------------------------------------------------
+// Purpose: Iterates through the entities for ones where Classify() == szClassT
+// Input  : pStartEntity - Last entity found, NULL to start a new iteration.
+//			szClassT - Class_T we're looking for
+//-----------------------------------------------------------------------------
+CBaseEntity* CGlobalEntityList::FindEntityByClassT(CBaseEntity* pStartEntity, int szClassT)
+{
+	const CEntInfo* pInfo = pStartEntity ? GetEntInfoPtr(pStartEntity->GetRefEHandle())->m_pNext : FirstEntInfo();
+
+	for (; pInfo; pInfo = pInfo->m_pNext)
+	{
+		CBaseEntity* pEntity = (CBaseEntity*)pInfo->m_pEntity;
+
+		if (!pEntity)
+		{
+			DevWarning("NULL entity in global entity list!\n");
+			continue;
+		}
+
+		if (pEntity->Classify() == szClassT)
+			return pEntity;
+	}
+
+	return NULL;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Iterates through the entities finding one where pOwner & szClassname match
+// Input  : pStartEntity - Last entity found, NULL to start a new iteration.
+//			pOwner - owner we're looking for
+//			szClassname - class name we're looking for
+//-----------------------------------------------------------------------------
+CBaseEntity* CGlobalEntityList::FindEntityByOwnerAndClassname(CBaseEntity* pStartEntity, const CBaseEntity* pOwner, const char* szClassname)
+{
+	const CEntInfo* pInfo = pStartEntity ? GetEntInfoPtr(pStartEntity->GetRefEHandle())->m_pNext : FirstEntInfo();
+
+	for (; pInfo; pInfo = pInfo->m_pNext)
+	{
+		CBaseEntity* pEntity = (CBaseEntity*)pInfo->m_pEntity;
+
+		if (!pEntity)
+		{
+			DevWarning("NULL entity in global entity list!\n");
+			continue;
+		}
+
+		if ((pEntity->GetOwnerEntity() == pOwner) && (pEntity->ClassMatches(szClassname)))
+			return pEntity;
+	}
+
+	return NULL;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Iterates through the entities finding one where pOwner & szClassT match
+// Input  : pStartEntity - Last entity found, NULL to start a new iteration.
+//			pOwner - owner we're looking for
+//			szClassname - class name we're looking for
+//-----------------------------------------------------------------------------
+CBaseEntity* CGlobalEntityList::FindEntityByOwnerAndClassT(CBaseEntity* pStartEntity, const CBaseEntity* pOwner, int szClassT)
+{
+	const CEntInfo* pInfo = pStartEntity ? GetEntInfoPtr(pStartEntity->GetRefEHandle())->m_pNext : FirstEntInfo();
+
+	for (; pInfo; pInfo = pInfo->m_pNext)
+	{
+		CBaseEntity* pEntity = (CBaseEntity*)pInfo->m_pEntity;
+
+		if (!pEntity)
+		{
+			DevWarning("NULL entity in global entity list!\n");
+			continue;
+		}
+
+		if ((pEntity->GetOwnerEntity() == pOwner) && (pEntity->Classify() == szClassT))
+			return pEntity;
+	}
+
+	return NULL;
+}
+// <-- Mulch
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Finds an entity given a procedural name.
@@ -1078,7 +1188,6 @@ CBaseEntity *CGlobalEntityList::FindEntityNearestFacing( const Vector &origin, c
 	return best_ent;
 }
 
-
 void CGlobalEntityList::OnAddEntity( IHandleEntity *pEnt, CBaseHandle handle )
 {
 	int i = handle.GetEntryIndex();
@@ -1492,7 +1601,9 @@ void RespawnEntities()
 	g_EntityListSystem.m_bRespawnAllEntities = true;
 }
 
-static ConCommand restart_entities( "respawn_entities", RespawnEntities, "Respawn all the entities in the map.", FCVAR_CHEAT | FCVAR_SPONLY );
+// Jiggles: No, this crashes the hell out of FF
+// YoYo178: not tested in sdk 2013
+//static ConCommand restart_entities( "respawn_entities", RespawnEntities, "Respawn all the entities in the map.", FCVAR_CHEAT | FCVAR_SPONLY );
 
 class CSortedEntityList
 {

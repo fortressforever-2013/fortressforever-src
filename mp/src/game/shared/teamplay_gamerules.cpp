@@ -44,6 +44,7 @@ CTeamplayRules::CTeamplayRules()
 
 	// Copy over the team from the server config
 	m_szTeamList[0] = 0;
+	m_szGameDescription[0] = '\0';
 
 	RecountTeams();
 }
@@ -306,28 +307,28 @@ void CTeamplayRules::DeathNotice( CBasePlayer *pVictim, const CTakeDamageInfo &i
 	if ( m_DisableDeathMessages )
 		return;
 
-	CBaseEntity *pKiller = info.GetAttacker();
-	if ( pVictim && pKiller && pKiller->IsPlayer() )
-	{
-		CBasePlayer *pk = (CBasePlayer*)pKiller;
+	//CBaseEntity *pKiller = info.GetAttacker();
+	//if ( pVictim && pKiller && pKiller->IsPlayer() )
+	//{
+	//	CBasePlayer *pk = (CBasePlayer*)pKiller;
 
-		if ( pk )
-		{
-			if ( (pk != pVictim) && (PlayerRelationship( pVictim, pk ) == GR_TEAMMATE) )
-			{
-				IGameEvent * event = gameeventmanager->CreateEvent( "player_death" );
-				if ( event )
-				{
-					event->SetInt("killer", pk->GetUserID() );
-					event->SetInt("victim", pVictim->GetUserID() );
-					event->SetInt("priority", 7 );	// HLTV event priority, not transmitted
-					
-					gameeventmanager->FireEvent( event );
-				}
-				return;
-			}
-		}
-	}
+	//	if ( pk )
+	//	{
+	//		if ( (pk != pVictim) && (PlayerRelationship( pVictim, pk ) == GR_TEAMMATE) )
+	//		{
+	//			IGameEvent * event = gameeventmanager->CreateEvent( "player_death" );
+	//			if ( event )
+	//			{
+	//				event->SetInt("killer", pk->GetUserID() );
+	//				event->SetInt("victim", pVictim->GetUserID() );
+	//				event->SetInt("priority", 7 );	// HLTV event priority, not transmitted
+	//				
+	//				gameeventmanager->FireEvent( event );
+	//			}
+	//			return;
+	//		}
+	//	}
+	//}
 
 	BaseClass::DeathNotice( pVictim, info );
 }
@@ -352,19 +353,21 @@ bool CTeamplayRules::IsTeamplay( void )
 	return true;
 }
 
-bool CTeamplayRules::FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker, const CTakeDamageInfo &info )
+bool CTeamplayRules::FCanTakeDamage( CBaseEntity *pVictim, CBaseEntity *pAttacker, const CTakeDamageInfo &info )
 {
-	if ( pAttacker && PlayerRelationship( pPlayer, pAttacker ) == GR_TEAMMATE && !info.IsForceFriendlyFire() )
+	if ( pAttacker && PlayerRelationship(pVictim, pAttacker ) == GR_TEAMMATE && !info.IsForceFriendlyFire() )
 	{
-		// my teammate hit me.
-		if ( (friendlyfire.GetInt() == 0) && (pAttacker != pPlayer) )
+		// If friendly fire is off and I'm not attacking myself, then
+		// someone else on my team/an ally is attacking me - don't
+		// take damage
+		if ( (friendlyfire.GetInt() == 0) && (pAttacker != pVictim) )
 		{
 			// friendly fire is off, and this hit came from someone other than myself,  then don't get hurt
 			return false;
 		}
 	}
 
-	return BaseClass::FPlayerCanTakeDamage( pPlayer, pAttacker, info );
+	return BaseClass::FCanTakeDamage(pVictim, pAttacker, info );
 }
 
 //=========================================================

@@ -55,6 +55,9 @@ void PortalPhysFrame( float deltaTime ); //small wrapper for PhysFrame that simu
 
 void PrecachePhysicsSounds( void );
 
+#include "ff_buildableobjects_shared.h"
+#include "ff_triggerclip.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -469,6 +472,26 @@ int CCollisionEvent::ShouldCollide_2( IPhysicsObject *pObj0, IPhysicsObject *pOb
 
 	if ( !pEntity0 || !pEntity1 )
 		return 1;
+
+	if ((FF_IsBuildableObject(pEntity0) || FF_IsBuildableObject(pEntity1)) && (pEntity0->Classify() == CLASS_TRIGGER_CLIP || pEntity1->Classify() == CLASS_TRIGGER_CLIP))
+	{
+		CFFBuildableObject* pBuildable = NULL;
+		CFFTriggerClip* pTriggerClip = NULL;
+		if (FF_IsBuildableObject(pEntity0))
+		{
+			pBuildable = (CFFBuildableObject*)pEntity0;
+			pTriggerClip = (CFFTriggerClip*)pEntity1;
+		}
+		else
+		{
+			pBuildable = (CFFBuildableObject*)pEntity1;
+			pTriggerClip = (CFFTriggerClip*)pEntity0;
+		}
+
+		return (int)ShouldFFTriggerClipBlock(pTriggerClip, pBuildable->GetTeamNumber(),
+			LUA_CLIP_FLAG_BUILDABLES, LUA_CLIP_FLAG_NONPLAYERS,
+			LUA_CLIP_FLAG_BUILDABLESBYTEAM | LUA_CLIP_FLAG_NONPLAYERSBYTEAM);
+	}
 
 	unsigned short gameFlags0 = pObj0->GetGameFlags();
 	unsigned short gameFlags1 = pObj1->GetGameFlags();

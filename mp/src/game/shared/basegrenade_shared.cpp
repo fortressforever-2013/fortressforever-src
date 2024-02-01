@@ -10,11 +10,18 @@
 #include "shake.h"
 #include "engine/IEngineSound.h"
 
+#include "ff_gamerules.h"
+#include "ff_grenade_base.h"
+#include "ff_shareddefs.h"
+#include "ff_utils.h"
+
 #if !defined( CLIENT_DLL )
 
 #include "soundent.h"
 #include "entitylist.h"
 #include "gamestats.h"
+
+#include "ff_entity_system.h"
 
 #endif
 
@@ -25,6 +32,16 @@ extern short	g_sModelIndexFireball;		// (in combatweapon.cpp) holds the index fo
 extern short	g_sModelIndexWExplosion;	// (in combatweapon.cpp) holds the index for the underwater explosion
 extern short	g_sModelIndexSmoke;			// (in combatweapon.cpp) holds the index for the smoke cloud
 extern ConVar    sk_plr_dmg_grenade;
+
+// --> Mirv: Gren optimisation
+class CRecvProxyData;
+extern void RecvProxy_LocalVelocityX(const CRecvProxyData* pData, void* pStruct, void* pOut);
+extern void RecvProxy_LocalVelocityY(const CRecvProxyData* pData, void* pStruct, void* pOut);
+extern void RecvProxy_LocalVelocityZ(const CRecvProxyData* pData, void* pStruct, void* pOut);
+// <--
+
+// Forward declare
+class CFFGrenadeBase;
 
 #if !defined( CLIENT_DLL )
 
@@ -68,7 +85,23 @@ BEGIN_NETWORK_TABLE( CBaseGrenade, DT_BaseGrenade )
 //	SendPropTime( SENDINFO( m_flDetonateTime ) ),
 	SendPropEHandle( SENDINFO( m_hThrower ) ),
 
-	SendPropVector( SENDINFO( m_vecVelocity ), 0, SPROP_NOSCALE ), 
+	//SendPropVector( SENDINFO( m_vecVelocity ), 0, SPROP_NOSCALE ),
+	// --> Mirv: Gren optimisation
+	//SendPropVector( SENDINFO( m_vecVelocity ), 0, SPROP_NOSCALE ), 
+
+	SendPropExclude("DT_BaseEntity", "m_angRotation"),
+
+	SendPropFloat(SENDINFO_VECTORELEM(m_vecVelocity, 0), 13, SPROP_CHANGES_OFTEN | SPROP_ROUNDDOWN, -1024.0f, 1024.0f),
+	SendPropFloat(SENDINFO_VECTORELEM(m_vecVelocity, 1), 13, SPROP_CHANGES_OFTEN | SPROP_ROUNDDOWN, -1024.0f, 1024.0f),
+	// --> squeek: Increase negative Z bounds to match player bounds (fixes DataTable Out-of-range value warnings due to sv_maxvelocity being defaulted to 3500)
+	SendPropFloat(SENDINFO_VECTORELEM(m_vecVelocity, 2), 14, SPROP_CHANGES_OFTEN | SPROP_ROUNDDOWN, /*-3072.0f*/ -4096.0f, 1024.0f),
+	// <--
+
+	SendPropFloat(SENDINFO_VECTORELEM(m_angRotation, 0), 9, SPROP_CHANGES_OFTEN | SPROP_ROUNDDOWN, 0.0f, 360.0f, SendProxy_AngleToFloat),
+	SendPropFloat(SENDINFO_VECTORELEM(m_angRotation, 1), 9, SPROP_CHANGES_OFTEN | SPROP_ROUNDDOWN, 0.0f, 360.0f, SendProxy_AngleToFloat),
+	SendPropFloat(SENDINFO_VECTORELEM(m_angRotation, 2), 9, SPROP_CHANGES_OFTEN | SPROP_ROUNDDOWN, 0.0f, 360.0f, SendProxy_AngleToFloat),
+	// <-- Mirv
+
 	// HACK: Use same flag bits as player for now
 	SendPropInt			( SENDINFO(m_fFlags), PLAYER_FLAG_BITS, SPROP_UNSIGNED, SendProxy_CropFlagsToPlayerFlagBitsLength ),
 #else
@@ -79,7 +112,19 @@ BEGIN_NETWORK_TABLE( CBaseGrenade, DT_BaseGrenade )
 	RecvPropEHandle( RECVINFO( m_hThrower ) ),
 
 	// Need velocity from grenades to make animation system work correctly when running
-	RecvPropVector( RECVINFO(m_vecVelocity), 0, RecvProxy_LocalVelocity ),
+	//RecvPropVector( RECVINFO(m_vecVelocity), 0, RecvProxy_LocalVelocity ),
+
+	// --> Mirv: Gren optimisation
+	//RecvPropVector( RECVINFO(m_vecVelocity), 0, RecvProxy_LocalVelocity ),
+	RecvPropFloat(RECVINFO(m_vecVelocity[0]), 0, RecvProxy_LocalVelocityX),
+	RecvPropFloat(RECVINFO(m_vecVelocity[1]), 0, RecvProxy_LocalVelocityY),
+	RecvPropFloat(RECVINFO(m_vecVelocity[2]), 0, RecvProxy_LocalVelocityZ),
+
+	RecvPropFloat(RECVINFO_NAME(m_angNetworkAngles[0], m_angRotation[0]), 0),
+	RecvPropFloat(RECVINFO_NAME(m_angNetworkAngles[1], m_angRotation[1]), 0),
+	RecvPropFloat(RECVINFO_NAME(m_angNetworkAngles[2], m_angRotation[2]), 0),
+
+	// <-- Mirv
 
 	RecvPropInt( RECVINFO( m_fFlags ) ),
 #endif
@@ -123,7 +168,8 @@ void CBaseGrenade::Explode( trace_t *pTrace, int bitsDamageType )
 	// Pull out of the wall a bit
 	if ( pTrace->fraction != 1.0 )
 	{
-		SetAbsOrigin( pTrace->endpos + (pTrace->plane.normal * 0.6) );
+		//SetAbsOrigin( pTrace->endpos + (pTrace->plane.normal * 0.6) );
+		SetLocalOrigin(pTrace->endpos + (pTrace->plane.normal * 32.0f));	// |-- Mirv: 32 units used in TFC
 	}
 
 	Vector vecAbsOrigin = GetAbsOrigin();
@@ -144,7 +190,7 @@ void CBaseGrenade::Explode( trace_t *pTrace, int bitsDamageType )
 		te->Explosion( filter, -1.0, // don't apply cl_interp delay
 			&vecAbsOrigin,
 			!( contents & MASK_WATER ) ? g_sModelIndexFireball : g_sModelIndexWExplosion,
-			m_DmgRadius * .03, 
+			/*m_DmgRadius * .03*/ m_flDamage / 128.0f, // scale
 			25,
 			TE_EXPLFLAG_NONE,
 			m_DmgRadius,
@@ -170,9 +216,15 @@ void CBaseGrenade::Explode( trace_t *pTrace, int bitsDamageType )
 #endif
 
 	// Use the thrower's position as the reported position
-	Vector vecReported = m_hThrower ? m_hThrower->GetAbsOrigin() : vec3_origin;
+	//Vector vecReported = m_hThrower ? m_hThrower->GetAbsOrigin() : vec3_origin;
+
+	// We need to report where the explosion took place
+	Vector vecReported = pTrace->endpos; //m_hThrower ? m_hThrower->GetAbsOrigin() : vec3_origin;
 	
-	CTakeDamageInfo info( this, m_hThrower, GetBlastForce(), GetAbsOrigin(), m_flDamage, bitsDamageType, 0, &vecReported );
+	//CTakeDamageInfo info( this, m_hThrower, GetBlastForce(), GetAbsOrigin(), m_flDamage, bitsDamageType, 0, &vecReported );
+	// --> Mirv: #0000675: Killing people with certain weapons says the person killed themself
+	CTakeDamageInfo info(this, /*m_hThrower*/ GetOwnerEntity(), GetBlastForce(), GetAbsOrigin(), m_flDamage, bitsDamageType, m_iKillType, &vecReported);
+	// <-- Mirv
 
 	RadiusDamage( info, GetAbsOrigin(), m_DmgRadius, CLASS_NONE, NULL );
 
@@ -282,6 +334,16 @@ void CBaseGrenade::PreDetonate( void )
 
 void CBaseGrenade::Detonate( void )
 {
+
+#ifdef GAME_DLL
+	// Verify our owner is still here!
+	if (!GetOwnerEntity())
+	{
+		Remove();
+		return;
+	}
+#endif
+
 	trace_t		tr;
 	Vector		vecSpot;// trace starts here!
 
@@ -298,12 +360,15 @@ void CBaseGrenade::Detonate( void )
 		UTIL_TraceLine( GetAbsOrigin(), GetAbsOrigin() + Vector( 0, 0, -32), MASK_SHOT_HULL, this, COLLISION_GROUP_NONE, &tr );
 	}
 
-	Explode( &tr, DMG_BLAST );
+	Explode( &tr, m_iDamageType );
 
-	if ( GetShakeAmplitude() )
+	// No shake if in a no gren area
+#ifdef GAME_DLL
+	if (GetShakeAmplitude() && FFScriptRunPredicates(this, "onexplode", true))
 	{
 		UTIL_ScreenShake( GetAbsOrigin(), GetShakeAmplitude(), 150.0, 1.0, GetShakeRadius(), SHAKE_START );
 	}
+#endif
 }
 
 
@@ -312,6 +377,13 @@ void CBaseGrenade::Detonate( void )
 // 
 void CBaseGrenade::ExplodeTouch( CBaseEntity *pOther )
 {
+	// Verify our owner is still here!
+	if (!GetOwnerEntity())
+	{
+		Remove();
+		return;
+	}
+
 	trace_t		tr;
 	Vector		vecSpot;// trace starts here!
 
@@ -319,12 +391,22 @@ void CBaseGrenade::ExplodeTouch( CBaseEntity *pOther )
 	if ( !pOther->IsSolid() )
 		return;
 
+	// --> Mirv: Check collision rules first
+	if (!g_pGameRules->ShouldCollide(GetCollisionGroup(), pOther->GetCollisionGroup()))
+		return;
+	// <-- Mirv: Check collision rules first
+
 	Vector velDir = GetAbsVelocity();
 	VectorNormalize( velDir );
 	vecSpot = GetAbsOrigin() - velDir * 32;
-	UTIL_TraceLine( vecSpot, vecSpot + velDir * 64, MASK_SOLID_BRUSHONLY, this, COLLISION_GROUP_NONE, &tr );
+	// direct rocket hits were essentially inverting movement effects because the trace was going straight through players
+	//UTIL_TraceLine( vecSpot, vecSpot + velDir * 64, MASK_SOLID_BRUSHONLY, this, COLLISION_GROUP_NONE, &tr );
+	UTIL_TraceLine(vecSpot, vecSpot + velDir * 64, MASK_SHOT_HULL, this, COLLISION_GROUP_NONE, &tr);
 
-	Explode( &tr, DMG_BLAST );
+	if (FF_IsAirshot(pOther))
+		m_iDamageType |= DMG_AIRSHOT;
+
+	Explode(&tr, m_iDamageType);
 }
 
 
@@ -332,7 +414,7 @@ void CBaseGrenade::DangerSoundThink( void )
 {
 	if (!IsInWorld())
 	{
-		Remove( );
+		Remove();
 		return;
 	}
 
@@ -351,6 +433,13 @@ void CBaseGrenade::DangerSoundThink( void )
 
 void CBaseGrenade::BounceTouch( CBaseEntity *pOther )
 {
+	// Verify our owner is still here!
+	if (!GetOwnerEntity())
+	{
+		Remove();
+		return;
+	}
+
 	if ( pOther->IsSolidFlagSet(FSOLID_TRIGGER | FSOLID_VOLUME_CONTENTS) )
 		return;
 
@@ -423,6 +512,13 @@ void CBaseGrenade::BounceTouch( CBaseEntity *pOther )
 
 void CBaseGrenade::SlideTouch( CBaseEntity *pOther )
 {
+	// Verify our owner is still here!
+	if (!GetOwnerEntity())
+	{
+		Remove();
+		return;
+	}
+
 	// don't hit the guy that launched this grenade
 	if ( pOther == GetThrower() )
 		return;
@@ -452,6 +548,14 @@ void CBaseGrenade ::BounceSound( void )
 
 void CBaseGrenade ::TumbleThink( void )
 {
+	// Verify our owner is still here!
+	if (!GetOwnerEntity())
+	{
+		Remove();
+		return;
+	}
+
+
 	if (!IsInWorld())
 	{
 		Remove( );
@@ -539,6 +643,8 @@ CBaseGrenade::CBaseGrenade(void)
 	m_DmgRadius			= 100;
 	m_flDetonateTime	= 0;
 	m_bHasWarnedAI		= false;
+	m_iKillType			= 0;
+	m_iDamageType		= DMG_BLAST;
 
 	SetSimulatedEveryTick( true );
 };

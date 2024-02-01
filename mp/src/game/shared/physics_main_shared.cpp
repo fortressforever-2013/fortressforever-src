@@ -19,6 +19,14 @@
 #include "utlmultilist.h"
 #include "tier1/callqueue.h"
 
+// BEG: Added by Mulch 11/07/2005
+#ifdef CLIENT_DLL
+	//#define CFFBuildableObject C_FFBuildableObject
+#endif
+
+#include "ff_buildableobjects_shared.h"
+// END: Added by Mulch 11/07/2005
+
 #ifdef PORTAL
 	#include "portal_util_shared.h"
 #endif
@@ -618,9 +626,9 @@ static bool g_bCleanupDatObject = true;
 //-----------------------------------------------------------------------------
 void CBaseEntity::PhysicsCheckForEntityUntouch( void )
 {
-	Assert( g_pNextLink == NULL );
+	//Assert( g_pNextLink == NULL );
 
-	touchlink_t *link;
+	touchlink_t* link, * nextLink;
 
 	touchlink_t *root = ( touchlink_t * )GetDataObject( TOUCHLINK );
 	if ( root )
@@ -634,7 +642,7 @@ void CBaseEntity::PhysicsCheckForEntityUntouch( void )
 		link = root->nextLink;
 		while ( link != root )
 		{
-			g_pNextLink = link->nextLink;
+			nextLink = link->nextLink;
 
 			// these touchlinks are not polled.  The ents are touching due to an outside
 			// system that will add/delete them as necessary (vphysics in this case)
@@ -657,7 +665,7 @@ void CBaseEntity::PhysicsCheckForEntityUntouch( void )
 				}
 			}
 
-			link = g_pNextLink;
+			link = nextLink;
 		}
 
 		g_bCleanupDatObject = saveCleanup;
@@ -669,8 +677,6 @@ void CBaseEntity::PhysicsCheckForEntityUntouch( void )
 			DestroyDataObject( TOUCHLINK );
 		}
 	}
-
-	g_pNextLink = NULL;
 
 	SetCheckUntouch( false );
 }
@@ -1110,6 +1116,20 @@ void CBaseEntity::PhysicsImpact( CBaseEntity *other, trace_t &trace )
 	{
 		return;
 	}
+
+	// BEG: Added by Mulch 11/07/2005
+	if (trace.m_pEnt)
+	{
+		if ((trace.m_pEnt->Classify() == CLASS_DISPENSER) ||
+			(trace.m_pEnt->Classify() == CLASS_SENTRYGUN) ||
+			(trace.m_pEnt->Classify() == CLASS_DETPACK))
+		{
+			// If there's no owner bail out
+			if (!(((CFFBuildableObject*)trace.m_pEnt)->CheckForOwner()))
+				return;
+		}
+	}
+	// END: Added by Mulch 11/07/2005
 
 	// If either of the entities is flagged to be deleted, 
 	//  don't call the touch functions
@@ -1600,9 +1620,12 @@ void CBaseEntity::PhysicsCheckWaterTransition( void )
 
 			if ( !IsEFlagSet( EFL_NO_WATER_VELOCITY_CHANGE ) )
 			{
-				Vector vecAbsVelocity = GetAbsVelocity();
+				// BEG: Removed by Mulch - it was deflecting
+				// stuff entering water
+				/*Vector vecAbsVelocity = GetAbsVelocity();
 				vecAbsVelocity[2] *= 0.5;
-				SetAbsVelocity( vecAbsVelocity );
+				SetAbsVelocity( vecAbsVelocity );*/
+				// END: Mulch
 			}
 		}
 	}
@@ -1696,9 +1719,13 @@ void CBaseEntity::PhysicsToss( void )
 	{	
 		// entity is trapped in another solid
 		// UNDONE: does this entity needs to be removed?
-		SetAbsVelocity(vec3_origin);
-		SetLocalAngularVelocity(vec3_angle);
-		return;
+		// Jiggles: Added this conditional to "fix" the "pipes don't always explode when they hit a player" bug
+		if (Classify() != CLASS_GLGRENADE)
+		{
+			SetAbsVelocity(vec3_origin);
+			SetLocalAngularVelocity(vec3_angle);
+			return;
+		}
 	}
 	
 #if !defined( CLIENT_DLL )

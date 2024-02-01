@@ -171,6 +171,14 @@ public:
 
 	virtual const unsigned char *GetEncryptionKey() { return NULL; }
 
+	// --> Mirv: Clientside rules
+
+	// These aren't pure virtual functions so that they don't 
+	// break all the other derived gamerule classes
+	virtual int		PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget) { AssertMsg(0, "This should not be called!"); return 0; }
+	virtual bool	FCanTakeDamage(CBaseEntity* pVictim, CBaseEntity* pAttacker) { AssertMsg(0, "This should not be called!"); return TRUE; }
+	// <-- Mirv
+
 	virtual bool InRoundRestart( void ) { return false; }
 
 	//Allow thirdperson camera.
@@ -265,6 +273,7 @@ public:
 	virtual bool IsTeamplay( void ) { return FALSE; };// is this deathmatch game being played with team rules?
 	virtual bool IsCoOp( void ) = 0;// is this a coop game?
 	virtual const char *GetGameDescription( void ) { return "Half-Life 2"; }  // this is the game name that gets seen in the server browser
+	virtual void SetGameDescription(const char* szGameDescription) { return; }  // this is the game name that gets seen in the server browser
 	
 // Client connection/disconnection
 	virtual bool ClientConnected( edict_t *pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen ) = 0;// a client just connected to the server (player hasn't spawned yet)
@@ -273,7 +282,7 @@ public:
 	
 // Client damage rules
 	virtual float FlPlayerFallDamage( CBasePlayer *pPlayer ) = 0;// this client just hit the ground after a fall. How much damage?
-	virtual bool  FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker, const CTakeDamageInfo &info ) {return TRUE;};// can this player take damage from this attacker?
+	virtual bool  FCanTakeDamage( CBaseEntity *pVictim, CBaseEntity *pAttacker, const CTakeDamageInfo &info ) {return TRUE;};// can this player take damage from this attacker?
 	virtual bool ShouldAutoAim( CBasePlayer *pPlayer, edict_t *target ) { return TRUE; }
 	virtual float GetAutoAimScale( CBasePlayer *pPlayer ) { return 1.0f; }
 	virtual int	GetAutoAimMode()	{ return AUTOAIM_ON; }
@@ -292,6 +301,7 @@ public:
 	virtual bool FPlayerCanRespawn( CBasePlayer *pPlayer ) = 0;// is this player allowed to respawn now?
 	virtual float FlPlayerSpawnTime( CBasePlayer *pPlayer ) = 0;// When in the future will this player be able to spawn?
 	virtual CBaseEntity *GetPlayerSpawnSpot( CBasePlayer *pPlayer );// Place this player on their spawnspot and face them the proper direction.
+	virtual Vector GetPlayerSpawnSpotOffset(const CBasePlayer* pPlayer, const Vector vecOrigin, const Vector vecPlayerBoundsMins, const Vector vecPlayerBoundsMaxs);// for moving the spawn spot around the original spawn spot if other players are inside it
 	virtual bool IsSpawnPointValid( CBaseEntity *pSpot, CBasePlayer *pPlayer );
 
 	virtual bool AllowAutoTargetCrosshair( void ) { return TRUE; };
@@ -350,7 +360,7 @@ public:
 
 // Teamplay stuff
 	virtual const char *GetTeamID( CBaseEntity *pEntity ) = 0;// what team is this entity on?
-	virtual int PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarget ) = 0;// What is the player's relationship with this entity?
+	//virtual int PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarget ) = 0;// What is the player's relationship with this entity?
 	virtual bool PlayerCanHearChat( CBasePlayer *pListener, CBasePlayer *pSpeaker ) = 0;
 	virtual void CheckChatText( CBasePlayer *pPlayer, char *pText ) { return; }
 

@@ -94,7 +94,10 @@ void CLocalSpaceEmitter::RenderParticles( CParticleRenderIterator *pIterator )
 		// Correct viewmodel squashing
 		if ( m_fFlags & FLE_VIEWMODEL )
 		{
-			FormatViewModelAttachment( worldPos, false );
+			//FormatViewModelAttachment( worldPos, false );
+			
+			// was set to true in ff's code, still commented though
+			//FormatViewModelAttachment( worldPos, true );
 		}
 
 		TransformParticle( mModelView, worldPos, screenPos );
@@ -106,7 +109,7 @@ void CLocalSpaceEmitter::RenderParticles( CParticleRenderIterator *pIterator )
 			pIterator->GetParticleDraw(),
 			screenPos,
 			UpdateColor( pParticle ),
-			UpdateAlpha( pParticle ) * GetAlphaDistanceFade( screenPos, m_flNearClipMin, m_flNearClipMax ),
+			UpdateAlpha(pParticle) * GetAlphaDistanceFade(screenPos, m_flNearClipMin, m_flNearClipMax, m_flFarClipMin, m_flFarClipMax),
 			UpdateScale( pParticle ),
 			pParticle->m_flRoll 
 			);

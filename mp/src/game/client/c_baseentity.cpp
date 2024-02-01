@@ -55,6 +55,17 @@ static bool g_bWasSkipping = (bool)-1;
 static bool g_bWasThreaded =(bool)-1;
 static int  g_nThreadModeTicks = 0;
 
+void cc_cl_interp_changed(IConVar* pConVar, const char* pOldString, float flOldValue )
+{
+	C_BaseEntityIterator iterator;
+	C_BaseEntity* pEnt;
+	while ((pEnt = iterator.Next()) != NULL)
+	{
+		pEnt->Interp_UpdateInterpolationAmounts(pEnt->GetVarMapping());
+	}
+}
+
+
 void cc_cl_interp_all_changed( IConVar *pConVar, const char *pOldString, float flOldValue )
 {
 	ConVarRef var( pConVar );
@@ -72,8 +83,17 @@ void cc_cl_interp_all_changed( IConVar *pConVar, const char *pOldString, float f
 	}
 }
 
+// --> Mirv: Using this to select interp
+static ConVar  cl_interp_ratio("cl_interp_ratio", "2.0", FCVAR_USERINFO | FCVAR_DEMO, "This is best kept to 2.0, don't you know.", true, 0.1f, true, 4.0f, cc_cl_interp_changed);
+// <--
 
 static ConVar  cl_extrapolate( "cl_extrapolate", "1", FCVAR_CHEAT, "Enable/disable extrapolation if interpolation history runs out." );
+
+// Defined in engine
+static ConVar cl_interpolate("cl_interpolate", "1.0f", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY);
+
+//static ConVar  cl_interp	 ( "cl_interp", "0.1", FCVAR_USERINFO | FCVAR_DEMO, "Interpolate object positions starting this many seconds in past", true, 0.01, true, 1.0, cc_cl_interp_changed );  
+
 static ConVar  cl_interp_npcs( "cl_interp_npcs", "0.0", FCVAR_USERINFO, "Interpolate NPC positions starting this many seconds in past (or cl_interp, if greater)" );  
 static ConVar  cl_interp_all( "cl_interp_all", "0", 0, "Disable interpolation list optimizations.", 0, 0, 0, 0, cc_cl_interp_all_changed );
 ConVar  r_drawmodeldecals( "r_drawmodeldecals", "1" );
@@ -459,6 +479,7 @@ BEGIN_RECV_TABLE_NOBASE(C_BaseEntity, DT_BaseEntity)
 	RecvPropEHandle( RECVINFO(m_hEffectEntity) ),
 	RecvPropInt( RECVINFO_NAME(m_hNetworkMoveParent, moveparent), 0, RecvProxy_IntToMoveParent ),
 	RecvPropInt( RECVINFO( m_iParentAttachment ) ),
+	RecvPropInt( RECVINFO(m_takedamage), 0 ),
 
 	RecvPropInt( "movetype", 0, SIZEOF_IGNORE, 0, RecvProxy_MoveType ),
 	RecvPropInt( "movecollide", 0, SIZEOF_IGNORE, 0, RecvProxy_MoveCollide ),
@@ -1240,6 +1261,7 @@ void C_BaseEntity::Release()
 
 	UpdateOnRemove();
 
+	PrintDeleteInfo();
 	delete this;
 }
 
@@ -1699,6 +1721,7 @@ void C_BaseEntity::GetShadowRenderBounds( Vector &mins, Vector &maxs, ShadowType
 	m_EntClientFlags &= ~ENTCLIENTFLAG_GETTINGSHADOWRENDERBOUNDS;
 }
 
+ConVar sDebugAbsQueriesValid("ffdev_debugabsqueriesvalid", "0", FCVAR_CHEAT);
 
 //-----------------------------------------------------------------------------
 // Purpose: Last received origin
@@ -1706,7 +1729,10 @@ void C_BaseEntity::GetShadowRenderBounds( Vector &mins, Vector &maxs, ShadowType
 //-----------------------------------------------------------------------------
 const Vector& C_BaseEntity::GetAbsOrigin( void ) const
 {
-	//Assert( s_bAbsQueriesValid );
+	if (!s_bAbsQueriesValid && sDebugAbsQueriesValid.GetBool())
+		Warning("!s_bAbsQueriesValid: %s\n", const_cast<C_BaseEntity*>(this)->GetClassname());
+	//Assert(s_bAbsQueriesValid);
+
 	const_cast<C_BaseEntity*>(this)->CalcAbsolutePosition();
 	return m_vecAbsOrigin;
 }
@@ -1718,7 +1744,10 @@ const Vector& C_BaseEntity::GetAbsOrigin( void ) const
 //-----------------------------------------------------------------------------
 const QAngle& C_BaseEntity::GetAbsAngles( void ) const
 {
+	if (!s_bAbsQueriesValid && sDebugAbsQueriesValid.GetBool())
+		Warning("!s_bAbsQueriesValid: %s\n", const_cast<C_BaseEntity*>(this)->GetClassname());
 	//Assert( s_bAbsQueriesValid );
+
 	const_cast<C_BaseEntity*>(this)->CalcAbsolutePosition();
 	return m_angAbsRotation;
 }
@@ -2037,6 +2066,9 @@ void C_BaseEntity::UpdatePartitionListEntry()
 		list |= PARTITION_CLIENT_SOLID_EDICTS;
 	else if (shouldCollide == ENTITY_SHOULD_RESPOND)
 		list |= PARTITION_CLIENT_RESPONSIVE_EDICTS;
+	// HACKHACK: Fix to allow laser beam to shine off ragdolls
+	else if (shouldCollide == ENTITY_SHOULD_COLLIDE_RESPOND)
+		list |= PARTITION_CLIENT_SOLID_EDICTS | PARTITION_CLIENT_RESPONSIVE_EDICTS;
 
 	// add the entity to the KD tree so we will collide against it
 	partition->RemoveAndInsert( PARTITION_CLIENT_SOLID_EDICTS | PARTITION_CLIENT_RESPONSIVE_EDICTS | PARTITION_CLIENT_NON_STATIC_EDICTS, list, CollisionProp()->GetPartitionHandle() );
@@ -3178,9 +3210,6 @@ void C_BaseEntity::Simulate()
 	AddEntity();	// Legacy support. Once-per-frame stuff should go in Simulate().
 }
 
-// Defined in engine
-static ConVar cl_interpolate( "cl_interpolate", "1.0f", FCVAR_USERINFO | FCVAR_DEVELOPMENTONLY );
-
 // (static function)
 void C_BaseEntity::InterpolateServerEntities()
 {
@@ -3680,6 +3709,7 @@ void C_BaseEntity::AddBrushModelDecal( const Ray_t& ray, const Vector& decalCent
 		model, GetAbsOrigin(), GetAbsAngles(), decalCenter, 0, 0 );
 }
 
+extern ConVar	ffdev_disableentitydecals;
 
 //-----------------------------------------------------------------------------
 // A method to apply a decal to an entity
@@ -3687,6 +3717,12 @@ void C_BaseEntity::AddBrushModelDecal( const Ray_t& ray, const Vector& decalCent
 void C_BaseEntity::AddDecal( const Vector& rayStart, const Vector& rayEnd,
 		const Vector& decalCenter, int hitbox, int decalIndex, bool doTrace, trace_t& tr, int maxLODToDecal )
 {
+	if (ffdev_disableentitydecals.GetBool())
+	{
+		if (Classify() != CLASS_NONE && Classify() < NUM_AI_CLASSES)
+			return;
+	}
+
 	Ray_t ray;
 	ray.Init( rayStart, rayEnd );
 
@@ -4904,7 +4940,8 @@ C_BaseEntity *C_BaseEntity::CreatePredictedEntityByName( const char *classname, 
 			}
 		}
 
-		return NULL;
+		// Mirv: For predicted rockets...
+		//return NULL;
 	}
 
 	// Try to create it
@@ -5888,9 +5925,31 @@ static float AdjustInterpolationAmount( C_BaseEntity *pEntity, float baseInterpo
 	return baseInterpolation;
 }
 
+static const ConVar* pUpdateRateCvar = NULL;
+static const ConVar* pMaxUpdateRateCvar = NULL;
+int nLastUpdateRate = 0;
+
 //-------------------------------------
 float C_BaseEntity::GetInterpolationAmount( int flags )
 {
+	// --> Mirv: Interpolation based on ratio
+	if (!pUpdateRateCvar || !pMaxUpdateRateCvar)
+	{
+		pUpdateRateCvar = cvar->FindVar("cl_updaterate");
+		pMaxUpdateRateCvar = cvar->FindVar("sv_maxupdaterate");
+		nLastUpdateRate = pUpdateRateCvar->GetFloat();
+	}
+	// Since it's not safe to hack in a handler we'll just have to test
+	// for the value changing here...
+	int nUpdateRate = min(pMaxUpdateRateCvar->GetInt(), pUpdateRateCvar->GetInt());
+	//if (nUpdateRate != nLastUpdateRate)
+	//{
+	//	nLastUpdateRate = nUpdateRate;
+	//	cc_cl_interp_changed(NULL, NULL);
+	//}
+	float flInterp = cl_interp_ratio.GetFloat() / nUpdateRate;
+	// <-- Mirv	
+
 	// If single player server is "skipping ticks" everything needs to interpolate for a bit longer
 	int serverTickMultiple = 1;
 	if ( IsSimulatingOnAlternateTicks() )
@@ -5910,7 +5969,8 @@ float C_BaseEntity::GetInterpolationAmount( int flags )
 	const bool bPlayingNonLocallyRecordedDemo = bPlayingDemo && !engine->IsPlayingDemoALocallyRecordedDemo();
 	if ( bPlayingMultiplayer || bPlayingNonLocallyRecordedDemo )
 	{
-		return AdjustInterpolationAmount( this, TICKS_TO_TIME( TIME_TO_TICKS( GetClientInterpAmount() ) + serverTickMultiple ) );
+		//return AdjustInterpolationAmount( this, TICKS_TO_TIME( TIME_TO_TICKS( GetClientInterpAmount() ) + serverTickMultiple ) );
+		return AdjustInterpolationAmount(this, TICKS_TO_TIME(TIME_TO_TICKS(flInterp) + serverTickMultiple));	// |-- Mirv: Use dynamic interp
 	}
 
 	int expandedServerTickMultiple = serverTickMultiple;
@@ -5933,7 +5993,8 @@ float C_BaseEntity::GetInterpolationAmount( int flags )
 		return TICK_INTERVAL * expandedServerTickMultiple;
 	}
 
-	return AdjustInterpolationAmount( this, TICKS_TO_TIME( TIME_TO_TICKS( GetClientInterpAmount() ) + serverTickMultiple ) );
+	//return AdjustInterpolationAmount( this, TICKS_TO_TIME( TIME_TO_TICKS( GetClientInterpAmount() ) + serverTickMultiple ) );
+	return AdjustInterpolationAmount(this, TICK_INTERVAL * (TIME_TO_TICKS(flInterp) + serverTickMultiple));	// |-- Mirv: Use dynamic interp
 }
 
 

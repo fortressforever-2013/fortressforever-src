@@ -15,6 +15,8 @@
 #include "mp_shareddefs.h"
 #include "utlbuffer.h"
 
+#include "ff_projectile_base.h"
+
 #ifdef CLIENT_DLL
 
 #else
@@ -37,6 +39,12 @@
 	#include "team.h"
 	#include "usermessages.h"
 	#include "tier0/icommandline.h"
+
+	// BEG: Added by Mulchman for Buildable Objects
+	#include "ff_buildableobjects_shared.h"
+	// END: Added by Mulchman for Buildable Objects
+
+	#include "omnibot_interface.h"
 
 #ifdef NEXT_BOT
 	#include "NextBotManager.h"
@@ -73,7 +81,7 @@ void MPTimeLimitCallback( IConVar *var, const char *pOldString, float flOldValue
 }
 #endif 
 
-ConVar mp_timelimit( "mp_timelimit", "0", FCVAR_NOTIFY|FCVAR_REPLICATED, "game time per map in minutes"
+ConVar mp_timelimit( "mp_timelimit", "20", FCVAR_NOTIFY|FCVAR_REPLICATED, "game time per map in minutes"
 #ifdef GAME_DLL
 					, MPTimeLimitCallback 
 #endif
@@ -85,7 +93,7 @@ ConVar mp_show_voice_icons( "mp_show_voice_icons", "1", FCVAR_REPLICATED, "Show 
 
 #ifdef GAME_DLL
 
-ConVar tv_delaymapchange( "tv_delaymapchange", "0", FCVAR_NONE, "Delays map change until broadcast is complete" );
+ConVar tv_delaymapchange( "tv_delaymapchange", "0", FCVAR_NOTIFY | FCVAR_REPLICATED, "Delays map change until broadcast is complete" );
 ConVar tv_delaymapchange_protect( "tv_delaymapchange_protect", "1", FCVAR_NONE, "Protect against doing a manual map change if HLTV is broadcasting and has not caught up with a major game event such as round_end" );
 
 ConVar mp_restartgame( "mp_restartgame", "0", FCVAR_GAMEDLL, "If non-zero, game will restart in the specified number of seconds" );
@@ -300,6 +308,8 @@ CMultiplayRules::CMultiplayRules()
 			engine->ServerCommand( szCommand );
 		}
 	}
+
+	m_flIntermissionEndTime = 0.f;
 
 	nextlevel.SetValue( "" );
 	LoadMapCycleFile();
@@ -642,7 +652,7 @@ ConVarRef suitcharger( "sk_suitcharger" );
 
 	//=========================================================
 	//=========================================================
-	bool CMultiplayRules::FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker, const CTakeDamageInfo &info )
+	bool CMultiplayRules::FCanTakeDamage( CBaseEntity *pVictim, CBaseEntity *pAttacker, const CTakeDamageInfo &info )
 	{
 		return true;
 	}
@@ -716,6 +726,23 @@ ConVarRef suitcharger( "sk_suitcharger" );
 			if ( pKiller->Classify() == CLASS_PLAYER )
 				return (CBasePlayer*)pKiller;
 
+			// BEG: Added by Mulchman
+			// Buildable Objects need to be specifically tested for
+			// because pScorer in DeathNotice is NULL when someone
+			// is killed by a Buildable Object (and this in incorrect -
+			// the owner of the Buildable Object needs to be credited
+			// with the kill). So, return the appropriate owner of
+			// the Buildable Object that made the kill.
+			if (pKiller->Classify() == CLASS_DETPACK)
+				return (CBasePlayer*)(((CFFDetpack*)pKiller)->m_hOwner.Get());
+
+			if (pKiller->Classify() == CLASS_SENTRYGUN)
+				return (CBasePlayer*)(((CFFSentryGun*)pKiller)->m_hOwner.Get());
+
+			if (pKiller->Classify() == CLASS_DISPENSER)
+				return (CBasePlayer*)(((CFFDispenser*)pKiller)->m_hOwner.Get());
+			// END: Added by Mulchman
+
 			// Killing entity might be specifying a scorer player
 			IScorer *pScorerInterface = dynamic_cast<IScorer*>( pKiller );
 			if ( pScorerInterface )
@@ -757,44 +784,56 @@ ConVarRef suitcharger( "sk_suitcharger" );
 		// Find the killer & the scorer
 		CBaseEntity *pInflictor = info.GetInflictor();
 		CBaseEntity *pKiller = info.GetAttacker();
+
+		// Jiggles: Maybe not the best spot to put this, but...
+		// If the gun killed someone while in malicious sabotage mode
+		// we want to give credit to the Spy who did it
+		CFFBuildableObject* pSabotagedBuildable = CFFBuildableObject::AttackerInflictorBuildable(pKiller, pInflictor);
+		if (pSabotagedBuildable)
+		{
+			if (pSabotagedBuildable->IsMaliciouslySabotaged())
+				pKiller = pSabotagedBuildable->m_hSaboteur;
+		}
+
 		CBasePlayer *pScorer = GetDeathScorer( pKiller, pInflictor, pVictim );
 		
 		pVictim->IncrementDeathCount( 1 );
 
-		// dvsents2: uncomment when removing all FireTargets
-		// variant_t value;
-		// g_EventQueue.AddEvent( "game_playerdie", "Use", value, 0, pVictim, pVictim );
+		// Bug #0000529: Total death column doesn't work
+		if (pVictim->GetTeam())
+			pVictim->GetTeam()->AddDeaths(1);
 		FireTargets( "game_playerdie", pVictim, pVictim, USE_TOGGLE, 0 );
 
-		// Did the player kill himself?
-		if ( pVictim == pScorer )  
-		{			
-			if ( UseSuicidePenalty() )
-			{
-				// Players lose a frag for killing themselves
-				pVictim->IncrementFragCount( -1 );
-			}			
-		}
-		else if ( pScorer )
+		if (pScorer && pVictim != pScorer)
 		{
 			// if a player dies in a deathmatch game and the killer is a client, award the killer some points
 			pScorer->IncrementFragCount( IPointsForKill( pScorer, pVictim ) );
+
+			// AfterShock - scoring system : Just award 100 points for frag (for now)
+			if (PlayerRelationship(pScorer, pVictim) == GR_TEAMMATE)
+			{
+				pScorer->AddFortPoints(-50, "#FF_FORTPOINTS_TEAMKILL");
+			}
+			else
+				pScorer->AddFortPoints(100, "#FF_FORTPOINTS_FRAG");
 			
 			// Allow the scorer to immediately paint a decal
 			pScorer->AllowImmediateDecalPainting();
 
-			// dvsents2: uncomment when removing all FireTargets
-			//variant_t value;
-			//g_EventQueue.AddEvent( "game_playerkill", "Use", value, 0, pScorer, pScorer );
 			FireTargets( "game_playerkill", pScorer, pScorer, USE_TOGGLE, 0 );
 		}
-		else
-		{  
-			if ( UseSuicidePenalty() )
+
+		// if there was a kill assister, give them some fort point as long as they're not a teammate from prior team dmg
+		CFFPlayer* pFFPlayer = ToFFPlayer(pVictim);
+		if (pFFPlayer)
+		{
+			// if we have a top assister give em some fort points
+			RecentAttackerInfo* pTopAssister = pFFPlayer->GetTopKillAssister(pScorer);
+			if (pTopAssister && pTopAssister->hPlayer.Get())
 			{
-				// Players lose a frag for letting the world kill them			
-				pVictim->IncrementFragCount( -1 );
-			}					
+				pTopAssister->hPlayer->AddFortPoints(25, "#FF_FORTPOINTS_ASSIST");
+				pTopAssister->hPlayer->IncrementAssistsCount(1);
+			}
 		}
 	}
 
@@ -803,25 +842,78 @@ ConVarRef suitcharger( "sk_suitcharger" );
 	//=========================================================
 	void CMultiplayRules::DeathNotice( CBasePlayer *pVictim, const CTakeDamageInfo &info )
 	{
+		//UTIL_LogPrintf("CMultiplayRules::DeathNotice\n");
 		// Work out what killed the player, and send a message to all clients about it
 		const char *killer_weapon_name = "world";		// by default, the player is killed by the world
 		int killer_ID = 0;
+		int iKilledSGLevel = 0;
+		int iKillerSGLevel = 0;
 
 		// Find the killer & the scorer
 		CBaseEntity *pInflictor = info.GetInflictor();
 		CBaseEntity *pKiller = info.GetAttacker();
-		CBasePlayer *pScorer = GetDeathScorer( pKiller, pInflictor, pVictim );
+		//CBasePlayer *pScorer = GetDeathScorer( pKiller, pInflictor, pVictim );
 
-		// Custom damage type?
-		if ( info.GetDamageCustom() )
+		// Removed, this is now handled further on
+		// Hack for sg rockets (might break other stuff?)
+		//if( pKiller->Classify() == CLASS_SENTRYGUN )
+		//	pInflictor = pKiller;
+
+		// Jiggles: Maybe not the best spot to put this, but...
+		// If the gun killed someone while in malicious sabotage mode
+		// we want to give credit to the Spy who did it
+		CFFBuildableObject* pSabotagedBuildable = CFFBuildableObject::AttackerInflictorBuildable(pKiller, pInflictor);
+		if (pSabotagedBuildable)
 		{
-			killer_weapon_name = GetDamageCustomString( info );
-			if ( pScorer )
+			if (pSabotagedBuildable->IsMaliciouslySabotaged())
+				pKiller = pSabotagedBuildable->m_hSaboteur;
+		}
+
+		// get level of SG if the killer is an SG
+		CFFBuildableObject* pBuildable = CFFBuildableObject::AttackerInflictorBuildable(pKiller, pInflictor);
+		if (pBuildable)
+		{
+			if (pBuildable->Classify() == CLASS_SENTRYGUN)
 			{
-				killer_ID = pScorer->GetUserID();
+				CFFSentryGun* pSentryGun = FF_ToSentrygun(pBuildable);
+				if (pSentryGun->GetLevel() == 1)
+					iKillerSGLevel = 1;
+				else if (pSentryGun->GetLevel() == 2)
+					iKillerSGLevel = 2;
+				else if (pSentryGun->GetLevel() == 3)
+					iKillerSGLevel = 3;
+				else
+					DevMsg("Unknown SG level :(");
 			}
 		}
-		else
+
+		/*
+		// HACK: Check for special infection deaths
+		if( pVictim->IsPlayer() )
+		{
+			CFFPlayer *pFFPlayer = ToFFPlayer( pVictim );
+			if( pFFPlayer && pFFPlayer->GetSpecialInfectedDeath() )
+			{
+				// Set killer & attacker to the medic
+				// that infected the victim
+				pInflictor = pFFPlayer->GetInfector();
+				pKiller = pFFPlayer->GetInfector();
+			}
+		}
+		*/
+
+		CBasePlayer* pScorer = GetDeathScorer(pKiller, pInflictor);
+
+		//// Custom damage type?
+		//if ( info.GetDamageCustom() )
+		//{
+		//	killer_weapon_name = GetDamageCustomString( info );
+		//	if ( pScorer )
+		//	{
+		//		killer_ID = pScorer->GetUserID();
+		//	}
+		//}
+		//else
 		{
 			// Is the killer a client?
 			if ( pScorer )
@@ -853,20 +945,91 @@ ConVarRef suitcharger( "sk_suitcharger" );
 				killer_weapon_name = STRING( pInflictor->m_iClassname );
 			}
 
-			// strip the NPC_* or weapon_* from the inflictor's classname
-			if ( strncmp( killer_weapon_name, "weapon_", 7 ) == 0 )
+			// --> Mirv: Special case for projectiles
+			CFFProjectileBase* pProjectile = dynamic_cast<CFFProjectileBase*> (pInflictor);
+
+			if (pProjectile && pProjectile->m_iSourceClassname != NULL_STRING)
 			{
+				killer_weapon_name = STRING(pProjectile->m_iSourceClassname);
+			}
+
+			// Another important thing to do is to make sure that mirvlet = mirv
+			// in the death messages
+			if (Q_strncmp(killer_weapon_name, "ff_grenade_mirvlet", 18) == 0)
+			{
+				killer_weapon_name = "ff_grenade_mirv";
+			}
+			// <-- Mirv
+
+			//fixes for certain time based damage.
+			switch (info.GetCustomKill())
+			{
+			case KILLTYPE_INFECTION:
+				killer_weapon_name = "ff_weapon_medkit";
+				break;
+			case KILLTYPE_BURN_LEVEL1:
+				killer_weapon_name = "ff_burndeath_level1";
+				break;
+			case KILLTYPE_BURN_LEVEL2:
+				killer_weapon_name = "ff_burndeath_level2";
+				break;
+			case KILLTYPE_BURN_LEVEL3:
+				killer_weapon_name = "ff_burndeath_level3";
+				break;
+			case KILLTYPE_GASSED:
+				killer_weapon_name = "ff_grenade_gas";
+				break;
+			case KILLTYPE_HEADSHOT:
+				killer_weapon_name = "BOOM_HEADSHOT"; // BOOM HEADSHOT!  AAAAAAAAHHHH!
+				break;
+			case KILLTYPE_BACKSTAB:
+				killer_weapon_name = "backstab";
+				break;
+			case KILLTYPE_SENTRYGUN_DET:
+				killer_weapon_name = "sg_det";
+				break;
+			case KILLTYPE_HEADCRUSH:
+				killer_weapon_name = "headcrush";
+				break;
+			case KILLTYPE_RAILBOUNCE_1:
+				killer_weapon_name = "ff_weapon_railgun_bounce1";
+				break;
+			case KILLTYPE_RAILBOUNCE_2:
+				killer_weapon_name = "ff_weapon_railgun_bounce2";
+				break;
+			}
+
+			//UTIL_LogPrintf(" killer_ID: %i\n",killer_ID);
+			//UTIL_LogPrintf(" killer_weapon_name: %s\n",killer_weapon_name);
+
+			// strip the NPC_* or weapon_* from the inflictor's classname
+			if (Q_strncmp( killer_weapon_name, "weapon_", 7 ) == 0 )
+			{
+				//UTIL_LogPrintf("  begins with weapon_, removing\n");
 				killer_weapon_name += 7;
 			}
-			else if ( strncmp( killer_weapon_name, "NPC_", 4 ) == 0 )
+			else if (Q_strncmp( killer_weapon_name, "NPC_", 4 ) == 0 )
 			{
+				//UTIL_LogPrintf("  begins with NPC_, removing\n");
 				killer_weapon_name += 4;
 			}
-			else if ( strncmp( killer_weapon_name, "func_", 5 ) == 0 )
+			else if (Q_strncmp( killer_weapon_name, "func_", 5 ) == 0 )
 			{
+				//UTIL_LogPrintf("  begins with func_, removing\n");
 				killer_weapon_name += 5;
 			}
+			// BEG: Added by Mulchman for ff_ entities
+			else if (Q_strnicmp(killer_weapon_name, "ff_", 3) == 0)
+			{
+				//UTIL_LogPrintf( "  begins with ff_, removing\n" );
+				killer_weapon_name += 3;
+			}
+			// END: Added by Mulchman for FF_ entities
 		}
+
+		//UTIL_LogPrintf(" userid (victim): %i\n",pVictim->GetUserID());
+		//UTIL_LogPrintf(" attacker: %i\n",killer_ID);
+		//UTIL_LogPrintf(" weapon: %s\n",killer_weapon_name);
 
 		IGameEvent * event = gameeventmanager->CreateEvent( "player_death" );
 		if ( event )
@@ -874,13 +1037,39 @@ ConVarRef suitcharger( "sk_suitcharger" );
 			event->SetInt("userid", pVictim->GetUserID() );
 			event->SetInt("attacker", killer_ID );
 			event->SetInt("customkill", info.GetDamageCustom() );
-			event->SetInt("priority", 7 );	// HLTV event priority, not transmitted
+			//event->SetInt("priority", 7 );	// HLTV event priority, not transmitted
+			event->SetString("weapon", killer_weapon_name);
+			event->SetInt("killedsglevel", iKilledSGLevel);
+			event->SetInt("killersglevel", iKillerSGLevel);
+			event->SetInt("priority", 10);
+
+			// #0001568: Falling into pitt damage shows electrocution icon, instead of falling damage icon
+			// Added damagetype field to the player_death message.  This field records the type of damage dealt by a trigger_hurt
+			// so, further down the road, we can determine which death icon to use (e.g. fall, drown, shock) instead of generic -> Defrag
+
+			// send the damage type
+			event->SetInt("damagetype", info.GetDamageType());
+
+			// make sure to always send somethign here, otherwise client will get default 0 which is world
+			event->SetInt("killassister", -1);
+			// send assist info if any
+			CFFPlayer* pFFPlayer = ToFFPlayer(pVictim);
+			if (pFFPlayer)
+			{
+				RecentAttackerInfo* pTopAssister = pFFPlayer->GetTopKillAssister(pScorer);
+				if (pTopAssister && pTopAssister->hPlayer.Get())
+				{
+					CFFPlayer* pAssister = pTopAssister->hPlayer.Get();
+					int assisterUserID = pAssister->GetUserID();
+					event->SetInt("killassister", assisterUserID);
+				}
+			}
 #ifdef HL1MP_DLL
 			event->SetString("weapon", killer_weapon_name );
 #endif			
 			gameeventmanager->FireEvent( event );
 		}
-
+		Omnibot::Notify_Death(pVictim, pKiller, killer_weapon_name);
 	}
 
 	//=========================================================
@@ -1056,14 +1245,16 @@ ConVarRef suitcharger( "sk_suitcharger" );
 	//=========================================================
 	int CMultiplayRules::DeadPlayerWeapons( CBasePlayer *pPlayer )
 	{
-		return GR_PLR_DROP_GUN_ACTIVE;
+		// Modified by L0ki: we dont drop weapons in FF
+		return GR_PLR_DROP_GUN_NO;
 	}
 
 	//=========================================================
 	//=========================================================
 	int CMultiplayRules::DeadPlayerAmmo( CBasePlayer *pPlayer )
 	{
-		return GR_PLR_DROP_AMMO_ACTIVE;
+		// Modified by L0ki: we drop all ammo types in FF
+		return GR_PLR_DROP_AMMO_ALL;
 	}
 
 	CBaseEntity *CMultiplayRules::GetPlayerSpawnSpot( CBasePlayer *pPlayer )
@@ -1115,8 +1306,9 @@ ConVarRef suitcharger( "sk_suitcharger" );
 	//=========================================================
 	bool CMultiplayRules::FAllowNPCs( void )
 	{
-		return true; // E3 hack
-		return ( allowNPCs.GetInt() != 0 );
+		//return true; // E3 hack
+		//return ( allowNPCs.GetInt() != 0 );
+		return false; // Jiggles: No need for NPCs in FF :)
 	}
 
 	//=========================================================
@@ -1147,6 +1339,37 @@ ConVarRef suitcharger( "sk_suitcharger" );
 				continue;
 
 			pPlayer->ShowViewPortPanel( PANEL_SCOREBOARD );
+
+			// --> Mirv: Lock into place too
+			CFFPlayer* pFFPlayer = ToFFPlayer(pPlayer);
+			pFFPlayer->LockPlayerInPlace();
+			pFFPlayer->AddFlag(FL_FROZEN);
+
+			if (Q_atoi(engine->GetClientConVarValue(pFFPlayer->entindex(), "hud_takesshots")))
+				engine->ClientCommand(pFFPlayer->edict(), "jpeg");
+
+			if (CFFWeaponBase* pWeapon = pFFPlayer->GetActiveFFWeapon())
+				pWeapon->Holster();
+			// <-- Mirv
+		}
+
+		IGameEvent* pEvent = gameeventmanager->CreateEvent("game_end");
+		if (pEvent)
+		{
+			//////////////////////////////////////////////////////////////////////////
+			CTeam* pWinningTeam = 0;
+			for (int i = 0; i < GetNumberOfTeams(); i++)
+			{
+				CTeam* pTeam = GetGlobalTeam(i);
+				if (pTeam)
+				{
+					if (!pWinningTeam || (pTeam->GetScore() > pWinningTeam->GetScore()))
+						pWinningTeam = pTeam;
+				}
+			}
+			//////////////////////////////////////////////////////////////////////////
+			pEvent->SetInt("winner", pWinningTeam ? pWinningTeam->GetTeamNumber() : 0);
+			gameeventmanager->FireEvent(pEvent);
 		}
 	}
 

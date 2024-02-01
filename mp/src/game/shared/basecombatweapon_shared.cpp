@@ -728,7 +728,6 @@ void CBaseCombatWeapon::Drop( const Vector &vecVelocity )
 #endif
 }
 
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Input  : *pPicker - 
@@ -2384,24 +2383,52 @@ bool CBaseCombatWeapon::SetIdealActivity( Activity ideal )
 	//Find the next sequence in the potential chain of sequences leading to our ideal one
 	int nextSequence = FindTransitionSequence( GetSequence(), m_nIdealSequence, NULL );
 
+	// --> Mirv: Fixed world model animations
+
+	// Must not send viewmodel sequences to the world model. The whole basecombatweapon
+	// this is done stupidly because it uses the viewmodel for all its stuff, even though
+	// it's actually a worldmodel on the client.
+	// Part of this fix is also in basecombatweapon.cpp
+
 	// Don't use transitions when we're deploying
 	if ( ideal != ACT_VM_DRAW && IsWeaponVisible() && nextSequence != m_nIdealSequence )
 	{
 		//Set our activity to the next transitional animation
+		// Timing has been moved into each conditional result now
 		SetActivity( ACT_TRANSITION );
 		SetSequence( nextSequence );	
 		SendViewModelAnim( nextSequence );
+		SetWeaponIdleTime(gpGlobals->curtime + SequenceDuration(nextSequence));
 	}
 	else
 	{
 		//Set our activity to the ideal
 		SetActivity( m_IdealActivity );
-		SetSequence( m_nIdealSequence );	
+		//SetSequence( m_nIdealSequence );
+		// The weapon model sequence need clamping to either idle or firing for now
+		// Need to call ResetSequenceInfo for the muzzleflashes
+		// Melee weapons won't have a fire animation (for now)
+		if (m_IdealActivity == ACT_VM_PRIMARYATTACK && !IsMeleeWeapon())
+		{
+			SetSequence(1);
+			ResetSequenceInfo();
+		}
+		else
+		{
+			SetSequence(0);
+		}
+
+		// Send the correct sequences to the viewmodel.
+		// Also use the correct timing from the original sequence (not the one
+		// that is really set)
 		SendViewModelAnim( m_nIdealSequence );
+		SetWeaponIdleTime(gpGlobals->curtime + SequenceDuration(m_nIdealSequence));
 	}
 
 	//Set the next time the weapon will idle
-	SetWeaponIdleTime( gpGlobals->curtime + SequenceDuration() );
+	// This has been moved into the conditional results above
+	//SetWeaponIdleTime( gpGlobals->curtime + SequenceDuration() );
+	// <-- Mirv
 	return true;
 }
 
@@ -2824,8 +2851,8 @@ END_NETWORK_TABLE()
 //-----------------------------------------------------------------------------
 BEGIN_NETWORK_TABLE_NOBASE( CBaseCombatWeapon, DT_LocalWeaponData )
 #if !defined( CLIENT_DLL )
-	SendPropIntWithMinusOneFlag( SENDINFO(m_iClip1 ), 8 ),
-	SendPropIntWithMinusOneFlag( SENDINFO(m_iClip2 ), 8 ),
+	//SendPropIntWithMinusOneFlag( SENDINFO(m_iClip1 ), 8 ),
+	//SendPropIntWithMinusOneFlag( SENDINFO(m_iClip2 ), 8 ),
 	SendPropInt( SENDINFO(m_iPrimaryAmmoType ), 8 ),
 	SendPropInt( SENDINFO(m_iSecondaryAmmoType ), 8 ),
 
@@ -2838,8 +2865,8 @@ BEGIN_NETWORK_TABLE_NOBASE( CBaseCombatWeapon, DT_LocalWeaponData )
 #endif
 
 #else
-	RecvPropIntWithMinusOneFlag( RECVINFO(m_iClip1 )),
-	RecvPropIntWithMinusOneFlag( RECVINFO(m_iClip2 )),
+	//RecvPropIntWithMinusOneFlag( RECVINFO(m_iClip1 )),
+	//RecvPropIntWithMinusOneFlag( RECVINFO(m_iClip2 )),
 	RecvPropInt( RECVINFO(m_iPrimaryAmmoType )),
 	RecvPropInt( RECVINFO(m_iSecondaryAmmoType )),
 
@@ -2850,10 +2877,25 @@ BEGIN_NETWORK_TABLE_NOBASE( CBaseCombatWeapon, DT_LocalWeaponData )
 #endif
 END_NETWORK_TABLE()
 
+//-----------------------------------------------------------------------------
+// Purpose: Propagation data for weapons. Only sent when a player's holding it.
+//-----------------------------------------------------------------------------
+BEGIN_NETWORK_TABLE_NOBASE(CBaseCombatWeapon, DT_ObserverWeaponData)
+#if !defined( CLIENT_DLL )
+SendPropIntWithMinusOneFlag(SENDINFO(m_iClip1), 8),
+SendPropIntWithMinusOneFlag(SENDINFO(m_iClip2), 8),
+#else
+RecvPropIntWithMinusOneFlag(RECVINFO(m_iClip1)),
+RecvPropIntWithMinusOneFlag(RECVINFO(m_iClip2)),
+#endif
+END_NETWORK_TABLE()
+
 BEGIN_NETWORK_TABLE(CBaseCombatWeapon, DT_BaseCombatWeapon)
 #if !defined( CLIENT_DLL )
 	SendPropDataTable("LocalWeaponData", 0, &REFERENCE_SEND_TABLE(DT_LocalWeaponData), SendProxy_SendLocalWeaponDataTable ),
 	SendPropDataTable("LocalActiveWeaponData", 0, &REFERENCE_SEND_TABLE(DT_LocalActiveWeaponData), SendProxy_SendActiveLocalWeaponDataTable ),
+	// Data that only gets sent to the player as well as observers of the player
+	SendPropDataTable("ObserverWeaponData", 0, &REFERENCE_SEND_TABLE(DT_ObserverWeaponData), SendProxy_OnlyToObservers),
 	SendPropModelIndex( SENDINFO(m_iViewModelIndex) ),
 	SendPropModelIndex( SENDINFO(m_iWorldModelIndex) ),
 	SendPropInt( SENDINFO(m_iState ), 8, SPROP_UNSIGNED ),
@@ -2861,9 +2903,37 @@ BEGIN_NETWORK_TABLE(CBaseCombatWeapon, DT_BaseCombatWeapon)
 #else
 	RecvPropDataTable("LocalWeaponData", 0, 0, &REFERENCE_RECV_TABLE(DT_LocalWeaponData)),
 	RecvPropDataTable("LocalActiveWeaponData", 0, 0, &REFERENCE_RECV_TABLE(DT_LocalActiveWeaponData)),
+	RecvPropDataTable("ObserverWeaponData", 0, 0, &REFERENCE_RECV_TABLE(DT_ObserverWeaponData)),
 	RecvPropInt( RECVINFO(m_iViewModelIndex)),
 	RecvPropInt( RECVINFO(m_iWorldModelIndex)),
 	RecvPropInt( RECVINFO(m_iState), 0, &CBaseCombatWeapon::RecvProxy_WeaponState ),
 	RecvPropEHandle( RECVINFO(m_hOwner ) ),
 #endif
 END_NETWORK_TABLE()
+
+#ifdef GAME_DLL
+//-----------------------------------------------------------------------------
+// Purpose: Remove this weapon, now!
+//-----------------------------------------------------------------------------
+void CBaseCombatWeapon::ForceRemove(void)
+{
+	SetRemoveable(true);
+	AddSpawnFlags(SF_NORESPAWN);
+	StopAnimation();
+	StopFollowingEntity();
+	SetMoveType(MOVETYPE_NONE);
+	SetGravity(1.0);
+	m_iState = WEAPON_NOT_CARRIED;
+	RemoveEffects(EF_NODRAW);
+	VPhysicsDestroyObject();
+	SetGroundEntity(NULL);
+	AddEFlags(EFL_NO_WEAPON_PICKUP);
+	SetThink(NULL);
+	SetTouch(NULL);
+	SetOwnerEntity(NULL);
+	SetOwner(NULL);
+
+	// Die!
+	UTIL_Remove(this);
+}
+#endif

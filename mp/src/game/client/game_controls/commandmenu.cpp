@@ -1,9 +1,9 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
 // $NoKeywords: $
-//===========================================================================//
+//=============================================================================//
 
 #include "cbase.h"
 #include <cdll_client_int.h>
@@ -12,7 +12,7 @@
 #include <icvar.h>
 #include <filesystem.h>
 
-#include "commandmenu.h"
+#include "CommandMenu.h"
 #include "vgui_controls/MenuItem.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -35,7 +35,7 @@ bool CommandMenu::LoadFromFile( const char * fileName)	// load menu from KeyValu
 {
 	KeyValues * kv = new KeyValues(fileName);
 
-	if  ( !kv->LoadFromFile( g_pFullFileSystem, fileName, "GAME" ) )
+	if  ( !kv->LoadFromFile( filesystem, fileName, "GAME" ) )
 		return false;
 
 	bool ret = LoadFromKeyValues( kv );
@@ -49,7 +49,7 @@ CommandMenu::~CommandMenu()
 	ClearMenu();
 }
 
-void CommandMenu::OnMessage(const KeyValues *params, VPANEL fromPanel)
+void CommandMenu::OnMessage(const KeyValues *params, vgui::VPANEL fromPanel)
 {
 	char text[255];
 	bool bHandled = false;
@@ -61,18 +61,18 @@ void CommandMenu::OnMessage(const KeyValues *params, VPANEL fromPanel)
 
 	if ( text[0] )
 	{
-		ConVarRef convar( text );
-		if ( convar.IsValid() )
+		ConVar * convar = (ConVar*) cvar->FindVar( text );
+		if ( convar )
 		{
-			// toggle cvar 
+			// toggel cvar 
 
-			if ( convar.GetInt() )	
+			if ( convar->GetInt() )	
 			{
-				convar.SetValue( 0 );
+				convar->SetValue( 0 );
 			}
 			else
 			{
-				convar.SetValue( 1 );
+				convar->SetValue( 1 );
 			}
 
 			UpdateMenu();
@@ -213,11 +213,11 @@ void CommandMenu::UpdateMenu()
 		if ( text[0] )
 		{
 			// set toggle state equal to cvar state
-			ConVarRef convar( text );
+			ConVar * convar = (ConVar*) cvar->FindVar( text );
 
-			if ( convar.IsValid() )
+			if ( convar )
 			{
-				menuitem.menu->SetMenuItemChecked( menuitem.itemnr, convar.GetBool() );
+				menuitem.menu->SetMenuItemChecked( menuitem.itemnr, convar->GetBool() );
 			}
 		}
 	}

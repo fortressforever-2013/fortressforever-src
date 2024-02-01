@@ -294,6 +294,10 @@ void CBasePlayer::ItemPostFrame()
 	// remove this line and call ImpulseCommands instead.
 	m_nImpulse = 0;
 #endif
+	// Mirv: Totally disable weapons in spectator mode
+	if (GetTeamNumber() >= TEAM_BLUE && GetTeamNumber() <= TEAM_GREEN)
+		if (GetActiveWeapon()) //voogru: crash fix 08/14/2006
+			GetActiveWeapon()->ItemPostFrame();
 }
 
 
@@ -515,7 +519,7 @@ void CBasePlayer::UpdateStepSound( surfacedata_t *psurface, const Vector &vecOri
 	float velwalk;
 	int	fLadder;
 
-	if ( m_flStepSoundTime > 0 )
+	/*if ( m_flStepSoundTime > 0 )
 	{
 		m_flStepSoundTime -= 1000.0f * gpGlobals->frametime;
 		if ( m_flStepSoundTime < 0 )
@@ -525,7 +529,12 @@ void CBasePlayer::UpdateStepSound( surfacedata_t *psurface, const Vector &vecOri
 	}
 
 	if ( m_flStepSoundTime > 0 )
+		return;*/
+
+	// --> Mirv: Replaced to fix footsteps
+	if (m_flStepSoundTime > gpGlobals->curtime)
 		return;
+	// <-- Mirv
 
 	if ( GetFlags() & (FL_FROZEN|FL_ATCONTROLS))
 		return;
@@ -654,6 +663,18 @@ void CBasePlayer::UpdateStepSound( surfacedata_t *psurface, const Vector &vecOri
 	if ( GetFlags() & FL_DUCKING )
 	{
 		fvol *= 0.65;
+	}
+
+	// --> Mirv: Redone sound stuff
+
+	// If we are walking or ducking, silence
+	if (GetFlags() & (FL_DUCKING) || m_nButtons & IN_SPEED)
+	{
+		fvol = 0;
+	}
+	else
+	{
+		fvol = 1.0f;
 	}
 
 	PlayStepSound( feet, psurface, fvol, false );
@@ -792,15 +813,15 @@ void CBasePlayer::SetStepSoundTime( stepsoundtimes_t iStepSoundTime, bool bWalki
 	{
 	case STEPSOUNDTIME_NORMAL:
 	case STEPSOUNDTIME_WATER_FOOT:
-		m_flStepSoundTime = bWalking ? 400 : 300;
+		m_flStepSoundTime = bWalking ? /*400 : 300;*/ gpGlobals->curtime + 0.400f : gpGlobals->curtime + 0.300f;	// |-- Mirv: Added gpGlobals->curtime
 		break;
 
 	case STEPSOUNDTIME_ON_LADDER:
-		m_flStepSoundTime = 350;
+		m_flStepSoundTime = /*350;*/ gpGlobals->curtime + 0.350f;	// |-- Mirv: Added gpGlobals->curtime
 		break;
 
 	case STEPSOUNDTIME_WATER_KNEE:
-		m_flStepSoundTime = 600;
+		m_flStepSoundTime = /*600;*/ gpGlobals->curtime + 0.600f;	// |-- Mirv: Added gpGlobals->curtime
 		break;
 
 	default:
@@ -812,6 +833,7 @@ void CBasePlayer::SetStepSoundTime( stepsoundtimes_t iStepSoundTime, bool bWalki
 	if ( ( GetFlags() & FL_DUCKING) || ( GetMoveType() == MOVETYPE_LADDER ) )
 	{
 		m_flStepSoundTime += 100;
+		//m_flStepSoundTime += 0.001f * flduck; // slower step time if ducking	// |-- Mirv: Added gpGlobals->curtime
 	}
 }
 
@@ -1367,6 +1389,8 @@ void CBasePlayer::PlayerUse ( void )
 
 		//!!!UNDONE: traceline here to prevent +USEing buttons through walls			
 
+		bool bUsed = false;
+
 		int caps = pUseEntity->ObjectCaps();
 		variant_t emptyVariant;
 		if ( ( (m_nButtons & IN_USE) && (caps & FCAP_CONTINUOUS_USE) ) || ( (m_afButtonPressed & IN_USE) && (caps & (FCAP_IMPULSE_USE|FCAP_ONOFF_USE)) ) )
@@ -1379,16 +1403,30 @@ void CBasePlayer::PlayerUse ( void )
 			if ( pUseEntity->ObjectCaps() & FCAP_ONOFF_USE )
 			{
 				pUseEntity->AcceptInput( "Use", this, this, emptyVariant, USE_ON );
+				bUsed = true;
 			}
 			else
 			{
 				pUseEntity->AcceptInput( "Use", this, this, emptyVariant, USE_TOGGLE );
+				bUsed = true;
 			}
 		}
 		// UNDONE: Send different USE codes for ON/OFF.  Cache last ONOFF_USE object to send 'off' if you turn away
 		else if ( (m_afButtonReleased & IN_USE) && (pUseEntity->ObjectCaps() & FCAP_ONOFF_USE) )	// BUGBUG This is an "off" use
 		{
 			pUseEntity->AcceptInput( "Use", this, this, emptyVariant, USE_OFF );
+			bUsed = true;
+		}
+
+		if (bUsed)
+		{
+			IGameEvent* pEvent = gameeventmanager->CreateEvent("player_use");
+			if (pEvent)
+			{
+				pEvent->SetInt("userid", GetUserID());
+				pEvent->SetInt("entity", pUseEntity->entindex());
+				gameeventmanager->FireEvent(pEvent, true);
+			}
 		}
 	}
 	else if ( m_afButtonPressed & IN_USE )
@@ -1449,6 +1487,27 @@ void CBasePlayer::SmoothViewOnStairs( Vector& eyeOrigin )
 	CBaseEntity *pGroundEntity = GetGroundEntity();
 	float flCurrentPlayerZ = GetLocalOrigin().z;
 	float flCurrentPlayerViewOffsetZ = GetViewOffset().z;
+
+	// --> Mirv:
+	// We're now only smoothing stairs if we've recently stepped up or down
+	// far enough (currently >= 8.0 units). This way the stair smoothing isn't
+	// affecting ramps
+	if (!m_bSmoothStair)
+	{
+		m_flOldPlayerZ = flCurrentPlayerZ;
+	}
+	else
+	{
+		// Once we've got close enough to our actual position then stop stair 
+		// smoothing
+		float flDistance = flCurrentPlayerZ - m_flOldPlayerZ;
+		if (flDistance < 0.1f && flDistance > -0.1f)
+		{
+			m_flOldPlayerZ = flCurrentPlayerZ;
+			m_bSmoothStair = false;
+		}
+	}
+	// <-- Mirv
 
 	// Smooth out stair step ups
 	// NOTE: Don't want to do this when the ground entity is moving the player

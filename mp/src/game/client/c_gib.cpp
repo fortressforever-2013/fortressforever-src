@@ -8,11 +8,22 @@
 #include "vcollide_parse.h"
 #include "c_gib.h"
 
+#include "debugoverlay_shared.h"
+#include "iefx.h"
+#include "decals.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+int	C_Gib::m_iBloodDecal = -1;
+
 //NOTENOTE: This is not yet coupled with the server-side implementation of CGib
 //			This is only a client-side version of gibs at the moment
+
+C_Gib::C_Gib()
+{
+	m_bDecal = true;
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -57,6 +68,10 @@ bool C_Gib::InitializeGib( const char *pszModelName, Vector vecOrigin, Vector ve
 	{
 		Release();
 		return false;
+
+		//SetSolid(SOLID_BBOX);
+		//AddSolidFlags(FSOLID_NOT_STANDABLE);
+		//SetMoveType(MOVETYPE_FLYGRAVITY, MOVECOLLIDE_FLY_BOUNCE);
 	}
 
 	SetAbsOrigin( vecOrigin );
@@ -129,5 +144,19 @@ void C_Gib::StartTouch( C_BaseEntity *pOther )
 //-----------------------------------------------------------------------------
 void C_Gib::HitSurface( C_BaseEntity *pOther )
 {
-	//TODO: Implement splatter or effects in child versions
+	// Already done a decal
+	if (m_bDecal)
+		return;
+
+	if (m_iBloodDecal == -1)
+	{
+		m_iBloodDecal = decalsystem->GetDecalIndexForName("Blood");
+	}
+
+	if (m_iBloodDecal >= 0)
+	{
+		effects->DecalShoot(m_iBloodDecal, pOther->entindex(), pOther->GetModel(), pOther->GetAbsOrigin(), pOther->GetAbsAngles(), GetAbsOrigin(), 0, 0);
+	}
+
+	m_bDecal = true;
 }

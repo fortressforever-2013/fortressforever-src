@@ -6,7 +6,7 @@
 
 #include "cbase.h"
 
-#if 0
+#if 1
 #include "mp3player.h"
 #include "KeyValues.h"
 #include "filesystem.h"
@@ -41,7 +41,7 @@ using namespace vgui;
 // Singleton
 static CMP3Player *g_pPlayer = NULL;
 
-vgui::Panel *GetSDKRootPanel();
+vgui::Panel *GetFFRootPanel();
 
 // Time between songs
 #define END_GAP_TIME	1.0f

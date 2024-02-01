@@ -65,6 +65,10 @@ extern ConVar replay_rendersetting_renderglow;
 #include "econ_item_description.h"
 #endif
 
+#include "c_ff_player.h"
+
+#include <string>
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -74,9 +78,11 @@ class CHudWeaponSelection;
 class CHudChat;
 class CHudVote;
 
-static vgui::HContext s_hVGuiContext = DEFAULT_VGUI_CONTEXT;
+static vgui::HContext s_hVGuiContext = vgui::DEFAULT_VGUI_CONTEXT;
 
-ConVar cl_drawhud( "cl_drawhud", "1", FCVAR_CHEAT, "Enable the rendering of the hud" );
+
+// Yeah, don't want this to be a cheat
+ConVar cl_drawhud("cl_drawhud", "1", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Enable the rendering of the hud");
 ConVar hud_takesshots( "hud_takesshots", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Auto-save a scoreboard screenshot at the end of a map." );
 ConVar hud_freezecamhide( "hud_freezecamhide", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Hide the HUD during freeze-cam" );
 ConVar cl_show_num_particle_systems( "cl_show_num_particle_systems", "0", FCVAR_CLIENTDLL, "Display the number of active particle systems." );
@@ -496,6 +502,8 @@ bool ClientModeShared::ShouldDrawParticles( )
 	return true;
 }
 
+void HudContextMenuInput(float* x, float* y);	// |-- Mirv: Radial context menu
+
 //-----------------------------------------------------------------------------
 // Purpose: Allow weapons to override mouse input (for binoculars)
 //-----------------------------------------------------------------------------
@@ -506,6 +514,8 @@ void ClientModeShared::OverrideMouseInput( float *x, float *y )
 	{
 		pWeapon->OverrideMouseInput( x, y );
 	}
+
+	HudContextMenuInput(x, y);		// |-- Mirv: Feed into our menu
 }
 
 //-----------------------------------------------------------------------------
@@ -645,6 +655,8 @@ void ClientModeShared::ProcessInput(bool bActive)
 	gHUD.ProcessInput( bActive );
 }
 
+extern int HudContextMenuInput(int down, int keynum, const char* pszCurrentBinding); // |-- Mirv: For context menu
+
 //-----------------------------------------------------------------------------
 // Purpose: We've received a keypress from the engine. Return 1 if the engine is allowed to handle it.
 //-----------------------------------------------------------------------------
@@ -654,25 +666,78 @@ int	ClientModeShared::KeyInput( int down, ButtonCode_t keynum, const char *pszCu
 		return 1;
 	
 	// Should we start typing a message?
-	if ( pszCurrentBinding &&
-		( Q_strcmp( pszCurrentBinding, "messagemode" ) == 0 ||
-		  Q_strcmp( pszCurrentBinding, "say" ) == 0 ) )
+	if (pszCurrentBinding)
 	{
-		if ( down )
+		//////////////////////////////////////////////////////////////////////////
+		// Say
+		bool bMessageMode = !Q_strncmp(pszCurrentBinding, "messagemode", 11);
+		bool bSay = !Q_strcmp(pszCurrentBinding, "say");
+		if (bMessageMode || bSay)
 		{
-			StartMessageMode( MM_SAY );
+			if (down)
+			{
+				if (bMessageMode)
+					StartMessageMode(MM_MESSAGEMODE);
+				else
+					StartMessageMode(MM_SAY);
+			}
+			return 0;
+
+			// Support starting the message partially filled in
+			if (bMessageMode && m_pChatElement)
+			{
+				const char* pStartStr = pszCurrentBinding + 11;
+				while (pStartStr && *pStartStr && *pStartStr == ' ')
+					++pStartStr;
+				m_pChatElement->StartInputMessage(pStartStr);
+			}
+			return 0;
 		}
-		return 0;
-	}
-	else if ( pszCurrentBinding &&
-				( Q_strcmp( pszCurrentBinding, "messagemode2" ) == 0 ||
-				  Q_strcmp( pszCurrentBinding, "say_team" ) == 0 ) )
-	{
-		if ( down )
+		//////////////////////////////////////////////////////////////////////////
+		// TeamSay
+		bool bSayTeam = !Q_strcmp(pszCurrentBinding, "say_team");
+		if (bSayTeam)
 		{
-			StartMessageMode( MM_SAY_TEAM );
+			if (down)
+			{
+				StartMessageMode(MM_SAY_TEAM);
+			}
+			return 0;
 		}
-		return 0;
+		//////////////////////////////////////////////////////////////////////////
+		// %i hack
+		bool bParsedOutMacro = false;
+		bool bSayBind = !Q_strncmp(pszCurrentBinding, "say ", 4);
+		bool bSayTeamBind = !Q_strncmp(pszCurrentBinding, "say_team ", 9);
+		if (bSayBind || bSayTeamBind)
+		{
+			C_FFPlayer* pPlayer = ToFFPlayer(C_BasePlayer::GetLocalPlayer());
+			if (pPlayer)
+			{
+				std::string strcmd = pszCurrentBinding;
+				while (true)
+				{
+					size_t tok = strcmd.find("%i");
+					if (tok == strcmd.npos)
+						break;
+
+					bParsedOutMacro = true;
+
+					strcmd.erase(tok, 2); // erase the token
+					if (pPlayer && pPlayer->m_hCrosshairInfo.m_szNameLastSeen[0])
+					{
+						strcmd.insert(tok, pPlayer->m_hCrosshairInfo.m_szNameLastSeen);
+					}
+				}
+
+				if (bParsedOutMacro)
+				{
+					// don't let the engine handle this one, because we're sending a new one with the macros replaced
+					engine->ClientCmd(strcmd.c_str());
+					return 0;
+				}
+			}
+		}
 	}
 	
 	// If we're voting...
@@ -708,6 +773,12 @@ int	ClientModeShared::KeyInput( int down, ButtonCode_t keynum, const char *pszCu
 	{
 		return pWeapon->KeyInput( down, keynum, pszCurrentBinding );
 	}
+
+	// --> Mirv: Check keypresses for the context menu
+	if (!HudContextMenuInput(down, keynum, pszCurrentBinding))
+		return 0;
+	// <-- Mirv
+
 
 	return 1;
 }
@@ -843,7 +914,7 @@ void ClientModeShared::LevelInit( const char *newmap )
 	}
 
 	// Create a vgui context for all of the in-game vgui panels...
-	if ( s_hVGuiContext == DEFAULT_VGUI_CONTEXT )
+	if ( s_hVGuiContext == vgui::DEFAULT_VGUI_CONTEXT )
 	{
 		s_hVGuiContext = vgui::ivgui()->CreateContext();
 	}
@@ -865,10 +936,10 @@ void ClientModeShared::LevelShutdown( void )
 	{
 		m_pChatElement->LevelShutdown();
 	}
-	if ( s_hVGuiContext != DEFAULT_VGUI_CONTEXT )
+	if ( s_hVGuiContext != vgui::DEFAULT_VGUI_CONTEXT )
 	{
 		vgui::ivgui()->DestroyContext( s_hVGuiContext );
- 		s_hVGuiContext = DEFAULT_VGUI_CONTEXT;
+ 		s_hVGuiContext = vgui::DEFAULT_VGUI_CONTEXT;
 	}
 
 	// Reset any player explosion/shock effects
@@ -984,7 +1055,8 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 			char szLocalized[100];
 			g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalized, szLocalized, sizeof(szLocalized) );
 
-			hudChat->Printf( CHAT_FILTER_JOINLEAVE, "%s", szLocalized );
+			//hudChat->Printf( CHAT_FILTER_JOINLEAVE, "%s", szLocalized );
+			hudChat->Printf(CHAT_FILTER_JOINLEAVE, "%s has joined the game\n", event->GetString("name"));
 		}
 	}
 	else if ( Q_strcmp( "player_disconnect", eventname ) == 0 )
@@ -1025,7 +1097,9 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 			char szLocalized[100];
 			g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalized, szLocalized, sizeof(szLocalized) );
 
-			hudChat->Printf( CHAT_FILTER_JOINLEAVE, "%s", szLocalized );
+			hudChat->Printf( CHAT_FILTER_JOINLEAVE, "%s left the game (%s)\n",
+				pPlayer->GetPlayerName(),
+				event->GetString("reason"));
 		}
 	}
 	else if ( Q_strcmp( "player_team", eventname ) == 0 )
@@ -1037,6 +1111,10 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 		bool bDisconnected = event->GetBool("disconnect");
 
 		if ( bDisconnected )
+			return;
+
+		// Bug #0000822: When someone leaves the game, it says "played joined team Unassigned"
+		if (event->GetInt("disconnect"))
 			return;
 
 		int team = event->GetInt( "team" );
@@ -1056,6 +1134,21 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 			C_Team *pTeam = GetGlobalTeam( team );
 			if ( pTeam )
 			{
+				// --> Mirv: Team localisation fix. This might be more a fundamental issue with the limitations of Printf that needs sorting though
+				wchar_t* szName = g_pVGuiLocalize->Find(pTeam->Get_Name());
+				char szbuf[256];
+				char* pszName;
+
+				if (szName)
+				{
+					g_pVGuiLocalize->ConvertUnicodeToANSI(szName, szbuf, sizeof(szbuf));
+					pszName = szbuf;
+				}
+				else
+					pszName = pTeam->Get_Name();
+
+				//hudChat->Printf(CHAT_FILTER_TEAMCHANGE, "Player %s joined team %s\n", pPlayer->GetPlayerName(), pszName);
+				// <-- Mirv: Team localisation fix. This might be more a fundamental issue with the limitations of Printf that needs sorting though
 				g_pVGuiLocalize->ConvertANSIToUnicode( pTeam->Get_Name(), wszTeam, sizeof(wszTeam) );
 			}
 			else
@@ -1512,6 +1605,6 @@ void ClientModeShared::ActivateInGameVGuiContext( vgui::Panel *pPanel )
 
 void ClientModeShared::DeactivateInGameVGuiContext()
 {
-	vgui::ivgui()->ActivateContext( DEFAULT_VGUI_CONTEXT );
+	vgui::ivgui()->ActivateContext( vgui::DEFAULT_VGUI_CONTEXT );
 }
 

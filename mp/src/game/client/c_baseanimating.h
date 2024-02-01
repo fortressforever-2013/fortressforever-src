@@ -26,6 +26,7 @@
 #include "ragdoll_shared.h"
 #include "tier0/threadtools.h"
 #include "datacache/idatacache.h"
+#include "materialsystem/imaterial.h"
 
 #define LIPSYNC_POSEPARAM_NAME "mouth"
 #define NUM_HITBOX_FIRES	10
@@ -491,6 +492,13 @@ public:
 	// Texture group to use
 	int								m_nSkin;
 
+	// Override Material (FF)
+	IMaterial*						m_pOverrideMaterial;
+	virtual void					FindOverrideMaterial(char const* pMaterialName, const char* pTextureGroupName, bool complain = true, const char* pComplainPrefix = NULL);
+	virtual void					ReleaseOverrideMaterial(char const* pMaterialName = 0);
+	void							StartMaterialOverride();
+	void							StopMaterialOverride();
+
 	// Object bodygroup
 	int								m_nBody;
 
@@ -498,6 +506,10 @@ public:
 	int								m_nHitboxSet;
 
 	CSequenceTransitioner			m_SequenceTransitioner;
+
+	// --> FF
+	ColorRGBExp32					m_colorMuzzleDLight;
+	// <-- FF
 
 protected:
 	CIKContext						*m_pIk;

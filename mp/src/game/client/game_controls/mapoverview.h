@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: MiniMap.h: interface for the CMiniMap class.
 //
@@ -13,7 +13,7 @@
 
 #include <vgui_controls/Panel.h>
 #include <game/client/iviewport.h>
-#include "mathlib/vector.h"
+#include <mathlib/vector.h>
 #include <igameevents.h>
 #include <shareddefs.h>
 #include <const.h>

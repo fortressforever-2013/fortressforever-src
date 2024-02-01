@@ -67,7 +67,7 @@ static ConVar cl_particle_stats_trigger_count( "cl_particle_stats_trigger_count"
 //
 //-----------------------------------------------------------------------------
 
-#define PARTICLE_SIZE	96
+#define MAX_PARTICLE_SIZE	96
 
 CParticleMgr *ParticleMgr()
 {
@@ -492,8 +492,10 @@ PMaterialHandle CParticleEffectBinding::FindOrAddMaterial( const char *pMaterial
 }
 
 
-Particle* CParticleEffectBinding::AddParticle( int sizeInBytes, PMaterialHandle hMaterial )
+Particle* CParticleEffectBinding::AddParticle( int sizeInBytes, PMaterialHandle hMaterial, int iMaxParticleSizeOverride)
 {
+	// so we can make some particles alloc more than 96 bytes, like with the flamethrower's flame particles
+	const int PARTICLE_SIZE = iMaxParticleSizeOverride > 0 ? iMaxParticleSizeOverride : MAX_PARTICLE_SIZE;
 	m_pParticleMgr->RepairPMaterial( hMaterial ); //HACKHACK: Remove this when we can stop leaking handles from level to level.
 
 	// We've currently clamped the particle size to PARTICLE_SIZE,

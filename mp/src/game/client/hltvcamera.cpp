@@ -328,6 +328,9 @@ void C_HLTVCamera::CalcInEyeCamView( Vector& eyeOrigin, QAngle& eyeAngles, float
 	eyeAngles = m_aCamAngle;
 	fov = m_flFOV;
 
+	float zNear, zFar;
+	pPlayer->CalcView(eyeOrigin, eyeAngles, zNear, zFar, fov);
+
 	pPlayer->CalcViewModelView( eyeOrigin, eyeAngles);
 
 	C_BaseViewModel *pViewModel = pPlayer->GetViewModel( 0 );
@@ -554,6 +557,13 @@ void C_HLTVCamera::SetMode(int iMode)
 	int iOldMode = m_nCameraMode;
 	m_nCameraMode = iMode;
 
+	// update spectator name when you change mode
+	IViewPortPanel* spectator = gViewPortInterface->FindPanelByName(PANEL_SPECGUI);
+	if (spectator && spectator->IsVisible())
+	{
+		spectator->Update();
+	}
+
 	IGameEvent *event = gameeventmanager->CreateEvent( "hltv_changed_mode" );
 	if ( event )
 	{
@@ -566,6 +576,9 @@ void C_HLTVCamera::SetMode(int iMode)
 
 void C_HLTVCamera::SetPrimaryTarget( int nEntity ) 
 {
+	if (!IsValidObserverTarget(nEntity))
+		return;
+
  	if ( m_iTraget1 == nEntity )
 		return;
 
@@ -593,6 +606,13 @@ void C_HLTVCamera::SetPrimaryTarget( int nEntity )
 	m_flLastDistance = m_flDistance;
 	m_flLastAngleUpdateTime = -1;
 
+	// update spectator name when you change target
+	IViewPortPanel* spectator = gViewPortInterface->FindPanelByName(PANEL_SPECGUI);
+	if (spectator && spectator->IsVisible())
+	{
+		spectator->Update();
+	}
+
 	IGameEvent *event = gameeventmanager->CreateEvent( "hltv_changed_target" );
 	if ( event )
 	{
@@ -601,6 +621,41 @@ void C_HLTVCamera::SetPrimaryTarget( int nEntity )
 		event->SetInt( "obs_target", m_iTraget1 );
 		gameeventmanager->FireEventClientSide( event );
 	}
+}
+
+bool C_HLTVCamera::IsValidObserverTarget(int nEntity)
+{
+	if (nEntity <= 0 || nEntity > gpGlobals->maxClients)
+		return false;
+
+	C_BasePlayer* pPlayer = UTIL_PlayerByIndex(nEntity);
+
+	if (!pPlayer)
+		return false;
+
+	// only follow living players 
+	if (pPlayer->IsObserver())
+		return false;
+
+	/* Don't spec observers or players who haven't picked a class yet
+	if ( player->IsObserver() )
+		return false;	*/
+
+	if (pPlayer == C_BasePlayer::GetLocalPlayer())
+		return false; // We can't observe ourselves.
+
+	// gibbed players have EF_NODRAW effect active, so make an exception for LIFE_DEAD players
+	if (pPlayer->m_lifeState != LIFE_DEAD && pPlayer->m_lifeState != LIFE_RESPAWNABLE && pPlayer->IsEffectActive(EF_NODRAW)) // don't watch invisible players
+		return false;
+
+	// 0001670: Player you are spectating changes when they die
+	// Commenting out the death check as dead players are actually valid targets (since they respawn almost instantly anyway...)
+	// Might want to alter this to be controllable by lua in future as certain game types may not allow respawning  -> Defrag
+
+	//if ( player->m_lifeState == LIFE_RESPAWNABLE ) // target is dead, waiting for respawn
+	//	return false;
+
+	return true;	// passed all test
 }
 
 void C_HLTVCamera::SpecNextPlayer( bool bInverse )
@@ -635,7 +690,7 @@ void C_HLTVCamera::SpecNextPlayer( bool bInverse )
 			continue;
 
 		// only follow living players 
-		if ( pPlayer->IsObserver() )
+		if (!IsValidObserverTarget(index))
 			continue;
 
 		break; // found a new player

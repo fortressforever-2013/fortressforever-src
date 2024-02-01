@@ -117,6 +117,8 @@
 #define	FL_CLIENT				(1<<7)	// Is a player
 #define FL_FAKECLIENT			(1<<8)	// Fake client, simulated server side; don't send network messages to them
 // NON-PLAYER SPECIFIC (i.e., not used by GameMovement or the client .dll ) -- Can still be applied to players, though
+
+// Jiggles: I moved the INWATER flag up because the client needs to know for setting the swim animations
 #define	FL_INWATER				(1<<9)	// In water
 
 // NOTE if you move things up, make sure to change this value
@@ -406,10 +408,21 @@ enum Collision_Group_t
 	COLLISION_GROUP_VEHICLE,
 	COLLISION_GROUP_PLAYER_MOVEMENT,  // For HL2, same as Collision_Group_Player, for
 										// TF2, this filters out other players and CBaseObjects
+
+	// FF
+	COLLISION_GROUP_BUILDABLE,		// We want buildables to block most things but have some special exceptions tbd -Green Mushy
+	COLLISION_GROUP_BUILDABLE_BUILDING,	// Jiggles: We want buildables that are being built to block player movement, but pretty much nothing else
+	// FF
+
 	COLLISION_GROUP_NPC,			// Generic NPC group
 	COLLISION_GROUP_IN_VEHICLE,		// for any entity inside a vehicle
 	COLLISION_GROUP_WEAPON,			// for any weapons that need collision detection
 	COLLISION_GROUP_VEHICLE_CLIP,	// vehicle clip brush to restrict vehicle movement
+
+	// FF
+	COLLISION_GROUP_ROCKET,			// Projectiles that HIT PLAYERS
+	// FF
+
 	COLLISION_GROUP_PROJECTILE,		// Projectiles!
 	COLLISION_GROUP_DOOR_BLOCKER,	// Blocks entities not permitted to get near moving doors
 	COLLISION_GROUP_PASSABLE_DOOR,	// Doors that the player shouldn't collide with
@@ -418,6 +431,11 @@ enum Collision_Group_t
 
 	COLLISION_GROUP_NPC_ACTOR,		// Used so NPCs in scripts ignore the player.
 	COLLISION_GROUP_NPC_SCRIPTED,	// USed for NPCs in scripts that should not collide with each other
+
+	// FF
+	COLLISION_GROUP_TRIGGERONLY,	// Stuff that can trigger but not actually be hit
+	COLLISION_GROUP_LASER,			// Can hit even the trigger only stuff
+	// FF
 
 	LAST_SHARED_COLLISION_GROUP
 };

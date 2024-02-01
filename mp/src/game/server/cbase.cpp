@@ -87,6 +87,8 @@ OUTPUTS:
 
 #include "tier0/vprof.h"
 
+#include "ff_luacontext.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -983,6 +985,15 @@ void CEventQueue::ServiceEvents( void )
 
 		if ( !targetFound )
 		{
+			//////////////////////////////////////////////////////////////////////////
+			if (pe->m_iTarget != NULL_STRING)
+			{
+				CFFLuaSC sc;
+				sc.Push(pe->m_pActivator);
+				sc.Push(pe->m_pCaller);
+				sc.CallFunction(NULL, STRING(pe->m_iTargetInput), STRING(pe->m_iTarget));
+			}
+			//////////////////////////////////////////////////////////////////////////
 			const char *pClass ="", *pName = "";
 			
 			// might be NULL

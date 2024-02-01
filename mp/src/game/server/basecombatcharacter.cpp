@@ -54,6 +54,13 @@
 	#include "portal_shareddefs.h"
 #endif
 
+#include "ff_player.h"
+#include "ff_scriptman.h"
+#include "ff_luacontext.h"
+
+#undef MINMAX_H
+#include "minmax.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -1598,8 +1605,9 @@ void CBaseCombatCharacter::Event_Killed( const CTakeDamageInfo &info )
 
 	CBaseCombatWeapon *pDroppedWeapon = m_hActiveWeapon.Get();
 
+	// Modified by L0ki: we dont need to drop weapons in FF
 	// Drop any weapon that I own
-	if ( VPhysicsGetObject() )
+	/*if (VPhysicsGetObject())
 	{
 		Vector weaponForce = forceVector * VPhysicsGetObject()->GetInvMass();
 		Weapon_Drop( m_hActiveWeapon, NULL, &weaponForce );
@@ -1607,7 +1615,7 @@ void CBaseCombatCharacter::Event_Killed( const CTakeDamageInfo &info )
 	else
 	{
 		Weapon_Drop( m_hActiveWeapon );
-	}
+	}*/
 	
 	// if flagged to drop a health kit
 	if (HasSpawnFlags(SF_NPC_DROP_HEALTHKIT))
@@ -2429,6 +2437,20 @@ int CBaseCombatCharacter::OnTakeDamage( const CTakeDamageInfo &info )
 			bool bGibbed = false;
 
 			Event_Killed( info );
+
+			if (ToFFPlayer(this))
+			{
+				// -------------------------------------------------------------------
+				// Keep the lua player_killed stuff after we've actually died
+				// so that for cases like the map hunted we aren't forcibly respawned
+				// and then killed by BaseClass::Event_Killed
+				// -------------------------------------------------------------------
+				// TODO: Change killer to an object
+				CFFLuaSC hPlayerKilled;
+				hPlayerKilled.Push(ToFFPlayer(this));
+				hPlayerKilled.Push(&info);
+				_scriptman.RunPredicates_LUA(NULL, &hPlayerKilled, "player_killed");
+			}
 
 			// Only classes that specifically request it are gibbed
 			if ( ShouldGib( info ) )

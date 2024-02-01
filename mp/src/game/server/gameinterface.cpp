@@ -130,6 +130,15 @@ extern ConVar tf_mm_servermode;
 #include "replay/ireplaysystem.h"
 #endif
 
+// FF
+#include "ff_gamerules.h"
+#include "ff_scriptman.h"
+#include "ff_luacontext.h"
+#include "ff_scheduleman.h"
+#include "ff_timerman.h"
+#include "util.h"
+#include "omnibot_interface.h"
+
 extern IToolFrameworkServer *g_pToolFrameworkServer;
 extern IParticleSystemQuery *g_pParticleSystemQuery;
 
@@ -657,6 +666,20 @@ bool CServerGameDLL::DLLInit( CreateInterfaceFn appSystemFactory,
 
 	// init the cvar list first in case inits want to reference them
 	InitializeCvars();
+
+	// --> Mirv: Default max_updaterate to tickrate
+	ConVar* sv_maxupdaterate = cvar->FindVar("sv_maxupdaterate");
+	ConVar* sv_maxcmdrate = cvar->FindVar("sv_maxcmdrate");
+
+	int nTickRate = 66;
+	if (CommandLine()->CheckParm("-tickrate"))
+	{
+		nTickRate = CommandLine()->ParmValue("-tickrate", 0);
+		nTickRate = clamp(nTickRate, 10, 66);
+	}
+	sv_maxupdaterate->SetValue(nTickRate);
+	sv_maxcmdrate->SetValue(nTickRate);
+	// <-- Mirv
 	
 	// Initialize the particle system
 	if ( !g_pParticleSystemMgr->Init( g_pParticleSystemQuery ) )
@@ -739,6 +762,8 @@ bool CServerGameDLL::DLLInit( CreateInterfaceFn appSystemFactory,
 	TheNavMesh = NavMeshFactory();
 #endif
 
+	Omnibot::omnibot_interface::OnDLLInit();
+
 	// init the gamestatsupload connection
 	gamestatsuploader->InitConnection();
 #endif
@@ -753,6 +778,8 @@ void CServerGameDLL::PostInit()
 
 void CServerGameDLL::DLLShutdown( void )
 {
+
+	Omnibot::omnibot_interface::OnDLLShutdown();
 
 	// Due to dependencies, these are not autogamesystems
 	ModelSoundsCacheShutdown();
@@ -965,6 +992,13 @@ bool CServerGameDLL::LevelInit( const char *pMapName, char const *pMapEntities, 
 	ResetWindspeed();
 	UpdateChapterRestrictions( pMapName );
 
+	// Added: Initialize Lua stuff
+	_scheduleman.Init();
+	_timerman.Init();
+	_scriptman.LevelInit(pMapName);
+
+	Omnibot::omnibot_interface::LevelInit();
+
 	if ( IsX360() && !background && (gpGlobals->maxClients == 1) && (g_nCurrentChapterIndex >= 0) )
 	{
 		// Single player games tell xbox live what game & chapter the user is playing
@@ -1035,11 +1069,11 @@ bool CServerGameDLL::LevelInit( const char *pMapName, char const *pMapEntities, 
 		}
 
 		// Clear out entity references, and parse the entities into it.
-		g_MapEntityRefs.Purge();
+		/*g_MapEntityRefs.Purge();
 		CMapLoadEntityFilter filter;
 		MapEntity_ParseAllEntities( pMapEntities, &filter );
 
-		g_pServerBenchmark->StartBenchmark();
+		g_pServerBenchmark->StartBenchmark();*/
 
 		// Now call the mod specific parse
 		LevelInit_ParseAllEntities( pMapEntities );
@@ -1062,6 +1096,25 @@ bool CServerGameDLL::LevelInit( const char *pMapName, char const *pMapEntities, 
 	g_AIFriendliesTalkSemaphore.Release();
 	g_AIFoesTalkSemaphore.Release();
 	g_OneWayTransition = false;
+
+	CFFLuaSC hStartup;
+	_scriptman.RunPredicates_LUA(NULL, &hStartup, "startup");
+
+	FFGameRules()->UpdateSpawnPoints();
+
+	// --> Mirv: Automatically execute map config
+	char szExecMapConfig[128];
+	Q_snprintf(szExecMapConfig, 127, "exec %.20s.cfg\n", pMapName);
+
+	engine->ServerCommand(szExecMapConfig);
+	engine->ServerExecute();
+	// <-- Mirv
+
+	// --> FF: Log the map name for convenience. Logs on dedicated servers get split into 'loading' and 'loaded',
+	//         where only the 'loading' log has the map name, but all the 'real' stuff is in the 'loaded'
+	//         log file. This will make it so the 'loaded' log file also has the map name.
+	UTIL_LogPrintf("Loaded map \"%s\"\n", pMapName);
+	// <--
 
 	// clear any pending autosavedangerous
 	m_fAutoSaveDangerousTime = 0.0f;
@@ -1133,6 +1186,9 @@ void CServerGameDLL::ServerActivate( edict_t *pEdictList, int edictCount, int cl
 	TheNavMesh->OnServerActivate();
 #endif
 #endif
+
+	// Omni-bot: Initialize the bot interface
+	Omnibot::omnibot_interface::InitBotInterface();
 
 #ifdef CSTRIKE_DLL // BOTPORT: TODO: move these ifdefs out
 	TheBots->ServerActivate();
@@ -1227,6 +1283,9 @@ void CServerGameDLL::GameFrame( bool simulating )
 #ifdef USE_NAV_MESH
 	TheNavMesh->Update();
 #endif
+
+	// Omni-bot: Update the bot interface
+	Omnibot::omnibot_interface::UpdateBotInterface();
 
 #ifdef NEXT_BOT
 	TheNextBots().Update();
@@ -1367,6 +1426,10 @@ void CServerGameDLL::OnQueryCvarValueFinished( QueryCvarCookie_t iCookie, edict_
 // Called when a level is shutdown (including changing levels)
 void CServerGameDLL::LevelShutdown( void )
 {
+
+	// Omni-bot: Shut down the bot interface
+	Omnibot::omnibot_interface::ShutdownBotInterface();
+
 #ifndef NO_STEAM
 	IGameSystem::LevelShutdownPreClearSteamAPIContextAllSystems();
 
@@ -1383,6 +1446,10 @@ void CServerGameDLL::LevelShutdown( void )
 	CSoundEnt::ShutdownSoundEnt();
 
 	gEntList.Clear();
+
+	_scriptman.LevelShutdown();
+	_scheduleman.Shutdown();
+	_timerman.Shutdown();
 
 	InvalidateQueryCache();
 
@@ -2761,6 +2828,10 @@ void CServerGameClients::ClientDisconnect( edict_t *pEdict )
 				g_pGameRules->ClientDisconnected( pEdict );
 				gamestats->Event_PlayerDisconnected( player );
 			}
+
+			// --> FF: moved this SetMaxSpeed call below ClientDisconnected
+			player->SetMaxSpeed(0.0f);
+			// <-- FF: moved this SetMaxSpeed call below ClientDisconnected
 		}
 
 		// Make sure all Untouch()'s are called for this client leaving
@@ -2805,6 +2876,8 @@ void CServerGameClients::ClientCommand( edict_t *pEntity, const CCommand &args )
 	::ClientCommand( pPlayer, args );
 }
 
+static ConVar* pMaxUpdateRate = NULL;
+
 //-----------------------------------------------------------------------------
 // Purpose: called after the player changes userinfo - gives dll a chance to modify 
 //			it before it gets sent into the rest of the engine->
@@ -2836,6 +2909,7 @@ void CServerGameClients::ClientSettingsChanged( edict_t *pEdict )
 	// its virtualized value has changed.		
 	
 	player->m_nUpdateRate = Q_atoi( QUICKGETCVARVALUE("cl_updaterate") );
+
 	static const ConVar *pMinUpdateRate = g_pCVar->FindVar( "sv_minupdaterate" );
 	static const ConVar *pMaxUpdateRate = g_pCVar->FindVar( "sv_maxupdaterate" );
 	if ( pMinUpdateRate && pMaxUpdateRate )

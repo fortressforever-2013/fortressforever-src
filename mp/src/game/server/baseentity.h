@@ -31,6 +31,7 @@ class IResponseSystem;
 class IEntitySaveUtils;
 class CRecipientFilter;
 class CStudioHdr;
+class CSpriteTrail;
 
 // Matching the high level concept is significantly better than other criteria
 // FIXME:  Could do this in the script file by making it required and bumping up weighting there instead...
@@ -195,6 +196,40 @@ enum Class_T
 	CLASS_NONE = 0,
 	CLASS_PLAYER,
 	CLASS_PLAYER_ALLY,
+
+	// BEG: Added by Mulchman
+	CLASS_DISPENSER,
+	CLASS_SENTRYGUN,
+	CLASS_DETPACK,
+	CLASS_MANCANNON,
+	CLASS_GREN,			// Normal gren
+	CLASS_GREN_EMP,		// Emp greande
+	CLASS_GREN_NAIL,	// Nail grenade
+	CLASS_GREN_MIRV,	// Mirv grenade
+	CLASS_GREN_MIRVLET,	// Mirvlet (from mirv gren)
+	CLASS_GREN_NAPALM,	// Napalm grenade
+	CLASS_GREN_GAS,		// Gas grenade
+	CLASS_GREN_CONC,	// Conc grenade
+	CLASS_GREN_LASER,
+	CLASS_GREN_SLOWFIELD,
+	// END: Added by Mulchman
+
+	//-- Added by L0ki --
+	CLASS_PIPEBOMB,
+	CLASS_GLGRENADE,
+	//------------------- 
+
+	// 0000936
+	CLASS_IC_ROCKET,
+	CLASS_RAIL_PROJECTILE,
+	CLASS_ROCKET,
+	CLASS_TURRET,
+	CLASS_BACKPACK,
+	CLASS_INFOSCRIPT,
+	CLASS_TRIGGERSCRIPT,
+	CLASS_TRIGGER_CLIP,
+	CLASS_TEAMSPAWN,
+
 	NUM_AI_CLASSES
 };
 
@@ -346,6 +381,8 @@ class CBaseEntity : public IServerEntity
 public:
 	DECLARE_CLASS_NOBASE( CBaseEntity );	
 
+	CUtlVector< int > m_hActiveScripts;
+
 	//----------------------------------------
 	// Class vars and functions
 	//----------------------------------------
@@ -357,6 +394,10 @@ public:
 
 	static bool				m_bInDebugSelect;
 	static int				m_nDebugPlayer;
+
+	// --> FF
+	CUtlVector<CBaseEntity*> m_ObjectivePlayerRefs;
+	// <-- FF
 
 protected:
 
@@ -379,6 +420,8 @@ public:
 	DECLARE_SERVERCLASS();
 	// data description
 	DECLARE_DATADESC();
+
+	void PrintDeleteInfo();
 	
 	// memory handling
     void *operator new( size_t stAllocateBlock );
@@ -425,6 +468,7 @@ public:
 	bool					IsCurrentlyTouching( void ) const;
 	const Vector&			GetAbsOrigin( void ) const;
 	const QAngle&			GetAbsAngles( void ) const;
+	Vector					GetAbsFacing() const;
 
 	SolidType_t				GetSolid() const;
 	int			 			GetSolidFlags( void ) const;
@@ -494,6 +538,10 @@ public:
 	void					SetEffectEntity( CBaseEntity *pEffectEnt );
 	CBaseEntity				*GetEffectEntity() const;
 
+	// specifies if this entity can collide with its owner entity
+	virtual bool			CanClipOwnerEntity() const { return false; }
+	virtual bool			CanClipPlayer() const { return true; }
+
 	// Only CBaseEntity implements these. CheckTransmit calls the virtual ShouldTransmit to see if the
 	// entity wants to be sent. If so, it calls SetTransmit, which will mark any dependents for transmission too.
 	virtual int				ShouldTransmit( const CCheckTransmitInfo *pInfo );
@@ -549,6 +597,8 @@ public:
 	virtual void Precache( void ) {}
 
 	virtual void SetModel( const char *szModelName );
+	virtual void SetModel(const char* szModelName, int iSkin);
+	virtual void SetSkin(int iSkin) {}
 
 protected:
 	// Notification on model load. May be called multiple times for dynamic models.
@@ -570,6 +620,11 @@ public:
 	// Activate - called for each entity after each load game and level load
 	virtual void Activate( void );
 
+	// Called once per frame after the server frame loop has finished and after all messages being
+	//  sent to clients have been sent.
+	// NOTE: This will not be called unless the entity requests it via gEntList.AddPostClientMessageEntity
+	void PostClientMessagesSent(void);
+
 	// Hierarchy traversal
 	CBaseEntity *GetMoveParent( void );
 	CBaseEntity *GetRootMoveParent();
@@ -588,6 +643,7 @@ public:
 	int			GetParentAttachment();
 
 	string_t	GetEntityName();
+	const char* GetName() { return STRING(GetEntityName()); }
 
 	bool		NameMatches( const char *pszNameOrWildcard );
 	bool		ClassMatches( const char *pszClassOrWildcard );
@@ -701,6 +757,8 @@ public:
 	virtual int	Restore( IRestore &restore );
 	virtual bool ShouldSavePhysics();
 
+	virtual int TakeEmp() { return 0; }	// |-- Mirv: For EMPs
+
 	// handler to reset stuff before you are restored
 	// NOTE: Always chain to base class when implementing this!
 	virtual void OnSave( IEntitySaveUtils *pSaveUtils );
@@ -769,6 +827,11 @@ public:
 
 	void				SetRenderMode( RenderMode_t nRenderMode );
 	RenderMode_t		GetRenderMode() const;
+
+	// for lua
+	void				SetRenderFx(int _fx) { m_nRenderFX = _fx; }
+	int					GetRenderFx() { return m_nRenderFX; }
+	void				ClearRenderFx() { m_nRenderFX = kRenderFxNone; }
 
 private:
 	// NOTE: Keep this near vtable so it's in cache with vtable.
@@ -857,6 +920,7 @@ protected:
 
 private:
 	CBaseEntity( CBaseEntity& );
+	CSpriteTrail* m_pSpriteTrail;
 
 	// list handling
 	friend class CGlobalEntityList;
@@ -880,7 +944,7 @@ public:
 
 // Classify - returns the type of group (i.e, "houndeye", or "human military" so that NPCs with different classnames
 // still realize that they are teammates. (overridden for NPCs that form groups)
-	virtual Class_T Classify ( void );
+	virtual Class_T Classify(void) { return CLASS_NONE; }
 	virtual void	DeathNotice ( CBaseEntity *pVictim ) {}// NPC maker children use this to tell the NPC maker that they have died.
 	virtual bool	ShouldAttractAutoAim( CBaseEntity *pAimingEnt ) { return ((GetFlags() & FL_AIMTARGET) != 0); }
 	virtual float	GetAutoAimRadius();
@@ -927,6 +991,7 @@ public:
 	CAI_BaseNPC				*MyNPCPointer( void ); 
 	virtual CBaseCombatCharacter *MyCombatCharacterPointer( void ) { return NULL; }
 	virtual INextBot		*MyNextBotPointer( void ) { return NULL; }
+	virtual CBasePlayer*	MyCharacterPointer(void) { return NULL; }
 	virtual float			GetDelay( void ) { return 0; }
 	virtual bool			IsMoving( void );
 	bool					IsWorld() { return entindex() == 0; }
@@ -937,6 +1002,9 @@ public:
 	void			AddPoints( int score, bool bAllowNegativeScore );
 	void			AddPointsToTeam( int score, bool bAllowNegativeScore );
 	void			RemoveAllDecals( void );
+	void	        StartTrail(int teamId);
+	void	        StartTrail(int teamId, float startWidth, float endWidth, float lifetime);
+	void	        StopTrail(void);
 
 	virtual bool	OnControls( CBaseEntity *pControls ) { return false; }
 	virtual bool	HasTarget( string_t targetname );
@@ -947,7 +1015,8 @@ public:
 	virtual bool	IsBaseTrain( void ) const { return false; }
 	bool			IsBSPModel() const;
 	bool			IsCombatCharacter() { return MyCombatCharacterPointer() == NULL ? false : true; }
-	bool			IsInWorld( void ) const;
+	//bool			IsInWorld( void ) const;
+	virtual bool	IsInWorld(void) const;
 	virtual bool	IsCombatItem( void ) const { return false; }
 
 	virtual bool	IsBaseCombatWeapon( void ) const { return false; }
@@ -1087,6 +1156,15 @@ public:
 	int		GetHealth() const		{ return m_iHealth; }
 	void	SetHealth( int amt )	{ m_iHealth = amt; }
 
+	// --> Added by Mulch for testing
+	// Armor accessors
+	int		GetMaxArmor() const { return m_iMaxArmor; }
+	void	SetMaxArmor(int amt) { m_iMaxArmor = amt; }
+
+	int		GetArmor() const { return m_iArmor; }
+	void	SetArmor(int amt) { m_iArmor = amt; }
+	// <-- Added by Mulch for testing
+
 	float HealthFraction() const;
 
 	// Ugly code to lookup all functions to make sure they are in the table when set.
@@ -1149,7 +1227,13 @@ public:
 	CNetworkVarForDerived( int, m_iHealth );
 
 	CNetworkVarForDerived( char, m_lifeState );
-	CNetworkVarForDerived( char , m_takedamage );
+	//CNetworkVarForDerived( char , m_takedamage );
+	CNetworkVar(unsigned char, m_takedamage);
+
+	// --> Added by Mulch for testing
+	CNetworkVarForDerived(int, m_iArmor);
+	CNetworkVarForDerived(int, m_iMaxArmor);
+	// <-- Added by Mulch for testing
 
 	// Damage filtering
 	string_t	m_iszDamageFilterName;	// The name of the entity to use as our damage filter.
@@ -1326,14 +1410,19 @@ public:
 	int						GetFlags( void ) const;
 	void					ClearFlags( void );
 
+	bool					IsOnFire(void) const { return (GetFlags() & FL_ONFIRE) ? true : false; }
+
 	// Sets the local position from a transform
 	void					SetLocalTransform( const matrix3x4_t &localTransform );
 
 	// See CSoundEmitterSystem
+	void					PlaySound(const char* soundname);
 	void					EmitSound( const char *soundname, float soundtime = 0.0f, float *duration = NULL );  // Override for doing the general case of CPASAttenuationFilter filter( this ), and EmitSound( filter, entindex(), etc. );
+	void					EmitSoundShared(const char* soundname, float soundtime = 0.0f, float* duration = NULL);
 	void					EmitSound( const char *soundname, HSOUNDSCRIPTHANDLE& handle, float soundtime = 0.0f, float *duration = NULL );  // Override for doing the general case of CPASAttenuationFilter filter( this ), and EmitSound( filter, entindex(), etc. );
 	void					StopSound( const char *soundname );
 	void					StopSound( const char *soundname, HSOUNDSCRIPTHANDLE& handle );
+	void					StopSoundInChannel(const char* soundname, HSOUNDSCRIPTHANDLE& handle, const int channel); // Jon: for AC stuff
 	void					GenderExpandString( char const *in, char *out, int maxlen );
 
 	virtual void ModifyEmitSoundParams( EmitSound_t &params );
@@ -1346,6 +1435,7 @@ public:
 	static void EmitSound( IRecipientFilter& filter, int iEntIndex, const char *soundname, const Vector *pOrigin = NULL, float soundtime = 0.0f, float *duration = NULL );
 	static void EmitSound( IRecipientFilter& filter, int iEntIndex, const char *soundname, HSOUNDSCRIPTHANDLE& handle, const Vector *pOrigin = NULL, float soundtime = 0.0f, float *duration = NULL );
 	static void StopSound( int iEntIndex, const char *soundname );
+	static void StopSoundInChannel(int iEntIndex, const char* soundname, const int channel); // Jon: for AC stuff
 	static soundlevel_t LookupSoundLevel( const char *soundname );
 	static soundlevel_t LookupSoundLevel( const char *soundname, HSOUNDSCRIPTHANDLE& handle );
 
@@ -1542,7 +1632,7 @@ public:
 	// Add a discontinuity to a step
 	bool					AddStepDiscontinuity( float flTime, const Vector &vecOrigin, const QAngle &vecAngles );
 	int						GetFirstThinkTick();	// get first tick thinking on any context
-private:
+protected:	// |-- Mirv: Changed from private
 	// origin and angles to use in step calculations
 	virtual	Vector			GetStepOrigin( void ) const;
 	virtual	QAngle			GetStepAngles( void ) const;
@@ -1737,7 +1827,7 @@ public:
 // Methods shared by client and server
 public:
 	void							SetSize( const Vector &vecMin, const Vector &vecMax ); // UTIL_SetSize( this, mins, maxs );
-	static int						PrecacheModel( const char *name, bool bPreload = true ); 
+	static int						PrecacheModel( const char *name, bool bPreload = true );
 	static bool						PrecacheSound( const char *name );
 	static void						PrefetchSound( const char *name );
 	void							Remove( ); // UTIL_Remove( this );
@@ -2111,8 +2201,6 @@ inline const QAngle& CBaseEntity::GetAbsAngles( void ) const
 	}
 	return m_angAbsRotation;
 }
-
-
 
 //-----------------------------------------------------------------------------
 // Returns the entity-to-world transform

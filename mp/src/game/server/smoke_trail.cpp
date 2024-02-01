@@ -57,6 +57,7 @@ BEGIN_DATADESC( SmokeTrail )
 	DEFINE_KEYFIELD( m_SpawnRadius, FIELD_FLOAT, "spawnradius" ),
 	DEFINE_FIELD( m_bEmit, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_nAttachment, FIELD_INTEGER ),
+	DEFINE_THINKFUNC(Think),
 
 END_DATADESC()
 
@@ -167,9 +168,46 @@ void SmokeTrail::FollowEntity( CBaseEntity *pEntity, const char *pAttachmentName
 		m_nAttachment = 0;
 	}
 
+	SetThink(&SmokeTrail::Think);
+	SetNextThink(gpGlobals->curtime);
+
 	BaseClass::FollowEntity( pEntity );
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Kill the trail if in water and do bubbles
+//-----------------------------------------------------------------------------
+void SmokeTrail::Think(void)
+{
+	// A smoke trail dies when the object 
+	// it is attached to goes into water
+
+	if (GetFollowedEntity())
+	{
+		if (GetFollowedEntity()->GetWaterLevel() != 0)
+		{
+			if (m_bEmit)
+				SetEmit(false);
+
+			// If we're going slow enough, don't do bubbles anymore
+			// Also make sure we're still underwater and haven't bounced out
+			if ((GetFollowedEntity()->GetAbsVelocity() != vec3_origin) && (UTIL_PointContents(GetFollowedEntity()->GetAbsOrigin()) & MASK_WATER))
+			{
+				// Do bubbles!
+				UTIL_Bubbles(GetFollowedEntity()->GetAbsOrigin() - Vector(16, 16, 16), GetFollowedEntity()->GetAbsOrigin() + Vector(16, 16, 16), random->RandomInt(3, 8));
+			}
+
+			// Think slower underwater
+			SetNextThink(gpGlobals->curtime + random->RandomFloat(0.1f, 0.4f));
+		}
+		else
+		{
+			// Set next time to think. Not underwater
+			// yet so keep spamming the think function
+			SetNextThink(gpGlobals->curtime);
+		}
+	}
+}
 
 //==================================================
 // RocketTrail
@@ -213,6 +251,7 @@ BEGIN_DATADESC( RocketTrail )
 	DEFINE_FIELD( m_nAttachment, FIELD_INTEGER ),
 	DEFINE_FIELD( m_bDamaged, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_flFlareScale, FIELD_FLOAT ),
+	DEFINE_THINKFUNC(Think),
 
 END_DATADESC()
 
@@ -291,7 +330,59 @@ void RocketTrail::FollowEntity( CBaseEntity *pEntity, const char *pAttachmentNam
 		m_nAttachment = 0;
 	}
 
+	SetThink(&RocketTrail::Think);
+	SetNextThink(gpGlobals->curtime);
+
 	BaseClass::FollowEntity( pEntity );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Kill the trail if in water and do bubbles
+//-----------------------------------------------------------------------------
+void RocketTrail::Think(void)
+{
+	// A rocket trail dies when the object 
+	// it is attached to goes into water but
+	// will restart if that object comes out
+	// of water
+
+	if (GetFollowedEntity())
+	{
+		if (GetFollowedEntity()->GetWaterLevel() != 0)
+		{
+			if (m_bEmit)
+				SetEmit(false);
+
+			// Make sure we're still under water... since we
+			// think slower we might have left the water and
+			// are now airborn (so therefore we don't want
+			// bubbles being made!)
+			if (UTIL_PointContents(GetFollowedEntity()->GetAbsOrigin()) & MASK_WATER)
+			{
+				// Do bubbles!
+				UTIL_Bubbles(GetFollowedEntity()->GetAbsOrigin() - Vector(16, 16, 16), GetFollowedEntity()->GetAbsOrigin() + Vector(16, 16, 16), random->RandomInt(3, 8));
+			}
+
+			// Think slower underwater
+			SetNextThink(gpGlobals->curtime + random->RandomFloat(0.1f, 0.4f));
+		}
+		else
+		{
+			// Turn on the trail, we're leaving water
+			if (!m_bEmit)
+				SetEmit(true);
+
+			// Set next time to think
+			SetNextThink(gpGlobals->curtime);
+		}
+	}
+	else
+	{
+		// If we're not following an entity, remove self
+		// See if this helps the rogue rocket trails at all
+		SetThink(&RocketTrail::SUB_Remove);
+		SetNextThink(gpGlobals->curtime);
+	}
 }
 
 //==================================================

@@ -39,25 +39,30 @@ void RegisterHapticMessages(void)
 
 void HapticMsg_SendWeaponAnim( CBasePlayer *pPlayer, int iActivity )
 {
+#ifdef HL2MP
 	//Send the haptics message
 	CSingleUserRecipientFilter user( pPlayer );
 	user.MakeReliable();
 	UserMessageBegin( user, "SPHapWeapEvent" );
 	WRITE_LONG(iActivity);
 	MessageEnd();
+#endif
 }
 
 void HapticMsg_SetDrag(CBasePlayer* pPlayer, float drag)
 {
+#ifdef HL2MP
 	CSingleUserRecipientFilter user( pPlayer );
 	user.MakeReliable();
 	UserMessageBegin( user, "HapSetDrag" );
 	WRITE_FLOAT(drag);
 	MessageEnd();
+#endif
 }
 
 void HapticMsg_SetConstantForce(CBasePlayer* pPlayer, Vector force)
 {
+#ifdef HL2MP
 	// portal does not network this.
 	CSingleUserRecipientFilter user( pPlayer );
 	user.MakeReliable();
@@ -66,10 +71,12 @@ void HapticMsg_SetConstantForce(CBasePlayer* pPlayer, Vector force)
 		WRITE_SHORT(force.y);
 		WRITE_SHORT(force.z);
 	MessageEnd();
+#endif
 }
 
 void HapticMsg_HapDmg(CBasePlayer* pPlayer, float pitch, float yaw, float dmg, float dmgType )
 {
+#ifdef HL2MP
 	CSingleUserRecipientFilter user(pPlayer);
 	user.MakeReliable();
 	UserMessageBegin(user,"HapDmg");
@@ -79,26 +86,31 @@ void HapticMsg_HapDmg(CBasePlayer* pPlayer, float pitch, float yaw, float dmg, f
 	WRITE_FLOAT(dmg);
 	WRITE_LONG(dmgType);
 	MessageEnd();
+#endif
 }
 
 void HapticMsg_Punch(CBasePlayer* pPlayer, float x, float y, float z)
 {
+#ifdef HL2MP
 	CSingleUserRecipientFilter user(pPlayer);
 	user.MakeReliable();
-	UserMessageBegin(user,"HapPunch");
+	UserMessageBegin(user, "HapPunch");
 
 	WRITE_FLOAT(x);
 	WRITE_FLOAT(y);
 	WRITE_FLOAT(z);
 	MessageEnd();
+#endif
 }
 
 void HapticMsg_MeleeContact(CBasePlayer* pPlayer)
 {
+#ifdef HL2MP
 	CSingleUserRecipientFilter user(pPlayer);
 	user.MakeReliable();
 	UserMessageBegin(user,"HapMeleeContact");
 	MessageEnd();
+#endif
 }
 
 #endif //!CLIENT_DLL

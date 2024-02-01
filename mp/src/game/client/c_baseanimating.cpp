@@ -54,17 +54,24 @@
 #include "replay/replay_ragdoll.h"
 #include "studio_stats.h"
 #include "tier1/callqueue.h"
+#include "view_scene.h"
 
 #ifdef TF_CLIENT_DLL
 #include "c_tf_player.h"
 #include "c_baseobject.h"
 #endif
 
+#include "ff_mathackman.h"
+#include "c_ff_player.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 static ConVar cl_SetupAllBones( "cl_SetupAllBones", "0" );
 ConVar r_sequence_debug( "r_sequence_debug", "" );
+
+// dlight scale
+extern ConVar cl_ffdlight_muzzle;
 
 // If an NPC is moving faster than this, he should play the running footstep sound
 const float RUN_SPEED_ESTIMATE_SQR = 150.0f * 150.0f;
@@ -725,6 +732,14 @@ C_BaseAnimating::C_BaseAnimating() :
 #ifdef _XBOX
 	m_iAccumulatedBoneMask = 0;
 #endif
+
+	// ff dlights
+	m_colorMuzzleDLight.r = 255;
+	m_colorMuzzleDLight.g = 192;
+	m_colorMuzzleDLight.b = 64;
+	m_colorMuzzleDLight.exponent = 5;
+	// ff dlights
+
 	m_pStudioHdr = NULL;
 	m_hStudioHdr = MDLHANDLE_INVALID;
 
@@ -744,6 +759,41 @@ C_BaseAnimating::C_BaseAnimating() :
 	m_flOldCycle = 0;
 }
 
+// Finds the specified material to use as the override material
+// MATERIAL SHOULD BE PRECACHED ELSEWHERE
+void C_BaseAnimating::FindOverrideMaterial(char const* pMaterialName, const char* pTextureGroupName, bool complain, const char* pComplainPrefix)
+{
+	// release if we're getting a new material
+	if (m_pOverrideMaterial)
+		if (strcmp(m_pOverrideMaterial->GetName(), pMaterialName) != 0)
+			ReleaseOverrideMaterial();
+
+	// only get it if we don't have one already
+	if (!m_pOverrideMaterial)
+	{
+		m_pOverrideMaterial = materials->FindMaterial(pMaterialName, pTextureGroupName, complain, pComplainPrefix);
+		if (m_pOverrideMaterial)
+			m_pOverrideMaterial->IncrementReferenceCount();
+	}
+}
+
+// Releases the override material
+void C_BaseAnimating::ReleaseOverrideMaterial(char const* pMaterialName)
+{
+	// can't release if it doesn't exist
+	if (!m_pOverrideMaterial)
+		return;
+
+	// if a material name is specified, only release if names match
+	if (pMaterialName)
+		if (strcmp(m_pOverrideMaterial->GetName(), pMaterialName) != 0)
+			return;
+
+	// reference counting is used instead of actual allocating/deallocating
+	m_pOverrideMaterial->DecrementReferenceCount();
+	m_pOverrideMaterial = NULL;
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: cleanup
 //-----------------------------------------------------------------------------
@@ -752,6 +802,9 @@ C_BaseAnimating::~C_BaseAnimating()
 	int i = g_PreviousBoneSetups.Find( this );
 	if ( i != -1 )
 		g_PreviousBoneSetups.FastRemove( i );
+
+	if (m_pOverrideMaterial)
+		ReleaseOverrideMaterial();
 
 	TermRopes();
 
@@ -1160,6 +1213,7 @@ CStudioHdr *C_BaseAnimating::OnNewModel()
 		AddEFlags( EFL_USE_PARTITION_WHEN_NOT_SOLID );
 	}
 
+	_mathackman.AddMathackModel(GetModelIndex());
 
 	// Most entities clear out their sequences when they change models on the server, but 
 	// not all entities network down their m_nSequence (like multiplayer game player entities), 
@@ -3135,6 +3189,9 @@ int C_BaseAnimating::DrawModel( int flags )
 	if ( !m_bReadyToDraw )
 		return 0;
 
+	if (C_FFPlayer::GetLocalFFPlayer() && (C_FFPlayer::GetLocalFFPlayer())->m_bMathackDetected)
+		return 0;
+
 	int drawn = 0;
 
 #ifdef TF_CLIENT_DLL
@@ -3375,7 +3432,42 @@ int C_BaseAnimating::InternalDrawModel( int flags )
 	return bMarkAsDrawn;
 }
 
+// starts overriding the material of the model being drawn
+void C_BaseAnimating::StartMaterialOverride()
+{
+	if (m_pOverrideMaterial)
+	{
+		// refract textures need "power of two frame buffer texture"
+		if (m_pOverrideMaterial->NeedsPowerOfTwoFrameBufferTexture())
+		{
+			// This TODO is just from garry, so I don't know what exactly it means
+			//Msg("TODO! C_BaseEntity::StartMaterialOverride\n");
+
+			// basially copies the font frame buffer to the refract texture
+			UpdateRefractTexture();
+		}
+
+		// override the material for when the model is drawn down below
+		modelrender->ForcedMaterialOverride(m_pOverrideMaterial);
+	}
+}
+
+// stops overriding the material of the model being drawn
+void C_BaseAnimating::StopMaterialOverride()
+{
+	if (m_pOverrideMaterial)
+		modelrender->ForcedMaterialOverride(NULL);
+}
+
 extern ConVar muzzleflash_light;
+
+//ConVar ffdev_muzzleflash_light_radius_min( "ffdev_muzzleflash_light_radius_min", "56" );
+//ConVar ffdev_muzzleflash_light_radius_max( "ffdev_muzzleflash_light_radius_max", "72" );
+//ConVar ffdev_muzzleflash_light_life( "ffdev_muzzleflash_light_life", "0.05" );
+//ConVar ffdev_muzzleflash_light_color_r( "ffdev_muzzleflash_light_color_r", "255" );
+//ConVar ffdev_muzzleflash_light_color_g( "ffdev_muzzleflash_light_color_g", "192" );
+//ConVar ffdev_muzzleflash_light_color_b( "ffdev_muzzleflash_light_color_b", "64" );
+//ConVar ffdev_muzzleflash_light_color_e( "ffdev_muzzleflash_light_color_e", "5" );
 
 void C_BaseAnimating::ProcessMuzzleFlashEvent()
 {
@@ -3389,16 +3481,53 @@ void C_BaseAnimating::ProcessMuzzleFlashEvent()
 			QAngle dummyAngles;
 			GetAttachment( 1, vAttachment, dummyAngles );
 
-			// Make an elight
-			dlight_t *el = effects->CL_AllocElight( LIGHT_INDEX_MUZZLEFLASH + index );
-			el->origin = vAttachment;
-			el->radius = random->RandomInt( 32, 64 ); 
-			el->decay = el->radius / 0.05f;
-			el->die = gpGlobals->curtime + 0.05f;
-			el->color.r = 255;
-			el->color.g = 192;
-			el->color.b = 64;
-			el->color.exponent = 5;
+			//// Make an elight
+			//dlight_t *el = effects->CL_AllocElight( LIGHT_INDEX_MUZZLEFLASH + index );
+			//el->origin = vAttachment;
+			//el->radius = random->RandomInt( 32, 64 ); 
+			//el->decay = el->radius / 0.05f;
+			//el->die = gpGlobals->curtime + 0.05f;
+			//el->color.r = 255;
+			//el->color.g = 192;
+			//el->color.b = 64;
+			//el->color.exponent = 5;
+
+			// dlight scale
+			float flDLightScale = cl_ffdlight_muzzle.GetFloat();
+
+			dlight_t* dl = NULL;
+			if (flDLightScale > 0.0f)
+				// Make a dlight (that's a "D" for dynamic so everything lights up, YAAAAYYYYY!)
+				//dl = effects->CL_AllocDlight( LIGHT_INDEX_MUZZLEFLASH + index );
+				dl = effects->CL_AllocDlight(0); // 0 allows multiple dynamic lights at the same time
+
+			if (dl) // I'm scared, daddy...of NULL pointers.
+			{
+				dl->origin = vAttachment;
+				dl->radius = random->RandomFloat(56/*ffdev_muzzleflash_light_radius_min.GetFloat()*/, 72/*ffdev_muzzleflash_light_radius_max.GetFloat()*/) * flDLightScale; // sorta small radius for muzzle flash
+				dl->die = gpGlobals->curtime + 0.05/*ffdev_muzzleflash_light_life.GetFloat()*/; // die = current time + life
+				dl->decay = dl->radius / 0.05/*ffdev_muzzleflash_light_life.GetFloat()*/; // radius / life = good fade
+
+				C_BasePlayer* pPlayer = NULL;
+				if (IsPlayer())
+					pPlayer = dynamic_cast<C_BasePlayer*>(this);
+				else if (IsViewModel())
+					pPlayer = C_BasePlayer::GetLocalPlayer();
+
+				ColorRGBExp32 colorDLight = m_colorMuzzleDLight;
+				if (pPlayer)
+				{
+					C_BaseCombatWeapon* pWeapon = pPlayer->GetActiveWeapon();
+					if (pWeapon)
+						colorDLight = pWeapon->m_colorMuzzleDLight;
+				}
+
+				//dl->color.r = colorDLight.r;// 255/*ffdev_muzzleflash_light_color_r.GetFloat()*/;
+				//dl->color.g = colorDLight.g;// 192/*ffdev_muzzleflash_light_color_g.GetFloat()*/;
+				//dl->color.b = colorDLight.b;// 64/*ffdev_muzzleflash_light_color_b.GetFloat()*/;
+				//dl->color.exponent = colorDLight.exponent;// 5/*ffdev_muzzleflash_light_color_e.GetFloat()*/; // essentially the brightness...also determines the gradient, basically
+				dl->color = colorDLight;
+			}
 		}
 	}
 }

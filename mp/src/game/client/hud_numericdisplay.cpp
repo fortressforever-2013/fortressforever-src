@@ -146,6 +146,29 @@ void CHudNumericDisplay::PaintNumbers(HFont font, int xpos, int ypos, int value)
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: paints a number right aligned, so the digits column is always in the same place
+//-----------------------------------------------------------------------------
+void CHudNumericDisplay::PaintNumbersRightAligned(HFont font, int xpos, int ypos, int value, int maxchars)
+{
+	int charWidth = surface()->GetCharacterWidth(font, '0');
+	int iTempxpos = xpos + charWidth * maxchars; // allow for X characters of score
+
+	wchar_t unicode[6];
+	swprintf(unicode, L"%d", value);
+
+	surface()->DrawSetTextFont(font);
+
+	for (wchar_t* wch = unicode; *wch != 0; wch++)
+		iTempxpos -= surface()->GetCharacterWidth(font, *wch);
+
+	surface()->DrawSetTextPos(iTempxpos, ypos);
+
+	for (wchar_t* wch = unicode; *wch != 0; wch++)
+		surface()->DrawUnicodeChar(*wch);
+}
+
+
+//-----------------------------------------------------------------------------
 // Purpose: draws the text
 //-----------------------------------------------------------------------------
 void CHudNumericDisplay::PaintLabel( void )
@@ -164,10 +187,10 @@ void CHudNumericDisplay::Paint()
 	if (m_bDisplayValue)
 	{
 		// draw our numbers
-		surface()->DrawSetTextColor(GetFgColor());
+		surface()->DrawSetTextColor(/*GetFgColor()*/ m_NumberColor);
 		PaintNumbers(m_hNumberFont, digit_xpos, digit_ypos, m_iValue);
 
-		// draw the overbright blur
+		/*// draw the overbright blur
 		for (float fl = m_flBlur; fl > 0.0f; fl -= 1.0f)
 		{
 			if (fl >= 1.0f)
@@ -182,7 +205,7 @@ void CHudNumericDisplay::Paint()
 				surface()->DrawSetTextColor(col);
 				PaintNumbers(m_hNumberGlowFont, digit_xpos, digit_ypos, m_iValue);
 			}
-		}
+		}*/
 	}
 
 	// total ammo

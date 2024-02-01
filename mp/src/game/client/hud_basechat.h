@@ -266,6 +266,8 @@ public:
 	// IGameEventListener interface:
 	virtual void FireGameEvent( IGameEvent *event);
 
+	void StartInputMessage(const char* _msg); // drevil
+
 	CHudChatHistory			*GetChatHistory();
 
 	void					FadeChatHistory();
@@ -305,6 +307,7 @@ protected:
 
 	CBaseHudChatInputLine	*m_pChatInput;
 	CBaseHudChatLine		*m_ChatLine;
+	CBaseHudChatLine* m_ChatLines[CHAT_INTERFACE_LINES];
 	int					m_iFontHeight;
 
 	CHudChatHistory			*m_pChatHistory;
@@ -394,6 +397,7 @@ public:
 	CBaseHudChatInputLine( vgui::Panel *parent, char const *panelName );
 
 	void			SetPrompt( const wchar_t *prompt );
+	void			GetPrompt(wchar_t* buffer, int buffersizebytes);
 	void			ClearEntry( void );
 	void			SetEntry( const wchar_t *entry );
 	void			GetMessageText( OUT_Z_BYTECAP(buffersizebytes) wchar_t *buffer, int buffersizebytes );
@@ -402,6 +406,7 @@ public:
 	virtual void	ApplySchemeSettings(vgui::IScheme *pScheme);
 
 	vgui::Panel		*GetInputPanel( void );
+	CBaseHudChatEntry* GetChatEntryInput() { return m_pInput; }
 	virtual vgui::VPANEL GetCurrentKeyFocus() { return m_pInput->GetVPanel(); } 
 
 	virtual void Paint()

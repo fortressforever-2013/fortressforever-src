@@ -32,6 +32,10 @@
 #include "haptics/ihaptics.h"
 
 
+#include "iinput.h"
+
+#include "c_ff_player.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -118,6 +122,10 @@ void C_BaseViewModel::UncorrectViewModelAttachment( Vector &vOrigin )
 //-----------------------------------------------------------------------------
 void C_BaseViewModel::FireEvent( const Vector& origin, const QAngle& angles, int event, const char *options )
 {
+	// Mirv: Don't do any viewmodel stuff in third person
+	if (input->CAM_IsThirdPerson())
+		return;
+
 	// We override sound requests so that we can play them locally on the owning player
 	if ( ( event == AE_CL_PLAYSOUND ) || ( event == CL_EVENT_SOUND ) )
 	{
@@ -303,11 +311,15 @@ int C_BaseViewModel::DrawModel( int flags )
 		render->SetColorModulation(	color );
 	}
 		
-	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
+	//C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
+	// use the owner of the weapon instead of the local player so it works universally (for spectators, etc)
+	C_FFPlayer* pPlayer = ToFFPlayer(GetOwner());
 	C_BaseCombatWeapon *pWeapon = GetOwningWeapon();
 	int ret;
 	// If the local player's overriding the viewmodel rendering, let him do it
-	if ( pPlayer && pPlayer->IsOverridingViewmodel() )
+	// Jon: override if we have an override material
+	//if ( pPlayer && pPlayer->IsOverridingViewmodel() )
+	if ((pPlayer && pPlayer->IsOverridingViewmodel()) || (pPlayer && m_pOverrideMaterial))
 	{
 		ret = pPlayer->DrawOverriddenViewmodel( this, flags );
 	}
@@ -368,6 +380,23 @@ int C_BaseViewModel::InternalDrawModel( int flags )
 //-----------------------------------------------------------------------------
 int C_BaseViewModel::DrawOverriddenViewmodel( int flags )
 {
+	C_FFPlayer* pPlayer = ToFFPlayer(GetOwner());
+	if (pPlayer)
+	{
+		if (!pPlayer->IsCloaked())
+		{
+			ReleaseOverrideMaterial(FF_CLOAK_MATERIAL);
+		}
+		else
+		{
+			// don't draw if cloaked and basically not moving
+			if (pPlayer->GetLocalVelocity().Length() < 1.0f)
+				return 1;
+
+			FindOverrideMaterial(FF_CLOAK_MATERIAL, FF_CLOAK_TEXTURE_GROUP);
+		}
+	}
+
 	return BaseClass::DrawModel( flags );
 }
 
@@ -378,12 +407,14 @@ int C_BaseViewModel::DrawOverriddenViewmodel( int flags )
 int C_BaseViewModel::GetFxBlend( void )
 {
 	// See if the local player wants to override the viewmodel's rendering
+	/*
 	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
 	if ( pPlayer && pPlayer->IsOverridingViewmodel() )
 	{
 		pPlayer->ComputeFxBlend();
 		return pPlayer->GetFxBlend();
 	}
+	*/
 
 	C_BaseCombatWeapon *pWeapon = GetOwningWeapon();
 	if ( pWeapon && pWeapon->IsOverridingViewmodel() )

@@ -31,6 +31,8 @@ public:
 	void ToggleChaseAsFirstPerson();
 	bool IsPVSLocked();
 	void SetAutoDirector( bool bActive );
+
+	bool IsValidObserverTarget(int nEntity);
 	
 	int  GetMode();	// returns current camera mode
 	C_BaseEntity *GetPrimaryTarget();  // return primary target

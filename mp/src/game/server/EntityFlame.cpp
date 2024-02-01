@@ -114,7 +114,7 @@ void CEntityFlame::InputIgnite( inputdata_t &inputdata )
 // Purpose: Creates a flame and attaches it to a target entity.
 // Input  : pTarget - 
 //-----------------------------------------------------------------------------
-CEntityFlame *CEntityFlame::Create( CBaseEntity *pTarget, bool useHitboxes )
+CEntityFlame *CEntityFlame::Create( CBaseEntity *pTarget, bool useHitboxes, float flameSize)
 {
 	CEntityFlame *pFlame = (CEntityFlame *) CreateEntityByName( "entityflame" );
 
@@ -126,9 +126,13 @@ CEntityFlame *CEntityFlame::Create( CBaseEntity *pTarget, bool useHitboxes )
 
 	float size = ( xSize + ySize ) * 0.5f;
 	
-	if ( size < 16.0f )
+	if (size != 0)
 	{
-		size = 16.0f;
+		size = size * flameSize;
+	}
+	else
+	{
+		size = flameSize;
 	}
 
 	UTIL_SetOrigin( pFlame, pTarget->GetAbsOrigin() );
@@ -324,6 +328,28 @@ void CEntityFlame::FlameThink( void )
 
 }  
 
+//-----------------------------------------------------------------------------
+// Purpose: Kill the flame NOW
+//-----------------------------------------------------------------------------
+void CEntityFlame::Extinguish(void)
+{
+	m_flLifetime = 0.0f;
+
+	SetParent(NULL);
+
+	if (m_hEntAttached)
+	{
+		m_hEntAttached->RemoveFlag(FL_ONFIRE);
+		m_hEntAttached = NULL;
+	}
+
+	if (m_bPlayingSound)
+		EmitSound("General.StopBurning");
+
+	SetThink(NULL);
+
+	UTIL_Remove(this);
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: 

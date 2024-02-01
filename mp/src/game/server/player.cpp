@@ -82,6 +82,15 @@
 #include "weapon_physcannon.h"
 #endif
 
+// For the upcast in CommitSuicide
+#include "ff_player.h"
+
+// For spectating info scripts
+#include "ff_item_flag.h"
+
+// Forward declare
+class CFFPlayer;
+
 ConVar autoaim_max_dist( "autoaim_max_dist", "2160" ); // 2160 = 180 feet
 ConVar autoaim_max_deflect( "autoaim_max_deflect", "0.99" );
 
@@ -106,11 +115,20 @@ static ConVar physicsshadowupdate_render( "physicsshadowupdate_render", "0" );
 bool IsInCommentaryMode( void );
 bool IsListeningToCommentary( void );
 
+//#if !defined( CSTRIKE_DLL )
+//ConVar cl_sidespeed( "cl_sidespeed", "450", FCVAR_REPLICATED | FCVAR_CHEAT );
+//ConVar cl_upspeed( "cl_upspeed", "320", FCVAR_REPLICATED | FCVAR_CHEAT );
+//ConVar cl_forwardspeed( "cl_forwardspeed", "450", FCVAR_REPLICATED | FCVAR_CHEAT );
+//ConVar cl_backspeed( "cl_backspeed", "450", FCVAR_REPLICATED | FCVAR_CHEAT );
+//#endif // CSTRIKE_DLL
+
+// YoYo178: match values from in_main.cpp to avoid the
+// "parent and child convars with different values" error
 #if !defined( CSTRIKE_DLL )
-ConVar cl_sidespeed( "cl_sidespeed", "450", FCVAR_REPLICATED | FCVAR_CHEAT );
-ConVar cl_upspeed( "cl_upspeed", "320", FCVAR_REPLICATED | FCVAR_CHEAT );
-ConVar cl_forwardspeed( "cl_forwardspeed", "450", FCVAR_REPLICATED | FCVAR_CHEAT );
-ConVar cl_backspeed( "cl_backspeed", "450", FCVAR_REPLICATED | FCVAR_CHEAT );
+ConVar cl_sidespeed( "cl_sidespeed", "1000", FCVAR_REPLICATED | FCVAR_CHEAT );
+ConVar cl_upspeed( "cl_upspeed", "1000", FCVAR_REPLICATED | FCVAR_CHEAT );
+ConVar cl_forwardspeed( "cl_forwardspeed", "1000", FCVAR_REPLICATED | FCVAR_CHEAT );
+ConVar cl_backspeed( "cl_backspeed", "1000", FCVAR_REPLICATED | FCVAR_CHEAT );
 #endif // CSTRIKE_DLL
 
 // This is declared in the engine, too
@@ -327,7 +345,7 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_FIELD( m_iBonusChallenge, FIELD_INTEGER ),
 	DEFINE_FIELD( m_lastDamageAmount, FIELD_INTEGER ),
 	DEFINE_FIELD( m_tbdPrev, FIELD_TIME ),
-	DEFINE_FIELD( m_flStepSoundTime, FIELD_FLOAT ),
+	//DEFINE_FIELD( m_flStepSoundTime, FIELD_TIME ),	|-- Mirv: Removed to fix footsteps
 	DEFINE_ARRAY( m_szNetname, FIELD_CHARACTER, MAX_PLAYER_NAME_LENGTH ),
 
 	//DEFINE_FIELD( m_flgeigerRange, FIELD_FLOAT ),	// Don't restore, reset in Precache()
@@ -361,9 +379,11 @@ BEGIN_DATADESC( CBasePlayer )
 	//DEFINE_FIELD( m_lasty, FIELD_INTEGER ),
 
 	DEFINE_FIELD( m_iFrags, FIELD_INTEGER ),
+	DEFINE_FIELD( m_iFortPoints, FIELD_INTEGER ),
 	DEFINE_FIELD( m_iDeaths, FIELD_INTEGER ),
 	DEFINE_FIELD( m_bAllowInstantSpawn, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_flNextDecalTime, FIELD_TIME ),
+	DEFINE_FIELD( m_iAssists, FIELD_INTEGER ),
 	//DEFINE_AUTO_ARRAY( m_szTeamName, FIELD_STRING ), // mp
 
 	//DEFINE_FIELD( m_iConnected, FIELD_INTEGER ),
@@ -604,6 +624,7 @@ CBasePlayer::CBasePlayer( )
 	m_PlayerInfo.SetParent( this );
 
 	ResetObserverMode();
+	ResetFortPointsCount();
 
 	m_surfaceProps = 0;
 	m_pSurfaceData = NULL;
@@ -621,6 +642,13 @@ CBasePlayer::CBasePlayer( )
 	m_nNumCrouches = 0;
 	m_bDuckToggled = false;
 	m_bPhysicsWasFrozen = false;
+
+	// Mulch:
+	// -1 = just joined map/need to force spawn once team/class have been chosen
+	// 0 - x = respawn delay (like when typing "kill" in the console)
+	m_flNextSpawnDelay = -1.0f;
+
+	ResetAsisstsCount();
 
 	// Used to mask off buttons
 	m_afButtonDisabled = 0;
@@ -684,6 +712,14 @@ void CBasePlayer::SetupVisibility( CBaseEntity *pViewEntity, unsigned char *pvs,
 
 int	CBasePlayer::UpdateTransmitState()
 {
+	// --> FF
+#ifdef GAME_DLL
+	// always transmit if you're an objective
+	if (m_ObjectivePlayerRefs.Count() > 0)
+		return SetTransmitState(FL_EDICT_ALWAYS);
+#endif // GAME_DLL
+	// <-- FF
+
 	// always call ShouldTransmit() for players
 	return SetTransmitState( FL_EDICT_FULLCHECK );
 }
@@ -731,9 +767,10 @@ int CBasePlayer::ShouldTransmit( const CCheckTransmitInfo *pInfo )
 
 bool CBasePlayer::WantsLagCompensationOnEntity( const CBasePlayer *pPlayer, const CUserCmd *pCmd, const CBitVec<MAX_EDICTS> *pEntityTransmitBits ) const
 {
+	/*  Jiggles: We need to predict team members for our Medpack and Wrench
 	// Team members shouldn't be adjusted unless friendly fire is on.
 	if ( !friendlyfire.GetInt() && pPlayer->GetTeamNumber() == GetTeamNumber() )
-		return false;
+		return false;*/
 
 	// If this entity hasn't been transmitted to us and acked, then don't bother lag compensating it.
 	if ( pEntityTransmitBits && !pEntityTransmitBits->Get( pPlayer->entindex() ) )
@@ -836,11 +873,13 @@ void CBasePlayer::DeathSound( const CTakeDamageInfo &info )
 		EmitSound( "Player.Death" );
 	}
 
+	// --> Mirv: Don't play suit sound'
 	// play one of the suit death alarms
-	if ( IsSuitEquipped() )
+	/*if ( IsSuitEquipped() )
 	{
 		UTIL_EmitGroupnameSuit(edict(), "HEV_DEAD");
-	}
+	}*/
+	// <-- Mirv: Don't play suit sound
 }
 
 // override takehealth
@@ -909,7 +948,8 @@ void CBasePlayer::TraceAttack( const CTakeDamageInfo &inputInfo, const Vector &v
 			// --------------------------------------------------
 			//  If an NPC check if friendly fire is disallowed
 			// --------------------------------------------------
-			CAI_BaseNPC *pNPC = info.GetAttacker()->MyNPCPointer();
+			// --> Mirv: All this disabled so we can impact friendlies
+			/*CAI_BaseNPC* pNPC = info.GetAttacker()->MyNPCPointer();
 			if ( pNPC && (pNPC->CapabilitiesGet() & bits_CAP_NO_HIT_PLAYER) && pNPC->IRelationType( this ) != D_HT )
 				return;
 
@@ -918,13 +958,13 @@ void CBasePlayer::TraceAttack( const CTakeDamageInfo &inputInfo, const Vector &v
 			{
 				if ( !g_pGameRules->FPlayerCanTakeDamage( this, info.GetAttacker(), info ) )
 					return;
-			}
+			}*/
 		}
 
 		SetLastHitGroup( ptr->hitgroup );
 
-		
-		switch ( ptr->hitgroup )
+		// --> Mirv: No location damage please
+		/*switch (ptr->hitgroup)
 		{
 		case HITGROUP_GENERIC:
 			break;
@@ -947,7 +987,8 @@ void CBasePlayer::TraceAttack( const CTakeDamageInfo &inputInfo, const Vector &v
 			break;
 		default:
 			break;
-		}
+		}*/
+		// <-- Mirv: No location damage please
 
 #ifdef HL2_EPISODIC
 		// If this damage type makes us bleed, then do so
@@ -955,8 +996,12 @@ void CBasePlayer::TraceAttack( const CTakeDamageInfo &inputInfo, const Vector &v
 		if ( bShouldBleed )
 #endif
 		{
-			SpawnBlood(ptr->endpos, vecDir, BloodColor(), info.GetDamage());// a little surface blood.
-			TraceBleed( info.GetDamage(), vecDir, ptr, info.GetDamageType() );
+			// Fix blood showing for teammates when FF is off.
+			if (g_pGameRules->FCanTakeDamage(ToFFPlayer(this), info.GetAttacker()))
+			{
+				SpawnBlood(ptr->endpos, vecDir, BloodColor(), info.GetDamage());// a little surface blood.
+				TraceBleed(info.GetDamage(), vecDir, ptr, info.GetDamageType());
+			}
 		}
 
 		AddMultiDamage( info, this );
@@ -1125,8 +1170,7 @@ int CBasePlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 		return 0;
 	// go take the damage first
 
-	
-	if ( !g_pGameRules->FPlayerCanTakeDamage( this, info.GetAttacker(), inputInfo ) )
+	if ( !g_pGameRules->FCanTakeDamage(this, info.GetAttacker()/*, inputInfo*/))
 	{
 		// Refuse the damage
 		return 0;
@@ -1562,6 +1606,13 @@ void CBasePlayer::RemoveAllItems( bool removeSuit )
 	}
 
 	UpdateClientData();
+
+	IGameEvent* pEvent = gameeventmanager->CreateEvent("player_removeallitems");
+	if (pEvent)
+	{
+		pEvent->SetInt("userid", GetUserID());
+		gameeventmanager->FireEvent(pEvent, true);
+	}
 }
 
 bool CBasePlayer::IsDead() const
@@ -1682,10 +1733,12 @@ void CBasePlayer::Event_Killed( const CTakeDamageInfo &info )
 	}
 
 	// don't let the status bar glitch for players with <0 health.
-	if (m_iHealth < -99)
+	// UNDONE: Check status bar in the actual display. We need to
+	// allow health to go way negative for gibbing
+	/*if (m_iHealth < -99)
 	{
 		m_iHealth = 0;
-	}
+	}*/
 
 	// holster the current weapon
 	if ( GetActiveWeapon() )
@@ -1697,7 +1750,10 @@ void CBasePlayer::Event_Killed( const CTakeDamageInfo &info )
 
 	if ( !IsObserver() )
 	{
-		SetViewOffset( VEC_DEAD_VIEWHEIGHT_SCALED( this ) );
+		// Jiggles: We're not doing the death view change here now -- see C_FFPlayer::CalcView() instead
+		// 2013-CHANGELATER
+		// NOTES: need tests on this one, sdk 2006 used VEC_DEAD_VIEWHEIGHT
+		//SetViewOffset( VEC_DEAD_VIEWHEIGHT_SCALED( this ) );
 	}
 	m_lifeState		= LIFE_DYING;
 
@@ -1953,7 +2009,11 @@ void CBasePlayer::WaterMove()
 		
 		if (m_AirFinished < gpGlobals->curtime)
 		{
-			EmitSound( "Player.DrownStart" );
+			//EmitSound( "Player.DrownStart" );
+			// --> Mirv: Fix the bubbly spawn start
+			if (GetTeamNumber() != TEAM_SPECTATOR && GetTeamNumber() != TEAM_UNASSIGNED)
+				EmitSound("Player.DrownStart");
+			// <-- Mirv: Fix the bubbly spawn start
 		}
 
 		m_AirFinished = gpGlobals->curtime + AIRTIME;
@@ -2148,16 +2208,53 @@ void CBasePlayer::PlayerDeathThink(void)
 // if the player has been dead for one second longer than allowed by forcerespawn, 
 // forcerespawn isn't on. Send the player off to an intermission camera until they 
 // choose to respawn.
-	if ( g_pGameRules->IsMultiplayer() && ( gpGlobals->curtime > (m_flDeathTime + DEATH_ANIMATION_TIME) ) && !IsObserver() )
+	// Bug #0000567: Dying and electing not to respawn results in the spec hud letterbox being displayed
+	/*if ( g_pGameRules->IsMultiplayer() && ( gpGlobals->curtime > (m_flDeathTime + DEATH_ANIMATION_TIME) ) && !IsObserver() )
 	{
 		// go to dead camera. 
 		StartObserverMode( m_iObserverLastMode );
-	}
+	}*/
 	
+	// Bug #0000569: Choosing a team after joining the server causes you to get stuck for a few seconds
+	// Respawn now because you just changed teams/joined the server/map change etc.
+	if (m_flNextSpawnDelay == -1)
+	{
+		respawn(this, !IsObserver());
+	}
+
+	// Bug #0000578: Suiciding using /kill doesn't cause a respawn delay
+	float fTimeDelta = m_flDeathTime + m_flNextSpawnDelay - gpGlobals->curtime;
+
+	// I changed this so that we can display messages to the player when they're dead
+	// the old version just spammed an empty message at the player when it was time to spawn. -> Defrag
+	if (fTimeDelta > 0.0f)
+	{
+		char szSpawnTime[10];
+		Q_snprintf(szSpawnTime, sizeof(szSpawnTime), "%.2f", m_flDeathTime + m_flNextSpawnDelay - gpGlobals->curtime);
+		ClientPrint(this, HUD_PRINTCENTER, "#FF_CANTSPAWN", szSpawnTime);
+	}
+
+	// display the ready to spawn message for two seconds after the respawn timer has expired
+	// but only if there actually was a delay in the first place -> Defrag
+	else if (fTimeDelta > -2.0f && m_flNextSpawnDelay > 0.01f)
+	{
+		ClientPrint(this, HUD_PRINTCENTER, "#FF_READYTOSPAWN");
+	}
+	else
+		// clear it out
+		ClientPrint(this, HUD_PRINTCENTER, "");
+
+	// Can't respawn if there's a spawn delay
+	if (gpGlobals->curtime < (m_flDeathTime + m_flNextSpawnDelay))
+	{
+		// Return so we don't allow the player a chance to respawn
+		return;
+	}
+
 // wait for any button down,  or mp_forcerespawn is set and the respawn time is up
 	if (!fAnyButtonDown 
-		&& !( g_pGameRules->IsMultiplayer() && forcerespawn.GetInt() > 0 && (gpGlobals->curtime > (m_flDeathTime + 5))) )
-		return;
+		&& !( g_pGameRules->IsMultiplayer() && forcerespawn.GetInt() > 0 && (gpGlobals->curtime > (m_flDeathTime + 0.5f))))	// |-- Mirv: No minimum length death time
+		return;																												// 5 -> 0.5f
 
 	m_nButtons = 0;
 	m_iRespawnFrames = 0;
@@ -2165,7 +2262,7 @@ void CBasePlayer::PlayerDeathThink(void)
 	//Msg( "Respawn\n");
 
 	respawn( this, !IsObserver() );// don't copy a corpse if we're in deathcam.
-	SetNextThink( TICK_NEVER_THINK );
+	//SetNextThink( TICK_NEVER_THINK );		// |-- Mirv: Still think because respawn may not be possible
 }
 
 /*
@@ -2350,6 +2447,14 @@ bool CBasePlayer::SetObserverMode(int mode )
 		//=============================================================================
 		// HPE_END
 		//=============================================================================
+	}
+
+	// Recenter the eye angles.
+	if (mode != OBS_MODE_DEATHCAM)
+	{
+		QAngle eyeAngles = EyeAngles();
+		eyeAngles.z = 0.f;
+		SnapEyeAngles(eyeAngles);
 	}
 
 	CheckObserverSettings();
@@ -2650,6 +2755,35 @@ bool CBasePlayer::SetObserverTarget(CBaseEntity *target)
 
 		JumptoPosition( tr.endpos, ang );
 	}
+
+	// Dexter: always set our conc time to new observer. 
+	// reason is, if we switch obs mode from in eye or to a new target
+	// update conc status appropriately (remove/update).
+
+	CFFPlayer* pFFSelf = ToFFPlayer(this);
+	if (pFFSelf)
+	{
+		if (m_iObserverMode == OBS_MODE_IN_EYE)
+		{
+			// we are still in eye, so update conc status to match this dude
+			CFFPlayer* pFFNewSpecTarget = ToFFPlayer(target);
+			if (pFFNewSpecTarget)
+			{
+				pFFSelf->m_flConcTime = pFFNewSpecTarget->m_flConcTime;
+				float timeRemaining = pFFNewSpecTarget->m_flConcTime == -1 ? -1 : (pFFNewSpecTarget->m_flConcTime > gpGlobals->curtime ? pFFNewSpecTarget->m_flConcTime - gpGlobals->curtime : 0);
+
+				if (timeRemaining > 0 || timeRemaining == -1)
+					pFFSelf->Concuss(timeRemaining, timeRemaining);
+				else
+					pFFSelf->UnConcuss(); // be sure to clear concussion icon
+			}
+		}
+		else
+		{
+			// clear conc time if we went to roaming etc
+			pFFSelf->UnConcuss();
+		}
+	}
 	
 	return true;
 }
@@ -2661,45 +2795,58 @@ bool CBasePlayer::IsValidObserverTarget(CBaseEntity * target)
 
 	// MOD AUTHORS: Add checks on target here or in derived method
 
-	if ( !target->IsPlayer() )	// only track players
-		return false;
-
-	CBasePlayer * player = ToBasePlayer( target );
-
-	/* Don't spec observers or players who haven't picked a class yet
- 	if ( player->IsObserver() )
-		return false;	*/
-
-	if( player == this )
-		return false; // We can't observe ourselves.
-
-	if ( player->IsEffectActive( EF_NODRAW ) ) // don't watch invisible players
-		return false;
-
-	if ( player->m_lifeState == LIFE_RESPAWNABLE ) // target is dead, waiting for respawn
-		return false;
-
-	if ( player->m_lifeState == LIFE_DEAD || player->m_lifeState == LIFE_DYING )
+	if (target->IsPlayer())	// track players
 	{
-		if ( (player->m_flDeathTime + DEATH_ANIMATION_TIME ) < gpGlobals->curtime )
+		CBasePlayer* player = ToBasePlayer(target);
+
+		/* Don't spec observers or players who haven't picked a class yet
+		if ( player->IsObserver() )
+			return false;	*/
+
+		if (player == this)
+			return false; // We can't observe ourselves.
+
+		// gibbed players have EF_NODRAW effect active, so make an exception for LIFE_DEAD players
+		if (player->m_lifeState != LIFE_DEAD && player->m_lifeState != LIFE_RESPAWNABLE && player->IsEffectActive(EF_NODRAW)) // don't watch invisible players
+			return false;
+
+		// 0001670: Player you are spectating changes when they die
+		// Commenting out the death check as dead players are actually valid targets (since they respawn almost instantly anyway...)
+		// Might want to alter this to be controllable by lua in future as certain game types may not allow respawning  -> Defrag
+
+		//if ( player->m_lifeState == LIFE_RESPAWNABLE ) // target is dead, waiting for respawn
+			//return false;
+
+		if (player->m_lifeState == LIFE_DEAD || player->m_lifeState == LIFE_DYING)
 		{
-			return false;	// allow watching until 3 seconds after death to see death animation
+			if ((player->m_flDeathTime + DEATH_ANIMATION_TIME) < gpGlobals->curtime)
+			{
+				return false;	// allow watching until 3 seconds after death to see death animation
+			}
 		}
-	}
-		
-	// check forcecamera settings for active players
-	if ( GetTeamNumber() != TEAM_SPECTATOR )
-	{
-		switch ( mp_forcecamera.GetInt() )	
+
+		// check forcecamera settings for active players
+		if (GetTeamNumber() != TEAM_SPECTATOR)
 		{
-			case OBS_ALLOW_ALL	:	break;
-			case OBS_ALLOW_TEAM :	if ( GetTeamNumber() != target->GetTeamNumber() )
-										 return false;
-									break;
-			case OBS_ALLOW_NONE :	return false;
+			switch (mp_forcecamera.GetInt())
+			{
+			case OBS_ALLOW_ALL:	break;
+			case OBS_ALLOW_TEAM:	if (GetTeamNumber() != target->GetTeamNumber())
+				return false;
+				break;
+			case OBS_ALLOW_NONE:	return false;
+			}
 		}
+		else if (target->Classify() == CLASS_INFOSCRIPT) // track info_ff_scripts
+		{
+			CFFInfoScript* pInfoScript = static_cast<CFFInfoScript*>(target);
+
+			if (pInfoScript->IsRemoved())
+				return false;
+		}
+		else
+			return false; // not one of the trackable entity types
 	}
-	
 	return true;	// passed all test
 }
 
@@ -2902,10 +3049,10 @@ void CBasePlayer::Duck( )
 //
 // ID's player as such.
 //
-Class_T  CBasePlayer::Classify ( void )
-{
-	return CLASS_PLAYER;
-}
+//Class_T  CBasePlayer::Classify ( void )
+//{
+//	return CLASS_PLAYER;
+//}
 
 
 void CBasePlayer::ResetFragCount()
@@ -2917,7 +3064,32 @@ void CBasePlayer::ResetFragCount()
 void CBasePlayer::IncrementFragCount( int nCount )
 {
 	m_iFrags += nCount;
+	m_iFrags = min(m_iFrags, 9999);	// |-- Mirv: Added to placate the trepids
 	pl.frags = m_iFrags;
+}
+
+void CBasePlayer::ResetFortPointsCount()
+{
+	m_iFortPoints = 0;
+	//pl.fortpoints = m_iFortPoints;
+}
+
+void CBasePlayer::IncrementFortPointsCount(int nCount)
+{
+	m_iFortPoints += nCount;
+	m_iFortPoints = min(m_iFortPoints, 9999999);	// |-- Mirv: Added to placate the trepids
+
+	//pl.fortpoints = m_iFortPoints;
+}
+
+void CBasePlayer::ResetAsisstsCount()
+{
+	m_iAssists = 0;
+}
+
+void CBasePlayer::IncrementAssistsCount(int nCount)
+{
+	m_iAssists += nCount;
 }
 
 void CBasePlayer::ResetDeathCount()
@@ -2951,6 +3123,28 @@ void CBasePlayer::AddPoints( int score, bool bAllowNegativeScore )
 
 	m_iFrags += score;
 	pl.frags = m_iFrags;
+}
+
+void CBasePlayer::AddFortPoints(int iFortpoints, const char* szDescription)
+{
+	m_iFortPoints += iFortpoints;
+	//pl.fortpoints = m_iFortPoints;
+	//ClientPrint( this, HUD_PRINTTALK, ("You scored " + (char *) fortpoints + " points!")  );
+	//ClientPrint( this, HUD_PRINTTALK, "#FF_SCOREPOINTS", fortpoints );
+
+	CSingleUserRecipientFilter filter(this);
+	filter.MakeReliable();
+
+	// set latest score on user HUD
+	UserMessageBegin(filter, "SetPlayerLatestFortPoints");
+	WRITE_STRING(szDescription);
+	WRITE_SHORT(iFortpoints);
+	MessageEnd();
+
+	// set new total score on user HUD
+	UserMessageBegin(filter, "SetPlayerTotalFortPoints");
+	WRITE_LONG(m_iFortPoints);
+	MessageEnd();
 }
 
 void CBasePlayer::AddPointsToTeam( int score, bool bAllowNegativeScore )
@@ -3393,6 +3587,12 @@ void CBasePlayer::PhysicsSimulate( void )
 	gpGlobals->curtime		= savetime;
 	gpGlobals->frametime	= saveframetime;	
 
+	// Since this isn't called for bots.. call it here?
+	if (m_pPhysicsController && IsBot())
+	{
+		UpdateVPhysicsPosition(m_vNewVPhysicsPosition, m_vNewVPhysicsVelocity, gpGlobals->frametime);
+	}
+
 // 	// Kick the player if they haven't sent a user command in awhile in order to prevent clients
 // 	// from using packet-level manipulation to mess with gamestate.  Not sending usercommands seems
 // 	// to have all kinds of bad effects, such as stalling a bunch of Think()'s and gamestate handling.
@@ -3665,6 +3865,9 @@ ConVar xc_crouch_debounce( "xc_crouch_debounce", "0", FCVAR_NONE );
 //-----------------------------------------------------------------------------
 void CBasePlayer::PlayerRunCommand(CUserCmd *ucmd, IMoveHelper *moveHelper)
 {
+	if (GetTeamNumber() <= TEAM_SPECTATOR)
+		ucmd->buttons &= ~IN_USE;
+
 	m_touchedPhysObject = false;
 
 	if ( pl.fixangle == FIXANGLE_NONE)
@@ -3680,7 +3883,8 @@ void CBasePlayer::PlayerRunCommand(CUserCmd *ucmd, IMoveHelper *moveHelper)
 		ucmd->forwardmove = 0;
 		ucmd->sidemove = 0;
 		ucmd->upmove = 0;
-		ucmd->buttons = 0;
+		// Jiggles: Don't block the USE key b/c we need it for squeek's training map (but still block everything else)
+		ucmd->buttons &= IN_USE;
 		ucmd->impulse = 0;
 		VectorCopy ( pl.v_angle, ucmd->viewangles );
 	}
@@ -5317,13 +5521,29 @@ void CBasePlayer::CommitSuicide( bool bExplode /*= false*/, bool bForce /*= fals
 	// don't let them suicide for 5 seconds after suiciding
 	m_fNextSuicideTime = gpGlobals->curtime + 5;
 
-	int fDamage = DMG_PREVENT_PHYSICS_FORCE | ( bExplode ? ( DMG_BLAST | DMG_ALWAYSGIB ) : DMG_NEVERGIB );
+	// C4189: local variable is initialized but not referenced
+	//int fDamage = DMG_PREVENT_PHYSICS_FORCE | ( bExplode ? ( DMG_BLAST | DMG_ALWAYSGIB ) : DMG_NEVERGIB );
 
 	// have the player kill themself
 	m_iHealth = 0;
-	CTakeDamageInfo info( this, this, 0, fDamage, m_iSuicideCustomKillFlags );
-	Event_Killed( info );
-	Event_Dying( info );
+	
+	//Event_Killed( info );
+
+	// Bug #0000700: people with infection should give medic kill if they suicide
+	CFFPlayer* pPlayer = ToFFPlayer(this);
+	if (pPlayer && pPlayer->GetSpecialInfectedDeath() && pPlayer->IsInfected() && pPlayer->GetInfector())
+	{
+		CTakeDamageInfo info(pPlayer->GetInfector(), pPlayer->GetInfector(), 0, DMG_NEVERGIB); // |-- Mirv: pInflictor = NULL so that death message is "x died."
+		Event_Killed(info);
+		Event_Dying(info);
+	}
+	else
+	{
+		CTakeDamageInfo info(NULL, this, 0, DMG_NEVERGIB); // |-- Mirv: pInflictor = NULL so that death message is "x died."
+		Event_Killed(info);
+		Event_Dying(info);
+	}
+	
 	m_iSuicideCustomKillFlags = 0;
 }
 
@@ -5540,11 +5760,12 @@ void CBasePlayer::LeaveVehicle( const Vector &vecExitPoint, const QAngle &vecExi
 	}
 	OnVehicleEnd( vNewPos );
 	SetAbsOrigin( vNewPos );
+	qAngles[ROLL] = 0; // |- mulch
 	SetAbsAngles( qAngles );
 	// Clear out any leftover velocity
 	SetAbsVelocity( vec3_origin );
 
-	qAngles[ROLL] = 0;
+	//qAngles[ROLL] = 0; |- mulch
 	SnapEyeAngles( qAngles );
 
 #ifndef HL2_DLL
@@ -5711,6 +5932,27 @@ CBaseEntity	*CBasePlayer::GiveNamedItem( const char *pszName, int iSubType )
 	if ( pent != NULL && !(pent->IsMarkedForDeletion()) ) 
 	{
 		pent->Touch( this );
+	}
+
+	// --> Mirv: Dropped weapon fix
+
+	// Sometimes weapons aren't equipped, for some reason. This seems to happen during
+	// telefrags (either occasionally or constantly) and rapidly dying in respawn spam.
+	// Check if the weapon has really been picked up and remove if it hasn't.
+	if (pent->GetOwnerEntity() != this)
+	{
+		pent->SetTouch(NULL);
+		UTIL_Remove(pent);
+	}
+
+	// <-- Mirv
+
+	IGameEvent* pEvent = gameeventmanager->CreateEvent("player_additem");
+	if (pEvent)
+	{
+		pEvent->SetInt("userid", GetUserID());
+		pEvent->SetString("item", pszName);
+		gameeventmanager->FireEvent(pEvent, true);
 	}
 
 	return pent;
@@ -5894,6 +6136,9 @@ ImpulseCommands
 
 void CBasePlayer::ImpulseCommands( )
 {
+	if (GetTeamNumber() <= TEAM_SPECTATOR)
+		return;
+
 	trace_t	tr;
 		
 	int iImpulse = (int)m_nImpulse;
@@ -6411,6 +6656,17 @@ bool CBasePlayer::ClientCommand( const CCommand &args )
 
 		RemoveAllItems( true );
 
+		// dexter - if a FF Player, be sure to remove buildables
+		// note: could we just remove this console command and force the player to use existing team spec/menu code?
+		CFFPlayer* pPlayer = ToFFPlayer(this);
+		if (pPlayer)
+		{
+			//DevMsg("removing buildables from steamid %s", pPlayer->m_PlayerInfo.GetNetworkIDString());
+			pPlayer->RemoveProjectiles();
+			pPlayer->RemoveBackpacks();
+			pPlayer->RemoveBuildables();
+		}
+
 		ChangeTeam( TEAM_SPECTATOR );
 
 		StartObserverMode( OBS_MODE_ROAMING );
@@ -6534,6 +6790,33 @@ bool CBasePlayer::ClientCommand( const CCommand &args )
 				SetObserverTarget( target );
 			}
 		}
+		else if (stricmp(cmd, "spec_item") == 0) // chase next player
+		{
+			if (GetObserverMode() > OBS_MODE_FIXED && args.ArgC() == 2)
+			{
+				CFFInfoScript* target = NULL;
+				CFFInfoScript* pEnt = (CFFInfoScript*)gEntList.FindEntityByClassT(NULL, CLASS_INFOSCRIPT);
+
+				while (pEnt != NULL)
+				{
+					if (FStrEq(STRING(pEnt->GetEntityName()), args.Arg(1)))
+					{
+						target = pEnt;
+						break;
+					}
+
+					// Next!
+					pEnt = (CFFInfoScript*)gEntList.FindEntityByClassT(pEnt, CLASS_INFOSCRIPT);
+				}
+
+				if (IsValidObserverTarget(target))
+				{
+					SetObserverTarget(target);
+				}
+			}
+
+			return true;
+		}
 		
 		return true;
 	}
@@ -6541,9 +6824,14 @@ bool CBasePlayer::ClientCommand( const CCommand &args )
 	else if ( stricmp( cmd, "spec_goto" ) == 0 ) // chase next player
 	{
 		if ( ( GetObserverMode() == OBS_MODE_FIXED ||
-			   GetObserverMode() == OBS_MODE_ROAMING ) &&
+			   GetObserverMode() == OBS_MODE_ROAMING ||
+			   GetObserverMode() > OBS_MODE_FIXED) &&
 			 args.ArgC() == 6 )
 		{
+			// if is a spec and in a valid obs mode but not in roaming yet, then force roaming
+			if (!(GetObserverMode() == OBS_MODE_FIXED || GetObserverMode() == OBS_MODE_ROAMING))
+				SetObserverMode(OBS_MODE_ROAMING);
+
 			Vector origin;
 			origin.x = atof( args[1] );
 			origin.y = atof( args[2] );
@@ -6784,7 +7072,7 @@ void CBasePlayer::UpdateClientData( void )
 		gInitHUD = false;
 
 		UserMessageBegin( user, "ResetHUD" );
-			WRITE_BYTE( 0 );
+			//WRITE_BYTE( 0 );
 		MessageEnd();
 
 		if ( !m_fGameHUDInitialized )
@@ -6867,6 +7155,41 @@ void CBasePlayer::UpdateClientData( void )
 						&& ( m_nPoisonDmg > m_nPoisonRestored ) 
 						&& ( m_iHealth < 100 );
 
+	// --> Mirv: Damage indicators too
+	if (m_DmgTake || m_DmgSave || m_bitsHUDDamage != m_bitsDamageType)
+	{
+		// Comes from inside me if not set
+		Vector damageOrigin = GetLocalOrigin();
+		// send "damage" message
+		// causes screen to flash, and pain compass to show direction of damage
+		damageOrigin = m_DmgOrigin;
+
+		// only send down damage type that have hud art
+		int visibleDamageBits = m_bitsDamageType & DMG_SHOWNHUD;
+
+		m_DmgTake = clamp(m_DmgTake, 0, 255);
+		m_DmgSave = clamp(m_DmgSave, 0, 255);
+
+		CSingleUserRecipientFilter user(this);
+		user.MakeReliable();
+		UserMessageBegin(user, "Damage");
+		WRITE_BYTE(m_DmgSave);		// armor	
+		WRITE_BYTE(m_DmgTake);		// health
+		WRITE_LONG(visibleDamageBits);
+		WRITE_FLOAT(damageOrigin.x);	//BUG: Should be fixed point (to hud) not floats
+		WRITE_FLOAT(damageOrigin.y);	//BUG: However, the HUD does _not_ implement bitfield messages (yet)
+		WRITE_FLOAT(damageOrigin.z);	//BUG: We use WRITE_VEC3COORD for everything else
+		MessageEnd();
+
+		m_DmgTake = 0;
+		m_DmgSave = 0;
+		m_bitsHUDDamage = m_bitsDamageType;
+
+		// Clear off non-time-based damage indicators
+		m_bitsDamageType &= DMG_TIMEBASED;
+	}
+	// <-- Mirv: Damage indicators too
+
 	// Check if the bonus progress HUD element should be displayed
 	if ( m_iBonusChallenge == 0 && m_iBonusProgress == 0 && !( m_Local.m_iHideHUD & HIDEHUD_BONUS_PROGRESS ) )
 		m_Local.m_iHideHUD |= HIDEHUD_BONUS_PROGRESS;
@@ -6879,6 +7202,7 @@ void CBasePlayer::UpdateClientData( void )
 
 void CBasePlayer::RumbleEffect( unsigned char index, unsigned char rumbleData, unsigned char rumbleFlags )
 {
+#ifndef FF_DLL
 	if( !IsAlive() )
 		return;
 
@@ -6890,8 +7214,10 @@ void CBasePlayer::RumbleEffect( unsigned char index, unsigned char rumbleData, u
 	WRITE_BYTE( rumbleData );
 	WRITE_BYTE( rumbleFlags	);
 	MessageEnd();
+#else
+	return;
+#endif
 }
-
 void CBasePlayer::EnableControl(bool fControl)
 {
 	if (!fControl)
@@ -7956,12 +8282,13 @@ void SendProxy_CropFlagsToPlayerFlagBitsLength( const SendProp *pProp, const voi
 #ifndef HL2_DLL
 		SendPropFloat		( SENDINFO_VECTORELEM(m_vecViewOffset, 0), 8, SPROP_ROUNDDOWN, -32.0, 32.0f),
 		SendPropFloat		( SENDINFO_VECTORELEM(m_vecViewOffset, 1), 8, SPROP_ROUNDDOWN, -32.0, 32.0f),
-		SendPropFloat		( SENDINFO_VECTORELEM(m_vecViewOffset, 2), 20, SPROP_CHANGES_OFTEN,	0.0f, 256.0f),
+		//SendPropFloat		( SENDINFO_VECTORELEM(m_vecViewOffset, 2), 20, SPROP_CHANGES_OFTEN,	0.0f, 256.0f),
+		SendPropFloat		( SENDINFO_VECTORELEM(m_vecViewOffset, 2), 10, SPROP_CHANGES_OFTEN, -10.0f, 128.0f),	// |-- Mirv: Adjusted for TFC style bboxes
 #endif
 
 		SendPropFloat		( SENDINFO(m_flFriction),		8,	SPROP_ROUNDDOWN,	0.0f,	4.0f),
 
-		SendPropArray3		( SENDINFO_ARRAY3(m_iAmmo), SendPropInt( SENDINFO_ARRAY(m_iAmmo), -1, SPROP_VARINT | SPROP_UNSIGNED ) ),
+		//SendPropArray3	( SENDINFO_ARRAY3(m_iAmmo), SendPropInt( SENDINFO_ARRAY(m_iAmmo), -1, SPROP_VARINT | SPROP_UNSIGNED ) ),
 			
 		SendPropInt			( SENDINFO( m_fOnTarget ), 2, SPROP_UNSIGNED ),
 
@@ -7971,9 +8298,18 @@ void SendProxy_CropFlagsToPlayerFlagBitsLength( const SendProp *pProp, const voi
 		SendPropEHandle		( SENDINFO( m_hLastWeapon ) ),
 		SendPropEHandle		( SENDINFO( m_hGroundEntity ), SPROP_CHANGES_OFTEN ),
 
-		SendPropFloat		( SENDINFO_VECTORELEM(m_vecVelocity, 0), 32, SPROP_NOSCALE|SPROP_CHANGES_OFTEN ),
+		// 2013-CHANGELATER
+		// NOTES: might need a review
+		/*SendPropFloat		( SENDINFO_VECTORELEM(m_vecVelocity, 0), 32, SPROP_NOSCALE|SPROP_CHANGES_OFTEN ),
 		SendPropFloat		( SENDINFO_VECTORELEM(m_vecVelocity, 1), 32, SPROP_NOSCALE|SPROP_CHANGES_OFTEN ),
-		SendPropFloat		( SENDINFO_VECTORELEM(m_vecVelocity, 2), 32, SPROP_NOSCALE|SPROP_CHANGES_OFTEN ),
+		SendPropFloat		( SENDINFO_VECTORELEM(m_vecVelocity, 2), 32, SPROP_NOSCALE|SPROP_CHANGES_OFTEN ),*/
+
+		// --> Mirv: Increase bounds
+		SendPropFloat(SENDINFO_VECTORELEM(m_vecVelocity, 0), 20, SPROP_CHANGES_OFTEN, /*-2048.0f*/ -4096.0f, /*2048.0f*/ 4096.0f),
+		SendPropFloat(SENDINFO_VECTORELEM(m_vecVelocity, 1), 20, SPROP_CHANGES_OFTEN, /*-2048.0f*/ -4096.0f, /*2048.0f*/ 4096.0f),
+		SendPropFloat(SENDINFO_VECTORELEM(m_vecVelocity, 2), 16, SPROP_CHANGES_OFTEN, /*-2048.0f*/ -4096.0f, /*2048.0f*/ 4096.0f),
+		// <-- Mirv
+
 
 #if PREDICTION_ERROR_CHECK_LEVEL > 1 
 		SendPropVector		( SENDINFO( m_vecBaseVelocity ), -1, SPROP_COORD ),
@@ -8013,7 +8349,17 @@ void SendProxy_CropFlagsToPlayerFlagBitsLength( const SendProp *pProp, const voi
 
 		SendPropEHandle(SENDINFO(m_hVehicle)),
 		SendPropEHandle(SENDINFO(m_hUseEntity)),
-		SendPropInt		(SENDINFO(m_iHealth), -1, SPROP_VARINT | SPROP_CHANGES_OFTEN ),
+		//SendPropInt	(SENDINFO(m_iHealth), -1, SPROP_VARINT | SPROP_CHANGES_OFTEN ),
+		// 
+		// Added by Mulch for testing
+		SendPropInt		(SENDINFO(m_iHealth), 10),
+		SendPropInt		(SENDINFO(m_iMaxHealth), 10), //AfterShock: we should work this out from class
+		SendPropInt		(SENDINFO(m_iArmor), 10),
+		SendPropInt		(SENDINFO(m_iMaxArmor), 10), //AfterShock: we should work this out from class
+
+		SendPropArray3(SENDINFO_ARRAY3(m_iAmmo), SendPropInt(SENDINFO_ARRAY(m_iAmmo), 10, SPROP_UNSIGNED), SendProxy_OnlyToObservers),
+		// Added by Mulch for testing
+
 		SendPropInt		(SENDINFO(m_lifeState), 3, SPROP_UNSIGNED ),
 		SendPropInt		(SENDINFO(m_iBonusProgress), 15 ),
 		SendPropInt		(SENDINFO(m_iBonusChallenge), 4 ),
@@ -9040,6 +9386,12 @@ int	CPlayerInfo::GetFragCount()
 	return m_pParent->FragCount(); 
 }
 
+int	CPlayerInfo::GetFortPointsCount()
+{
+	Assert(m_pParent);
+	return m_pParent->FortPointsCount();
+}
+
 int	CPlayerInfo::GetDeathCount() 
 { 
 	Assert( m_pParent );
@@ -9244,6 +9596,15 @@ const QAngle CPlayerInfo::GetLocalAngles( void )
 	else
 	{
 		return QAngle();
+	}
+}
+
+void CPlayerInfo::PostClientMessagesSent(void)
+{
+	Assert(m_pParent);
+	if (m_pParent->IsBot())
+	{
+		m_pParent->PostClientMessagesSent();
 	}
 }
 

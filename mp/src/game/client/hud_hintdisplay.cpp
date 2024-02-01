@@ -340,7 +340,7 @@ void CHudHintDisplay::LocalizeAndDisplay( const char *pszHudTxtMsg, const char *
 }
 
 
-
+#ifdef HL2MP
 
 //-----------------------------------------------------------------------------
 // Purpose: Displays small key-centric hints on the right hand side of the screen
@@ -788,3 +788,5 @@ void CHudHintKeyDisplay::MsgFunc_KeyHintText( bf_read &msg )
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "KeyHintMessageHide" ); 
 	}
 }
+
+#endif

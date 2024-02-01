@@ -24,7 +24,7 @@
 #include "tier0/memdbgon.h"
 
 static ConVar cl_showfps( "cl_showfps", "0", 0, "Draw fps meter at top of screen (1 = fps, 2 = smooth fps)" );
-static ConVar cl_showpos( "cl_showpos", "0", 0, "Draw current position at top of screen" );
+static ConVar cl_showpos( "cl_showpos", "0", 0, "Draw current position at top of screen (view angles only show with sv_cheats 1)" );
 static ConVar cl_showbattery( "cl_showbattery", "0", 0, "Draw current battery level at top of screen when on battery power" );
 
 extern bool g_bDisplayParticlePerformance;
@@ -330,6 +330,16 @@ void CFPSPanel::Paint()
 											  "pos:  %.02f %.02f %.02f", 
 											  vecOrigin.x, vecOrigin.y, vecOrigin.z );
 		i++;
+
+		// only draw angle if cheats is on
+		if (sv_cheats && sv_cheats->GetBool())
+		{
+			g_pMatSystemSurface->DrawColoredText(m_hFont, x, 2 + i * (vgui::surface()->GetFontTall(m_hFont) + 2),
+				255, 255, 255, 255,
+				"ang:  %.2f %.2f %.2f",
+				MainViewAngles().x, MainViewAngles().y, MainViewAngles().z);
+			i++;
+		}
 
 		g_pMatSystemSurface->DrawColoredText( m_hFont, x, 2 + i * ( vgui::surface()->GetFontTall( m_hFont ) + 2 ), 
 											  255, 255, 255, 255, 

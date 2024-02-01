@@ -5,8 +5,9 @@
 //=============================================================================//
 
 #include "cbase.h"
-#include "sdk_fx_shared.h"
-#include "c_sdk_player.h"
+//#include "sdk_fx_shared.h"
+#include "ff_fx_shared.h"
+#include "c_ff_player.h"
 #include "c_basetempentity.h"
 #include <cliententitylist.h>
 

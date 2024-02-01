@@ -1235,8 +1235,17 @@ void SENTENCEG_PlaySentenceIndex( edict_t *entity, int iSentenceIndex, float vol
 {
 	if ( iSentenceIndex >= 0 )
 	{
-		CPASAttenuationFilter filter( GetContainingEntity( entity ), soundlevel );
-		CBaseEntity::EmitSentenceByIndex( filter, ENTINDEX(entity), CHAN_VOICE, iSentenceIndex, volume, soundlevel, flags, pitch );
+		/*CPASAttenuationFilter filter( GetContainingEntity( entity ), soundlevel );
+		CBaseEntity::EmitSentenceByIndex( filter, ENTINDEX(entity), CHAN_VOICE, iSentenceIndex, volume, soundlevel, flags, pitch );*/
+		// Jiggles: We don't want to send this to other players -- just use a SingleRecipientFilter
+		CBasePlayer* pPlayer = ToBasePlayer(GetContainingEntity(entity));
+		if (pPlayer)
+		{
+			CSingleUserRecipientFilter filter(pPlayer);
+			// Using CHAN_VOICE, the vox was getting cut-off by pain/death sounds
+			CBaseEntity::EmitSentenceByIndex(filter, ENTINDEX(entity), CHAN_STREAM/* CHAN_VOICE */, iSentenceIndex, volume, soundlevel, flags, pitch);
+		}
+
 	}
 }
 
@@ -1333,6 +1342,27 @@ void SENTENCEG_Init()
 		return;
 
 	engine->PrecacheSentenceFile( "scripts/sentences.txt" );
+
+	// begin jon: ability to use "maps\mapname_sentences.txt" and "scripts/sentences_common.txt" as well
+	Msg("SENTENCEG_Init: precached scripts/sentences.txt\n");
+
+	engine->PrecacheSentenceFile("scripts/sentences_common.txt");
+	Msg("SENTENCEG_Init: precached scripts/sentences_common.txt\n");
+
+	const char* mapname = STRING(gpGlobals->mapname);
+	if (mapname && *mapname)
+	{
+		if (filesystem->FileExists(UTIL_VarArgs("maps/%s_sentences.txt", mapname)))
+		{
+			char mapSentencesFilename[256] = { 0 };
+			Q_snprintf(mapSentencesFilename, sizeof(mapSentencesFilename), "maps/%s_sentences.txt", mapname);
+			engine->PrecacheSentenceFile(mapSentencesFilename);
+
+			Msg("SENTENCEG_Init: precached maps/%s_sentences.txt\n", mapname);
+		}
+	}
+	// end jon: ability to use "maps\mapname_sentences.txt" and "scripts/sentences_common.txt" as well
+
 	fSentencesInit = true;
 }
 
