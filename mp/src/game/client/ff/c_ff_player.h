@@ -75,9 +75,9 @@ bool CC_SpyCloak(void);
 bool CC_SpySilentCloak(void);
 bool CC_SpySmartCloak(void);
 
-bool CC_EngyMe(void);
-bool CC_SaveMe(void);
-bool CC_AmmoMe(void);
+bool CC_EngyMe(const CCommand& args = CCommand());
+bool CC_SaveMe(const CCommand& args = CCommand());
+bool CC_AmmoMe(const CCommand& args = CCommand());
 
 // Moved here from ff_shareddefs.h
 typedef struct SpyInfo_s

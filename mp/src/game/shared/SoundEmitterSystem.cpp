@@ -1217,7 +1217,7 @@ void CBaseEntity::EmitSoundShared(const char* soundname, float soundtime /*= 0.0
 	//VPROF( "CBaseEntity::EmitSound" );
 	VPROF_BUDGET("CBaseEntity::EmitSound", _T("CBaseEntity::EmitSound"));
 
-	CPASAttenuationFilter filter(this, soundname);
+	CPASAttenuationFilter filter( this, soundname );
 
 #ifdef GAME_DLL
 	// FF: AfterShock: Don't send to self. This fixes clientside prediction on sounds and means we can just do 1 shared EmitSound(bla)
@@ -1235,7 +1235,7 @@ void CBaseEntity::EmitSoundShared(const char* soundname, float soundtime /*= 0.0
 	params.m_pflSoundDuration = duration;
 	params.m_bWarnOnDirectWaveReference = true;
 
-	EmitSound(filter, entindex(), params);
+	EmitSound( filter, entindex(), params );
 }
 
 //-----------------------------------------------------------------------------

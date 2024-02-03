@@ -546,7 +546,7 @@ void IN_ScoreUp(const CCommand& args)
 }
 
 // BEGIN: Jiggles: For display of the Map Screenshot
-void IN_MapShotDown(void)
+void IN_MapShotDown(const CCommand& args)
 {
 	if (gViewPortInterface)
 	{
@@ -554,7 +554,7 @@ void IN_MapShotDown(void)
 			g_pMapScreen->KeyDown();
 	}
 }
-void IN_MapShotUp(void)
+void IN_MapShotUp(const CCommand& args)
 {
 	if (gViewPortInterface)
 	{
@@ -565,7 +565,7 @@ void IN_MapShotUp(void)
 // END: Jiggles: For display of the Map Screenshot
 
 // BEG: Added by Mulchman for team change & class change
-void IN_ChangeTeam(void)
+void IN_ChangeTeam(const CCommand& args)
 {
 	if (gViewPortInterface)
 	{
@@ -575,14 +575,14 @@ void IN_ChangeTeam(void)
 	}
 }
 
-void IN_ChangeClass(void)
+void IN_ChangeClass(const CCommand& args)
 {
 	// --> Mirv: Select team first bud
 	C_BasePlayer* player = C_BasePlayer::GetLocalPlayer();
 
 	if (player && player->GetTeamNumber() < TEAM_BLUE)
 	{
-		IN_ChangeTeam();
+		IN_ChangeTeam(args);
 		return;
 	}
 	// <-- Mirv: Select team first bud
@@ -596,7 +596,7 @@ void IN_ChangeClass(void)
 }
 // END: Added by Mulchman for team change & class change
 
-void IN_ServerInfo(void)
+void IN_ServerInfo(const CCommand& args)
 {
 	if (gViewPortInterface)
 	{
@@ -609,7 +609,7 @@ void IN_ServerInfo(void)
 extern void HudContextShowCalls(bool visible);
 
 // BEG: Mulch: For medic & engy hud radial style menu
-void IN_MedEngyMenuDown(void)
+void IN_MedEngyMenuDown(const CCommand& args)
 {
 	//if( g_pMedEngyHudMenu )
 	//	g_pMedEngyHudMenu->KeyDown();
@@ -617,7 +617,7 @@ void IN_MedEngyMenuDown(void)
 	HudContextShowCalls(true);
 }
 
-void IN_MedEngyMenuUp(void)
+void IN_MedEngyMenuUp(const CCommand& args)
 {
 	//if( g_pMedEngyHudMenu )
 	//	g_pMedEngyHudMenu->KeyUp();
@@ -628,13 +628,13 @@ void IN_MedEngyMenuUp(void)
 
 
 // BEGIN: Jiggles: For displaying the Hint Center
-void IN_HintCenterDown(void)
+void IN_HintCenterDown(const CCommand& args)
 {
 	if (g_pHintCenter)
 		g_pHintCenter->KeyDown();
 }
 
-void IN_HintCenterUp(void)
+void IN_HintCenterUp(const CCommand& args)
 {
 	if (g_pHintCenter)
 		g_pHintCenter->KeyUp();

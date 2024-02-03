@@ -636,7 +636,7 @@ bool CC_SpySmartCloak(void)
 	return true;
 }
 
-bool CC_EngyMe(void)
+bool CC_EngyMe(const CCommand& args)
 {
 	if (!engine->IsConnected() || !engine->IsInGame())
 		return false;
@@ -648,11 +648,11 @@ bool CC_EngyMe(void)
 	if (!pLocalPlayer->IsAlive())
 		return false;
 
-	pLocalPlayer->Command_EngyMe();
+	pLocalPlayer->Command_EngyMe(args);
 	return true;
 }
 
-bool CC_SaveMe(void)
+bool CC_SaveMe(const CCommand& args)
 {
 	if (!engine->IsConnected() || !engine->IsInGame())
 		return false;
@@ -664,11 +664,11 @@ bool CC_SaveMe(void)
 	if (!pLocalPlayer->IsAlive())
 		return false;
 
-	pLocalPlayer->Command_SaveMe();
+	pLocalPlayer->Command_SaveMe(args);
 	return true;
 }
 
-bool CC_AmmoMe(void)
+bool CC_AmmoMe(const CCommand& args)
 {
 	if (!engine->IsConnected() || !engine->IsInGame())
 		return false;
@@ -680,7 +680,7 @@ bool CC_AmmoMe(void)
 	if (!pLocalPlayer->IsAlive())
 		return false;
 
-	pLocalPlayer->Command_AmmoMe();
+	pLocalPlayer->Command_AmmoMe(args);
 	return true;
 }
 

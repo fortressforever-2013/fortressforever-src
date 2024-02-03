@@ -1771,7 +1771,7 @@ namespace FFLib
 		FF_LuaHudIcon( pPlayer, pszIdentifier, x, y, pszImage, 0, 0 );
 	}
 
-	// .addFunctionault alignment
+	// default alignment
 	void AddHudIcon( CFFPlayer *pPlayer, const char *pszImage, const char *pszIdentifier, int x, int y, int iWidth, int iHeight )
 	{
 		if( !pPlayer || !pszImage || !pszIdentifier )
@@ -1815,7 +1815,7 @@ namespace FFLib
 		}
 	}
 
-	// .addFunctionault alignment
+	// default alignment
 	void AddHudIconToTeam( CFFTeam *pTeam, const char *pszImage, const char *pszIdentifier, int x, int y, int iWidth, int iHeight )
 	{
 		if( !pszImage || !pszIdentifier || ( iWidth < 0 ) || ( iHeight < 0 ) )
@@ -1888,7 +1888,7 @@ namespace FFLib
 		}
 	}
 
-	// .addFunctionault alignment
+	// default alignment
 	void AddHudIconToAll( const char *pszImage, const char *pszIdentifier, int x, int y, int iWidth, int iHeight )
 	{
 		if( !pszImage || !pszIdentifier || ( iWidth < 0 ) || ( iHeight < 0 ) )

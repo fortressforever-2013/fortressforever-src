@@ -177,7 +177,8 @@ FF_SHARED_COMMAND( toggletwo, &CFFPlayer::Command_ToggleTwo, CC_ToggleTwo, "Prim
 FF_SHARED_COMMAND(primeone, &CFFPlayer::Command_PrimeOne, CC_PrimeOne, "Primes one of your primary grenades.", FF_CMD_ALIVE | FF_CMD_PREMATCH );
 FF_SHARED_COMMAND(primetwo, &CFFPlayer::Command_PrimeTwo, CC_PrimeTwo, "Prime one of your secondary grenades.", FF_CMD_ALIVE | FF_CMD_PREMATCH );
 FF_SHARED_COMMAND(throwgren, &CFFPlayer::Command_ThrowGren, CC_ThrowGren, "Throw a primed grenade.", FF_CMD_ALIVE | FF_CMD_CLOAKED | FF_CMD_PREMATCH );
-//		had to do it this way because you cant use + and - with the macros
+
+// had to do it this way because you cant use + and - with the macros
 #ifndef CLIENT_DLL
 	static CPlayerCommand SrvCmd_PlusGrenOne("+gren1", &CFFPlayer::Command_PrimeOne, FF_CMD_ALIVE | FF_CMD_PREMATCH );
 	static CPlayerCommand SrvCmd_MinusGrenOne("-gren1", &CFFPlayer::Command_ThrowGren, FF_CMD_ALIVE | FF_CMD_CLOAKED | FF_CMD_PREMATCH );
@@ -188,64 +189,28 @@ FF_SHARED_COMMAND(throwgren, &CFFPlayer::Command_ThrowGren, CC_ThrowGren, "Throw
 	{
 		bool shouldSend = CC_PrimeOne();
 		if(shouldSend && engine->IsInGame())
-		{
-			std::string fullcmd;
-			for(int i = 0; i < args.ArgC(); i++)
-			{
-				if(i > 0)
-					fullcmd += ' ';
-				fullcmd += args.Arg(i);
-			}
-			engine->ServerCmd(fullcmd.c_str());
-		}
+			engine->ServerCmd(args.GetCommandString());
 	}
 	static ConCommand CliCmd_PlusGrenOne("+gren1", CliCmdFunc_PlusGrenOne, "Primes a primary grenade while the key is held.");
 	void CliCmdFunc_MinusGrenOne(const CCommand& args)
 	{
 		bool shouldSend = CC_ThrowGren();
 		if(shouldSend && engine->IsInGame())
-		{
-			std::string fullcmd;
-			for(int i = 0; i < args.ArgC(); i++)
-			{
-				if(i > 0)
-					fullcmd += ' ';
-				fullcmd += args.Arg(i);
-			}
-			engine->ServerCmd(fullcmd.c_str());
-		}
+			engine->ServerCmd(args.GetCommandString());
 	}
 	static ConCommand CliCmd_MinusGrenOne("-gren1", CliCmdFunc_MinusGrenOne, "Releases a primary grenade that was previously primed with +gren1.");
 	void CliCmdFunc_PlusGrenTwo(const CCommand& args)
 	{
 		bool shouldSend = CC_PrimeTwo();
 		if(shouldSend && engine->IsInGame())
-		{
-			std::string fullcmd;
-			for(int i = 0; i < args.ArgC(); i++)
-			{
-				if(i > 0)
-					fullcmd += ' ';
-				fullcmd += args.Arg(i);
-			}
-			engine->ServerCmd(fullcmd.c_str());
-		}
+			engine->ServerCmd(args.GetCommandString());
 	}
 	static ConCommand CliCmd_PlusGrenTwo("+gren2", CliCmdFunc_PlusGrenTwo, "Primes a secondary grenade while the key is held.");
 	void CliCmdFunc_MinusGrenTwo(const CCommand& args)
 	{
 		bool shouldSend = CC_ThrowGren();
 		if(shouldSend && engine->IsInGame())
-		{
-			std::string fullcmd;
-			for(int i = 0; i < args.ArgC(); i++)
-			{
-				if(i > 0)
-					fullcmd += ' ';
-				fullcmd += args.Arg(i);
-			}
-			engine->ServerCmd(fullcmd.c_str());
-		}
+			engine->ServerCmd(args.GetCommandString());
 	}
 	static ConCommand CliCmd_MinusGrenTwo("-gren2", CliCmdFunc_MinusGrenTwo, "Releases a secondary grenade that was previously primed with +gren2.");
 #endif

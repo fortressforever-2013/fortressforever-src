@@ -518,7 +518,9 @@ void CViewRender::OnRenderStart()
 	C_BasePlayer* player = C_BasePlayer::GetLocalPlayer();
 	if (player)
 	{
-		default_fov.SetValue(player->m_iDefaultFOV);
+		// 0001369: fixes default_fov command to work again
+		// FF: SDK2006 -> SDK2013: this part was previously in c_baseplayer.cpp
+		//default_fov.SetValue(player->m_iDefaultFOV);
 
 		//Update our FOV, including any zooms going on
 		int iDefaultFOV = default_fov.GetInt();
