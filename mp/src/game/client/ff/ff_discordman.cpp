@@ -1,303 +1,209 @@
-// wrapper for discord rich presence api
-// they provide static libs, dlls and headers to use directly, but to no
-// surprise, having to use ancient vc2005 ABI, we cant even link against
-// modern DLL stub libs. Also the discord header includes stdint which vc2005 
-// doesn't even have (lol), so its mostly just manually pulling in the structs
-// and loading the library functions manually at runtime.
+// ff_discordman.cpp
+// rewrote entirely in SDK2013
 
 #include "cbase.h"
-#include <igameresources.h>
-#include <inetchannelinfo.h>
-#include "c_ff_player.h"
-#include "ff_utils.h"
-
 #include "ff_discordman.h"
+
+#include "igameresources.h"
+#include "c_ff_team.h"
+#include "ff_gamerules.h"
+
+#include <time.h>
+#include <sstream>
+#include <string>
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-#define DISCORD_LIBRARY_DLL "discord-rpc.dll"
-#define DISCORD_APP_ID "404135974801637378"
-#define STEAM_ID "253530"
+//#define DISCORD_LIBRARY_DLL "discord-rpc.dll"
+//#define DISCORD_APP_ID "404135974801637378"
+#define DISCORD_APP_ID "1203330706017619988"
+//#define STEAM_ID "243750" // 2013-CHANGELATER
 
 // update once every 10 seconds. discord has an internal rate limiter of 15 seconds as well
-#define DISCORD_UPDATE_RATE 10.0f
+//#define DISCORD_UPDATE_RATE 10.0f
 
-ConVar use_discord("cl_discord", "1", FCVAR_CLIENTDLL | FCVAR_ARCHIVE | FCVAR_USERINFO,
+ConVar use_discord("cl_discord", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE | FCVAR_USERINFO,
 	"Enable discord rich presence integration (current, server, map etc)");
+static int64_t startTimestamp = time(0);
 
 CFFDiscordManager _discord;
 
-// runtime entry point nastiness we will hide in here
-typedef void (*pDiscord_Initialize)(const char* applicationId,
-	DiscordEventHandlers* handlers,
-	int autoRegister,
-	const char* optionalSteamId);
-
-typedef void (*pDiscord_Shutdown)(void);
-typedef void (*pDiscord_RunCallbacks)(void);
-typedef void (*pDiscord_UpdatePresence)(const DiscordRichPresence* presence);
-
-static pDiscord_Initialize Discord_Initialize = NULL;
-static pDiscord_Shutdown Discord_Shutdown = NULL;
-static pDiscord_RunCallbacks Discord_RunCallbacks = NULL;
-static pDiscord_UpdatePresence Discord_UpdatePresence = NULL;
-
 CFFDiscordManager::CFFDiscordManager()
 {
-	Q_memset(m_szLatchedMapname, 0, MAX_MAP_NAME);
-	m_bApiReady = false;
-	m_bInitializeRequested = false;
 }
 
 CFFDiscordManager::~CFFDiscordManager()
 {
-	m_bApiReady = false;
-	if (m_hDiscordDLL)
-	{
-		// blocks :(
-		//if (m_bApiReady)
-		//	Discord_Shutdown();
-
-		// i mean really, we could just let os handle since our dtor is called at game exit but
-		FreeLibrary(m_hDiscordDLL);
-	}
-	m_hDiscordDLL = NULL;
-	Discord_Initialize = NULL;
-	Discord_Shutdown = NULL;
-	Discord_RunCallbacks = NULL;
-	Discord_UpdatePresence = NULL;
 }
 
 void CFFDiscordManager::Init()
 {
-	m_hDiscordDLL = LoadLibrary(DISCORD_LIBRARY_DLL);
-	if (!m_hDiscordDLL)
-	{
-		m_bErrored = true;
-		Warning("failed to load discord DLL, ensure %s exists\n", DISCORD_LIBRARY_DLL);
-		return;
-	}
-
-	Discord_Initialize = (pDiscord_Initialize)GetProcAddress(m_hDiscordDLL, "Discord_Initialize");
-	Discord_Shutdown = (pDiscord_Shutdown)GetProcAddress(m_hDiscordDLL, "Discord_Shutdown");
-	Discord_RunCallbacks = (pDiscord_RunCallbacks)GetProcAddress(m_hDiscordDLL, "Discord_RunCallbacks");
-	Discord_UpdatePresence = (pDiscord_UpdatePresence)GetProcAddress(m_hDiscordDLL, "Discord_UpdatePresence");
-
-	InitializeDiscord();
-	m_bInitializeRequested = true;
-
-	// make sure to call this after game system initialized
-	gameeventmanager->AddListener(this, "server_spawn", false);
-}
-
-void CFFDiscordManager::RunFrame()
-{
-	if (m_bErrored)
-		return;
-
-	// NOTE: we want to run this even if they have use_discord off, so we can clear
-	// any previous state that may have already been sent
-	UpdateRichPresence();
-
-	// always run this, otherwise we will chicken & egg waiting for ready
-	if (Discord_RunCallbacks)
-		Discord_RunCallbacks();
-}
-
-void CFFDiscordManager::OnReady()
-{
-	DevMsg("discord ready");
-	_discord.m_bApiReady = true;
-	_discord.Reset();
-}
-
-void CFFDiscordManager::OnDiscordError(int errorCode, const char* szMessage)
-{
-	_discord.m_bApiReady = false;
-	_discord.m_bErrored = true;
-	char buff[1024];
-	Q_snprintf(buff, 1024, "Discord init failed. code %d - error: %s\n", errorCode, szMessage);
-	Warning(buff);
-}
-
-void CFFDiscordManager::SetLogo()
-{
-	m_sDiscordRichPresence.largeImageKey = "logo-big";
-	m_sDiscordRichPresence.largeImageText = "";
-	// dont set big and small, small shows up bottom right like a notification. 
-	// class icon would be good
-	//m_sDiscordRichPresence.smallImageKey = "logo-small";
-	//m_sDiscordRichPresence.smallImageText = "";
-}
-
-void CFFDiscordManager::InitializeDiscord()
-{
-	if (!Discord_Initialize)
-		return;
-
 	DiscordEventHandlers handlers;
-	Q_memset(&handlers, 0, sizeof(handlers));
-	handlers.ready = &CFFDiscordManager::OnReady;
-	handlers.errored = &CFFDiscordManager::OnDiscordError;
-	// the join api is based around parties. dont bother
-	Discord_Initialize(DISCORD_APP_ID, &handlers, 1, STEAM_ID);
+	memset(&handlers, 0, sizeof(handlers));
+
+	handlers.ready = OnReady;
+	handlers.disconnected = OnDisconnect;
+	handlers.errored = OnError;
+	handlers.joinGame = OnDiscordJoin;
+	handlers.spectateGame = OnDiscordSpectate;
+	handlers.joinRequest = OnDiscordJoinRequest;
+
+	char appid[255];
+	sprintf(appid, "%d", engine->GetAppID());
+	Discord_Initialize(DISCORD_APP_ID, &handlers, 1, appid);
+
+	Reset();
 }
 
-bool CFFDiscordManager::NeedToUpdate()
+void CFFDiscordManager::OnReady(const DiscordUser* connectedUser)
 {
-	if (!m_bApiReady || m_bErrored || m_szLatchedMapname[0] == '\0')
-		return false;
+	DevMsg("[DISCORD] Connected to user %s#%s - %s\n",
+		connectedUser->username,
+		connectedUser->discriminator,
+		connectedUser->userId);
+}
 
-	return gpGlobals->curtime >= m_flLastUpdatedTime + DISCORD_UPDATE_RATE;
+void CFFDiscordManager::OnDisconnect(int errcode, const char* message)
+{
+	DevMsg("[DISCORD] Disconnected (%d: %s)\n", errcode, message);
+}
+
+void CFFDiscordManager::OnError(int errcode, const char* message)
+{
+	DevMsg("[DISCORD] Error (%d: %s)\n", errcode, message);
+}
+
+void CFFDiscordManager::OnDiscordJoin(const char* secret)
+{
+
+}
+
+void CFFDiscordManager::OnDiscordSpectate(const char* secret)
+{
+
+}
+
+void CFFDiscordManager::OnDiscordJoinRequest(const DiscordUser* request)
+{
+
+}
+
+void CFFDiscordManager::Shutdown()
+{
+	Discord_Shutdown();
+}
+
+void CFFDiscordManager::Update(DiscordRichPresence& discordPresence)
+{
+	if (!use_discord.GetInt())
+		return;
+
+	Discord_UpdatePresence(&discordPresence);
 }
 
 void CFFDiscordManager::Reset()
 {
-	if (m_bApiReady)
-	{
-		Q_memset(&m_sDiscordRichPresence, 0, sizeof(m_sDiscordRichPresence));
-		m_sDiscordRichPresence.state = "in menus";
-		SetLogo();
-		Discord_UpdatePresence(&m_sDiscordRichPresence);
-	}
+	memset(&m_szCurrentMap, 0, MAX_MAP_NAME);
+	DiscordRichPresence discordPresence;
+	memset(&discordPresence, 0, sizeof(discordPresence));
+
+	discordPresence.state = "Idle";
+	discordPresence.details = "Main Menu";
+	discordPresence.startTimestamp = startTimestamp;
+	discordPresence.largeImageKey = "logo-big";
+
+	Update(discordPresence);
 }
 
-void CFFDiscordManager::UpdatePlayerInfo()
+void CFFDiscordManager::LevelPreInit(const char* mapname)
 {
-	// FF_NumPlayers() from utils doesnt work client side because it doesnt use game resources :)
+	strncpy_s(m_szCurrentMap, mapname, MAX_MAP_NAME);
+
+	DiscordRichPresence discordPresence;
+	memset(&discordPresence, 0, sizeof(discordPresence));
+
+	discordPresence.state = "Joining a server...";
+	discordPresence.largeImageKey = "logo-big";
+
+	Update(discordPresence);
+}
+
+void CFFDiscordManager::LevelInit(const char* mapname)
+{
+	strncpy_s(m_szCurrentMap, mapname, MAX_MAP_NAME);
+
+	DiscordRichPresence discordPresence;
+	memset(&discordPresence, 0, sizeof(discordPresence));
+
+	char buffer[256];
+	discordPresence.state = "In-Game";
+	sprintf(buffer, "Map: %s", mapname);
+	discordPresence.details = buffer;
+	discordPresence.largeImageKey = "logo-big";
+
+	Update(discordPresence);
+
+	UpdateGameData();
+}
+
+void CFFDiscordManager::UpdateGameData()
+{
 	IGameResources* pGR = GameResources();
+
 	if (!pGR)
 		return;
 
-	int maxPlayers = gpGlobals->maxClients;
+	DiscordRichPresence discordPresence;
+	memset(&discordPresence, 0, sizeof(discordPresence));
+
 	int curPlayers = 0;
-	const char* className = NULL;
-	int teamNum = 0;
-	const char* playerName = NULL;
-	int frags = 0;
-	int deaths = 0;
-	int points = 0;
-	int teamPoints = 0;
+	int maxPlayers = gpGlobals->maxClients;
 
+	char detailsStr[128];
+	char stateStr[128];
+
+	std::stringstream scoresStream;
+	scoresStream << FFGameRules()->GetGameDescription() << " (";
+
+	for (int i = TEAM_BLUE; i <= TEAM_GREEN; i++)
+	{
+		C_FFTeam* team = GetGlobalFFTeam(i);
+
+		// If team is disabled, we probably don't want their score.
+		if (team->Get_Teams() == -1)
+			continue;
+
+		scoresStream << team->Get_Score();
+
+		// if the next team isn't disabled, add a separator
+		if (GetGlobalFFTeam(i + 1)->Get_Teams() != -1)
+			scoresStream << " | ";
+	}
+	scoresStream << ")";
+
+	// we could also grab the player count from the above for loop
+	// by summing all teams' player counts
+	// but that wouldn't count spectators or unassigned so..
 	for (int i = 1; i < maxPlayers; i++)
-	{
 		if (pGR->IsConnected(i))
-		{
-
 			curPlayers++;
-			if (pGR->IsLocalPlayer(i))
-			{
-				playerName = pGR->GetPlayerName(i);
-				frags = pGR->GetFrags(i);
-				deaths = pGR->GetDeaths(i);
-				teamNum = pGR->GetTeam(i);
-				points = pGR->GetFortPoints(i);
-				teamPoints = pGR->GetTeamScore(teamNum);
-				// dont call Class_IntToPrintString as spec, its noisy
-				if (teamNum != TEAM_SPECTATOR)
-				{
-					// this will always return our hardcoded english string,
-					// we dont want to send a localized to discord (right?)
-					int classNum = pGR->GetClass(i);
-					className = Class_IntToPrintString(classNum);
-				}
-			}
-		}
-	}
 
-	// state is top line, details is box below
-	if (m_szLatchedHostname[0] != '\0')
-	{
-		Q_snprintf(m_szServerInfo, DISCORD_FIELD_SIZE, "[%d/%d] %s - %s", curPlayers, maxPlayers, m_szLatchedMapname, m_szLatchedHostname);
-		DevMsg("[Discord] sending state of '%s'\n", m_szServerInfo);
-		m_sDiscordRichPresence.state = m_szServerInfo;
-	}
+	// step by step conversion to avoid a dangling pointer
+	std::string scoresString = scoresStream.str();
+	const char* actualTeamScores = scoresString.c_str();
 
-	const char* teamStr = NULL;
+	sprintf(stateStr, "Map: %s (%i/%i)", m_szCurrentMap, curPlayers, maxPlayers);
+	strcpy_s(detailsStr, 128, actualTeamScores);
 
-	switch (teamNum)
-	{
-		// NOTE: this should eventually respect using lua teamnames
-	case TEAM_RED: teamStr = "Red"; break;
-	case TEAM_BLUE: teamStr = "Blue"; break;
-	case TEAM_YELLOW: teamStr = "Yellow"; break;
-	case TEAM_GREEN: teamStr = "Green"; break;
-	}
+	discordPresence.state = stateStr;
+	discordPresence.details = detailsStr;
+	discordPresence.largeImageKey = "logo-big";
 
-	if (!teamStr || Q_strlen(className) < 1)
-	{
-		Q_snprintf(m_szDetails, DISCORD_FIELD_SIZE, "Spectating");
-	}
-	else
-	{
-		Q_snprintf(m_szDetails, DISCORD_FIELD_SIZE, "%s (%d pts) - %s %d pts %d:%d K:D", teamStr, teamPoints, className, points, frags, deaths);
-	}
-
-	DevMsg("[Discord] sending details of '%s'\n", m_szDetails);
-	m_sDiscordRichPresence.details = m_szDetails;
+	Update(discordPresence);
 }
 
-void CFFDiscordManager::FireGameEvent(IGameEvent* event)
-{
-	const char* type = event->GetName();
-
-	if (Q_strcmp(type, "server_spawn") == 0)
-	{
-		// copy from event, it is freed after
-		Q_strncpy(m_szLatchedHostname, event->GetString("hostname"), 255);
-	}
-}
-
-void CFFDiscordManager::UpdateRichPresence()
-{
-	if (!NeedToUpdate())
-		return;
-
-	m_flLastUpdatedTime = gpGlobals->curtime;
-
-	if (!use_discord.GetBool())
-	{
-		// Reset to clear any previous state
-		Reset();
-		return;
-	}
-
-	// we cant use time() due to relative timestamps for VCR mode
-	// dont bother with elapsed timer. kinda pointless
-	// discordPresence.startTimestamp = //time(0);
-
-	// MAP THUMBNAILS
-	//m_sDiscordRichPresence.largeImageKey = m_szLatchedMapname;
-	//m_sDiscordRichPresence.largeImageText = m_szLatchedMapname;
-
-	UpdatePlayerInfo();
-	UpdateNetworkInfo();
-
-	//m_sDiscordRichPresence.instance = 1;
-	SetLogo();
-	Discord_UpdatePresence(&m_sDiscordRichPresence);
-}
-
-
-void CFFDiscordManager::UpdateNetworkInfo()
-{
-	//INetChannelInfo* ni = engine->GetNetChannelInfo();
-	// set ip address as our cookie so if someone really wanted,
-	// they could connect directly through discord
-
-	// even in a private server (then needs password) this doesnt need to be secret,
-	// just set the address so other clients can get it in join request
-	// TODO: dont bother setting this, its based on a client challenge system
-	// for party joins, not servers. boo
-	// m_sDiscordRichPresence.joinSecret = ni->GetAddress();
-}
-
-void CFFDiscordManager::LevelInit(const char* szMapname)
+void CFFDiscordManager::LevelShutdown()
 {
 	Reset();
-	// we cant update our presence here, because if its the first map a client loaded,
-	// discord api may not yet be loaded, so latch
-	Q_strcpy(m_szLatchedMapname, szMapname);
-	// important, clear last update time as well
-	m_flLastUpdatedTime = max(0, gpGlobals->curtime - DISCORD_UPDATE_RATE);
 }

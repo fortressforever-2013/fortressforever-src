@@ -338,55 +338,32 @@ public:
 
 public:
 	// ---> FF server-side player command handlers
-	void Command_TestCommand(const CCommand& args);
-	void Command_Class(const CCommand& args);
-	void Command_Team(const CCommand& args);
-	void Command_WhatTeam( void ); // for testing purposes
-	void Command_BuildDispenser( void );
-	void Command_BuildSentryGun( void );
-	void Command_BuildDetpack( void );
-	void Command_BuildManCannon( void );
-	void Command_DispenserText(const CCommand& args);	// to set custom dispenser text messages on the server
-	void Command_PrimeOne(void); // prime primary grenade
-	void Command_PrimeTwo(void); // prime secondary grenade
-	void Command_ThrowGren(void); // throw currently primed grenade
-	void Command_ToggleOne( void );
-	void Command_ToggleTwo( void );	
-	void Command_FlagInfo( void ); // flaginfo
-	void Command_DropItems( void );
-	void Command_DetPipes( void );
-	void Command_Discard( void );	
+	void Command_TestCommand(const CCommand& args = CCommand());
+	void Command_Class(const CCommand& args = CCommand());
+	void Command_Team(const CCommand& args = CCommand());
+	void Command_WhatTeam(const CCommand& args = CCommand()); // for testing purposes
+	void Command_BuildDispenser(const CCommand& args = CCommand());
+	void Command_BuildSentryGun(const CCommand& args = CCommand());
+	void Command_BuildDetpack(const CCommand& args = CCommand());
+	void Command_BuildManCannon(const CCommand& args = CCommand());
+	void Command_DispenserText(const CCommand& args = CCommand());	// to set custom dispenser text messages on the server
+	void Command_PrimeOne(const CCommand& args = CCommand()); // prime primary grenade
+	void Command_PrimeTwo(const CCommand& args = CCommand()); // prime secondary grenade
+	void Command_ThrowGren(const CCommand& args = CCommand()); // throw currently primed grenade
+	void Command_ToggleOne(const CCommand& args = CCommand());
+	void Command_ToggleTwo(const CCommand& args = CCommand());
+	void Command_FlagInfo(const CCommand& args = CCommand()); // flaginfo
+	void Command_DropItems(const CCommand& args = CCommand());
+	void Command_DetPipes(const CCommand& args = CCommand());
+	void Command_Discard(const CCommand& args = CCommand());
 	void Command_SaveMe(const CCommand& args = CCommand());
 	void Command_EngyMe(const CCommand& args = CCommand());
 	void Command_AmmoMe(const CCommand& args = CCommand());
-	void Command_Disguise(const CCommand& args);
+	void Command_Disguise(const CCommand& args = CCommand());
 
-	void Command_SabotageSentry();
-	void Command_SabotageDispenser();
+	void Command_SabotageSentry(const CCommand& args = CCommand());
+	void Command_SabotageDispenser(const CCommand& args = CCommand());
 	// ---> end of FF server-side player command handlers
-
-	void Command_BuildDetpack(const CCommand& args);
-	
-	void Command_SpyCloak(const CCommand& args);
-	void Command_SpySilentCloak(const CCommand& args);
-	void Command_SpySmartCloak(const CCommand& args);
-
-	void Command_WhatTeam(const CCommand& args); // for testing purposes
-	void Command_BuildDispenser(const CCommand& args);
-	void Command_BuildSentryGun(const CCommand& args);
-	void Command_Discard(const CCommand& args);
-	void Command_FlagInfo(const CCommand& args); // flaginfo
-	void Command_DropItems(const CCommand& args);
-	void Command_DetPipes(const CCommand& args);
-	void Command_PrimeOne(const CCommand& args); // prime primary grenade
-	void Command_PrimeTwo(const CCommand& args); // prime secondary grenade
-	void Command_ThrowGren(const CCommand& args); // throw currently primed grenade
-	void Command_ToggleOne(const CCommand& args);
-	void Command_ToggleTwo(const CCommand& args);
-	void Command_BuildManCannon(const CCommand& args);
-
-	void Command_SabotageSentry(const CCommand& args);
-	void Command_SabotageDispenser(const CCommand& args);
 
 protected:
     // Beg: Added by Mulchman for building objects and such
@@ -709,7 +686,7 @@ private:
 
 public:
 	// --> Mirv: Various things
-	void Command_SetChannel(const CCommand& args);
+	void Command_SetChannel(const CCommand& args = CCommand());
 	int m_iChannel;
     float m_flMancannonTime;		// Last time the player was affected (pushed) by a jump pad
 	float m_flMancannonDetTime;		// Used to allow the Scout to det his jump pad
@@ -733,9 +710,9 @@ private:
 	
 	// Shared stuffs:
 public:
-	void Command_SpyCloak( void );
-	void Command_SpySilentCloak( void );
-	void Command_SpySmartCloak( void );
+	void Command_SpyCloak(const CCommand& args = CCommand());
+	void Command_SpySilentCloak(const CCommand& args = CCommand());
+	void Command_SpySmartCloak(const CCommand& args = CCommand());
 	bool IsCloaked( void ) const { return m_iCloaked != 0; }
 private:
 	void Cloak( void );	
@@ -792,7 +769,7 @@ public:
 	CFFMapGuide *FindMapGuide(string_t targetname);
 	void MoveTowardsMapGuide();
 
-	void Command_MapGuide(const CCommand& args);
+	void Command_MapGuide(const CCommand& args = CCommand());
 
 	void UpdateCamera( bool bUnassigned );
 

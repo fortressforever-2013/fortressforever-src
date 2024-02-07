@@ -1006,12 +1006,13 @@ void CInput::ScaleMovements(CUserCmd* cmd)
 
 	// clip to maxspeed
 	// FIXME FIXME:  This doesn't work
+
 	// --> Mirv: FIXED FIXED
 	if (Client_IsIntermission())
 	{
 		cmd->forwardmove = 0.0f;
-		cmd->sidemove = 0.0f;
-		cmd->upmove = 0.0f;
+		cmd->sidemove    = 0.0f;
+		cmd->upmove      = 0.0f;
 
 		ForceScoreboard();
 	}
@@ -1023,17 +1024,17 @@ void CInput::ScaleMovements(CUserCmd* cmd)
 	// telling the server to move at its own maxspeed and the client/server movements
 	// won't diverge.
 
-	C_FFPlayer* pPlayer = ToFFPlayer(CBasePlayer::GetLocalPlayer());
+	C_FFPlayer *pPlayer = ToFFPlayer(CBasePlayer::GetLocalPlayer());
 
 	if (!pPlayer)
 		return;
 
-	float flSpeed = sqrt((cmd->forwardmove * cmd->forwardmove) +
-		(cmd->sidemove * cmd->sidemove) +
-		(cmd->upmove * cmd->upmove));
+	float flSpeed = sqrt((cmd->forwardmove * cmd->forwardmove) + 
+						 (cmd->sidemove * cmd->sidemove) + 
+						 (cmd->upmove * cmd->upmove));
 
 	float flMaxSpeed = pPlayer->MaxSpeed() * pPlayer->m_flSpeedModifier;
-
+	
 	// SourceTV clients' maxspeed is set to zero, which made it impossible to move in freelook
 	// the commented code below (original SDK code?) has this if check -squeek
 	if (pPlayer->IsHLTV() && flMaxSpeed == 0)
@@ -1043,16 +1044,16 @@ void CInput::ScaleMovements(CUserCmd* cmd)
 	{
 		float fRatio = flMaxSpeed / flSpeed;
 		cmd->forwardmove *= fRatio;
-		cmd->sidemove *= fRatio;
-		cmd->upmove *= fRatio;
+		cmd->sidemove    *= fRatio;
+		cmd->upmove      *= fRatio;
 	}
 
 	// Oh gawd.
 	// These are transmitted in a way that the decimal part gets lost. This causes the
 	// client to end up slightly faster sometimes and therefore warp around as the server
 	// drags it back. Therefore lop off the fraction now.
-	cmd->forwardmove = (int)cmd->forwardmove;
-	cmd->sidemove = (int)cmd->sidemove;
+	cmd->forwardmove = (int) cmd->forwardmove;
+	cmd->sidemove = (int) cmd->sidemove;
 
 	// <-- Mirv
 	return;
@@ -1069,7 +1070,7 @@ void CInput::ScaleMovements(CUserCmd* cmd)
 	{
 		float fratio = spd / fmov;
 
-		if ( !IsNoClipping() )
+		if ( !IsNoClipping() ) 
 		{
 			cmd->forwardmove	*= fratio;
 			cmd->sidemove		*= fratio;

@@ -87,7 +87,7 @@ enum FF_View_Effects_t
 enum LuaEffectType
 {
 	LUA_EF_ONFIRE = 0,		// put a player on fire
-	LUA_EF_CONC,				// concuss a player
+	LUA_EF_CONC,			// concuss a player
 	LUA_EF_GAS,				// gas a player
 	LUA_EF_INFECT,			// infect a player
 	LUA_EF_RADIOTAG,		// radio tag a player

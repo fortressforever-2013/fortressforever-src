@@ -54,8 +54,10 @@ REGISTER_GAMERULES_CLASS( CFFGameRules );
 BEGIN_NETWORK_TABLE_NOBASE( CFFGameRules, DT_FFGameRules )
 #ifdef CLIENT_DLL
 	RecvPropFloat( RECVINFO( m_flRoundStarted ) ),
+	RecvPropString( RECVINFO( m_szGameDescription ) ), // discord rpc
 #else
 	SendPropFloat( SENDINFO( m_flRoundStarted ) ),
+	SendPropString( SENDINFO( m_szGameDescription ) ), // discord rpc
 #endif
 END_NETWORK_TABLE()
 
@@ -1825,8 +1827,20 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 	}
 	// <-- Mirv: Prematch
 
+	// --- added by YoYo178 to display game description on discord rich presence
+	void CFFGameRules::SetGameDescription(const char* szGameDescription)
+	{
+		BaseClass::SetGameDescription(szGameDescription);
+		Q_snprintf(m_szGameDescription.GetForModify(), sizeof(m_szGameDescription), "FF %s", szGameDescription);
+	}
+
 #endif
 
+	const char *CFFGameRules::GetGameDescription()
+	{
+		return m_szGameDescription.Get() ? m_szGameDescription.Get() : "Fortress Forever";
+	}
+	// --- added by YoYo178 to display game description on discord rich presence
 
 bool CFFGameRules::ShouldCollide( int collisionGroup0, int collisionGroup1 )
 {

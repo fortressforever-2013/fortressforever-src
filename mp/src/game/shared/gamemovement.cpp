@@ -4102,6 +4102,11 @@ void CGameMovement::PlayerRoughLandingEffects( float fvol )
 		CFFPlayer* pFFPlayer = ToFFPlayer(player);
 		Assert(pFFPlayer);
 
+		// SDK2013 bug: fall damage played when the player
+		// hits a wall at high speed
+		if (!pFFPlayer->GetGroundEntity())
+			return;
+
 		pFFPlayer->PlayFallSound(mv->m_vecAbsOrigin, player->m_pSurfaceData, fvol);
 
 		// Play landing sound right away.
@@ -4902,6 +4907,10 @@ void CGameMovement::PlayerMove( void )
 			}
 		}
 	}
+
+	CFFPlayer* pFFPlayer = dynamic_cast<CFFPlayer*>(player);
+	if (pFFPlayer->IsRampsliding() && pFFPlayer->m_nButtons & IN_JUMP)
+		CategorizePosition();
 
 	// Now that we are "unstuck", see where we are (player->GetWaterLevel() and type, player->GetGroundEntity()).
 	if ( player->GetMoveType() != MOVETYPE_WALK ||

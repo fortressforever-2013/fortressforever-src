@@ -117,6 +117,8 @@ public:
 
 	void			PlayerKilled(CBasePlayer *pVictim, const CTakeDamageInfo &info);
 
+	// display game description on discord rich presence
+	const char*		GetGameDescription(void);
 
 #ifdef CLIENT_DLL
 
@@ -166,6 +168,10 @@ public:
 	
 	virtual void	ClientSettingsChanged( CBasePlayer *pPlayer );
 
+	// display game description on discord rich presence
+	// clients should not be able to use this, obviously
+	virtual void	SetGameDescription(const char* szGameDescription);
+
 //private:
 //	CFFMapFilter	m_hMapFilter;
 
@@ -177,6 +183,10 @@ protected:
 	float	m_flGameStarted;
 	float	m_flNextMsg;
 	CNetworkVar( float, m_flRoundStarted );
+
+private:
+	// display game description on discord rich presence
+	CNetworkString(m_szGameDescription, 32);
 
 public:
 	void StartGame(bool bAllowReset=true);

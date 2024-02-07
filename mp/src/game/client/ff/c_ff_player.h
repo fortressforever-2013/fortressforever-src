@@ -62,18 +62,18 @@ bool CanStealMouseForAimSentry(void);
 //void SetStealMouseForCloak( bool bValue );
 //bool CanStealMouseForCloak( void );
 
-bool CC_PrimeOne(void);
-bool CC_PrimeTwo(void);
-bool CC_ThrowGren(void);
+bool CC_PrimeOne(const CCommand& args = CCommand());
+bool CC_PrimeTwo(const CCommand& args = CCommand());
+bool CC_ThrowGren(const CCommand& args = CCommand());
 
 // --> Mirv: More gren priming functions
-bool CC_ToggleOne(void);
-bool CC_ToggleTwo(void);
+bool CC_ToggleOne(const CCommand& args = CCommand());
+bool CC_ToggleTwo(const CCommand& args = CCommand());
 // <-- Mirv: More gren priming functions
 
-bool CC_SpyCloak(void);
-bool CC_SpySilentCloak(void);
-bool CC_SpySmartCloak(void);
+bool CC_SpyCloak(const CCommand& args = CCommand());
+bool CC_SpySilentCloak(const CCommand& args = CCommand());
+bool CC_SpySmartCloak(const CCommand& args = CCommand());
 
 bool CC_EngyMe(const CCommand& args = CCommand());
 bool CC_SaveMe(const CCommand& args = CCommand());
@@ -248,6 +248,7 @@ private:
 	int m_iActiveSabotages;
 	int m_iSpyDisguising;
 	bool m_bJetpacking;
+	bool m_bJetpackSFXPlaying;
 	// Called by shared code.
 		// for HUD ammo pickup history
 	int m_iOldPrimary;
@@ -545,18 +546,17 @@ protected:
 	bool m_bIsRampsliding;
 	float m_flNextRampslideFX;
 
+	// is the ramp slide sound playing?
+	// added to avoid console spam with sv_soundemitter_trace 1
+	// so we only call StopSound() when we actually need to
+	bool m_bSlideSFXPlaying;
+
 	// ----------------------------------
 	// Cloak stuff
 public:
-	void Command_SpyCloak(void);
-	void Command_SpySilentCloak(void);
-	void Command_SpySmartCloak(void);
-
-	// overloaded due to ff_playercommand.cpp
-	// these functions just call the original functions anyway
-	void Command_SpyCloak(const CCommand& args);
-	void Command_SpySilentCloak(const CCommand& args);
-	void Command_SpySmartCloak(const CCommand& args);
+	void Command_SpyCloak(const CCommand& args = CCommand());
+	void Command_SpySilentCloak(const CCommand& args = CCommand());
+	void Command_SpySmartCloak(const CCommand& args = CCommand());
 	void Command_AmmoMe(const CCommand& args = CCommand());
 	void Command_SaveMe(const CCommand& args = CCommand());
 	void Command_EngyMe(const CCommand& args = CCommand());

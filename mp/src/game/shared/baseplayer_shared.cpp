@@ -832,8 +832,9 @@ void CBasePlayer::SetStepSoundTime( stepsoundtimes_t iStepSoundTime, bool bWalki
 	// UNDONE: need defined numbers for run, walk, crouch, crouch run velocities!!!!	
 	if ( ( GetFlags() & FL_DUCKING) || ( GetMoveType() == MOVETYPE_LADDER ) )
 	{
-		m_flStepSoundTime += 100;
-		//m_flStepSoundTime += 0.001f * flduck; // slower step time if ducking	// |-- Mirv: Added gpGlobals->curtime
+		m_flStepSoundTime += 0.001f * 100; // slower step time if ducking
+	} else {
+		m_flStepSoundTime += 0.001f;
 	}
 }
 
@@ -2042,44 +2043,45 @@ bool CBasePlayer::SetFOV( CBaseEntity *pRequester, int FOV, float zoomRate, int 
 //-----------------------------------------------------------------------------
 void CBasePlayer::UpdateUnderwaterState( void )
 {
-	if ( GetWaterLevel() == WL_Eyes )
+	if (GetWaterLevel() < WL_Eyes)
 	{
-		if ( IsPlayerUnderwater() == false )
+		if (IsPlayerUnderwater())
 		{
-			SetPlayerUnderwater( true );
+			SetPlayerUnderwater(false);
+
+			if(m_iHealth > 0 && IsAlive())
+				RemoveFlag(FL_INWATER);	// Jiggles: Added for swim animations
 		}
-		return;
 	}
-
-	if ( IsPlayerUnderwater() )
+	else if (GetWaterLevel() < WL_Waist)
 	{
-		SetPlayerUnderwater( false );
-	}
-
-	if ( GetWaterLevel() == 0 )
-	{
-		if ( GetFlags() & FL_INWATER )
+		if (GetWaterLevel() == 0)
 		{
-#ifndef CLIENT_DLL
-			if ( m_iHealth > 0 && IsAlive() )
+			if (GetFlags() & FL_INWATER)
 			{
-				EmitSound( "Player.Wade" );
+				if (m_iHealth > 0 && IsAlive())
+					EmitSound("Player.Wade");
+
+				RemoveFlag(FL_INWATER);
 			}
-#endif
-			RemoveFlag( FL_INWATER );
+			return;
 		}
 	}
-	else if ( !(GetFlags() & FL_INWATER) )
+	else if (GetWaterLevel() > WL_Waist)
 	{
-#ifndef CLIENT_DLL
-		// player enter water sound
-		if (GetWaterType() == CONTENTS_WATER)
+		if (IsPlayerUnderwater() == false)
 		{
-			EmitSound( "Player.Wade" );
+			SetPlayerUnderwater(true);
 		}
-#endif
-
-		AddFlag( FL_INWATER );
+		if (m_iHealth > 0 && IsAlive()) {
+			// Jiggles: Added for swim animations
+			if (!(GetFlags() & FL_INWATER))
+			{
+				AddFlag(FL_INWATER);
+			}
+		}
+		// END ADD
+		return;
 	}
 }
 

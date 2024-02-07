@@ -2871,14 +2871,14 @@ namespace FFLib
 	
 	void SetGameDescription( const char *szGameDescription )
 	{
-		if ( g_pGameRules ) // this function may be called before the world has spawned, and the game rules initialized
-			g_pGameRules->SetGameDescription( szGameDescription );
+		if ( FFGameRules() ) // this function may be called before the world has spawned, and the game rules initialized
+			FFGameRules()->SetGameDescription( szGameDescription );
 	}
 	
 	const char* GetGameDescription()
 	{
-		if ( g_pGameRules ) // this function may be called before the world has spawned, and the game rules initialized
-			return g_pGameRules->GetGameDescription();
+		if (FFGameRules()) // this function may be called before the world has spawned, and the game rules initialized
+			return FFGameRules()->GetGameDescription();
 		else
 			return "";
 	}

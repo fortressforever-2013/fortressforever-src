@@ -144,7 +144,7 @@ FF_AUTO_COMMAND( whatteam, &CFFPlayer::Command_WhatTeam, "Tells what team you're
 FF_AUTO_COMMAND( dispenser, &CFFPlayer::Command_BuildDispenser, "Build or detonate a dispenser.", FF_CMD_SKILL_COMMAND | FF_CMD_ALIVE | FF_CMD_PREMATCH );
 FF_AUTO_COMMAND( sentrygun, &CFFPlayer::Command_BuildSentryGun, "Build or detonate a sentry gun.", FF_CMD_SKILL_COMMAND | FF_CMD_ALIVE | FF_CMD_PREMATCH );
 FF_AUTO_COMMAND( dispensertext, &CFFPlayer::Command_DispenserText, "Set custom text for your dispenser.", FF_CMD_ALIVE | FF_CMD_DEAD | FF_CMD_SPEC | FF_CMD_PREMATCH );
-FF_AUTO_COMMAND(detpack, static_cast<void (CFFPlayer::*)(const CCommand&)>(&CFFPlayer::Command_BuildDetpack), "Drop a detpack.", FF_CMD_SKILL_COMMAND | FF_CMD_ALIVE | FF_CMD_PREMATCH);
+FF_AUTO_COMMAND( detpack, &CFFPlayer::Command_BuildDetpack, "Drop a detpack.", FF_CMD_SKILL_COMMAND | FF_CMD_ALIVE | FF_CMD_PREMATCH );
 FF_AUTO_COMMAND( mancannon, &CFFPlayer::Command_BuildManCannon, "Build a man cannon.", FF_CMD_SKILL_COMMAND | FF_CMD_ALIVE | FF_CMD_PREMATCH );
 FF_AUTO_COMMAND( discard, &CFFPlayer::Command_Discard, "Discards unneeded ammo", FF_CMD_ALIVE | FF_CMD_PREMATCH | FF_CMD_CLOAKED );
 FF_SHARED_COMMAND( saveme, &CFFPlayer::Command_SaveMe, CC_SaveMe, "Call for medical attention", FF_CMD_ALIVE | FF_CMD_PREMATCH );

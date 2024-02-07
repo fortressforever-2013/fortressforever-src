@@ -1340,7 +1340,7 @@ bool CFFPlayer::HandleShotImpactingWater(const FireBulletsInfo_t &info, const Ve
 //-----------------------------------------------------------------------------
 // Purpose: Shared cloak code
 //-----------------------------------------------------------------------------
-void CFFPlayer::Command_SpyCloak( void )
+void CFFPlayer::Command_SpyCloak(const CCommand& args)
 {
 	// Jon: always allow uncloaking if already cloaked
 	if( IsCloaked() )
@@ -1394,17 +1394,9 @@ void CFFPlayer::Command_SpyCloak( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Shared cloak code
-//-----------------------------------------------------------------------------
-void CFFPlayer::Command_SpyCloak(const CCommand& args)
-{
-	Command_SpyCloak();
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: Shared smart cloak code
 //-----------------------------------------------------------------------------
-void CFFPlayer::Command_SpySmartCloak( void )
+void CFFPlayer::Command_SpySmartCloak(const CCommand& args)
 {
 	// Jon: always allow uncloaking if already cloaked
 	if( IsCloaked() )
@@ -1470,17 +1462,9 @@ void CFFPlayer::Command_SpySmartCloak( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Shared smart cloak code
-//-----------------------------------------------------------------------------
-void CFFPlayer::Command_SpySmartCloak(const CCommand& args)
-{
-	Command_SpySmartCloak();
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: Shared silent cloak code
 //-----------------------------------------------------------------------------
-void CFFPlayer::Command_SpySilentCloak( void )
+void CFFPlayer::Command_SpySilentCloak(const CCommand& args)
 {
 	// Jon: always allow uncloaking if already cloaked
 	if( IsCloaked() )
@@ -1543,14 +1527,6 @@ void CFFPlayer::Command_SpySilentCloak( void )
 #ifdef GAME_DLL
 	SpyCloakFadeIn();
 #endif
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Shared silent cloak code
-//-----------------------------------------------------------------------------
-void CFFPlayer::Command_SpySilentCloak(const CCommand& args)
-{
-	Command_SpySilentCloak();
 }
 
 //-----------------------------------------------------------------------------
@@ -1996,7 +1972,7 @@ void CFFPlayer::Command_SaveMe(const CCommand& args)
 		}
 		// End Hint Code
 #endif
-	}	
+	}
 }
 
 //-----------------------------------------------------------------------------

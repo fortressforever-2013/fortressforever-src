@@ -44,16 +44,17 @@ class C_BaseEntity;
 class C_TeamColorMaterialProxy : public IMaterialProxy
 {
 public:
-	C_TeamColorMaterialProxy( void );
-	virtual ~C_TeamColorMaterialProxy( void );
-	virtual bool Init( IMaterial *pMaterial, KeyValues *pKeyValues );
-	virtual void OnBind( void *pC_BaseEntity );
-	virtual void Release( void ) { delete this; }
+	C_TeamColorMaterialProxy(void);
+	virtual ~C_TeamColorMaterialProxy(void);
+	virtual bool Init(IMaterial* pMaterial, KeyValues* pKeyValues);
+	virtual void OnBind(void* pC_BaseEntity);
+	virtual void Release(void) { delete this; }
+	IMaterial* GetMaterial(void) { return m_pValue->GetOwningMaterial(); };
 
-private:	
+private:
 	// Actual $ value we will be modifying in the .vmt to adjust
 	// the team coloring
-	IMaterialVar	*m_pValue;
+	IMaterialVar* m_pValue;
 
 	// Array of vectors to hold the team coloring values
 	// that are read in from the .vmt
@@ -61,11 +62,11 @@ private:
 	// 1 = red
 	// 2 = yellow
 	// 3 = green
-	Vector			m_vecTeamColorVals[ 4 ];
+	Vector			m_vecTeamColorVals[4];
 
 protected:
 	// This gets overridden by the super class
-	const char**	m_ppszStrings;
+	const char** m_ppszStrings;
 
 };
 
@@ -77,11 +78,8 @@ protected:
 class C_Color_TeamColorMaterialProxy : public C_TeamColorMaterialProxy
 {
 public:
-	C_Color_TeamColorMaterialProxy( void );
-	virtual IMaterial* GetMaterial() { return m_pMaterial; }
+	C_Color_TeamColorMaterialProxy(void);
 
-private:
-	IMaterial* m_pMaterial;
 };
 
 //=============================================================================
@@ -92,11 +90,8 @@ private:
 class C_Refract_TeamColorMaterialProxy : public C_TeamColorMaterialProxy
 {
 public:
-	C_Refract_TeamColorMaterialProxy( void );
-	virtual IMaterial* GetMaterial() { return m_pMaterial; }
+	C_Refract_TeamColorMaterialProxy(void);
 
-private:
-	IMaterial* m_pMaterial;
 };
 
 //=============================================================================
@@ -112,11 +107,11 @@ class C_FFPlayerVelocityMaterialProxy : public CResultProxy
 	//-------------------------------------------------------------------------
 
 public:
-	C_FFPlayerVelocityMaterialProxy( void );
-	virtual ~C_FFPlayerVelocityMaterialProxy( void );
+	C_FFPlayerVelocityMaterialProxy(void);
+	virtual ~C_FFPlayerVelocityMaterialProxy(void);
 
-	virtual bool Init( IMaterial *pMaterial, KeyValues *pKeyValues );
-	virtual void OnBind( void *pC_BaseEntity );
+	virtual bool Init(IMaterial* pMaterial, KeyValues* pKeyValues);
+	virtual void OnBind(void* pC_BaseEntity);
 
 };
 
@@ -132,11 +127,11 @@ class C_FFLocalPlayerVelocityMaterialProxy : public CResultProxy
 	//-------------------------------------------------------------------------
 
 public:
-	C_FFLocalPlayerVelocityMaterialProxy( void );
-	virtual ~C_FFLocalPlayerVelocityMaterialProxy( void );
+	C_FFLocalPlayerVelocityMaterialProxy(void);
+	virtual ~C_FFLocalPlayerVelocityMaterialProxy(void);
 
-	virtual bool Init( IMaterial *pMaterial, KeyValues *pKeyValues );
-	virtual void OnBind( void *pC_BaseEntity );
+	virtual bool Init(IMaterial* pMaterial, KeyValues* pKeyValues);
+	virtual void OnBind(void* pC_BaseEntity);
 
 };
 
@@ -153,11 +148,11 @@ class C_FFWeaponVelocityMaterialProxy : public CResultProxy
 	//-------------------------------------------------------------------------
 
 public:
-	C_FFWeaponVelocityMaterialProxy( void );
-	virtual ~C_FFWeaponVelocityMaterialProxy( void );
+	C_FFWeaponVelocityMaterialProxy(void);
+	virtual ~C_FFWeaponVelocityMaterialProxy(void);
 
-	virtual bool Init( IMaterial *pMaterial, KeyValues *pKeyValues );
-	virtual void OnBind( void *pC_BaseEntity );
+	virtual bool Init(IMaterial* pMaterial, KeyValues* pKeyValues);
+	virtual void OnBind(void* pC_BaseEntity);
 
 };
 
@@ -169,11 +164,11 @@ public:
 class C_FFSpyCloakMaterialProxy : public CResultProxy
 {
 public:
-	C_FFSpyCloakMaterialProxy( void );
-	virtual ~C_FFSpyCloakMaterialProxy( void );
+	C_FFSpyCloakMaterialProxy(void);
+	virtual ~C_FFSpyCloakMaterialProxy(void);
 
-	virtual bool Init( IMaterial *pMaterial, KeyValues *pKeyValues );
-	virtual void OnBind( void *pC_BaseEntity );
+	virtual bool Init(IMaterial* pMaterial, KeyValues* pKeyValues);
+	virtual void OnBind(void* pC_BaseEntity);
 
 };
 
@@ -185,10 +180,10 @@ public:
 class C_FFTeamScore_MaterialProxy : public CResultProxy
 {
 public:
-	C_FFTeamScore_MaterialProxy( void );
+	C_FFTeamScore_MaterialProxy(void);
 
-	virtual bool Init( IMaterial *pMaterial, KeyValues *pKeyValues );
-	virtual void OnBind( void *pC_BaseEntity );
+	virtual bool Init(IMaterial* pMaterial, KeyValues* pKeyValues);
+	virtual void OnBind(void* pC_BaseEntity);
 
 protected:
 	int m_iTeam;
@@ -202,7 +197,7 @@ protected:
 class C_FFTeamScore_Blue_MaterialProxy : public C_FFTeamScore_MaterialProxy
 {
 public:
-	C_FFTeamScore_Blue_MaterialProxy( void )
+	C_FFTeamScore_Blue_MaterialProxy(void)
 	{
 		m_iTeam = FF_TEAM_BLUE;
 	}
@@ -216,7 +211,7 @@ public:
 class C_FFTeamScore_Red_MaterialProxy : public C_FFTeamScore_MaterialProxy
 {
 public:
-	C_FFTeamScore_Red_MaterialProxy( void )
+	C_FFTeamScore_Red_MaterialProxy(void)
 	{
 		m_iTeam = FF_TEAM_RED;
 	}
@@ -230,9 +225,9 @@ public:
 class C_FFTeamScore_Yellow_MaterialProxy : public C_FFTeamScore_MaterialProxy
 {
 public:
-	C_FFTeamScore_Yellow_MaterialProxy( void )
+	C_FFTeamScore_Yellow_MaterialProxy(void)
 	{
-        m_iTeam = FF_TEAM_YELLOW;
+		m_iTeam = FF_TEAM_YELLOW;
 	}
 };
 
@@ -244,9 +239,9 @@ public:
 class C_FFTeamScore_Green_MaterialProxy : public C_FFTeamScore_MaterialProxy
 {
 public:
-	C_FFTeamScore_Green_MaterialProxy( void )
+	C_FFTeamScore_Green_MaterialProxy(void)
 	{
-        m_iTeam = FF_TEAM_GREEN;
+		m_iTeam = FF_TEAM_GREEN;
 	}
 };
 

@@ -92,6 +92,7 @@ void CFFModeManager::LevelInit( const char *newmap )
 void CFFModeManager::LevelShutdown( void )
 {
 	g_pClientMode->LevelShutdown();
+	_discord.Reset();
 }
 
 //-----------------------------------------------------------------------------

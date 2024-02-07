@@ -42,11 +42,15 @@
 	static CPlayerCommand SrvCmd_##cmd(#cmd, ServerFunc, Flags);
 #else
 #define FF_SHARED_COMMAND(cmd, ServerFunc, ClientFunc, Description, Flags) \
-	void CliCmdFunc_##cmd(const CCommand& args) \
-	{ \
-		engine->ServerCmd(args.GetCommandString()); \
-	} \
-	static ConCommand CliCmd_##cmd(#cmd, CliCmdFunc_##cmd, Description);
+    void CliCmdFunc_##cmd(const CCommand& args) \
+    { \
+        bool shouldSend = ClientFunc(); \
+        if(shouldSend && engine->IsInGame()) \
+        { \
+            engine->ServerCmd(args.GetCommandString()); \
+        } \
+    } \
+    static ConCommand CliCmd_##cmd(#cmd, CliCmdFunc_##cmd, Description);
 #endif
 
 

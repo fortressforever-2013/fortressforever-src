@@ -1724,7 +1724,7 @@ void CFFPlayer::InitialSpawn( void )
 //			velocity but not anymore.
 //-----------------------------------------------------------------------------
 /*
-void CFFPlayer::Command_SpyCloak( void )
+void CFFPlayer::Command_SpyCloak( const CCommand& args )
 {
 	Warning( "[Cloak] [S] Time: %f\n", gpGlobals->curtime );
 
@@ -1738,7 +1738,7 @@ void CFFPlayer::Command_SpyCloak( void )
 		EmitSound( "Player.Death" );
 	}
 
-	Command_SpySilentCloak();
+	Command_SpySilentCloak(args);
 }
 */
 
@@ -1747,7 +1747,7 @@ void CFFPlayer::Command_SpyCloak( void )
 //			That wasn't really a description or a purpose, I know.
 //-----------------------------------------------------------------------------
 /*
-void CFFPlayer::Command_SpySilentCloak( void )
+void CFFPlayer::Command_SpySilentCloak( const CCommand& args )
 {
 	Warning( "[Silent Cloak] [S] Time: %f\n", gpGlobals->curtime );
 
@@ -3090,13 +3090,8 @@ void CFFPlayer::FindRadioTaggedPlayers( void )
 	}
 }
 
-void CFFPlayer::Command_WhatTeam( void )
-{
-}
-
 void CFFPlayer::Command_WhatTeam(const CCommand& args)
 {
-	Command_WhatTeam();
 }
 
 void CFFPlayer::Command_DispenserText(const CCommand& args)
@@ -3152,37 +3147,17 @@ void CFFPlayer::Command_DispenserText(const CCommand& args)
 		GetDispenser()->SetText( m_szCustomDispenserText );
 }
 
-void CFFPlayer::Command_BuildDispenser( void )
+void CFFPlayer::Command_BuildDispenser(const CCommand& args)
 {
 	//m_bCancelledBuild = false;
 	m_iWantBuild = FF_BUILD_DISPENSER;
 	PreBuildGenericThink();
 }
 
-void CFFPlayer::Command_BuildDispenser(const CCommand& args)
-{
-	Command_BuildDispenser();
-}
-
-void CFFPlayer::Command_BuildSentryGun( void )
+void CFFPlayer::Command_BuildSentryGun(const CCommand& args)
 {	
 	//m_bCancelledBuild = false;
 	m_iWantBuild = FF_BUILD_SENTRYGUN;
-	PreBuildGenericThink();
-}
-
-void CFFPlayer::Command_BuildSentryGun(const CCommand& args)
-{	
-	Command_BuildSentryGun();
-}
-
-void CFFPlayer::Command_BuildDetpack(void)
-{
-	// Assume 5 second fuse time
-	m_iDetpackTime = 5;
-
-	//m_bCancelledBuild = false;
-	m_iWantBuild = FF_BUILD_DETPACK;
 	PreBuildGenericThink();
 }
 
@@ -3233,15 +3208,10 @@ void CFFPlayer::Command_BuildDetpack(const CCommand& args)
 	PreBuildGenericThink();
 }
 
-void CFFPlayer::Command_BuildManCannon( void )
+void CFFPlayer::Command_BuildManCannon(const CCommand& args)
 {
 	m_iWantBuild = FF_BUILD_MANCANNON;
 	PreBuildGenericThink();
-}
-
-void CFFPlayer::Command_BuildManCannon(const CCommand& args)
-{
-	Command_BuildManCannon();
 }
 
 //ConVar sg_buildtime("ffdev_sg_buildtime", "7.0", FCVAR_REPLICATED | FCVAR_CHEAT, "Sentry Gun build time");
@@ -3735,24 +3705,16 @@ void CFFPlayer::PostBuildGenericThink( void )
 /**
 	FlagInfo
 */
-void CFFPlayer::Command_FlagInfo( void )
+void CFFPlayer::Command_FlagInfo(const CCommand& args)
 {	
 	CFFLuaSC hFlagInfo( 1, this );
 	_scriptman.RunPredicates_LUA(NULL, &hFlagInfo, "flaginfo");
 }
 
 /**
-	FlagInfo
-*/
-void CFFPlayer::Command_FlagInfo(const CCommand& args)
-{	
-	Command_FlagInfo();
-}
-
-/**
 	DropItems
 */
-void CFFPlayer::Command_DropItems( void )
+void CFFPlayer::Command_DropItems(const CCommand& args)
 {	
 	CFFLuaSC hDropItemCmd( 1, this );
 	//entsys.RunPredicates(NULL, this, "dropitems");
@@ -3772,20 +3734,10 @@ void CFFPlayer::Command_DropItems( void )
 	}
 }
 
-void CFFPlayer::Command_DropItems(const CCommand& args)
-{	
-	Command_DropItems();
-}
-
-void CFFPlayer::Command_DetPipes( void )
+void CFFPlayer::Command_DetPipes(const CCommand& args)
 {	
 	if( ( GetPipebombShotTime() + PIPE_DET_DELAY ) < gpGlobals->curtime )
 		CFFProjectilePipebomb::DestroyAllPipes(this);
-}
-
-void CFFPlayer::Command_DetPipes(const CCommand& args)
-{	
-	Command_DetPipes();
 }
 
 /**
@@ -3797,7 +3749,7 @@ void CFFPlayer::Command_DetPipes(const CCommand& args)
 // Removed ubiquitous i counters for more descriptive names.  Old variable name for "bKeepAmmo" was "iDiscardable" which was 
 // ... backwards (since we only discarded it if iDiscardable evaluated to false).  Made my head hurt a bit! |---> Defrag
 
-void CFFPlayer::Command_Discard( void )
+void CFFPlayer::Command_Discard(const CCommand& args)
 {
 	CFFItemBackpack *pBackpack = NULL;
 
@@ -3891,11 +3843,6 @@ void CFFPlayer::Command_Discard( void )
 		// Play a sound
 		EmitSound("Item.Toss");
 	}
-}
-
-void CFFPlayer::Command_Discard(const CCommand& args)
-{
-	Command_Discard();
 }
 
 void CFFPlayer::StatusEffectsThink( void )
@@ -4223,20 +4170,20 @@ bool CFFPlayer::LuaIsEffectActive( int iEffect )
 		}
 		break;
 
-		case LUA_EF_LEGSHOT: IsSpeedEffectSet( SE_LEGSHOT ); break;
-		case LUA_EF_TRANQ: IsSpeedEffectSet( SE_TRANQ ); break;
-		case LUA_EF_ACSPINUP: IsSpeedEffectSet( SE_ASSAULTCANNON ); break;
-		case LUA_EF_SNIPERRIFLE: IsSpeedEffectSet( SE_SNIPERRIFLE ); break;
-		case LUA_EF_SPEED_LUA1: IsSpeedEffectSet( SE_LUA1 ); break;
-		case LUA_EF_SPEED_LUA2: IsSpeedEffectSet( SE_LUA1 ); break;
-		case LUA_EF_SPEED_LUA3: IsSpeedEffectSet( SE_LUA1 ); break;
-		case LUA_EF_SPEED_LUA4: IsSpeedEffectSet( SE_LUA1 ); break;
-		case LUA_EF_SPEED_LUA5: IsSpeedEffectSet( SE_LUA1 ); break;
-		case LUA_EF_SPEED_LUA6: IsSpeedEffectSet( SE_LUA1 ); break;
-		case LUA_EF_SPEED_LUA7: IsSpeedEffectSet( SE_LUA1 ); break;
-		case LUA_EF_SPEED_LUA8: IsSpeedEffectSet( SE_LUA1 ); break;
-		case LUA_EF_SPEED_LUA9: IsSpeedEffectSet( SE_LUA1 ); break;
-		case LUA_EF_SPEED_LUA10: IsSpeedEffectSet( SE_LUA1 ); break;
+		case LUA_EF_LEGSHOT: return IsSpeedEffectSet( SE_LEGSHOT ); break;
+		case LUA_EF_TRANQ: return IsSpeedEffectSet( SE_TRANQ ); break;
+		case LUA_EF_ACSPINUP: return IsSpeedEffectSet( SE_ASSAULTCANNON ); break;
+		case LUA_EF_SNIPERRIFLE: return IsSpeedEffectSet( SE_SNIPERRIFLE ); break;
+		case LUA_EF_SPEED_LUA1: return IsSpeedEffectSet( SE_LUA1 ); break;
+		case LUA_EF_SPEED_LUA2: return IsSpeedEffectSet( SE_LUA2 ); break;
+		case LUA_EF_SPEED_LUA3: return IsSpeedEffectSet( SE_LUA3 ); break;
+		case LUA_EF_SPEED_LUA4: return IsSpeedEffectSet( SE_LUA4 ); break;
+		case LUA_EF_SPEED_LUA5: return IsSpeedEffectSet( SE_LUA5 ); break;
+		case LUA_EF_SPEED_LUA6: return IsSpeedEffectSet( SE_LUA6 ); break;
+		case LUA_EF_SPEED_LUA7: return IsSpeedEffectSet( SE_LUA7 ); break;
+		case LUA_EF_SPEED_LUA8: return IsSpeedEffectSet( SE_LUA8 ); break;
+		case LUA_EF_SPEED_LUA9: return IsSpeedEffectSet( SE_LUA9 ); break;
+		case LUA_EF_SPEED_LUA10: return IsSpeedEffectSet( SE_LUA10 ); break;
 	}
 
 	return false;
@@ -4265,15 +4212,15 @@ void CFFPlayer::LuaRemoveEffect( int iEffect )
 		case LUA_EF_ACSPINUP: RemoveSpeedEffect( SE_ASSAULTCANNON, true ); break;
 		case LUA_EF_SNIPERRIFLE: RemoveSpeedEffect( SE_SNIPERRIFLE, true ); break;
 		case LUA_EF_SPEED_LUA1: RemoveSpeedEffect( SE_LUA1, true ); break;
-		case LUA_EF_SPEED_LUA2: RemoveSpeedEffect( SE_LUA1, true ); break;
-		case LUA_EF_SPEED_LUA3: RemoveSpeedEffect( SE_LUA1, true ); break;
-		case LUA_EF_SPEED_LUA4: RemoveSpeedEffect( SE_LUA1, true ); break;
-		case LUA_EF_SPEED_LUA5: RemoveSpeedEffect( SE_LUA1, true ); break;
-		case LUA_EF_SPEED_LUA6: RemoveSpeedEffect( SE_LUA1, true ); break;
-		case LUA_EF_SPEED_LUA7: RemoveSpeedEffect( SE_LUA1, true ); break;
-		case LUA_EF_SPEED_LUA8: RemoveSpeedEffect( SE_LUA1, true ); break;
-		case LUA_EF_SPEED_LUA9: RemoveSpeedEffect( SE_LUA1, true ); break;
-		case LUA_EF_SPEED_LUA10: RemoveSpeedEffect( SE_LUA1, true ); break;
+		case LUA_EF_SPEED_LUA2: RemoveSpeedEffect( SE_LUA2, true ); break;
+		case LUA_EF_SPEED_LUA3: RemoveSpeedEffect( SE_LUA3, true ); break;
+		case LUA_EF_SPEED_LUA4: RemoveSpeedEffect( SE_LUA4, true ); break;
+		case LUA_EF_SPEED_LUA5: RemoveSpeedEffect( SE_LUA5, true ); break;
+		case LUA_EF_SPEED_LUA6: RemoveSpeedEffect( SE_LUA6, true ); break;
+		case LUA_EF_SPEED_LUA7: RemoveSpeedEffect( SE_LUA7, true ); break;
+		case LUA_EF_SPEED_LUA8: RemoveSpeedEffect( SE_LUA8, true ); break;
+		case LUA_EF_SPEED_LUA9: RemoveSpeedEffect( SE_LUA9, true ); break;
+		case LUA_EF_SPEED_LUA10: RemoveSpeedEffect( SE_LUA10, true ); break;
 	}
 }
 
@@ -4284,12 +4231,12 @@ void CFFPlayer::AddSpeedEffect(SpeedEffectType type, float duration, float speed
 
 	// Without boolean we default to accumulative, but warn anyway in case we just forgot
 	// boolean = effect is either on or off. Accumulative = the more effect you get, the stronger the effect is (e.g. more caltrops = slower)
-	Assert((mod & SEM_BOOLEAN)|(mod & SEM_ACCUMULATIVE));
+	Assert((mod & SEM_BOOLEAN) | (mod & SEM_ACCUMULATIVE));
 
 	if (mod & SEM_BOOLEAN)
 	{
 		// Search for an already existing one to overwrite
-		for( ; i < NUM_SPEED_EFFECTS; i++)
+		for (; i < NUM_SPEED_EFFECTS; i++)
 		{
 			// we'll overwrite the old one
 			if (m_vSpeedEffects[i].type == type)
@@ -4297,11 +4244,11 @@ void CFFPlayer::AddSpeedEffect(SpeedEffectType type, float duration, float speed
 		}
 
 		// We didn't overwrite one, so lets find an empty spot!
-		if( i == NUM_SPEED_EFFECTS )
+		if (i == NUM_SPEED_EFFECTS)
 		{
 			// Gotta reset 0, too.
 			i = 0;
-			while( m_vSpeedEffects[ i ].active && ( i != NUM_SPEED_EFFECTS ) )
+			while (m_vSpeedEffects[i].active && (i != NUM_SPEED_EFFECTS))
 				++i;
 		}
 	}
@@ -4313,7 +4260,7 @@ void CFFPlayer::AddSpeedEffect(SpeedEffectType type, float duration, float speed
 
 	if (i == NUM_SPEED_EFFECTS)
 	{
-		Warning( "ERROR: Too many speed effects. Raise NUM_SPEED_EFFECTS\n" );
+		Warning("ERROR: Too many speed effects. Raise NUM_SPEED_EFFECTS\n");
 		return;
 	}
 
@@ -4326,37 +4273,33 @@ void CFFPlayer::AddSpeedEffect(SpeedEffectType type, float duration, float speed
 	m_vSpeedEffects[i].modifiers = mod;
 	m_vSpeedEffects[i].bLuaEnforced = bLuaAdded;
 
-	if( iIcon != -1 )
+	if (iIcon != -1)
 	{
-		CSingleUserRecipientFilter user( ( CBasePlayer * )this );
+		CSingleUserRecipientFilter user((CBasePlayer*)this);
 		user.MakeReliable();
 
-		UserMessageBegin( user, "StatusIconUpdate" );
-			WRITE_BYTE( iIcon );
-			WRITE_FLOAT( flIconDuration );
+		UserMessageBegin(user, "StatusIconUpdate");
+		WRITE_BYTE(iIcon);
+		WRITE_FLOAT(flIconDuration);
 		MessageEnd();
 	}
-	
+
 	// Set any player vars
-	switch( m_vSpeedEffects[i].type )
-	{
-		case SE_TRANQ: m_bTranqed = true; break;
-	}
-	
+	if (type == SE_TRANQ)
+		m_bTranqed = true;
+
 	RecalculateSpeed();
 }
 
 bool CFFPlayer::IsSpeedEffectSet( SpeedEffectType type )
 {
-	bool bFound = false;
-
-	for( int i = 0; ( i < NUM_SPEED_EFFECTS ) && !bFound; i++ )
+	for( int i = 0; ( i < NUM_SPEED_EFFECTS ); i++ )
 	{
 		if( ( m_vSpeedEffects[ i ].type == type ) && ( m_vSpeedEffects[ i ].active ) )
-			bFound = true;
+			return true;
 	}
 
-	return bFound;
+	return false;
 }
 
 void CFFPlayer::RemoveSpeedEffect(SpeedEffectType type, bool bLuaAdded)
@@ -4808,34 +4751,23 @@ void CFFPlayer::IncreaseBurnLevel( int iAmount )
 }
 
 // Toggle grenades (requested by defrag)
-void CFFPlayer::Command_ToggleOne( void )
-{
-	if( IsGrenadePrimed() )
-		Command_ThrowGren();
-	else
-		Command_PrimeOne();
-}
-
-void CFFPlayer::Command_ToggleTwo( void )
-{
-	if( IsGrenadePrimed() )
-		Command_ThrowGren();
-	else
-		Command_PrimeTwo();
-}
-
-// Toggle grenades (requested by defrag)
 void CFFPlayer::Command_ToggleOne(const CCommand& args)
 {
-	Command_ToggleOne();
+	if( IsGrenadePrimed() )
+		Command_ThrowGren(args);
+	else
+		Command_PrimeOne(args);
 }
 
 void CFFPlayer::Command_ToggleTwo(const CCommand& args)
 {
-	Command_ToggleTwo();
+	if( IsGrenadePrimed() )
+		Command_ThrowGren(args);
+	else
+		Command_PrimeTwo(args);
 }
 
-void CFFPlayer::Command_PrimeOne(void)
+void CFFPlayer::Command_PrimeOne(const CCommand& args)
 {
 	if (IsGrenadePrimed())
 		return;
@@ -4880,7 +4812,7 @@ void CFFPlayer::Command_PrimeOne(void)
 	}
 }
 
-void CFFPlayer::Command_PrimeTwo(void)
+void CFFPlayer::Command_PrimeTwo(const CCommand& args)
 {
 	if (IsGrenadePrimed())
 		return;
@@ -4948,17 +4880,7 @@ void CFFPlayer::Command_PrimeTwo(void)
 	}
 }
 
-void CFFPlayer::Command_PrimeOne(const CCommand& args)
-{
-	Command_PrimeOne();
-}
-
-void CFFPlayer::Command_PrimeTwo(const CCommand& args)
-{
-	Command_PrimeTwo();
-}
-
-void CFFPlayer::Command_ThrowGren(void)
+void CFFPlayer::Command_ThrowGren(const CCommand& args)
 {
 	if (!IsGrenadePrimed())
 		return;
@@ -4992,11 +4914,6 @@ void CFFPlayer::Command_ThrowGren(void)
 		ThrowGrenade(fPrimeTimer);
 	
 	ResetGrenadeState();
-}
-
-void CFFPlayer::Command_ThrowGren(const CCommand& args)
-{
-	Command_ThrowGren();
 }
 
 void CFFPlayer::ResetGrenadeState( void )
@@ -7508,7 +7425,7 @@ void CFFPlayer::ReduceArmorClass()
 // Purpose: Find all sentry guns that have been sabotaged by this player and 
 //			turn them on the enemy.
 //-----------------------------------------------------------------------------
-void CFFPlayer::Command_SabotageSentry()
+void CFFPlayer::Command_SabotageSentry(const CCommand& args)
 {
 	CFFSentryGun *pSentry = NULL; 
 
@@ -7526,7 +7443,7 @@ void CFFPlayer::Command_SabotageSentry()
 // Purpose: Find all dispensers that have been sabotaged by this player and 
 //			detonate them
 //-----------------------------------------------------------------------------
-void CFFPlayer::Command_SabotageDispenser()
+void CFFPlayer::Command_SabotageDispenser(const CCommand& args)
 {
 	CFFDispenser *pDispenser = NULL; 
 
@@ -7536,24 +7453,6 @@ void CFFPlayer::Command_SabotageDispenser()
 			pDispenser->MaliciouslySabotage(this);
 	}
 	m_iActiveSabotages &= ~1;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Find all sentry guns that have been sabotaged by this player and 
-//			turn them on the enemy.
-//-----------------------------------------------------------------------------
-void CFFPlayer::Command_SabotageSentry(const CCommand& args)
-{
-	Command_SabotageSentry();
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Find all dispensers that have been sabotaged by this player and 
-//			detonate them
-//-----------------------------------------------------------------------------
-void CFFPlayer::Command_SabotageDispenser(const CCommand& args)
-{
-	Command_SabotageDispenser();
 }
 
 //-----------------------------------------------------------------------------

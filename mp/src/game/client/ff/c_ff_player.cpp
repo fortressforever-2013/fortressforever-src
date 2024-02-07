@@ -45,6 +45,7 @@
 #include "model_types.h"
 
 #include "ff_hud_chat.h"
+#include "ff_discordman.h"
 
 #include "collisionutils.h" // hlstriker: For player avoidance
 #include "history_resource.h" // squeek: For adding grens to the ammo pickups on the right
@@ -296,7 +297,7 @@ void OnChangeToCTimerExpired(C_FFHintTimer* pHintTimer)
 }
 
 // --> Mirv: Toggle grenades (requested by defrag)
-bool CC_ToggleOne()
+bool CC_ToggleOne(const CCommand& args)
 {
 	if (!engine->IsConnected() || !engine->IsInGame())
 		return false;
@@ -336,7 +337,7 @@ bool CC_ToggleOne()
 	return true;
 }
 
-bool CC_ToggleTwo()
+bool CC_ToggleTwo(const CCommand& args)
 {
 	if (!engine->IsConnected() || !engine->IsInGame())
 		return false;
@@ -377,7 +378,7 @@ bool CC_ToggleTwo()
 }
 // <-- Mirv: Toggle grenades (requested by defrag)
 
-bool CC_PrimeOne(void)
+bool CC_PrimeOne(const CCommand& args)
 {
 	if (!engine->IsConnected() || !engine->IsInGame())
 		return false;
@@ -468,7 +469,7 @@ bool CC_PrimeOne(void)
 	return true;
 }
 
-bool CC_PrimeTwo(void)
+bool CC_PrimeTwo(const CCommand& args)
 {
 	if (!engine->IsConnected() || !engine->IsInGame())
 		return false;
@@ -552,7 +553,7 @@ bool CC_PrimeTwo(void)
 	pLocalPlayer->m_flGrenPrimeTime = gpGlobals->curtime;
 	return true;
 }
-bool CC_ThrowGren(void)
+bool CC_ThrowGren(const CCommand& args)
 {
 	if (!engine->IsConnected() || !engine->IsInGame())
 		return false;
@@ -579,7 +580,7 @@ bool CC_ThrowGren(void)
 	return true;
 }
 
-bool CC_SpyCloak(void)
+bool CC_SpyCloak(const CCommand& args)
 {
 	if (!engine->IsConnected() || !engine->IsInGame())
 		return false;
@@ -594,11 +595,11 @@ bool CC_SpyCloak(void)
 	if (pLocalPlayer->GetClassSlot() != CLASS_SPY)
 		return false;
 
-	pLocalPlayer->Command_SpyCloak();
+	pLocalPlayer->Command_SpyCloak(args);
 	return true;
 }
 
-bool CC_SpySilentCloak(void)
+bool CC_SpySilentCloak(const CCommand& args)
 {
 	if (!engine->IsConnected() || !engine->IsInGame())
 		return false;
@@ -613,11 +614,11 @@ bool CC_SpySilentCloak(void)
 	if (pLocalPlayer->GetClassSlot() != CLASS_SPY)
 		return false;
 
-	pLocalPlayer->Command_SpySilentCloak();
+	pLocalPlayer->Command_SpySilentCloak(args);
 	return true;
 }
 
-bool CC_SpySmartCloak(void)
+bool CC_SpySmartCloak(const CCommand& args)
 {
 	if (!engine->IsConnected() || !engine->IsInGame())
 		return false;
@@ -632,7 +633,7 @@ bool CC_SpySmartCloak(void)
 	if (pLocalPlayer->GetClassSlot() != CLASS_SPY)
 		return false;
 
-	pLocalPlayer->Command_SpySmartCloak();
+	pLocalPlayer->Command_SpySmartCloak(args);
 	return true;
 }
 
@@ -1766,6 +1767,9 @@ void C_FFPlayer::Spawn(void)
 	}
 
 	m_flNextRampslideFX = 0;
+
+	// update game status on every player spawn
+	_discord.UpdateGameData();
 }
 
 //-----------------------------------------------------------------------------
@@ -2550,20 +2554,30 @@ void C_FFPlayer::ClientThink(void)
 			g_pEffects->Sparks(GetFeetOrigin() + Vector(random->RandomFloat(-iRandomOffset, iRandomOffset), random->RandomFloat(-iRandomOffset, iRandomOffset), flVerticalOffset), iSparkMagnitude, iSparkLength, &vecDir);
 
 			EmitSound("Player.RampslideMetal");
+			m_bSlideSFXPlaying = true;
 		}
 		else
 		{
 			float flDustSize = cl_rampslidefx_dust_size.GetFloat();
 			float flDustSpeed = 0.0f; // controls how far apart the dust particles get spawned in vecDir's direction; not particularly useful
 			g_pEffects->Dust(GetFeetOrigin() + Vector(random->RandomFloat(-iRandomOffset, iRandomOffset), random->RandomFloat(-iRandomOffset, iRandomOffset), flVerticalOffset), vecDir, flDustSize, flDustSpeed);
-			StopSound("Player.RampslideMetal");
+
+			if (m_bSlideSFXPlaying)
+			{
+				StopSound("Player.RampslideMetal");
+				m_bSlideSFXPlaying = false;
+			}
 		}
 
 		m_flNextRampslideFX = gpGlobals->curtime + cl_rampslidefx_interval.GetFloat();
 	}
 	else if (!IsRampsliding())
 	{
-		StopSound("Player.RampslideMetal");
+		if (m_bSlideSFXPlaying)
+		{
+			StopSound("Player.RampslideMetal");
+			m_bSlideSFXPlaying = false;
+		}
 	}
 
 	// Update infection emitters
@@ -2653,7 +2667,9 @@ void C_FFPlayer::ClientThink(void)
 			m_pJetpackEmitter = CJetpackEmitter::Create("JetpackEmitter", this);
 
 		m_pJetpackEmitter->SetDieTime(gpGlobals->curtime + 5.0f);
+
 		EmitSound("Player.JetpackLoop");
+		m_bJetpackSFXPlaying = true;
 	}
 	else
 	{
@@ -2664,7 +2680,15 @@ void C_FFPlayer::ClientThink(void)
 		}
 		// TODO: Is StopSound expensive?
 		// Should this only be called if we know the sound is playing?
-		StopSound("Player.JetpackLoop");
+		// 
+		// Yeah it seems to spam the console when sv_soundemitter_trace is set to 1
+		// so we should only call it when actually needed
+
+		if (m_bJetpackSFXPlaying)
+		{
+			StopSound("Player.JetpackLoop");
+			m_bJetpackSFXPlaying = false;
+		}
 	}
 
 	_mathackman.Update();

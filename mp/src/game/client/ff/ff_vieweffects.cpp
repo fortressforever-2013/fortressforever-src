@@ -270,7 +270,7 @@ public:
 	//-----------------------------------------------------------------------------
 	// Purpose: Register
 	//-----------------------------------------------------------------------------
-	CFFTranquilizerViewEffect(const char *pName) : CFFBaseViewEffect(FF_VIEWEFFECT_TRANQUILIZED)
+	CFFTranquilizerViewEffect(const char* pName) : CFFBaseViewEffect(FF_VIEWEFFECT_TRANQUILIZED)
 	{
 	}
 
@@ -306,7 +306,7 @@ public:
 			return;
 
 		CMatRenderContextPtr pMatRenderContext(g_pMaterialSystem);
-		IMesh *pMesh = pMatRenderContext->GetDynamicMesh(true, NULL, NULL, m_hEyeLidMaterial);
+		IMesh* pMesh = pMatRenderContext->GetDynamicMesh(true, NULL, NULL, m_hEyeLidMaterial);
 
 		CMeshBuilder meshBuilder;
 		meshBuilder.Begin(pMesh, MATERIAL_QUADS, 1);
@@ -314,7 +314,7 @@ public:
 		float flAmount = 0.2f;
 
 #define M_PI_2     1.57079632679489661923
-		
+
 		if (flElapsed <= M_PI_2)
 		{
 			flAmount = 0.05f + 0.15f * sinf(flElapsed);
@@ -363,7 +363,7 @@ public:
 		}
 		else
 		{
-			KeyValues *pKeys = new KeyValues("keys");
+			KeyValues* pKeys = new KeyValues("keys");
 			pKeys->SetFloat("duration", 0.0f);
 
 			g_pScreenSpaceEffects->SetScreenSpaceEffectParams("tranquilizedeffect", pKeys);
@@ -377,7 +377,7 @@ public:
 	// Purpose: Expects a DURATION as a FLOAT.
 	//			Will also trigger the screenspace effect.
 	//-----------------------------------------------------------------------------
-	void Message(bf_read &msg)
+	void Message(bf_read& msg)
 	{
 		//m_flStart = gpGlobals->curtime;
 		//m_flDuration = msg.ReadFloat();
@@ -392,7 +392,7 @@ public:
 		}
 		else
 		{
-			KeyValues *pKeys = new KeyValues("keys");
+			KeyValues* pKeys = new KeyValues("keys");
 			pKeys->SetFloat("duration", flNewDuration - 0.3f);
 			pKeys->SetFloat("delay", 0.3f);	// Not used atm
 

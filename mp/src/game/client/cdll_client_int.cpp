@@ -963,6 +963,8 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 	vieweffects->Init();
 	ffvieweffects->Init();	// |-- Mirv
 
+	_discord.Init();
+
 	C_BaseTempEntity::PrecacheTempEnts();
 
 	input->Init_All();
@@ -1126,6 +1128,7 @@ void CHLClient::Shutdown( void )
 	ShutdownFbx();
 #endif
 
+	_discord.Shutdown();
 	
 	// This call disconnects the VGui libraries which we rely on later in the shutdown path, so don't do it
 //	DisconnectTier3Libraries( );
@@ -1202,7 +1205,7 @@ void CHLClient::HudUpdate( bool bActive )
 	// at the main menu. otherwise it will not initialize until we join a 
 	// server , breaking join-from-discord functionality. this might
 	// be better in a game system
-	_discord.RunFrame();
+	//_discord.RunFrame();
 
 #ifdef SIXENSE
 	// If we're not connected, update sixense so we can move the mouse cursor when in the menus

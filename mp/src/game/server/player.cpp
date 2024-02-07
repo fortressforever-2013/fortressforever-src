@@ -2009,7 +2009,6 @@ void CBasePlayer::WaterMove()
 		
 		if (m_AirFinished < gpGlobals->curtime)
 		{
-			//EmitSound( "Player.DrownStart" );
 			// --> Mirv: Fix the bubbly spawn start
 			if (GetTeamNumber() != TEAM_SPECTATOR && GetTeamNumber() != TEAM_UNASSIGNED)
 				EmitSound("Player.DrownStart");
@@ -2033,7 +2032,6 @@ void CBasePlayer::WaterMove()
 			m_bitsDamageType &= ~DMG_DROWN;
 			m_rgbTimeBasedDamage[itbd_DrownRecover] = 0;
 		}
-
 	}
 	else
 	{	// fully under water

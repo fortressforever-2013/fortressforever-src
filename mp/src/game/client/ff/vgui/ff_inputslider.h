@@ -51,6 +51,9 @@ namespace vgui
 		//-----------------------------------------------------------------------------
 		virtual void SetValue(int value, bool bTriggerChangeMessage = true)
 		{
+			if (value < _range[0] || value > _range[1])
+				return;
+
 			m_pInputBox->SetText(VarArgs("%d", value));
 			BaseClass::SetValue(value, bTriggerChangeMessage);
 		}
