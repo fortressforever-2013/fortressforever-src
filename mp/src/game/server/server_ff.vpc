@@ -1,0 +1,153 @@
+//-----------------------------------------------------------------------------
+//	SERVER_FF.VPC
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		"..\.."
+$Macro GAMENAME 	"ff" [!$SOURCESDK]
+$Macro GAMENAME 	"FortressForever2013" [$SOURCESDK] // TEMP!!
+
+$Include "$SRCDIR\game\server\server_base.vpc"
+$Include "$SRCDIR\game\server\nav_mesh.vpc" [$SOURCESDK]
+
+$Include "$SRCDIR\game\shared\ff\ff_shared.vpc"
+
+$Configuration
+{
+	$Compiler
+	{
+		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\lib\thirdparty\LuaBridge3,$SRCDIR\lib\thirdparty\lua-5.1.5\include,$SRCDIR\game\shared\ff\grenades,$SRCDIR\game\shared\ff\projectiles,$SRCDIR\game\shared\ff\weapons,$SRCDIR\game\shared\ff,.\ff\buildables,.\ff\lua,.\ff,$SRCDIR\omnibot"
+		$PreprocessorDefinitions		"$BASE;FF;FF_DLL;GAME_DLL;SDK2013CE" // maybe change all instances of GAME_DLL to FF_DLL in the future
+		
+		$AdditionalOptions					"$BASE /std:c++17"
+	}
+	
+	$Linker
+	{
+		$AdditionalLibraryDirectories	"..\..\lib\thirdparty\luabind\lib;..\..\lib\thirdparty\lua-5.1.5\lib;$BASE"
+		$AdditionalDependencies			"lua.lib$BASE"
+	}
+}
+
+$Project "Server (FF)"
+{
+	$Folder "FF Source Files"
+	{
+		$Folder "Buildables"
+		{
+			$File "$SRCDIR\game\server\ff\buildables\ff_buildableobject.cpp"
+			$File "$SRCDIR\game\server\ff\buildables\ff_buildableobject.h"
+			$File "$SRCDIR\game\server\ff\buildables\ff_detpack.cpp"
+			$File "$SRCDIR\game\server\ff\buildables\ff_dispenser.cpp"
+			$File "$SRCDIR\game\server\ff\buildables\ff_mancannon.cpp"
+			$File "$SRCDIR\game\server\ff\buildables\ff_sentrygun.cpp"
+			$File "$SRCDIR\game\server\ff\buildables\ff_sentrygun.h"
+		}
+		
+		$Folder "Lua"
+		{
+			$File "$SRCDIR\game\server\ff\lua\ff_luacontext.cpp"
+			$File "$SRCDIR\game\server\ff\lua\ff_luacontext.h"
+			$File "$SRCDIR\game\server\ff\lua\ff_lualib.cpp"
+			$File "$SRCDIR\game\server\ff\lua\ff_lualib.h"
+			$File "$SRCDIR\game\server\ff\lua\ff_lualib_base.cpp"
+			$File "$SRCDIR\game\server\ff\lua\ff_lualib_buildables.cpp"
+			$File "$SRCDIR\game\server\ff\lua\ff_lualib_constants.cpp"
+			$File "$SRCDIR\game\server\ff\lua\ff_lualib_constants.h"
+			$File "$SRCDIR\game\server\ff\lua\ff_lualib_data.cpp"
+			$File "$SRCDIR\game\server\ff\lua\ff_lualib_globals.cpp"
+			$File "$SRCDIR\game\server\ff\lua\ff_lualib_math.cpp"
+			$File "$SRCDIR\game\server\ff\lua\ff_lualib_misc.cpp"
+			$File "$SRCDIR\game\server\ff\lua\ff_lualib_omnibot.cpp"
+			$File "$SRCDIR\game\server\ff\lua\ff_lualib_player.cpp"
+			$File "$SRCDIR\game\server\ff\lua\ff_lualib_team.cpp"
+			$File "$SRCDIR\game\server\ff\lua\ff_lualib_util.cpp"
+			$File "$SRCDIR\game\server\ff\lua\ff_lualib_weapons.cpp"
+			$File "$SRCDIR\game\server\ff\lua\ff_scriptman.cpp"
+			$File "$SRCDIR\game\server\ff\lua\ff_scriptman.h"
+		}
+		
+		$Folder "Temporary Entities"
+		{
+			$File "$SRCDIR\game\server\ff\te_firebullets.cpp"
+			$File "$SRCDIR\game\server\ff\te_firebullets.h"
+		}
+		
+		$File "$SRCDIR\game\server\ff\ffentityinfomanager.cpp"
+		$File "$SRCDIR\game\server\ff\ffentityinfomanager.h"
+		$File "$SRCDIR\game\server\ff\ff_bot_temp.cpp"
+		$File "$SRCDIR\game\server\ff\ff_bot_temp.h"
+		$File "$SRCDIR\game\server\ff\ff_brushentity.cpp"
+		$File "$SRCDIR\game\server\ff\ff_client.cpp"
+		$File "$SRCDIR\game\server\ff\ff_entity_system.cpp"
+		$File "$SRCDIR\game\server\ff\ff_entity_system.h"
+		$File "$SRCDIR\game\server\ff\ff_env_flamejet.cpp"
+		$File "$SRCDIR\game\server\ff\ff_env_flamejet.h"
+		$File "$SRCDIR\game\server\ff\ff_env_message.cpp"
+		$File "$SRCDIR\game\server\ff\ff_env_sparkler.cpp"
+		$File "$SRCDIR\game\server\ff\ff_eventlog.cpp"
+		$File "$SRCDIR\game\server\ff\ff_gameinterface.cpp"
+		$File "$SRCDIR\game\server\ff\ff_goal.cpp"
+		$File "$SRCDIR\game\server\ff\ff_goal.h"
+		$File "$SRCDIR\game\server\ff\ff_grenade_napalmlet.cpp"
+		$File "$SRCDIR\game\server\ff\ff_grenade_napalmlet.h"
+		$File "$SRCDIR\game\server\ff\ff_item_backpack.cpp"
+		$File "$SRCDIR\game\server\ff\ff_item_backpack.h"
+		$File "$SRCDIR\game\server\ff\ff_item_flag.cpp"
+		$File "$SRCDIR\game\server\ff\ff_item_flag.h"
+		$File "$SRCDIR\game\server\ff\ff_logicalentity.cpp"
+		$File "$SRCDIR\game\server\ff\ff_mapfilter.cpp"
+		$File "$SRCDIR\game\server\ff\ff_mapfilter.h"
+		$File "$SRCDIR\game\server\ff\ff_menuman.cpp"
+		$File "$SRCDIR\game\server\ff\ff_menuman.h"
+		$File "$SRCDIR\game\server\ff\ff_minecart.cpp"
+		$File "$SRCDIR\game\server\ff\ff_minecart.h"
+		$File "$SRCDIR\game\server\ff\ff_modelentity.cpp"
+		$File "$SRCDIR\game\server\ff\ff_player.cpp"
+		$File "$SRCDIR\game\server\ff\ff_player.h"
+		$File "$SRCDIR\game\server\ff\ff_playermove.cpp"
+		$File "$SRCDIR\game\server\ff\ff_scheduleman.cpp"
+		$File "$SRCDIR\game\server\ff\ff_scheduleman.h"
+		$File "$SRCDIR\game\server\ff\ff_sevtest.cpp"
+		$File "$SRCDIR\game\server\ff\ff_team.cpp"
+		$File "$SRCDIR\game\server\ff\ff_team.h"
+		$File "$SRCDIR\game\server\ff\ff_timerman.cpp"
+		$File "$SRCDIR\game\server\ff\ff_timerman.h"
+		$File "$SRCDIR\game\server\ff\ff_vehicle_jeep.cpp"		
+	}
+	
+	$Folder "Omnibot Source Files"
+	{
+		$File "$SRCDIR\omnibot\Base_Messages.h"
+		$File "$SRCDIR\omnibot\BotExports.h"
+		
+		$File "$SRCDIR\omnibot\BotLoadLibrary.cpp"
+		{
+			$Configuration
+			{
+				$Compiler
+				{
+					$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
+				}
+			}
+		}
+		
+		$File "$SRCDIR\omnibot\FF_Config.h"
+		$File "$SRCDIR\omnibot\Functions_Bot.h"
+		$File "$SRCDIR\omnibot\IEngineInterface.h"
+		$File "$SRCDIR\omnibot\MessageHelper.h"
+		$File "$SRCDIR\omnibot\Omni-Bot.h"
+		$File "$SRCDIR\omnibot\Omni-Bot_BasicTypes.h"
+		$File "$SRCDIR\omnibot\Omni-Bot_BitFlags.h"
+		$File "$SRCDIR\omnibot\Omni-Bot_Color.h"
+		$File "$SRCDIR\omnibot\Omni-Bot_Events.h"
+		$File "$SRCDIR\omnibot\Omni-Bot_Types.h"
+		$File "$SRCDIR\omnibot\omnibot_eventhandler.cpp"
+		$File "$SRCDIR\omnibot\omnibot_eventhandler.h"
+		$File "$SRCDIR\omnibot\omnibot_interface.cpp"
+		$File "$SRCDIR\omnibot\omnibot_interface.h"
+		$File "$SRCDIR\omnibot\TF_Config.h"
+		$File "$SRCDIR\omnibot\TF_Messages.h"
+	}
+}

@@ -1,0 +1,249 @@
+//-----------------------------------------------------------------------------
+//	CLIENT_FF.VPC
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		"..\.."
+$Macro GAMENAME 	"ff" [!$SOURCESDK]
+$Macro GAMENAME 	"FortressForever2013" [$SOURCESDK] // TEMP!!
+
+$Include "$SRCDIR\game\client\client_base.vpc"
+$Include "$SRCDIR\game\shared\ff\ff_shared.vpc"
+
+$Macro LIBTHIRDPARTY	"$SRCDIR\lib\thirdparty"
+
+$Configuration
+{
+	$Compiler
+	{
+		$AdditionalIncludeDirectories		"$BASE;..\..\lib\thirdparty\discord-rpc\include,..\shared\ff\grenades,..\shared\ff\projectiles,..\shared\ff\weapons,..\shared\ff,.\ff\fx,.\ff\vgui\fortressoptions,.\ff\vgui,.\ff\hud\ui,.\ff\hud,.\ff"
+		$PreprocessorDefinitions			"$BASE;FF;FF_CLIENT_DLL;SDK2013CE"
+		
+		$AdditionalOptions					"$BASE /std:c++17"
+	}
+	
+	$Linker
+	{
+		$AdditionalLibraryDirectories		"$LIBTHIRDPARTY\discord-rpc\lib;$BASE"
+		$AdditionalDependencies				"discord-rpc.lib$BASE" // $BASE already includes a trailing semi-colon on its left side
+	}
+}
+
+$Project "Client (FF)"
+{
+	$Folder "Source Files"
+	{
+		-$File	"$SRCDIR\game\shared\weapon_parse_default.cpp"
+		
+		$Folder	"game_controls Header Files"
+		{
+			$File "$SRCDIR\game\client\game_controls\classmenu.h"
+			$File "$SRCDIR\game\client\game_controls\mapscreen.h"
+		}
+		
+		$Folder "game_controls"
+		{
+			$File "$SRCDIR\game\client\game_controls\classmenu.cpp"
+			$File "$SRCDIR\game\client\game_controls\mapscreen.cpp"
+		}
+	}
+
+	// FF specific files
+	$Folder "FF Source Files"
+	{
+		$Folder "FX"
+		{
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_bloodstream.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_bloodstream.h"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_bonusfire.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_concbits.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_concbits.h"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_conc_emitter.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_conc_emitter.h"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_empzap.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_empzap.h"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_flash_emitter.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_flash_emitter.h"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_gascloud_emitter.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_gascloud_emitter.h"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_grenades.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_grenades.h"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_immunity.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_immunity.h"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_impacts.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_infection.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_infection.h"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_jetpack.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_jetpack.h"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_napalm_emitter.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_napalm_emitter.h"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_overpressure.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_overpressure.h"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_railbeam.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_railbeam.h"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_ring_emitter.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_ring_emitter.h"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_slowfield.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_tracer.cpp"
+			$File "$SRCDIR\game\client\ff\fx\ff_fx_weaponfx.cpp"
+		}
+		
+		$Folder "HUD"
+		{
+			$Folder "UI"
+			{
+				
+			}
+			
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_addarmor.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_addhealth.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_ammo.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_armor.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_boxes.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_boxes.h"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_buildable_messages.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_buildstate.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_buildstate.h"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_buildtimer.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_buildtimer.h"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_cellcount.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_chat.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_chat.h"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_crosshairinfo.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_damageindicator.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_deathnotice.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_grenade1.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_grenade1timer.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_grenade1timer.h"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_grenade2.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_grenade2timer.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_grenade2timer.h"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_health.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_hint.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_hint.h"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_HintCenter.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_HintCenter.h"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_hitindicator.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_jetpackfuelbar.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_keystate.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_keystate.h"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_location.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_lua.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_lua.h"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_menu.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_menu.h"
+			//$File "$SRCDIR\game\client\ff\hud\ff_hud_menu_medengy.cpp"
+			//$File "$SRCDIR\game\client\ff\hud\ff_hud_menu_medengy.h"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_message.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_objectiveicon.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_overpressure.cpp"
+			//$File "$SRCDIR\game\client\ff\hud\ff_hud_playerscore.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_radar.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_radiotag.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_roundinfo.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_scorelatest.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_scoretotal.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_speedometer.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_spydisguise.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_statusicons.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_teamscores.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_weaponinfo.cpp"
+			$File "$SRCDIR\game\client\ff\hud\ff_hud_weaponselection.cpp"
+			
+		}
+		
+		$Folder "Temporary Entities"
+		{
+			$File "$SRCDIR\game\client\ff\c_te_firebullets.cpp"
+		}
+		
+		$Folder "VGUI"
+		{
+			$Folder "Fortress Options"
+			{
+				$File "$SRCDIR\game\client\ff\vgui\fortressoptions\ff_crosshairoptions.cpp"
+				$File "$SRCDIR\game\client\ff\vgui\fortressoptions\ff_crosshairoptions.h"
+				$File "$SRCDIR\game\client\ff\vgui\fortressoptions\ff_dlightoptions.cpp"
+				$File "$SRCDIR\game\client\ff\vgui\fortressoptions\ff_dlightoptions.h"
+				$File "$SRCDIR\game\client\ff\vgui\fortressoptions\ff_miscoptions.cpp"
+				$File "$SRCDIR\game\client\ff\vgui\fortressoptions\ff_miscoptions.h"
+				$File "$SRCDIR\game\client\ff\vgui\fortressoptions\ff_options.cpp"
+				$File "$SRCDIR\game\client\ff\vgui\fortressoptions\ff_options.h"
+				$File "$SRCDIR\game\client\ff\vgui\fortressoptions\ff_optionspage.h"
+				$File "$SRCDIR\game\client\ff\vgui\fortressoptions\ff_timeroptions.cpp"
+				$File "$SRCDIR\game\client\ff\vgui\fortressoptions\ff_timeroptions.h"
+			}
+			
+			$File "$SRCDIR\game\client\ff\vgui\FFSectionedListPanel.cpp"
+			$File "$SRCDIR\game\client\ff\vgui\FFSectionedListPanel.h"
+			$File "$SRCDIR\game\client\ff\vgui\ffviewport.cpp"
+			$File "$SRCDIR\game\client\ff\vgui\ffviewport.h"
+			$File "$SRCDIR\game\client\ff\vgui\ff_button.cpp"
+			$File "$SRCDIR\game\client\ff\vgui\ff_button.h"
+			$File "$SRCDIR\game\client\ff\vgui\ff_frame.h"
+			$File "$SRCDIR\game\client\ff\vgui\ff_gamemodes.cpp"
+			$File "$SRCDIR\game\client\ff\vgui\ff_gamemodes.h"
+			$File "$SRCDIR\game\client\ff\vgui\ff_gameui.h"
+			$File "$SRCDIR\game\client\ff\vgui\ff_inputslider.h"
+			$File "$SRCDIR\game\client\ff\vgui\ff_luabox.cpp"
+			$File "$SRCDIR\game\client\ff\vgui\ff_luabox.h"
+			$File "$SRCDIR\game\client\ff\vgui\ff_menu_panel.cpp"
+			$File "$SRCDIR\game\client\ff\vgui\ff_menu_panel.h"
+			$File "$SRCDIR\game\client\ff\vgui\ff_modelpanel.cpp"
+			$File "$SRCDIR\game\client\ff\vgui\ff_modelpanel.h"
+			$File "$SRCDIR\game\client\ff\vgui\ff_panel.cpp"
+			$File "$SRCDIR\game\client\ff\vgui\ff_panel.h"
+			$File "$SRCDIR\game\client\ff\vgui\ff_training.cpp"
+			$File "$SRCDIR\game\client\ff\vgui\ff_training.h"
+			$File "$SRCDIR\game\client\ff\vgui\ff_vgui_timer.cpp"
+			$File "$SRCDIR\game\client\ff\vgui\ff_vgui_timer.h"
+			$File "$SRCDIR\game\client\ff\vgui\vgui_rootpanel_ff.cpp"
+			$File "$SRCDIR\game\client\ff\vgui\vgui_rootpanel_ff.h"
+			
+		}
+		
+		$File "$SRCDIR\game\client\ff\clientmode_ff.cpp"
+		$File "$SRCDIR\game\client\ff\clientmode_ff.h"
+		$File "$SRCDIR\game\client\ff\c_ff_buildableobjects.cpp"
+		$File "$SRCDIR\game\client\ff\c_ff_buildableobjects.h"
+		$File "$SRCDIR\game\client\ff\c_ff_env_flamejet.cpp"
+		$File "$SRCDIR\game\client\ff\c_ff_env_flamejet.h"
+		$File "$SRCDIR\game\client\ff\c_ff_env_sparkler.cpp"
+		$File "$SRCDIR\game\client\ff\c_ff_hint_timers.cpp"
+		$File "$SRCDIR\game\client\ff\c_ff_hint_timers.h"
+		$File "$SRCDIR\game\client\ff\c_ff_item_flag.cpp"
+		$File "$SRCDIR\game\client\ff\c_ff_materialproxies.cpp"
+		$File "$SRCDIR\game\client\ff\c_ff_materialproxies.h"
+		$File "$SRCDIR\game\client\ff\c_ff_player.cpp"
+		$File "$SRCDIR\game\client\ff\c_ff_player.h"
+		//$File "$SRCDIR\game\client\ff\c_ff_rail_effects.cpp"
+		//$File "$SRCDIR\game\client\ff\c_ff_rail_effects.h"
+		$File "$SRCDIR\game\client\ff\c_ff_team.cpp"
+		$File "$SRCDIR\game\client\ff\c_ff_team.h"
+		$File "$SRCDIR\game\client\ff\c_ff_timers.cpp"
+		$File "$SRCDIR\game\client\ff\c_ff_timers.h"
+		$File "$SRCDIR\game\client\ff\ff_cdll_client_int.cpp"
+		$File "$SRCDIR\game\client\ff\ff_cdll_client_int.h"
+		$File "$SRCDIR\game\client\ff\ff_discordman.cpp"
+		$File "$SRCDIR\game\client\ff\ff_discordman.h"
+		$File "$SRCDIR\game\client\ff\ff_glyph.cpp"
+		$File "$SRCDIR\game\client\ff\ff_glyph.h"
+		$File "$SRCDIR\game\client\ff\ff_in_main.cpp"
+		$File "$SRCDIR\game\client\ff\ff_mathackman.cpp"
+		$File "$SRCDIR\game\client\ff\ff_mathackman.h"
+		$File "$SRCDIR\game\client\ff\ff_prediction.cpp"
+		$File "$SRCDIR\game\client\ff\ff_screenspaceeffects.cpp"
+		$File "$SRCDIR\game\client\ff\ff_teamcolorproxy.cpp"
+		$File "$SRCDIR\game\client\ff\ff_vieweffects.cpp"
+		$File "$SRCDIR\game\client\ff\ff_vieweffects.h"
+		$File "$SRCDIR\game\client\ff\ProxyAmmo.cpp"
+		$File "$SRCDIR\game\client\ff\ProxyCharge.cpp"
+		$File "$SRCDIR\game\client\ff\ProxyClass.cpp"
+		$File "$SRCDIR\game\client\ff\ProxyMap.cpp"
+		$File "$SRCDIR\game\client\ff\ProxyOverpressure.cpp"
+		$File "$SRCDIR\game\client\ff\ProxySlowfield.cpp"
+		$File "$SRCDIR\game\client\ff\ProxyTeam.cpp"
+
+	}
+}
