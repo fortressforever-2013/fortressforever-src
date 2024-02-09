@@ -87,8 +87,6 @@ void ModelPanel::Paint()
 //-----------------------------------------------------------------------------
 void ModelPanel::SetupPositioningAndLighting(Vector &vecOrigin)
 {
-	//CBasePlayer *pLocalPlayer = CBasePlayer::GetLocalPlayer();
-
 	CMatRenderContextPtr pRenderContext(materials);
 
 	pRenderContext->SetLightingOrigin(vec3_origin);

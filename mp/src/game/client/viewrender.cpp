@@ -54,6 +54,8 @@
 #include "sourcevr/isourcevirtualreality.h"
 #include "client_virtualreality.h"
 
+#include "ff_vieweffects.h"
+
 #ifdef PORTAL
 //#include "C_Portal_Player.h"
 #include "portal_render_targets.h"
@@ -80,6 +82,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+static ConVar ffdev_showrenderbounds("ffdev_showrenderbounds", "0", FCVAR_FF_FFDEV_CLIENT);
 
 static void testfreezeframe_f( void )
 {
@@ -108,12 +111,12 @@ ConVar r_entityclips( "r_entityclips", "1" ); //FIXME: Nvidia drivers before 81.
 // Matches the version in the engine
 static ConVar r_drawopaqueworld( "r_drawopaqueworld", "1", FCVAR_CHEAT );
 static ConVar r_drawtranslucentworld( "r_drawtranslucentworld", "1", FCVAR_CHEAT );
-static ConVar r_3dsky( "r_3dsky","1", 0, "Enable the rendering of 3d sky boxes" );
+static ConVar r_3dsky( "r_3dsky","1", FCVAR_ARCHIVE, "Enable the rendering of 3d sky boxes" );
 static ConVar r_skybox( "r_skybox","1", FCVAR_CHEAT, "Enable the rendering of sky boxes" );
 #ifdef TF_CLIENT_DLL
 ConVar r_drawviewmodel( "r_drawviewmodel","1", FCVAR_ARCHIVE );
 #else
-ConVar r_drawviewmodel( "r_drawviewmodel","1", FCVAR_CHEAT );
+ConVar r_drawviewmodel( "r_drawviewmodel","1", FCVAR_ARCHIVE );
 #endif
 static ConVar r_drawtranslucentrenderables( "r_drawtranslucentrenderables", "1", FCVAR_CHEAT );
 static ConVar r_drawopaquerenderables( "r_drawopaquerenderables", "1", FCVAR_CHEAT );
@@ -149,8 +152,8 @@ static ConVar r_debugcheapwater( "r_debugcheapwater", "0", FCVAR_CHEAT );
 static ConVar r_waterforceexpensive( "r_waterforceexpensive", "0", FCVAR_ARCHIVE );
 #endif
 static ConVar r_waterforcereflectentities( "r_waterforcereflectentities", "0" );
-static ConVar r_WaterDrawRefraction( "r_WaterDrawRefraction", "1", 0, "Enable water refraction" );
-static ConVar r_WaterDrawReflection( "r_WaterDrawReflection", "1", 0, "Enable water reflection" );
+static ConVar r_WaterDrawRefraction( "r_WaterDrawRefraction", "1", FCVAR_ARCHIVE, "Enable water refraction" );
+static ConVar r_WaterDrawReflection( "r_WaterDrawReflection", "1", FCVAR_ARCHIVE, "Enable water reflection" );
 static ConVar r_ForceWaterLeaf( "r_ForceWaterLeaf", "1", 0, "Enable for optimization to water - considers view in leaf under water for purposes of culling" );
 static ConVar mat_drawwater( "mat_drawwater", "1", FCVAR_CHEAT );
 static ConVar mat_clipz( "mat_clipz", "1" );
@@ -2180,6 +2183,8 @@ void CViewRender::RenderView( const CViewSetup &view, int nClearFlags, int whatT
 	// Draw the 2D graphics
 	render->Push2DView( view, 0, saveRenderTarget, GetFrustum() );
 
+	ffvieweffects->Render(VIEWEFFECT_BEFOREHUD, view.width, view.height);	// |-- Mirv
+
 	Render2DEffectsPreHUD( view );
 
 	if ( whatToDraw & RENDERVIEW_DRAWHUD )
@@ -2198,6 +2203,14 @@ void CViewRender::RenderView( const CViewSetup &view, int nClearFlags, int whatT
 		bool bClear = false;
 		bool bPaintMainMenu = false;
 		ITexture *pTexture = NULL;
+
+		// --> Mirv: 
+		// Reduce the depth range so that our hud stuff isn't affected
+		// by the world/viewmodel.
+		// this line errors in SDK2013
+		//pRenderContext->DepthRange( 0.0f, 0.1f );
+		// <--
+
 		if( UseVR() )
 		{
 			if( g_ClientVirtualReality.ShouldRenderHUDInWorld() )
@@ -2325,6 +2338,8 @@ void CViewRender::RenderView( const CViewSetup &view, int nClearFlags, int whatT
 	}
 
 	CDebugViewRender::Draw2DDebuggingInfo( view );
+
+	ffvieweffects->Render(VIEWEFFECT_AFTERHUD, view.width, view.height);	// |-- Mirv
 
 	Render2DEffectsPostHUD( view );
 
@@ -4212,6 +4227,23 @@ static inline void DrawTranslucentRenderable( IClientRenderable *pEnt, bool twoP
 
 	if ( bShadowDepth )
 		flags |= STUDIO_SHADOWDEPTHTEXTURE;
+
+#if _DEBUG
+	if (ffdev_showrenderbounds.GetBool())
+	{
+		Vector mins, maxs;
+		pEnt->GetRenderBounds(mins, maxs);
+		debugoverlay->AddBoxOverlay(pEnt->GetRenderOrigin(), mins, maxs, pEnt->GetRenderAngles(), 255, 255, 255, 64, 0.01);
+		if (pEnt->GetModel())
+		{
+			const char* pName = modelinfo->GetModelName(pEnt->GetModel());
+			if (Q_stricmp(pName, "models/props_c17/tv_monitor01_screen.mdl"))
+			{
+				debugoverlay->AddTextOverlay(pEnt->GetRenderOrigin(), 0.01, pName);
+			}
+		}
+	}
+#endif
 
 	float *pRenderClipPlane = NULL;
 	if( r_entityclips.GetBool() )
