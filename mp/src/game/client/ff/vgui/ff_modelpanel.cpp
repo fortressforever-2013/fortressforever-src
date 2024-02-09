@@ -87,46 +87,30 @@ void ModelPanel::Paint()
 //-----------------------------------------------------------------------------
 void ModelPanel::SetupPositioningAndLighting(Vector &vecOrigin)
 {
-	CBasePlayer *pLocalPlayer = CBasePlayer::GetLocalPlayer();
+	//CBasePlayer *pLocalPlayer = CBasePlayer::GetLocalPlayer();
 
-	vecOrigin = pLocalPlayer->EyePosition();
-	Vector lightOrigin = vecOrigin;
+	CMatRenderContextPtr pRenderContext(materials);
 
-	// find a spot inside the world for the dlight's origin, or it won't illuminate the model
-	Vector testPos(vecOrigin.x - 100, vecOrigin.y, vecOrigin.z + 100);
-	trace_t tr;
-	UTIL_TraceLine(vecOrigin, testPos, MASK_OPAQUE, pLocalPlayer, COLLISION_GROUP_NONE, &tr);
-	if (tr.fraction == 1.0f)
+	pRenderContext->SetLightingOrigin(vec3_origin);
+	pRenderContext->SetAmbientLight(0.4, 0.4, 0.4);
+
+	static Vector white[6] =
 	{
-		lightOrigin = tr.endpos;
-	}
-	else
-	{
-		// Now move the model away so we get the correct illumination
-		lightOrigin = tr.endpos + Vector(1, 0, -1);	// pull out from the solid
-		Vector start = lightOrigin;
-		Vector end = lightOrigin + Vector(100, 0, -100);
-		UTIL_TraceLine(start, end, MASK_OPAQUE, pLocalPlayer, COLLISION_GROUP_NONE, &tr);
-		vecOrigin = tr.endpos;
-	}
+		Vector(0.4, 0.4, 0.4),
+		Vector(0.4, 0.4, 0.4),
+		Vector(0.4, 0.4, 0.4),
+		Vector(0.4, 0.4, 0.4),
+		Vector(0.4, 0.4, 0.4),
+		Vector(0.4, 0.4, 0.4),
+	};
 
-	float ambient = engine->GetLightForPoint(vecOrigin, true).Length();
+	g_pStudioRender->SetAmbientLightColors(white);
+	g_pStudioRender->SetLocalLights(0, NULL);
 
-	// Make a light so the model is well lit.
-	// use a non-zero number so we cannibalize ourselves next frame
-	dlight_t *dl = effects->CL_AllocDlight(LIGHT_INDEX_TE_DYNAMIC+1);
-
-	dl->flags = DLIGHT_NO_WORLD_ILLUMINATION;
-	dl->origin = lightOrigin;
-	// Go away immediately so it doesn't light the world too.
-	dl->die = gpGlobals->curtime + 0.1f;
-
-	dl->color.r = dl->color.g = dl->color.b = 250;
-	if (ambient < 1.0f)
-	{
-		dl->color.exponent = 1 + (1 - ambient) * 2;
-	}
-	dl->radius	= 400;
+	Vector vecMins, vecMaxs;
+	m_hModel->GetRenderBounds(vecMins, vecMaxs);
+	LightDesc_t spotLight(vec3_origin + Vector(0, 0, 200), Vector(1, 1, 1), m_hModel->GetAbsOrigin() + Vector(0, 0, (vecMaxs.z - vecMins.z) * 0.75), 0.035, 0.873);
+	g_pStudioRender->SetLocalLights(1, &spotLight);
 
 	// Move model in front of our view
 	m_hModel->SetAbsOrigin(vecOrigin);
@@ -174,7 +158,12 @@ void ModelPanel::DoRendering(Vector vecOrigin)
 //-----------------------------------------------------------------------------
 void ModelPanel::DrawModels()
 {
+	modelrender->SuppressEngineLighting(true);
+	float color[3] = { 1.0f, 1.0f, 1.0f };
+	render->SetColorModulation(color);
+	render->SetBlend(1.0f);
 	m_hModel->DrawModel(STUDIO_RENDER);
+	modelrender->SuppressEngineLighting(false);
 }
 
 //-----------------------------------------------------------------------------
