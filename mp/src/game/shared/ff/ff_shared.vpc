@@ -3,6 +3,12 @@
 // expects $SRCDIR macro to exist
 $Project
 {
+	$Folder "Source Files"
+	{
+		$File "$SRCDIR\game\shared\predicted_viewmodel.cpp"
+		$File "$SRCDIR\game\shared\predicted_viewmodel.h"
+	}
+	
 	$Folder "FF Shared Source Files"
 	{
 		$Folder "Grenades"

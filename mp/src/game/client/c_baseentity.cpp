@@ -89,8 +89,10 @@ static ConVar  cl_interp_ratio("cl_interp_ratio", "2.0", FCVAR_USERINFO | FCVAR_
 
 static ConVar  cl_extrapolate( "cl_extrapolate", "1", FCVAR_CHEAT, "Enable/disable extrapolation if interpolation history runs out." );
 
-// Defined in engine
-static ConVar cl_interpolate("cl_interpolate", "1.0f", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY);
+// can't add FCVAR_CHEAT flag to this because
+// it's defined in engine without the FCVAR_CHEAT
+// flag
+static ConVar cl_interpolate("cl_interpolate", "1.0f", FCVAR_USERINFO | FCVAR_DEVELOPMENTONLY);
 
 //static ConVar  cl_interp	 ( "cl_interp", "0.1", FCVAR_USERINFO | FCVAR_DEMO, "Interpolate object positions starting this many seconds in past", true, 0.01, true, 1.0, cc_cl_interp_changed );  
 

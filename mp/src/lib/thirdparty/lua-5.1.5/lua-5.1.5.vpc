@@ -4,14 +4,26 @@ $Macro SRCDIR		"..\..\.."
 
 $Include "$SRCDIR\vpc_scripts\source_lib_base.vpc"	// this for static lib
 
+$Configuration	"Debug"
+{
+	$General
+	{
+		$OutputDirectory			".\Debug"
+		$IntermediateDirectory		".\Debug"
+	}
+}
+
+$Configuration	"Release"
+{
+	$General
+	{
+		$OutputDirectory			".\Release"
+		$IntermediateDirectory		".\Release"
+	}
+}
+
 $Configuration
 {
-	$General	
-	{
-		$OutputDirectory				".\lib"
-		$IntermediateDirectory			".\lib"
-	}
-	
 	$Compiler
 	{
 		$AdditionalIncludeDirectories	"$BASE;.\include"

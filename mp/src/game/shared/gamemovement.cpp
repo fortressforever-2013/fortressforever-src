@@ -1176,7 +1176,7 @@ void CGameMovement::ProcessMovement( CBasePlayer *pPlayer, CMoveData *pMove )
 	player = pPlayer;
 
 	mv = pMove;
-	mv->m_flMaxSpeed = pPlayer->GetPlayerMaxSpeed();
+	mv->m_flMaxSpeed = /*pPlayer->GetPlayerMaxSpeed();*/ sv_maxspeed.GetFloat();
 
 	// CheckV( player->CurrentCommandNumber(), "StartPos", mv->GetAbsOrigin() );
 
