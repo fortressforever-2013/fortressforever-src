@@ -125,6 +125,7 @@ void CFFDiscordManager::LevelPreInit(const char* mapname)
 
 	discordPresence.state = "Joining a server...";
 	discordPresence.largeImageKey = "logo-big";
+	discordPresence.startTimestamp = startTimestamp;
 
 	Update(discordPresence);
 }
@@ -141,6 +142,7 @@ void CFFDiscordManager::LevelInit(const char* mapname)
 	sprintf(buffer, "Map: %s", mapname);
 	discordPresence.details = buffer;
 	discordPresence.largeImageKey = "logo-big";
+	discordPresence.startTimestamp = startTimestamp;
 
 	Update(discordPresence);
 
@@ -199,6 +201,7 @@ void CFFDiscordManager::UpdateGameData()
 	discordPresence.state = stateStr;
 	discordPresence.details = detailsStr;
 	discordPresence.largeImageKey = "logo-big";
+	discordPresence.startTimestamp = startTimestamp;
 
 	Update(discordPresence);
 }

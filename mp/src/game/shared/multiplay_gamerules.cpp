@@ -353,7 +353,7 @@ bool CMultiplayRules::Init()
 	// override some values for multiplay.
 
 		// suitcharger
-#ifndef TF_DLL
+#if !defined( TF_DLL ) && !defined( FF_DLL )
 //=============================================================================
 // HPE_BEGIN:
 // [menglish] CS doesn't have the suitcharger either
@@ -962,39 +962,39 @@ ConVarRef suitcharger( "sk_suitcharger" );
 			// <-- Mirv
 
 			//fixes for certain time based damage.
-			switch (info.GetCustomKill())
+			switch (info.GetDamageCustom())
 			{
-			case KILLTYPE_INFECTION:
+			case DAMAGETYPE_INFECTION:
 				killer_weapon_name = "ff_weapon_medkit";
 				break;
-			case KILLTYPE_BURN_LEVEL1:
+			case DAMAGETYPE_BURN_LEVEL1:
 				killer_weapon_name = "ff_burndeath_level1";
 				break;
-			case KILLTYPE_BURN_LEVEL2:
+			case DAMAGETYPE_BURN_LEVEL2:
 				killer_weapon_name = "ff_burndeath_level2";
 				break;
-			case KILLTYPE_BURN_LEVEL3:
+			case DAMAGETYPE_BURN_LEVEL3:
 				killer_weapon_name = "ff_burndeath_level3";
 				break;
-			case KILLTYPE_GASSED:
+			case DAMAGETYPE_GASSED:
 				killer_weapon_name = "ff_grenade_gas";
 				break;
-			case KILLTYPE_HEADSHOT:
+			case DAMAGETYPE_HEADSHOT:
 				killer_weapon_name = "BOOM_HEADSHOT"; // BOOM HEADSHOT!  AAAAAAAAHHHH!
 				break;
-			case KILLTYPE_BACKSTAB:
+			case DAMAGETYPE_BACKSTAB:
 				killer_weapon_name = "backstab";
 				break;
-			case KILLTYPE_SENTRYGUN_DET:
+			case DAMAGETYPE_SENTRYGUN_DET:
 				killer_weapon_name = "sg_det";
 				break;
-			case KILLTYPE_HEADCRUSH:
+			case DAMAGETYPE_HEADCRUSH:
 				killer_weapon_name = "headcrush";
 				break;
-			case KILLTYPE_RAILBOUNCE_1:
+			case DAMAGETYPE_RAILBOUNCE_1:
 				killer_weapon_name = "ff_weapon_railgun_bounce1";
 				break;
-			case KILLTYPE_RAILBOUNCE_2:
+			case DAMAGETYPE_RAILBOUNCE_2:
 				killer_weapon_name = "ff_weapon_railgun_bounce2";
 				break;
 			}

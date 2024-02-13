@@ -3857,14 +3857,14 @@ void CFFPlayer::StatusEffectsThink( void )
 				if( pGasser )
 				{
 					CTakeDamageInfo info(pGasser, pGasser, vec3_origin, GetAbsOrigin(), 1.0f, DMG_DIRECT);
-					info.SetCustomKill(KILLTYPE_GASSED);
+					info.SetDamageCustom(DAMAGETYPE_GASSED);
 
 					TakeDamage(info);
 				}
 				else //must be lua set...
 				{
 					CTakeDamageInfo info(this, this, vec3_origin, GetAbsOrigin(), 1.0f, DMG_DIRECT);
-					info.SetCustomKill(KILLTYPE_GASSED);
+					info.SetDamageCustom(DAMAGETYPE_GASSED);
 
 					TakeDamage(info);
 				}
@@ -4016,7 +4016,7 @@ void CFFPlayer::StatusEffectsThink( void )
 			//Msg("Damage done: %d Tick: %d Total damage done: %d\n", iInfectDamage, m_iInfectTick, m_nNumInfectDamage);
 
 			CTakeDamageInfo info( pInfector, pInfector, iInfectDamage, DMG_POISON );
-			info.SetCustomKill(KILLTYPE_INFECTION);
+			info.SetDamageCustom(DAMAGETYPE_INFECTION);
 			info.SetDamagePosition( GetAbsOrigin() );
 			TakeDamage( info );
 
@@ -5610,7 +5610,7 @@ int CFFPlayer::ObjectCaps( void )
 void CFFPlayer::LimbDecapitation(const CTakeDamageInfo &info)
 {
 	// Headshot
-	if (info.GetCustomKill() == KILLTYPE_HEADSHOT)
+	if (info.GetDamageCustom() == DAMAGETYPE_HEADSHOT)
 	{
 		m_fBodygroupState = DECAP_HEAD;
 		return;
@@ -6532,7 +6532,7 @@ int CFFPlayer::LuaAddHealth(int iAmount, bool bAllowOverheal)
 	{
 		// use direct damage so armor is ignored
 		CTakeDamageInfo info( this, this, -iAmount, DMG_DIRECT );
-		info.SetCustomKill(KILLTYPE_INFECTION);
+		info.SetDamageCustom(DAMAGETYPE_INFECTION);
 
 		TakeDamage( info );
 	}

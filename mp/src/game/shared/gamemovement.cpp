@@ -4155,7 +4155,7 @@ void CGameMovement::PlayerRoughLandingEffects( float fvol )
 					if (FF_IsAirshot(pCrushedPlayer))
 						bitsDamageType |= DMG_AIRSHOT;
 
-					CTakeDamageInfo info(player, player, flCrushDamage, bitsDamageType, KILLTYPE_HEADCRUSH);
+					CTakeDamageInfo info(player, player, flCrushDamage, bitsDamageType, DAMAGETYPE_HEADCRUSH);
 					pCrushedPlayer->TakeDamage(info);
 				}
 			}

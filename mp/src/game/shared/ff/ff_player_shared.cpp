@@ -457,7 +457,7 @@ void CFFPlayer::FireBullet(
 
 	if (bHeadshot)
 	{
-		info.SetCustomKill(KILLTYPE_HEADSHOT);
+		info.SetDamageCustom(DAMAGETYPE_HEADSHOT);
 	}
 
 	tr.m_pEnt->DispatchTraceAttack(info, vecDir, &tr);

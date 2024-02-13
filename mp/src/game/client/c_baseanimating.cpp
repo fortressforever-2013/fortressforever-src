@@ -3315,10 +3315,16 @@ bool C_BaseAnimating::OnInternalDrawModel( ClientModelRenderInfo_t *pInfo )
 //-----------------------------------------------------------------------------
 void C_BaseAnimating::DoInternalDrawModel( ClientModelRenderInfo_t *pInfo, DrawModelState_t *pState, matrix3x4_t *pBoneToWorldArray )
 {
+	// allow overriding of materials for any entity derived from C_BaseAnimating
+	StartMaterialOverride();
+
 	if ( pState)
 	{
 		modelrender->DrawModelExecute( *pState, *pInfo, pBoneToWorldArray );
 	}
+
+	// stop overriding so every model isn't drawn with the override material
+	StopMaterialOverride();
 
 	if ( vcollide_wireframe.GetBool() )
 	{

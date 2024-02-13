@@ -225,8 +225,8 @@ void CFFProjectileRail::RailTouch( CBaseEntity *pOther )
 	
 	switch(m_iNumBounces)
 	{
-	case 1: m_iKillType = KILLTYPE_RAILBOUNCE_1; break;
-	case 2: m_iKillType = KILLTYPE_RAILBOUNCE_2; break;
+	case 1: m_iKillType = DAMAGETYPE_RAILBOUNCE_1; break;
+	case 2: m_iKillType = DAMAGETYPE_RAILBOUNCE_2; break;
 	}
 
 	// If the object we touch takes damage
@@ -542,7 +542,7 @@ void CFFProjectileRail::OnDataChanged( DataUpdateType_t updateType )
 	if ( updateType == DATA_UPDATE_CREATED )
 	{
 		// make the crossbow bolt invisible (for some stupid reason, shit doesn't get interpolated properly without a model)
-		FindOverrideMaterial("effects/cloak", TEXTURE_GROUP_CLIENT_EFFECTS);
+		FindOverrideMaterial(FF_CLOAK_MATERIAL, TEXTURE_GROUP_CLIENT_EFFECTS);
 
 		// dlight scale
 		float flDLightScale = cl_ffdlight_rail.GetFloat();

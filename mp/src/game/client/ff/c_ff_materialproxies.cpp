@@ -496,7 +496,7 @@ void C_FFSpyCloakMaterialProxy::OnBind(void* pC_BaseEntity)
 	// Update the value in the material proxy
 	SetFloatResult(flVal);
 
-	Warning( "[Spy Cloak Proxy] %s - %f (%f)\n", pPlayer->GetPlayerName(), flSpeed, flVal );
+	//Warning( "[Spy Cloak Proxy] %s - %f (%f)\n", pPlayer->GetPlayerName(), flSpeed, flVal );
 }
 
 EXPOSE_INTERFACE(C_FFSpyCloakMaterialProxy, IMaterialProxy, "FF_SpyCloakProxy" IMATERIAL_PROXY_INTERFACE_VERSION)
