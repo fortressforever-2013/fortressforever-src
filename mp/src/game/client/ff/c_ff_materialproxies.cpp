@@ -112,7 +112,6 @@ bool C_TeamColorMaterialProxy::Init(IMaterial* pMaterial, KeyValues* pKeyValues)
 //-----------------------------------------------------------------------------
 void C_TeamColorMaterialProxy::OnBind(void* pC_BaseEntity)
 {
-	Warning("CTeamColorMaterialProxy::OnBind\n");
 	// Get the entity this material is on
 	C_BaseEntity* pEntity = ((IClientRenderable*)pC_BaseEntity)->GetIClientUnknown()->GetBaseEntity();
 	if (pEntity)
