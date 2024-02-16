@@ -661,13 +661,6 @@ void CViewRender::SetUpViews()
 	view.m_bViewToProjectionOverride = false;
 	view.m_eStereoEye = STEREO_EYE_MONO;
 
-	// --> Mirv: Make sure this doesn't go negative
-	if (m_View.fovViewmodel < 10.0f)
-	{
-		m_View.fovViewmodel = 10.0f;
-	}
-	// <-- Mirv
-
 	// Enable spatial partition access to edicts
 	partition->SuppressLists(PARTITION_ALL_CLIENT_EDICTS, false);
 
@@ -752,6 +745,13 @@ void CViewRender::SetUpViews()
 #else
 	view.fovViewmodel = g_pClientMode->GetViewModelFOV() - flFOVOffset;
 #endif
+
+	// --> Mirv: Make sure this doesn't go negative
+	if (m_View.fovViewmodel < 10.0f)
+	{
+		m_View.fovViewmodel = 10.0f;
+	}
+	// <-- Mirv
 
 	if (UseVR())
 	{

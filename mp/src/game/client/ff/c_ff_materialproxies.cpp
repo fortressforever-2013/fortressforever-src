@@ -112,6 +112,7 @@ bool C_TeamColorMaterialProxy::Init(IMaterial* pMaterial, KeyValues* pKeyValues)
 //-----------------------------------------------------------------------------
 void C_TeamColorMaterialProxy::OnBind(void* pC_BaseEntity)
 {
+	Warning("CTeamColorMaterialProxy::OnBind\n");
 	// Get the entity this material is on
 	C_BaseEntity* pEntity = ((IClientRenderable*)pC_BaseEntity)->GetIClientUnknown()->GetBaseEntity();
 	if (pEntity)
@@ -191,6 +192,7 @@ void C_TeamColorMaterialProxy::OnBind(void* pC_BaseEntity)
 const char* g_ppszColor_TeamColorStrings[] =
 {
 	"$color",
+	"$color2",
 	"$TeamColorBlue",
 	"$TeamColorRed",
 	"$TeamColorYellow",
@@ -205,6 +207,41 @@ C_Color_TeamColorMaterialProxy::C_Color_TeamColorMaterialProxy(void)
 {
 	// Overwrite
 	m_ppszStrings = g_ppszColor_TeamColorStrings;
+}
+
+bool C_Color_TeamColorMaterialProxy::Init(IMaterial* pMaterial, KeyValues* pKeyValues)
+{
+	int iCount = 0;
+	while (m_ppszStrings[iCount] != NULL)
+	{
+		bool bFound = true;
+
+		if (iCount == 0 || iCount == 1)
+		{
+			m_pValue = pMaterial->FindVar(m_ppszStrings[iCount], &bFound);
+
+			if (!bFound)
+				return false;
+		}
+		else
+		{
+			IMaterialVar* pMatVar = pMaterial->FindVar(m_ppszStrings[iCount], &bFound);
+
+			if (!bFound)
+				return false;
+
+			Vector vecVals;
+			pMatVar->GetVecValue(vecVals.Base(), pMatVar->VectorSize());
+
+			m_vecTeamColorVals[iCount - 1] = vecVals;
+		}
+
+		iCount++;
+	}
+
+	DevMsg("[Color Team Color] Material Proxy succesful!\n");
+
+	return true;
 }
 
 EXPOSE_INTERFACE(C_Color_TeamColorMaterialProxy, IMaterialProxy, "Color_TeamColor" IMATERIAL_PROXY_INTERFACE_VERSION)

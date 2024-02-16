@@ -51,6 +51,9 @@ public:
 	virtual void Release(void) { delete this; }
 	IMaterial* GetMaterial(void) { return m_pValue->GetOwningMaterial(); };
 
+	// is this a good idea?
+	friend class C_Color_TeamColorMaterialProxy;
+
 private:
 	// Actual $ value we will be modifying in the .vmt to adjust
 	// the team coloring
@@ -79,6 +82,7 @@ class C_Color_TeamColorMaterialProxy : public C_TeamColorMaterialProxy
 {
 public:
 	C_Color_TeamColorMaterialProxy(void);
+	bool Init(IMaterial* pMaterial, KeyValues* pKeyValues);
 
 };
 
