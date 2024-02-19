@@ -91,3 +91,6 @@ compile_commands.json
 
 *.recipe
 *.vcxproj.FileListAbsolute.txt
+
+# causes issues
+ttsapp.RES
