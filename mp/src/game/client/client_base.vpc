@@ -340,6 +340,8 @@ $Project
 		$File	"fx_tracer.cpp"
 		$File	"fx_trail.cpp"
 		$File	"fx_water.cpp"
+		$File	"hl2\fx_hl2_impacts.cpp"
+		$File	"hl2\fx_hl2_tracers.cpp"
 		$File	"$SRCDIR\game\shared\gamemovement.cpp"
 		$File	"$SRCDIR\game\shared\gamerules.cpp"
 		$File	"$SRCDIR\game\shared\gamerules_register.cpp"
