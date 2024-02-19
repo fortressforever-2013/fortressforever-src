@@ -46,6 +46,8 @@ ConVar hud_lua( "hud_lua", "1", FCVAR_ARCHIVE, "When 0, stops drawing all HUD el
 // 80, just to be safe
 #define MAX_KEY_LENGTH 80
 
+#define MSG_KEYNOTBOUND "<NOT BOUND>"
+
 DECLARE_HUDELEMENT(CHudLua);
 DECLARE_HUD_MESSAGE(CHudLua, FF_HudLua);
 
@@ -517,18 +519,24 @@ bool CHudLua::TranslateKeyCommand( const char *szMessage, char *szTranslated, in
 					sKeyCommand[iKeyIndex] = '\0';
 					//Msg( "\nCommand: %s\n", sKeyCommand );
 					const char* sConvertedCommand = engine->Key_LookupBinding(sKeyCommand);
+					bool bFound = true;
 
 					if (!sConvertedCommand) {
-						Warning("Attempt to translate key command failed! Either the bind doesn't exist or is not bound to a key!\n");
-						return false;
+						bFound = false;
+						//Warning("Attempt to translate key command failed! Either the bind doesn't exist or is not bound to a key!\n");
+						sConvertedCommand = MSG_KEYNOTBOUND;
 					}
 
 					// --> Convert key name to uppercase
 					char sConvertedCommandUpper[MAX_KEY_LENGTH];
 					strcpy(sConvertedCommandUpper, sConvertedCommand);
 
-					for (size_t i = 0; i < strlen(sConvertedCommandUpper); i++)
-						sConvertedCommandUpper[i] = ::toupper(sConvertedCommandUpper[i]);
+					// only attempt to convert to uppercase if it found the key
+					if ( bFound )
+					{
+						for (size_t i = 0; i < strlen(sConvertedCommandUpper); i++)
+							sConvertedCommandUpper[i] = ::toupper(sConvertedCommandUpper[i]);
+					}
 					// <-- Convert key name to uppercase
 
 					//Msg( "\nConverted Command: %s\n", sConvertedCommand );

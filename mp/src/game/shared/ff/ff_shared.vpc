@@ -112,7 +112,6 @@ $Project
 	$File "$SRCDIR\game\shared\ff\ff_playercommand.cpp"
 	$File "$SRCDIR\game\shared\ff\ff_playercommand.h"
 	$File "$SRCDIR\game\shared\ff\ff_player_shared.cpp"
-	$File "$SRCDIR\game\shared\ff\ff_player_shared.h"
 	$File "$SRCDIR\game\shared\ff\ff_radiotagdata.cpp"
 	$File "$SRCDIR\game\shared\ff\ff_radiotagdata.h"
 	$File "$SRCDIR\game\shared\ff\ff_shared.vpc"
