@@ -294,10 +294,6 @@ void CBasePlayer::ItemPostFrame()
 	// remove this line and call ImpulseCommands instead.
 	m_nImpulse = 0;
 #endif
-	// Mirv: Totally disable weapons in spectator mode
-	if (GetTeamNumber() >= TEAM_BLUE && GetTeamNumber() <= TEAM_GREEN)
-		if (GetActiveWeapon()) //voogru: crash fix 08/14/2006
-			GetActiveWeapon()->ItemPostFrame();
 }
 
 
