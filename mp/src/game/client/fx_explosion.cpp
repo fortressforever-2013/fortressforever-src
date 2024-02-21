@@ -317,12 +317,12 @@ void C_BaseExplosionEffect::CreateCore( void )
 				pParticle->m_flLifetime = 0.0f;
 
 				// --> Mirv: Use TF2 length smoke but scale it so that it hovers up slowly
-		//#ifdef INVASION_CLIENT_DLL
+//#ifdef INVASION_CLIENT_DLL
 				pParticle->m_flDieTime = random->RandomFloat(0.5f, 1.0f) * (m_flScale * m_flScale * m_flScale);
-				//#else
-				//			pParticle->m_flDieTime	= random->RandomFloat( 2.0f, 3.0f );
-				//#endif
-						// <-- Mirv
+//#else
+				//pParticle->m_flDieTime	= random->RandomFloat( 2.0f, 3.0f );
+//#endif
+				// <-- Mirv
 
 				pParticle->m_vecVelocity.Random(-spread, spread);
 				pParticle->m_vecVelocity += (m_vecDirection * random->RandomFloat(1.0f, 6.0f));
@@ -384,12 +384,12 @@ void C_BaseExplosionEffect::CreateCore( void )
 				pParticle->m_flLifetime = 0.0f;
 
 				// --> Mirv: Use quicker TF2 style smoke time again, but don't modify for scale
-		//#ifdef INVASION_CLIENT_DLL
+//#ifdef INVASION_CLIENT_DLL
 				pParticle->m_flDieTime = random->RandomFloat(0.5f, 1.0f);
-				//#else
-				//			pParticle->m_flDieTime	= random->RandomFloat( 0.5f, 1.0f );
-				//#endif
-						// <-- Mirv
+//#else
+				//pParticle->m_flDieTime	= random->RandomFloat( 0.5f, 1.0f );
+//#endif
+				// <-- Mirv
 
 				pParticle->m_vecVelocity.Random(-spread, spread);
 				pParticle->m_vecVelocity += (m_vecDirection * random->RandomFloat(1.0f, 6.0f));
@@ -417,8 +417,8 @@ void C_BaseExplosionEffect::CreateCore( void )
 				pParticle->m_uchColor[1] = (worldLight[1] * nColor);
 				pParticle->m_uchColor[2] = (worldLight[2] * nColor);
 
-				pParticle->m_uchStartSize = random->RandomInt(32, 64);
-				pParticle->m_uchEndSize = pParticle->m_uchStartSize * 2;
+				pParticle->m_uchStartSize = random->RandomInt(32, 64) * m_flScale;
+				pParticle->m_uchEndSize = clamp(pParticle->m_uchStartSize * 2, 32, 255);
 
 				pParticle->m_uchStartAlpha = random->RandomFloat(128, 255);
 				pParticle->m_uchEndAlpha = 0;
