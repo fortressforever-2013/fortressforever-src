@@ -175,6 +175,7 @@ float C_BaseExplosionEffect::ScaleForceByDeviation( Vector &deviant, Vector &sou
 	return dot;
 }
 
+
 static ConVar cl_reducedexplosions("cl_reduced_explosions", "0", FCVAR_ARCHIVE);
 
 //-----------------------------------------------------------------------------
@@ -228,7 +229,6 @@ void C_BaseExplosionEffect::Create( const Vector &position, float force, float s
 	}
 
 	CreateDebris();
-	//FIXME: CreateDynamicLight();
 	if (!(UTIL_PointContents(m_vecOrigin) & CONTENTS_WATER))
 		CreateDynamicLight();
 	CreateMisc();
@@ -240,7 +240,7 @@ void C_BaseExplosionEffect::Create( const Vector &position, float force, float s
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void C_BaseExplosionEffect::CreateCore(void)
+void C_BaseExplosionEffect::CreateCore( void )
 {
 	if (m_fFlags & TE_EXPLFLAG_NOFIREBALL)
 		return;
@@ -254,12 +254,12 @@ void C_BaseExplosionEffect::CreateCore(void)
 
 	// --> Mirv: Remove the cap for now
 	//Cap our force
-	//if ( force < EXPLOSION_FORCE_MIN )
-	//	force = EXPLOSION_FORCE_MIN;
+	/*if (force < EXPLOSION_FORCE_MIN)
+		force = EXPLOSION_FORCE_MIN;
 
-	//if ( force > EXPLOSION_FORCE_MAX )
-	//	force = EXPLOSION_FORCE_MAX;
-	// <--
+	if (force > EXPLOSION_FORCE_MAX)
+		force = EXPLOSION_FORCE_MAX;*/
+		// <--
 
 	float spread = 1.0f - (0.15f * force);
 
@@ -317,14 +317,12 @@ void C_BaseExplosionEffect::CreateCore(void)
 				pParticle->m_flLifetime = 0.0f;
 
 				// --> Mirv: Use TF2 length smoke but scale it so that it hovers up slowly
-	//#ifdef INVASION_CLIENT_DLL
+		//#ifdef INVASION_CLIENT_DLL
 				pParticle->m_flDieTime = random->RandomFloat(0.5f, 1.0f) * (m_flScale * m_flScale * m_flScale);
+				//#else
+				//			pParticle->m_flDieTime	= random->RandomFloat( 2.0f, 3.0f );
 				//#endif
-#ifdef _XBOX
-				pParticle->m_flDieTime = 1.0f;
-#else
-				pParticle->m_flDieTime = random->RandomFloat(2.0f, 3.0f);
-#endif
+						// <-- Mirv
 
 				pParticle->m_vecVelocity.Random(-spread, spread);
 				pParticle->m_vecVelocity += (m_vecDirection * random->RandomFloat(1.0f, 6.0f));
@@ -352,11 +350,10 @@ void C_BaseExplosionEffect::CreateCore(void)
 				pParticle->m_uchColor[1] = (worldLight[1] * nColor);
 				pParticle->m_uchColor[2] = (worldLight[2] * nColor);
 
-				//pParticle->m_uchStartSize	= 72;
 				// --> Mirv: Scale the size of the rising smoke too
 				pParticle->m_uchStartSize = clamp(72 * m_flScale, 20, 126);
-				// <-- Mirv
 				pParticle->m_uchEndSize = pParticle->m_uchStartSize * 2;
+				// <-- Mirv
 
 				pParticle->m_uchStartAlpha = 255;
 				pParticle->m_uchEndAlpha = 0;
@@ -372,7 +369,6 @@ void C_BaseExplosionEffect::CreateCore(void)
 		//
 
 #ifndef _XBOX
-
 		number = (int)ceil(8 * g_flFractional);
 
 		for (i = 0; i < number; i++)
@@ -388,12 +384,12 @@ void C_BaseExplosionEffect::CreateCore(void)
 				pParticle->m_flLifetime = 0.0f;
 
 				// --> Mirv: Use quicker TF2 style smoke time again, but don't modify for scale
-	//#ifdef INVASION_CLIENT_DLL
+		//#ifdef INVASION_CLIENT_DLL
 				pParticle->m_flDieTime = random->RandomFloat(0.5f, 1.0f);
 				//#else
 				//			pParticle->m_flDieTime	= random->RandomFloat( 0.5f, 1.0f );
 				//#endif
-							// <-- Mirv
+						// <-- Mirv
 
 				pParticle->m_vecVelocity.Random(-spread, spread);
 				pParticle->m_vecVelocity += (m_vecDirection * random->RandomFloat(1.0f, 6.0f));
@@ -421,10 +417,8 @@ void C_BaseExplosionEffect::CreateCore(void)
 				pParticle->m_uchColor[1] = (worldLight[1] * nColor);
 				pParticle->m_uchColor[2] = (worldLight[2] * nColor);
 
-				/*pParticle->m_uchStartSize	= random->RandomInt( 32, 64 );
-				pParticle->m_uchEndSize		= pParticle->m_uchStartSize * 2;*/
-				pParticle->m_uchStartSize = random->RandomInt(32, 64) * m_flScale;
-				pParticle->m_uchEndSize = clamp(pParticle->m_uchStartSize * 2, 32, 255);
+				pParticle->m_uchStartSize = random->RandomInt(32, 64);
+				pParticle->m_uchEndSize = pParticle->m_uchStartSize * 2;
 
 				pParticle->m_uchStartAlpha = random->RandomFloat(128, 255);
 				pParticle->m_uchEndAlpha = 0;
@@ -435,20 +429,87 @@ void C_BaseExplosionEffect::CreateCore(void)
 		}
 #endif // !_XBOX
 
-		//
-		// Embers
-		//
+//		//
+//		// Ground ring
+//		//
+//
+//		Vector	vRight, vUp;
+//		VectorVectors( m_vecDirection, vRight, vUp );
+//
+//		Vector	forward;
+//
+//#ifndef INVASION_CLIENT_DLL
+//
+//#ifndef _XBOX 
+//		int	numRingSprites = 32;
+//#else
+//		int	numRingSprites = 8;
+//#endif
+//
+//		float flIncr = (2*M_PI) / (float) numRingSprites; // Radians
+//		float flYaw = 0.0f;
+//
+//		for ( i = 0; i < numRingSprites; i++ )
+//		{
+//			flYaw += flIncr;
+//			SinCos( flYaw, &forward.y, &forward.x );
+//			forward.z = 0.0f;
+//
+//			offset = ( RandomVector( -4.0f, 4.0f ) + m_vecOrigin ) + ( forward * random->RandomFloat( 8.0f, 16.0f ) );
+//
+//			pParticle = (SimpleParticle *) pSimple->AddParticle( sizeof( SimpleParticle ), m_Material_Smoke, offset );
+//
+//			if ( pParticle != NULL )
+//			{
+//				pParticle->m_flLifetime = 0.0f;
+//				pParticle->m_flDieTime	= random->RandomFloat( 0.5f, 1.5f );
+//
+//				pParticle->m_vecVelocity = forward;
+//			
+//				float	fForce = random->RandomFloat( 500, 2000 ) * force;
+//
+//				//Scale the force down as we fall away from our main direction
+//				ScaleForceByDeviation( pParticle->m_vecVelocity, pParticle->m_vecVelocity, spread, &fForce );
+//
+//				pParticle->m_vecVelocity *= fForce;
+//				
+//				#if __EXPLOSION_DEBUG
+//				debugoverlay->AddLineOverlay( m_vecOrigin, m_vecOrigin + pParticle->m_vecVelocity, 255, 0, 0, false, 3 );
+//				#endif
+//
+//				int nColor = random->RandomInt( luminosity*0.5f, luminosity );
+//				pParticle->m_uchColor[0] = ( worldLight[0] * nColor );
+//				pParticle->m_uchColor[1] = ( worldLight[1] * nColor );
+//				pParticle->m_uchColor[2] = ( worldLight[2] * nColor );
+//
+//				pParticle->m_uchStartSize	= random->RandomInt( 16, 32 );
+//				pParticle->m_uchEndSize		= pParticle->m_uchStartSize * 4;
+//
+//				pParticle->m_uchStartAlpha	= random->RandomFloat( 16, 32 );
+//				pParticle->m_uchEndAlpha	= 0;
+//				
+//				pParticle->m_flRoll			= random->RandomInt( 0, 360 );
+//				pParticle->m_flRollDelta	= random->RandomFloat( -8.0f, 8.0f );
+//			}
+//		}
+//#endif
+//	}
+
+#ifndef _XBOX
+
+	//
+	// Embers
+	//
 
 		if (m_Material_Embers[0] == NULL)
 		{
 			m_Material_Embers[0] = pSimple->GetPMaterial("effects/fire_embers1");
 		}
+
 		if (m_Material_Embers[1] == NULL)
 		{
 			m_Material_Embers[1] = pSimple->GetPMaterial("effects/fire_embers2");
 		}
-
-#ifndef INVASION_CLIENT_DLL
 
 		number = (int)ceil(16 * g_flFractional);
 
@@ -458,13 +519,11 @@ void C_BaseExplosionEffect::CreateCore(void)
 			offset *= m_flScale;	// |-- Mirv: Scale offset
 			offset += m_vecOrigin;
 
-			//pParticle = (SimpleParticle *) pSimple->AddParticle( sizeof( SimpleParticle ), m_Material_Smoke, offset );
 			pParticle = (SimpleParticle*)pSimple->AddParticle(sizeof(SimpleParticle), m_Material_Embers[random->RandomInt(0, 1)], offset);
 
 			if (pParticle != NULL)
 			{
 				pParticle->m_flLifetime = 0.0f;
-				//pParticle->m_flDieTime	= random->RandomFloat( 0.5f, 1.5f );
 				pParticle->m_flDieTime = random->RandomFloat(2.0f, 3.0f);
 
 				pParticle->m_vecVelocity.Random(-spread * 2, spread * 2);
@@ -491,9 +550,12 @@ void C_BaseExplosionEffect::CreateCore(void)
 				int nColor = random->RandomInt(192, 255);
 				pParticle->m_uchColor[0] = pParticle->m_uchColor[1] = pParticle->m_uchColor[2] = nColor;
 
+				pParticle->m_uchStartSize = random->RandomInt(8, 16) * vDev;
+
 				// --> Mirv: Scale up the ember size too
 				pParticle->m_uchStartSize = clamp(pParticle->m_uchStartSize * m_flScale * m_flScale * m_flScale * m_flScale, 4, 255);
 				// <-- Mirv
+
 				pParticle->m_uchEndSize = pParticle->m_uchStartSize;
 
 				pParticle->m_uchStartAlpha = 255;
@@ -531,7 +593,7 @@ void C_BaseExplosionEffect::CreateCore(void)
 			if (pParticle != NULL)
 			{
 				pParticle->m_flLifetime = 0.0f;
-				pParticle->m_flDieTime = random->RandomFloat(0.4f, 0.6f);
+				pParticle->m_flDieTime = random->RandomFloat(0.2f, 0.4f);
 
 				pParticle->m_vecVelocity.Random(-spread * 0.75f, spread * 0.75f);
 				pParticle->m_vecVelocity += m_vecDirection;
@@ -640,8 +702,7 @@ void C_BaseExplosionEffect::CreateDebris( void )
 		tParticle->m_vecVelocity	= dir * random->RandomFloat( 1500, 2500 );
 
 		Color32Init( tParticle->m_color, 255, 255, 255, 255 );
-	}
-	*/
+	}*/
 
 	int i;
 	Vector	dir;
@@ -658,7 +719,7 @@ void C_BaseExplosionEffect::CreateDebris( void )
 
 	// Setup our collision information
 	fleckEmitter->m_ParticleCollision.Setup( m_vecOrigin, &m_vecDirection, 0.9f, 512, 1024, 800, 0.5f );
-	
+
 	int number = (int)ceil(16 * g_flFractional);
 
 #ifdef _XBOX
@@ -717,7 +778,6 @@ void C_BaseExplosionEffect::CreateMisc( void )
 {
 }
 
-
 //ConVar ffdev_explosion_light_radius_min( "ffdev_explosion_light_radius_min", "224" );
 //ConVar ffdev_explosion_light_radius_max( "ffdev_explosion_light_radius_max", "256" );
 //ConVar ffdev_explosion_light_life( "ffdev_explosion_light_life", "0.25" );
@@ -725,7 +785,7 @@ void C_BaseExplosionEffect::CreateMisc( void )
 //ConVar ffdev_explosion_light_color_g( "ffdev_explosion_light_color_g", "224" );
 //ConVar ffdev_explosion_light_color_b( "ffdev_explosion_light_color_b", "128" );
 //ConVar ffdev_explosion_light_color_e( "ffdev_explosion_light_color_e", "5" );
-// 
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
