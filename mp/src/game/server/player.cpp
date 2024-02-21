@@ -5520,7 +5520,7 @@ void CBasePlayer::CommitSuicide( bool bExplode /*= false*/, bool bForce /*= fals
 	m_fNextSuicideTime = gpGlobals->curtime + 5;
 
 	// C4189: local variable is initialized but not referenced
-	//int fDamage = DMG_PREVENT_PHYSICS_FORCE | ( bExplode ? ( DMG_BLAST | DMG_ALWAYSGIB ) : DMG_NEVERGIB );
+	int fDamage = DMG_PREVENT_PHYSICS_FORCE | ( bExplode ? ( DMG_BLAST | DMG_ALWAYSGIB ) : DMG_NEVERGIB );
 
 	// have the player kill themself
 	m_iHealth = 0;
@@ -5529,19 +5529,20 @@ void CBasePlayer::CommitSuicide( bool bExplode /*= false*/, bool bForce /*= fals
 
 	// Bug #0000700: people with infection should give medic kill if they suicide
 	CFFPlayer* pPlayer = ToFFPlayer(this);
-	if (pPlayer && pPlayer->GetSpecialInfectedDeath() && pPlayer->IsInfected() && pPlayer->GetInfector())
+	if (pPlayer)
 	{
-		CTakeDamageInfo info(pPlayer->GetInfector(), pPlayer->GetInfector(), 0, DMG_NEVERGIB); // |-- Mirv: pInflictor = NULL so that death message is "x died."
-		Event_Killed(info);
-		Event_Dying(info);
+		if (pPlayer->GetSpecialInfectedDeath() && pPlayer->IsInfected() && pPlayer->GetInfector())
+		{
+			CTakeDamageInfo info(pPlayer->GetInfector(), pPlayer->GetInfector(), pPlayer->GetHealth(), fDamage); // |-- Mirv: pInflictor = NULL so that death message is "x died."
+			pPlayer->TakeDamage(info);
+		}
+		else
+		{
+			CTakeDamageInfo info(NULL, this, pPlayer ? pPlayer->GetHealth() + 50 : 0, fDamage); // |-- Mirv: pInflictor = NULL so that death message is "x died."
+			pPlayer->TakeDamage(info);
+		}
 	}
-	else
-	{
-		CTakeDamageInfo info(NULL, this, 0, DMG_NEVERGIB); // |-- Mirv: pInflictor = NULL so that death message is "x died."
-		Event_Killed(info);
-		Event_Dying(info);
-	}
-	
+
 	m_iSuicideCustomKillFlags = 0;
 }
 
