@@ -8,7 +8,9 @@
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
-
+#ifdef CLIENT_DLL
+#include <prediction.h>
+#endif
 LINK_ENTITY_TO_CLASS( predicted_viewmodel, CPredictedViewModel );
 
 IMPLEMENT_NETWORKCLASS_ALIASED( PredictedViewModel, DT_PredictedViewModel )
@@ -54,6 +56,8 @@ ConVar cl_wpn_sway_scale( "cl_wpn_sway_scale", "1.0", FCVAR_CLIENTDLL|FCVAR_CHEA
 void CPredictedViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAngle& original_angles )
 {
 	#ifdef CLIENT_DLL
+		if (prediction->InPrediction())
+			return;
 		// Calculate our drift
 		Vector	forward, right, up;
 		AngleVectors( angles, &forward, &right, &up );
