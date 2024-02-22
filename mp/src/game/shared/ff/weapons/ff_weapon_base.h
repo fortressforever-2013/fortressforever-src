@@ -261,7 +261,9 @@ private:
 #ifdef CLIENT_DLL
 	// Some things from HL2MP
 	virtual bool	ShouldPredict();
+public:
 	virtual void	OnDataChanged(DataUpdateType_t type);
+private:
 	virtual int		DrawModel( int flags );
 	virtual RenderGroup_t GetRenderGroup( void );
 	virtual ShadowType_t ShadowCastType( void );
