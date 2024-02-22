@@ -1033,6 +1033,7 @@ private:
 public:
 	RecentAttackerInfo* GetTopKillAssister( CBasePlayer *killerToIgnore );
 	void RemoveMeFromKillAssists( );
+	bool m_bRequireRePressBuildable;
 };
 
 inline CFFPlayer *ToFFPlayer( CBaseEntity *pEntity )

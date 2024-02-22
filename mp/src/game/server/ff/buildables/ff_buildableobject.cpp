@@ -160,11 +160,10 @@ IMPLEMENT_SERVERCLASS_ST( CFFBuildableObject, DT_FFBuildableObject )
 END_SEND_TABLE( )
 
 // Start of our data description for the class
-/*
 BEGIN_DATADESC( CFFBuildableObject )
-	DEFINE_THINKFUNC( OnObjectThink ),
+	DEFINE_THINKFUNC(DetonateThink),
+	//DEFINE_THINKFUNC( OnObjectThink ),
 END_DATADESC( )
-*/
 
 const char *g_pszFFModels[ ] =
 {
@@ -244,6 +243,8 @@ CFFBuildableObject::CFFBuildableObject( void )
 	m_hSaboteur = NULL;
 	m_bMaliciouslySabotaged = false;
 	m_iSaboteurTeamNumber = TEAM_UNASSIGNED;
+
+	m_bMarkedForDetonation = false;
 }
 
 /**
@@ -418,7 +419,7 @@ void CFFBuildableObject::GoLive( void )
 		//	EmitSound( sndFilter, entindex(), m_ppszSounds[ 0 ] );
 		//}		
 
-
+	SetContextThink(&CFFBuildableObject::DetonateThink, TICK_NEVER_THINK, "DetonateThink");
 }
 
 /**
@@ -476,6 +477,12 @@ void CFFBuildableObject::Precache( void )
 
 	// Call base class
 	BaseClass::Precache();	
+}
+
+
+void CFFBuildableObject::DetonateThink(void)
+{
+	Detonate();
 }
 
 /**

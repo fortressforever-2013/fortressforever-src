@@ -108,8 +108,7 @@ void CFFManCannon::GoLive( void )
 	if ( MANCANNON_HEALTH_REGEN > 0 )
 	{
 		// start thinking
-		SetThink( &CFFManCannon::OnJumpPadThink );
-		SetNextThink( gpGlobals->curtime );
+		SetContextThink( &CFFManCannon::OnJumpPadThink, gpGlobals->curtime, "JumpPadThink" );
 	}
 	// caes
 }

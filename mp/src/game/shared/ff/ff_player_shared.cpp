@@ -739,11 +739,6 @@ void CFFPlayer::ClassSpecificSkill()
 			}			
 			break;
 
-		case CLASS_SCOUT:
-			engine->ClientCmd("mancannon");
-			m_flNextClassSpecificSkill = gpGlobals->curtime + 0.25f; //ffdev_mancannon_commandtime.GetFloat();
-			break;
-
 #endif
 		default:
 			break;

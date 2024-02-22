@@ -619,6 +619,7 @@ CFFPlayer::CFFPlayer()
 
 	m_recentAttackers.Purge();
 	//m_iStatsID = -1;
+	m_bRequireRePressBuildable = false;
 }
 
 CFFPlayer::~CFFPlayer()
@@ -820,6 +821,15 @@ void CFFPlayer::PostThink()
 		m_angEyeAngles = EyeAngles();
 
 		m_PlayerAnimState->Update( m_angEyeAngles[YAW], m_angEyeAngles[PITCH] );
+	}
+
+	if ( m_nButtons & (IN_ATTACK | IN_ATTACK2) )
+	{
+		m_bRequireRePressBuildable = true;
+	}
+	else
+	{
+		m_bRequireRePressBuildable = false;
 	}
 }
 
@@ -3226,30 +3236,12 @@ void CFFPlayer::PreBuildGenericThink( void )
 	if( !m_bBuilding )
 	{
 		m_bBuilding = true; // Set these immediately in case player tries to do anything elsewhere, presumably?
-		m_bStaticBuilding = true;
 
 		// Store the player's current origin
 		m_vecBuildOrigin = GetAbsOrigin();
 
 		// Our neat buildable info container
 		CFFBuildableInfo hBuildInfo( this, m_iWantBuild );
-
-		// See if player is in a no build area first
-		// TODO: need to check where the SG is being built, NOT where player is? - AfterShock
-		if( IsInNoBuild(hBuildInfo) )
-		{
-			Omnibot::Notify_Build_CantBuild(this, m_iWantBuild);
-
-			// Re-initialize
-			m_iCurBuild = FF_BUILD_NONE;
-			m_iWantBuild = FF_BUILD_NONE;
-			m_bBuilding = false;
-			m_bStaticBuilding = false;
-			
-			ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_NOBUILD" );
-
-			return;
-		}
 
 		/*
 		DevMsg( "[Building] Not currently building so lets try to build a: %s" );
@@ -3268,38 +3260,59 @@ void CFFPlayer::PreBuildGenericThink( void )
 			( (m_iWantBuild == FF_BUILD_DETPACK) && GetDetpack()) ||
 			( (m_iWantBuild == FF_BUILD_MANCANNON) && GetManCannon()) )
 		{
-			Omnibot::Notify_Build_AlreadyBuilt(this, m_iWantBuild);
-
-			switch( m_iWantBuild )
+			if (!m_bRequireRePressBuildable)
 			{
-				case FF_BUILD_DISPENSER: ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_DISPENSER_ALREADYBUILT" ); break;
-				case FF_BUILD_SENTRYGUN: ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_SENTRYGUN_ALREADYBUILT" ); break;
-				case FF_BUILD_DETPACK: ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_DETPACK_ALREADYSET" ); break;
-				case FF_BUILD_MANCANNON: 
+				m_bRequireRePressBuildable = true;
+				Omnibot::Notify_Build_AlreadyBuilt(this, m_iWantBuild);
+
+				switch (m_iWantBuild)
+				{
+				case FF_BUILD_DISPENSER: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_DISPENSER_ALREADYBUILT"); break;
+				case FF_BUILD_SENTRYGUN: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_SENTRYGUN_ALREADYBUILT"); break;
+				case FF_BUILD_DETPACK: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_DETPACK_ALREADYSET"); break;
+				case FF_BUILD_MANCANNON:
 					// If the Scout right-clicks after has built a jump pad, he'll get the warning, and a message
 					// that he can click again to det it; this gives him 2 seconds to do so
-					if ( gpGlobals->curtime > m_flMancannonDetTime )
+					if (gpGlobals->curtime > m_flMancannonDetTime)
 					{
-						ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_MANCANNON_ALREADYBUILT" ); 
+						ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_MANCANNON_ALREADYBUILT");
 						m_flMancannonDetTime = gpGlobals->curtime + 2.f;
 					}
 					else
 					{
-						CFFManCannon *pJumpPadToDet = GetManCannon();
-						if ( pJumpPadToDet )
+						CFFManCannon* pJumpPadToDet = GetManCannon();
+						if (pJumpPadToDet)
 						{
-							pJumpPadToDet->Detonate();
-							ClientPrint( this, HUD_PRINTCENTER, "#FF_MANCANNON_DESTROYED" );
+							pJumpPadToDet->DetonateNextFrame();
+							ClientPrint(this, HUD_PRINTCENTER, "#FF_MANCANNON_DESTROYED");
 						}
 					}
 					break;
+				}
+
+				// Re-initialize
+				m_iCurBuild = FF_BUILD_NONE;
+				m_iWantBuild = FF_BUILD_NONE;
+				m_bBuilding = false;
+				m_bStaticBuilding = false;
 			}
+
+			return;
+		}
+
+		// See if player is in a no build area first
+		// TODO: need to check where the SG is being built, NOT where player is? - AfterShock
+		if (IsInNoBuild(hBuildInfo))
+		{
+			Omnibot::Notify_Build_CantBuild(this, m_iWantBuild);
 
 			// Re-initialize
 			m_iCurBuild = FF_BUILD_NONE;
 			m_iWantBuild = FF_BUILD_NONE;
 			m_bBuilding = false;
 			m_bStaticBuilding = false;
+
+			ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_NOBUILD");
 
 			return;
 		}
@@ -3350,6 +3363,7 @@ void CFFPlayer::PreBuildGenericThink( void )
 		{
 			// BUILD! - Create the actual item finally
 			m_iCurBuild = m_iWantBuild;	
+			m_bStaticBuilding = true;
 
 			switch( m_iCurBuild )
 			{
@@ -3512,49 +3526,51 @@ void CFFPlayer::PreBuildGenericThink( void )
 		if( m_iCurBuild == m_iWantBuild )
 		{
 			// DevMsg( "[Building] You're currently building this item so cancel the build.\n" );
-			Omnibot::Notify_Build_BuildCancelled(this,m_iCurBuild);
-
-			CFFBuildableObject *pBuildable = GetBuildable( m_iCurBuild );
-			
-			if( pBuildable )
+			if (!m_bRequireRePressBuildable)
 			{
-				switch( m_iCurBuild )
+				m_bRequireRePressBuildable = true;
+				Omnibot::Notify_Build_BuildCancelled(this, m_iCurBuild);
+				CFFBuildableObject* pBuildable = GetBuildable(m_iCurBuild);
+
+				if (pBuildable)
 				{
-				case FF_BUILD_DISPENSER:
-					GiveAmmo( FF_BUILDCOST_DISPENSER, AMMO_CELLS, true );
-					break;
-				case FF_BUILD_SENTRYGUN:
-					GiveAmmo( FF_BUILDCOST_SENTRYGUN, AMMO_CELLS, true );
-					break;
-				default:
-					break;
+					switch (m_iCurBuild)
+					{
+					case FF_BUILD_DISPENSER:
+						GiveAmmo(FF_BUILDCOST_DISPENSER, AMMO_CELLS, true);
+						break;
+					case FF_BUILD_SENTRYGUN:
+						GiveAmmo(FF_BUILDCOST_SENTRYGUN, AMMO_CELLS, true);
+						break;
+					default:
+						break;
+					}
+
+					pBuildable->Cancel();
 				}
 
-				pBuildable->Cancel();
+
+				// Unlock the player
+				UnlockPlayer();
+
+				// Mirv: Cancel build timer
+				CSingleUserRecipientFilter user(this);
+				user.MakeReliable();
+				UserMessageBegin(user, "FF_BuildTimer");
+				WRITE_SHORT(FF_BUILD_NONE);
+				WRITE_FLOAT(0);
+				MessageEnd();
+
+				// Re-initialize
+				m_iCurBuild = FF_BUILD_NONE;
+				m_iWantBuild = FF_BUILD_NONE;
+				m_bBuilding = false;
+				m_bStaticBuilding = false;
+
+
+				if (m_hActiveWeapon)
+					m_hActiveWeapon->Deploy();
 			}
-
-				
-			// Unlock the player
-			UnlockPlayer();			
-
-			// Mirv: Cancel build timer
-			CSingleUserRecipientFilter user( this );
-			user.MakeReliable();
-			UserMessageBegin( user, "FF_BuildTimer" );
-				WRITE_SHORT( FF_BUILD_NONE );
-				WRITE_FLOAT( 0 );
-			MessageEnd();
-
-			// Re-initialize
-			m_iCurBuild = FF_BUILD_NONE;
-			m_iWantBuild = FF_BUILD_NONE;
-			m_bBuilding = false;
-			m_bStaticBuilding = false;
-
-			
-			if( m_hActiveWeapon )
-				m_hActiveWeapon->Deploy();
-				
 		}
 		else
 		{

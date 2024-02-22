@@ -373,7 +373,7 @@ bool CFFWeaponDeploySentryGun::CanBeSelected( void )
 			return;
 		}
 
-		pSentry->Detonate();
+		pSentry->DetonateNextFrame();
 	}
 
 	CON_COMMAND(detdismantlesentry, "Dismantles or detonate sentrygun depending on distance") 
@@ -422,6 +422,6 @@ bool CFFWeaponDeploySentryGun::CanBeSelected( void )
 			pSentry->RemoveQuietly();
 		}
 		else
-			pSentry->Detonate();
+			pSentry->DetonateNextFrame();
 	}
 #endif

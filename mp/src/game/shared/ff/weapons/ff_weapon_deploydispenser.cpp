@@ -340,7 +340,7 @@ bool CFFWeaponDeployDispenser::CanBeSelected( void )
 			return;
 		}
 
-		pDispenser->Detonate();
+		pDispenser->DetonateNextFrame();
 	}
 
 	CON_COMMAND(detdismantledispenser, "Dismantles or detonate dispenser depending on distance")
@@ -393,7 +393,7 @@ bool CFFWeaponDeployDispenser::CanBeSelected( void )
 		}
 		else
         {
-			pDispenser->Detonate();
+			pDispenser->DetonateNextFrame();
         }
 	}
 #endif

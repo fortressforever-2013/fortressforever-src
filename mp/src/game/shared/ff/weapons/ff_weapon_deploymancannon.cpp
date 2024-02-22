@@ -53,13 +53,14 @@ public:
 	virtual bool CanDeploy( void );
 	virtual bool Deploy( void );
 	virtual void ItemPostFrame( void );
+	virtual void ItemHolsterFrame(void);
 
 	virtual FFWeaponID GetWeaponID( void ) const		{ return FF_WEAPON_DEPLOYMANCANNON; }
 
 private:
 
 	CFFWeaponDeployManCannon( const CFFWeaponDeployManCannon & );
-
+	CNetworkVar(float, m_flNextHolsteredAttack);
 protected:
 #ifdef CLIENT_DLL
 	C_FFManCannon *m_pBuildable;
@@ -85,9 +86,17 @@ protected:
 IMPLEMENT_NETWORKCLASS_ALIASED( FFWeaponDeployManCannon, DT_FFWeaponDeployManCannon )
 
 BEGIN_NETWORK_TABLE( CFFWeaponDeployManCannon, DT_FFWeaponDeployManCannon )
+#ifdef GAME_DLL
+SendPropTime(SENDINFO(m_flNextHolsteredAttack)),
+#else
+RecvPropTime(RECVINFO(m_flNextHolsteredAttack)),
+#endif
 END_NETWORK_TABLE()
 
 BEGIN_PREDICTION_DATA( CFFWeaponDeployManCannon )
+#ifdef CLIENT_DLL
+DEFINE_PRED_FIELD_TOL(m_flNextHolsteredAttack, FIELD_FLOAT, FTYPEDESC_INSENDTABLE, TD_MSECTOLERANCE)
+#endif
 END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS( ff_weapon_deploymancannon, CFFWeaponDeployManCannon );
@@ -102,6 +111,8 @@ PRECACHE_WEAPON_REGISTER( ff_weapon_deploymancannon );
 //----------------------------------------------------------------------------
 CFFWeaponDeployManCannon::CFFWeaponDeployManCannon( void )
 {
+	m_flNextHolsteredAttack = 0.0f;
+
 #ifdef CLIENT_DLL
 	m_pBuildable = NULL;
 	m_bInSetTimerMenu = false;
@@ -120,13 +131,13 @@ void CFFWeaponDeployManCannon::ItemPostFrame()
 	//Track the duration of the fire
 	//FIXME: Check for IN_ATTACK2 as well?
 	//FIXME: What if we're calling ItemBusyFrame?
-	m_fFireDuration = (pOwner->m_nButtons & IN_ATTACK) ? (m_fFireDuration + gpGlobals->frametime) : 0.0f;
+	m_fFireDuration = (pOwner->m_nButtons & (IN_ATTACK | IN_ATTACK2)) ? (m_fFireDuration + gpGlobals->frametime) : 0.0f;
 
 	// if just released the attack, then reset nextfiretime
-	if (pOwner->m_afButtonReleased & IN_ATTACK)
+	if (pOwner->m_afButtonReleased & (IN_ATTACK | IN_ATTACK2))
 		m_flNextPrimaryAttack = gpGlobals->curtime;
 
-	if ((pOwner->m_nButtons & IN_ATTACK || pOwner->m_afButtonPressed & IN_ATTACK) && (m_flNextPrimaryAttack <= gpGlobals->curtime))
+	if ((pOwner->m_nButtons & (IN_ATTACK | IN_ATTACK2) || pOwner->m_afButtonPressed & (IN_ATTACK | IN_ATTACK2)) && (m_flNextPrimaryAttack <= gpGlobals->curtime))
 	{
 			PrimaryAttack();
 	}
@@ -153,6 +164,41 @@ void CFFWeaponDeployManCannon::ItemPostFrame()
 		}
 	}
 }
+
+//-----------------------------------------------------------------------------
+// Purpose: A modified ItemPostFrame to allow for different cycledecrements
+//-----------------------------------------------------------------------------
+void CFFWeaponDeployManCannon::ItemHolsterFrame()
+{
+	CFFPlayer *pOwner = ToFFPlayer(GetOwner());
+	if (!pOwner)
+		return;
+
+	//Track the duration of the fire
+	//FIXME: Check for IN_ATTACK2 as well?
+	//FIXME: What if we're calling ItemBusyFrame?
+	m_fFireDuration = (pOwner->m_nButtons & IN_ATTACK2) ? (m_fFireDuration + gpGlobals->frametime) : 0.0f;
+
+	// if just released the attack, then reset nextfiretime
+	if (pOwner->m_afButtonReleased & IN_ATTACK2)
+		m_flNextHolsteredAttack = gpGlobals->curtime;
+
+	if ((pOwner->m_nButtons & IN_ATTACK2 || pOwner->m_afButtonPressed & IN_ATTACK2) && (m_flNextHolsteredAttack <= gpGlobals->curtime))
+	{
+		if (m_flNextHolsteredAttack < gpGlobals->curtime)
+		{
+			m_flNextHolsteredAttack = gpGlobals->curtime + 0.5f;
+			
+			Cleanup();
+
+#ifdef GAME_DLL
+			CFFPlayer* pPlayer = GetPlayerOwner();
+			pPlayer->Command_BuildManCannon();
+#endif
+		}
+	}
+}
+
 
 //----------------------------------------------------------------------------
 // Purpose: Handles whatever should be done when they fire (build, aim, etc)

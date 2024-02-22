@@ -248,6 +248,7 @@ public:
 	DECLARE_CLIENTCLASS();
 #else
 	DECLARE_SERVERCLASS();
+	DECLARE_DATADESC()
 #endif
 
 	// --> shared
@@ -438,9 +439,18 @@ protected:
 	bool	m_bUsePhysics;
 
 	char	m_BuildableLocation[1024];
+public:
+		virtual void DetonateThink();
+		virtual void DetonateNextFrame() 
+		{ 
+			if( m_bMarkedForDetonation )
+				return;
 
+			m_bMarkedForDetonation = true;
+			SetContextThink(&CFFBuildableObject::DetonateThink, gpGlobals->curtime + gpGlobals->interval_per_tick, "DetonateThink");
+		}
+		bool	m_bMarkedForDetonation;
 #endif
-
 };
 
 //=============================================================================
