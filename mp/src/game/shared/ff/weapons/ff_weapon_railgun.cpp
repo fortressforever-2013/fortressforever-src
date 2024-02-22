@@ -130,25 +130,18 @@ public:
 
 	virtual FFWeaponID GetWeaponID( void ) const { return FF_WEAPON_RAILGUN; }
 
-	void PlayRevSound();
-	void StopRevSound();
-	int m_nRevSound;
-
-	int m_iAmmoUsed;
-	float m_flStartTime;
+	CNetworkVar(int, m_iAmmoUsed);
+	CNetworkVar(float, m_flStartTime);
 
 #ifdef GAME_DLL
 
-	void RailgunEmitSound( const char* szSoundName );
-
-	bool m_bPlayRevSound;
-	float m_flRevSoundNextUpdate;
-	EmitSound_t m_paramsRevSound;
-
+	// transmit to all clients
+	virtual int		UpdateTransmitState() { return SetTransmitState(FL_EDICT_ALWAYS); }
 	float m_flNextResupply;
 
 #else
-
+	virtual void	OnDataChanged(DataUpdateType_t updateType);
+	void			UpdateRevSound(void);
 	virtual void	ViewModelDrawn( C_BaseViewModel *pBaseViewModel );
 	virtual RenderGroup_t GetRenderGroup( void ) { return RENDER_GROUP_TRANSLUCENT_ENTITY; }
 	virtual bool IsTranslucent( void )			 { return true; }
@@ -157,15 +150,8 @@ private:
 	CSoundPatch *m_sndRev;
 	int	m_iAttachment1;
 	int m_iAttachment2;
-	float m_flTotalChargeTimeBuffered;
-	float m_flClampedChargeTimeBuffered;
-	float m_flChargeTimeBufferedNextUpdate;
 
 #endif	
-
-private:
-	bool m_bInFire;
-	float m_flFireStartTime;
 
 	CFFWeaponRailgun( const CFFWeaponRailgun & );
 };
@@ -177,13 +163,18 @@ private:
 IMPLEMENT_NETWORKCLASS_ALIASED( FFWeaponRailgun, DT_FFWeaponRailgun )
 
 BEGIN_NETWORK_TABLE(CFFWeaponRailgun, DT_FFWeaponRailgun )
-#ifdef GAME_DLL
+#ifdef CLIENT_DLL
+	RecvPropTime( RECVINFO( m_flStartTime ) ),
+	RecvPropInt( RECVINFO(m_iAmmoUsed) ),
 #else
+	SendPropTime( SENDINFO( m_flStartTime ) ),
+	SendPropInt( SENDINFO(m_iAmmoUsed), 3, SPROP_UNSIGNED ),
 #endif
 END_NETWORK_TABLE()
 
 #ifdef CLIENT_DLL
 BEGIN_PREDICTION_DATA( CFFWeaponRailgun )
+	DEFINE_PRED_FIELD(m_flStartTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
 END_PREDICTION_DATA()
 #endif
 
@@ -199,14 +190,10 @@ PRECACHE_WEAPON_REGISTER( ff_weapon_railgun );
 //----------------------------------------------------------------------------
 CFFWeaponRailgun::CFFWeaponRailgun( void )
 {
-	m_nRevSound = SPECIAL1;
 	m_iAmmoUsed = 0;
 	m_flStartTime = 0.0f;
 
 #ifdef GAME_DLL
-
-	m_bPlayRevSound = false;
-	m_flRevSoundNextUpdate = 0.0f;
 
 	m_flNextResupply = 0.0f;
 
@@ -215,9 +202,6 @@ CFFWeaponRailgun::CFFWeaponRailgun( void )
 	m_sndRev = NULL;
 
 	m_iAttachment1 = m_iAttachment2 = -1;
-
-	m_flTotalChargeTimeBuffered = m_flClampedChargeTimeBuffered = 0.0f;
-	m_flChargeTimeBufferedNextUpdate = 0.0f;
 
 	m_colorMuzzleDLight.r = g_uchRailColors[0][0];
 	m_colorMuzzleDLight.g = g_uchRailColors[0][1];
@@ -235,18 +219,11 @@ void CFFWeaponRailgun::UpdateOnRemove( void )
 	m_flStartTime = 0.0f;
 	m_flNextPrimaryAttack = gpGlobals->curtime + RAILGUN_COOLDOWNTIME_ZEROCHARGE;
 
-#ifdef GAME_DLL
+#ifdef CLIENT_DLL
 
-	m_flRevSoundNextUpdate = 0.0f;
-
-#else
-
-	m_flTotalChargeTimeBuffered = m_flClampedChargeTimeBuffered = 0.0f;
-	m_flChargeTimeBufferedNextUpdate = 0.0f;
+	UpdateRevSound();
 
 #endif
-
-	StopRevSound();
 
 	BaseClass::UpdateOnRemove();
 }
@@ -262,19 +239,14 @@ bool CFFWeaponRailgun::Deploy( void )
 
 #ifdef GAME_DLL
 
-	m_flRevSoundNextUpdate = 0.0f;
-
 	// resupply every X seconds with the railgun out
 	m_flNextResupply = gpGlobals->curtime + RAILGUN_RESUPPLY_INTERVAL;
 
 #else
 
-	m_flTotalChargeTimeBuffered = m_flClampedChargeTimeBuffered = 0.0f;
-	m_flChargeTimeBufferedNextUpdate = 0.0f;
+	UpdateRevSound();
 
 #endif
-
-	StopRevSound();
 
 	return BaseClass::Deploy();
 }
@@ -288,18 +260,11 @@ bool CFFWeaponRailgun::Holster( CBaseCombatWeapon *pSwitchingTo )
 	m_flStartTime = 0.0f;
 	m_flNextPrimaryAttack = gpGlobals->curtime + RAILGUN_COOLDOWNTIME_ZEROCHARGE;
 
-#ifdef GAME_DLL
+#ifdef CLIENT_DLL
 
-	m_flRevSoundNextUpdate = 0.0f;
-
-#else
-
-	m_flTotalChargeTimeBuffered = m_flClampedChargeTimeBuffered = 0.0f;
-	m_flChargeTimeBufferedNextUpdate = 0.0f;
+	UpdateRevSound();
 
 #endif
-
-	StopRevSound();
 
 	return BaseClass::Holster( pSwitchingTo );
 }
@@ -328,6 +293,9 @@ void CFFWeaponRailgun::Fire( void )
 
 	if (!pPlayer)
 		return;
+
+	CANCEL_IF_BUILDING();
+	CANCEL_IF_CLOAKED();
 
 	pPlayer->m_flTrueAimTime = gpGlobals->curtime;
 
@@ -371,304 +339,195 @@ void CFFWeaponRailgun::Fire( void )
 	const int iDamageRadius = 100;
 	CFFProjectileRail *pRail = CFFProjectileRail::CreateRail( this, vecSrc, pPlayer->EyeAngles(), pPlayer, flDamage, iDamageRadius, flSpeed, flClampedChargeTime );	
 	Omnibot::Notify_PlayerShoot(pPlayer, Omnibot::TF_WP_RAILGUN, pRail);
-
-	// play a different sound for a fully charged shot
-	if ( flClampedChargeTime < RAILGUN_MAXCHARGETIME )
-		RailgunEmitSound(GetFFWpnData().aShootSounds[SINGLE]);
-	else
-		RailgunEmitSound(GetFFWpnData().aShootSounds[WPN_DOUBLE]);
-
-	// stop the rev sound immediately
-	StopRevSound();
-	
 #endif
 
+	// MUST call sound before removing a round from the clip of a CMachineGun
+	if (gpGlobals->curtime - m_flStartTime >= RAILGUN_MAXCHARGETIME)
+	{
+		WeaponSound(WPN_DOUBLE);
+	}
+	else
+	{
+		WeaponSound(SINGLE);
+	}
+
+	m_flStartTime = 0.0f;
+
+#ifdef CLIENT_DLL
+	UpdateRevSound();
+#endif
+
+	if (pPlayer->GetAmmoCount(m_iPrimaryAmmoType) <= 0)
+	{
+		// HEV suit - indicate out of ammo condition
+		pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
+	}
+
+	m_iAmmoUsed = 0;
 }
 
 //----------------------------------------------------------------------------
 // Purpose: Handle all the chargeup stuff here
 //----------------------------------------------------------------------------
-void CFFWeaponRailgun::ItemPostFrame( void )
+void CFFWeaponRailgun::ItemPostFrame(void)
 {
-	CFFPlayer *pPlayer = ToFFPlayer(GetOwner());
+	CFFPlayer* pPlayer = ToFFPlayer(GetOwner());
+	if (!pPlayer)
+		return;
 
-	if (pPlayer->m_nButtons & IN_ATTACK)
-	{	
-		CANCEL_IF_BUILDING();
-	}
-
-	float flTotalChargeTime = gpGlobals->curtime - m_flStartTime;
-	float flClampedChargeTime = clamp(gpGlobals->curtime - m_flStartTime, 0, RAILGUN_MAXCHARGETIME);
-
-	if (m_iAmmoUsed <= 0)
+	if (m_flStartTime != 0.0f)
 	{
-		flTotalChargeTime = flClampedChargeTime = 0.0f;
-	}
-	
-	// if we're currently firing, then check to see if we release
-	if (m_iAmmoUsed > 0) 
-	{
-		// Using m_afButtonReleased to catch the button being released rather than
-		// just testing for IN_ATTACK not being pressed. This way we don't think we've
-		// fird multiple times due to the latency of m_bInFire being changed by server
-		//if (! (pPlayer->m_nButtons & IN_ATTACK)) 
+		float flTimeSinceStart = gpGlobals->curtime - m_flStartTime;
+
 		if (pPlayer->m_afButtonReleased & IN_ATTACK)
 		{
-			// reset the data
-			m_iAmmoUsed = 0;
-
+			// Fire now
 			Fire();
 		}
-		else
+		else if (flTimeSinceStart >= RAILGUN_OVERCHARGETIME)
 		{
+			m_flStartTime = 0.0f;
+			m_iAmmoUsed = 0;
 
-#ifdef GAME_DLL
-			if (!m_bPlayRevSound)
-				m_bPlayRevSound = true;
+#ifdef CLIENT_DLL
+			UpdateRevSound();
+#else
+			// remove one more rail on overcharge
+			pPlayer->RemoveAmmo(1, m_iPrimaryAmmoType);
 
-			PlayRevSound();
+			// give cells on overcharge
+			pPlayer->GiveAmmo(RAILGUN_RESUPPLY_CELLS, AMMO_CELLS, true);
 #endif
+			// play an overcharge sound
+			WeaponSound(BURST);
 
-			if ( pPlayer->GetAmmoCount(GetPrimaryAmmoType()) > 0 )
-			{
-				if ( (flClampedChargeTime >= RAILGUN_MAXCHARGETIME * 0.5f && m_iAmmoUsed < RAILGUN_AMMOAMOUNT_HALFCHARGE) || (flClampedChargeTime >= RAILGUN_MAXCHARGETIME && m_iAmmoUsed < RAILGUN_AMMOAMOUNT_FULLCHARGE) )
-				{
+			m_flNextPrimaryAttack = gpGlobals->curtime + RAILGUN_COOLDOWNTIME_OVERCHARGE;
+		}
+		else if ((flTimeSinceStart >= RAILGUN_MAXCHARGETIME * 0.5f && m_iAmmoUsed < RAILGUN_AMMOAMOUNT_HALFCHARGE) || (flTimeSinceStart >= RAILGUN_MAXCHARGETIME && m_iAmmoUsed < RAILGUN_AMMOAMOUNT_FULLCHARGE))
+		{
+			int iClampedTime = clamp(flTimeSinceStart, 0, 2);
+
+			// play a charge sound
+			WeaponSound( WeaponSound_t(SPECIAL1 + iClampedTime) );
 #ifdef GAME_DLL
-					// play a charge sound
-					// it's very important that half-charge is SPECIAL2 and full-charge is SPECIAL3 ( as in right after SPECIAL1 [as in 1, 2, 3] )
-					RailgunEmitSound(GetFFWpnData().aShootSounds[WeaponSound_t(SPECIAL1 + int(flClampedChargeTime))]);
-
-					// remove additional ammo at each charge level
-					pPlayer->RemoveAmmo( 1, m_iPrimaryAmmoType );
+			// remove additional ammo at each charge level
+			pPlayer->RemoveAmmo(1, m_iPrimaryAmmoType);
 #endif
-
-					// client needs to know, too
-					m_iAmmoUsed++;
-				}
-			}
-			// autofire if we have no ammo to charge with and aren't already halfway charged (so players can still try to get a good charged shot)
-			else if (m_iAmmoUsed < RAILGUN_AMMOAMOUNT_HALFCHARGE)
-			{
-				m_iAmmoUsed = 0;
-				Fire();
-			}
-			else if (m_iAmmoUsed < RAILGUN_AMMOAMOUNT_FULLCHARGE)
-			{
-				// doing this so you can have 2 ammo and get halfway charged, but won't instantly become fully charged when you get more ammo
-				flClampedChargeTime = RAILGUN_MAXCHARGETIME * 0.5f;
-				m_flStartTime = gpGlobals->curtime - flClampedChargeTime;
-			}
-
-			// check if it's been overcharged
-			if (RAILGUN_OVERCHARGETIME <= flTotalChargeTime )
-			{
-				m_flStartTime = 0.0f;
-				m_iAmmoUsed = 0;
-				m_flNextPrimaryAttack = gpGlobals->curtime + RAILGUN_COOLDOWNTIME_OVERCHARGE;
-				
-				StopRevSound();
-
-#ifdef GAME_DLL
-				// deal damage
-				//pPlayer->TakeDamage( CTakeDamageInfo( this, pPlayer, RAILGUN_OVERCHARGEDAMAGE * int(m_flClampedChargeTime), DMG_SHOCK ) );
-
-				// remove one more rail on overcharge
-				pPlayer->RemoveAmmo( 1, m_iPrimaryAmmoType );
-
-				// give cells on overcharge
-				pPlayer->GiveAmmo( RAILGUN_RESUPPLY_CELLS, AMMO_CELLS, true );
-
-				// play an overcharge sound
-				RailgunEmitSound(GetFFWpnData().aShootSounds[BURST]);
-#endif
-			}
+			// client needs to know, too
+			m_iAmmoUsed++;
 		}
 	}
-	else
-	{
-		if (pPlayer->m_nButtons & IN_ATTACK && m_flNextPrimaryAttack <= gpGlobals->curtime && pPlayer->GetAmmoCount(GetPrimaryAmmoType()) > 0) 
-		{
-			// set up us the variables!
-			m_iAmmoUsed = 1;
-			m_flStartTime = gpGlobals->curtime;
-
 #ifdef GAME_DLL
-			// remove ammo immediately
-			pPlayer->RemoveAmmo( 1, m_iPrimaryAmmoType );
-#endif
-		}
-	}
-
-	if (!(pPlayer->m_nButtons & IN_ATTACK))
-		WeaponIdle();
-
-
-#ifdef GAME_DLL
-	// allow players to continue to charge if they've hit the halfway mark
-	// and don't make it immediately switch, causing shot sounds to stop
-	if (pPlayer->GetAmmoCount(GetPrimaryAmmoType()) <= 0 && m_flNextPrimaryAttack < gpGlobals->curtime && m_iAmmoUsed < RAILGUN_AMMOAMOUNT_HALFCHARGE)
-	{
-		HandleFireOnEmpty();
-
-		// HEV suit - indicate out of ammo condition
-		pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0); 
-	}
-
 	// time to resupply?
 	if (m_flNextResupply <= gpGlobals->curtime)
 	{
 		// give ammo already, GOSH!
-		pPlayer->GiveAmmo( RAILGUN_RESUPPLY_RAILS, m_iPrimaryAmmoType, true );
+		pPlayer->GiveAmmo(RAILGUN_RESUPPLY_RAILS, m_iPrimaryAmmoType, true);
 
 		// resupply every X seconds with the railgun out
 		m_flNextResupply = gpGlobals->curtime + RAILGUN_RESUPPLY_INTERVAL;
 	}
-
-#else // ^^ GAME_DLL ^^
-
-	// create a little buffer so some client stuff can be more smooth
-	if (m_flChargeTimeBufferedNextUpdate <= gpGlobals->curtime)
-	{
-		m_flChargeTimeBufferedNextUpdate = gpGlobals->curtime + RAILGUN_CHARGETIMEBUFFERED_UPDATEINTERVAL;
-		m_flTotalChargeTimeBuffered = flTotalChargeTime;
-		m_flClampedChargeTimeBuffered = flClampedChargeTime;
-	}
-
-	PlayRevSound();
-
-#endif
-}
-
-#ifdef GAME_DLL
-void CFFWeaponRailgun::RailgunEmitSound( const char *szSoundName )
-{
-	CSoundParameters params;
-	if ( !CBaseEntity::GetParametersForSound( szSoundName, params, NULL ) || !GetOwner() )
-		return;
-
-	CPASAttenuationFilter filter( GetOwner(), params.soundlevel );
-	EmitSound_t ep;
-	ep.m_pSoundName = params.soundname;
-	ep.m_flVolume = params.volume;
-	ep.m_SoundLevel = params.soundlevel;
-	ep.m_nPitch = params.pitch;
-	GetOwner()->EmitSound( filter, GetOwner()->entindex(), ep ); // This needs to be client predicted, can probably just use EmitSoundShared instead of this.. - AfterShock
-}
 #endif
 
-void CFFWeaponRailgun::PlayRevSound()
-{
-	// if not charging
-	if (m_iAmmoUsed <= 0)
+	//Track the duration of the fire
+	//FIXME: Check for IN_ATTACK2 as well?
+	//FIXME: What if we're calling ItemBusyFrame?
+	m_fFireDuration = (pPlayer->m_nButtons & IN_ATTACK) ? (m_fFireDuration + gpGlobals->frametime) : 0.0f;
+
+	if ((pPlayer->m_nButtons & IN_ATTACK) && (m_flNextPrimaryAttack <= gpGlobals->curtime))
 	{
-		StopRevSound();
-		return;
-	}
+		// allow players to continue to charge if they've hit the halfway mark
+		// and don't make it immediately switch, causing shot sounds to stop
+		if ( pPlayer->GetAmmoCount(GetPrimaryAmmoType()) <= 0 && m_iAmmoUsed < RAILGUN_AMMOAMOUNT_HALFCHARGE )
+		{
+			if ( m_flStartTime != 0.0f )
+			{
+				// Fire now
+				Fire();
+			}
+			else if( m_flNextPrimaryAttack < gpGlobals->curtime )
+			{
+				// HEV suit - indicate out of ammo condition
+				HandleFireOnEmpty();
 
-	float flClampedChargeTime = clamp(gpGlobals->curtime - m_flStartTime, 0, RAILGUN_MAXCHARGETIME);
+				pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
+			}
+		}
+		else
+		{
+			if ((pPlayer->m_afButtonPressed & IN_ATTACK) || (pPlayer->m_afButtonReleased & IN_ATTACK2))
+			{
+				m_flNextPrimaryAttack = gpGlobals->curtime;
+			}
 
-	float flTempClampedChargeTime = flClampedChargeTime;
+			if (m_flStartTime <= 0)
+			{
+				// save that we had the attack button down
+				m_flStartTime = gpGlobals->curtime;
+
 #ifdef CLIENT_DLL
-	flTempClampedChargeTime = m_flClampedChargeTimeBuffered;
-#endif
-
-	float flPercent = clamp( flTempClampedChargeTime / RAILGUN_MAXCHARGETIME, 0.0f, 1.0f);
-	float flVolume = RAILGUN_REVSOUND_VOLUME_LOW + ((RAILGUN_REVSOUND_VOLUME_HIGH - RAILGUN_REVSOUND_VOLUME_LOW) * flPercent);
-	float flPitch = RAILGUN_REVSOUND_PITCH_LOW + ((RAILGUN_REVSOUND_PITCH_HIGH - RAILGUN_REVSOUND_PITCH_LOW) * flPercent);
-
-#ifdef GAME_DLL
-
-	if (!m_bPlayRevSound || m_iAmmoUsed < 1 )
-	{
-		StopRevSound();
-		return;
-	}
-
-	// wait a little while so we're not constantly calling EmitSound
-	if (gpGlobals->curtime < m_flRevSoundNextUpdate)
-		return;
-	m_flRevSoundNextUpdate = gpGlobals->curtime + RAILGUN_REVSOUND_UPDATEINTERVAL;
-
-	const char *shootsound = GetShootSound( m_nRevSound );
-	if (!shootsound || !shootsound[0])
-		return;
-
-	if (!m_paramsRevSound.m_pSoundName)
-	{
-		m_paramsRevSound.m_pSoundName = shootsound;
-		m_paramsRevSound.m_flSoundTime = 0.0f;
-		m_paramsRevSound.m_pOrigin = NULL;
-		m_paramsRevSound.m_pflSoundDuration = NULL;
-		m_paramsRevSound.m_bWarnOnDirectWaveReference = true;
-		m_paramsRevSound.m_SoundLevel = SNDLVL_NORM;
-		m_paramsRevSound.m_nFlags = SND_CHANGE_PITCH | SND_CHANGE_VOL;
-	}
-
-	m_paramsRevSound.m_flVolume = flVolume;
-	m_paramsRevSound.m_nPitch = flPitch;
-
-	CPASAttenuationFilter filter( this, m_paramsRevSound.m_SoundLevel );
-	if ( IsPredicted() )
-	{
-		filter.UsePredictionRules();
-	}
-	EmitSound( filter, entindex(), m_paramsRevSound, m_paramsRevSound.m_hSoundScriptHandle );
-
-	m_bPlayRevSound = true;
-
+				UpdateRevSound();
 #else
+				// remove ammo immediately
+				pPlayer->RemoveAmmo(1, m_iPrimaryAmmoType);
+#endif
+				// client needs to know, too
+				m_iAmmoUsed++;
+			}
+		}
+	}
 
-	if ( flPercent == 0.0f )
+	// -----------------------
+	//  No buttons down
+	// -----------------------
+	if (! ((pPlayer->m_nButtons & IN_ATTACK) || /* (pOwner->m_nButtons & IN_ATTACK2) ||*/ (pPlayer->m_nButtons & IN_RELOAD))) // |-- Mirv: Removed attack2 so things can continue while in menu
 	{
-		StopRevSound();
+		// no fire buttons down or reloading
+		if (!ReloadOrSwitchWeapons() && (m_bInReload == false))
+		{
+			WeaponIdle();
+		}
+	}
+}
+
+
+#ifdef CLIENT_DLL
+void CFFWeaponRailgun::OnDataChanged( DataUpdateType_t updateType )
+{
+	BaseClass::OnDataChanged( updateType );
+
+	UpdateRevSound();
+}
+
+
+void CFFWeaponRailgun::UpdateRevSound( void )
+{
+	CFFPlayer *pPlayer = ToFFPlayer( GetOwner() );
+	if ( !pPlayer )
 		return;
-	}
 
-	// setup and play the rev sound if it's not setup yet
-	if (!m_sndRev)
+	CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
+
+	if ( m_flStartTime != 0.0f )
 	{
-		const char *shootsound = GetShootSound( m_nRevSound );
-		if (!shootsound || !shootsound[0])
-			return;
-
-		CPASAttenuationFilter filter( this );
-		m_sndRev = (CSoundEnvelopeController::GetController()).SoundCreate( filter, entindex(), shootsound );
-		CSoundEnvelopeController::GetController().Play( m_sndRev, flVolume, flPitch );
+		if ( !m_sndRev )
+		{
+			CLocalPlayerFilter filter;
+			m_sndRev = controller.SoundCreate( filter, pPlayer->entindex(), GetShootSound( SPECIAL1 ) );
+			controller.Play( m_sndRev, RAILGUN_REVSOUND_VOLUME_LOW, RAILGUN_REVSOUND_PITCH_LOW );
+			controller.SoundChangePitch( m_sndRev, RAILGUN_REVSOUND_PITCH_HIGH, RAILGUN_MAXCHARGETIME );
+			controller.SoundChangeVolume( m_sndRev, RAILGUN_REVSOUND_VOLUME_HIGH, RAILGUN_MAXCHARGETIME);
+		}
 	}
-	// modify the rev sound if it exists
 	else
 	{
-		CSoundEnvelopeController::GetController().SoundChangeVolume( m_sndRev, flVolume, 0.05f );
-		CSoundEnvelopeController::GetController().SoundChangePitch( m_sndRev, flPitch, 0.05f );
+		if ( m_sndRev )
+		{
+			controller.SoundDestroy( m_sndRev );
+			m_sndRev = NULL;
+		}
 	}
-
-#endif
 }
-
-void CFFWeaponRailgun::StopRevSound()
-{
-#ifdef GAME_DLL
-
-	const char *shootsound = GetShootSound( m_nRevSound );
-	if ( !shootsound || !shootsound[0] )
-		return;
-
-	StopSound( entindex(), shootsound );
-	m_bPlayRevSound = false;
-	m_flRevSoundNextUpdate = gpGlobals->curtime + RAILGUN_COOLDOWNTIME_ZEROCHARGE - RAILGUN_REVSOUND_UPDATEINTERVAL;
-
-#else
-
-	if (m_sndRev)
-	{
-		CSoundEnvelopeController::GetController().SoundDestroy(m_sndRev);
-		m_sndRev = NULL;
-	}
-
-#endif
-}
-
-#ifdef CLIENT_DLL
 
 //-----------------------------------------------------------------------------
 // Purpose: This takes place after the viewmodel is drawn. We use this to
@@ -678,8 +537,10 @@ void CFFWeaponRailgun::StopRevSound()
 void CFFWeaponRailgun::ViewModelDrawn( C_BaseViewModel *pBaseViewModel )
 {
 	// Not charging at all or even much, so no need to draw shit
-	if (m_flClampedChargeTimeBuffered <= 0.0)
+	if (m_flStartTime <= 0.0)
 		return;
+
+	float flClampedChargeTime = clamp(gpGlobals->curtime - m_flStartTime, 0, RAILGUN_MAXCHARGETIME);
 
 	// We'll get these done and out of the way
 	if (m_iAttachment1 == -1 || m_iAttachment2 == -1)
@@ -699,7 +560,7 @@ void CFFWeaponRailgun::ViewModelDrawn( C_BaseViewModel *pBaseViewModel )
 	::FormatViewModelAttachment(vecEnd, true);
 	::FormatViewModelAttachment(vecMuzzle, true);
 
-	float flPercent = clamp( m_flClampedChargeTimeBuffered / RAILGUN_MAXCHARGETIME, 0.0f, 1.0f);
+	float flPercent = clamp(flClampedChargeTime / RAILGUN_MAXCHARGETIME, 0.0f, 1.0f);
 	flPercent = sqrtf( flPercent );
 	float effectScale = flPercent == 1.0f ? 5.0f : 2.0f;
 
