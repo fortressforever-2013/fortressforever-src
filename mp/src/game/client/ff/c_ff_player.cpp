@@ -2488,13 +2488,17 @@ void C_FFPlayer::OnDataChanged(DataUpdateType_t type)
 		// Added extra guards to make this safer
 		if (IsAlive() && GetTeamNumber() >= TEAM_BLUE && GetActiveWeapon() != m_pOldActiveWeapon)
 		{
+			// m_pOldActiveWeapon turns null when you drop packets and plays an infinitely looping animation for some reason.
+			// dont do this if that's the case
 			if (m_pOldActiveWeapon)
+			{
 				m_pOldActiveWeapon->Holster(GetActiveWeapon());
 
-			if (GetActiveWeapon())
-				GetActiveWeapon()->Deploy();
+				if (GetActiveWeapon())
+					GetActiveWeapon()->Deploy();
 
-			m_pOldActiveWeapon = GetActiveWeapon();
+				m_pOldActiveWeapon = GetActiveWeapon();
+			}
 		}
 
 		// Also lets keep track of the lift state of the local player here too
