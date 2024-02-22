@@ -460,8 +460,8 @@ public:
 	bool Weapon_Switch(CBaseCombatWeapon* pWeapon, int viewmodelindex = 0);
 	CBaseCombatWeapon* m_pOldActiveWeapon;
 
-	float		m_flNextJumpTimeForDouble;
-	bool		m_bCanDoubleJump;
+	CNetworkVar(float, m_flNextJumpTimeForDouble);
+	CNetworkVar(bool, m_bCanDoubleJump);
 
 	virtual		float GetFOV();
 

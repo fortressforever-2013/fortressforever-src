@@ -991,8 +991,8 @@ public:
 	Vector		BodyTarget(const Vector &posSrc, bool bNoisy);
 
 	// TODO: Possibly network this?
-	float		m_flNextJumpTimeForDouble;
-	bool		m_bCanDoubleJump;
+	CNetworkVar(float, m_flNextJumpTimeForDouble);
+	CNetworkVar(bool, m_bCanDoubleJump);
 
 	CNetworkVar(float, m_flSpeedModifier);
 	float		m_flSpeedModifierOld;
