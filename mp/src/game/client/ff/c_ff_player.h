@@ -627,6 +627,8 @@ private:
 	static void C_FFPlayer::StopGrenTimersListener(bf_read& msg);
 	//public:
 	//	void C_FFPlayer::GrenadeTimerExpired(C_FFTimer *pTimer);
+public:
+	CNetworkVar(float, m_flLastSpawnTime);
 };
 
 // Just straight up copying the server version. Tired

@@ -474,6 +474,7 @@ IMPLEMENT_SERVERCLASS_ST( CFFPlayer, DT_FFPlayer )
 	SendPropBool( SENDINFO( m_bJetpacking ) ),
 	SendPropBool(SENDINFO(m_bCanDoubleJump)),
 	SendPropTime(SENDINFO(m_flNextJumpTimeForDouble)),
+	SendPropTime(SENDINFO(m_flLastSpawnTime)),
 END_SEND_TABLE( )
 
 LINK_ENTITY_TO_CLASS( ff_ragdoll, CFFRagdoll );
@@ -1691,6 +1692,8 @@ void CFFPlayer::SetupClassVariables()
 
 	// clear recent attacker (kill assist) info
 	m_recentAttackers.Purge();
+
+	m_flLastSpawnTime = gpGlobals->curtime;
 }
 
 void CFFPlayer::InitialSpawn( void )

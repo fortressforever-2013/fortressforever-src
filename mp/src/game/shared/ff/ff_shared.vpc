@@ -123,4 +123,5 @@ $Project
 	$File "$SRCDIR\game\shared\ff\ff_usermessages.cpp"
 	$File "$SRCDIR\game\shared\ff\ff_utils.cpp"
 	$File "$SRCDIR\game\shared\ff\ff_utils.h"
+	$File "$SRCDIR\game\shared\ff\ff_cvar_override.cpp"
 }

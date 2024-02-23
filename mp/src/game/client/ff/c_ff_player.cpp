@@ -872,6 +872,7 @@ RecvPropInt(RECVINFO(m_iActiveSabotages)),
 RecvPropBool(RECVINFO(m_bJetpacking)),
 RecvPropInt(RECVINFO(m_bCanDoubleJump)),
 RecvPropTime(RECVINFO(m_flNextJumpTimeForDouble)),
+RecvPropTime(RECVINFO(m_flLastSpawnTime)),
 END_RECV_TABLE()
 
 BEGIN_PREDICTION_DATA(C_FFPlayer)

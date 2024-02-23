@@ -193,6 +193,8 @@ public:
 	bool HasGameStarted() { return !( m_flGameStarted < 0 ); }
 	float GetRoundStart( void ) const { return m_flRoundStarted; }
 	void SetRoundStart( float flStartTime ) { m_flRoundStarted = flStartTime; }
+
+	virtual bool IsConnectedUserInfoChangeAllowed(CBasePlayer* pPlayer);
 };
 
 //-----------------------------------------------------------------------------

@@ -16,6 +16,7 @@
 #ifdef CLIENT_DLL
 	#define C_FFTeam CFFTeam
 	#include "c_ff_team.h"
+	#include "c_ff_player.h"
 
 #else
 	#include "voice_gamemgr.h"
@@ -2245,3 +2246,32 @@ bool Server_IsIntermission()
 	return g->IsIntermission();
 }
 #endif
+
+bool CFFGameRules::IsConnectedUserInfoChangeAllowed( CBasePlayer* pPlayer )
+{
+#ifdef GAME_DLL
+	CFFPlayer * pFFPlayer = ToFFPlayer(pPlayer);
+#else
+	C_FFPlayer* pFFPlayer = C_FFPlayer::GetLocalFFPlayer();
+#endif
+	if (pFFPlayer)
+	{
+		// We can change if we're not alive.
+		if (pFFPlayer->m_lifeState != LIFE_ALIVE)
+			return true;
+
+		// We can change if we're not any team
+		int iPlayerTeam = pFFPlayer->GetTeamNumber();
+		if (iPlayerTeam <= LAST_SHARED_TEAM)
+			return true;
+
+		// We can change if we've respawned/changed classes within the last 2 seconds,
+		// this allows for <classname>.cfg files to change these types of ConVars.
+		// Called everytime the player respawns.
+		float flRespawnTime = pFFPlayer->m_flLastSpawnTime;
+		if ((gpGlobals->curtime - flRespawnTime) < 2.0f)
+			return true;
+	}
+
+	return false;
+}

@@ -3217,7 +3217,9 @@ void C_BaseEntity::InterpolateServerEntities()
 {
 	VPROF_BUDGET( "C_BaseEntity::InterpolateServerEntities", VPROF_BUDGETGROUP_INTERPOLATION );
 
-	s_bInterpolate = cl_interpolate.GetBool();
+	// fuck off!!!!
+	// s_bInterpolate = cl_interpolate.GetBool();
+	s_bInterpolate = true;
 
 	// Don't interpolate during timedemo playback
 	if ( engine->IsPlayingTimeDemo() || engine->IsPaused() )
