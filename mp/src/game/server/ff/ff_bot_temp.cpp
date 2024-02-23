@@ -70,7 +70,7 @@
 //#include "ff_detpack.h"
 #include "ff_buildableobjects_shared.h"
 
-CON_COMMAND(ffdev_tranqme, "tranqs you")
+CON_COMMAND_F(ffdev_tranqme, "tranqs you", FCVAR_CHEAT)
 {
 	CFFPlayer* you = ToFFPlayer(UTIL_GetCommandClient());
 	you->AddSpeedEffect(SE_TRANQ, 6.0, 0.3f, SEM_BOOLEAN | SEM_HEALABLE, FF_STATUSICON_TRANQUILIZED, 6.0f);
@@ -138,7 +138,10 @@ CON_COMMAND( bot_slot, "change to slot x" )
 {
 	int iSlot = 1;
 
-	const char *pszString = engine->Cmd_Argv(1);
+	const char* pszString = args[1];
+	if( !pszString )
+		return;
+
 	switch( pszString[0] )
 	{
 		case '1': iSlot = 1; break;
@@ -257,6 +260,9 @@ CON_COMMAND(bot_disguise, "trigger a disguise")
 
 CON_COMMAND(bot_disguisez, "trigger a disguise")
 {
+	if ((!args[1] || !args[1][0]) || (!args[2] || !args[2][0]))
+		return;
+
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		CFFPlayer *pPlayer = ToFFPlayer(UTIL_PlayerByIndex(i));
@@ -266,37 +272,37 @@ CON_COMMAND(bot_disguisez, "trigger a disguise")
 			int iTeam = TEAM_UNASSIGNED;
 			int iClass = CLASS_NONE;
 
-			if( !Q_stricmp( engine->Cmd_Argv(1), "blue" ) )
+			if (!Q_stricmp( args[1], "blue"))
 				iTeam = TEAM_BLUE;
-			else if( !Q_stricmp( engine->Cmd_Argv(1), "red" ) )
+			else if( !Q_stricmp( args[1], "red" ) )
 				iTeam = TEAM_RED;
-			else if( !Q_stricmp( engine->Cmd_Argv(1), "yellow" ) )
+			else if( !Q_stricmp( args[1], "yellow" ) )
 				iTeam = TEAM_YELLOW;
-			else if( !Q_stricmp( engine->Cmd_Argv(1), "green" ) )
+			else if( !Q_stricmp( args[1], "green" ) )
 				iTeam = TEAM_GREEN;
 
-			if( !Q_stricmp( engine->Cmd_Argv(2), "scout" ) )
+			if( !Q_stricmp( args[2], "scout" ) )
 				iClass = CLASS_SCOUT;
-			else if( !Q_stricmp( engine->Cmd_Argv(2), "sniper" ) )
+			else if( !Q_stricmp( args[2], "sniper" ) )
 				iClass = CLASS_SNIPER;
-			else if( !Q_stricmp( engine->Cmd_Argv(2), "soldier" ) )
+			else if( !Q_stricmp( args[2], "soldier" ) )
 				iClass = CLASS_SOLDIER;
-			else if( !Q_stricmp( engine->Cmd_Argv(2), "demoman" ) )
+			else if( !Q_stricmp( args[2], "demoman" ) )
 				iClass = CLASS_DEMOMAN;
-			else if( !Q_stricmp( engine->Cmd_Argv(2), "medic" ) )
+			else if( !Q_stricmp( args[2], "medic" ) )
 				iClass = CLASS_MEDIC;
-			else if( !Q_stricmp( engine->Cmd_Argv(2), "hwguy" ) )
+			else if( !Q_stricmp( args[2], "hwguy" ) )
 				iClass = CLASS_HWGUY;
-			else if( !Q_stricmp( engine->Cmd_Argv(2), "pyro" ) )
+			else if( !Q_stricmp( args[2], "pyro" ) )
 				iClass = CLASS_PYRO;
-			else if( !Q_stricmp( engine->Cmd_Argv(2), "spy" ) )
+			else if( !Q_stricmp( args[2], "spy" ) )
 				iClass = CLASS_SPY;
-			else if( !Q_stricmp( engine->Cmd_Argv(2), "engineer" ) )
+			else if( !Q_stricmp( args[2], "engineer" ) )
 				iClass = CLASS_ENGINEER;
 
 			if( iTeam != TEAM_UNASSIGNED && iClass != CLASS_NONE )
 			{
-				Warning( "[Bot %s] Disguising as: %s %s\n", pPlayer->GetPlayerName(), engine->Cmd_Argv(1), engine->Cmd_Argv(2) );
+				Warning( "[Bot %s] Disguising as: %s %s\n", pPlayer->GetPlayerName(), args[1], args[2] );
 				pPlayer->Bot_Disguise( iTeam, iClass );
 			}			
 		}
@@ -447,7 +453,10 @@ CON_COMMAND(ffdev_iclass, "instant switch")
 {
 	CFFPlayer *you = ToFFPlayer(UTIL_GetCommandClient());
 
-	int iClass = atoi(engine->Cmd_Argv(1));
+	if (!args[1] || !args[1][0])
+		return;
+
+	int iClass = atoi(args[1]);
 
 	you->InstaSwitch(iClass);
 }
@@ -551,17 +560,14 @@ CBasePlayer *BotPutInServer( bool bFrozen )
 }
 
 // Handler for the "bot" command.
-void BotAdd_f()
+void BotAdd_f( const CCommand &args )
 {
-	extern int FindEngineArgInt( const char *pName, int defaultVal );
-	extern const char* FindEngineArg( const char *pName );
-
 	// Look at -count.
-	int count = FindEngineArgInt( "-count", 1 );
+	int count = args.FindArgInt( "-count", 1 );
 	count = clamp( count, 1, 16 );
 
 	// Look at -frozen.
-	bool bFrozen = !!FindEngineArg( "-frozen" );
+	bool bFrozen = !!args.FindArg("-frozen");
 		
 	// Ok, spawn all the bots.
 	while ( --count >= 0 )
@@ -784,7 +790,7 @@ void Bot_HandleSendCmd( CFFBot *pBot )
 	{
 		DevMsg( "[Bot] Clientcmd: %s\n", bot_sendcmd.GetString() );
 		//send the cmd from this bot
-		pBot->ClientCommand( bot_sendcmd.GetString() );
+		engine->ClientCommand( pBot->edict(), bot_sendcmd.GetString());
 
 		// BEG: Added by Mulch to get the bot to actually do stuff
 		if( Q_strcmp( "dispenser", bot_sendcmd.GetString() ) == 0 )
@@ -1072,9 +1078,79 @@ void Bot_Think( CFFBot *pBot )
 		cmd.impulse = 0;
 	}
 
-	float frametime = gpGlobals->frametime;
-	RunPlayerMove( pBot, cmd, frametime );
+//	float frametime = gpGlobals->frametime;
+//	RunPlayerMove( pBot, cmd, frametime );
 }
 
+CON_COMMAND_F( bot_teleport, "Teleport the specified bot to the specified position & angles.\n\tFormat: bot_teleport <bot name> <X> <Y> <Z> <Pitch> <Yaw> <Roll>", FCVAR_CHEAT )
+{
+	const char* botname = args[1];
+
+	if ( args.ArgC() < 2 )
+	{
+		CUtlVector< CBasePlayer* > botcandidates;
+
+		CBasePlayer* pPlayer;
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			pPlayer = ToBasePlayer(UTIL_PlayerByIndex(i));
+
+			if (!pPlayer)
+				continue;
+
+			if (!pPlayer->IsFakeClient())
+				continue;
+
+			botcandidates.AddToTail(pPlayer);
+		}
+
+		if ( botcandidates.Count() > 0 )
+		{
+			int iRandom = RandomInt(0, botcandidates.Count() - 1);
+			botname = botcandidates[iRandom]->GetPlayerName();
+		}
+	}
+
+	if ( !botname )
+	{
+		Msg("No bot specified. bot_teleport <bot name> <X> <Y> <Z> <Pitch> <Yaw> <Roll>\n");
+		return;
+	}
+
+	// get the bot's player object
+	CBasePlayer *pBot = UTIL_PlayerByName( botname );
+	if ( !pBot )
+	{
+		Msg( "No bot with name %s\n", botname );
+		return;
+	}
+
+	Vector vecPos( vec3_origin );
+	QAngle vecAng( vec3_angle );
+
+	if ( args.ArgC() >= 5 )
+	{
+		vecPos = Vector( atof( args[2] ), atof( args[3] ), atof( args[4] ) );
+
+		if ( args.ArgC() >= 8 )
+		{
+			vecAng = QAngle( atof( args[5] ), atof( args[6] ), atof( args[7] ) );
+		}
+	}
+	else
+	{
+		CBasePlayer* pPlayer = UTIL_GetCommandClient();
+		trace_t tr;
+		Vector forward;
+		pPlayer->EyeVectors( &forward );
+		UTIL_TraceLine( pPlayer->EyePosition(), pPlayer->EyePosition() + forward * MAX_TRACE_LENGTH, MASK_SOLID, pPlayer, COLLISION_GROUP_NONE, &tr );
+		if ( tr.fraction != 1.0 )
+		{
+			vecPos = tr.endpos;
+		}
+	}
+
+	pBot->Teleport( &vecPos, &vecAng, NULL );
+}
 
 #endif // _DEBUG
