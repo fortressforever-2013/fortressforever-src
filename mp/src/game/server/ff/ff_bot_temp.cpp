@@ -554,7 +554,7 @@ CBasePlayer *BotPutInServer( bool bFrozen, int iTeam, int iClass, const char *ps
 
 	//pPlayer->ChangeTeam( TEAM_UNASSIGNED );
 	pPlayer->ChangeTeam( iTeam );
-	pPlayer->ChangeClass( bot_changeclass.GetInt() ? Class_IntToString(bot_changeclass.GetInt()) ? iClass );
+	pPlayer->ChangeClass( bot_changeclass.GetInt() ? Class_IntToString(bot_changeclass.GetInt()) : Class_IntToString(iClass) );
 	pPlayer->RemoveAllItems( true );
 	pPlayer->Spawn();
 
