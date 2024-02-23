@@ -148,7 +148,7 @@ void CFFManCannon::OnJumpPadThink( void )
 			m_flLastHeal = 0;
 		}
 	}
-	SetNextThink( gpGlobals->curtime + 0.1f );
+	SetContextThink(&CFFManCannon::OnJumpPadThink, gpGlobals->curtime + 0.1f, "JumpPadThink");
 	// caes
 }
 
