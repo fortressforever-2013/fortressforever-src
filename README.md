@@ -1,44 +1,21 @@
-<p align="center">
-  <img src=".assets/sdk2013ce.png" width="200" height="200">
-</p>
-
 <div align="center">
-
- <a href="">[![Multiplayer Win](https://github.com/Nbc66/source-sdk-2013-ce/actions/workflows/MP_windows.yml/badge.svg)](https://github.com/Nbc66/source-sdk-2013-ce/actions/workflows/MP_windows.yml)</a>
-<a href="">[![Singleplayer Win](https://github.com/Nbc66/source-sdk-2013-ce/actions/workflows/SP_windows.yml/badge.svg)](https://github.com/Nbc66/source-sdk-2013-ce/actions/workflows/SP_windows.yml)</a>
-
+  <img src="https://avatars.githubusercontent.com/u/2388970" width="200" height="200">
 </div>
 
-# Source SDK 2013 Community Edition
-Source 2013 CE is a clean fork of Valve's [Source SDK 2013 repo](https://github.com/valveSoftware/source-sdk-2013) 
-with the goal of fixing up the SDK and to provide a clean bloat-free codebase that works out of the box to make developers' lives easier.
+# Fortress Forever 2013
+This is a working port of the game [Fortress Forever](https://store.steampowered.com/app/253530/Fortress_Forever/) on Source SDK 2013 using Nbc66's [SDK 2013 Community Edition](https://github.com/Nbc66/source-sdk-2013-ce) repository.
 
-# Info
-There are currently two branches, the first one being `master` which will only contain fixes without any extra additions.</br>
-The second one is `Experimental` which is the branch we use to add new features and helpful tools for developers.</br>
-And a third branch `enhancements` soon to appear, which will include some neat features that we think you will enjoy, 
-some made by the community, some backported from other engine branches such as Alien Swarm, and everything in-between.
+Fortress Forever was made using Source SDK 2006, the original repository of the game could be found [here](https://github.com/fortressforever/fortressforever).
 
-You can find Source 2013 CE's roadmap by going to our [Trello board](https://trello.com/b/MOxQ2iai/source-sdk-2013-community-edition).
-
-And you can also give us suggestions for fixes and features that you'd like to see in our Discord channel (`#source-SDK-2013-ce`) found in the 
-Source Modding Community server, which you can join [here](https://discord.gg/BD6WpY5).
-
-# Requirements 
-To be able to use Source 2013 CE you will need to download **Visual Studio 2022** and install:
+**Note:** This repository contains the **source code** of the game and **not the game files**, The repository containing the game files could be found [here](https://github.com/fortressforever-2013/FortressForever2013).
+# Instructions (Windows)
+To be able to compile Fortress Forever 2013 you will need to download **Visual Studio 2022** and install:
 * MSVC v143 - VS 2022 C++ x64/x86 build tools
 * C++ MFC Library for latest v143 build tools (x86 and x64)
 * Windows 11 SDK (10.0.22000.0)
 
-As of July 2023, CE has been tested on Visual Studio 2022 with the latest versions of the requirements listed above. So if desired you can use that instead.
-
-# Contributing
-We appreciate any form of help so ideally if you want to help this project out the best way would be to make a pull request.
-
-# Ending Notes
-Thank you for trying out this project we hope we will help you out with your Source engine troubles!
-
-Made with :heart: by [@Nbc66](https://github.com/Nbc66) & [@GamerDude27](https://github.com/GamerDude27)
-
-Credits for 2019 support: momentum mod, Brae, and Anthonypython
-Credits for CI: TF2Vintage, Deathreus, Dio, Anthonypython
+1. Clone this repository and run `creategameprojects.bat` or `createallprojects.bat`
+    * This will generate the project files and solution files that are needed in order to compile the game.
+2. Open the generated `Game_FF.sln` or `Everything_FF.sln` using Visual Studio 2022.
+3. Run `Build Solution`.
+    * The compiled binaries would automatically be copied to `mp/game/FortressForever2013`.
