@@ -172,6 +172,9 @@ void CFFDiscordManager::UpdateGameData()
 	{
 		C_FFTeam* team = GetGlobalFFTeam(i);
 
+		if (!team)
+			continue;
+
 		// If team is disabled, we probably don't want their score.
 		if (team->Get_Teams() == -1)
 			continue;
@@ -179,7 +182,7 @@ void CFFDiscordManager::UpdateGameData()
 		scoresStream << team->Get_Score();
 
 		// if the next team isn't disabled, add a separator
-		if (GetGlobalFFTeam(i + 1)->Get_Teams() != -1)
+		if (GetGlobalFFTeam(i + 1) && GetGlobalFFTeam(i + 1)->Get_Teams() != -1)
 			scoresStream << " | ";
 	}
 	scoresStream << ")";
