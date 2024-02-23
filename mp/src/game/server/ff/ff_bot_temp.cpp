@@ -84,8 +84,6 @@ CON_COMMAND_F(ffdev_tranqme, "tranqs you", FCVAR_CHEAT)
 	MessageEnd();
 }
 
-#ifdef _DEBUG
-
 class CFFBot;
 void Bot_Think( CFFBot *pBot );
 bool Bot_GhostThinkRecord( CFFBot *pBot );
@@ -95,7 +93,7 @@ ConVar bot_forcefireweapon( "bot_forcefireweapon", "", 0, "Force bots with the s
 ConVar bot_forceattack2( "bot_forceattack2", "0", 0, "When firing, use attack2." );
 ConVar bot_forceattackon( "bot_forceattackon", "0", 0, "When firing, don't tap fire, hold it down." );
 ConVar bot_flipout( "bot_flipout", "0", 0, "When on, all bots fire their guns." );
-ConVar bot_changeclass( "bot_changeclass", "1", 0, "Force all bots to change to the specified class." );
+ConVar bot_changeclass( "bot_changeclass", "0", 0, "Force all bots to change to the specified class." );
 static ConVar bot_mimic( "bot_mimic", "0", 0, "Bot uses usercmd of player by index." );
 static ConVar bot_mimic_yaw_offset( "bot_mimic_yaw_offset", "0", 0, "Offsets the bot yaw." );
 
@@ -521,11 +519,17 @@ public:
 // Purpose: Create a new Bot and put it in the game.
 // Output : Pointer to the new Bot, or NULL if there's no free clients.
 //-----------------------------------------------------------------------------
-CBasePlayer *BotPutInServer( bool bFrozen )
+CBasePlayer *BotPutInServer( bool bFrozen, int iTeam, int iClass, const char *pszCustomName )
 {
 	char botname[ 64 ];
-	Q_snprintf( botname, sizeof( botname ), "Bot%02i", g_CurBotNumber );
-
+	if ( pszCustomName && pszCustomName[0] )
+	{
+		V_strcpy_safe( botname, pszCustomName );
+	}
+	else
+	{
+		Q_snprintf(botname, sizeof(botname), "Bot%02i", g_CurBotNumber);
+	}
 	
 	// This trick lets us create a CFFBot for this client instead of the CFFPlayer
 	// that we would normally get when ClientPutInServer is called.
@@ -549,8 +553,8 @@ CBasePlayer *BotPutInServer( bool bFrozen )
 		pPlayer->AddEFlags( EFL_BOT_FROZEN );
 
 	//pPlayer->ChangeTeam( TEAM_UNASSIGNED );
-	pPlayer->ChangeTeam( TEAM_BLUE );
-	pPlayer->ChangeClass( Class_IntToString(bot_changeclass.GetInt()) );
+	pPlayer->ChangeTeam( iTeam );
+	pPlayer->ChangeClass( bot_changeclass.GetInt() ? Class_IntToString(bot_changeclass.GetInt()) ? iClass );
 	pPlayer->RemoveAllItems( true );
 	pPlayer->Spawn();
 
@@ -562,17 +566,80 @@ CBasePlayer *BotPutInServer( bool bFrozen )
 // Handler for the "bot" command.
 void BotAdd_f( const CCommand &args )
 {
+	if ( !UTIL_IsCommandIssuedByServerAdmin() )
+		return;
+
+	// The bot command uses switches like command-line switches.
+	// -count <count> tells how many bots to spawn.
+	// -team <index> selects the bot's team. Default is -1 which chooses randomly.
+	//	Note: if you do -team !, then it 
+	// -class <index> selects the bot's class. Default is -1 which chooses randomly.
+	// -frozen prevents the bots from running around when they spawn in.
+	// -name sets the bot's name
+
 	// Look at -count.
 	int count = args.FindArgInt( "-count", 1 );
 	count = clamp( count, 1, 16 );
 
+	if ( args.FindArg( "-all" ) )
+		count = 9;
+
 	// Look at -frozen.
-	bool bFrozen = !!args.FindArg("-frozen");
+	bool bFrozen = !!args.FindArg( "-frozen" );
 		
+	const char* szClassNames[] = {
+	"scout", "sniper", "soldier",
+	"demoman", "medic", "hwguy",
+	"pyro", "spy", "engineer",
+	"civilian"
+	};
+
+	const char* szTeamNames[] = { "blue", "red", "yellow", "green" };
+
 	// Ok, spawn all the bots.
 	while ( --count >= 0 )
 	{
-		BotPutInServer( bFrozen );
+		// What class do they want?
+		int iClass = RandomInt( CLASS_SCOUT, CLASS_CIVILIAN );
+		char const *pVal = args.FindArg( "-class" );
+		if ( pVal )
+		{
+			for ( int i = CLASS_SCOUT; i < CLASS_CIVILIAN + 1; i++ )
+			{
+				if ( V_stricmp( pVal, szClassNames[i] ) == 0 )
+				{
+					iClass = i;
+					break;
+				}
+			}
+		}
+		if ( args.FindArg( "-all" ) )
+			iClass = 9 - count;
+
+		int iTeam = TEAM_UNASSIGNED;
+		pVal = args.FindArg( "-team" );
+		if ( pVal )
+		{
+			if ( V_stricmp( pVal, "random" ) == 0 )
+			{
+				iTeam = RandomInt( FIRST_GAME_TEAM, GetNumberOfTeams() - 1 );
+			}
+			else
+			{
+				for ( int i = 0; i < GetNumberOfTeams(); i++ )
+				{
+					if ( V_stricmp( pVal, szTeamNames[i] ) == 0 )
+					{
+						iTeam = i + 2;
+						break;
+					}
+				}
+			}
+		}
+
+		char const *pName = args.FindArg( "-name" );
+
+		BotPutInServer( bFrozen, iTeam, iClass, pName );
 	}
 }
 ConCommand cc_Bot( "bot_add", BotAdd_f, "Add a bot.", FCVAR_CHEAT );
@@ -1152,5 +1219,3 @@ CON_COMMAND_F( bot_teleport, "Teleport the specified bot to the specified positi
 
 	pBot->Teleport( &vecPos, &vecAng, NULL );
 }
-
-#endif // _DEBUG
