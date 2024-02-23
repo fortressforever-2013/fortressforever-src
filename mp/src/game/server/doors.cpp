@@ -1301,6 +1301,11 @@ void CBaseDoor::Blocked( CBaseEntity *pOther )
 	// If set, ignore non-player ents that block us.  Mainly of use in multiplayer to prevent exploits.
 	else if ( pOther && !pOther->IsPlayer() && m_bIgnoreNonPlayerEntsOnBlock )
 	{
+		// This doesn't actually prevent door movement being stopped...
+		// Disable collisions with the blocking entity so we can resume opening/closing
+		// and not spam collision sounds
+		EntityPhysics_CreateSolver(this, pOther, true, 4.0f);
+
 		return;
 	}
 

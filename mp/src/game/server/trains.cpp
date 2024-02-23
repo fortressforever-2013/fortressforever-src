@@ -1698,7 +1698,10 @@ void CFuncTrackTrain::Blocked( CBaseEntity *pOther )
 		vecNewVelocity *= m_flBlockDamage;
 		pOther->SetAbsVelocity( vecNewVelocity );
 	}
-	if ( HasSpawnFlags(SF_TRACKTRAIN_UNBLOCKABLE_BY_PLAYER) )
+	// We want this physics interaction to always be checked regardless of spawnflag.
+	// Mappers and Valve don't set this because it makes players get stuck or pushed outside the map...
+	// But I can't think of a good reason not to let trains handle being blocked by physics entities
+	if ( !pOther->IsPlayer() )
 	{
 		CBaseEntity *pPhysicsBlocker = FindPhysicsBlockerForHierarchy(this);
 		if ( pPhysicsBlocker )
