@@ -1772,29 +1772,29 @@ namespace FFLib
 	}
 
 	// default alignment
-	void AddHudIcon( CFFPlayer *pPlayer, const char *pszImage, const char *pszIdentifier, float x, float y, float iWidth, float iHeight )
+	void AddHudIcon( CFFPlayer *pPlayer, const char *pszImage, const char *pszIdentifier, float x, float y, float flWidth, float flHeight )
 	{
 		if( !pPlayer || !pszImage || !pszIdentifier )
 			return;
 
-		FF_LuaHudIcon( pPlayer, pszIdentifier, x, y, pszImage, iWidth, iHeight );
+		FF_LuaHudIcon( pPlayer, pszIdentifier, x, y, pszImage, flWidth, flHeight );
 	}
 
-	void AddHudIcon( CFFPlayer *pPlayer, const char *pszImage, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, int iAlign )
+	void AddHudIcon( CFFPlayer *pPlayer, const char *pszImage, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, int iAlign )
 	{
-		if( !pPlayer || !pszImage || !pszIdentifier || ( iWidth < 0 ) || ( iHeight < 0 ) )
+		if( !pPlayer || !pszImage || !pszIdentifier || ( flWidth < 0 ) || ( flHeight < 0 ) )
 			return;
 
-		FF_LuaHudIcon( pPlayer, pszIdentifier, x, y, pszImage, iWidth, iHeight, iAlign );
+		FF_LuaHudIcon( pPlayer, pszIdentifier, x, y, pszImage, flWidth, flHeight, iAlign );
 	}
 
 	// added y alignment
-	void AddHudIcon( CFFPlayer *pPlayer, const char *pszImage, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, float iAlignX, float iAlignY )
+	void AddHudIcon( CFFPlayer *pPlayer, const char *pszImage, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, float flAlignX, float flAlignY )
 	{
-		if( !pPlayer || !pszImage || !pszIdentifier || ( iWidth < 0 ) || ( iHeight < 0 ) )
+		if( !pPlayer || !pszImage || !pszIdentifier || ( flWidth < 0 ) || ( flHeight < 0 ) )
 			return;
 
-		FF_LuaHudIcon( pPlayer, pszIdentifier, x, y, pszImage, iWidth, iHeight, iAlignX, iAlignY );
+		FF_LuaHudIcon( pPlayer, pszIdentifier, x, y, pszImage, flWidth, flHeight, flAlignX, flAlignY );
 	}
 
 	void AddHudIconToTeam( CFFTeam *pTeam, const char *pszImage, const char *pszIdentifier, float x, float y )
@@ -1816,9 +1816,9 @@ namespace FFLib
 	}
 
 	// default alignment
-	void AddHudIconToTeam( CFFTeam *pTeam, const char *pszImage, const char *pszIdentifier, float x, float y, float iWidth, float iHeight )
+	void AddHudIconToTeam( CFFTeam *pTeam, const char *pszImage, const char *pszIdentifier, float x, float y, float flWidth, float flHeight )
 	{
-		if( !pszImage || !pszIdentifier || ( iWidth < 0 ) || ( iHeight < 0 ) )
+		if( !pszImage || !pszIdentifier || ( flWidth < 0 ) || ( flHeight < 0 ) )
 			return;
 
 		// loop through each player
@@ -1829,14 +1829,14 @@ namespace FFLib
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
 				if ( pPlayer->GetTeam()->GetTeamNumber() == pTeam->GetTeamNumber() )
-					FF_LuaHudIcon(pPlayer, pszIdentifier, x, y, pszImage, iWidth, iHeight);
+					FF_LuaHudIcon(pPlayer, pszIdentifier, x, y, pszImage, flWidth, flHeight);
 			}
 		}
 	}
 
-	void AddHudIconToTeam( CFFTeam *pTeam, const char *pszImage, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, int iAlign )
+	void AddHudIconToTeam( CFFTeam *pTeam, const char *pszImage, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, int iAlign )
 	{
-		if( !pszImage || !pszIdentifier || ( iWidth < 0 ) || ( iHeight < 0 ) )
+		if( !pszImage || !pszIdentifier || ( flWidth < 0 ) || ( flHeight < 0 ) )
 			return;
 
 		// loop through each player
@@ -1847,15 +1847,15 @@ namespace FFLib
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
 				if ( pPlayer->GetTeam()->GetTeamNumber() == pTeam->GetTeamNumber() )
-					FF_LuaHudIcon(pPlayer, pszIdentifier, x, y, pszImage, iWidth, iHeight, iAlign);
+					FF_LuaHudIcon(pPlayer, pszIdentifier, x, y, pszImage, flWidth, flHeight, iAlign);
 			}
 		}
 	}
 
 	// added y alignment
-	void AddHudIconToTeam( CFFTeam *pTeam, const char *pszImage, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, float iAlignX, float iAlignY )
+	void AddHudIconToTeam( CFFTeam *pTeam, const char *pszImage, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, float flAlignX, float flAlignY )
 	{
-		if( !pszImage || !pszIdentifier || ( iWidth < 0 ) || ( iHeight < 0 ) )
+		if( !pszImage || !pszIdentifier || ( flWidth < 0 ) || ( flHeight < 0 ) )
 			return;
 
 		// loop through each player
@@ -1866,7 +1866,7 @@ namespace FFLib
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
 				if ( pPlayer->GetTeam()->GetTeamNumber() == pTeam->GetTeamNumber() )
-					FF_LuaHudIcon(pPlayer, pszIdentifier, x, y, pszImage, iWidth, iHeight, iAlignX, iAlignY);
+					FF_LuaHudIcon(pPlayer, pszIdentifier, x, y, pszImage, flWidth, flHeight, flAlignX, flAlignY);
 			}
 		}
 	}
@@ -1889,9 +1889,9 @@ namespace FFLib
 	}
 
 	// default alignment
-	void AddHudIconToAll( const char *pszImage, const char *pszIdentifier, float x, float y, float iWidth, float iHeight )
+	void AddHudIconToAll( const char *pszImage, const char *pszIdentifier, float x, float y, float flWidth, float flHeight )
 	{
-		if( !pszImage || !pszIdentifier || ( iWidth < 0 ) || ( iHeight < 0 ) )
+		if( !pszImage || !pszIdentifier || ( flWidth < 0 ) || ( flHeight < 0 ) )
 			return;
 
 		// loop through each player
@@ -1901,14 +1901,14 @@ namespace FFLib
 			if (ent && ent->IsPlayer())
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
-				FF_LuaHudIcon(pPlayer, pszIdentifier, x, y, pszImage, iWidth, iHeight);
+				FF_LuaHudIcon(pPlayer, pszIdentifier, x, y, pszImage, flWidth, flHeight);
 			}
 		}
 	}
 
-	void AddHudIconToAll( const char *pszImage, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, int iAlign )
+	void AddHudIconToAll( const char *pszImage, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, int iAlign )
 	{
-		if( !pszImage || !pszIdentifier || ( iWidth < 0 ) || ( iHeight < 0 ) )
+		if( !pszImage || !pszIdentifier || ( flWidth < 0 ) || ( flHeight < 0 ) )
 			return;
 
 		// loop through each player
@@ -1918,15 +1918,15 @@ namespace FFLib
 			if (ent && ent->IsPlayer())
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
-				FF_LuaHudIcon(pPlayer, pszIdentifier, x, y, pszImage, iWidth, iHeight, iAlign);
+				FF_LuaHudIcon(pPlayer, pszIdentifier, x, y, pszImage, flWidth, flHeight, iAlign);
 			}
 		}
 	}
 
 	// added y alignment
-	void AddHudIconToAll( const char *pszImage, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, float iAlignX, float iAlignY )
+	void AddHudIconToAll( const char *pszImage, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, float flAlignX, float flAlignY )
 	{
-		if( !pszImage || !pszIdentifier || ( iWidth < 0 ) || ( iHeight < 0 ) )
+		if( !pszImage || !pszIdentifier || ( flWidth < 0 ) || ( flHeight < 0 ) )
 			return;
 
 		// loop through each player
@@ -1936,56 +1936,56 @@ namespace FFLib
 			if (ent && ent->IsPlayer())
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
-				FF_LuaHudIcon(pPlayer, pszIdentifier, x, y, pszImage, iWidth, iHeight, iAlignX, iAlignY);
+				FF_LuaHudIcon(pPlayer, pszIdentifier, x, y, pszImage, flWidth, flHeight, flAlignX, flAlignY);
 			}
 		}
 	}
 
-	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, CHudBoxBorder border, float iAlignX, float iAlignY )
+	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, CHudBoxBorder border, float flAlignX, float flAlignY )
 	{
 		if( !pPlayer || !pszIdentifier )
 			return;
 
-		FF_LuaHudBox( pPlayer, pszIdentifier, x, y, iWidth, iHeight, clr, border.clr, border.width, iAlignX, iAlignY );
+		FF_LuaHudBox( pPlayer, pszIdentifier, x, y, flWidth, flHeight, clr, border.clr, border.width, flAlignX, flAlignY );
 	}
-	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, CHudBoxBorder border, float iAlignX )
+	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, CHudBoxBorder border, float flAlignX )
 	{
-		AddHudBox( pPlayer, pszIdentifier, x, y, iWidth, iHeight, clr, border, iAlignX, -1 );
+		AddHudBox( pPlayer, pszIdentifier, x, y, flWidth, flHeight, clr, border, flAlignX, -1 );
 	}
-	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, CHudBoxBorder border )
+	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, CHudBoxBorder border )
 	{
-		AddHudBox( pPlayer, pszIdentifier, x, y, iWidth, iHeight, clr, border, -1, -1 );
+		AddHudBox( pPlayer, pszIdentifier, x, y, flWidth, flHeight, clr, border, -1, -1 );
 	}
 
-	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr )
+	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr )
 	{
-		AddHudBox( pPlayer, pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(), -1, -1 );
+		AddHudBox( pPlayer, pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(), -1, -1 );
 	}
-	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, float iAlignX )
+	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, float flAlignX )
 	{
-		AddHudBox( pPlayer, pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(), iAlignX, -1 );
+		AddHudBox( pPlayer, pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(), flAlignX, -1 );
 	}
-	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, float iAlignX, float iAlignY )
+	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, float flAlignX, float flAlignY )
 	{
-		AddHudBox( pPlayer, pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(), iAlignX, iAlignY );
+		AddHudBox( pPlayer, pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(), flAlignX, flAlignY );
 	}
 	
-	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, Color borderclr )
+	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, Color borderclr )
 	{
-		AddHudBox( pPlayer, pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(borderclr), -1, -1 );
+		AddHudBox( pPlayer, pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(borderclr), -1, -1 );
 	}
-	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, Color borderclr, float iAlignX )
+	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, Color borderclr, float flAlignX )
 	{
-		AddHudBox( pPlayer, pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(borderclr), iAlignX, -1 );
+		AddHudBox( pPlayer, pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(borderclr), flAlignX, -1 );
 	}
-	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, Color borderclr, float iAlignX, float iAlignY )
+	void AddHudBox( CFFPlayer *pPlayer, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, Color borderclr, float flAlignX, float flAlignY )
 	{
-		AddHudBox( pPlayer, pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(borderclr), iAlignX, iAlignY );
+		AddHudBox( pPlayer, pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(borderclr), flAlignX, flAlignY );
 	}
 
-	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, CHudBoxBorder border, float iAlignX, float iAlignY )
+	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, CHudBoxBorder border, float flAlignX, float flAlignY )
 	{
-		if( !pTeam || !pszIdentifier || ( iWidth < 0 ) || ( iHeight < 0 ) )
+		if( !pTeam || !pszIdentifier || ( flWidth < 0 ) || ( flHeight < 0 ) )
 			return;
 
 		// loop through each player
@@ -1996,48 +1996,48 @@ namespace FFLib
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
 				if ( pPlayer->GetTeam()->GetTeamNumber() == pTeam->GetTeamNumber() )
-					FF_LuaHudBox( pPlayer, pszIdentifier, x, y, iWidth, iHeight, clr, border.clr, border.width, iAlignX, iAlignY );
+					FF_LuaHudBox( pPlayer, pszIdentifier, x, y, flWidth, flHeight, clr, border.clr, border.width, flAlignX, flAlignY );
 			}
 		}
 	}
-	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, CHudBoxBorder border, float iAlignX )
+	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, CHudBoxBorder border, float flAlignX )
 	{
-		AddHudBoxToTeam( pTeam, pszIdentifier, x, y, iWidth, iHeight, clr, border, iAlignX, -1 );
+		AddHudBoxToTeam( pTeam, pszIdentifier, x, y, flWidth, flHeight, clr, border, flAlignX, -1 );
 	}
-	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, CHudBoxBorder border )
+	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, CHudBoxBorder border )
 	{
-		AddHudBoxToTeam( pTeam, pszIdentifier, x, y, iWidth, iHeight, clr, border, -1, -1 );
+		AddHudBoxToTeam( pTeam, pszIdentifier, x, y, flWidth, flHeight, clr, border, -1, -1 );
 	}
 
-	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr )
+	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr )
 	{
-		AddHudBoxToTeam( pTeam, pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(), -1, -1 );
+		AddHudBoxToTeam( pTeam, pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(), -1, -1 );
 	}
-	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, float iAlignX )
+	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, float flAlignX )
 	{
-		AddHudBoxToTeam( pTeam, pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(), iAlignX, -1 );
+		AddHudBoxToTeam( pTeam, pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(), flAlignX, -1 );
 	}
-	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, float iAlignX, float iAlignY )
+	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, float flAlignX, float flAlignY )
 	{
-		AddHudBoxToTeam( pTeam, pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(), iAlignX, iAlignY );
+		AddHudBoxToTeam( pTeam, pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(), flAlignX, flAlignY );
 	}
 	
-	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, Color borderclr )
+	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, Color borderclr )
 	{
-		AddHudBoxToTeam( pTeam, pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(borderclr), -1, -1 );
+		AddHudBoxToTeam( pTeam, pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(borderclr), -1, -1 );
 	}
-	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, Color borderclr, float iAlignX )
+	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, Color borderclr, float flAlignX )
 	{
-		AddHudBoxToTeam( pTeam, pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(borderclr), iAlignX, -1 );
+		AddHudBoxToTeam( pTeam, pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(borderclr), flAlignX, -1 );
 	}
-	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, Color borderclr, float iAlignX, float iAlignY )
+	void AddHudBoxToTeam( CFFTeam *pTeam, const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, Color borderclr, float flAlignX, float flAlignY )
 	{
-		AddHudBoxToTeam( pTeam, pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(borderclr), iAlignX, iAlignY );
+		AddHudBoxToTeam( pTeam, pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(borderclr), flAlignX, flAlignY );
 	}
 
-	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, CHudBoxBorder border, float iAlignX, float iAlignY )
+	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, CHudBoxBorder border, float flAlignX, float flAlignY )
 	{
-		if( !pszIdentifier || ( iWidth < 0 ) || ( iHeight < 0 ) )
+		if( !pszIdentifier || ( flWidth < 0 ) || ( flHeight < 0 ) )
 			return;
 
 		// loop through each player
@@ -2047,43 +2047,43 @@ namespace FFLib
 			if (ent && ent->IsPlayer())
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
-				FF_LuaHudBox( pPlayer, pszIdentifier, x, y, iWidth, iHeight, clr, border.clr, border.width, iAlignX, iAlignY );
+				FF_LuaHudBox( pPlayer, pszIdentifier, x, y, flWidth, flHeight, clr, border.clr, border.width, flAlignX, flAlignY );
 			}
 		}
 	}
-	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, CHudBoxBorder border, float iAlignX )
+	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, CHudBoxBorder border, float flAlignX )
 	{
-		AddHudBoxToAll( pszIdentifier, x, y, iWidth, iHeight, clr, border, iAlignX, -1 );
+		AddHudBoxToAll( pszIdentifier, x, y, flWidth, flHeight, clr, border, flAlignX, -1 );
 	}
-	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, CHudBoxBorder border )
+	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, CHudBoxBorder border )
 	{
-		AddHudBoxToAll( pszIdentifier, x, y, iWidth, iHeight, clr, border, -1, -1 );
+		AddHudBoxToAll( pszIdentifier, x, y, flWidth, flHeight, clr, border, -1, -1 );
 	}
 
-	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr )
+	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr )
 	{
-		AddHudBoxToAll( pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(), -1, -1 );
+		AddHudBoxToAll( pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(), -1, -1 );
 	}
-	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, float iAlignX )
+	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, float flAlignX )
 	{
-		AddHudBoxToAll( pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(), iAlignX, -1 );
+		AddHudBoxToAll( pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(), flAlignX, -1 );
 	}
-	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, float iAlignX, float iAlignY )
+	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, float flAlignX, float flAlignY )
 	{
-		AddHudBoxToAll( pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(), iAlignX, iAlignY );
+		AddHudBoxToAll( pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(), flAlignX, flAlignY );
 	}
 	
-	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, Color borderclr )
+	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, Color borderclr )
 	{
-		AddHudBoxToAll( pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(borderclr, 1), -1, -1 );
+		AddHudBoxToAll( pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(borderclr, 1), -1, -1 );
 	}
-	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, Color borderclr, float iAlignX )
+	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, Color borderclr, float flAlignX )
 	{
-		AddHudBoxToAll( pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(borderclr, 1), iAlignX, -1 );
+		AddHudBoxToAll( pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(borderclr, 1), flAlignX, -1 );
 	}
-	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float iWidth, float iHeight, Color clr, Color borderclr, float iAlignX, float iAlignY )
+	void AddHudBoxToAll( const char *pszIdentifier, float x, float y, float flWidth, float flHeight, Color clr, Color borderclr, float flAlignX, float flAlignY )
 	{
-		AddHudBoxToAll( pszIdentifier, x, y, iWidth, iHeight, clr, CHudBoxBorder(borderclr, 1), iAlignX, iAlignY );
+		AddHudBoxToAll( pszIdentifier, x, y, flWidth, flHeight, clr, CHudBoxBorder(borderclr, 1), flAlignX, flAlignY );
 	}
 
 	void AddHudText( CFFPlayer *pPlayer, const char *pszIdentifier, const char *pszText, float x, float y )
@@ -2102,20 +2102,20 @@ namespace FFLib
 		FF_LuaHudText( pPlayer, pszIdentifier, x, y, pszText, iAlign );
 	}
 
-	void AddHudText( CFFPlayer *pPlayer, const char *pszIdentifier, const char *pszText, float x, float y, float iAlignX, float iAlignY )
+	void AddHudText( CFFPlayer *pPlayer, const char *pszIdentifier, const char *pszText, float x, float y, float flAlignX, float flAlignY )
 	{
 		if( !pPlayer || !pszIdentifier || !pszText )
 			return;
 
-		FF_LuaHudText( pPlayer, pszIdentifier, x, y, pszText, iAlignX, iAlignY );
+		FF_LuaHudText( pPlayer, pszIdentifier, x, y, pszText, flAlignX, flAlignY );
 	}
 	
-	void AddHudText( CFFPlayer *pPlayer, const char *pszIdentifier, const char *pszText, float x, float y, float iAlignX, float iAlignY, int iSize )
+	void AddHudText( CFFPlayer *pPlayer, const char *pszIdentifier, const char *pszText, float x, float y, float flAlignX, float flAlignY, int iSize )
 	{
 		if( !pPlayer || !pszIdentifier || !pszText )
 			return;
 
-		FF_LuaHudText( pPlayer, pszIdentifier, x, y, pszText, iAlignX, iAlignY, iSize );
+		FF_LuaHudText( pPlayer, pszIdentifier, x, y, pszText, flAlignX, flAlignY, iSize );
 	}
 
 	void AddHudTextToTeam( CFFTeam *pTeam, const char *pszIdentifier, const char *pszText, float x, float y )
@@ -2154,7 +2154,7 @@ namespace FFLib
 		}
 	}
 
-	void AddHudTextToTeam( CFFTeam *pTeam, const char *pszIdentifier, const char *pszText, float x, float y, float iAlignX, float iAlignY )
+	void AddHudTextToTeam( CFFTeam *pTeam, const char *pszIdentifier, const char *pszText, float x, float y, float flAlignX, float flAlignY )
 	{
 		if( !pszIdentifier || !pszText )
 			return;
@@ -2167,12 +2167,12 @@ namespace FFLib
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
 				if ( pPlayer->GetTeam()->GetTeamNumber() == pTeam->GetTeamNumber() )
-					FF_LuaHudText( pPlayer, pszIdentifier, x, y, pszText, iAlignX, iAlignY );
+					FF_LuaHudText( pPlayer, pszIdentifier, x, y, pszText, flAlignX, flAlignY );
 			}
 		}
 	}
 
-	void AddHudTextToTeam( CFFTeam *pTeam, const char *pszIdentifier, const char *pszText, float x, float y, float iAlignX, float iAlignY, int iSize )
+	void AddHudTextToTeam( CFFTeam *pTeam, const char *pszIdentifier, const char *pszText, float x, float y, float flAlignX, float flAlignY, int iSize )
 	{
 		if( !pszIdentifier || !pszText )
 			return;
@@ -2185,7 +2185,7 @@ namespace FFLib
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
 				if ( pPlayer->GetTeam()->GetTeamNumber() == pTeam->GetTeamNumber() )
-					FF_LuaHudText( pPlayer, pszIdentifier, x, y, pszText, iAlignX, iAlignY, iSize );
+					FF_LuaHudText( pPlayer, pszIdentifier, x, y, pszText, flAlignX, flAlignY, iSize );
 			}
 		}
 	}
@@ -2224,7 +2224,7 @@ namespace FFLib
 		}
 	}
 
-	void AddHudTextToAll( const char *pszIdentifier, const char *pszText, float x, float y, float iAlignX, float iAlignY )
+	void AddHudTextToAll( const char *pszIdentifier, const char *pszText, float x, float y, float flAlignX, float flAlignY )
 	{
 		if( !pszIdentifier || !pszText )
 			return;
@@ -2236,12 +2236,12 @@ namespace FFLib
 			if (ent && ent->IsPlayer())
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
-				FF_LuaHudText( pPlayer, pszIdentifier, x, y, pszText, iAlignX, iAlignY );
+				FF_LuaHudText( pPlayer, pszIdentifier, x, y, pszText, flAlignX, flAlignY );
 			}
 		}
 	}
 
-	void AddHudTextToAll( const char *pszIdentifier, const char *pszText, float x, float y, float iAlignX, float iAlignY, int iSize )
+	void AddHudTextToAll( const char *pszIdentifier, const char *pszText, float x, float y, float flAlignX, float flAlignY, int iSize )
 	{
 		if( !pszIdentifier || !pszText )
 			return;
@@ -2253,7 +2253,7 @@ namespace FFLib
 			if (ent && ent->IsPlayer())
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
-				FF_LuaHudText( pPlayer, pszIdentifier, x, y, pszText, iAlignX, iAlignY, iSize );
+				FF_LuaHudText( pPlayer, pszIdentifier, x, y, pszText, flAlignX, flAlignY, iSize );
 			}
 		}
 	}
@@ -2298,20 +2298,20 @@ namespace FFLib
 		FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, _timerman.GetTime( pszTimerIdentifier ), _timerman.GetIncrement( pszTimerIdentifier ), iAlign );
 	}
 	
-	void AddHudTimer( CFFPlayer *pPlayer, const char *pszIdentifier, const char *pszTimerIdentifier, float x, float y, float iAlignX, float iAlignY )
+	void AddHudTimer( CFFPlayer *pPlayer, const char *pszIdentifier, const char *pszTimerIdentifier, float x, float y, float flAlignX, float flAlignY )
 	{
 		if( !pPlayer || !pszIdentifier )
 			return;
 
-		FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, _timerman.GetTime( pszTimerIdentifier ), _timerman.GetIncrement( pszTimerIdentifier ), iAlignX, iAlignY );
+		FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, _timerman.GetTime( pszTimerIdentifier ), _timerman.GetIncrement( pszTimerIdentifier ), flAlignX, flAlignY );
 	}
 	
-	void AddHudTimer( CFFPlayer *pPlayer, const char *pszIdentifier, const char *pszTimerIdentifier, float x, float y, float iAlignX, float iAlignY, int iSize )
+	void AddHudTimer( CFFPlayer *pPlayer, const char *pszIdentifier, const char *pszTimerIdentifier, float x, float y, float flAlignX, float flAlignY, int iSize )
 	{
 		if( !pPlayer || !pszIdentifier )
 			return;
 
-		FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, _timerman.GetTime( pszTimerIdentifier ), _timerman.GetIncrement( pszTimerIdentifier ), iAlignX, iAlignY, iSize );
+		FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, _timerman.GetTime( pszTimerIdentifier ), _timerman.GetIncrement( pszTimerIdentifier ), flAlignX, flAlignY, iSize );
 	}
 
 	void AddHudTimer( CFFPlayer *pPlayer, const char *pszIdentifier, float flStartValue, float flSpeed, float x, float y )
@@ -2330,20 +2330,20 @@ namespace FFLib
 		FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, flStartValue, flSpeed, iAlign );
 	}
 
-	void AddHudTimer( CFFPlayer *pPlayer, const char *pszIdentifier, float flStartValue, float flSpeed, float x, float y, float iAlignX, float iAlignY )
+	void AddHudTimer( CFFPlayer *pPlayer, const char *pszIdentifier, float flStartValue, float flSpeed, float x, float y, float flAlignX, float flAlignY )
 	{
 		if( !pPlayer || !pszIdentifier )
 			return;
 
-		FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, flStartValue, flSpeed, iAlignX, iAlignY );
+		FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, flStartValue, flSpeed, flAlignX, flAlignY );
 	}
 	
-	void AddHudTimer( CFFPlayer *pPlayer, const char *pszIdentifier, float flStartValue, float flSpeed, float x, float y, float iAlignX, float iAlignY, int iSize )
+	void AddHudTimer( CFFPlayer *pPlayer, const char *pszIdentifier, float flStartValue, float flSpeed, float x, float y, float flAlignX, float flAlignY, int iSize )
 	{
 		if( !pPlayer || !pszIdentifier )
 			return;
 
-		FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, flStartValue, flSpeed, iAlignX, iAlignY, iSize );
+		FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, flStartValue, flSpeed, flAlignX, flAlignY, iSize );
 	}
 	
 	void AddHudTimerToTeam( CFFTeam *pTeam, const char *pszIdentifier, const char *pszTimerIdentifier, float x, float y )
@@ -2382,7 +2382,7 @@ namespace FFLib
 		}
 	}
 	
-	void AddHudTimerToTeam( CFFTeam *pTeam, const char *pszIdentifier, const char *pszTimerIdentifier, float x, float y, float iAlignX, float iAlignY )
+	void AddHudTimerToTeam( CFFTeam *pTeam, const char *pszIdentifier, const char *pszTimerIdentifier, float x, float y, float flAlignX, float flAlignY )
 	{
 		if( !pszIdentifier )
 			return;
@@ -2395,12 +2395,12 @@ namespace FFLib
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
 				if ( pPlayer->GetTeam()->GetTeamNumber() == pTeam->GetTeamNumber() )
-					FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, _timerman.GetTime( pszTimerIdentifier ), _timerman.GetIncrement( pszTimerIdentifier ), iAlignX, iAlignY );
+					FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, _timerman.GetTime( pszTimerIdentifier ), _timerman.GetIncrement( pszTimerIdentifier ), flAlignX, flAlignY );
 			}
 		}
 	}
 	
-	void AddHudTimerToTeam( CFFTeam *pTeam, const char *pszIdentifier, const char *pszTimerIdentifier, float x, float y, float iAlignX, float iAlignY, int iSize )
+	void AddHudTimerToTeam( CFFTeam *pTeam, const char *pszIdentifier, const char *pszTimerIdentifier, float x, float y, float flAlignX, float flAlignY, int iSize )
 	{
 		if( !pszIdentifier )
 			return;
@@ -2413,7 +2413,7 @@ namespace FFLib
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
 				if ( pPlayer->GetTeam()->GetTeamNumber() == pTeam->GetTeamNumber() )
-					FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, _timerman.GetTime( pszTimerIdentifier ), _timerman.GetIncrement( pszTimerIdentifier ), iAlignX, iAlignY, iSize );
+					FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, _timerman.GetTime( pszTimerIdentifier ), _timerman.GetIncrement( pszTimerIdentifier ), flAlignX, flAlignY, iSize );
 			}
 		}
 	}
@@ -2454,7 +2454,7 @@ namespace FFLib
 		}
 	}
 
-	void AddHudTimerToTeam( CFFTeam *pTeam, const char *pszIdentifier, float flStartValue, float flSpeed, float x, float y, float iAlignX, float iAlignY )
+	void AddHudTimerToTeam( CFFTeam *pTeam, const char *pszIdentifier, float flStartValue, float flSpeed, float x, float y, float flAlignX, float flAlignY )
 	{
 		if( !pszIdentifier )
 			return;
@@ -2467,12 +2467,12 @@ namespace FFLib
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
 				if ( pPlayer->GetTeam()->GetTeamNumber() == pTeam->GetTeamNumber() )
-					FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, flStartValue, flSpeed, iAlignX, iAlignY );
+					FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, flStartValue, flSpeed, flAlignX, flAlignY );
 			}
 		}
 	}
 	
-	void AddHudTimerToTeam( CFFTeam *pTeam, const char *pszIdentifier, float flStartValue, float flSpeed, float x, float y, float iAlignX, float iAlignY, int iSize )
+	void AddHudTimerToTeam( CFFTeam *pTeam, const char *pszIdentifier, float flStartValue, float flSpeed, float x, float y, float flAlignX, float flAlignY, int iSize )
 	{
 		if( !pszIdentifier )
 			return;
@@ -2485,7 +2485,7 @@ namespace FFLib
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
 				if ( pPlayer->GetTeam()->GetTeamNumber() == pTeam->GetTeamNumber() )
-					FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, flStartValue, flSpeed, iAlignX, iAlignY, iSize );
+					FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, flStartValue, flSpeed, flAlignX, flAlignY, iSize );
 			}
 		}
 	}
@@ -2524,7 +2524,7 @@ namespace FFLib
 		}
 	}
 	
-	void AddHudTimerToAll( const char *pszIdentifier, const char *pszTimerIdentifier, float x, float y, float iAlignX, float iAlignY )
+	void AddHudTimerToAll( const char *pszIdentifier, const char *pszTimerIdentifier, float x, float y, float flAlignX, float flAlignY )
 	{
 		if( !pszIdentifier )
 			return;
@@ -2536,12 +2536,12 @@ namespace FFLib
 			if (ent && ent->IsPlayer())
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
-				FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, _timerman.GetTime( pszTimerIdentifier ), _timerman.GetIncrement( pszTimerIdentifier ), iAlignX, iAlignY );
+				FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, _timerman.GetTime( pszTimerIdentifier ), _timerman.GetIncrement( pszTimerIdentifier ), flAlignX, flAlignY );
 			}
 		}
 	}
 	
-	void AddHudTimerToAll( const char *pszIdentifier, const char *pszTimerIdentifier, float x, float y, float iAlignX, float iAlignY, int iSize )
+	void AddHudTimerToAll( const char *pszIdentifier, const char *pszTimerIdentifier, float x, float y, float flAlignX, float flAlignY, int iSize )
 	{
 		if( !pszIdentifier )
 			return;
@@ -2553,7 +2553,7 @@ namespace FFLib
 			if (ent && ent->IsPlayer())
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
-				FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, _timerman.GetTime( pszTimerIdentifier ), _timerman.GetIncrement( pszTimerIdentifier ), iAlignX, iAlignY, iSize );
+				FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, _timerman.GetTime( pszTimerIdentifier ), _timerman.GetIncrement( pszTimerIdentifier ), flAlignX, flAlignY, iSize );
 			}
 		}
 	}
@@ -2592,7 +2592,7 @@ namespace FFLib
 		}
 	}
 
-	void AddHudTimerToAll( const char *pszIdentifier, float flStartValue, float flSpeed, float x, float y, float iAlignX, float iAlignY )
+	void AddHudTimerToAll( const char *pszIdentifier, float flStartValue, float flSpeed, float x, float y, float flAlignX, float flAlignY )
 	{
 		if( !pszIdentifier )
 			return;
@@ -2604,12 +2604,12 @@ namespace FFLib
 			if (ent && ent->IsPlayer())
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
-				FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, flStartValue, flSpeed, iAlignX, iAlignY );
+				FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, flStartValue, flSpeed, flAlignX, flAlignY );
 			}
 		}
 	}
 	
-	void AddHudTimerToAll( const char *pszIdentifier, float flStartValue, float flSpeed, float x, float y, float iAlignX, float iAlignY, int iSize )
+	void AddHudTimerToAll( const char *pszIdentifier, float flStartValue, float flSpeed, float x, float y, float flAlignX, float flAlignY, int iSize )
 	{
 		if( !pszIdentifier )
 			return;
@@ -2621,7 +2621,7 @@ namespace FFLib
 			if (ent && ent->IsPlayer())
 			{
 				CFFPlayer *pPlayer = ToFFPlayer( ent );
-				FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, flStartValue, flSpeed, iAlignX, iAlignY, iSize );
+				FF_LuaHudTimer( pPlayer, pszIdentifier, x, y, flStartValue, flSpeed, flAlignX, flAlignY, iSize );
 			}
 		}
 	}
