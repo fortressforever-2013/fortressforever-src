@@ -21,9 +21,17 @@
 IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponBaseClip, DT_FFWeaponBaseClip)
 
 BEGIN_NETWORK_TABLE(CFFWeaponBaseClip, DT_FFWeaponBaseClip)
+#ifdef CLIENT_DLL
+	RecvPropTime( RECVINFO( m_flReloadTime ) ),
+#else
+	SendPropTime( SENDINFO( m_flReloadTime ) ),
+#endif
 END_NETWORK_TABLE()
 
 BEGIN_PREDICTION_DATA(CFFWeaponBaseClip)
+#ifdef CLIENT_DLL
+	DEFINE_PRED_FIELD(m_flReloadTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
+#endif
 END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(weapon_ff_baseclip, CFFWeaponBaseClip);

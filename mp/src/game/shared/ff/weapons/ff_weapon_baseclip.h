@@ -38,7 +38,7 @@ public:
 
 	CFFWeaponBaseClip();
 
-	float m_flReloadTime;
+	CNetworkVar(float, m_flReloadTime);
 
 	// This is here for the pipe/gren launcher really
 	bool	m_fIsSwitching;
