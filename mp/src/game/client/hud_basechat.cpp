@@ -1349,13 +1349,13 @@ Color CBaseHudChat::GetTextColorForClient( TextColor colorNum, int clientIndex )
 			}
 			else
 			{
-				c = GetDefaultTextColor();
+				c = GetClientColor(clientIndex);
 			}
 		}
 		break;
 
 	default:
-		c = GetDefaultTextColor();
+		c = GetClientColor(clientIndex);
 	}
 
 	return Color( c[0], c[1], c[2], 255 );

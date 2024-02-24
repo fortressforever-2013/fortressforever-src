@@ -62,9 +62,6 @@ public:
 
 	virtual Color	GetClientColor(int clientIndex);
 
-	void			MsgFunc_SayText(bf_read& msg);
-	void			MsgFunc_TextMsg(bf_read& msg);
-
 	void			ChatPrintf(int iPlayerIndex, const char* fmt, ...);
 };
 
