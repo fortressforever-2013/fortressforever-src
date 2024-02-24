@@ -178,7 +178,15 @@ void CFFWeaponDeployDispenser::PrimaryAttack( void )
 
 #ifdef GAME_DLL
 		CFFPlayer *pPlayer = GetPlayerOwner();
-		pPlayer->Command_BuildDispenser();
+
+		if (pPlayer->GetDispenser() && pPlayer->GetDispenser()->IsBuilt())
+		{
+			engine->ClientCommand( pPlayer->edict(), "detdismantledispenser" );
+		}
+		else
+		{
+			pPlayer->Command_BuildDispenser();
+		}
 #endif
 	}
 }

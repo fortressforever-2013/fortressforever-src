@@ -731,6 +731,9 @@ void CFFPlayer::ClassSpecificSkill()
 			break;
 
 		case CLASS_ENGINEER:
+			engine->ClientCmd("aimsentry");
+			m_flNextClassSpecificSkill = gpGlobals->curtime + 0.1f; //ffdev_mancannon_commandtime.GetFloat();
+			break;
 		case CLASS_SPY:
 			// Bug #0001683: Can use engineer radial menu when dead.  This seems to put an end to it -> Defrag
 			if( IsAlive()  )
