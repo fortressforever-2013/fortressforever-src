@@ -306,9 +306,20 @@ void CFFWeaponLaserDot::SetLaserPosition(const Vector &origin)
 IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponSniperRifle, DT_FFWeaponSniperRifle) 
 
 BEGIN_NETWORK_TABLE(CFFWeaponSniperRifle, DT_FFWeaponSniperRifle) 
+#ifdef CLIENT_DLL
+	RecvPropTime(RECVINFO(m_flFireStartTime)),
+	RecvPropBool(RECVINFO(m_bInFire)),
+#else
+	SendPropTime(SENDINFO(m_flFireStartTime)),
+	SendPropBool(SENDINFO(m_bInFire)),
+#endif
 END_NETWORK_TABLE() 
 
 BEGIN_PREDICTION_DATA(CFFWeaponSniperRifle) 
+#ifdef CLIENT_DLL
+	DEFINE_PRED_FIELD(m_flFireStartTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
+	DEFINE_PRED_FIELD(m_bInFire, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
+#endif
 END_PREDICTION_DATA() 
 
 LINK_ENTITY_TO_CLASS(ff_weapon_sniperrifle, CFFWeaponSniperRifle);

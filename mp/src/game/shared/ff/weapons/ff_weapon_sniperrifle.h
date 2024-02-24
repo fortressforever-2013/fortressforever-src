@@ -132,7 +132,7 @@ public:
 
 private:
 	bool m_bZoomed;
-	bool m_bInFire;
+	CNetworkVar(bool, m_bInFire);
 
 	CFFWeaponSniperRifle(const CFFWeaponSniperRifle &);
 
@@ -143,7 +143,7 @@ private:
 	CHandle<CFFWeaponLaserDot>	m_hLaserDot;
 #endif
 
-	float m_flFireStartTime;
+	CNetworkVar(float, m_flFireStartTime);
 
 #ifdef CLIENT_DLL
 	float m_flZoomTime;
