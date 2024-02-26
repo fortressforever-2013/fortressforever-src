@@ -1149,7 +1149,7 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 
 				//hudChat->Printf(CHAT_FILTER_TEAMCHANGE, "Player %s joined team %s\n", pPlayer->GetPlayerName(), pszName);
 				// <-- Mirv: Team localisation fix. This might be more a fundamental issue with the limitations of Printf that needs sorting though
-				g_pVGuiLocalize->ConvertANSIToUnicode( pTeam->Get_Name(), wszTeam, sizeof(wszTeam) );
+				g_pVGuiLocalize->ConvertANSIToUnicode( pszName, wszTeam, sizeof(wszTeam) );
 			}
 			else
 			{

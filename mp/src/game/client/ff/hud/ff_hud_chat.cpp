@@ -157,8 +157,8 @@ void CHudChat::ApplySchemeSettings(vgui::IScheme* pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
 
-	SetBgColor(Color(0, 0, 0, 0));
-	SetFgColor(Color(0, 0, 0, 0));
+//	SetBgColor(Color(0, 0, 0, 0));
+//	SetFgColor(Color(0, 0, 0, 0));
 }
 
 

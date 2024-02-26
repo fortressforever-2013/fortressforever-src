@@ -1294,7 +1294,7 @@ void CBaseHudChat::FadeChatHistory( void )
 			if ( IsMouseInputEnabled() )
 			{
 				SetAlpha( 255 );
-				GetChatHistory()->SetBgColor( Color( 0, 0, 0, CHAT_HISTORY_ALPHA - alpha ) );
+				GetChatHistory()->SetBgColor( Color( GetBgColor().r() / 4, GetBgColor().g() / 4, GetBgColor().b() / 4, CHAT_HISTORY_ALPHA - alpha ) );
 				m_pChatInput->GetPrompt()->SetAlpha( (CHAT_HISTORY_ALPHA*2) - alpha );
 				m_pChatInput->GetInputPanel()->SetAlpha( (CHAT_HISTORY_ALPHA*2) - alpha );
 				SetBgColor( Color( GetBgColor().r(), GetBgColor().g(), GetBgColor().b(), CHAT_HISTORY_ALPHA - alpha ) );
@@ -1302,8 +1302,8 @@ void CBaseHudChat::FadeChatHistory( void )
 			}
 			else
 			{
-				GetChatHistory()->SetBgColor( Color( 0, 0, 0, alpha ) );
 				SetBgColor( Color( GetBgColor().r(), GetBgColor().g(), GetBgColor().b(), alpha ) );
+				GetChatHistory()->SetBgColor( Color( GetBgColor().r() / 4, GetBgColor().g() / 4, GetBgColor().b() / 4, alpha) );
 			
 				m_pChatInput->GetPrompt()->SetAlpha( alpha );
 				m_pChatInput->GetInputPanel()->SetAlpha( alpha );
@@ -1633,6 +1633,26 @@ This is a very long string that I am going to attempt to paste into the cs hud c
 
 		char szbuf[144];	// more than 128
 		Q_snprintf( szbuf, sizeof(szbuf), "%s \"%s\"", m_nMessageMode == MM_SAY ? "say" : "say_team", ansi );
+
+		C_FFPlayer* pPlayer = ToFFPlayer(C_BasePlayer::GetLocalPlayer());
+		if (pPlayer)
+		{
+			std::string strcmd = szbuf;
+			while (true)
+			{
+				size_t tok = strcmd.find("%i");
+				if (tok == strcmd.npos)
+					break;
+
+				strcmd.erase(tok, 2); // erase the token
+				if (pPlayer && pPlayer->m_hCrosshairInfo.m_szNameLastSeen[0])
+				{
+					strcmd.insert(tok, pPlayer->m_hCrosshairInfo.m_szNameLastSeen);
+				}
+
+				V_sprintf_safe(szbuf, "%s", strcmd.c_str());
+			}
+		}
 
 		engine->ClientCmd_Unrestricted(szbuf);
 	}

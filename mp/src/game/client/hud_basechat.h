@@ -36,7 +36,7 @@ namespace vgui
 #define CHAT_HISTORY_FADE_TIME 0.25f
 #define CHAT_HISTORY_IDLE_TIME 15.0f
 #define CHAT_HISTORY_IDLE_FADE_TIME 2.5f
-#define CHAT_HISTORY_ALPHA 127
+#define CHAT_HISTORY_ALPHA 115
 
 extern Color g_ColorBlue;
 extern Color g_ColorRed;
