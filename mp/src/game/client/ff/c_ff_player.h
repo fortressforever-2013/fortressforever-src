@@ -629,6 +629,7 @@ private:
 	//	void C_FFPlayer::GrenadeTimerExpired(C_FFTimer *pTimer);
 public:
 	CNetworkVar(float, m_flLastSpawnTime);
+	float GetNextCloak() { return m_flNextCloak; }
 };
 
 // Just straight up copying the server version. Tired

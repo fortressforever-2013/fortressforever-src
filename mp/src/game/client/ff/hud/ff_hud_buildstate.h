@@ -81,6 +81,7 @@ private:
 	wchar_t m_szDetpack[128];
 	wchar_t m_szPipes[128];
 	wchar_t m_szMedpacks[128];
+	wchar_t m_szCloak[128];
 
 	bool m_bDrawDispenser;
 	bool m_bDrawSentry;
@@ -88,6 +89,7 @@ private:
 	bool m_bDrawDetpack;
 	bool m_bDrawPipes;
 	bool m_bDrawMedpacks;
+	bool m_bDrawCloak;
 
 	int m_iHealthPerc, m_iAmmoPerc;
 	bool m_fNoRockets;
@@ -97,6 +99,7 @@ private:
 	int m_iNumPipes;
 	int m_iNumMedpacks;
 	float m_flMedpackRegenPercent;
+	float m_flCloakTimeLeft;
 
 	void MsgFunc_DispenserMsg(bf_read &msg);
 	void MsgFunc_SentryMsg(bf_read &msg);

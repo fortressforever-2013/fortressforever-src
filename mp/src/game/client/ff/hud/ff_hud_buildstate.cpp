@@ -108,7 +108,7 @@ void CHudBuildState::OnTick()
 	if (!pPlayer) 
 		return;
 
-	m_bDrawDispenser = m_bDrawSentry = m_bDrawManCannon = m_bDrawDetpack = m_bDrawPipes = m_bDrawMedpacks = false;
+	m_bDrawDispenser = m_bDrawSentry = m_bDrawManCannon = m_bDrawDetpack = m_bDrawPipes = m_bDrawMedpacks = m_bDrawCloak = false;
 	m_iSentryLevel = 0;
 
 	C_FFDispenser *pDispenser = pPlayer->GetDispenser();
@@ -140,6 +140,25 @@ void CHudBuildState::OnTick()
 	else
 	{
 		m_bDrawMedpacks = false;
+	}
+
+	if (pPlayer && pPlayer->GetClassSlot() == CLASS_SPY && !pPlayer->IsCloaked())
+	{
+		float flTime = pPlayer->GetNextCloak() - gpGlobals->curtime;
+		if( flTime > 0.0f )
+		{
+			m_bDrawCloak = true;
+			m_flCloakTimeLeft = flTime;
+		}
+		else
+		{
+			m_bDrawCloak = false;
+			m_flCloakTimeLeft = 0.0f;
+		}
+	}
+	else
+	{
+		m_bDrawCloak = false;
 	}
 }
 
@@ -205,7 +224,7 @@ void CHudBuildState::MsgFunc_PipeMsg(bf_read &msg)
 
 void CHudBuildState::Paint() 
 {
-	if (!m_bDrawDispenser && !m_bDrawSentry && !m_bDrawManCannon && !m_bDrawDetpack && !m_bDrawPipes && !m_bDrawMedpacks) 
+	if (!m_bDrawDispenser && !m_bDrawSentry && !m_bDrawManCannon && !m_bDrawDetpack && !m_bDrawPipes && !m_bDrawMedpacks && !m_bDrawCloak ) 
 		return;
 
 	// Draw icons
@@ -336,5 +355,15 @@ void CHudBuildState::Paint()
 			surface()->DrawSetColor( clr.r(), clr.g(), clr.b(), 200 );		
 			surface()->DrawOutlinedRect( iLeft, iTop, iRight, iBottom );
 		}
+	}
+
+	if (m_bDrawCloak)
+	{
+		surface()->DrawSetTextPos(text1_xpos, text1_ypos);
+
+		_snwprintf(m_szCloak, 127, L"Time Left: %.2f seconds", m_flCloakTimeLeft);
+
+		for (wchar_t* wch = m_szCloak; *wch != 0; wch++)
+			surface()->DrawUnicodeChar(*wch);
 	}
 }
