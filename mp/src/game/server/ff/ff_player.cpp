@@ -623,6 +623,7 @@ CFFPlayer::CFFPlayer()
 	m_recentAttackers.Purge();
 	//m_iStatsID = -1;
 	m_bRequireRePressBuildable = false;
+	m_bQueueDetonation = false;
 }
 
 CFFPlayer::~CFFPlayer()

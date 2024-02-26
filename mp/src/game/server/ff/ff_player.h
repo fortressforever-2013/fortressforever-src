@@ -1035,6 +1035,7 @@ public:
 	void RemoveMeFromKillAssists( );
 	bool m_bRequireRePressBuildable;
 	CNetworkVar(float, m_flLastSpawnTime);
+	bool m_bQueueDetonation;
 };
 
 inline CFFPlayer *ToFFPlayer( CBaseEntity *pEntity )

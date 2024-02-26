@@ -661,8 +661,7 @@ void CFFPlayer::ClassSpecificSkill()
 	{
 #ifdef GAME_DLL
 	case CLASS_DEMOMAN:
-		if( ( GetPipebombShotTime() + PIPE_DET_DELAY ) < gpGlobals->curtime )
-			CFFProjectilePipebomb::DestroyAllPipes(this);
+		m_bQueueDetonation = true;
 		break;
 
 	case CLASS_MEDIC:
@@ -1812,6 +1811,16 @@ void CFFPlayer::SharedPreThink( void )
 		ClassSpecificSkillHold();
 
 	JetpackRechargeThink();
+#ifdef GAME_DLL
+	if (m_bQueueDetonation)
+	{
+		if ((GetPipebombShotTime() + PIPE_DET_DELAY) < gpGlobals->curtime)
+		{
+			m_bQueueDetonation = false;
+			CFFProjectilePipebomb::DestroyAllPipes(this);
+		}
+	}
+#endif
 }
 
 //-----------------------------------------------------------------------------
