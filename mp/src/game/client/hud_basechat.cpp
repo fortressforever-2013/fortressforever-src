@@ -790,8 +790,8 @@ void CBaseHudChat::MsgFunc_SayText( bf_read &msg )
 		Printf( CHAT_FILTER_NONE, "%s", hudtextmessage->LookupString( szString ) );
 	}
 
-	CLocalPlayerFilter filter;
-	C_BaseEntity::EmitSound( filter, SOUND_FROM_LOCAL_PLAYER, "HudChat.Message" );
+	//CLocalPlayerFilter filter;
+	//C_BaseEntity::EmitSound( filter, SOUND_FROM_LOCAL_PLAYER, "HudChat.Message" );
 
 	Msg( "%s", szString );
 }
@@ -848,8 +848,8 @@ void CBaseHudChat::MsgFunc_SayText2( bf_read &msg )
 
 		Msg( "%s\n", RemoveColorMarkup(ansiString) );
 
-		CLocalPlayerFilter filter;
-		C_BaseEntity::EmitSound( filter, SOUND_FROM_LOCAL_PLAYER, "HudChat.Message" );
+		//CLocalPlayerFilter filter;
+		//C_BaseEntity::EmitSound( filter, SOUND_FROM_LOCAL_PLAYER, "HudChat.Message" );
 	}
 	else
 	{
@@ -1841,6 +1841,14 @@ void CBaseHudChat::ChatPrintf( int iPlayerIndex, int iFilter, const char *fmt, .
 
 			if ( nameInString )
 			{
+				// Go ahead and play the correct "chat beep" sound.
+				// These strings will be the same length if the "(TEAM)" prefix is missing
+				CLocalPlayerFilter filter;
+				if (strlen(pmsg) == wcslen(nameInString))
+					C_BaseEntity::EmitSound(filter, -1, "HudChat.Message");
+				else
+					C_BaseEntity::EmitSound(filter, -1, "HudChat.TeamMessage");
+
 				iNameStart = (nameInString - wbuf);
 				iNameLength = wcslen( wideName );
 			}
