@@ -1857,6 +1857,16 @@ public:
 	static CBasePlayer				*GetPredictionPlayer( void );
 	static void						SetPredictionPlayer( CBasePlayer *player );
 
+	// -- luabridge3 stuff to avoid const-correctness issues, added for the sake of existing scripts
+	
+	inline Vector LUA_GetAbsVelocity(void)	{ return GetAbsVelocity();	};
+	inline Vector LUA_GetAbsOrigin(void)	{ return GetAbsOrigin();	};
+	inline Vector LUA_WorldAlignMins(void)	{ return WorldAlignMins();	};
+	inline Vector LUA_WorldAlignMaxs(void)	{ return WorldAlignMaxs();	};
+	inline QAngle LUA_GetAbsAngles(void)	{ return GetAbsAngles();	};
+	inline Vector LUA_GetAbsFacing(void)	{ return GetAbsFacing();	};
+	
+	// -- luabridge3 stuff to avoid const-correctness issues, added for the sake of existing scripts
 
 	// For debugging shared code
 	static bool						IsServer( void )
