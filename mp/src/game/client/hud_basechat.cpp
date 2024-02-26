@@ -183,7 +183,15 @@ wchar_t* ReadChatTextString( bf_read &msg, OUT_Z_BYTECAP(outSizeInBytes) wchar_t
 	szString[0] = 0;
 	msg.ReadString( szString, sizeof(szString) );
 
-	g_pVGuiLocalize->ConvertANSIToUnicode( szString, pOut, outSizeInBytes );
+	const wchar_t* pBuf = g_pVGuiLocalize->Find(szString);
+	if ( pBuf )
+	{
+		V_wcsncpy( pOut, pBuf, outSizeInBytes );
+	}
+	else
+	{
+		g_pVGuiLocalize->ConvertANSIToUnicode( szString, pOut, outSizeInBytes );
+	}
 
 	StripEndNewlineFromString( pOut );
 
