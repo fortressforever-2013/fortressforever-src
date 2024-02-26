@@ -18,6 +18,7 @@
 
 #ifdef CLIENT_DLL
 	#include "c_ff_player.h"
+	#include <prediction.h>
 	#define CRecipientFilter C_RecipientFilter	// |-- For PlayJumpSound
 
 	extern void HudContextShow(bool visible);
@@ -1649,6 +1650,11 @@ void CFFPlayer::Overpressure( void )
 	{
 		return;
 	}
+
+#ifdef CLIENT_DLL
+	if( prediction->InPrediction() && !prediction->IsFirstTimePredicted() )
+		return;
+#endif
 
 	CEffectData data;
 	data.m_vOrigin = GetAbsOrigin();
