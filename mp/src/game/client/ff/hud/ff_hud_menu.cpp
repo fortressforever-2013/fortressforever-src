@@ -37,6 +37,7 @@
 
 #include "ff_hud_chat.h"
 #include <igameresources.h>
+#include <prediction.h>
 
 using namespace vgui;
 
@@ -50,7 +51,7 @@ ConVar cm_capturemouse("cl_cmcapture", "1", FCVAR_ARCHIVE, "Context menu capture
 ConVar cm_hidecursor("cl_cmhidecursor", "0", FCVAR_ARCHIVE, "Show mouse cursor");
 ConVar cm_size("cl_cmsize", "120", FCVAR_ARCHIVE, "Size of context radial menu");
 ConVar cm_bounds("cl_cmbounds", "120", FCVAR_ARCHIVE, "Bounds of the context radial menu");
-ConVar cm_progresstime("cl_cmprogresstime", "0.7", FCVAR_ARCHIVE, "Time to wait for menu progress");
+ConVar cm_progresstime("cl_cmprogresstime", "0.3", FCVAR_ARCHIVE, "Time to wait for menu progress");
 ConVar cm_squash("cl_cmsquash", "0.7", FCVAR_ARCHIVE, "");
 ConVar cm_highlightdistance("cl_cmhighlightdistance", "50", FCVAR_ARCHIVE, "Distance for an option to highlight");
 ConVar cm_waitforrelease("cl_cmwaitforrelease", "1", FCVAR_ARCHIVE, "Menu waits for mouse release before selection");
@@ -543,16 +544,19 @@ void CHudContextMenu::Display(bool state)
 		if (m_iSelected >= 0)
 		{
 			// Make sure this is a valid button (i.e. not disabled)
-			if (m_pMenu->options[m_iSelected].conditionfunc && m_pMenu->options[m_iSelected].conditionfunc() == MENU_SHOW)
+			if (m_flLastCommand + 0.1f <= gpGlobals->curtime && m_pMenu->options[m_iSelected].conditionfunc && m_pMenu->options[m_iSelected].conditionfunc() == MENU_SHOW)
 			{
 				pPlayer->EmitSound("ContextMenu.Select");
 				DoCommand(m_pMenu->options[m_iSelected].szCommand);
+				m_flLastCommand = gpGlobals->curtime;
 			}
 		}
 		// If this menu has a default command and the user exited within the default action time then run the command
-		else if (m_flMenuStart + cm_defaultactiontime.GetFloat() > gpGlobals->curtime && m_pMenu->default_cmd)
+		else if (m_flLastCommand + 0.1f <= gpGlobals->curtime && m_flMenuStart + cm_defaultactiontime.GetFloat() > gpGlobals->curtime && m_pMenu->default_cmd)
+		{
+			m_flLastCommand = gpGlobals->curtime;
 			engine->ClientCmd(m_pMenu->default_cmd);
-
+		}
 		else
 			pPlayer->EmitSound("ContextMenu.Close");
 
@@ -888,6 +892,9 @@ void HudContextMenuInput(float *x, float *y)
 void HudContextShow(bool visible) 
 {
 	if (!g_pHudContextMenu) 
+		return;
+
+	if (prediction->InPrediction() && !prediction->IsFirstTimePredicted())
 		return;
 
 	if (visible)

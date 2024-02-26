@@ -74,7 +74,7 @@ private:
 	// Progress
 	float	m_flSelectStart;
 	float	m_flMenuStart;
-
+	float	m_flLastCommand;
 	bool	m_fVisible;
 
 	menu_t	*m_pMenu;
