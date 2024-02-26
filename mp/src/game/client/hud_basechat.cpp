@@ -77,9 +77,24 @@ char* RemoveColorMarkup( char *str )
 				{
 					--in;
 				}
-			}
 
-			continue;
+				continue;
+			}
+			else if (*in == '^')
+			{
+				if (*(in + 1) >= '0' && *(in + 1) <= '9')
+				{
+					++in;
+
+					// if we reached the end of the string first, then back up
+					if (*in == 0)
+					{
+						--in;
+					}
+
+					continue;
+				}
+			}
 		}
 		*out = *in;
 		++out;
@@ -1349,13 +1364,13 @@ Color CBaseHudChat::GetTextColorForClient( TextColor colorNum, int clientIndex )
 			}
 			else
 			{
-				c = GetClientColor(clientIndex);
+				c = GetDefaultTextColor();
 			}
 		}
 		break;
 
 	default:
-		c = GetClientColor(clientIndex);
+		c = GetDefaultTextColor();
 	}
 
 	return Color( c[0], c[1], c[2], 255 );
@@ -1411,7 +1426,7 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 	wchar_t *txt = m_text;
 	int lineLen = wcslen( m_text );
 	Color colCustom;
-	if ( m_text[0] == COLOR_PLAYERNAME || m_text[0] == COLOR_LOCATION || m_text[0] == COLOR_NORMAL || m_text[0] == COLOR_ACHIEVEMENT || m_text[0] == COLOR_CUSTOM || m_text[0] == COLOR_HEXCODE || m_text[0] == COLOR_HEXCODE_ALPHA )
+	if ( m_text[0] == COLOR_PLAYERNAME || m_text[0] == COLOR_LOCATION || m_text[0] == COLOR_NORMAL || m_text[0] == COLOR_ACHIEVEMENT || m_text[0] == COLOR_CUSTOM || m_text[0] == COLOR_HEXCODE || m_text[0] == COLOR_HEXCODE_ALPHA)
 	{
 		while ( txt && *txt )
 		{
@@ -1470,6 +1485,53 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 					}
 				}
 				break;
+			case '^':
+			{
+				range.start = nBytesIn + 2;
+				range.end = lineLen;
+				++txt;
+
+				if (range.end > range.start)
+				{
+					Color col;
+					switch (txt[0])
+					{
+						case '0': // orange
+							col = Color( 226, 118, 10, 255 ); break;
+						case '1': // blue
+							col = Color(60, 60, 255, 255); break;
+						case '2': // red
+							col = Color(255, 60, 60, 255); break;
+						case '3': // yellow
+							col = Color(248, 248, 0, 255); break;
+						case '4': // green
+							col = Color(40, 245, 40, 255); break;
+						case '5': // white
+							col = Color(255, 255, 255, 255); break;
+						case '6': // black
+							col = Color(20, 20, 20, 255); break;
+						case '7': // grey
+							col = Color(188, 188, 188, 255); break;
+						case '8': // magenta
+							col = Color(139, 45, 139, 255); break;
+						case '9': // cyan
+							col = Color(0, 255, 255, 255); break;
+					}
+
+					if (col != Color())
+					{
+						range.color = col;
+						bFoundColorCode = true;
+					}
+					txt++;
+				}
+				else
+				{
+					// Not enough characters remaining for a hex code. Skip the rest of the string.
+					bDone = true;
+				}
+				break;
+			}
 			default:
 				++txt;
 			}
@@ -1844,7 +1906,7 @@ void CBaseHudChat::ChatPrintf( int iPlayerIndex, int iFilter, const char *fmt, .
 				// Go ahead and play the correct "chat beep" sound.
 				// These strings will be the same length if the "(TEAM)" prefix is missing
 				CLocalPlayerFilter filter;
-				if (strlen(pmsg) == wcslen(nameInString))
+				if (strlen(pmsg + 1) == wcslen(nameInString))
 					C_BaseEntity::EmitSound(filter, -1, "HudChat.Message");
 				else
 					C_BaseEntity::EmitSound(filter, -1, "HudChat.TeamMessage");

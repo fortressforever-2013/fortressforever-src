@@ -195,6 +195,8 @@ public:
 	void SetRoundStart( float flStartTime ) { m_flRoundStarted = flStartTime; }
 
 	virtual bool IsConnectedUserInfoChangeAllowed(CBasePlayer* pPlayer);
+
+	virtual const char* GetChatFormat(bool bTeamOnly, CBasePlayer* pPlayer);
 };
 
 //-----------------------------------------------------------------------------

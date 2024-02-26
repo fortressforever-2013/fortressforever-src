@@ -2275,3 +2275,40 @@ bool CFFGameRules::IsConnectedUserInfoChangeAllowed( CBasePlayer* pPlayer )
 
 	return false;
 }
+
+const char *CFFGameRules::GetChatFormat( bool bTeamOnly, CBasePlayer *pPlayer )
+{
+	// Dedicated server output.
+	if ( !pPlayer )
+		return NULL;
+
+	CFFPlayer *pFFPlayer = static_cast<CFFPlayer*>( pPlayer );
+
+	const char *pszFormat = NULL;
+
+	// Team only.
+	if ( bTeamOnly )
+	{
+		if ( pFFPlayer->GetTeamNumber() == TEAM_SPECTATOR )
+		{
+			pszFormat = "FF_Chat_Spec";
+		}
+		else
+		{
+			pszFormat = "FF_Chat_Team";
+		}
+	}
+	else
+	{	
+		if ( pFFPlayer->GetTeamNumber() == TEAM_SPECTATOR )
+		{
+			pszFormat = "FF_Chat_AllSpec";	
+		}
+		else
+		{
+			pszFormat = "FF_Chat_All";	
+		}
+	}
+
+	return pszFormat;
+}
