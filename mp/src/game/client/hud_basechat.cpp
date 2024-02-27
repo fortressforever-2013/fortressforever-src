@@ -183,15 +183,31 @@ wchar_t* ReadChatTextString( bf_read &msg, OUT_Z_BYTECAP(outSizeInBytes) wchar_t
 	szString[0] = 0;
 	msg.ReadString( szString, sizeof(szString) );
 
-	const wchar_t* pBuf = g_pVGuiLocalize->Find(szString);
-	if ( pBuf )
+	// this seems pretty hackish to me
+	// but at least it fixes the localization
+	// ---
+	wchar_t translated[512];
+	wchar_t temp[512];
+
+	memset(translated, 0, sizeof(translated));
+	memset(temp, 0, sizeof(temp));
+
+	const char* token = strtok(szString, " ");
+	while (token != NULL)
 	{
-		V_wcsncpy( pOut, pBuf, outSizeInBytes );
+		wchar_t *pBuf = g_pVGuiLocalize->Find(token);
+
+		if (!pBuf)
+			g_pVGuiLocalize->ConvertANSIToUnicode(token, temp, outSizeInBytes);
+
+		V_wcsncat(translated, (pBuf ? pBuf : temp), outSizeInBytes);
+		V_wcsncat(translated, L" ", outSizeInBytes);
+
+		token = strtok(NULL, " ");
 	}
-	else
-	{
-		g_pVGuiLocalize->ConvertANSIToUnicode( szString, pOut, outSizeInBytes );
-	}
+
+	V_wcsncpy(pOut, translated, outSizeInBytes);
+	// ---
 
 	StripEndNewlineFromString( pOut );
 
