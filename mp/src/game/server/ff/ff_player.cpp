@@ -41,6 +41,7 @@
 // added these so I could cast to check for grenades that are not derived from projectile base
 // Could probably do it more cleanly but I just went with what was already in place.  -> Defrag
 #include "ff_grenade_napalmlet.h"
+#include "dt_common.h"
 
 // Lua includes
 extern "C"
@@ -420,6 +421,8 @@ END_SEND_TABLE( )
 BEGIN_SEND_TABLE_NOBASE( CFFPlayer, DT_FFNonLocalPlayerExclusive )
 END_SEND_TABLE()
 
+#undef offsetof
+#define offsetof(s,m)	(size_t)&(((s *)0)->m)
 IMPLEMENT_SERVERCLASS_ST( CFFPlayer, DT_FFPlayer )
 	SendPropExclude( "DT_BaseAnimating", "m_flPoseParameter" ),
 	SendPropExclude( "DT_BaseAnimating", "m_flPlaybackRate" ),	
@@ -447,9 +450,8 @@ IMPLEMENT_SERVERCLASS_ST( CFFPlayer, DT_FFPlayer )
 	// Data that only gets sent to the player as well as observers of the player
 	SendPropDataTable( "ffplayerobserverdata", 0, &REFERENCE_SEND_TABLE(DT_FFPlayerObserver), SendProxy_OnlyToObservers ),
 
-//	AZZY--TODO
-//	SendPropAngle( SENDINFO_VECTORELEM(m_angEyeAngles, 0), 11 ),
-//	SendPropAngle( SENDINFO_VECTORELEM(m_angEyeAngles, 1), 11 ),
+	SendPropFloat( SENDINFO_VECTORELEM( m_angEyeAngles, 0 ), 16, SPROP_CHANGES_OFTEN, -90.0f, 90.0f ),
+	SendPropAngle( SENDINFO_VECTORELEM( m_angEyeAngles, 1 ), 16, SPROP_CHANGES_OFTEN ),
 	SendPropEHandle( SENDINFO( m_hRagdoll ) ),
 
 	SendPropInt( SENDINFO( m_iClassStatus ), 4, SPROP_UNSIGNED ),   // AfterShock: this only uses the last hex digit i.e. 0x0000000F

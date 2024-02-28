@@ -51,13 +51,6 @@
 #include "history_resource.h" // squeek: For adding grens to the ammo pickups on the right
 #include "ff_mathackman.h" // squeek: For mathack manager update in ClientThink
 
-extern CFFDiscordManager _discord;
-
-#ifdef LINUX
-#undef offsetof
-#define offsetof(s,m)	(size_t)&(((s *)0)->m)
-#endif
-
 #if defined( CFFPlayer )
 #undef CFFPlayer
 #endif
@@ -177,7 +170,7 @@ extern void HudContextForceClose();
 // #0000331: impulse 81 not working (weapon_cubemap)
 #include "../c_weapon__stubs.h"
 #include "ff_weapon_base.h"
-#include "valve_minmax_on.h"
+
 STUB_WEAPON_CLASS(weapon_cubemap, WeaponCubemap, C_BaseCombatWeapon);
 
 
