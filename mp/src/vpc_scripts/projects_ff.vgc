@@ -137,5 +137,5 @@ $Project "togl"
 // FF's life, LUA
 $Project "lua"
 {
-	"lib\thirdparty\lua-5.1.5\lua-5.1.5.vpc" [$WIN32||$X360||$POSIX]
+	"thirdparty\lua-5.1.5\lua-5.1.5.vpc" [$WIN32||$X360||$POSIX]
 }

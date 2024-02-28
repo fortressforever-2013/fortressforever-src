@@ -11,13 +11,13 @@ $Macro GAMENAME 	"FortressForever2013" [$SOURCESDK] // TEMP!!
 $Include "$SRCDIR\game\client\client_base.vpc"
 $Include "$SRCDIR\game\shared\ff\ff_shared.vpc"
 
-$Macro LIBTHIRDPARTY	"$SRCDIR\lib\thirdparty"
+$Macro THIRDPARTY	"$SRCDIR\thirdparty"
 
 $Configuration
 {
 	$Compiler
 	{
-		$AdditionalIncludeDirectories		"$BASE;..\..\lib\thirdparty\discord-rpc\include,..\shared\ff\grenades,..\shared\ff\projectiles,..\shared\ff\weapons,..\shared\ff,.\ff\fx,.\ff\vgui\fortressoptions,.\ff\vgui,.\ff\hud\ui,.\ff\hud,.\ff"
+		$AdditionalIncludeDirectories		"$BASE;$THIRDPARTY\discord-rpc\include,..\shared\ff\grenades,..\shared\ff\projectiles,..\shared\ff\weapons,..\shared\ff,.\ff\fx,.\ff\vgui\fortressoptions,.\ff\vgui,.\ff\hud\ui,.\ff\hud,.\ff"
 		$PreprocessorDefinitions			"$BASE;FF;FF_CLIENT_DLL;SDK2013CE"
 		
 		$AdditionalOptions					"$BASE /std:c++17"
@@ -25,7 +25,7 @@ $Configuration
 	
 	$Linker
 	{
-		$AdditionalLibraryDirectories		"$LIBTHIRDPARTY\discord-rpc\lib;$BASE"
+		$AdditionalLibraryDirectories		"$THIRDPARTY\discord-rpc\lib;$BASE"
 		$AdditionalDependencies				"discord-rpc.lib$BASE" // $BASE already includes a trailing semi-colon on its left side
 	}
 }

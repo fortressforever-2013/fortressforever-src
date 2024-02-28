@@ -1,6 +1,6 @@
 // lua project script
 
-$Macro SRCDIR		"..\..\.."
+$Macro SRCDIR		"..\.."
 
 $Include "$SRCDIR\vpc_scripts\source_lib_base.vpc"	// this for static lib
 
