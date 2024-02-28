@@ -4,24 +4,6 @@ $Macro SRCDIR		"..\.."
 
 $Include "$SRCDIR\vpc_scripts\source_lib_base.vpc"	// this for static lib
 
-$Configuration	"Debug"
-{
-	$General
-	{
-		$OutputDirectory			".\Debug"
-		$IntermediateDirectory		".\Debug"
-	}
-}
-
-$Configuration	"Release"
-{
-	$General
-	{
-		$OutputDirectory			".\Release"
-		$IntermediateDirectory		".\Release"
-	}
-}
-
 $Configuration
 {
 	$Compiler
@@ -35,15 +17,6 @@ $Configuration
 		$PreprocessorDefinitions		"$BASE;_CRT_SECURE_NO_WARNINGS;LUA_OPNAMES"
 		
 		$AdditionalOptions				"$BASE /std:c++17"
-	}
-
-	$Librarian
-	{
-		$OutputFile							".\lib\lua.lib"
-		// Suppress this warning using the undocumented /ignore linker switch
-		// schemalib.lib(schemaclassinfo.obj) : warning LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
-		$AdditionalOptions					"$BASE /ignore:4221"
-		$IgnoreAllDefaultLibraries			"Yes (/NODEFAULTLIB)"
 	}
 }
 

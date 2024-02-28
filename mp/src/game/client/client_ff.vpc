@@ -22,12 +22,6 @@ $Configuration
 		
 		$AdditionalOptions					"$BASE /std:c++17"
 	}
-	
-	$Linker
-	{
-		$AdditionalLibraryDirectories		"$THIRDPARTY\discord-rpc\lib;$BASE"
-		$AdditionalDependencies				"discord-rpc.lib$BASE" // $BASE already includes a trailing semi-colon on its left side
-	}
 }
 
 $Project "Client (FF)"
@@ -245,5 +239,11 @@ $Project "Client (FF)"
 		$File "$SRCDIR\game\client\ff\ProxySlowfield.cpp"
 		$File "$SRCDIR\game\client\ff\ProxyTeam.cpp"
 
+	}
+
+	$Folder	"Link Libraries"
+	{
+		$ImpLib			"$LIBPUBLIC\discord-rpc"	[$WIN32]
+        $Lib                    libdiscord-rpc	   [$LINUX]
 	}
 }
