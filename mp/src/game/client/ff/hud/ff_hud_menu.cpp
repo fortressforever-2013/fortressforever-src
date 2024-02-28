@@ -544,17 +544,17 @@ void CHudContextMenu::Display(bool state)
 		if (m_iSelected >= 0)
 		{
 			// Make sure this is a valid button (i.e. not disabled)
-			if (m_flLastCommand + 0.1f <= gpGlobals->curtime && m_pMenu->options[m_iSelected].conditionfunc && m_pMenu->options[m_iSelected].conditionfunc() == MENU_SHOW)
+			if (m_flLastCommand <= gpGlobals->curtime && m_pMenu->options[m_iSelected].conditionfunc && m_pMenu->options[m_iSelected].conditionfunc() == MENU_SHOW)
 			{
 				pPlayer->EmitSound("ContextMenu.Select");
 				DoCommand(m_pMenu->options[m_iSelected].szCommand);
-				m_flLastCommand = gpGlobals->curtime;
+				m_flLastCommand = gpGlobals->curtime + 0.1f;
 			}
 		}
 		// If this menu has a default command and the user exited within the default action time then run the command
-		else if (m_flLastCommand + 0.1f <= gpGlobals->curtime && m_flMenuStart + cm_defaultactiontime.GetFloat() > gpGlobals->curtime && m_pMenu->default_cmd)
+		else if (m_flLastCommand <= gpGlobals->curtime && m_flMenuStart + cm_defaultactiontime.GetFloat() > gpGlobals->curtime && m_pMenu->default_cmd)
 		{
-			m_flLastCommand = gpGlobals->curtime;
+			m_flLastCommand = gpGlobals->curtime + 0.1f;
 			engine->ClientCmd(m_pMenu->default_cmd);
 		}
 		else

@@ -93,6 +93,7 @@ public:
 	CHudContextMenu(const char *pElementName) : CHudElement(pElementName), vgui::Panel(NULL, "HudRadialMenu") 
 	{
 		SetParent(g_pClientMode->GetViewport());
+		m_flLastCommand = 0.0f;
 		SetHiddenBits(HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED);
 	}
 
