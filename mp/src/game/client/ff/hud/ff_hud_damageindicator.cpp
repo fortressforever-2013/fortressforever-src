@@ -21,7 +21,7 @@
 #include "materialsystem/imaterialvar.h"
 #include "ieffects.h"
 #include "hudelement.h"
-#include "ClientEffectPrecacheSystem.h"
+#include "clienteffectprecachesystem.h"
 
 using namespace vgui;
 

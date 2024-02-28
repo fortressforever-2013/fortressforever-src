@@ -14,7 +14,7 @@
 #include "particle_prototype.h"
 #include "particle_util.h"
 #include "baseparticleentity.h"
-#include "ClientEffectPrecacheSystem.h"
+#include "clienteffectprecachesystem.h"
 #include "c_ff_player.h"
 #include "c_ff_env_flamejet.h"
 #include "iinput.h"

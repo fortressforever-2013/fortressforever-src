@@ -14,7 +14,7 @@
 #include <utlqueue.h> // a vector based queue template to manage our VGUI menu queue
 #include <vgui_controls/Frame.h>
 #include "vguitextwindow.h"
-#include "vgui/isurface.h"
+#include "vgui/ISurface.h"
 #include "commandmenu.h"
 #include <igameevents.h>
 

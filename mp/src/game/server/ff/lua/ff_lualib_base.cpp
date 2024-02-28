@@ -7,7 +7,7 @@
 // includes
 #include "cbase.h"
 #include "ff_lualib.h"
-#include "EntityList.h"
+#include "entitylist.h"
 #include "ff_item_flag.h"
 #include "ff_triggerclip.h"
 #include "ff_projectile_base.h"

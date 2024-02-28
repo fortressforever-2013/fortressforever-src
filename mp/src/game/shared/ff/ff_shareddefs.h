@@ -11,9 +11,9 @@
 #endif
 
 #ifdef CLIENT_DLL
-	#include "materialsystem/IMaterialSystem.h"
-	#include "materialsystem/IMesh.h"
-	#include "ClientEffectPrecacheSystem.h"
+	#include "materialsystem/imaterialsystem.h"
+	#include "materialsystem/imesh.h"
+	#include "clienteffectprecachesystem.h"
 	#include "view_scene.h"
 #endif
 
