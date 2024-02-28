@@ -16,7 +16,7 @@
 #include "hudelement.h"
 
 #include <vgui/ISurface.h>
-#include <vgui/IVGUI.h>
+#include <vgui/IVGui.h>
 
 #include "ff_panel.h"
 #include "c_ff_player.h"

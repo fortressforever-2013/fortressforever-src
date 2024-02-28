@@ -30,7 +30,7 @@
 #include <KeyValues.h>
 #include <vgui/Cursor.h>
 #include <vgui/IScheme.h>
-#include <vgui/IVGUI.h>
+#include <vgui/IVGui.h>
 #include <vgui/ILocalize.h>
 #include <vgui/VGUI.h>
 
@@ -40,7 +40,7 @@
 
 // viewport definitions
 #include <baseviewport.h>
-#include "FFViewport.h"
+#include "ffviewport.h"
 
 #include "vguicenterprint.h"
 #include "text_message.h"

@@ -152,7 +152,7 @@
 #endif
 
 // BEG: Added by Mulchman for team menu at level start up
-#include <game\client\iviewport.h>
+#include "../public/game/client/iviewport.h"
 // END: Added by Mulchman for team menu at level start up
 
 // <-- FF

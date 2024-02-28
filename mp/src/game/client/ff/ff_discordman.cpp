@@ -1,6 +1,5 @@
 // ff_discordman.cpp
 // rewrote entirely in SDK2013
-
 #include "cbase.h"
 #include "ff_discordman.h"
 
@@ -8,9 +7,11 @@
 #include "c_ff_team.h"
 #include "ff_gamerules.h"
 
+#include "valve_minmax_off.h"
 #include <time.h>
 #include <sstream>
 #include <string>
+#include "valve_minmax_on.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -118,7 +119,7 @@ void CFFDiscordManager::Reset()
 
 void CFFDiscordManager::LevelPreInit(const char* mapname)
 {
-	strncpy_s(m_szCurrentMap, mapname, MAX_MAP_NAME);
+	strncpy(m_szCurrentMap, mapname, MAX_MAP_NAME);
 
 	DiscordRichPresence discordPresence;
 	memset(&discordPresence, 0, sizeof(discordPresence));
@@ -132,7 +133,7 @@ void CFFDiscordManager::LevelPreInit(const char* mapname)
 
 void CFFDiscordManager::LevelInit(const char* mapname)
 {
-	strncpy_s(m_szCurrentMap, mapname, MAX_MAP_NAME);
+	strncpy(m_szCurrentMap, mapname, MAX_MAP_NAME);
 
 	DiscordRichPresence discordPresence;
 	memset(&discordPresence, 0, sizeof(discordPresence));
@@ -199,7 +200,8 @@ void CFFDiscordManager::UpdateGameData()
 	const char* actualTeamScores = scoresString.c_str();
 
 	sprintf(stateStr, "Map: %s (%i/%i)", m_szCurrentMap, curPlayers, maxPlayers);
-	strcpy_s(detailsStr, 128, actualTeamScores);
+	strncpy(detailsStr, actualTeamScores, 128);
+	detailsStr[127] = '\0';
 
 	discordPresence.state = stateStr;
 	discordPresence.details = detailsStr;

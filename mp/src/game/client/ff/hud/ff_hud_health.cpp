@@ -19,7 +19,7 @@
 
 #include <KeyValues.h>
 #include <vgui/ISurface.h>
-#include <vgui/IVGUI.h>
+#include <vgui/IVGui.h>
 #include <vgui_controls/AnimationController.h>
 
 #include <vgui/ILocalize.h>
@@ -29,7 +29,7 @@ using namespace vgui;
 #include "hudelement.h"
 #include "hud_numericdisplay.h"
 
-#include "ConVar.h"
+#include "convar.h"
 
 #include "c_ff_player.h"
 #include "ff_utils.h"

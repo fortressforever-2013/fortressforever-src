@@ -12,7 +12,7 @@
 #include <icvar.h>
 #include <filesystem.h>
 
-#include "CommandMenu.h"
+#include "commandmenu.h"
 #include "vgui_controls/MenuItem.h"
 
 // memdbgon must be the last include file in a .cpp file!!!

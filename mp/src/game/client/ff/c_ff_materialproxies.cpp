@@ -21,9 +21,9 @@
 #include "cbase.h"
 #include "c_ff_materialproxies.h"
 #include <KeyValues.h>
-#include "materialsystem/IMaterialVar.h"
-#include "materialsystem/IMaterial.h"
-#include "IClientRenderable.h"
+#include "materialsystem/imaterialvar.h"
+#include "materialsystem/imaterial.h"
+#include "iclientrenderable.h"
 #include "ff_shareddefs.h"
 
 #include "ff_buildableobjects_shared.h"

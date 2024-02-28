@@ -8,7 +8,9 @@
 #include "cbase.h"
 #include "hud_basechat.h"
 
+#include "valve_minmax_off.h"
 #include <string>
+#include "valve_minmax_on.h"
 #include <vgui/IScheme.h>
 #include <vgui/IVGui.h>
 #include "iclientmode.h"

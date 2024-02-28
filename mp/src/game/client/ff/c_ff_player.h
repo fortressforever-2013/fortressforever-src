@@ -358,7 +358,7 @@ private:
 
 private:
 	// ---> FF movecode stuff (billdoor)
-	friend CFFGameMovement;
+//	friend CFFGameMovement;
 	void StartSkiing(void) { if (m_iSkiState == 0) m_iSkiState = 1; m_iLocalSkiState = 1; };
 	void StopSkiing(void) { if (m_iSkiState == 1) m_iSkiState = 0; m_iLocalSkiState = 0; };
 	int GetSkiState(void) { return m_iSkiState.Get(); };

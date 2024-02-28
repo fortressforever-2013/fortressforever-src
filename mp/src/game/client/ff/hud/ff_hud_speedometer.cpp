@@ -230,7 +230,7 @@ void CHudSpeedometer::Paint()
 		surface()->DrawSetTextColor( m_TextColor );
 
 		wchar_t textunicode[12];
-		swprintf(textunicode, L"Average: ");
+		swprintf(textunicode, L"Average: ", L"");
 
 		for( wchar_t *wch = textunicode; *wch != 0; wch++ )
 			surface()->DrawUnicodeChar( *wch );

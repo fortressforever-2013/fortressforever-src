@@ -46,6 +46,8 @@ extern ConVar v_viewmodel_fov;
 
 IClientMode *g_pClientMode = NULL;
 
+extern CFFDiscordManager _discord;
+
 // --------------------------------------------------------------------------------- //
 // CFFModeManager.
 // --------------------------------------------------------------------------------- //
@@ -68,6 +70,7 @@ IVModeManager *modemanager = ( IVModeManager * )&g_ModeManager;
 // --------------------------------------------------------------------------------- //
 
 #define SCREEN_FILE		"scripts/vgui_screens.txt"
+extern CFFDiscordManager _discord;
 
 void CFFModeManager::Init()
 {

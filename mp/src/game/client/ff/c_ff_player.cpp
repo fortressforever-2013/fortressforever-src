@@ -17,7 +17,7 @@
 #include "in_buttons.h"
 #include "filesystem.h"
 
-#include "materialsystem/IMaterialSystem.h"
+#include "materialsystem/imaterialsystem.h"
 #include "materialsystem/imesh.h"
 #include "clienteffectprecachesystem.h"
 
@@ -50,6 +50,13 @@
 #include "collisionutils.h" // hlstriker: For player avoidance
 #include "history_resource.h" // squeek: For adding grens to the ammo pickups on the right
 #include "ff_mathackman.h" // squeek: For mathack manager update in ClientThink
+
+extern CFFDiscordManager _discord;
+
+#ifdef LINUX
+#undef offsetof
+#define offsetof(s,m)	(size_t)&(((s *)0)->m)
+#endif
 
 #if defined( CFFPlayer )
 #undef CFFPlayer
@@ -170,7 +177,7 @@ extern void HudContextForceClose();
 // #0000331: impulse 81 not working (weapon_cubemap)
 #include "../c_weapon__stubs.h"
 #include "ff_weapon_base.h"
-
+#include "valve_minmax_on.h"
 STUB_WEAPON_CLASS(weapon_cubemap, WeaponCubemap, C_BaseCombatWeapon);
 
 
@@ -844,8 +851,8 @@ RecvPropDataTable("fforigin", 0, 0, &REFERENCE_RECV_TABLE(DT_NonLocalOrigin)),
 // Data that only gets sent to the player as well as observers of the player
 RecvPropDataTable("ffplayerobserverdata", 0, 0, &REFERENCE_RECV_TABLE(DT_FFPlayerObserver)),
 
-RecvPropFloat(RECVINFO(m_angEyeAngles[0])),
-RecvPropFloat(RECVINFO(m_angEyeAngles[1])),
+RecvPropFloat(RECVINFO(m_angEyeAngles.x)),
+RecvPropFloat(RECVINFO(m_angEyeAngles.y)),
 RecvPropEHandle(RECVINFO(m_hRagdoll)),
 
 RecvPropInt(RECVINFO(m_iClassStatus)),
@@ -2600,7 +2607,7 @@ void C_FFPlayer::ClientThink(void)
 			m_pInfectionEmitter2 = CInfectionEmitter::Create("InfectionEmitter");
 
 		// scale the number of particles depending on how close it is to wearing off; make sure there are at least some particles
-		int iNumParticles = max(1, (int)((1 - (float)m_iInfectTick / FFDEV_INFECT_NUMTICKS) * ffdev_infection_startingparticles.GetInt()));
+		int iNumParticles = std::max(1, (int)((1 - (float)m_iInfectTick / FFDEV_INFECT_NUMTICKS) * ffdev_infection_startingparticles.GetInt()));
 
 		// Update emitter position, die time, and number of particles
 		if (!!m_pInfectionEmitter1)
@@ -3263,7 +3270,7 @@ float C_FFPlayer::GetFOV()
 	// Reduce faster than we increase
 	float flSpeed = flTargetModifier < 0.0f ? 1.0f : 1.0f;
 
-	flFOVModifier = approach(flFOVModifier, flTargetModifier * gpGlobals->frametime * flSpeed, max(flTargetModifier, 0.0f));
+	flFOVModifier = approach(flFOVModifier, flTargetModifier * gpGlobals->frametime * flSpeed, std::max(flTargetModifier, 0.0f));
 
 	// Just double check the clamping here...
 	flFOVModifier = clamp(flFOVModifier, 0.0f, flMaximum);
@@ -3499,7 +3506,7 @@ void C_FFPlayer::AvoidPlayers(CUserCmd* pCmd)
 		flSideScale = fabs(cl_sidespeed.GetFloat()) / fabs(pCmd->sidemove);
 	}
 
-	float flScale = min(flForwardScale, flSideScale);
+	float flScale = std::min(flForwardScale, flSideScale);
 	pCmd->forwardmove *= flScale;
 	pCmd->sidemove *= flScale;
 

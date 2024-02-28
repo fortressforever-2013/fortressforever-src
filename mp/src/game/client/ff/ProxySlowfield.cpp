@@ -11,11 +11,11 @@
 *********************************************************************/
 
 #include "cbase.h"
-#include "FunctionProxy.h"
+#include "functionproxy.h"
 #include "c_ff_player.h"
 #include "ff_grenade_base.h"
 #include "ff_weapon_base.h"
-#include "materialsystem/IMaterialVar.h"
+#include "materialsystem/imaterialvar.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"

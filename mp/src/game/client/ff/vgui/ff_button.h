@@ -14,7 +14,7 @@
 #define FF_BUTTON_H
 
 #include "vgui_controls/Button.h"
-#include "keyvalues.h"
+#include "KeyValues.h"
 #include "ff_menu_panel.h"
 
 namespace vgui
@@ -79,7 +79,7 @@ namespace vgui
 		//-----------------------------------------------------------------------------
 		virtual void Paint()
 		{
-			Button::BaseClass::Paint();
+			Panel::Paint();
 		}
 
 		//-----------------------------------------------------------------------------

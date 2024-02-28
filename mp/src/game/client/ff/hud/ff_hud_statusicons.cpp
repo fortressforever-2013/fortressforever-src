@@ -17,7 +17,7 @@
 #include "hudelement.h"
 #include "hud_macros.h"
 #include "iclientmode.h"
-#include "engine/IVDebugOverlay.h"
+#include "../../../public/engine/ivdebugoverlay.h"
 
 using namespace vgui;
 

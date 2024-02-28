@@ -16,7 +16,7 @@
 #include "cbase.h"
 #include <vgui_controls/Panel.h>
 #include <vgui/ISurface.h>
-#include "color.h"
+#include "Color.h"
 #include "c_ff_player.h"
 
 namespace vgui

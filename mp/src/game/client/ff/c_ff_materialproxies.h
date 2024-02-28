@@ -21,8 +21,8 @@
 #ifndef FF_MATERIALPROXIES_H
 #define FF_MATERIALPROXIES_H
 
-#include "materialsystem/IMaterialProxy.h"
-#include "FunctionProxy.h"
+#include "materialsystem/imaterialproxy.h"
+#include "functionproxy.h"
 
 // Forward declarations
 class IMaterialVar;

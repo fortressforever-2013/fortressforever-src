@@ -5,15 +5,15 @@
 // $LastChangedRevision: 2370 $
 //
 ////////////////////////////////////////////////////////////////////////////////
-
+#include "valve_minmax_off.h"
 #include "BotExports.h"
 
 #pragma warning(disable:4530) //C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
 #pragma warning(disable:4706) //assignment within conditional expression
 #pragma warning(disable:5205) // delete of an abstract class 'IEngineInterface' (line 238)
-
+#include <cstring>
 #include <string>
-
+#include "valve_minmax_on.h"
 //////////////////////////////////////////////////////////////////////////
 
 bool					g_IsOmnibotLoaded = false;
@@ -272,7 +272,7 @@ const char *OB_VA(const char* _msg, ...)
 
 #include <dlfcn.h>
 #define GetProcAddress dlsym
-#define NULL 0
+//#define NULL 0
 
 //////////////////////////////////////////////////////////////////////////	
 void *g_BotLibrary = NULL;

@@ -27,7 +27,7 @@
 #include <vgui/ISurface.h>
 #include "hud_lcd.h"
 
-#include "materialsystem/IMaterialSystemHardwareConfig.h"
+#include "materialsystem/imaterialsystemhardwareconfig.h"
 // --> FF
 #include "c_ff_player.h"
 #include "ff_utils.h"

@@ -11,7 +11,7 @@
 *********************************************************************/
 
 #include "cbase.h"
-#include "FunctionProxy.h"
+#include "functionproxy.h"
 #include "c_ff_player.h"
 #include "ff_weapon_base.h"
 

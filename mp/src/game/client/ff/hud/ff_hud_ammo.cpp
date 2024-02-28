@@ -14,7 +14,7 @@
 
 //#include <KeyValues.h>
 #include <vgui/ISurface.h>
-#include <vgui/IVGUI.h>
+#include <vgui/IVGui.h>
 //#include <vgui_controls/AnimationController.h>
 //#include <igameresources.h>
 
