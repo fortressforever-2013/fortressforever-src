@@ -34,3 +34,4 @@ char* ParseFile( char* pFileBytes, OUT_Z_ARRAY char (&pTokenOut)[count], bool* p
 }
 
 #endif // FILESYSTEM_HELPERS_H
+
