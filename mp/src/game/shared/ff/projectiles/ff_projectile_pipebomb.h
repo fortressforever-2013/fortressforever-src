@@ -77,7 +77,7 @@ public:
 
 	// We have our own create function
 	static CFFProjectilePipebomb *CreatePipebomb(const CBaseEntity *pSource, const Vector &vecOrigin, const QAngle &angAngles, CBasePlayer *pentOwner, const int iDamage, const int iDamageRadius, const int iSpeed);
-	static void CFFProjectilePipebomb::DestroyAllPipes(CBaseEntity *pOwner, bool force = false);
+	static void DestroyAllPipes(CBaseEntity *pOwner, bool force = false);
 
 #ifdef GAME_DLL	
 	void DetonatePipe(bool force = false, CBaseEntity *pOther = NULL);

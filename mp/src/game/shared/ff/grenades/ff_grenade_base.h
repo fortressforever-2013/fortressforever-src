@@ -83,7 +83,7 @@ public:
 	
 	virtual Class_T		Classify( void ) { return CLASS_GREN; }
 	Class_T	GetGrenId() { return Classify(); }
-	virtual color32 CFFGrenadeBase::GetColour();
+	virtual color32 GetColour();
 
 	bool	m_fIsHandheld;
 	CNetworkVar( bool, m_bIsOn );
