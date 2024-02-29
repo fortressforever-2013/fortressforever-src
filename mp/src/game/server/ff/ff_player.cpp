@@ -423,6 +423,11 @@ END_SEND_TABLE()
 
 #undef offsetof
 #define offsetof(s,m)	(size_t)&(((s *)0)->m)
+#undef min
+#define min(a,b)  (((a) < (b)) ? (a) : (b))
+#undef max
+#define max(a,b)  (((a) > (b)) ? (a) : (b))
+
 IMPLEMENT_SERVERCLASS_ST( CFFPlayer, DT_FFPlayer )
 	SendPropExclude( "DT_BaseAnimating", "m_flPoseParameter" ),
 	SendPropExclude( "DT_BaseAnimating", "m_flPlaybackRate" ),	
@@ -450,7 +455,7 @@ IMPLEMENT_SERVERCLASS_ST( CFFPlayer, DT_FFPlayer )
 	// Data that only gets sent to the player as well as observers of the player
 	SendPropDataTable( "ffplayerobserverdata", 0, &REFERENCE_SEND_TABLE(DT_FFPlayerObserver), SendProxy_OnlyToObservers ),
 
-	SendPropFloat( SENDINFO_VECTORELEM( m_angEyeAngles, 0 ), 16, SPROP_CHANGES_OFTEN, -90.0f, 90.0f ),
+	SendPropAngle( SENDINFO_VECTORELEM( m_angEyeAngles, 0 ), 16, SPROP_CHANGES_OFTEN ),
 	SendPropAngle( SENDINFO_VECTORELEM( m_angEyeAngles, 1 ), 16, SPROP_CHANGES_OFTEN ),
 	SendPropEHandle( SENDINFO( m_hRagdoll ) ),
 
@@ -654,8 +659,8 @@ void CFFPlayer::UpdateOnRemove( void )
 void CFFPlayer::SetRespawnDelay( float flDelay )
 {
 	// The largest delay is what the player will be told
-	float flTmpDelay = std::max( flDelay, mp_respawndelay.GetFloat() );
-	m_flNextSpawnDelay = std::max( flTmpDelay, m_fl_LuaSet_PlayerRespawnDelay );
+	float flTmpDelay = max( flDelay, mp_respawndelay.GetFloat() );
+	m_flNextSpawnDelay = max( flTmpDelay, m_fl_LuaSet_PlayerRespawnDelay );
 }
 
 CFFPlayer *CFFPlayer::CreatePlayer( const char *className, edict_t *ed )
@@ -3819,10 +3824,10 @@ void CFFPlayer::Command_Discard(const CCommand& args)
 	// We're an engineer
 	else
 	{
-		int iShells = std::min(GetAmmoCount(AMMO_SHELLS), 40); // Default 20, 2 per unit
-		int iNails = std::min(GetAmmoCount(AMMO_NAILS), 20); // Default 20, 1 per unit
-		int iCells = std::min(GetAmmoCount(AMMO_CELLS), 20); // Default 10, 2 per unit
-		int iRockets = std::min(GetAmmoCount(AMMO_ROCKETS), 20); // Default 10, 2 per unit
+		int iShells = min(GetAmmoCount(AMMO_SHELLS), 40); // Default 20, 2 per unit
+		int iNails = min(GetAmmoCount(AMMO_NAILS), 20); // Default 20, 1 per unit
+		int iCells = min(GetAmmoCount(AMMO_CELLS), 20); // Default 10, 2 per unit
+		int iRockets = min(GetAmmoCount(AMMO_ROCKETS), 20); // Default 10, 2 per unit
 
 		// We have at least 1 of one type of ammo
 		if (iShells || iNails || iCells || iRockets)
@@ -3962,7 +3967,7 @@ void CFFPlayer::StatusEffectsThink( void )
 		{
 			m_flLastOverHealthTick = gpGlobals->curtime;
 			int iMaxHealth = m_iMaxHealth;
-			m_iHealth = std::max( m_iHealth - FFDEV_REGEN_HEALTH, iMaxHealth );
+			m_iHealth = max( m_iHealth - FFDEV_REGEN_HEALTH, iMaxHealth );
 		}
 	}
 
@@ -4031,7 +4036,7 @@ void CFFPlayer::StatusEffectsThink( void )
 
 			int iInfectDamage = m_fNextInfectedTickDamage;
 			// if infect damage will kill, then bring the player to 1hp instead
-			iInfectDamage = std::min(iInfectDamage, GetHealth() - 1);
+			iInfectDamage = min(iInfectDamage, GetHealth() - 1);
 
 			// calc next tick's damage
 			// multiply tick damage by the mult, raise to the power of the exp, and round to the nearest whole number
@@ -6048,10 +6053,10 @@ int CFFPlayer::Heal(CFFPlayer *pHealer, float flHealth, bool healToFull)
 	else if ( healToFull == true)
 	{
 		// Bug #0000467: Medic can't give over 100% health [just added in the "m_iHealth =" line...]
-		m_iHealth = std::min( ( float )( m_iHealth + flHealth ), ( float )( m_iMaxHealth * 1.5f ) );
+		m_iHealth = min( ( float )( m_iHealth + flHealth ), ( float )( m_iMaxHealth * 1.5f ) );
 	}
 	else
-		m_iHealth = std::max( std::min( ( float )( m_iHealth + flHealth ), ( float )( m_iMaxHealth ) ) , ( float )( m_iHealth ) );
+		m_iHealth = max( min( ( float )( m_iHealth + flHealth ), ( float )( m_iMaxHealth ) ) , ( float )( m_iHealth ) );
 
 	if (IsInfected())
 	{
@@ -6549,7 +6554,7 @@ int CFFPlayer::LuaAddHealth(int iAmount, bool bAllowOverheal)
 		if (m_iHealth > m_iMaxHealth)
 			return 0;
 
-		iAmount = std::min( iAmount, m_iMaxHealth - m_iHealth );
+		iAmount = min( iAmount, m_iMaxHealth - m_iHealth );
 	}
 
 	if (iAmount > 0)
@@ -6735,7 +6740,7 @@ int CFFPlayer::GiveAmmo(int iCount, int iAmmoIndex, bool bSuppressSound)
 		return 0;
 
 	int iMax = m_iMaxAmmo[iAmmoIndex];
-	int iAdd = std::min(iCount, iMax - m_iAmmo[iAmmoIndex]);
+	int iAdd = min(iCount, iMax - m_iAmmo[iAmmoIndex]);
 	if (iAdd < 1)
 		return 0;
 
@@ -7402,7 +7407,7 @@ int CFFPlayer::AddArmor( int iAmount )
 	// AfterShock: not needed now disp quiet sabotage is canned
 	//m_iArmorType = m_iBaseArmorType;
 
-	iAmount = std::min( iAmount, m_iMaxArmor - m_iArmor );
+	iAmount = min( iAmount, m_iMaxArmor - m_iArmor );
 	if (iAmount <= 0)
 		return 0;
 
@@ -7428,7 +7433,7 @@ int CFFPlayer::AddArmor( int iAmount )
 int CFFPlayer::RemoveArmor( int iAmount )
 {
 	int iArmor = m_iArmor;
-	int iRemovedAmt = std::min( iAmount, iArmor );
+	int iRemovedAmt = min( iAmount, iArmor );
 
 	m_iArmor = clamp( m_iArmor - iAmount, 0, m_iArmor );
 
@@ -8021,6 +8026,6 @@ float CFFPlayer::GetJetpackFuelPercent()
 
 void CFFPlayer::SetJetpackFuelPercent(float newPct)
 {
-	float pctClamped = std::max(0.0f, std::min(newPct, 100.0f));
+	float pctClamped = max(0.0f, min(newPct, 100.0f));
 	m_iJetpackFuel = (int)(200.0f * (pctClamped / 100.0f));
 }

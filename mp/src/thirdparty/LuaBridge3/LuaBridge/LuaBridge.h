@@ -8,7 +8,6 @@
 
 #include "tier0/valve_minmax_off.h"
 #include <algorithm>
-#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cstddef>

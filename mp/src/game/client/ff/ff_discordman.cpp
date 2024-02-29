@@ -119,7 +119,7 @@ void CFFDiscordManager::Reset()
 
 void CFFDiscordManager::LevelPreInit(const char* mapname)
 {
-	strncpy(m_szCurrentMap, mapname, MAX_MAP_NAME);
+	Q_strncpy(m_szCurrentMap, mapname, MAX_MAP_NAME);
 
 	DiscordRichPresence discordPresence;
 	memset(&discordPresence, 0, sizeof(discordPresence));
@@ -133,7 +133,7 @@ void CFFDiscordManager::LevelPreInit(const char* mapname)
 
 void CFFDiscordManager::LevelInit(const char* mapname)
 {
-	strncpy(m_szCurrentMap, mapname, MAX_MAP_NAME);
+	Q_strncpy(m_szCurrentMap, mapname, MAX_MAP_NAME);
 
 	DiscordRichPresence discordPresence;
 	memset(&discordPresence, 0, sizeof(discordPresence));
@@ -200,7 +200,7 @@ void CFFDiscordManager::UpdateGameData()
 	const char* actualTeamScores = scoresString.c_str();
 
 	sprintf(stateStr, "Map: %s (%i/%i)", m_szCurrentMap, curPlayers, maxPlayers);
-	strncpy(detailsStr, actualTeamScores, 128);
+	Q_strncpy(detailsStr, actualTeamScores, 128);
 	detailsStr[127] = '\0';
 
 	discordPresence.state = stateStr;

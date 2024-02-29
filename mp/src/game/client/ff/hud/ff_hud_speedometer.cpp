@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright ï¿½ 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -229,8 +229,7 @@ void CHudSpeedometer::Paint()
 
 		surface()->DrawSetTextColor( m_TextColor );
 
-		wchar_t textunicode[12];
-		swprintf(textunicode, L"Average: ", L"");
+		wchar_t textunicode[] = L"Average: ";
 
 		for( wchar_t *wch = textunicode; *wch != 0; wch++ )
 			surface()->DrawUnicodeChar( *wch );

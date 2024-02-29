@@ -761,6 +761,13 @@ void RecvProxy_PrimeTime(const CRecvProxyData* pData, void* pStruct, void* pOut)
 	}
 }
 
+#undef offsetof
+#define offsetof(s,m)	(size_t)&(((s *)0)->m)
+#undef min
+#define min(a,b)  (((a) < (b)) ? (a) : (b))
+#undef max
+#define max(a,b)  (((a) > (b)) ? (a) : (b))
+
 BEGIN_RECV_TABLE_NOBASE(C_FFPlayer, DT_FFLocalPlayerExclusive)
 
 #ifdef EXTRA_LOCAL_ORIGIN_ACCURACY
@@ -844,8 +851,8 @@ RecvPropDataTable("fforigin", 0, 0, &REFERENCE_RECV_TABLE(DT_NonLocalOrigin)),
 // Data that only gets sent to the player as well as observers of the player
 RecvPropDataTable("ffplayerobserverdata", 0, 0, &REFERENCE_RECV_TABLE(DT_FFPlayerObserver)),
 
-RecvPropFloat(RECVINFO(m_angEyeAngles.x)),
-RecvPropFloat(RECVINFO(m_angEyeAngles.y)),
+RecvPropFloat(RECVINFO(m_angEyeAngles[0])),
+RecvPropFloat(RECVINFO(m_angEyeAngles[1])),
 RecvPropEHandle(RECVINFO(m_hRagdoll)),
 
 RecvPropInt(RECVINFO(m_iClassStatus)),
@@ -2600,7 +2607,7 @@ void C_FFPlayer::ClientThink(void)
 			m_pInfectionEmitter2 = CInfectionEmitter::Create("InfectionEmitter");
 
 		// scale the number of particles depending on how close it is to wearing off; make sure there are at least some particles
-		int iNumParticles = std::max(1, (int)((1 - (float)m_iInfectTick / FFDEV_INFECT_NUMTICKS) * ffdev_infection_startingparticles.GetInt()));
+		int iNumParticles = max(1, (int)((1 - (float)m_iInfectTick / FFDEV_INFECT_NUMTICKS) * ffdev_infection_startingparticles.GetInt()));
 
 		// Update emitter position, die time, and number of particles
 		if (!!m_pInfectionEmitter1)
@@ -3263,7 +3270,7 @@ float C_FFPlayer::GetFOV()
 	// Reduce faster than we increase
 	float flSpeed = flTargetModifier < 0.0f ? 1.0f : 1.0f;
 
-	flFOVModifier = approach(flFOVModifier, flTargetModifier * gpGlobals->frametime * flSpeed, std::max(flTargetModifier, 0.0f));
+	flFOVModifier = approach(flFOVModifier, flTargetModifier * gpGlobals->frametime * flSpeed, max(flTargetModifier, 0.0f));
 
 	// Just double check the clamping here...
 	flFOVModifier = clamp(flFOVModifier, 0.0f, flMaximum);
@@ -3499,7 +3506,7 @@ void C_FFPlayer::AvoidPlayers(CUserCmd* pCmd)
 		flSideScale = fabs(cl_sidespeed.GetFloat()) / fabs(pCmd->sidemove);
 	}
 
-	float flScale = std::min(flForwardScale, flSideScale);
+	float flScale = min(flForwardScale, flSideScale);
 	pCmd->forwardmove *= flScale;
 	pCmd->sidemove *= flScale;
 

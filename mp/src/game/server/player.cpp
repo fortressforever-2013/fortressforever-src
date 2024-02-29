@@ -5520,7 +5520,7 @@ void CBasePlayer::CommitSuicide( bool bExplode /*= false*/, bool bForce /*= fals
 	m_fNextSuicideTime = gpGlobals->curtime + 5;
 
 	// C4189: local variable is initialized but not referenced
-	int fDamage = DMG_PREVENT_PHYSICS_FORCE | ( bExplode ? ( DMG_BLAST | DMG_ALWAYSGIB ) : DMG_NEVERGIB );
+	int fDamage = DMG_PREVENT_PHYSICS_FORCE | ( bExplode ? DMG_ALWAYSGIB : DMG_NEVERGIB );
 
 	// have the player kill themself
 	m_iHealth = 0;
@@ -5538,7 +5538,7 @@ void CBasePlayer::CommitSuicide( bool bExplode /*= false*/, bool bForce /*= fals
 		}
 		else
 		{
-			CTakeDamageInfo info(NULL, this, pPlayer ? pPlayer->GetHealth() + 50 : 0, fDamage); // |-- Mirv: pInflictor = NULL so that death message is "x died."
+			CTakeDamageInfo info(NULL, this, pPlayer ? pPlayer->GetHealth() + 999 : 0, fDamage); // |-- Mirv: pInflictor = NULL so that death message is "x died."
 			pPlayer->TakeDamage(info);
 		}
 	}
@@ -5566,7 +5566,7 @@ void CBasePlayer::CommitSuicide( const Vector &vecForce, bool bExplode /*= false
 
 	// Kill the player.
 	CTakeDamageInfo info;
-	info.SetDamage( nHealth + 10 );
+	info.SetDamage( nHealth + 999 );
 	info.SetAttacker( this );
 	info.SetDamageType( bExplode ? DMG_ALWAYSGIB : DMG_GENERIC );
 	info.SetDamageForce( vecForce );

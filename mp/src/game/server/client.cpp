@@ -1174,10 +1174,10 @@ void kill_helper( const CCommand &args, bool bExplode )
 
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-CON_COMMAND( kill, "Kills the player with generic damage" )
-{
-	kill_helper( args, false );
-}
+// CON_COMMAND( kill, "Kills the player with generic damage" )
+// {
+//	kill_helper( args, false );
+// }
 
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
