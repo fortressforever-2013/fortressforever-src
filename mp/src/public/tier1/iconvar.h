@@ -86,11 +86,6 @@ class CCommand;
 // #define FCVAR_AVAILABLE			(1<<27)
 // #define FCVAR_AVAILABLE			(1<<31)
 
-// FF types of convars
-#define FCVAR_FF_FFDEV (FCVAR_CHEAT|FCVAR_NOTIFY)
-#define FCVAR_FF_FFDEV_REPLICATED (FCVAR_CHEAT|FCVAR_NOTIFY|FCVAR_REPLICATED)
-#define FCVAR_FF_FFDEV_CLIENT (FCVAR_CHEAT)
-
 #define FCVAR_MATERIAL_THREAD_MASK ( FCVAR_RELOAD_MATERIALS | FCVAR_RELOAD_TEXTURES | FCVAR_MATERIAL_SYSTEM_THREAD )	
 
 //-----------------------------------------------------------------------------

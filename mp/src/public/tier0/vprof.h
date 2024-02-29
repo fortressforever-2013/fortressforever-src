@@ -143,11 +143,6 @@
 #define VPROF_BUDGETGROUP_FINDATTRIBUTE				_T("FindAttribute")
 #define VPROF_BUDGETGROUP_FINDATTRIBUTEUNSAFE		_T("FindAttributeUnsafe")
 	
-// FF SPECIFIC VPROF ENTRIES
-#define VPROF_BUDGETGROUP_FF_BUILDABLE				_T( "FF Buildable Objects" )
-#define VPROF_BUDGETGROUP_FF_LUA					_T( "FF Lua" )
-#define VPROF_BUDGETGROUP_FF_MATHACKDETECT			_T( "FF Mathack Detection" )
-
 #ifdef _X360
 // update flags
 #define VPROF_UPDATE_BUDGET				0x01	// send budget data every frame

@@ -1182,7 +1182,7 @@ extern "C"
 
     //===========================================
     // NEW!!! 64-bit
-#if !defined(PROTECTED_THINGS_DISABLE) && !defined(_DEBUG)
+#ifndef PROTECTED_THINGS_DISABLE
     char* __cdecl _strdup(const char* string)
     {
         int nSize = (int)strlen(string) + 1;

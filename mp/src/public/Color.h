@@ -68,13 +68,6 @@ public:
 	inline int g() const	{ return _color[1]; }
 	inline int b() const	{ return _color[2]; }
 	inline int a() const	{ return _color[3]; }
-
-	// -- setters for LuaBridge3
-	inline void setR(int r) { _color[0] = (unsigned char) r; }
-	inline void setG(int g) { _color[0] = (unsigned char) g; }
-	inline void setB(int b) { _color[0] = (unsigned char) b; }
-	inline void setA(int a) { _color[0] = (unsigned char) a; }
-	// -- setters for LuaBridge3
 	
 	unsigned char &operator[](int index)
 	{
