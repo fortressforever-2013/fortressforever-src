@@ -68,6 +68,10 @@ mathlib.lib
 raytrace.lib
 tier1.lib
 vgui_controls.lib
+mathlib.a
+raytrace.a
+tier1.a
+vgui_controls.a
 
 lua.lib
 lua.pdb
