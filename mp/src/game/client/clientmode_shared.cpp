@@ -1229,7 +1229,7 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 			}
 		}
 
-		if ( team == 0 && GetLocalTeam() )
+		if ( team == 0 && GetLocalTeam() > 0 )
 		{
 			bValidTeam = false;
 		}
