@@ -70,7 +70,7 @@ public:
 
 		const char *pValue = NULL;
 
-#ifdef _WIN32
+#if 1
 		// Use GetEnvironmentVariable instead of getenv because getenv doesn't pick up changes
 		// to the process environment after the DLL was loaded.
 		char szBuf[ 4096 ];
@@ -121,7 +121,7 @@ public:
 		if ( !pszBuf || ( nBufSize <= 0 ) )
 			return 0;
 	
-#ifdef _WIN32
+#if 1
 		// Use GetEnvironmentVariable instead of getenv because getenv doesn't pick up changes
 		// to the process environment after the DLL was loaded.
 		return GetEnvironmentVariable( m_pVarName, pszBuf, nBufSize );
