@@ -197,18 +197,10 @@ wchar_t* ReadChatTextString( bf_read &msg, OUT_Z_BYTECAP(outSizeInBytes) wchar_t
 	const char* token = strtok(szString, " ");
 	while (token != NULL)
 	{
-		if (token[0] == '#')
+		if (token[0] == '#' && g_pVGuiLocalize->Find(token))
 		{
 			wchar_t* pBuf = g_pVGuiLocalize->Find(token);
-			if (pBuf)
-			{
-				V_wcsncat(translated, pBuf, outSizeInBytes);
-			}
-			else
-			{
-				g_pVGuiLocalize->ConvertANSIToUnicode(token, temp, outSizeInBytes);
-				V_wcsncat(translated, temp, outSizeInBytes);
-			}
+			V_wcsncat(translated, pBuf, outSizeInBytes);
 		}
 		else
 		{
