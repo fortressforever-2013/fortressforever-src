@@ -36,7 +36,6 @@
 #include <vector>
 #include "tier0/valve_minmax_on.h"
 
-
 // Begin File: Source/LuaBridge/detail/Config.h
 
 #if !(__cplusplus >= 201703L || (defined(_MSC_VER) && _HAS_CXX17))
