@@ -200,7 +200,15 @@ wchar_t* ReadChatTextString( bf_read &msg, OUT_Z_BYTECAP(outSizeInBytes) wchar_t
 		if (token[0] == '#')
 		{
 			wchar_t* pBuf = g_pVGuiLocalize->Find(token);
-			V_wcsncat(translated, pBuf, outSizeInBytes);
+			if (pBuf)
+			{
+				V_wcsncat(translated, pBuf, outSizeInBytes);
+			}
+			else
+			{
+				g_pVGuiLocalize->ConvertANSIToUnicode(token, temp, outSizeInBytes);
+				V_wcsncat(translated, temp, outSizeInBytes);
+			}
 		}
 		else
 		{
