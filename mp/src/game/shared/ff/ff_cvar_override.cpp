@@ -26,7 +26,7 @@ struct CFFConVarDefaultOverrideEntry
 static CFFConVarDefaultOverrideEntry s_FFConVarOverrideEntries[] =
 {
 	/* interpolation */
-	{ OVERRIDE_CLIENT, "cl_interp",               "0.15152" },
+	{ OVERRIDE_CLIENT, "cl_interp",               "0.0" },
 	{ OVERRIDE_CLIENT, "cl_interp_ratio",       "2.0" },
 
 	/* lag compensation */
