@@ -30,6 +30,8 @@ $Project "Client (FF)"
 	{
 		-$File	"$SRCDIR\game\shared\weapon_parse_default.cpp"
 		
+		$File "$SRCDIR\game\client\hud_voicestatus.cpp"
+		
 		$Folder	"game_controls Header Files"
 		{
 			$File "$SRCDIR\game\client\game_controls\classmenu.h"
