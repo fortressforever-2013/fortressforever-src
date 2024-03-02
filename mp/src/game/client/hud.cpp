@@ -603,6 +603,10 @@ void CHudTexture::Precache(void)
 
 void CHudTexture::DrawSelf(int x, int y, const Color& clr) const
 {
+	// FF TODO: THIS IS AWFUL / EVIL
+	if (this == reinterpret_cast<CHudTexture*>(0xFFEEFFEE))
+		return;
+
 	DrawSelf(x, y, Width(), Height(), clr);
 }
 
