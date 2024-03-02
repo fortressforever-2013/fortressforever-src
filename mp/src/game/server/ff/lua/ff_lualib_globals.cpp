@@ -224,13 +224,8 @@ namespace FFLib
 
 	void ChatToAll(const char *szMessage)
 	{
-		bool bChat = true;
 		CBroadcastRecipientFilter filter;
-		UserMessageBegin( filter, "SayText" );
-			WRITE_BYTE( 0 ); // world, dedicated server says
-			WRITE_STRING( szMessage );
-			WRITE_BYTE( bChat );
-		MessageEnd();
+		UTIL_SayText2Filter(filter, 0, true, "FF_Chat_LUA", szMessage );
 	}
 
 	void ChatToPlayer(CFFPlayer *pPlayer, const char *szMessage)
@@ -238,13 +233,8 @@ namespace FFLib
 		if (!pPlayer)
 			return;
 
-		bool bChat = true;
 		CSingleUserRecipientFilter filter(pPlayer);
-		UserMessageBegin( filter, "SayText" );
-			WRITE_BYTE( 0 ); // world, dedicated server says
-			WRITE_STRING( szMessage );
-			WRITE_BYTE( bChat );
-		MessageEnd();
+		UTIL_SayText2Filter(filter, 0, true, "FF_Chat_LUA", szMessage );
 	}
 
 	void BroadcastMessage(const char* szMessage)
