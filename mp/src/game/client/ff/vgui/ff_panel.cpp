@@ -70,16 +70,13 @@ namespace vgui
 		//if( FF_IsPlayerSpec( pPlayer ) || !FF_HasPlayerPickedClass( pPlayer ) )
 		//	return;
 
-		if ( IsVisible() )
-		{
-			if (m_pHudBackground)
-				if (cl_teamcolourhud.GetBool())
-					m_pHudBackground->DrawSelf(0, 0, m_TeamColorHudBackgroundColour);
-				else
-					m_pHudBackground->DrawSelf(0, 0, m_HudBackgroundColour);
-			if (m_pHudForeground)
-				m_pHudForeground->DrawSelf(0, 0, m_HudForegroundColour);
-		}
+		if (m_pHudBackground)
+			if (cl_teamcolourhud.GetBool())
+				m_pHudBackground->DrawSelf(0, 0, m_TeamColorHudBackgroundColour);
+			else
+				m_pHudBackground->DrawSelf(0, 0, m_HudBackgroundColour);
+		if (m_pHudForeground)
+			m_pHudForeground->DrawSelf(0, 0, m_HudForegroundColour);
 
 		BaseClass::PaintBackground();
 	}
@@ -121,6 +118,9 @@ namespace vgui
 	{
 		m_iPlayerTeam = -1;
 		
+		m_pHudBackground = NULL;
+		m_pHudForeground = NULL;
+
 		ivgui()->AddTickSignal( GetVPanel(), 500 );
 		//HScheme scheme = vgui::scheme()->LoadSchemeFromFile( "resource/HudScheme.res", "HudScheme");
 		//SetScheme(scheme);
