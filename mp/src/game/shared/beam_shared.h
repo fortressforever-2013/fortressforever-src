@@ -248,7 +248,7 @@ public:
 //-----------------------------------------------------------------------------
 // Inline methods 
 //-----------------------------------------------------------------------------
-inline int CBeam::ObjectCaps( void )
+int CBeam::ObjectCaps( void )
 { 
 	int flags = 0;
 	if ( HasSpawnFlags( SF_BEAM_TEMPORARY ) )
@@ -257,7 +257,7 @@ inline int CBeam::ObjectCaps( void )
 }
 #endif
 
-inline void	CBeam::SetFireTime( float flFireTime )		
+void	CBeam::SetFireTime( float flFireTime )		
 { 
 	m_flFireTime = flFireTime; 
 }
@@ -265,7 +265,7 @@ inline void	CBeam::SetFireTime( float flFireTime )
 //-----------------------------------------------------------------------------
 // NOTE: Start + End Pos are specified in *relative* coordinates 
 //-----------------------------------------------------------------------------
-inline void CBeam::SetStartPos( const Vector &pos ) 
+void CBeam::SetStartPos( const Vector &pos ) 
 { 
 #if defined( CLIENT_DLL )
 	SetNetworkOrigin( pos );
@@ -273,13 +273,13 @@ inline void CBeam::SetStartPos( const Vector &pos )
 	SetLocalOrigin( pos );
 }
 
-inline void CBeam::SetEndPos( const Vector &pos ) 
+void CBeam::SetEndPos( const Vector &pos ) 
 { 
 	m_vecEndPos = pos; 
 }
 	 
  // center point of beam
-inline const Vector &CBeam::WorldSpaceCenter( void ) const 
+const Vector &CBeam::WorldSpaceCenter( void ) const 
 {
 	Vector &vecResult = AllocTempVector();
 	VectorAdd( GetAbsStartPos(), GetAbsEndPos(), vecResult );
@@ -287,159 +287,159 @@ inline const Vector &CBeam::WorldSpaceCenter( void ) const
 	return vecResult;
 }
 
-inline void CBeam::SetStartAttachment( int attachment )	
+void CBeam::SetStartAttachment( int attachment )	
 {
 	Assert( (attachment & ~ATTACHMENT_INDEX_MASK) == 0 );
 	m_nAttachIndex.Set( 0, attachment );
 }
 
-inline void CBeam::SetEndAttachment( int attachment )		
+void CBeam::SetEndAttachment( int attachment )		
 { 
 	Assert( (attachment & ~ATTACHMENT_INDEX_MASK) == 0 );
 	m_nAttachIndex.Set( m_nNumBeamEnts-1, attachment );
 }
 
-inline void CBeam::SetTexture( int spriteIndex )		
+void CBeam::SetTexture( int spriteIndex )		
 { 
 	SetModelIndex( spriteIndex ); 
 }
 
-inline void CBeam::SetHaloTexture( int spriteIndex )	
+void CBeam::SetHaloTexture( int spriteIndex )	
 { 
 	m_nHaloIndex = spriteIndex; 
 }
 
-inline void CBeam::SetHaloScale( float haloScale )		
+void CBeam::SetHaloScale( float haloScale )		
 { 
 	m_fHaloScale = haloScale; 
 }
 
-inline void CBeam::SetWidth( float width )				
+void CBeam::SetWidth( float width )				
 {
 	Assert( width <= MAX_BEAM_WIDTH );
 	m_fWidth = MIN( MAX_BEAM_WIDTH, width );
 }
 
-inline void CBeam::SetEndWidth( float endWidth )		
+void CBeam::SetEndWidth( float endWidth )		
 { 
 	Assert( endWidth <= MAX_BEAM_WIDTH );
 	m_fEndWidth	= MIN( MAX_BEAM_WIDTH, endWidth );
 }
 
-inline void CBeam::SetFadeLength( float fadeLength )	
+void CBeam::SetFadeLength( float fadeLength )	
 { 
 	m_fFadeLength = fadeLength; 
 }
 
-inline void CBeam::SetNoise( float amplitude )			
+void CBeam::SetNoise( float amplitude )			
 { 
 	m_fAmplitude = amplitude; 
 }
 
-inline void CBeam::SetColor( int r, int g, int b )		
+void CBeam::SetColor( int r, int g, int b )		
 { 
 	SetRenderColor( r, g, b, GetRenderColor().a );
 }
 
-inline void CBeam::SetBrightness( int brightness )		
+void CBeam::SetBrightness( int brightness )		
 { 
 	SetRenderColorA( brightness ); 
 }
 
-inline void CBeam::SetFrame( float frame )				
+void CBeam::SetFrame( float frame )				
 { 
 	m_fStartFrame = frame; 
 }
 
-inline void CBeam::SetScrollRate( int speed )			
+void CBeam::SetScrollRate( int speed )			
 { 
 	m_fSpeed = speed; 
 }
 
-inline CBaseEntity* CBeam::GetStartEntityPtr( void ) const 
+CBaseEntity* CBeam::GetStartEntityPtr( void ) const 
 { 
 	return m_hAttachEntity[0].Get(); 
 }
 
-inline int CBeam::GetStartEntity( void ) const 
+int CBeam::GetStartEntity( void ) const 
 { 
 	CBaseEntity *pEntity = m_hAttachEntity[0].Get();
 	return pEntity ? pEntity->entindex() : 0; 
 }
 
-inline CBaseEntity* CBeam::GetEndEntityPtr( void ) const 
+CBaseEntity* CBeam::GetEndEntityPtr( void ) const 
 { 
 	return m_hAttachEntity[1].Get(); 
 }
 
-inline int CBeam::GetEndEntity( void ) const	
+int CBeam::GetEndEntity( void ) const	
 { 
 	CBaseEntity *pEntity = m_hAttachEntity[m_nNumBeamEnts-1].Get();
 	return pEntity ? pEntity->entindex() : 0; 
 }
 
-inline int CBeam::GetStartAttachment() const
+int CBeam::GetStartAttachment() const
 {
 	return m_nAttachIndex[0] & ATTACHMENT_INDEX_MASK;
 }
 
-inline int CBeam::GetEndAttachment() const
+int CBeam::GetEndAttachment() const
 {
 	return m_nAttachIndex[m_nNumBeamEnts-1] & ATTACHMENT_INDEX_MASK;
 }
 
-inline int CBeam::GetTexture( void )		
+int CBeam::GetTexture( void )		
 { 
 	return GetModelIndex(); 
 }
 
-inline float CBeam::GetWidth( void ) const		
+float CBeam::GetWidth( void ) const		
 {
 	return m_fWidth; 
 }
 
-inline float CBeam::GetEndWidth( void ) const	
+float CBeam::GetEndWidth( void ) const	
 { 
 	return m_fEndWidth; 
 }
 
-inline float CBeam::GetFadeLength( void ) const	
+float CBeam::GetFadeLength( void ) const	
 { 
 	return m_fFadeLength; 
 }
 
-inline float CBeam::GetNoise( void ) const		
+float CBeam::GetNoise( void ) const		
 { 
 	return m_fAmplitude; 
 }
 
-inline int CBeam::GetBrightness( void ) const	
+int CBeam::GetBrightness( void ) const	
 { 
 	return GetRenderColor().a;
 }
 
-inline float CBeam::GetFrame( void ) const		
+float CBeam::GetFrame( void ) const		
 { 
 	return m_fStartFrame; 
 }
 
-inline float CBeam::GetScrollRate( void ) const	
+float CBeam::GetScrollRate( void ) const	
 {
 	return m_fSpeed; 
 }
 
-inline float CBeam::GetHDRColorScale( void ) const
+float CBeam::GetHDRColorScale( void ) const
 {
 	return m_flHDRColorScale;
 }
 
-inline void CBeam::LiveForTime( float time ) 
+void CBeam::LiveForTime( float time ) 
 { 
 	SetThink(&CBeam::SUB_Remove); 
 	SetNextThink( gpGlobals->curtime + time ); 
 }
 
-inline void	CBeam::BeamDamageInstant( trace_t *ptr, float damage ) 
+void	CBeam::BeamDamageInstant( trace_t *ptr, float damage ) 
 { 
 	m_flDamage = damage; 
 	m_flFireTime = gpGlobals->curtime - 1;
