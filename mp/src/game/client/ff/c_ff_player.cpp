@@ -940,16 +940,16 @@ private:
 };
 
 
-IMPLEMENT_CLIENTCLASS_DT_NOBASE(C_FFRagdoll, DT_FFRagdoll, CFFRagdoll)
-RecvPropVector(RECVINFO(m_vecRagdollOrigin)),
-RecvPropEHandle(RECVINFO(m_hPlayer)),
-RecvPropInt(RECVINFO(m_nModelIndex)),
-RecvPropInt(RECVINFO(m_nForceBone)),
-RecvPropVector(RECVINFO(m_vecForce)),
-RecvPropVector(RECVINFO(m_vecRagdollVelocity)),
+IMPLEMENT_CLIENTCLASS_DT_NOBASE( C_FFRagdoll, DT_FFRagdoll, CFFRagdoll )
+	RecvPropVector( RECVINFO( m_vecRagdollOrigin ) ),
+	RecvPropEHandle( RECVINFO( m_hPlayer ) ),
+	RecvPropInt( RECVINFO( m_nModelIndex ) ),
+	RecvPropInt( RECVINFO( m_nForceBone ) ),
+	RecvPropVector( RECVINFO( m_vecForce ) ),
+	RecvPropVector( RECVINFO( m_vecRagdollVelocity ) ),
 
-RecvPropInt(RECVINFO(m_fBodygroupState)),
-RecvPropInt(RECVINFO(m_nSkinIndex)),
+	RecvPropInt( RECVINFO( m_fBodygroupState ) ),
+	RecvPropInt( RECVINFO( m_nSkinIndex ) ),
 END_RECV_TABLE()
 
 
@@ -1134,7 +1134,21 @@ void C_FFRagdoll::CreateRagdoll()
 	// Make us a ragdoll..
 	m_nRenderFX = kRenderFxRagdoll;
 
-	BecomeRagdollOnClient();
+	matrix3x4_t boneDelta0[MAXSTUDIOBONES];
+	matrix3x4_t boneDelta1[MAXSTUDIOBONES];
+	matrix3x4_t currentBones[MAXSTUDIOBONES];
+	const float boneDt = 0.05f;
+
+	if (pPlayer && !pPlayer->IsDormant())
+	{
+		pPlayer->GetRagdollInitBoneArrays(boneDelta0, boneDelta1, currentBones, boneDt);
+	}
+	else
+	{
+		GetRagdollInitBoneArrays(boneDelta0, boneDelta1, currentBones, boneDt);
+	}
+
+	InitAsClientRagdoll(boneDelta0, boneDelta1, currentBones, boneDt);
 
 	// HACKHACK: Fix to allow laser beam to shine off ragdolls
 	SetSolid(SOLID_BBOX);
