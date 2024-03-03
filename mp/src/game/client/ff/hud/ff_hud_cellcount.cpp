@@ -29,7 +29,7 @@ using namespace vgui;
 #include "hudelement.h"
 #include "ff_panel.h"
 
-#include "ConVar.h"
+#include "convar.h"
 
 #include "c_ff_player.h"
 #include "ff_utils.h"

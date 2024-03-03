@@ -13,7 +13,7 @@
 #include "cbase.h"
 #include "ff_fx_railbeam.h"
 #include "c_te_effect_dispatch.h"
-#include "ClientEffectPrecacheSystem.h"
+#include "clienteffectprecachesystem.h"
 #include "view.h"
 #include "iinput.h"
 

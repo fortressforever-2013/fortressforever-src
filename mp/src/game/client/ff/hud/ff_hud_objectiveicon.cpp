@@ -22,7 +22,7 @@ using namespace vgui;
 #include <vgui/ISurface.h>
 #include <vgui/ILocalize.h>
 #include <vgui/IVGui.h>
-#include "VGUI_BitmapImage.h"
+#include "vgui_bitmapimage.h"
 
 #include "cliententitylist.h"
 

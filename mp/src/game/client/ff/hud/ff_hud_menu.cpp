@@ -313,6 +313,7 @@ ADD_MENU_BRANCH(disguiseteam, "#FF_CM_DISGUISEFRIENDLY", 'M', "", &FriendlyDMenu
 	return MENU_SHOW;
 }
 
+
 ADD_MENU_BRANCH(disguiseenemy, "#FF_CM_DISGUISEENEMY", 'N', "", &EnemyDMenu)
 {
 	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
@@ -372,10 +373,10 @@ ADD_MENU_OPTION(lastdisguise, "#FF_CM_DISGUISELAST", 'J', "disguise last") { ret
 //-----------------------------------------------------------------------------
 // Detpack menu options
 //-----------------------------------------------------------------------------
-ADD_MENU_OPTION( det5, "#FF_CM_DETPACK5", 'C', "detpack 5" ) { return MENU_SHOW; }
-ADD_MENU_OPTION( det10, "#FF_CM_DETPACK10", 'D', "detpack 10" ) { return MENU_SHOW; }
-ADD_MENU_OPTION( det20, "#FF_CM_DETPACK20", 'E', "detpack 20" ) { return MENU_SHOW; }
-ADD_MENU_OPTION( det50, "#FF_CM_DETPACK50", 'F', "detpack 50" ) { return MENU_SHOW; }
+ADD_MENU_OPTION(det5, "#FF_CM_DETPACK5", 'C', "detpack 5") { return MENU_SHOW; }
+ADD_MENU_OPTION(det10, "#FF_CM_DETPACK10", 'D', "detpack 10") { return MENU_SHOW; }
+ADD_MENU_OPTION(det20, "#FF_CM_DETPACK20", 'E', "detpack 20") { return MENU_SHOW; }
+ADD_MENU_OPTION(det50, "#FF_CM_DETPACK50", 'F', "detpack 50") { return MENU_SHOW; }
 
 //-----------------------------------------------------------------------------
 // Cloak options
@@ -401,7 +402,7 @@ int CanCloak()
 	return MENU_SHOW;
 }
 
-ADD_MENU_OPTION( smartcloak, "#FF_CM_SMARTCLOAK", 'A', "smartcloak" ) { return CanCloak(); }
+ADD_MENU_OPTION(smartcloak, "#FF_CM_SMARTCLOAK", 'A', "smartcloak") { return CanCloak(); }
 //ADD_MENU_OPTION( scloak, "#FF_CM_SCLOAK", 'B', "scloak" ) { return CanCloak(); }
 
 
@@ -409,7 +410,7 @@ ADD_MENU_OPTION( smartcloak, "#FF_CM_SMARTCLOAK", 'A', "smartcloak" ) { return C
 // Sentry Sabotage
 //-----------------------------------------------------------------------------
 
-ADD_MENU_OPTION( sentrysabotage, "#FF_CM_SABOTAGESENTRY", 'H', "sentrysabotage" )
+ADD_MENU_OPTION( sentrysabotage , "#FF_CM_SABOTAGESENTRY", 'H', "sentrysabotage")
 {
 	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
 	if( !pPlayer )
@@ -434,9 +435,9 @@ ADD_MENU_OPTION(dispensersabotage, "#FF_CM_SABOTAGEDISPENSER", 'I', "dispensersa
 //-----------------------------------------------------------------------------
 // Medic/Engineer stuff
 //-----------------------------------------------------------------------------
-ADD_MENU_OPTION( need_armor, "#FF_CM_CALLARMOR", '(', "engyme" ) { return MENU_SHOW; }
-ADD_MENU_OPTION( need_medic, "#FF_CM_CALLMEDIC", '%', "saveme" ) { return MENU_SHOW; }
-ADD_MENU_OPTION( need_ammo, "#FF_CM_CALLAMMO", '^', "ammome" ) { return MENU_SHOW; }
+ADD_MENU_OPTION(need_armor, "#FF_CM_CALLARMOR", '(', "engyme") { return MENU_SHOW; }
+ADD_MENU_OPTION(need_medic, "#FF_CM_CALLMEDIC", '%', "saveme") { return MENU_SHOW; }
+ADD_MENU_OPTION(need_ammo, "#FF_CM_CALLAMMO", '^', "ammome") { return MENU_SHOW; }
 
 
 //-----------------------------------------------------------------------------

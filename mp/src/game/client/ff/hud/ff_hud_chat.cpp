@@ -403,7 +403,7 @@ void CHudChat::ChatPrintf(int iPlayerIndex, const char* fmt, ...)
 		engine->GetPlayerInfo(iPlayerIndex, &sPlayerInfo);
 
 	int bufSize = (strlen(pmsg) + 1) * sizeof(wchar_t);
-	wchar_t* wbuf = static_cast<wchar_t*>(_malloca(bufSize));
+	wchar_t* wbuf = static_cast<wchar_t*>(_alloca(bufSize));
 	if (wbuf)
 	{
 		Color clrNameColor = GetClientColor(iPlayerIndex);

@@ -13,7 +13,7 @@
 #include <vgui/IScheme.h>
 #include <vgui/ILocalize.h>
 #include <vgui/ISurface.h>
-#include <FileSystem.h>
+#include <filesystem.h>
 #include <KeyValues.h>
 #include <convar.h>
 #include <vgui_controls/ImageList.h>

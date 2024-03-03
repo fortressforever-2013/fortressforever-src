@@ -17,9 +17,9 @@
 #include "in_buttons.h"
 #include "filesystem.h"
 
-#include "materialsystem/IMaterialSystem.h"
-#include "materialsystem/IMesh.h"
-#include "ClientEffectPrecacheSystem.h"
+#include "materialsystem/imaterialsystem.h"
+#include "materialsystem/imesh.h"
+#include "clienteffectprecachesystem.h"
 
 #include "iviewrender_beams.h"
 #include "r_efx.h"
@@ -760,6 +760,13 @@ void RecvProxy_PrimeTime(const CRecvProxyData* pData, void* pStruct, void* pOut)
 			pLocalPlayer->m_flLatency = engine->Time() - pLocalPlayer->m_flPrimeTime;
 	}
 }
+
+#undef offsetof
+#define offsetof(s,m)	(size_t)&(((s *)0)->m)
+#undef min
+#define min(a,b)  (((a) < (b)) ? (a) : (b))
+#undef max
+#define max(a,b)  (((a) > (b)) ? (a) : (b))
 
 BEGIN_RECV_TABLE_NOBASE(C_FFPlayer, DT_FFLocalPlayerExclusive)
 

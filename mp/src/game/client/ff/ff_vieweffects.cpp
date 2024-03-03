@@ -15,8 +15,8 @@
 #include "hud_macros.h"
 #include "ff_shareddefs.h"
 #include "ScreenSpaceEffects.h"
-#include "keyvalues.h"
-#include "materialsystem/IMaterialSystemHardwareConfig.h"
+#include "KeyValues.h"
+#include "materialsystem/imaterialsystemhardwareconfig.h"
 
 void __MsgFunc_FFViewEffect(bf_read &msg);
 

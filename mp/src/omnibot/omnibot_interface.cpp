@@ -18,7 +18,7 @@
 #include "ff_utils.h"
 #include "ff_gamerules.h"
 #include "func_ladder.h"
-#include "engine\iserverplugin.h"
+#include "../public/engine/iserverplugin.h"
 extern ConVar mp_prematch;
 
 // Mirv: Just added this to stop all the redefinition warnings whenever i do a full recompile
@@ -36,7 +36,9 @@ extern ConVar mp_prematch;
 #include "omnibot_eventhandler.h"
 #include "Omni-Bot_Events.h"
 
+#include "valve_minmax_off.h"
 #include <vector>
+#include "valve_minmax_on.h"
 
 ConVar	omnibot_enable( "omnibot_enable", "1", FCVAR_ARCHIVE | FCVAR_PROTECTED);
 ConVar	omnibot_path( "omnibot_path", "omni-bot", FCVAR_ARCHIVE | FCVAR_PROTECTED);

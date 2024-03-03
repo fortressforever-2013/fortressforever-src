@@ -1,11 +1,11 @@
 
 #include "cbase.h"
-#include "ProxyEntity.h"
-#include "materialsystem/IMaterialVar.h"
-#include "materialsystem/ITexture.h"
+#include "proxyentity.h"
+#include "materialsystem/imaterialvar.h"
+#include "materialsystem/itexture.h"
 #include "vtf/vtf.h"
-#include "materialsystem/IMaterial.h"
-#include "materialsystem/IMaterialProxy.h"
+#include "materialsystem/imaterial.h"
+#include "materialsystem/imaterialproxy.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"

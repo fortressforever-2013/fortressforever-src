@@ -13,7 +13,7 @@
 
 #include "cbase.h"
 #include "c_ff_rail_effects.h"
-#include "ClientEffectPrecacheSystem.h"
+#include "clienteffectprecachesystem.h"
 #include "beamdraw.h"
 #include "model_types.h"
 

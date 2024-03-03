@@ -6,7 +6,7 @@
 
 #include "cbase.h"
 
-#if 1
+#if 0
 #include "mp3player.h"
 #include "KeyValues.h"
 #include "filesystem.h"
@@ -819,7 +819,7 @@ void CMP3Player::RemoveTempSounds()
 	FileFindHandle_t fh;
 
 	char path[ 512 ];
-	Q_strncpy( path, "sound/_mp3/*.mp3", sizeof( path ) );
+	Q_strncpy( path, "sound/_mp3/*.mp3", sizeof( path ) ); // */
 
 	char const *fn = g_pFullFileSystem->FindFirstEx( path, "MOD", &fh );
 	if ( fn )
@@ -1313,12 +1313,6 @@ void CMP3Player::PopulateTree()
 
 	PopulateLists();
 }
-
-// Instead of including windows.h
-extern "C"
-{
-	extern int __stdcall CopyFileA( char *pszSource, char *pszDest, int bFailIfExists );
-};
 
 void CMP3Player::GetLocalCopyOfSong( const MP3File_t &mp3, char *outsong, size_t outlen )
 {

@@ -10,7 +10,7 @@
 #include "recvproxy.h"
 #include "c_ff_team.h"
 
-#include <vgui/vgui.h>
+#include <vgui/VGUI.h>
 #include "vgui/ILocalize.h"
 
 // memdbgon must be the last include file in a .cpp file!!!

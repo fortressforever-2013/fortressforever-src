@@ -57,14 +57,14 @@ typedef struct menu_s {
 } menu_t;
 
 #define ADD_MENU_OPTION(id, name, icon, command) \
-	int MenuOption##id##();	\
-	MenuOption id##(name, icon, command, &MenuOption##id##, NULL);	\
-	int MenuOption##id##()
+	int MenuOption##id();	\
+	MenuOption id = MenuOption(name, icon, command, &MenuOption##id, NULL);	\
+	int MenuOption##id()
 
 #define ADD_MENU_BRANCH(id, name, icon, command, nextmenu) \
-	int MenuOption##id##();	\
-	MenuOption id##(name, icon, command, &MenuOption##id##, nextmenu);	\
-	int MenuOption##id##()
+        int MenuOption##id(); \
+        MenuOption id = MenuOption(name, icon, command, &MenuOption##id, nextmenu);      \
+        int MenuOption##id() \
 
 class CHudContextMenu : public CHudElement, public vgui::Panel
 {

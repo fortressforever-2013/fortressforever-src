@@ -136,13 +136,13 @@ public:
 	}
 
 	// Call this when the player dies
-	void CFFPipebombCounter::Reset(void)
+	void Reset(void)
 	{
 		m_iPipes = -1;
 	}
 
 	// Get the number of pipes out
-	int CFFPipebombCounter::GetPipes(void) const
+	int GetPipes(void) const
 	{
 		return m_iPipes;
 	}
@@ -276,7 +276,7 @@ public:
 	CFFWeaponBase* GetActiveFFWeapon() const;
 
 	C_BaseAnimating* BecomeRagdollOnClient(bool bCopyEntity);
-	IRagdoll* C_FFPlayer::GetRepresentativeRagdoll() const;
+	IRagdoll* GetRepresentativeRagdoll() const;
 
 	void FireBullet(
 		Vector vecSrc,
@@ -358,7 +358,7 @@ private:
 
 private:
 	// ---> FF movecode stuff (billdoor)
-	friend CFFGameMovement;
+//	friend CFFGameMovement;
 	void StartSkiing(void) { if (m_iSkiState == 0) m_iSkiState = 1; m_iLocalSkiState = 1; };
 	void StopSkiing(void) { if (m_iSkiState == 1) m_iSkiState = 0; m_iLocalSkiState = 0; };
 	int GetSkiState(void) { return m_iSkiState.Get(); };
@@ -624,7 +624,7 @@ private:
 	CNetworkVector(m_vecObjectiveOrigin);
 
 	// Dexter: grenade timer killin' shit
-	static void C_FFPlayer::StopGrenTimersListener(bf_read& msg);
+	static void StopGrenTimersListener(bf_read& msg);
 	//public:
 	//	void C_FFPlayer::GrenadeTimerExpired(C_FFTimer *pTimer);
 public:

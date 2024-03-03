@@ -24,12 +24,6 @@ $Configuration
 		
 		$AdditionalOptions					"$BASE /std:c++17"
 	}
-	
-	$Linker
-	{
-		$AdditionalLibraryDirectories	"$THIRDPARTY\lua-5.1.5\lib;$BASE"
-		$AdditionalDependencies			"lua$_STATICLIB_EXT$BASE"
-	}
 }
 
 $Project "Server (FF)"
@@ -151,5 +145,11 @@ $Project "Server (FF)"
 		$File "$SRCDIR\omnibot\omnibot_interface.h"
 		$File "$SRCDIR\omnibot\TF_Config.h"
 		$File "$SRCDIR\omnibot\TF_Messages.h"
+	}
+
+	$Folder	"Link Libraries"
+	{
+		$ImpLib			"$LIBPUBLIC\lua"	[$WIN32]
+		$Lib            	lua	   [$LINUX]
 	}
 }

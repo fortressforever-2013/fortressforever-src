@@ -14,8 +14,10 @@
 #ifndef ff_playercommand_H
 #define ff_playercommand_H
 
+#include "valve_minmax_off.h"
 #include <map>
 #include <string>
+#include "valve_minmax_on.h"
 
 // use this macro do define commands that are trivial on the client (exist only to enable tab completion)
 // the implementation of the command should reside on the server dll as a member of CFFPlayer

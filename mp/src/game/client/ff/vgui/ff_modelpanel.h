@@ -17,7 +17,7 @@
 #include <vgui/ISurface.h>
 #include <vgui/ISystem.h>
 #include <vgui_controls/Panel.h>
-#include "color.h"
+#include "Color.h"
 
 namespace vgui
 {

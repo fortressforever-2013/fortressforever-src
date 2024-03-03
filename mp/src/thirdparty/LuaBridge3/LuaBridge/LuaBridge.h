@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "tier0/valve_minmax_off.h"
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -33,7 +34,7 @@
 #include <utility>
 #include <variant>
 #include <vector>
-
+#include "tier0/valve_minmax_on.h"
 
 // Begin File: Source/LuaBridge/detail/Config.h
 

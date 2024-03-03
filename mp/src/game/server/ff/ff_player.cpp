@@ -41,6 +41,7 @@
 // added these so I could cast to check for grenades that are not derived from projectile base
 // Could probably do it more cleanly but I just went with what was already in place.  -> Defrag
 #include "ff_grenade_napalmlet.h"
+#include "dt_common.h"
 
 // Lua includes
 extern "C"
@@ -284,7 +285,7 @@ void CC_Player_Kill( void )
 		}
 	}
 }
-static ConCommand kill("kill", CC_Player_Kill, "kills the player");
+static ConCommand ffkill("kill", CC_Player_Kill, "kills the player");
 
 // -------------------------------------------------------------------------------- //
 // Player animation event. Sent to the client when a player fires, jumps, reloads, etc..
@@ -420,6 +421,13 @@ END_SEND_TABLE( )
 BEGIN_SEND_TABLE_NOBASE( CFFPlayer, DT_FFNonLocalPlayerExclusive )
 END_SEND_TABLE()
 
+#undef offsetof
+#define offsetof(s,m)	(size_t)&(((s *)0)->m)
+#undef min
+#define min(a,b)  (((a) < (b)) ? (a) : (b))
+#undef max
+#define max(a,b)  (((a) > (b)) ? (a) : (b))
+
 IMPLEMENT_SERVERCLASS_ST( CFFPlayer, DT_FFPlayer )
 	SendPropExclude( "DT_BaseAnimating", "m_flPoseParameter" ),
 	SendPropExclude( "DT_BaseAnimating", "m_flPlaybackRate" ),	
@@ -447,8 +455,8 @@ IMPLEMENT_SERVERCLASS_ST( CFFPlayer, DT_FFPlayer )
 	// Data that only gets sent to the player as well as observers of the player
 	SendPropDataTable( "ffplayerobserverdata", 0, &REFERENCE_SEND_TABLE(DT_FFPlayerObserver), SendProxy_OnlyToObservers ),
 
-	SendPropAngle( SENDINFO_VECTORELEM(m_angEyeAngles, 0), 11 ),
-	SendPropAngle( SENDINFO_VECTORELEM(m_angEyeAngles, 1), 11 ),
+	SendPropAngle( SENDINFO_VECTORELEM( m_angEyeAngles, 0 ), 16, SPROP_CHANGES_OFTEN ),
+	SendPropAngle( SENDINFO_VECTORELEM( m_angEyeAngles, 1 ), 16, SPROP_CHANGES_OFTEN ),
 	SendPropEHandle( SENDINFO( m_hRagdoll ) ),
 
 	SendPropInt( SENDINFO( m_iClassStatus ), 4, SPROP_UNSIGNED ),   // AfterShock: this only uses the last hex digit i.e. 0x0000000F
@@ -3958,7 +3966,8 @@ void CFFPlayer::StatusEffectsThink( void )
 		if( gpGlobals->curtime > ( m_flLastOverHealthTick + FFDEV_OVERHEALTH_FREQ ) )
 		{
 			m_flLastOverHealthTick = gpGlobals->curtime;
-			m_iHealth = max( m_iHealth - FFDEV_REGEN_HEALTH, m_iMaxHealth );
+			int iMaxHealth = m_iMaxHealth;
+			m_iHealth = max( m_iHealth - FFDEV_REGEN_HEALTH, iMaxHealth );
 		}
 	}
 
@@ -7423,7 +7432,8 @@ int CFFPlayer::AddArmor( int iAmount )
 //-----------------------------------------------------------------------------
 int CFFPlayer::RemoveArmor( int iAmount )
 {
-	int iRemovedAmt = min( iAmount, m_iArmor );
+	int iArmor = m_iArmor;
+	int iRemovedAmt = min( iAmount, iArmor );
 
 	m_iArmor = clamp( m_iArmor - iAmount, 0, m_iArmor );
 

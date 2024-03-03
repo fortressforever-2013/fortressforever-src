@@ -66,9 +66,9 @@ extern ConVar replay_rendersetting_renderglow;
 #endif
 
 #include "c_ff_player.h"
-
+#include "valve_minmax_off.h"
 #include <string>
-
+#include "valve_minmax_on.h"
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 

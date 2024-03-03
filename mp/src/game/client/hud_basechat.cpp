@@ -8,7 +8,9 @@
 #include "cbase.h"
 #include "hud_basechat.h"
 
+#include "valve_minmax_off.h"
 #include <string>
+#include "valve_minmax_on.h"
 #include <vgui/IScheme.h>
 #include <vgui/IVGui.h>
 #include "iclientmode.h"
@@ -195,14 +197,26 @@ wchar_t* ReadChatTextString( bf_read &msg, OUT_Z_BYTECAP(outSizeInBytes) wchar_t
 	const char* token = strtok(szString, " ");
 	while (token != NULL)
 	{
-		wchar_t *pBuf = g_pVGuiLocalize->Find(token);
-
-		if (!pBuf)
+		if (token[0] == '#')
+		{
+			wchar_t* pBuf = g_pVGuiLocalize->Find(token);
+			if (pBuf)
+			{
+				V_wcsncat(translated, pBuf, outSizeInBytes);
+			}
+			else
+			{
+				g_pVGuiLocalize->ConvertANSIToUnicode(token, temp, outSizeInBytes);
+				V_wcsncat(translated, temp, outSizeInBytes);
+			}
+		}
+		else
+		{
 			g_pVGuiLocalize->ConvertANSIToUnicode(token, temp, outSizeInBytes);
+			V_wcsncat(translated, temp, outSizeInBytes);
+		}
 
-		V_wcsncat(translated, (pBuf ? pBuf : temp), outSizeInBytes);
 		V_wcsncat(translated, L" ", outSizeInBytes);
-
 		token = strtok(NULL, " ");
 	}
 

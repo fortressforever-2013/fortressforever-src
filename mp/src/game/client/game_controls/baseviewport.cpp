@@ -26,7 +26,7 @@
 #include <vgui/IScheme.h>
 #include <vgui/IVGui.h>
 #include <vgui/ILocalize.h>
-#include <vgui/ipanel.h>
+#include <vgui/IPanel.h>
 
 //#include <keydefs.h> // K_ENTER, ... define
 #include <igameresources.h>

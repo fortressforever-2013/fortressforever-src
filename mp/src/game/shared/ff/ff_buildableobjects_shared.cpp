@@ -31,7 +31,7 @@
 	#include "omnibot_interface.h"	
 #else
 	#include "c_gib.h"
-	#include "ClientEffectPrecacheSystem.h"
+	#include "clienteffectprecachesystem.h"
 	#include "c_te_effect_dispatch.h"
 #endif
 

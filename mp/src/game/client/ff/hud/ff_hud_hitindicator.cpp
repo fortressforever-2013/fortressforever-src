@@ -11,10 +11,10 @@
 #include "iclientmode.h"
 #include "hud_macros.h"
 #include "view.h"
-#include "vgui_controls/controls.h"
+#include "vgui_controls/Controls.h"
 #include <vgui_controls/Panel.h>
 #include "vgui/ISurface.h"
-#include "IVRenderView.h"
+#include "ivrenderview.h"
 #include "ff_weapon_base.h"
 #include "c_ff_player.h"
 #include "ff_utils.h"

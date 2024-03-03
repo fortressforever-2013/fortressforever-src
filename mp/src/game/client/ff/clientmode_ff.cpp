@@ -10,13 +10,13 @@
 #include "clientmode_ff.h"
 #include "cdll_client_int.h"
 #include "iinput.h"
-#include "vgui/isurface.h"
-#include "vgui/ipanel.h"
+#include "vgui/ISurface.h"
+#include "vgui/IPanel.h"
 #include <vgui_controls/AnimationController.h>
 #include "ivmodemanager.h"
 //#include "BuyMenu.h"
 #include "filesystem.h"
-#include "vgui/ivgui.h"
+#include "vgui/IVGui.h"
 #include "hud_chat.h"
 #include "view_shared.h"
 #include "view.h"
@@ -26,7 +26,6 @@
 #include "dlight.h"
 #include <imapoverview.h>
 #include "c_playerresource.h"
-#include <keyvalues.h>
 #include "text_message.h"
 #include "panelmetaclassmgr.h"
 #include "c_soundscape.h"
@@ -46,6 +45,8 @@ ConVar default_fov( "default_fov", "90", FCVAR_ARCHIVE, "Default FOV value", tru
 extern ConVar v_viewmodel_fov;
 
 IClientMode *g_pClientMode = NULL;
+
+extern CFFDiscordManager _discord;
 
 // --------------------------------------------------------------------------------- //
 // CFFModeManager.
@@ -69,6 +70,7 @@ IVModeManager *modemanager = ( IVModeManager * )&g_ModeManager;
 // --------------------------------------------------------------------------------- //
 
 #define SCREEN_FILE		"scripts/vgui_screens.txt"
+extern CFFDiscordManager _discord;
 
 void CFFModeManager::Init()
 {
