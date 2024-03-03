@@ -539,7 +539,7 @@ public:
 
 	virtual bool			CanBreatheUnderwater() const { return false; }
 	virtual void			PlayerUse( void );
-	virtual void			PlayUseDenySound() {}
+	virtual void			PlayUseDenySound() { EmitSound("Player.UseDeny"); }
 
 	virtual CBaseEntity		*FindUseEntity( void );
 	virtual bool			IsUseableEntity( CBaseEntity *pEntity, unsigned int requiredCaps );

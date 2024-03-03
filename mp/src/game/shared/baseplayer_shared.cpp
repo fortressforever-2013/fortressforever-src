@@ -1428,6 +1428,10 @@ void CBasePlayer::PlayerUse ( void )
 	}
 	else if ( m_afButtonPressed & IN_USE )
 	{
+		// haha, very funny
+		if ( !IsAlive() && m_iHealth <= 0 )
+			return;
+
 		PlayUseDenySound();
 	}
 #endif
