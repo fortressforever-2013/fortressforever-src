@@ -539,6 +539,10 @@ void CHudContextMenu::Display(bool state)
 	if (!pPlayer)
 		return;
 
+	// no.
+	if ( !pPlayer->IsAlive() && pPlayer->m_iHealth <= 0 )
+		return;
+
 	// There is a menu and it's cancelling
 	if (m_pMenu && m_fVisible == true && state == false)
 	{
