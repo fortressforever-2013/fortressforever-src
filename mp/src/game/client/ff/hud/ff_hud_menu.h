@@ -111,6 +111,7 @@ public:
 
 	int		KeyEvent(int down, int keynum, const char *pszCurrentBinding);
 
+	virtual void Reset() { m_flLastCommand = 0.0f; }
 	float	m_flPosX;
 	float	m_flPosY;
 
