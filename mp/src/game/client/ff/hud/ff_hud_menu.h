@@ -109,8 +109,7 @@ public:
 	void	SetMenu();
 	void	DoCommand(const char *cmd);
 
-	int		KeyEvent(int down, int keynum, const char *pszCurrentBinding);
-
+	int		KeyInput(int down, int keynum, const char *pszCurrentBinding);
 	virtual void Reset() { m_flLastCommand = 0.0f; }
 	float	m_flPosX;
 	float	m_flPosY;

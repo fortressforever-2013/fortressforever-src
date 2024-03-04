@@ -71,6 +71,7 @@ extern ConVar replay_rendersetting_renderglow;
 #include "valve_minmax_on.h"
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+#include <ff_hud_menu.h>
 
 #define ACHIEVEMENT_ANNOUNCEMENT_MIN_TIME 10
 
@@ -774,12 +775,6 @@ int	ClientModeShared::KeyInput( int down, ButtonCode_t keynum, const char *pszCu
 		return pWeapon->KeyInput( down, keynum, pszCurrentBinding );
 	}
 
-	// --> Mirv: Check keypresses for the context menu
-	if (!HudContextMenuInput(down, keynum, pszCurrentBinding))
-		return 0;
-	// <-- Mirv
-
-
 	return 1;
 }
 
@@ -821,11 +816,21 @@ int ClientModeShared::HandleSpectatorKeyInput( int down, ButtonCode_t keynum, co
 	return 1;
 }
 
+extern CHudContextMenu* g_pHudContextMenu;
+
 //-----------------------------------------------------------------------------
 // Purpose: See if hud elements want key input. Return 0 if the key is swallowed
 //-----------------------------------------------------------------------------
 int ClientModeShared::HudElementKeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding )
 {
+	if ( g_pHudContextMenu )
+	{
+		if ( !g_pHudContextMenu->KeyInput(down, keynum, pszCurrentBinding) )
+		{
+			return 0;
+		}
+	}
+
 	if ( m_pWeaponSelection )
 	{
 		if ( !m_pWeaponSelection->KeyInput( down, keynum, pszCurrentBinding ) )

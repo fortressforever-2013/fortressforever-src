@@ -854,15 +854,15 @@ void CHudContextMenu::MouseMove(float *x, float *y)
 	}
 }
 
-int CHudContextMenu::KeyEvent(int down, int keynum, const char *pszCurrentBinding)
+int CHudContextMenu::KeyInput(int down, int keynum, const char *pszCurrentBinding)
 {
 	if (!m_fVisible || !down) 
 		return 1;
 
-	if (keynum < '0' || keynum > '9')
+	if (keynum < KEY_0 || keynum > KEY_9)
 		return 1;
 
-	int iMenuOption = (keynum == '0' ? 9 : keynum - '1');
+	int iMenuOption = (keynum == KEY_0 ? 9 : keynum - KEY_1);
 
 	if (iMenuOption >= m_nOptions)
 		return 1;
@@ -884,7 +884,7 @@ int CHudContextMenu::KeyEvent(int down, int keynum, const char *pszCurrentBindin
 int HudContextMenuInput(int down, int keynum, const char *pszCurrentBinding)
 {
 	if (g_pHudContextMenu)
-		return g_pHudContextMenu->KeyEvent(down, keynum, pszCurrentBinding);
+		return g_pHudContextMenu->KeyInput(down, keynum, pszCurrentBinding);
 	return 1;
 }
 
