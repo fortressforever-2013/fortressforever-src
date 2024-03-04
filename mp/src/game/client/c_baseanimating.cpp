@@ -290,6 +290,8 @@ BEGIN_DATADESC( C_ClientRagdoll )
 
 END_DATADESC()
 
+static ConVar ragdoll_fadeaftertime("ragdoll_fadeaftertime", "5.0", FCVAR_ARCHIVE, "After this many seconds, the ragdoll will disappear.");
+
 C_ClientRagdoll::C_ClientRagdoll( bool bRestoring )
 {
 	m_iCurrentFriction = 0;
@@ -300,8 +302,7 @@ C_ClientRagdoll::C_ClientRagdoll( bool bRestoring )
 	m_bImportant = false;
 	m_bNoModelParticles = false;
 	
-	ConVarRef ragdoll_sleepaftertime("ragdoll_sleepafterTime");
-	m_flFadeOutTime = gpGlobals->curtime + ragdoll_sleepaftertime.GetFloat();
+	m_flFadeOutTime = gpGlobals->curtime + ragdoll_fadeaftertime.GetFloat();
 
 	SetClassname("client_ragdoll");
 
