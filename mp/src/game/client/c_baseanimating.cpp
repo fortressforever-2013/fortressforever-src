@@ -299,6 +299,9 @@ C_ClientRagdoll::C_ClientRagdoll( bool bRestoring )
 	m_bFadingOut = false;
 	m_bImportant = false;
 	m_bNoModelParticles = false;
+	
+	ConVarRef ragdoll_sleepaftertime("ragdoll_sleepafterTime");
+	m_flFadeOutTime = gpGlobals->curtime + ragdoll_sleepaftertime.GetFloat();
 
 	SetClassname("client_ragdoll");
 
@@ -585,6 +588,9 @@ void C_ClientRagdoll::ClientThink( void )
 
 	HandleAnimatedFriction();
 
+	if ( gpGlobals->curtime >= m_flFadeOutTime )
+		m_bReleaseRagdoll = true;
+	
 	FadeOut();
 }
 

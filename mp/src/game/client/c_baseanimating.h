@@ -710,6 +710,8 @@ private:
 	float m_flScaleEnd[NUM_HITBOX_FIRES];
 	float m_flScaleTimeStart[NUM_HITBOX_FIRES];
 	float m_flScaleTimeEnd[NUM_HITBOX_FIRES];
+
+	float m_flFadeOutTime;
 };
 
 //-----------------------------------------------------------------------------
