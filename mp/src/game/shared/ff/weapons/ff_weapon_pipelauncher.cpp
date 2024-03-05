@@ -251,7 +251,7 @@ void CFFWeaponPipeLauncher::Synchronise()
 
 		if (w && w->GetWeaponID() == FF_WEAPON_GRENADELAUNCHER)
 		{
-			w->m_iClip1 = m_iClip1;
+			w->SetClip1(m_iClip1);
 			break;
 		}
 	}

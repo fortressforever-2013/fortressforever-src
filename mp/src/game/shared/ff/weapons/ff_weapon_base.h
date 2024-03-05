@@ -254,6 +254,10 @@ public:
 	virtual float		GetRecoilMultiplier( void ) { return 1.0f; }
 	bool				m_bMuzzleFlash;
 
+	// Let grenade launchers and pipe launchers report variable changes accurately
+	void				SetClip1(int iAmount) { m_iClip1 = iAmount; }
+	int					GetClip1() { return m_iClip1; }
+
 private:
 
 	CFFWeaponBase(const CFFWeaponBase &);
