@@ -99,7 +99,7 @@ ifeq ($(USE_VALVE_BINDIR),1)
 	STRIP_FLAGS =
 else
 	# Linux desktop client (or client/dedicated server in chroot).
-	STRIP_FLAGS = -x
+	STRIP_FLAGS = # -x
 endif
 
 ifeq ($(CLANG_BUILD),1)
