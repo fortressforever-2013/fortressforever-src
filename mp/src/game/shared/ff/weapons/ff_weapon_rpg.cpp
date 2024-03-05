@@ -50,7 +50,7 @@ public:
 	virtual bool		SendWeaponAnim(int iActivity);
 	virtual FFWeaponID	GetWeaponID() const	{ return FF_WEAPON_RPG; }
 
-	bool	m_fStartedReloading;
+	CNetworkVar(bool, m_fStartedReloading);
 
 private:
 	CFFWeaponRPG(const CFFWeaponRPG &);
@@ -63,9 +63,17 @@ private:
 IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponRPG, DT_FFWeaponRPG) 
 
 BEGIN_NETWORK_TABLE(CFFWeaponRPG, DT_FFWeaponRPG) 
+#ifdef CLIENT_DLL
+RecvPropBool(RECVINFO(m_fStartedReloading)),
+#else
+SendPropBool(SENDINFO(m_fStartedReloading)),
+#endif
 END_NETWORK_TABLE() 
 
 BEGIN_PREDICTION_DATA(CFFWeaponRPG) 
+#ifdef CLIENT_DLL
+DEFINE_PRED_FIELD(m_fStartedReloading, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
+#endif
 END_PREDICTION_DATA() 
 
 LINK_ENTITY_TO_CLASS(ff_weapon_rpg, CFFWeaponRPG);
