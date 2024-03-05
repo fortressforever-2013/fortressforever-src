@@ -157,6 +157,9 @@ typedef enum
 
 	// End of physical weapons
 	// =======================
+	
+	// Cubemap
+	FF_WEAPON_CUBEMAP,
 
 	// Buildables
 	FF_WEAPON_DEPLOYDISPENSER, 

@@ -171,9 +171,6 @@ extern void HudContextForceClose();
 #include "../c_weapon__stubs.h"
 #include "ff_weapon_base.h"
 
-STUB_WEAPON_CLASS(weapon_cubemap, WeaponCubemap, C_BaseCombatWeapon);
-
-
 CLIENTEFFECT_REGISTER_BEGIN(PrecacheTranquilizedSprite)
 CLIENTEFFECT_MATERIAL("sprites/ff_sprite_tranquilized")
 CLIENTEFFECT_REGISTER_END()

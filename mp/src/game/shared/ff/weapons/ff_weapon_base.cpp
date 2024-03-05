@@ -704,3 +704,31 @@ CFFWeaponBase::~CFFWeaponBase()
 	}
 #endif
 }
+
+
+#ifdef CLIENT_DLL
+#define CFFWeaponCubemap C_FFWeaponCubemap
+#endif
+
+class CFFWeaponCubemap : public CFFWeaponBase
+{
+public:
+	DECLARE_CLASS(CFFWeaponCubemap, CFFWeaponBase);
+	DECLARE_NETWORKCLASS();
+	DECLARE_PREDICTABLE();
+
+	virtual FFWeaponID GetWeaponID() const { return FF_WEAPON_CUBEMAP; }
+	virtual void PrimaryAttack(void) {}
+	virtual void SecondaryAttack(void) {}
+};
+
+IMPLEMENT_NETWORKCLASS_ALIASED( FFWeaponCubemap, DT_FFWeaponCubemap )
+
+BEGIN_NETWORK_TABLE(CFFWeaponCubemap, DT_FFWeaponCubemap)
+END_NETWORK_TABLE()
+
+BEGIN_PREDICTION_DATA(CFFWeaponCubemap)
+END_PREDICTION_DATA()
+
+LINK_ENTITY_TO_CLASS(weapon_cubemap, CFFWeaponCubemap);
+PRECACHE_WEAPON_REGISTER(weapon_cubemap);
