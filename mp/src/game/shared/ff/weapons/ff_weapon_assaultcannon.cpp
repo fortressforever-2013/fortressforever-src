@@ -59,8 +59,6 @@
 #define FF_AC_SPEEDEFFECT_MAX 0.2f
 #define FF_AC_SPEEDEFFECT_MIN 0.7f
 
-#ifdef CLIENT_DLL
-
 #define FF_AC_BARRELROTATIONSOUND_VOLUME_HIGH		1.0f
 #define FF_AC_BARRELROTATIONSOUND_VOLUME_LOW		0.01f
 #define FF_AC_BARRELROTATIONSOUND_PITCH_HIGH		100.0f
@@ -76,21 +74,56 @@
 
 #define FF_AC_CHARGETIMEBUFFERED_UPDATEINTERVAL 0.02f
 
-#endif
-
 //=============================================================================
 // CFFWeaponAssaultCannon tables
 //=============================================================================
 
+/*
+* 	CNetworkVar(bool, m_bClamped);
+	CNetworkVar(bool, m_bAmmoTick);
+* 	CNetworkVar(float, m_flLastTick);
+	CNetworkVar(float, m_flDeployTick);
+	CNetworkVar(float, m_flTriggerPressed);
+	CNetworkVar(float, m_flTriggerReleased);
+	CNetworkVar(bool, m_bFiring);
+	CNetworkVar(float, m_flChargeTime);
+	CNetworkVar(float, m_flMaxChargeTime);
+	CNetworkVar(int, m_iBarrelRotation);
+	CNetworkVar(float, m_flBarrelRotationValue);
+	CNetworkVar(float, m_flBarrelRotationDelta);
+	CNetworkVar(float, m_flBarrelRotationStopTimer);
+*/
 IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponAssaultCannon, DT_FFWeaponAssaultCannon) 
 
 BEGIN_NETWORK_TABLE(CFFWeaponAssaultCannon, DT_FFWeaponAssaultCannon) 
 #ifdef GAME_DLL
 	SendPropFloat(SENDINFO(m_flTriggerPressed)),
 	SendPropFloat(SENDINFO(m_flTriggerReleased)),
+	SendPropFloat(SENDINFO(m_flLastTick)),
+	SendPropFloat(SENDINFO(m_flDeployTick)),
+	SendPropFloat(SENDINFO(m_flChargeTime)),
+	SendPropFloat(SENDINFO(m_flMaxChargeTime)),
+	SendPropBool(SENDINFO(m_bClamped)),
+	SendPropBool(SENDINFO(m_bAmmoTick)),
+	SendPropBool(SENDINFO(m_bFiring)),
+	SendPropInt(SENDINFO(m_iBarrelRotation)),
+	SendPropFloat(SENDINFO(m_flBarrelRotationValue)),
+	SendPropFloat(SENDINFO(m_flBarrelRotationDelta)),
+	SendPropFloat(SENDINFO(m_flBarrelRotationStopTimer)),
 #else
 	RecvPropFloat(RECVINFO(m_flTriggerPressed)),
 	RecvPropFloat(RECVINFO(m_flTriggerReleased)),
+	RecvPropFloat(RECVINFO(m_flLastTick)),
+	RecvPropFloat(RECVINFO(m_flDeployTick)),
+	RecvPropFloat(RECVINFO(m_flChargeTime)),
+	RecvPropFloat(RECVINFO(m_flMaxChargeTime)),
+	RecvPropBool(RECVINFO(m_bClamped)),
+	RecvPropBool(RECVINFO(m_bAmmoTick)),
+	RecvPropBool(RECVINFO(m_bFiring)),
+	RecvPropInt(RECVINFO(m_iBarrelRotation)),
+	RecvPropFloat(RECVINFO(m_flBarrelRotationValue)),
+	RecvPropFloat(RECVINFO(m_flBarrelRotationDelta)),
+	RecvPropFloat(RECVINFO(m_flBarrelRotationStopTimer)),
 #endif
 END_NETWORK_TABLE() 
 
@@ -98,6 +131,17 @@ END_NETWORK_TABLE()
 BEGIN_PREDICTION_DATA(CFFWeaponAssaultCannon) 
 	DEFINE_PRED_FIELD_TOL(m_flTriggerPressed, FIELD_FLOAT, FTYPEDESC_INSENDTABLE, 1.0f),
 	DEFINE_PRED_FIELD_TOL(m_flTriggerReleased, FIELD_FLOAT, FTYPEDESC_INSENDTABLE, 1.0f),
+	DEFINE_PRED_FIELD(m_flLastTick, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
+	DEFINE_PRED_FIELD(m_flDeployTick, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
+	DEFINE_PRED_FIELD(m_flChargeTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
+	DEFINE_PRED_FIELD(m_flMaxChargeTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
+	DEFINE_PRED_FIELD(m_bClamped, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
+	DEFINE_PRED_FIELD(m_bAmmoTick, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
+	DEFINE_PRED_FIELD(m_bFiring, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
+	DEFINE_PRED_FIELD(m_iBarrelRotation, FIELD_INTEGER, FTYPEDESC_INSENDTABLE),
+	DEFINE_PRED_FIELD(m_flBarrelRotationValue, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
+	DEFINE_PRED_FIELD(m_flBarrelRotationDelta, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
+	DEFINE_PRED_FIELD(m_flBarrelRotationStopTimer, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
 END_PREDICTION_DATA() 
 #endif
 
@@ -124,15 +168,11 @@ CFFWeaponAssaultCannon::CFFWeaponAssaultCannon()
 	m_bClamped = false;
 	m_flMaxChargeTime = FF_AC_MAXCHARGETIME;
 
-#ifdef CLIENT_DLL
-
-	m_flChargeTimeBuffered = 0.0f;
-	m_flChargeTimeBufferedNextUpdate = 0.0f;
-
 	m_iBarrelRotation = -69;
 	m_flBarrelRotationValue = 0.0f;
 	m_flBarrelRotationDelta = 0.0f;
 	m_flBarrelRotationStopTimer = 0.0f;
+#ifdef CLIENT_DLL
 	m_sndBarrelRotation = NULL;
 	m_sndLoopShot = NULL;
 #endif
@@ -289,17 +329,10 @@ bool CFFWeaponAssaultCannon::Deploy()
 		if ( pOwner->m_nButtons & IN_ATTACK || pOwner->m_afButtonPressed & IN_ATTACK )
 			m_flTriggerPressed = gpGlobals->curtime; // set this if we come into this while +attacking
 	
-#ifdef CLIENT_DLL
-
-	m_flChargeTimeBuffered = 0.0f;
-	m_flChargeTimeBufferedNextUpdate = 0.0f;
-
 	m_iBarrelRotation = -69;
 	m_flBarrelRotationValue = 0.0f;
 	m_flBarrelRotationDelta = 0.0f;
 	m_flBarrelRotationStopTimer = 0.0f;
-
-#endif
 
 	return BaseClass::Deploy();
 }
@@ -436,17 +469,6 @@ void CFFWeaponAssaultCannon::UpdateChargeTime()
 
 	if (m_flChargeTime < 0)
 		m_flChargeTime = 0;
-
-#ifdef CLIENT_DLL
-
-	// create a little buffer so some client stuff can be more smooth
-	if (m_flChargeTimeBufferedNextUpdate <= gpGlobals->curtime)
-	{
-		m_flChargeTimeBufferedNextUpdate = gpGlobals->curtime + FF_AC_CHARGETIMEBUFFERED_UPDATEINTERVAL;
-		m_flChargeTimeBuffered = m_flChargeTime;
-	}
-
-#endif
 }
 
 void CFFWeaponAssaultCannon::ItemPostFrame()
@@ -466,9 +488,7 @@ void CFFWeaponAssaultCannon::ItemPostFrame()
 	// Keep track of fire duration for anywhere else it may be needed
 	UpdateChargeTime();
 
-#ifdef CLIENT_DLL
 	UpdateBarrelRotation();
-#endif
 
 	float flTimeSinceRelease = gpGlobals->curtime - m_flTriggerReleased;
 
@@ -731,7 +751,7 @@ void CFFWeaponAssaultCannon::StopLoopShotSound()
 		m_sndLoopShot = NULL;
 	}
 }
-
+#endif
 //-----------------------------------------------------------------------------
 // Purpose: Keep the barrels spinning
 //-----------------------------------------------------------------------------
@@ -758,9 +778,9 @@ void CFFWeaponAssaultCannon::UpdateBarrelRotation()
 			m_flBarrelRotationValue = pVM->GetPoseParameter(m_iBarrelRotation);
 
 		// the barrel is spinning
-		if (m_flChargeTimeBuffered > 0 || m_bFiring)
+		if (m_flChargeTime > 0 || m_bFiring)
 		{
-			m_flBarrelRotationDelta = gpGlobals->frametime * FLerp( FF_AC_BARRELROTATION_SPEED_MIN, FF_AC_BARRELROTATION_SPEED_MAX, m_flChargeTimeBuffered / FF_AC_MAXCHARGETIME );
+			m_flBarrelRotationDelta = gpGlobals->frametime * Lerp(  m_flChargeTime / FF_AC_MAXCHARGETIME, FF_AC_BARRELROTATION_SPEED_MIN, FF_AC_BARRELROTATION_SPEED_MAX );
 			m_flBarrelRotationStopTimer = 0.0f;
 		}
 		// barrel needs to stop spinning
@@ -770,7 +790,7 @@ void CFFWeaponAssaultCannon::UpdateBarrelRotation()
 			m_flBarrelRotationStopTimer = clamp(m_flBarrelRotationStopTimer + gpGlobals->frametime, 0, FF_AC_WINDDOWNTIME);
 
 			// smooth transition (FLerp rules)
-			m_flBarrelRotationDelta = gpGlobals->frametime * FLerp( FF_AC_BARRELROTATION_SPEED_MIN, 0, m_flBarrelRotationStopTimer / FF_AC_WINDDOWNTIME );
+			m_flBarrelRotationDelta = gpGlobals->frametime * Lerp( m_flBarrelRotationStopTimer / FF_AC_WINDDOWNTIME, FF_AC_BARRELROTATION_SPEED_MIN, 0.0f );
 		}
 		else
 			// reset the timer
@@ -784,7 +804,7 @@ void CFFWeaponAssaultCannon::UpdateBarrelRotation()
 
 			m_flBarrelRotationValue += m_flBarrelRotationDelta;
 			m_flBarrelRotationValue = pVM->SetPoseParameter(m_iBarrelRotation, m_flBarrelRotationValue);
-
+#ifdef CLIENT_DLL
 			float flPercent = (m_flBarrelRotationDelta / gpGlobals->frametime) / FF_AC_BARRELROTATION_SPEED_MAX;
 			float flVolume = FLerp( FF_AC_BARRELROTATIONSOUND_VOLUME_LOW, FF_AC_BARRELROTATIONSOUND_VOLUME_HIGH, flPercent );
 			float flPitch = FLerp( FF_AC_BARRELROTATIONSOUND_PITCH_LOW, FF_AC_BARRELROTATIONSOUND_PITCH_HIGH, flPercent );
@@ -830,10 +850,11 @@ void CFFWeaponAssaultCannon::UpdateBarrelRotation()
 		else
 		{
 			StopBarrelRotationSound();
+#endif
 		}
 	}
 }
-
+#ifdef CLIENT_DLL
 //-----------------------------------------------------------------------------
 // Purpose: This is a awful function to quickly get the AC charge. It will be
 //			replaced tomorrow.

@@ -66,25 +66,22 @@ public:
 private:
 	virtual float GetFireRate();
 	Vector GetFireSpread();
-	bool m_bClamped;
-	bool m_bAmmoTick;
+	CNetworkVar(bool, m_bClamped);
+	CNetworkVar(bool, m_bAmmoTick);
 
+	void UpdateBarrelRotation();
+	CNetworkVar(int, m_iBarrelRotation);
+	CNetworkVar(float, m_flBarrelRotationValue);
+	CNetworkVar(float, m_flBarrelRotationDelta);
+	CNetworkVar(float, m_flBarrelRotationStopTimer);
 
 #ifdef CLIENT_DLL
 
-	void UpdateBarrelRotation();
 	void StopBarrelRotationSound();
-	int m_iBarrelRotation;
-	float m_flBarrelRotationValue;
-	float m_flBarrelRotationDelta;
-	float m_flBarrelRotationStopTimer;
 	CSoundPatch *m_sndBarrelRotation;
 
 	void StopLoopShotSound();
 	CSoundPatch *m_sndLoopShot;
-
-	float m_flChargeTimeBuffered;
-	float m_flChargeTimeBufferedNextUpdate;
 
 #endif
 
@@ -97,13 +94,13 @@ private:
 
 public:	// temp while i expose m_flChargeTime to global function
 
-	float m_flLastTick;
-	float m_flDeployTick;
+	CNetworkVar(float, m_flLastTick);
+	CNetworkVar(float, m_flDeployTick);
 	CNetworkVar(float, m_flTriggerPressed);
 	CNetworkVar(float, m_flTriggerReleased);
-	bool m_bFiring;
-	float m_flChargeTime;
-	float m_flMaxChargeTime;
+	CNetworkVar(bool, m_bFiring);
+	CNetworkVar(float, m_flChargeTime);
+	CNetworkVar(float, m_flMaxChargeTime);
 };
 
 #endif // FF_WEAPON_ASSAULTCANNON_H
