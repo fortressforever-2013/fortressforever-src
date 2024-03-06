@@ -5538,7 +5538,8 @@ void CBasePlayer::CommitSuicide( bool bExplode /*= false*/, bool bForce /*= fals
 		}
 		else
 		{
-			CTakeDamageInfo info(NULL, this, pPlayer ? pPlayer->GetHealth() + 999 : 0, fDamage); // |-- Mirv: pInflictor = NULL so that death message is "x died."
+			int iGib = bExplode ? 999 : 10;
+			CTakeDamageInfo info(NULL, this, pPlayer ? pPlayer->GetHealth() + iGib : 0, fDamage); // |-- Mirv: pInflictor = NULL so that death message is "x died."
 			pPlayer->TakeDamage(info);
 		}
 	}
