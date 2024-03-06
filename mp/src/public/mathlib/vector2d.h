@@ -20,10 +20,12 @@
 #include "tier0/basetypes.h"
 
 // For rand(). We really need a library!
-#include <stdlib.h>
+// #include <stdlib.h> // no we do not!
 
 #include "tier0/dbg.h"
 #include "mathlib/math_pfns.h"
+
+#include "vstdlib/random.h"
 
 //=========================================================
 // 2D Vector2D
@@ -239,8 +241,8 @@ inline void Vector2D::Init( vec_t ix, vec_t iy )
 
 inline void Vector2D::Random( float minVal, float maxVal )
 {
-	x = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
-	y = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
+	x = RandomFloat(minVal, maxVal);
+	y = RandomFloat(minVal, maxVal);
 }
 
 inline void Vector2DClear( Vector2D& a )

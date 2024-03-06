@@ -14,6 +14,7 @@
 #include "particlemgr.h"
 #include "cdll_client_int.h"
 #include "timedevent.h"
+#include "vstdlib/random.h"
 
 // Lerp between two floating point numbers.
 inline float FLerp(float minVal, float maxVal, float t)
@@ -29,7 +30,7 @@ inline Vector VecLerp(const Vector &minVal, const Vector &maxVal, float t)
 // Get a random floating point number between the two specified numbers.
 inline float FRand(float minVal, float maxVal)
 {
-	return minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
+	return RandomFloat(minVal, maxVal);
 }
 
 // Apply velocity and acceleration to position and acceleration to velocity.

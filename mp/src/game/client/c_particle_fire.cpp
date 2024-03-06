@@ -227,9 +227,9 @@ void C_ParticleFire::Update(float fTimeDelta)
 				static int nTries = 50;
 				for(int iTry=0; iTry < nTries; iTry++)
 				{
-					FireEmitter *pSourceEmitter = &m_Emitters[rand() % m_nEmitters];
+					FireEmitter* pSourceEmitter = &m_Emitters[RandomInt(0, m_nEmitters - 1)];
 					
-					int iOffset = rand() % NUM_FIREGRID_OFFSETS;
+					int iOffset = RandomInt(0, NUM_FIREGRID_OFFSETS - 1);
 					if(pSourceEmitter->m_DirectionsTested & (1 << iOffset))
 						continue;
 
@@ -279,7 +279,7 @@ void C_ParticleFire::Update(float fTimeDelta)
 				static float particleSpeed = 15;
 				pParticle->m_StartPos = pEmitter->m_Pos;
 				pParticle->m_Direction = g_FireSpreadDirection * particleSpeed + RandomVector(0, particleSpeed*0.5);
-				pParticle->m_iRamp = rand() % NUM_FIRE_RAMPS;
+				pParticle->m_iRamp = RandomInt(0, NUM_FIRE_RAMPS - 1);
 				pParticle->m_Lifetime = 0;
 			}
 		}

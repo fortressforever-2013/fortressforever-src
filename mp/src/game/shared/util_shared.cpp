@@ -199,13 +199,7 @@ Vector SharedRandomVector( const char *sharedname, float minVal, float maxVal, i
 
 	int seed = SeedFileLineHash( CBaseEntity::GetPredictionRandomSeed(), sharedname, additionalSeed );
 	RandomSeed( seed );
-	// HACK:  Can't call RandomVector/Angle because it uses rand() not vstlib Random*() functions!
-	// Get a random vector.
-	Vector random;
-	random.x = RandomFloat( minVal, maxVal );
-	random.y = RandomFloat( minVal, maxVal );
-	random.z = RandomFloat( minVal, maxVal );
-	return random;
+	return RandomVector(minVal, maxVal);
 }
 
 QAngle SharedRandomAngle( const char *sharedname, float minVal, float maxVal, int additionalSeed /*=0*/ )
@@ -214,14 +208,7 @@ QAngle SharedRandomAngle( const char *sharedname, float minVal, float maxVal, in
 
 	int seed = SeedFileLineHash( CBaseEntity::GetPredictionRandomSeed(), sharedname, additionalSeed );
 	RandomSeed( seed );
-
-	// HACK:  Can't call RandomVector/Angle because it uses rand() not vstlib Random*() functions!
-	// Get a random vector.
-	Vector random;
-	random.x = RandomFloat( minVal, maxVal );
-	random.y = RandomFloat( minVal, maxVal );
-	random.z = RandomFloat( minVal, maxVal );
-	return QAngle( random.x, random.y, random.z );
+	return RandomAngle(minVal, maxVal);
 }
 
 

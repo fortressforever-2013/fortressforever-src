@@ -506,9 +506,9 @@ void C_ParticleSmokeGrenade::UpdateParticleAndFindTrade( int iParticle, float fT
 	int x, y, z;
 	GetParticleInfoXYZ(iParticle, x, y, z);
 
-	int xCountOffset = rand();
-	int yCountOffset = rand();
-	int zCountOffset = rand();
+	int xCountOffset = RandomInt(0, 2);
+	int yCountOffset = RandomInt(0, 2);
+	int zCountOffset = RandomInt(0, 2);
 
 	bool bFound = false;
 	for(int xCount=0; xCount < 3 && !bFound; xCount++)
@@ -859,12 +859,12 @@ void C_ParticleSmokeGrenade::FillVolume()
 					*/
 					{
 						SmokeGrenadeParticle *pParticle = 
-							(SmokeGrenadeParticle*)m_ParticleEffect.AddParticle(sizeof(SmokeGrenadeParticle), m_MaterialHandles[rand() % NUM_MATERIAL_HANDLES]);
+							(SmokeGrenadeParticle*)m_ParticleEffect.AddParticle(sizeof(SmokeGrenadeParticle), m_MaterialHandles[RandomInt(0, NUM_MATERIAL_HANDLES - 1)]);
 
 						if(pParticle)
 						{
 							pParticle->m_Pos = vPos - m_SmokeBasePos; // store its position in local space
-							pParticle->m_ColorInterp = (unsigned char)((rand() * 255) / VALVE_RAND_MAX);
+							pParticle->m_ColorInterp = (unsigned char)RandomInt(0, 255);
 							pParticle->m_RotationSpeed = FRand(-ROTATION_SPEED, ROTATION_SPEED); // Rotation speed.
 							pParticle->m_CurRotation = FRand(-6, 6);
 

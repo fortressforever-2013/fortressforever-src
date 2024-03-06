@@ -13,24 +13,24 @@
 #pragma once
 #endif
 
-#include <math.h>
-#include <float.h>
+// #include <math.h>
+// #include <float.h>
 
 // For vec_t, put this somewhere else?
 #include "tier0/basetypes.h"
 
 // For rand(). We really need a library!
-#include <stdlib.h>
+// #include <stdlib.h> // no we do not!
 
 #ifndef _X360
 // For MMX intrinsics
 #include <xmmintrin.h>
 #endif
 
-#include "tier0/dbg.h"
+// #include "tier0/dbg.h"
 #include "tier0/threadtools.h"
 #include "mathlib/vector2d.h"
-#include "mathlib/math_pfns.h"
+// #include "mathlib/math_pfns.h"
 #include "minmax.h"
 
 // Uncomment this to add extra Asserts to check for NANs, uninitialized vecs, etc.
@@ -556,9 +556,9 @@ inline void Vector::Init( vec_t ix, vec_t iy, vec_t iz )
 
 inline void Vector::Random( vec_t minVal, vec_t maxVal )
 {
-	x = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
-	y = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
-	z = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
+	x = RandomFloat(minVal, maxVal);
+	y = RandomFloat(minVal, maxVal);
+	z = RandomFloat(minVal, maxVal);
 	CHECK_VALID(*this);
 }
 
@@ -1909,9 +1909,9 @@ inline void QAngle::Init( vec_t ix, vec_t iy, vec_t iz )
 
 inline void QAngle::Random( vec_t minVal, vec_t maxVal )
 {
-	x = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
-	y = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
-	z = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
+	x = RandomFloat(minVal, maxVal);
+	y = RandomFloat(minVal, maxVal);
+	z = RandomFloat(minVal, maxVal);
 	CHECK_VALID(*this);
 }
 
@@ -1919,10 +1919,9 @@ inline void QAngle::Random( vec_t minVal, vec_t maxVal )
 
 inline QAngle RandomAngle( float minVal, float maxVal )
 {
-	Vector random;
+	QAngle random;
 	random.Random( minVal, maxVal );
-	QAngle ret( random.x, random.y, random.z );
-	return ret;
+	return random;
 }
 
 #endif

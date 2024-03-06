@@ -1210,7 +1210,7 @@ void CViewRender::Render(vrect_t* rect)
 		if (gl_clear_randomcolor.GetBool())
 		{
 			CMatRenderContextPtr pRenderContext(materials);
-			pRenderContext->ClearColor3ub(rand() % 256, rand() % 256, rand() % 256);
+			pRenderContext->ClearColor3ub(RandomInt(0, 255), RandomInt(0, 255), RandomInt(0, 255));
 			pRenderContext->ClearBuffers(true, false, false);
 			pRenderContext->Release();
 		}

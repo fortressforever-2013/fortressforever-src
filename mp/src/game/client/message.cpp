@@ -433,7 +433,7 @@ void CHudMessage::MessageScanStart( void )
 			m_parms.fadeBlend = 0;	// Pure source (on)
 		m_parms.charTime = 0;
 
-		if ( m_parms.pMessage->effect == 1 && (rand()%100) < 10 )
+		if (m_parms.pMessage->effect == 1 && RandomInt(1, 100) <= 10)
 			m_parms.charTime = 1;
 		break;
 

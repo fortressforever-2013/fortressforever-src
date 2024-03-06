@@ -2219,7 +2219,7 @@ void DumpPolyhedronToGLView( const CPolyhedron *pPolyhedron, const char *pFilena
 	int counter;
 	for( counter = 0; counter != pPolyhedron->iVertexCount; ++counter )
 	{
-		pColors[counter].Init( rand()/32768.0f, rand()/32768.0f, rand()/32768.0f );
+		pColors[counter].Random(0.0f, 1.0f);
 	}
 
 	Vector *pTransformedPoints = (Vector *)stackalloc( pPolyhedron->iVertexCount * sizeof( Vector ) );

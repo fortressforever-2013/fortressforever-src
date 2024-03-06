@@ -144,7 +144,7 @@ CBaseEntityList::CBaseEntityList()
 	for ( i = 0; i < NUM_ENT_ENTRIES; i++ )
 	{
 		m_EntPtrArray[i].ClearLinks();
-		m_EntPtrArray[i].m_SerialNumber = (rand()& SERIAL_MASK); // generate random starting serial number
+		m_EntPtrArray[i].m_SerialNumber = RandomInt(0, SERIAL_MASK); // generate random starting serial number
 		m_EntPtrArray[i].m_pEntity = NULL;
 	}
 

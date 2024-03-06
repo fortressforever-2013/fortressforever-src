@@ -398,9 +398,9 @@ void C_FuncSmokeVolume::Update( float fTimeDelta )
 			int x, y, z;
 			GetParticleInfoXYZ(i, x, y, z);
 
-			int xCountOffset = rand();
-			int yCountOffset = rand();
-			int zCountOffset = rand();
+			int xCountOffset = RandomInt(0, 2);
+			int yCountOffset = RandomInt(0, 2);
+			int zCountOffset = RandomInt(0, 2);
 
 			bool bFound = false;
 			for(int xCount=0; xCount < 3 && !bFound; xCount++)
@@ -588,7 +588,7 @@ void C_FuncSmokeVolume::FillVolume()
 						if(pParticle)
 						{
 							pParticle->m_Pos = vPos;
-							pParticle->m_ColorInterp = (unsigned char)((rand() * 255) / VALVE_RAND_MAX);
+							pParticle->m_ColorInterp = RandomInt(0, 255);
 							pParticle->m_RotationFactor = FRand( -1.0f, 1.0f ); // Rotation factor.
 							pParticle->m_CurRotation = FRand( -m_RotationSpeed, m_RotationSpeed );
 						}

@@ -11,17 +11,21 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-#ifdef GNUC
-#define __cdecl 
-#endif
-
-void __cdecl srand(unsigned int)
+extern "C" 
 {
-}
+	// hide visibility on GCC or shit hits the fan ! -azzy
 
-int __cdecl rand()
-{
-	return RandomInt( 0, VALVE_RAND_MAX );
-}
+	DLL_LOCAL
+		void __cdecl srand(unsigned int)
+	{
+	}
+
+	DLL_LOCAL
+		int __cdecl rand()
+	{
+		return RandomInt(0, VALVE_RAND_MAX);
+	}
+
+} // extern "C"
 
 #endif // !_STATIC_LINKED || _SHARED_LIB
