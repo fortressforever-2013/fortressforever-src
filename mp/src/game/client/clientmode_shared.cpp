@@ -950,6 +950,8 @@ void ClientModeShared::LevelShutdown( void )
 	// Reset any player explosion/shock effects
 	CLocalPlayerFilter filter;
 	enginesound->SetPlayerDSP( filter, 0, true );
+
+	C_BaseEntity::EmitSound(filter, SOUND_FROM_LOCAL_PLAYER, "MenuMusic.Music");
 }
 
 
