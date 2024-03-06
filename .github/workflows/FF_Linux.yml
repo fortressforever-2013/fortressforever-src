@@ -1,0 +1,35 @@
+name: FF_Linux
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on:
+      ubuntu-latest
+        
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Configure dependencies
+        shell: bash
+        run: sudo apt install -y g++-9-multilib gcc-9-multilib
+        
+      - name: Create project
+        run: cd mp/src;devtools/bin/vpc /ff +game /mksln Game_FF
+
+      - name: Build project
+        env:
+          CC: gcc-9
+          CXX: g++-9
+        run: cd mp/src;make -f Game_FF.mak server_ff
+
+      - name: Pack
+        shell: bash
+        run: tar cJfv Linux.tar.xz mp/game/FortressForever2013/bin
+
+      - name: Upload product
+        uses: actions/upload-artifact@v2
+        with:
+          name: FF_2013
+          path: Linux.tar.xz

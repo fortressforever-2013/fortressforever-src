@@ -1,0 +1,32 @@
+name: FF_Windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on:
+      windows-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure dependencies
+        uses: ilammy/msvc-dev-cmd@v1
+        
+      - name: Create project
+        run: cd mp/src;devtools/bin/vpc.exe /2013 /ff +game /mksln Game_FF.sln
+
+      - name: Build project
+        run: cd mp/src;devenv Game_FF.sln /Build Release
+
+      - name: Pack
+        shell: bash
+        run: tar cJfv Windows.tar.xz mp/game/FortressForever2013/bin
+
+      - name: Upload product
+        uses: actions/upload-artifact@v2
+        with:
+          name: FF_2013
+          path: Windows.tar.xz
