@@ -951,7 +951,8 @@ void ClientModeShared::LevelShutdown( void )
 	CLocalPlayerFilter filter;
 	enginesound->SetPlayerDSP( filter, 0, true );
 
-	C_BaseEntity::EmitSound(filter, SOUND_FROM_LOCAL_PLAYER, "MenuMusic.Music");
+	if( !engine->IsConnected() )
+		C_BaseEntity::EmitSound(filter, SOUND_FROM_LOCAL_PLAYER, "MenuMusic.Music");
 }
 
 
