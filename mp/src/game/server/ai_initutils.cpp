@@ -222,6 +222,11 @@ int CNodeEnt::Spawn( const char *pMapData )
 		return -1;
 	}
 	
+	if (!g_pAINetworkManager || !g_pBigAINet)
+	{
+		UTIL_RemoveImmediate(this);
+		return -1;
+	}
 	// ---------------------------------------------------------------------------------
 	//  First check if this node has a hint.  If so create a hint entity
 	// ---------------------------------------------------------------------------------
