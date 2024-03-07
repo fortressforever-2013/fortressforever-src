@@ -119,7 +119,7 @@ ConVar sv_motd_enable( "sv_motd_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "
 #define OVERPRESSURE_IGNOREFRIENDLY false //ffdev_overpressure_friendlyignore.GetBool()
 
 //ConVar ffdev_jetpack_horizontalpush_cap("ffdev_jetpack_horizontalpush_cap", "1000", FCVAR_REPLICATED | FCVAR_CHEAT);
-#define JETPACK_HORIZONTALPUSH_CAP 1000.0f // ffdev_jetpack_horizontalpush_cap.GetFloat()
+#define JETPACK_HORIZONTALPUSH_CAP 500.0f // ffdev_jetpack_horizontalpush_cap.GetFloat()
 //ConVar ffdev_jetpack_verticalpush_downwardslimit("ffdev_jetpack_verticalpush_downwardslimit", "1", FCVAR_REPLICATED | FCVAR_CHEAT);
 #define FFDEV_JETPACK_VERTICALPUSH_DOWNWARDSLIMIT 1.0f //ffdev_jetpack_verticalpush_downwardslimit.GetFloat()
 

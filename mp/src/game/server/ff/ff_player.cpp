@@ -5301,10 +5301,10 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 	//}
 
 	// if it's a pyro shooting themself (i.e. the IC) they take less damage
-	if ( GetClassSlot() == CLASS_PYRO && info.GetDamageType()&DMG_BURN && (info.GetInflictor() == this || info.GetAttacker() == this))
-	{
-		info.SetDamage(info.GetDamage() * FFDEV_PYRO_IC_SELFDAMAGE_MULTIPLIER);
-	}
+//	if ( GetClassSlot() == CLASS_PYRO && info.GetDamageType()&DMG_BURN && (info.GetInflictor() == this || info.GetAttacker() == this))
+//	{
+//		info.SetDamage(info.GetDamage() * FFDEV_PYRO_IC_SELFDAMAGE_MULTIPLIER);
+//	}
 
 	// keep track of amount of damage last sustained
 	m_lastDamageAmount = info.GetDamage();
