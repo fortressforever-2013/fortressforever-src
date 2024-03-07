@@ -480,7 +480,7 @@ int CBasePlayerAnimState::CalcSequenceIndex( const char *pBaseName, ... )
 		if ( dict.Find( szFullName ) == -1 )
 		{
 			dict.Insert( szFullName, 0 );
-			Warning( "CalcSequenceIndex: can't find '%s'.\n", szFullName );
+			DevWarning( "CalcSequenceIndex: can't find '%s'.\n", szFullName );
 		}
 
 		iSequence = 0;

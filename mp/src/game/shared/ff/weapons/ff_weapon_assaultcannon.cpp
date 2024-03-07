@@ -440,7 +440,7 @@ void CFFWeaponAssaultCannon::UpdateChargeTime()
 		m_flChargeTime = gpGlobals->curtime - m_flTriggerPressed + 0.0001f;
 		if (m_flChargeTime >= m_flMaxChargeTime)
 		{
-			DevMsg("Max charge");
+		//	DevMsg("Max charge");
 			m_flChargeTime = m_flMaxChargeTime;
 		}
 	}

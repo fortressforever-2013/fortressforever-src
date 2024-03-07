@@ -3588,7 +3588,7 @@ void C_BaseAnimating::DoAnimationEvents( CStudioHdr *pStudioHdr )
 	int nStudioNumSeq = pStudioHdr->GetNumSeq();
 	if ( nStudioNumSeq < 1 )
 	{
-		Warning( "%s[%d]: no sequences?\n", GetDebugName(), entindex() );
+		DevWarning( "%s[%d]: no sequences?\n", GetDebugName(), entindex() );
 		Assert( nStudioNumSeq >= 1 );
 		return;
 	}
@@ -3597,7 +3597,7 @@ void C_BaseAnimating::DoAnimationEvents( CStudioHdr *pStudioHdr )
 	if ( nSeqNum >= nStudioNumSeq )
 	{
 		// This can happen e.g. while reloading Heavy's shotgun, switch to the minigun.
-		Warning( "%s[%d]: Playing sequence %d but there's only %d in total?\n", GetDebugName(), entindex(), nSeqNum, nStudioNumSeq );
+		DevWarning( "%s[%d]: Playing sequence %d but there's only %d in total?\n", GetDebugName(), entindex(), nSeqNum, nStudioNumSeq );
 		return;
 	}
 

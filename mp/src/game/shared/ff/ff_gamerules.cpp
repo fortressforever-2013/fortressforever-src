@@ -1281,10 +1281,10 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 					}
 				}
 			}
-			else
-			{
-				DevMsg("NOT A PLAYER !! \n");
-			}
+		//	else
+		//	{
+		//		DevMsg("NOT A PLAYER !! \n");
+		//	}
 #endif
 
 			// Our grenades are set up so that they have the flag FL_GRENADE. So, we can do this:
