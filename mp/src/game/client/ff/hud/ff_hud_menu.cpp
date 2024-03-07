@@ -171,7 +171,7 @@ int CheckLastDisguise()
 // Engineer menu options
 //-----------------------------------------------------------------------------
 
-ADD_MENU_OPTION(builddispenser, "#FF_CM_BUILDDISPENSER", 'Q', "qdispenser")
+ADD_MENU_OPTION(builddispenser, "#FF_CM_BUILDDISPENSER", 'Q', "dispenser")
 {
 	C_FFPlayer *ff = C_FFPlayer::GetLocalFFPlayer();
 
@@ -225,7 +225,7 @@ ADD_MENU_OPTION(dismantledispenser, "#FF_CM_DISMANTLEDISPENSER", 'Q', "dismantle
 	return MENU_SHOW;
 }
 
-ADD_MENU_OPTION(buildsentry, "#FF_CM_BUILDSENTRY", 'S', "qsentry")
+ADD_MENU_OPTION(buildsentry, "#FF_CM_BUILDSENTRY", 'S', "sentrygun")
 {
 	C_FFPlayer *ff = C_FFPlayer::GetLocalFFPlayer();
 
