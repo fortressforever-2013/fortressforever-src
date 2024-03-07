@@ -360,7 +360,9 @@ void ClientModeShared::Init()
 	ListenForGameEvent( "server_cvar" );
 	ListenForGameEvent( "player_changename" );
 	ListenForGameEvent( "teamplay_broadcast_audio" );
-	ListenForGameEvent( "achievement_earned" );
+
+	// obsolete, for now
+	//ListenForGameEvent( "achievement_earned" );
 
 #if defined( TF_CLIENT_DLL )
 	ListenForGameEvent( "item_found" );
@@ -384,7 +386,9 @@ void ClientModeShared::Init()
 	m_CursorNone = vgui::dc_none;
 
 	HOOK_MESSAGE( VGUIMenu );
+#ifdef HL2MP
 	HOOK_MESSAGE( Rumble );
+#endif
 }
 
 

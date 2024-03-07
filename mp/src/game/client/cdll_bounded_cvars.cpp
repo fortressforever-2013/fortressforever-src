@@ -60,14 +60,26 @@ ConVar_ServerBounded *cl_predict = &cl_predict_var;
 // cl_interp_ratio.
 // ------------------------------------------------------------------------------------------ //
 
+void cc_cl_interp_changed(IConVar* pConVar, const char* pOldString, float flOldValue)
+{
+	C_BaseEntityIterator iterator;
+	C_BaseEntity* pEnt;
+
+	while ((pEnt = iterator.Next()) != NULL)
+	{
+		pEnt->Interp_UpdateInterpolationAmounts(pEnt->GetVarMapping());
+	}
+}
+
 class CBoundedCvar_InterpRatio : public ConVar_ServerBounded
 {
 public:
 	CBoundedCvar_InterpRatio() :
 	  ConVar_ServerBounded( "cl_interp_ratio", 
 		  "2.0", 
-		  FCVAR_USERINFO | FCVAR_NOT_CONNECTED, 
-		  "Sets the interpolation amount (final amount is cl_interp_ratio / cl_updaterate)." )
+		  FCVAR_USERINFO | FCVAR_NOT_CONNECTED | FCVAR_DEMO,
+		  "This is best kept to 2.0, don't you know.",
+		  cc_cl_interp_changed )
 	  {
 	  }
 

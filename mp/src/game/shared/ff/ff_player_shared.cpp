@@ -44,15 +44,17 @@
 #include "effect_dispatch_data.h"
 #include "engine/ivdebugoverlay.h"
 
+// SDK 2013: just use r_shadows_gamecontrol directly...
+
 // Wrapper CVAR for letting sv_shadows alter r_shadows_gamecontrol
-void SV_Shadows_Callback(IConVar *var, char const *pOldValue, float oldValue)
-{
-	ConVar *c = cvar->FindVar("r_shadows_gamecontrol");
-	ConVarRef sv_shadows(var->GetName());
-	if (c)
-		c->SetValue(sv_shadows.GetString());
-}
-ConVar sv_shadows("sv_shadows", "-1", FCVAR_REPLICATED | FCVAR_NOTIFY, "Toggle shadows on and off | 0 disables | any other number enables", SV_Shadows_Callback );
+//void SV_Shadows_Callback(IConVar *var, char const *pOldValue, float oldValue)
+//{
+//	ConVar *c = cvar->FindVar("r_shadows_gamecontrol");
+//	ConVarRef sv_shadows(var->GetName());
+//	if (c)
+//		c->SetValue(sv_shadows.GetString());
+//}
+//ConVar sv_shadows("sv_shadows", "-1", FCVAR_REPLICATED | FCVAR_NOTIFY, "Toggle shadows on and off | 0 disables | any other number enables", SV_Shadows_Callback );
 
 ConVar sv_voice_inputfromfile("sv_voice_inputfromfile", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "Toggle voice_inputfromfile");
 

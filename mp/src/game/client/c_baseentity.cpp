@@ -55,17 +55,6 @@ static bool g_bWasSkipping = (bool)-1;
 static bool g_bWasThreaded =(bool)-1;
 static int  g_nThreadModeTicks = 0;
 
-void cc_cl_interp_changed(IConVar* pConVar, const char* pOldString, float flOldValue )
-{
-	C_BaseEntityIterator iterator;
-	C_BaseEntity* pEnt;
-	while ((pEnt = iterator.Next()) != NULL)
-	{
-		pEnt->Interp_UpdateInterpolationAmounts(pEnt->GetVarMapping());
-	}
-}
-
-
 void cc_cl_interp_all_changed( IConVar *pConVar, const char *pOldString, float flOldValue )
 {
 	ConVarRef var( pConVar );
@@ -83,8 +72,9 @@ void cc_cl_interp_all_changed( IConVar *pConVar, const char *pOldString, float f
 	}
 }
 
+// now in cdll_bounded_cvars
 // --> Mirv: Using this to select interp
-static ConVar  cl_interp_ratio("cl_interp_ratio", "2.0", FCVAR_USERINFO | FCVAR_DEMO, "This is best kept to 2.0, don't you know.", true, 0.1f, true, 4.0f, cc_cl_interp_changed);
+//static ConVar  cl_interp_ratio("cl_interp_ratio", "2.0", FCVAR_USERINFO | FCVAR_DEMO, "This is best kept to 2.0, don't you know.", true, 0.1f, true, 4.0f, cc_cl_interp_changed);
 // <--
 
 static ConVar  cl_extrapolate( "cl_extrapolate", "1", FCVAR_CHEAT, "Enable/disable extrapolation if interpolation history runs out." );
@@ -5951,7 +5941,7 @@ float C_BaseEntity::GetInterpolationAmount( int flags )
 	//	nLastUpdateRate = nUpdateRate;
 	//	cc_cl_interp_changed(NULL, NULL);
 	//}
-	float flInterp = cl_interp_ratio.GetFloat() / nUpdateRate;
+	float flInterp = cl_interp_ratio->GetFloat() / nUpdateRate;
 	// <-- Mirv	
 
 	// If single player server is "skipping ticks" everything needs to interpolate for a bit longer

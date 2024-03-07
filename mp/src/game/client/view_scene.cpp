@@ -26,8 +26,6 @@ ConVar r_updaterefracttexture( "r_updaterefracttexture", "1", FCVAR_CHEAT ); // 
 																			 // Already a cheat in SDK2013, convenient.
 ConVar r_depthoverlay( "r_depthoverlay", "0", FCVAR_CHEAT, "Replaces opaque objects with their grayscaled depth values. r_showz_power scales the output." );
 
-static ConVar ffdev_showrenderbounds("ffdev_showrenderbounds", "0", FCVAR_FF_FFDEV_CLIENT);
-
 int g_viewscene_refractUpdateFrame = 0;
 bool g_bAllowMultipleRefractUpdatesPerScenePerFrame = false;
 

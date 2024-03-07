@@ -121,13 +121,14 @@ void HapticMsg_MeleeContact(CBasePlayer* pPlayer)
 #ifdef CLIENT_DLL
 void HookHapticMessages(void)
 {
+#ifdef HL2MP
 	HOOK_MESSAGE(SPHapWeapEvent);
 	HOOK_MESSAGE(HapDmg);
 	HOOK_MESSAGE(HapPunch);
 	HOOK_MESSAGE(HapSetDrag);
 	HOOK_MESSAGE(HapSetConst);
 	HOOK_MESSAGE(HapMeleeContact);
-
+#endif
 }
 
 // Defined in haptics_utils

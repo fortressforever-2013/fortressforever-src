@@ -63,6 +63,10 @@ static CFFConVarDefaultOverrideEntry s_FFConVarOverrideEntries[] =
 
 	/* optimization for projected textures. broken for sdk2013 */
 	{ OVERRIDE_CLIENT, "r_flashlightscissor", "0" },
+
+	/* ff's interp ratio limits */
+	{ OVERRIDE_SERVER, "sv_client_min_interp_ratio",      "0.1" },
+	{ OVERRIDE_SERVER, "sv_client_max_interp_ratio",      "4.0" },
 };
 
 
