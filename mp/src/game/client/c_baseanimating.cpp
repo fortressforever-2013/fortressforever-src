@@ -3339,7 +3339,7 @@ void C_BaseAnimating::DoInternalDrawModel( ClientModelRenderInfo_t *pInfo, DrawM
 		{
 			m_pRagdoll->DrawWireframe();
 		}
-		else if ( IsSolid() && CollisionProp()->GetSolid() == SOLID_VPHYSICS )
+		else if ( ( IsSolid() && CollisionProp()->GetSolid() == SOLID_VPHYSICS ) || vcollide_wireframe.GetInt() == 2 )
 		{
 			vcollide_t *pCollide = modelinfo->GetVCollide( GetModelIndex() );
 			if ( pCollide && pCollide->solidCount == 1 )
