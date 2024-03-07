@@ -179,15 +179,7 @@ void CFFWeaponDeploySentryGun::PrimaryAttack( void )
 		
 #ifdef GAME_DLL
 		CFFPlayer *pPlayer = GetPlayerOwner();
-
-		if (pPlayer->GetSentryGun() && pPlayer->GetSentryGun()->IsBuilt())
-		{
-			engine->ClientCommand(pPlayer->edict(), "detdismantlesentry");
-		}
-		else
-		{
-			pPlayer->Command_BuildSentryGun();
-		}
+		pPlayer->Command_BuildSentryGun();
 #endif
 	}
 }

@@ -170,7 +170,7 @@ int CheckLastDisguise()
 //-----------------------------------------------------------------------------
 // Engineer menu options
 //-----------------------------------------------------------------------------
-#if 0
+
 ADD_MENU_OPTION(builddispenser, "#FF_CM_BUILDDISPENSER", 'Q', "qdispenser")
 {
 	C_FFPlayer *ff = C_FFPlayer::GetLocalFFPlayer();
@@ -296,7 +296,7 @@ ADD_MENU_OPTION(aimsentry, "#FF_CM_AIMSENTRY", 'O', "aimsentry")
 
 	return MENU_SHOW;
 }
-#endif
+
 //-----------------------------------------------------------------------------
 // Disguise menu options
 //-----------------------------------------------------------------------------
@@ -443,7 +443,7 @@ ADD_MENU_OPTION(need_ammo, "#FF_CM_CALLAMMO", '^', "ammome") { return MENU_SHOW;
 //-----------------------------------------------------------------------------
 // Menu option lists
 //-----------------------------------------------------------------------------
-// MenuOption EngineerOptionList[] = { aimsentry, builddispenser, detdispenser, dismantledispenser, dismantlesentry, detsentry, buildsentry };
+MenuOption EngineerOptionList[] = { aimsentry, builddispenser, detdispenser, dismantledispenser, dismantlesentry, detsentry, buildsentry };
 MenuOption DemomanOptionList[] = { det5, det10, det20, det50 };
 MenuOption SpyOptionList[] = { lastdisguise, disguiseenemy, smartcloak, sentrysabotage, dispensersabotage, disguiseteam };
 MenuOption ClassDOptionList[] = { disguisescout, disguisesniper, disguisesoldier, disguisedemoman, disguisemedic, disguisehwguy, disguisepyro, disguisespy, disguiseengineer, disguisecivilian };
@@ -454,7 +454,7 @@ MenuOption CallOptionList[] = { need_armor, need_medic, need_ammo };
 //-----------------------------------------------------------------------------
 // Menus themselves
 //-----------------------------------------------------------------------------
-// menu_t EngineerMenu = { ARRAYSIZE(EngineerOptionList), EngineerOptionList, "aimsentry" };
+menu_t EngineerMenu = { ARRAYSIZE(EngineerOptionList), EngineerOptionList, "aimsentry" };
 menu_t DemomanMenu = { ARRAYSIZE(DemomanOptionList), DemomanOptionList, "detpack 5" };
 menu_t SpyMenu = { ARRAYSIZE(SpyOptionList), SpyOptionList, "smartcloak" };
 menu_t ClassDMenu = { ARRAYSIZE(ClassDOptionList), ClassDOptionList, NULL };
@@ -462,7 +462,7 @@ menu_t FriendlyDMenu = { ARRAYSIZE(FriendlyDOptionList), FriendlyDOptionList, NU
 menu_t EnemyDMenu = { ARRAYSIZE(EnemyDOptionList), EnemyDOptionList, NULL };
 menu_t CallMenu = { ARRAYSIZE(CallOptionList), CallOptionList, "saveme" };
 
-menu_t Menus[] = { /*EngineerMenu,*/ DemomanMenu, SpyMenu, ClassDMenu, FriendlyDMenu, EnemyDMenu, CallMenu};
+menu_t Menus[] = { EngineerMenu, DemomanMenu, SpyMenu, ClassDMenu, FriendlyDMenu, EnemyDMenu, CallMenu };
 
 CHudContextMenu::~CHudContextMenu() 
 {
@@ -582,7 +582,7 @@ void CHudContextMenu::Display(bool state)
 	{
 		switch (pPlayer->GetClassSlot())
 		{
-//		case CLASS_ENGINEER: m_pMenu = &EngineerMenu; break;
+		case CLASS_ENGINEER: m_pMenu = &EngineerMenu; break;
 		case CLASS_SPY: m_pMenu = &SpyMenu; break;
 		case CLASS_DEMOMAN: m_pMenu = &DemomanMenu; break;
 		default: m_pMenu = &CallMenu;
