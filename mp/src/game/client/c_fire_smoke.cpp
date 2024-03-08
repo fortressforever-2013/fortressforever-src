@@ -345,6 +345,11 @@ void C_EntityFlame::CreateEffect( void )
 		C_BaseEntity *pEntity = m_hEntAttached;
 		m_hOldAttached = m_hEntAttached;
 
+		// --> Mirv: Don't attach to local player in first person mode
+		if (pEntity == CBasePlayer::GetLocalPlayer() && !input->CAM_IsThirdPerson())
+			return;
+		// <--
+
 		ParticleProp()->AddControlPoint( m_hEffect, 1, pEntity, PATTACH_ABSORIGIN_FOLLOW );
 		m_hEffect->SetControlPoint( 0, GetAbsOrigin() );
 		m_hEffect->SetControlPoint( 1, GetAbsOrigin() );
