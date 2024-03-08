@@ -177,7 +177,7 @@ void CHudCellCount::Paint()
 		
 		// Get the class as a string
 		wchar_t unicode[6];
-		swprintf(unicode, L"%d", m_iCellCount);
+		V_snwprintf(unicode, sizeof(unicode), L"%d", m_iCellCount);
 
 		// Draw text
 		surface()->DrawSetTextFont( m_hTextFont );

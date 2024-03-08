@@ -163,7 +163,7 @@ void CHudTeamScores::PaintNumbersRightAligned(HFont font, int xpos, int ypos, in
 	int iTempxpos = xpos + charWidth * maxchars; // allow for X characters of score
 
 	wchar_t unicode[6];
-	swprintf(unicode, L"%d", value);
+	V_snwprintf(unicode, sizeof(unicode), L"%d", value);
 
 	surface()->DrawSetTextFont( font );
 	
@@ -185,7 +185,7 @@ void CHudTeamScores::PaintNumbers(HFont font, int xpos, int ypos, int value)
 {
 	surface()->DrawSetTextFont(font);
 	wchar_t unicode[6];
-	swprintf(unicode, L"%d", value);
+	V_snwprintf(unicode, sizeof(unicode), L"%d", value);
 	surface()->DrawSetTextPos(xpos, ypos);
 	surface()->DrawUnicodeString( unicode );
 }

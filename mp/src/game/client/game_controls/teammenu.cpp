@@ -462,7 +462,7 @@ void CTeamMenu::UpdateTeamButtons()
 
 		if (szTeamName)
 		{
-			swprintf( szName, L"%c. %s", wchTeamNumber, szTeamName );
+			V_snwprintf( szName, sizeof(szName), L"%c. %s", wchTeamNumber, szTeamName );
 			szTeamName = szName;
 		}
 		else
@@ -482,7 +482,7 @@ void CTeamMenu::UpdateTeamButtons()
 		else
 		{
 			// no name, just use the number
-			swprintf( szTeamName, L"%c.", wchTeamNumber );
+			V_snwprintf( szTeamName, sizeof(szTeamName), L"%c.", wchTeamNumber );
 			pTeamButton->SetText(szTeamName);
 		}
 

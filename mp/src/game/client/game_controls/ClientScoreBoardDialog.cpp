@@ -622,7 +622,7 @@ void CClientScoreBoardDialog::UpdateHeaders( void )
 		}
 		else
 		{
-			swprintf( szName, L"%s - (%i players)", szTeamName, iNumPlayers );
+			V_snwprintf( szName, sizeof(szName), L"%s - (%i players)", szTeamName, iNumPlayers );
 			szTeamName = szName;
 		}
 
@@ -630,7 +630,7 @@ void CClientScoreBoardDialog::UpdateHeaders( void )
 
 		// Look up team fort points (currently hacked to get team score (frags) which is what was previously used)
 		wchar_t szFortPoints[ 6 ];
-		swprintf( szFortPoints, L"%d", pGR->GetTeamScore( iTeam ) );
+		V_snwprintf( szFortPoints, sizeof(szFortPoints), L"%d", pGR->GetTeamScore( iTeam ) );
 
 		// Display team fort points (probably will actually be team score e.g. captures *10)
 		m_pPlayerList->ModifyColumn( i, "fortpoints", szFortPoints );
@@ -638,7 +638,7 @@ void CClientScoreBoardDialog::UpdateHeaders( void )
 		// AfterShock - commented this out so teamfrags arent shown (and scores are clearer)
 		// Look up team score (frags)
 		//wchar_t szScore[ 6 ];
-		//swprintf( szScore, L"%d", pGR->GetTeamScore( iTeam ) );
+		//V_snwprintf( szScore, sizeof(szScore), L"%d", pGR->GetTeamScore( iTeam ) );
 
 		// Display team frags
 		//m_pPlayerList->ModifyColumn( i, "score", szScore );
@@ -647,7 +647,7 @@ void CClientScoreBoardDialog::UpdateHeaders( void )
 		// AfterShock - commented this out so teamdeaths arent shown (and scores are clearer)
 		// Look up team deaths
 		//wchar_t szDeaths[ 6 ];
-		//swprintf( szDeaths, L"%d", pGR->GetTeamDeaths( iTeam ) );
+		//V_snwprintf( szDeaths, sizeof(szDeaths), L"%d", pGR->GetTeamDeaths( iTeam ) );
 
 		// Display team deaths
 		//m_pPlayerList->ModifyColumn( i, "deaths", szDeaths );
@@ -664,7 +664,7 @@ void CClientScoreBoardDialog::UpdateHeaders( void )
 		else
 		{
 			wchar_t szLatency[ 12 ];
-			swprintf( szLatency, L"%i", iLatency );
+			V_snwprintf( szLatency, sizeof(szLatency), L"%i", iLatency );
 			m_pPlayerList->ModifyColumn( i, "ping", szLatency );
 		}
 	}

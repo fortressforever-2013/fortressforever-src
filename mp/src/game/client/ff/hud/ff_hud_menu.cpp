@@ -712,7 +712,7 @@ void CHudContextMenu::Paint()
 		int iconOffsetY = surface()->GetFontTall(m_hMenuIcon) / 2;
 
 		wchar_t unicode[2];
-		swprintf(unicode, L"%c", character);
+		V_snwprintf(unicode, sizeof(unicode), L"%c", character);
 
 		surface()->DrawSetTextPos(m_flPositions[i][0] - iconOffsetX, m_flPositions[i][1] - iconOffsetY);
 		surface()->DrawUnicodeChar(unicode[0]);
@@ -740,7 +740,7 @@ void CHudContextMenu::Paint()
 		int textHeightX = surface()->GetFontTall(m_hTextFont);
 		surface()->DrawSetTextPos(m_flPositions[i][0] - numberOffsetX, m_flPositions[i][1] + iconOffsetY + py + textHeightX);
 
-		swprintf(unicode, L"%c", chDisplay);
+		V_snwprintf(unicode, sizeof(unicode), L"%c", chDisplay);
 		surface()->DrawUnicodeChar(unicode[0]);
 	}
 
