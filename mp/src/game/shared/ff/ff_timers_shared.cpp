@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////
 CFFTimerBase::CFFTimerBase( std::string strName, const float flDuration )
 :	m_pfnExpiredCallback(NULL), m_pfnIntervalCallback(NULL), m_flCallbackInterval(0), m_bRemoveWhenExpired(false),
-m_flDuration( flDuration ), m_strName( strName )
+m_flDuration( flDuration ), m_strName( strName ), m_pfnHintExpiredCallback( NULL ), m_pfnHintIntervalCallback( NULL )
 {
 }
 
