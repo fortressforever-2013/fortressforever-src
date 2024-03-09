@@ -62,6 +62,7 @@ public:
 	void	HudIcon(int hudIdentifier, int iX, int iY, const char *pszSource, int iWidth, int iHeight, int iAlignX, int iAlignY);
 	void	HudBox(int hudIdentifier, int iX, int iY, int iWidth, int iHeight, Color clr, Color clrBorder, int iBorderWidth, int iAlignX, int iAlignY);
 	void	HudText(int hudIdentifier, int iX, int iY, const char *pszText, int iAlignX, int iAlignY, int iSize);
+	void	HudTextColored(int hudIdentifier, int iX, int iY, const char *pszText, int iAlignX, int iAlignY, int iSize, Color clr = Color(200, 220, 255, 255));
 
 	bool	TranslateKeyCommand( const char *szMessage, char *szTranslated, int iBufferSizeInBytes );
 

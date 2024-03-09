@@ -6,10 +6,11 @@
 
 #include "cbase.h"
 
-#if 0
+#if 1
 #include "mp3player.h"
 #include "KeyValues.h"
 #include "filesystem.h"
+#include <filesystem>
 
 #include "vgui_controls/MenuButton.h"
 #include "vgui_controls/Menu.h"
@@ -1368,7 +1369,9 @@ void CMP3Player::GetLocalCopyOfSong( const MP3File_t &mp3, char *outsong, size_t
 
 		// !!!HACK HACK:
 		// Total hack right now, using windows OS calls to copy file to full destination
-		int success = ::CopyFileA( sourcepath, destpath, TRUE );
+		// not anymore because
+		// we now have std::filesystem::copy_file which we can use (since C++17)
+		int success = std::filesystem::copy_file( sourcepath, destpath/*, TRUE*/ );
 		if ( success > 0 )
 		{
 			Q_snprintf( outsong, outlen, "_mp3/%s.mp3", hexname );

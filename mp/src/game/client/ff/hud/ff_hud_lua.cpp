@@ -179,6 +179,28 @@ void CHudLua::MsgFunc_FF_HudLua(bf_read &msg)
 			break;
 		}
 
+	case HUD_TEXT_COLOR:
+		{
+			int xPos = msg.ReadShort();
+			int yPos = msg.ReadShort();
+
+			char szText[256];
+			if (!msg.ReadString(szText, 255))
+				return;
+
+			int r = msg.ReadShort();
+			int g = msg.ReadShort();
+			int b = msg.ReadShort();
+			int a = msg.ReadShort();
+
+			int iAlignX = msg.ReadShort();
+			int iAlignY = msg.ReadShort();
+			int iSize = msg.ReadShort();
+
+			HudTextColored(hudIdentifier, xPos, yPos, szText, iAlignX, iAlignY, iSize, Color(r, g, b, a));
+
+			break;
+		}
 	case HUD_TIMER:
 		{
 			int xPos = msg.ReadShort();
@@ -481,6 +503,103 @@ void CHudLua::HudText(int hudIdentifier, int iX, int iY, const char *pszText, in
 	pLabel->SetVisible(true);
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Create a new text box on the hud - x & y alignment
+//-----------------------------------------------------------------------------
+void CHudLua::HudTextColored(int hudIdentifier, int iX, int iY, const char* pszText, int iAlignX, int iAlignY, int iSize, Color clr)
+{
+	// Create or find the correct hud element
+	Label* pLabel = dynamic_cast<Label*> (GetHudElement(hudIdentifier, HUD_TEXT_COLOR));
+
+	if (!pLabel)
+		return;
+
+	// set to item-specific defaults if values weren't set or are invalid
+	iAlignX = (iAlignX < 0) ? 0 : iAlignX;
+	iAlignY = (iAlignY < 0) ? 0 : iAlignY;
+
+	char szTranslatedText[1024];
+
+	// Now set this label up
+	if (TranslateKeyCommand(pszText, szTranslatedText, sizeof(szTranslatedText)))
+		pLabel->SetText(szTranslatedText);
+	else
+		pLabel->SetText(pszText);
+
+	if (iSize >= 1 && iSize <= 5)
+	{
+		IScheme* pScheme = scheme()->GetIScheme(pLabel->GetScheme());
+		if (pScheme)
+		{
+			HFont font = pScheme->GetFont(VarArgs("LuaText%d", iSize), pLabel->IsProportional());
+			if (font != INVALID_FONT)
+				pLabel->SetFont(font);
+		}
+	}
+
+	pLabel->SetFgColor(clr);
+
+	pLabel->SizeToContents();
+
+	int iProperXPosition = 0;
+	int iProperYPosition = 0;
+	int scaledX = scheme()->GetProportionalScaledValue(iX);
+	int scaledY = scheme()->GetProportionalScaledValue(iY);
+	int scaledW = 0; // surface()->GetCharacterWidth(pTimer->GetFont(), '0' ) * 5;
+	int scaledH = 0; // surface()->GetFontTall( pTimer->GetFont() );
+	pLabel->GetContentSize(scaledW, scaledH);
+
+	switch (iAlignX)
+	{
+	case 1: //HUD_ALIGNX_RIGHT :
+		iProperXPosition = (ScreenWidth() - scaledX) - scaledW;
+		break;
+	case 2: //HUD_ALIGNX_CENTERLEFT :
+		iProperXPosition = ((ScreenWidth() / 2) - scaledX) - scaledW;
+		break;
+	case 3: //HUD_ALIGNX_CENTERRIGHT :
+		iProperXPosition = (ScreenWidth() / 2) + scaledX;
+		break;
+	case 4: //HUD_ALIGNX_CENTER :
+		iProperXPosition = (ScreenWidth() / 2) - (scaledW / 2) + scaledX;
+		break;
+	case 5: //HUD_ALIGNX_RIGHT_STRINGSTART :
+		iProperXPosition = ScreenWidth() - scaledX;
+		break;
+	case 6: //HUD_ALIGNX_LEFT_STRINGEND :
+		iProperXPosition = scaledX - scaledW;
+		break;
+	case 0: //HUD_ALIGNX_LEFT : 
+	default:
+		iProperXPosition = scaledX;
+		break;
+	}
+	switch (iAlignY)
+	{
+	case 1: //HUD_ALIGNY_BOTTOM :
+		iProperYPosition = (ScreenHeight() - scaledY) - scaledH;
+		break;
+	case 2: //HUD_ALIGNY_CENTERUP :
+		iProperYPosition = ((ScreenHeight() / 2) - scaledY) - scaledH;
+		break;
+	case 3: //HUD_ALIGNY_CENTERDOWN :
+		iProperYPosition = (ScreenHeight() / 2) + scaledY;
+		break;
+	case 4: //HUD_ALIGNY_CENTER :
+		iProperYPosition = (ScreenHeight() / 2) - (scaledH / 2) + scaledY;
+		break;
+	case 0: //HUD_ALIGNY_TOP : 
+	default:
+		iProperYPosition = scaledY;
+		break;
+	}
+
+	pLabel->SetPos(iProperXPosition, iProperYPosition);
+
+	//pLabel->MoveToFront();
+	pLabel->SetVisible(true);
+}
+
 //-------------------------------------------------------------------------------
 // Purpose: Translate key commands into user's current key bind, and add the 
 //			hint text to the text box. 
@@ -710,6 +829,23 @@ Panel *CHudLua::GetHudElement(int hudIdentifier, HudElementType_t iType)
 					HFont font = pScheme->GetFont( "LuaText_Default", pLabel->IsProportional() );
 						if ( font != INVALID_FONT )
 							pLabel->SetFont( font );
+				}
+			}
+		}
+		break;
+		case HUD_TEXT_COLOR:
+		{
+			pPanel = new Label(this, szPanelName, "");
+
+			Label* pLabel = dynamic_cast<Label*>(pPanel);
+			if (pLabel)
+			{
+				IScheme* pScheme = scheme()->GetIScheme(pLabel->GetScheme());
+				if (pScheme)
+				{
+					HFont font = pScheme->GetFont("LuaText_Default", pLabel->IsProportional());
+					if (font != INVALID_FONT)
+						pLabel->SetFont(font);
 				}
 			}
 		}

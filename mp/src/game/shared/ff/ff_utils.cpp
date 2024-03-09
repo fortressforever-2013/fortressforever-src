@@ -783,6 +783,42 @@ void FF_LuaHudText(CFFPlayer *pPlayer, const char *pszIdentifier, int x, int y, 
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: Set some colored text on the hud
+//-----------------------------------------------------------------------------
+void FF_LuaHudTextColored(CFFPlayer* pPlayer, const char* pszIdentifier, const char* pszColor, int x, int y, const char* pszText, int iAlignX/* = -1*/, int iAlignY/* = -1*/, int iSize/* = -1*/)
+{
+	if (!pPlayer)
+		return;
+
+	int r, g, b, a;
+	if ( sscanf( pszColor, "%i %i %i %i", &r, &g, &b, &a ) != 4 )
+		r = g = b = a = 255;
+
+	r = clamp(r, 0, 255);
+	g = clamp(g, 0, 255);
+	b = clamp(b, 0, 255);
+	a = clamp(a, 0, 255);
+
+	CSingleUserRecipientFilter user(pPlayer);
+	user.MakeReliable();
+
+	UserMessageBegin(user, "FF_HudLua");
+	WRITE_BYTE(HUD_TEXT_COLOR);
+	WRITE_SHORT(_scriptman.GetOrAddHudElementIndex(pszIdentifier));
+	WRITE_SHORT(x);
+	WRITE_SHORT(y);
+	WRITE_STRING(pszText);
+	WRITE_SHORT(r);
+	WRITE_SHORT(g);
+	WRITE_SHORT(b);
+	WRITE_SHORT(a);
+	WRITE_SHORT(iAlignX);
+	WRITE_SHORT(iAlignY);
+	WRITE_SHORT(iSize);
+	MessageEnd();
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: Set a timer on the hud
 //-----------------------------------------------------------------------------
 void FF_LuaHudTimer(CFFPlayer *pPlayer, const char *pszIdentifier, int x, int y, float flStartValue, float flSpeed, int iAlignX/* = -1*/, int iAlignY/* = -1*/, int iSize/* = -1*/)

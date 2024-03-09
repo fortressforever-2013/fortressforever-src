@@ -2247,6 +2247,178 @@ namespace FFLib
 			}
 		}
 	}
+
+	void AddColoredHudText(CFFPlayer* pPlayer, const char* pszIdentifier, const char* pszText, const char* pszColor, float x, float y)
+	{
+		if (!pPlayer || !pszIdentifier || !pszText)
+			return;
+
+		FF_LuaHudTextColored(pPlayer, pszIdentifier, pszColor, x, y, pszText);
+	}
+
+	void AddColoredHudText(CFFPlayer* pPlayer, const char* pszIdentifier, const char* pszText, const char* pszColor, float x, float y, int iAlign)
+	{
+		if (!pPlayer || !pszIdentifier || !pszText)
+			return;
+
+		FF_LuaHudTextColored(pPlayer, pszIdentifier, pszColor, x, y, pszText, iAlign);
+	}
+
+	void AddColoredHudText(CFFPlayer* pPlayer, const char* pszIdentifier, const char* pszText, const char* pszColor, float x, float y, float flAlignX, float flAlignY)
+	{
+		if (!pPlayer || !pszIdentifier || !pszText)
+			return;
+
+		FF_LuaHudTextColored(pPlayer, pszIdentifier, pszColor, x, y, pszText, flAlignX, flAlignY);
+	}
+
+	void AddColoredHudText(CFFPlayer* pPlayer, const char* pszIdentifier, const char* pszText, const char* pszColor, float x, float y, float flAlignX, float flAlignY, int iSize)
+	{
+		if (!pPlayer || !pszIdentifier || !pszText)
+			return;
+
+		FF_LuaHudTextColored(pPlayer, pszIdentifier, pszColor, x, y, pszText, flAlignX, flAlignY, iSize);
+	}
+
+	void AddColoredHudTextToTeam(CFFTeam* pTeam, const char* pszIdentifier, const char* pszText, const char* pszColor, float x, float y)
+	{
+		if (!pszIdentifier || !pszText)
+			return;
+
+		// loop through each player
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			CBasePlayer* ent = UTIL_PlayerByIndex(i);
+			if (ent && ent->IsPlayer())
+			{
+				CFFPlayer* pPlayer = ToFFPlayer(ent);
+				if (pPlayer->GetTeam()->GetTeamNumber() == pTeam->GetTeamNumber())
+					FF_LuaHudTextColored(pPlayer, pszIdentifier, pszColor, x, y, pszText);
+			}
+		}
+	}
+
+	void AddColoredHudTextToTeam(CFFTeam* pTeam, const char* pszIdentifier, const char* pszText, const char* pszColor, float x, float y, int iAlign)
+	{
+		if (!pszIdentifier || !pszText)
+			return;
+
+		// loop through each player
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			CBasePlayer* ent = UTIL_PlayerByIndex(i);
+			if (ent && ent->IsPlayer())
+			{
+				CFFPlayer* pPlayer = ToFFPlayer(ent);
+				if (pPlayer->GetTeam()->GetTeamNumber() == pTeam->GetTeamNumber())
+					FF_LuaHudTextColored(pPlayer, pszIdentifier, pszColor, x, y, pszText, iAlign);
+			}
+		}
+	}
+
+	void AddColoredHudTextToTeam(CFFTeam* pTeam, const char* pszIdentifier, const char* pszText, const char* pszColor, float x, float y, float flAlignX, float flAlignY)
+	{
+		if (!pszIdentifier || !pszText)
+			return;
+
+		// loop through each player
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			CBasePlayer* ent = UTIL_PlayerByIndex(i);
+			if (ent && ent->IsPlayer())
+			{
+				CFFPlayer* pPlayer = ToFFPlayer(ent);
+				if (pPlayer->GetTeam()->GetTeamNumber() == pTeam->GetTeamNumber())
+					FF_LuaHudTextColored(pPlayer, pszIdentifier, pszColor, x, y, pszText, flAlignX, flAlignY);
+			}
+		}
+	}
+
+	void AddColoredHudTextToTeam(CFFTeam* pTeam, const char* pszIdentifier, const char* pszText, const char* pszColor, float x, float y, float flAlignX, float flAlignY, int iSize)
+	{
+		if (!pszIdentifier || !pszText)
+			return;
+
+		// loop through each player
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			CBasePlayer* ent = UTIL_PlayerByIndex(i);
+			if (ent && ent->IsPlayer())
+			{
+				CFFPlayer* pPlayer = ToFFPlayer(ent);
+				if (pPlayer->GetTeam()->GetTeamNumber() == pTeam->GetTeamNumber())
+					FF_LuaHudTextColored(pPlayer, pszIdentifier, pszColor, x, y, pszText, flAlignX, flAlignY, iSize);
+			}
+		}
+	}
+
+	void AddColoredHudTextToAll(const char* pszIdentifier, const char* pszText, const char* pszColor, float x, float y)
+	{
+		if (!pszIdentifier || !pszText)
+			return;
+
+		// loop through each player
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			CBasePlayer* ent = UTIL_PlayerByIndex(i);
+			if (ent && ent->IsPlayer())
+			{
+				CFFPlayer* pPlayer = ToFFPlayer(ent);
+				FF_LuaHudTextColored(pPlayer, pszIdentifier, pszColor, x, y, pszText);
+			}
+		}
+	}
+
+	void AddColoredHudTextToAll(const char* pszIdentifier, const char* pszText, const char* pszColor, float x, float y, int iAlign)
+	{
+		if (!pszIdentifier || !pszText)
+			return;
+
+		// loop through each player
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			CBasePlayer* ent = UTIL_PlayerByIndex(i);
+			if (ent && ent->IsPlayer())
+			{
+				CFFPlayer* pPlayer = ToFFPlayer(ent);
+				FF_LuaHudTextColored(pPlayer, pszIdentifier, pszColor, x, y, pszText, iAlign);
+			}
+		}
+	}
+
+	void AddColoredHudTextToAll(const char* pszIdentifier, const char* pszText, const char* pszColor, float x, float y, float flAlignX, float flAlignY)
+	{
+		if (!pszIdentifier || !pszText)
+			return;
+
+		// loop through each player
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			CBasePlayer* ent = UTIL_PlayerByIndex(i);
+			if (ent && ent->IsPlayer())
+			{
+				CFFPlayer* pPlayer = ToFFPlayer(ent);
+				FF_LuaHudTextColored(pPlayer, pszIdentifier, pszColor, x, y, pszText, flAlignX, flAlignY);
+			}
+		}
+	}
+
+	void AddColoredHudTextToAll(const char* pszIdentifier, const char* pszText, const char* pszColor, float x, float y, float flAlignX, float flAlignY, int iSize)
+	{
+		if (!pszIdentifier || !pszText)
+			return;
+
+		// loop through each player
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			CBasePlayer* ent = UTIL_PlayerByIndex(i);
+			if (ent && ent->IsPlayer())
+			{
+				CFFPlayer* pPlayer = ToFFPlayer(ent);
+				FF_LuaHudTextColored(pPlayer, pszIdentifier, pszColor, x, y, pszText, flAlignX, flAlignY, iSize);
+			}
+		}
+	}
 	
 	void AddTimer( const char *pszIdentifier, float flStartValue, float flSpeed )
 	{
@@ -3000,6 +3172,30 @@ namespace FFLib
 	{
 		return CBaseEntity::PrecacheModel(name, true);
 	}
+
+	void HudMsg(int iChannel, float x, float y, int r1, int g1, int b1, int a1, int r2, int g2, int b2, int a2, int iEffect, float flFadeIn, float flFadeOut, float flHoldTime, float flFXTime, const char* pszMessage)
+	{
+		CBroadcastRecipientFilter filter;
+		UserMessageBegin(filter, "HudMsg");
+			WRITE_BYTE(iChannel);
+			WRITE_FLOAT(x);
+			WRITE_FLOAT(y);
+			WRITE_BYTE(r1);
+			WRITE_BYTE(g1);
+			WRITE_BYTE(b1);
+			WRITE_BYTE(a1);
+			WRITE_BYTE(r2);
+			WRITE_BYTE(g2);
+			WRITE_BYTE(b2);
+			WRITE_BYTE(a2);
+			WRITE_BYTE(iEffect);
+			WRITE_FLOAT(flFadeIn);
+			WRITE_FLOAT(flFadeOut);
+			WRITE_FLOAT(flHoldTime);
+			WRITE_FLOAT(flFXTime);
+			WRITE_STRING(pszMessage);
+		MessageEnd();
+	}
 } // namespace FFLib
 
 //---------------------------------------------------------------------------
@@ -3119,6 +3315,27 @@ void CFFLuaLib::InitGlobals(lua_State* L)
 			overload<const char*, const char*, float, float, int>(&FFLib::AddHudTextToAll),
 			overload<const char*, const char*, float, float, float, float>(&FFLib::AddHudTextToAll),
 			overload<const char*, const char*, float, float, float, float, int>(&FFLib::AddHudTextToAll)
+		)
+
+		.addFunction("AddColoredHudText",
+			overload<CFFPlayer*, const char*, const char*, const char*, float, float>(&FFLib::AddColoredHudText),
+			overload<CFFPlayer*, const char*, const char*, const char*, float, float, int>(&FFLib::AddColoredHudText),
+			overload<CFFPlayer*, const char*, const char*, const char*, float, float, float, float>(&FFLib::AddColoredHudText),
+			overload<CFFPlayer*, const char*, const char*, const char*, float, float, float, float, int>(&FFLib::AddColoredHudText)
+		)
+
+		.addFunction("AddColoredHudTextToTeam",
+			overload<CFFTeam*, const char*, const char*, const char*, float, float>(&FFLib::AddColoredHudTextToTeam),
+			overload<CFFTeam*, const char*, const char*, const char*, float, float, int>(&FFLib::AddColoredHudTextToTeam),
+			overload<CFFTeam*, const char*, const char*, const char*, float, float, float, float>(&FFLib::AddColoredHudTextToTeam),
+			overload<CFFTeam*, const char*, const char*, const char*, float, float, float, float, int>(&FFLib::AddColoredHudTextToTeam)
+		)
+
+		.addFunction("AddColoredHudTextToAll",
+			overload<const char*, const char*, const char*, float, float>(&FFLib::AddColoredHudTextToAll),
+			overload<const char*, const char*, const char*, float, float, int>(&FFLib::AddColoredHudTextToAll),
+			overload<const char*, const char*, const char*, float, float, float, float>(&FFLib::AddColoredHudTextToAll),
+			overload<const char*, const char*, const char*, float, float, float, float, int>(&FFLib::AddColoredHudTextToAll)
 		)
 
 		.addFunction("AddTimer",				&FFLib::AddTimer)
@@ -3365,5 +3582,6 @@ void CFFLuaLib::InitGlobals(lua_State* L)
 			overload<const char*, const char*>(&FFLib::SpawnEntity)
 		)
 
-		.addFunction("GetMapName",				&FFLib::GetMapName);
+		.addFunction("GetMapName",				&FFLib::GetMapName)
+		.addFunction("HudMsg",				&FFLib::HudMsg);
 }
