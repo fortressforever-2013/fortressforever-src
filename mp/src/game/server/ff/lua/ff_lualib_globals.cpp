@@ -3172,30 +3172,6 @@ namespace FFLib
 	{
 		return CBaseEntity::PrecacheModel(name, true);
 	}
-
-	void HudMsg(int iChannel, float x, float y, int r1, int g1, int b1, int a1, int r2, int g2, int b2, int a2, int iEffect, float flFadeIn, float flFadeOut, float flHoldTime, float flFXTime, const char* pszMessage)
-	{
-		CBroadcastRecipientFilter filter;
-		UserMessageBegin(filter, "HudMsg");
-			WRITE_BYTE(iChannel);
-			WRITE_FLOAT(x);
-			WRITE_FLOAT(y);
-			WRITE_BYTE(r1);
-			WRITE_BYTE(g1);
-			WRITE_BYTE(b1);
-			WRITE_BYTE(a1);
-			WRITE_BYTE(r2);
-			WRITE_BYTE(g2);
-			WRITE_BYTE(b2);
-			WRITE_BYTE(a2);
-			WRITE_BYTE(iEffect);
-			WRITE_FLOAT(flFadeIn);
-			WRITE_FLOAT(flFadeOut);
-			WRITE_FLOAT(flHoldTime);
-			WRITE_FLOAT(flFXTime);
-			WRITE_STRING(pszMessage);
-		MessageEnd();
-	}
 } // namespace FFLib
 
 //---------------------------------------------------------------------------
@@ -3582,6 +3558,5 @@ void CFFLuaLib::InitGlobals(lua_State* L)
 			overload<const char*, const char*>(&FFLib::SpawnEntity)
 		)
 
-		.addFunction("GetMapName",				&FFLib::GetMapName)
-		.addFunction("HudMsg",				&FFLib::HudMsg);
+		.addFunction("GetMapName",				&FFLib::GetMapName);
 }
