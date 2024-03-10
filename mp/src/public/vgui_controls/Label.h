@@ -86,6 +86,7 @@ public:
 		CS_NORMAL,
 		CS_DULL,
 		CS_BRIGHT,
+		CS_CUSTOM,
 	};
 	virtual void SetTextColorState(EColorState state);
 

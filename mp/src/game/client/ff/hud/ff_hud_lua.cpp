@@ -537,8 +537,6 @@ void CHudLua::HudTextColored(int hudIdentifier, int iX, int iY, const char* pszT
 		}
 	}
 
-	pLabel->SetFgColor(clr);
-
 	pLabel->SizeToContents();
 
 	int iProperXPosition = 0;
@@ -595,6 +593,10 @@ void CHudLua::HudTextColored(int hudIdentifier, int iX, int iY, const char* pszT
 	}
 
 	pLabel->SetPos(iProperXPosition, iProperYPosition);
+
+	pLabel->SetTextColorState(Label::EColorState::CS_CUSTOM);
+
+	pLabel->SetFgColor(clr);
 
 	//pLabel->MoveToFront();
 	pLabel->SetVisible(true);

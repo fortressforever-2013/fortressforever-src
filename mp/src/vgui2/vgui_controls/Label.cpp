@@ -985,7 +985,9 @@ void Label::OnRequestFocus(VPANEL subFocus, VPANEL defaultPanel)
 //-----------------------------------------------------------------------------
 void Label::ApplySchemeSettings(IScheme *pScheme)
 {
-	BaseClass::ApplySchemeSettings(pScheme);
+	// allow colors from lua, kinda hackish
+	if ( _textColorState != CS_CUSTOM )
+		BaseClass::ApplySchemeSettings(pScheme);
 
 	if (_fontOverrideName)
 	{
@@ -1040,6 +1042,8 @@ void Label::ApplySchemeSettings(IScheme *pScheme)
 
 	switch (_textColorState)
 	{
+	case CS_CUSTOM:
+		break;
 	case CS_DULL:
 		SetFgColor(GetSchemeColor("Label.TextDullColor", pScheme));
 		break;
