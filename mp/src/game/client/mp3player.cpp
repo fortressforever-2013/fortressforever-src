@@ -10,7 +10,9 @@
 #include "mp3player.h"
 #include "KeyValues.h"
 #include "filesystem.h"
+#include <valve_minmax_off.h>
 #include <filesystem>
+#include <valve_minmax_on.h>
 
 #include "vgui_controls/MenuButton.h"
 #include "vgui_controls/Menu.h"
