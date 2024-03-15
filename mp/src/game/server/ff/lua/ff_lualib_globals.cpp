@@ -531,8 +531,7 @@ namespace FFLib
 
 	void ConsoleToAll(const char* szMessage)
 	{
-		Msg( szMessage );
-		Msg( "\n" );
+		Msg( "%s\n", szMessage );
 	}
 
 	void ServerCommand(const char* command)

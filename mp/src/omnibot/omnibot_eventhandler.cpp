@@ -292,7 +292,7 @@ CON_COMMAND( listevt, "List all the events matching a given pattern" )
 	KeyValues *pEventAsKey;
 	int event_count;
 	char arg1[128]; // no way, I hate pointers...
-	Q_snprintf(arg1, 128, args.Arg (1)); // get any argument to the command
+	Q_snprintf(arg1, 128, "%s", args.Arg (1)); // get any argument to the command
 	// tell people what we are going to do
 	if (arg1[0] == 0)
 		DevMsg ("Printing out ALL game, server and MOD events...\n");
@@ -347,7 +347,7 @@ CON_COMMAND( listevt, "List all the events matching a given pattern" )
 
 void event_ServerMessage(IGameEvent *_event)
 {
-	DevMsg(__FUNCTION__);
+	DevMsg("%s", __FUNCTION__);
 }
 
 void event_ServerPlayerConnect(IGameEvent *_event)
@@ -370,12 +370,12 @@ void event_ServerPlayerDisConnect(IGameEvent *_event)
 
 void event_ServerPlayerInfo(IGameEvent *_event)
 {
-	DevMsg(__FUNCTION__);
+	DevMsg("%s", __FUNCTION__);
 }
 
 void event_ServerPlayerActivate(IGameEvent *_event)
 {
-	DevMsg(__FUNCTION__);
+	DevMsg("%s", __FUNCTION__);
 }
 
 void event_ServerPlayerSay(IGameEvent *_event)
@@ -433,17 +433,17 @@ void event_ServerPlayerRemoveAllItems(IGameEvent *_event)
 
 void event_GameTeamInfo(IGameEvent *_event)
 {
-	DevMsg(__FUNCTION__);
+	DevMsg("%s", __FUNCTION__);
 }
 
 void event_GameTeamScore(IGameEvent *_event)
 {
-	DevMsg(__FUNCTION__);
+	DevMsg("%s", __FUNCTION__);
 }
 
 void event_GamePlayerScore(IGameEvent *_event)
 {
-	DevMsg(__FUNCTION__);
+	DevMsg("%s", __FUNCTION__);
 }
 
 //void event_GamePlayerShoot(IGameEvent *_event)
@@ -467,12 +467,12 @@ void event_GamePlayerUse(IGameEvent *_event)
 
 void event_GamePlayerChangeName(IGameEvent *_event)
 {
-	DevMsg(__FUNCTION__);
+	DevMsg("%s", __FUNCTION__);
 }
 
 void event_GameNewMap(IGameEvent *_event)
 {
-	DevMsg(__FUNCTION__);
+	DevMsg("%s", __FUNCTION__);
 }
 
 void event_GameStart(IGameEvent *_event)
@@ -488,27 +488,27 @@ void event_GameEnd(IGameEvent *_event)
 
 void event_RoundStart(IGameEvent *_event)
 {
-	DevMsg(__FUNCTION__);
+	DevMsg("%s", __FUNCTION__);
 }
 
 void event_RoundEnd(IGameEvent *_event)
 {
-	DevMsg(__FUNCTION__);
+	DevMsg("%s", __FUNCTION__);
 }
 
 void event_GameMessage(IGameEvent *_event)
 {
-	DevMsg(__FUNCTION__);
+	DevMsg("%s", __FUNCTION__);
 }
 
 void event_BreakBreakable(IGameEvent *_event)
 {
-	DevMsg(__FUNCTION__);
+	DevMsg("%s", __FUNCTION__);
 }
 
 void event_BreakProp(IGameEvent *_event)
 {
-	DevMsg(__FUNCTION__);
+	DevMsg("%s", __FUNCTION__);
 }
 
 void event_Class(IGameEvent *_event)

@@ -454,7 +454,7 @@ void CFFGameMovement::CategorizePosition()
 
 #ifdef GAME_DLL
 	CFFPlayer *pFFPlayer = ToFFPlayer(player);
-	if (pFFPlayer->m_flMancannonTime > 0.0f && player->GetGroundEntity() != NULL || player->GetWaterLevel() > WL_Feet)
+	if ( pFFPlayer->m_flMancannonTime > 0.0f && ( player->GetGroundEntity() != NULL || player->GetWaterLevel() > WL_Feet ) )
 	{
 		// reset jump pad time so that it stops conc speed limiting
 		// once you're firmly on the ground or in water

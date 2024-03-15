@@ -59,8 +59,8 @@ public:
 	
 protected:
 
-	void CHudTeamScores::PaintNumbers(HFont font, int xpos, int ypos, int value);
-	void CHudTeamScores::PaintNumbersRightAligned(HFont font, int xpos, int ypos, int value, int maxchars);
+	void PaintNumbers(HFont font, int xpos, int ypos, int value);
+	void PaintNumbersRightAligned(HFont font, int xpos, int ypos, int value, int maxchars);
 
 private:
 	// Stuff we need to know	

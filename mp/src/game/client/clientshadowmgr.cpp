@@ -2488,7 +2488,7 @@ void CClientShadowMgr::BuildRenderToTextureShadow( IClientRenderable* pRenderabl
 	Vector boxSize;
 	VectorSubtract( maxs, mins, boxSize );
 	
-	Vector yvec;
+	Vector yvec = Vector(0, 0, 0);
 	float fProjMax = 0.0f;
 	for( int i = 0; i != 3; ++i )
 	{

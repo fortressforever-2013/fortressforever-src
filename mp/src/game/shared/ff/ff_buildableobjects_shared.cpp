@@ -349,8 +349,10 @@ CFFBuildableInfo::CFFBuildableInfo( CFFPlayer *pPlayer, int iBuildObject )
 //-----------------------------------------------------------------------------
 bool CFFBuildableInfo::IsGeometryInTheWay( void )
 {
-	// Get the correct mins/maxs 
-	Vector vecMins, vecMaxs;
+	// Get the correct mins/maxs
+	Vector vecMins = Vector(0, 0, 0);
+	Vector vecMaxs = Vector(0, 0, 0);
+	
 	switch( m_iBuildObject )
 	{
 		case FF_BUILD_DISPENSER: vecMins = FF_DISPENSER_MINS; vecMaxs = FF_DISPENSER_MAXS; break;

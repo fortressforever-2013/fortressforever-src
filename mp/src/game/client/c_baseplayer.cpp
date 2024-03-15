@@ -1492,7 +1492,9 @@ void C_BasePlayer::CalcChaseCamView(Vector& eyeOrigin, QAngle& eyeAngles, float&
 
 	// QAngle tmpangles;
 
-	Vector forward, viewpoint, origin;
+	Vector forward = Vector(0, 0, 0);
+	Vector viewpoint = Vector(0, 0, 0);
+	Vector origin = Vector(0, 0, 0);
 
 	if (target->IsPlayer())
 	{

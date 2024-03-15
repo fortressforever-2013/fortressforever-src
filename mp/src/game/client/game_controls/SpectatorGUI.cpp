@@ -232,7 +232,7 @@ void CSpectatorMenu::ShowPanel(bool bShow)
 
 	//bool bIsEnabled = true;
 	
-	 if ( engine->IsHLTV() && HLTVCamera()->IsPVSLocked() || !cl_drawhud.GetBool() )
+	 if ( ( engine->IsHLTV() && HLTVCamera()->IsPVSLocked() ) || !cl_drawhud.GetBool() )
 	 {
 		 // when wattching HLTV with a locked PVS, some elements are disabled
 		 //bIsEnabled = false;

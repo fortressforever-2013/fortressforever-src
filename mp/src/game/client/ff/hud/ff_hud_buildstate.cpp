@@ -211,7 +211,8 @@ void CHudBuildState::MsgFunc_PipeMsg(bf_read &msg)
 		//DevMsg("Incrementing pipe count (to %i)\n", m_iNumPipes);
 		break;
 	case DECREMENT_PIPES:
-		m_iNumPipes = max(0, m_iNumPipes--);
+		m_iNumPipes = max(0, m_iNumPipes);
+		m_iNumPipes--;
 		//DevMsg("Decrementing pipe count (to %i)\n", m_iNumPipes);
 		break;
 	case RESET_PIPES:

@@ -56,7 +56,7 @@ static int print(lua_State *L)
 			return luaL_error(L, LUA_QL("tostring") " must return a string to " LUA_QL("print"));
 		if (i>1)
 			Msg("\t");
-		Msg(s);
+		Msg("%s", s);
 		lua_pop(L, 1);  /* pop result */
 	}
 	Msg("\n");

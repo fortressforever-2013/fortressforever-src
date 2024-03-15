@@ -146,7 +146,7 @@ CFFInfoScript::CFFInfoScript( void )
 CFFInfoScript::~CFFInfoScript( void )
 {
 	m_spawnflags = 0;
-	m_vStartOrigin = Vector();
+	m_vStartOrigin = Vector(0, 0, 0);
 }
 
 //-----------------------------------------------------------------------------

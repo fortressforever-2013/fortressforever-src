@@ -251,7 +251,7 @@ void CHudHint::Paint()
 }
 
 /************************************************************************/
-/* Load hints into given container
+/* Load hints into given container					*/
 /************************************************************************/
 void LoadHints(const char *pFilename, HintVector &hints)
 {

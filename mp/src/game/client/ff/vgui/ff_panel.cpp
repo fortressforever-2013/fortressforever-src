@@ -71,10 +71,12 @@ namespace vgui
 		//	return;
 
 		if (m_pHudBackground)
+		{
 			if (cl_teamcolourhud.GetBool())
 				m_pHudBackground->DrawSelf(0, 0, m_TeamColorHudBackgroundColour);
 			else
 				m_pHudBackground->DrawSelf(0, 0, m_HudBackgroundColour);
+		}
 		if (m_pHudForeground)
 			m_pHudForeground->DrawSelf(0, 0, m_HudForegroundColour);
 

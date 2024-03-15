@@ -537,7 +537,7 @@ float CFFGrenadeLaser::getLengthPercent()
 			QAngle angRadial = GetAbsAngles();
 
 			trace_t tr;
-			char i;
+			int i;
 
 			CFFPlayer *pgrenOwner = ToFFPlayer( this->GetOwnerEntity() );
 
