@@ -801,7 +801,7 @@ Panel *CHudLua::GetHudElement(int hudIdentifier, HudElementType_t iType)
 
 	Panel *pPanel = NULL;
 	char szPanelName[16];
-	sprintf(szPanelName, "ff_hud_lua_%d", hudIdentifier);
+	V_sprintf_safe(szPanelName, "ff_hud_lua_%d", hudIdentifier);
 
 	// Return a new one of the correct type
 	switch (iType)

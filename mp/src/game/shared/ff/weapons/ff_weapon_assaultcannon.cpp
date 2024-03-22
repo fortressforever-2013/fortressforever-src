@@ -284,7 +284,7 @@ void CFFWeaponAssaultCannon::ClampOn()
 	{
 		m_bClamped = true;
 		m_flMaxChargeTime = m_flChargeTime;
-		DevMsg("Clamped: charge is %f",m_flChargeTime);
+		DevMsg("Clamped: charge is %f", (float) m_flChargeTime);
 	}
 	// play anim or stop charge bar?
 	// timer to stop people clamping/unclamping too fast?

@@ -429,7 +429,7 @@ void CBaseViewport::Start( IGameUIFuncs *pGameUIFuncs, IGameEventManager2 * pGam
 
 //-----------------------------------------------------------------------------
 // Purpose: Updates the spectator panel with new player info
-/*-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void CBaseViewport::UpdateSpectatorPanel()
 {
 	char bottomText[128];

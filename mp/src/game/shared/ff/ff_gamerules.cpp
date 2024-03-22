@@ -1597,7 +1597,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 			}
 		}
 
-		CBasePlayer *pScorer = pScorer = GetDeathScorer( pKiller, pInflictor );
+		CBasePlayer *pScorer = GetDeathScorer( pKiller, pInflictor );
 
 		// pVictim is the buildables owner
 		CFFPlayer *pVictim = NULL, *pOwner = NULL;

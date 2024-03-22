@@ -146,7 +146,7 @@ protected:
 
 	vgui::SectionedListPanel *m_pPlayerList;
 
-	int s_VoiceImage[5];
+	int s_VoiceImage[7];
 	int s_ChannelImage[5];	// |-- Mirv: Channel Images
 	int TrackerImage;
 	int	m_HLTVSpectators;

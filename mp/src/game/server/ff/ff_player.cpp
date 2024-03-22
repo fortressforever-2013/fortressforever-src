@@ -5388,7 +5388,7 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 		float flMaxSpeed = MaxSpeed();
 
 		// dont slow on team damage or self damage, else we couldnt rocket jump or boost!
-		if ( !g_pGameRules->PlayerRelationship( this, ToFFPlayer( info.GetAttacker() ) ) == GR_TEAMMATE ) 
+		if ( !( g_pGameRules->PlayerRelationship( this, ToFFPlayer( info.GetAttacker() ) ) == GR_TEAMMATE ) ) 
 		{
 			if (flHorizontalSpeed > flMaxSpeed)
 			{

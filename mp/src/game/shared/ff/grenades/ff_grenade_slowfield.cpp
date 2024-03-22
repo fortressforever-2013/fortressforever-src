@@ -464,7 +464,7 @@ void CFFGrenadeSlowfield::UpdateOnRemove()
 				}
 
 				// only change players active slowfield if they will be going slower
-				if (pPlayer->GetActiveSlowfield() != this && pPlayer->GetLaggedMovementValue() > flLaggedMovement || pPlayer->GetActiveSlowfield() == NULL)
+				if ( pPlayer->GetActiveSlowfield() != this && ( pPlayer->GetLaggedMovementValue() > flLaggedMovement || pPlayer->GetActiveSlowfield() == NULL ) )
 				{
 					pPlayer->SetLaggedMovementValue(flLaggedMovement);
 					pPlayer->SetActiveSlowfield( this );

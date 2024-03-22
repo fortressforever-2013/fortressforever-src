@@ -70,7 +70,7 @@ public:
 
 		// --> Mirv: [HACK] Quick way to get round renaming files for now (V SILLY)
 		char name[128];
-		sprintf( name, GetName() );
+		sprintf( name, "%s", GetName() );
 		
 		if( strlen(name) > 6 )
 			name[strlen(name) - 6] = 0;

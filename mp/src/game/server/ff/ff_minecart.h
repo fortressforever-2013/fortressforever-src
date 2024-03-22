@@ -40,7 +40,7 @@ public:
 	virtual void Precache( void	);
 	virtual void Spawn( void );
 	virtual bool CreateVPhysics( void );
-	virtual int ObjectCaps( void ) { return BaseClass::ObjectCaps() & ~FCAP_ACROSS_TRANSITION | FCAP_IMPULSE_USE; }
+	virtual int ObjectCaps( void ) { return ( BaseClass::ObjectCaps() & ( ~FCAP_ACROSS_TRANSITION | FCAP_IMPULSE_USE ) ); }
 
 	void OnUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );	
 

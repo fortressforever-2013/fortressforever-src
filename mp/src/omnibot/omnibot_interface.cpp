@@ -2547,7 +2547,7 @@ namespace Omnibot
 			static char mapname[256] = {0};
 			if(gpGlobals->mapname.ToCStr())
 			{
-				Q_snprintf( mapname, sizeof( mapname ), STRING( gpGlobals->mapname ) );
+				Q_snprintf( mapname, sizeof( mapname ), "%s", STRING( gpGlobals->mapname ) );
 			}
 			return mapname;
 		}

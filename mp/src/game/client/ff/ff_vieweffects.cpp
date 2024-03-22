@@ -160,6 +160,7 @@ CFFViewEffectsMgr::CFFViewEffectsMgr()
 	{
 		m_pViewEffects[i] = NULL;
 	}
+	m_nViewEffects = 0;
 }
 
 //-----------------------------------------------------------------------------

@@ -582,7 +582,7 @@ void CTeamMenu::UpdateMapDescriptionText()
 
 	// Could not find a title for this, just stick everything in the normal spot
 	// Or there was nothing after the title
-	if (!pszEndOfHead || (pszEndOfHead + 1) == '\0')
+	if ( !pszEndOfHead || ( (*(pszEndOfHead + 1)) == '\0' ) )
 	{
 		m_pMapDescriptionHead->SetText("Unknown map style");
 		m_pMapDescriptionText->SetText(szBuffer);

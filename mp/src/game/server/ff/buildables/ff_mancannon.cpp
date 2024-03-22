@@ -124,7 +124,7 @@ void CFFManCannon::OnJumpPadThink( void )
 		if ( gpGlobals->curtime >= m_flLastHeal + MANCANNON_HEALTICKLENGTH && m_iHealth < MANCANNON_HEALTH )
 		{
 			m_iHealth = min( ( m_iHealth + MANCANNON_HEALTH_REGEN ), MANCANNON_HEALTH );
-			DevMsg("[S] Jumppad health regen: %i\n", m_iHealth);
+			DevMsg("[S] Jumppad health regen: %i\n", (int) m_iHealth);
 
 			// This will force an update of this variable for the client
 			NetworkStateChanged( ( int * )&m_iHealth );

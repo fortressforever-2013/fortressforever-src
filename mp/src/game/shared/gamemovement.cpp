@@ -4599,8 +4599,8 @@ void CGameMovement::Duck( void )
 			if (player->m_Local.m_bDucking)
 			{
 				// Finish ducking immediately if duck time is over or not on ground
-				if (((float)player->m_Local.m_flDucktime / 1000.0 <= (1.0 - TIME_TO_DUCK)) ||
-					(player->GetGroundEntity() == NULL) && player->m_Local.m_flDucktime > 0)
+				if ( ( ( (float) player->m_Local.m_flDucktime / 1000.0 <= (1.0 - TIME_TO_DUCK) ) || player->GetGroundEntity() == NULL ) &&
+				player->m_Local.m_flDucktime > 0 )
 				{
 					player->m_Local.m_bDucked = true; //pmove->usehull = 1;
 					//pmove->view_ofs[2] = VEC_DUCK_VIEW;
