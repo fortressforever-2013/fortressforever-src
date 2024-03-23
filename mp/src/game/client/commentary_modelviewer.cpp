@@ -262,7 +262,7 @@ void CommentaryShowModelViewer( const CCommand &args )
 		if ( !pCommentaryPanel )
 		{
 			pCommentaryPanel = pViewport->CreatePanelByName( PANEL_COMMENTARY_MODELVIEWER );
-			pViewport->AddNewPanel( pCommentaryPanel/*, "PANEL_COMMENTARY_MODELVIEWER"*/ );
+			pViewport->AddNewPanel( pCommentaryPanel, "PANEL_COMMENTARY_MODELVIEWER" );
 		}
 
 		if ( pCommentaryPanel )

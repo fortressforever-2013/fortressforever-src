@@ -10,54 +10,70 @@
 /// ---------
 /// Aug 15, 2005 Mirv: First creation
 
+
 #include "cbase.h"
-#include "classmenu.h"
-#include <networkstringtabledefs.h>
+#include <stdio.h>
+
 #include <cdll_client_int.h>
+
+#include "classmenu.h"
 
 #include <vgui/IScheme.h>
 #include <vgui/ILocalize.h>
 #include <vgui/ISurface.h>
-#include <filesystem.h>
 #include <KeyValues.h>
-#include <convar.h>
 #include <vgui_controls/ImageList.h>
+#include <filesystem.h>
 
 #include <vgui_controls/TextEntry.h>
 #include <vgui_controls/Button.h>
-#include <vgui_controls/RichText.h>
-#include <vgui_controls/ProgressBar.h>
-#include "ff_modelpanel.h"
-#include "ff_frame.h"
+#include <vgui_controls/Panel.h>
 
+#include "cdll_util.h"
+#include "IGameUIFuncs.h" // for key bindings
+#ifndef _XBOX
+extern IGameUIFuncs *gameuifuncs; // for key binding details
+#endif
 #include <game/client/iviewport.h>
 
+#include <stdlib.h> // MAX_PATH define
+
+#include <networkstringtabledefs.h>
+#include <cdll_client_int.h>
+#include <convar.h>
 #include "ienginevgui.h"
 #include "IGameUIFuncs.h"
 #include <igameresources.h>
 
+#include <vgui_controls/RichText.h>
+#include <vgui_controls/ProgressBar.h>
+
+#include "ff_modelpanel.h"
+#include "ff_frame.h"
 #include "ff_playerclass_parse.h"
 #include "ff_weapon_parse.h"
 #include "ff_utils.h"
-
 #include "ff_button.h"
-
-extern IFileSystem **pFilesystem;
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 using namespace vgui;
-extern INetworkStringTable *g_pStringTableInfoPanel;
-extern IGameUIFuncs *gameuifuncs;
+extern IFileSystem** pFilesystem;
+extern INetworkStringTable* g_pStringTableInfoPanel;
+extern IGameUIFuncs* gameuifuncs;
+
+#ifdef TF_CLIENT_DLL
+#define HUD_CLASSAUTOKILL_FLAGS		( FCVAR_CLIENTDLL | FCVAR_ARCHIVE | FCVAR_USERINFO )
+#else
+#define HUD_CLASSAUTOKILL_FLAGS		( FCVAR_CLIENTDLL | FCVAR_ARCHIVE )
+#endif // !TF_CLIENT_DLL
 
 // Button names
-const char *szClassButtons[] = { "scoutbutton", "sniperbutton", "soldierbutton", 
-								 "demomanbutton", "medicbutton", "hwguybutton", 
-								 "pyrobutton", "spybutton", "engineerbutton", 
+const char* szClassButtons[] = { "scoutbutton", "sniperbutton", "soldierbutton",
+								 "demomanbutton", "medicbutton", "hwguybutton",
+								 "pyrobutton", "spybutton", "engineerbutton",
 								 "civilianbutton" };
-
-using namespace vgui;
 
 //=============================================================================
 // A team button has the following components:
@@ -154,7 +170,7 @@ public:
 				char character = pIcon->cCharacterInFont;
 
 				wchar_t unicode[2];
-				V_snwprintf(unicode, sizeof(unicode), L"%c", character);
+				swprintf(unicode, L"%c", character);
 
 				surface()->DrawSetTextColor(Color(255, 255, 255, 255));
 				surface()->DrawSetTextFont(hFont);
@@ -297,12 +313,14 @@ CON_COMMAND( hud_reloadclassmenu, "hud_reloadclassmenu" )
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CClassMenu::CClassMenu(IViewPort *pViewPort) : Frame(NULL, PANEL_CLASS) 
+CClassMenu::CClassMenu(IViewPort *pViewPort) : Frame(NULL, PANEL_CLASS)
 {
-	// initialize dialog
 	m_pViewPort = pViewPort;
+	m_iScoreBoardKey = BUTTON_CODE_INVALID; // this is looked up in Activate()
+	m_iTeam = 0;
 
-	m_flNextUpdate = 0;
+	// initialize dialog
+	SetTitle("", true);
 
 	// load the new scheme early!!
 	SetScheme("ClientScheme");
@@ -313,10 +331,9 @@ CClassMenu::CClassMenu(IViewPort *pViewPort) : Frame(NULL, PANEL_CLASS)
 	// hide the system buttons
 	SetTitleBarVisible(false);
 
-	// info window about this class
 	m_pClassInfo = new RichText(this, "ClassInfo");
 	m_pClassInfo->SetVerticalScrollbar(false);
-	m_pClassInfo->SetBgColor(Color(0,0,0,50));
+	m_pClassInfo->SetBgColor(Color(0, 0, 0, 50));
 	m_pClassInfo->SetPaintBorderEnabled(true);
 	m_pClassInfo->SetPaintBackgroundEnabled(true);
 	m_pClassInfo->SetPaintBackgroundType(2);
@@ -327,31 +344,31 @@ CClassMenu::CClassMenu(IViewPort *pViewPort) : Frame(NULL, PANEL_CLASS)
 	m_pPrimaryGren = new LoadoutLabel(this, "PrimaryGren", "Primary");
 	m_pSecondaryGren = new LoadoutLabel(this, "SecondaryGren", "Secondary");
 
-	m_pGrenadesSection = new Section( this, "GrenadesSection" );
-	m_pWeaponsSection = new Section( this, "WeaponsSection" );
-	m_pClassInfoSection = new Section( this, "ClassInfoSection" );
-	m_pClassRoleSection = new Section( this, "ClassRoleSection" );
+	m_pGrenadesSection = new Section(this, "GrenadesSection");
+	m_pWeaponsSection = new Section(this, "WeaponsSection");
+	m_pClassInfoSection = new Section(this, "ClassInfoSection");
+	m_pClassRoleSection = new Section(this, "ClassRoleSection");
 
-	m_pClassRole = new Label( this, "ClassRole", "" );
-	
-	for(int i=0; i<8; i++)
+	m_pClassRole = new Label(this, "ClassRole", "");
+
+	for (int i = 0; i < 8; i++)
 	{
-		m_WepSlots[i] = new LoadoutLabel(this, VarArgs("WepSlot%d", i+1), VarArgs("Weapon %d", i+1));
+		m_WepSlots[i] = new LoadoutLabel(this, VarArgs("WepSlot%d", i + 1), VarArgs("Weapon %d", i + 1));
 	}
 
-	char *pszButtons[] = { "ScoutButton", "SniperButton", "SoldierButton", "DemomanButton", "MedicButton", "HwguyButton", "PyroButton", "SpyButton", "EngineerButton", "CivilianButton" };
+	char* pszButtons[] = { "ScoutButton", "SniperButton", "SoldierButton", "DemomanButton", "MedicButton", "HwguyButton", "PyroButton", "SpyButton", "EngineerButton", "CivilianButton" };
 
 	for (int iClassIndex = 0; iClassIndex < ARRAYSIZE(pszButtons); iClassIndex++)
 	{
-		m_pClassButtons[iClassIndex] = new MouseOverButton(this, pszButtons[iClassIndex], (const char *) NULL, this, pszButtons[iClassIndex]);
+		m_pClassButtons[iClassIndex] = new MouseOverButton(this, pszButtons[iClassIndex], (const char*)NULL, this, pszButtons[iClassIndex]);
 	}
 
 	m_pSpeed = new ClassPropertiesLabel(this, "SpeedLabel", "Speed");
-	m_pSpeed->SetMaxValue( 400 - 180 );
+	m_pSpeed->SetMaxValue(400 - 180);
 	m_pFirepower = new ClassPropertiesLabel(this, "FirepowerLabel", "Firepower");
-	m_pFirepower->SetMaxValue( 100 );
+	m_pFirepower->SetMaxValue(100);
 	m_pHealth = new ClassPropertiesLabel(this, "HealthLabel", "Health");
-	m_pHealth->SetMaxValue( 400 );
+	m_pHealth->SetMaxValue(400);
 
 	m_pModelView = new PlayerModelPanel(this, "ClassPreview");
 
@@ -362,76 +379,28 @@ CClassMenu::CClassMenu(IViewPort *pViewPort) : Frame(NULL, PANEL_CLASS)
 	m_pModelView->SetZPos(50);
 
 	LoadControlSettings("Resource/UI/ClassMenu.res");
-	
+
 	Reset();
+
+	// Inheriting classes are responsible for calling LoadControlSettings()!
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Destructor
 //-----------------------------------------------------------------------------
-CClassMenu::~CClassMenu() 
+CClassMenu::~CClassMenu()
 {
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Do whatever command is needed
+// Purpose: 
 //-----------------------------------------------------------------------------
-void CClassMenu::OnCommand(const char *command) 
-{
-	if (Q_strcmp(command, "cancel") != 0)
-	{
-		engine->ClientCmd(VarArgs("class %s", command));
-	}
-
-	m_pViewPort->ShowPanel(this, false);
-
-	BaseClass::OnCommand(command);
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Nothing
-//-----------------------------------------------------------------------------
-void CClassMenu::SetData(KeyValues *data) 
-{
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Show or don't show
-//-----------------------------------------------------------------------------
-void CClassMenu::ShowPanel(bool bShow) 
-{
-	if (BaseClass::IsVisible() == bShow) 
-		return;
-
-	m_pViewPort->ShowBackGround(bShow);
-
-	if (bShow) 
-	{
-		Activate();
-		SetMouseInputEnabled(true);
-
-		// Update straight away
-		Update();
-
-		MoveToFront();
-	}
-	else
-	{
-		SetVisible(false);
-		SetMouseInputEnabled(false);
-		Reset();
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Don't need anything yet
-//-----------------------------------------------------------------------------
-void CClassMenu::Reset() 
+void CClassMenu::Reset()
 {
 	SetClassInfoVisible(false);
 }
 
-void CClassMenu::SetClassInfoVisible( bool state )
+void CClassMenu::SetClassInfoVisible(bool state)
 {
 	if (state == false)
 		m_pModelView->Reset();
@@ -439,7 +408,7 @@ void CClassMenu::SetClassInfoVisible( bool state )
 	m_pPrimaryGren->SetVisible(state);
 	m_pSecondaryGren->SetVisible(state);
 
-	for (int i=0; i<8; i++)
+	for (int i = 0; i < 8; i++)
 		m_WepSlots[i]->SetVisible(state);
 
 	m_pSpeed->SetVisible(state);
@@ -447,7 +416,7 @@ void CClassMenu::SetClassInfoVisible( bool state )
 	m_pHealth->SetVisible(state);
 	m_pClassInfo->SetVisible(state);
 	m_pClassRole->SetVisible(state);
-	
+
 	m_pGrenadesSection->SetVisible(state);
 	m_pWeaponsSection->SetVisible(state);
 	m_pClassInfoSection->SetVisible(state);
@@ -505,16 +474,113 @@ void CClassMenu::Update()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Give them some key control too
+// Purpose: Called when the user picks a class
 //-----------------------------------------------------------------------------
-void CClassMenu::OnKeyCodePressed(KeyCode code) 
+void CClassMenu::OnCommand( const char *command )
 {
+	if (Q_stricmp(command, "cancel"))
+		engine->ClientCmd(VarArgs("class %s", command));
+
+	m_pViewPort->ShowPanel(this, false);
+
+	BaseClass::OnCommand( command );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: shows the class menu
+//-----------------------------------------------------------------------------
+void CClassMenu::ShowPanel(bool bShow)
+{
+	if (BaseClass::IsVisible() == bShow)
+		return;
+
+	m_pViewPort->ShowBackGround(bShow);
+
+	if ( bShow )
+	{
+		Activate();
+		SetMouseInputEnabled( true );
+
+		// Update straight away
+		Update();
+
+		MoveToFront();
+	}
+	else
+	{
+		SetVisible( false );
+		SetMouseInputEnabled( false );
+		Reset();
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Nothing
+//-----------------------------------------------------------------------------
+void CClassMenu::SetData(KeyValues *data)
+{
+	// do nothing
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Sets the text of a control by name
+//-----------------------------------------------------------------------------
+void CClassMenu::SetLabelText(const char *textEntryName, const char *text)
+{
+	Label *entry = dynamic_cast<Label *>(FindChildByName(textEntryName));
+	if (entry)
+	{
+		entry->SetText(text);
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Sets the visibility of a button by name
+//-----------------------------------------------------------------------------
+void CClassMenu::SetVisibleButton(const char *textEntryName, bool state)
+{
+	Button *entry = dynamic_cast<Button *>(FindChildByName(textEntryName));
+	if (entry)
+	{
+		entry->SetVisible(state);
+	}
+}
+
+void CClassMenu::OnKeyCodePressed(KeyCode code)
+{
+	int nDir = 0;
+
+	switch ( code )
+	{
+	case KEY_XBUTTON_UP:
+	case KEY_XSTICK1_UP:
+	case KEY_XSTICK2_UP:
+	case KEY_UP:
+	case KEY_XBUTTON_LEFT:
+	case KEY_XSTICK1_LEFT:
+	case KEY_XSTICK2_LEFT:
+	case KEY_LEFT:
+		nDir = -1;
+		break;
+
+	case KEY_XBUTTON_DOWN:
+	case KEY_XSTICK1_DOWN:
+	case KEY_XSTICK2_DOWN:
+	case KEY_DOWN:
+	case KEY_XBUTTON_RIGHT:
+	case KEY_XSTICK1_RIGHT:
+	case KEY_XSTICK2_RIGHT:
+	case KEY_RIGHT:
+		nDir = 1;
+		break;
+	}
+
 	// Show the scoreboard over this if needed
 	if (gameuifuncs->GetButtonCodeForBind("showscores") == code)
 		gViewPortInterface->ShowPanel(PANEL_SCOREBOARD, true);
-	
+
 	if (gameuifuncs->GetButtonCodeForBind("serverinfo") == code)
-		engine->ClientCmd( "serverinfo" );
+		engine->ClientCmd("serverinfo");
 
 	// Support hiding the class menu by hitting your changeclass button again like TFC
 	// 0001232: Or if the user presses escape, kill the menu

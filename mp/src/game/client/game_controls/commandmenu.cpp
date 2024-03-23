@@ -1,9 +1,9 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
 // $NoKeywords: $
-//=============================================================================//
+//===========================================================================//
 
 #include "cbase.h"
 #include <cdll_client_int.h>
@@ -35,7 +35,7 @@ bool CommandMenu::LoadFromFile( const char * fileName)	// load menu from KeyValu
 {
 	KeyValues * kv = new KeyValues(fileName);
 
-	if  ( !kv->LoadFromFile( filesystem, fileName, "GAME" ) )
+	if  ( !kv->LoadFromFile( g_pFullFileSystem, fileName, "GAME" ) )
 		return false;
 
 	bool ret = LoadFromKeyValues( kv );
@@ -49,7 +49,7 @@ CommandMenu::~CommandMenu()
 	ClearMenu();
 }
 
-void CommandMenu::OnMessage(const KeyValues *params, vgui::VPANEL fromPanel)
+void CommandMenu::OnMessage(const KeyValues *params, VPANEL fromPanel)
 {
 	char text[255];
 	bool bHandled = false;
@@ -61,18 +61,18 @@ void CommandMenu::OnMessage(const KeyValues *params, vgui::VPANEL fromPanel)
 
 	if ( text[0] )
 	{
-		ConVar * convar = (ConVar*) cvar->FindVar( text );
-		if ( convar )
+		ConVarRef convar( text );
+		if ( convar.IsValid() )
 		{
-			// toggel cvar 
+			// toggle cvar 
 
-			if ( convar->GetInt() )	
+			if ( convar.GetInt() )	
 			{
-				convar->SetValue( 0 );
+				convar.SetValue( 0 );
 			}
 			else
 			{
-				convar->SetValue( 1 );
+				convar.SetValue( 1 );
 			}
 
 			UpdateMenu();
@@ -213,11 +213,11 @@ void CommandMenu::UpdateMenu()
 		if ( text[0] )
 		{
 			// set toggle state equal to cvar state
-			ConVar * convar = (ConVar*) cvar->FindVar( text );
+			ConVarRef convar( text );
 
-			if ( convar )
+			if ( convar.IsValid() )
 			{
-				menuitem.menu->SetMenuItemChecked( menuitem.itemnr, convar->GetBool() );
+				menuitem.menu->SetMenuItemChecked( menuitem.itemnr, convar.GetBool() );
 			}
 		}
 	}

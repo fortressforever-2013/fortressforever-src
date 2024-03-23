@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -13,13 +13,19 @@
 
 #include <vgui/IScheme.h>
 #include <vgui_controls/Button.h>
-#include <vgui_controls/HTML.h>
+#include <vgui/KeyCode.h>
 #include <filesystem.h>
 
 extern vgui::Panel *g_lastPanel;
+extern vgui::Button *g_lastButton;
 
 //-----------------------------------------------------------------------------
 // Purpose: Triggers a new panel when the mouse goes over the button
+//    
+// the new panel has the same dimensions as the passed templatePanel and is of
+// the same class.
+//
+// must at least inherit from vgui::EditablePanel to support LoadControlSettings
 //-----------------------------------------------------------------------------
 class MouseOverPanelButton : public vgui::Button
 {
@@ -27,14 +33,14 @@ private:
 	DECLARE_CLASS_SIMPLE( MouseOverPanelButton, vgui::Button );
 	
 public:
-	MouseOverPanelButton( vgui::Panel *parent, const char *panelName, vgui::Panel *templatePanel ) :
-	  vgui::Button( parent, panelName, L"MouseOverPanelButton" )
+	MouseOverPanelButton(vgui::Panel *parent, const char *panelName, vgui::Panel *templatePanel ) :
+					Button( parent, panelName, "MouseOverPanelButton")
 	{
 		m_pPanel = new vgui::HTML( parent, NULL );
-		m_pPanel->SetVisible( false );
+		m_pPanel ->SetVisible( false );
 
 		// copy size&pos from template panel
-		int x,y, wide, tall;
+		int x,y,wide,tall;
 		templatePanel->GetBounds( x, y, wide, tall );
 		m_pPanel->SetBounds( x, y, wide, tall );
 		int px, py;
@@ -44,21 +50,26 @@ public:
 		// Apply pin settings from template, too
 		m_pPanel->SetAutoResize( templatePanel->GetPinCorner(), templatePanel->GetAutoResize(), px, py, rx, ry );
 
+		m_bPreserveArmedButtons = false;
+		m_bUpdateDefaultButtons = false;
 	}
 
-	void ShowPage( )
+	virtual void SetPreserveArmedButtons( bool bPreserve ){ m_bPreserveArmedButtons = bPreserve; }
+	virtual void SetUpdateDefaultButtons( bool bUpdate ){ m_bUpdateDefaultButtons = bUpdate; }
+
+	void ShowPage()
 	{
 		if( m_pPanel )
 		{
 			m_pPanel->SetVisible( true );
-			m_pPanel->MoveToFront( );
+			m_pPanel->MoveToFront();
 			g_lastPanel = m_pPanel;
 		}
 	}
 	
-	void HidePage( )
+	virtual void HidePage()
 	{
-		if( m_pPanel )
+		if ( m_pPanel )
 		{
 			m_pPanel->SetVisible( false );
 		}
@@ -78,10 +89,10 @@ public:
 		Q_snprintf( classPanel, sizeof( classPanel ), "resource/classes/%s.html", /*className*/ name );
 		// <-- Mirv: [HACK] Quick way to get round renaming files for now (V SILLY)
 
-		if( filesystem->FileExists( classPanel ) )
+		if ( g_pFullFileSystem->FileExists( classPanel, IsX360() ? "MOD" : "GAME" ) )
 		{
 		}
-		else if( filesystem->FileExists( "resource/classes/default.html" ) )
+		else if (g_pFullFileSystem->FileExists( "resource/classes/default.html", IsX360() ? "MOD" : "GAME" ) )
 		{
 			Q_snprintf ( classPanel, sizeof( classPanel ), "resource/classes/default.html" );
 		}
@@ -90,7 +101,6 @@ public:
 			return NULL;
 		}
 
-		
 		return classPanel;
 	}
 
@@ -107,31 +117,79 @@ public:
 	{
 		BaseClass::ApplySettings( resourceData );
 
-		char szLocalFile[ _MAX_PATH ];
+		char szLocalFile[_MAX_PATH];
 
-		filesystem->GetLocalPath( GetClassPage( GetName( ) ), szLocalFile, sizeof( szLocalFile ) );
-		m_pPanel->OpenURL( szLocalFile, NULL );
+		g_pFullFileSystem->GetLocalPath(GetClassPage(GetName()), szLocalFile, sizeof(szLocalFile));
+		m_pPanel->OpenURL(szLocalFile, NULL);
+	}		
+
+	vgui::HTML *GetClassPanel( void ) { return m_pPanel; }
+
+	virtual void OnCursorExited()
+	{
+		if ( !m_bPreserveArmedButtons )
+		{
+			BaseClass::OnCursorExited();
+		}
 	}
 
-private:
-
-	virtual void OnCursorEntered( ) 
+	virtual void OnCursorEntered() 
 	{
-		BaseClass::OnCursorEntered( );
+		BaseClass::OnCursorEntered();
 
-		if( m_pPanel && IsEnabled( ) )
+		if ( !IsEnabled() )
+			return;
+
+		// are we updating the default buttons?
+		if ( m_bUpdateDefaultButtons )
 		{
-			if( g_lastPanel )
+			SetAsDefaultButton( 1 );
+		}
+
+		// are we preserving the armed state (and need to turn off the old button)?
+		if ( m_bPreserveArmedButtons )
+		{
+			if ( g_lastButton && g_lastButton != this )
+			{
+				g_lastButton->SetArmed( false );
+			}
+
+			g_lastButton = this;
+		}
+
+		// turn on our panel (if it isn't already)
+		if ( m_pPanel && ( !m_pPanel->IsVisible() ) )
+		{
+			// turn off the previous panel
+			if ( g_lastPanel && g_lastPanel->IsVisible() )
 			{
 				g_lastPanel->SetVisible( false );
 			}
 
-			ShowPage( );
+			ShowPage();
 		}
 	}
 
+	virtual void OnKeyCodeReleased( vgui::KeyCode code )
+	{
+		BaseClass::OnKeyCodeReleased( code );
+
+		if ( m_bPreserveArmedButtons )
+		{
+			if ( g_lastButton )
+			{
+				g_lastButton->SetArmed( true );
+			}
+		}
+	}
+
+private:
+
 	vgui::HTML *m_pPanel;
+	bool m_bPreserveArmedButtons;
+	bool m_bUpdateDefaultButtons;
 };
 
+#define MouseOverPanelButton MouseOverPanelButton<vgui::EditablePanel>
 
 #endif // MOUSEOVERPANELBUTTON_H

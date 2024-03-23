@@ -1,9 +1,9 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
 // $NoKeywords: $
-//=============================================================================//
+//===========================================================================//
 
 #include "cbase.h"
 #include <stdio.h>
@@ -12,8 +12,10 @@
 #include <cdll_util.h>
 #include <globalvars_base.h>
 #include <igameresources.h>
-
+#include "IGameUIFuncs.h" // for key bindings
+#include "inputsystem/iinputsystem.h"
 #include "clientscoreboarddialog.h"
+#include <voice_status.h>
 
 #include <vgui/IScheme.h>
 #include <vgui/ILocalize.h>
@@ -29,22 +31,22 @@
 #include <game/client/iviewport.h>
 #include <igameresources.h>
 
-#include "voice_status.h"
-//#include "Friends/IFriendsUser.h"
+#include "vgui_avatarimage.h"
 
 #include "in_buttons.h"
-
-#include "IGameUIFuncs.h" // for key bindings
-extern IGameUIFuncs *gameuifuncs; // for key binding details
-
 #include "ff_gamerules.h"
 #include "c_ff_player.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-// extern vars
-//extern IFriendsUser *g_pFriendsUser;
+using namespace vgui;
+extern IGameUIFuncs* gameuifuncs; // for key binding details
+
+bool AvatarIndexLessFunc( const int &lhs, const int &rhs )	
+{ 
+	return lhs < rhs; 
+}
 
 extern bool g_fBlockedStatus[256];	// |-- Mirv: The blocked status of people's text
 
@@ -112,8 +114,6 @@ bool ActivateScoreboard()
 	return false;
 }
 
-using namespace vgui;
-
 const char *szClassName[] = {	"", 
 								"#FF_SCOREBOARD_SCOUT", 
 								"#FF_SCOREBOARD_SNIPER",
@@ -129,11 +129,12 @@ const char *szClassName[] = {	"",
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CClientScoreBoardDialog::CClientScoreBoardDialog(IViewPort *pViewPort) : Frame( NULL, PANEL_SCOREBOARD )
+CClientScoreBoardDialog::CClientScoreBoardDialog(IViewPort *pViewPort) : EditablePanel( NULL, PANEL_SCOREBOARD )
 {
 	m_iPlayerIndexSymbol = KeyValuesSystem()->GetSymbolForString("playerIndex");
+	m_nCloseKey = BUTTON_CODE_INVALID;
 
-	memset( s_VoiceImage, 0x0, sizeof( s_VoiceImage ) );
+	memset(s_VoiceImage, 0x0, sizeof(s_VoiceImage));
 	//memset( s_ChannelImage, 0x0, sizeof( s_ChannelImage ) ); // |-- Mirv: Voice channels
 	TrackerImage = 0;
 	m_pViewPort = pViewPort;
@@ -145,17 +146,17 @@ CClientScoreBoardDialog::CClientScoreBoardDialog(IViewPort *pViewPort) : Frame( 
 										// even if it won't always be the case
 										// Otherwise panels within this one will not
 										// receive mouse input (thanks valve)
-	SetSizeable(false);
+	//SetSizeable(false);
 
 	// hide the system buttons
-	SetTitleBarVisible( false );
+	//SetTitleBarVisible( false );
 
 	// set the scheme before any child control is created
 	SetScheme("ClientScheme");
 
-	m_iJumpKey = -1;
+	m_nJumpKey = BUTTON_CODE_INVALID;
 
-	m_pMapName = new Label( this, "MapName", GetFormattedMapName() );
+	m_pMapName = new Label(this, "MapName", GetFormattedMapName());
 
 	m_pPlayerList = new SectionedListPanel(this, "PlayerList");
 	//m_pPlayerList->SetVerticalScrollbar(false);
@@ -163,23 +164,33 @@ CClientScoreBoardDialog::CClientScoreBoardDialog(IViewPort *pViewPort) : Frame( 
 	LoadControlSettings("Resource/UI/ScoreBoard.res");
 	m_iDesiredHeight = GetTall();
 	m_pPlayerList->SetVisible( false ); // hide this until we load the images in applyschemesettings
-	m_pPlayerList->AddActionSignalTarget( this );
+	m_pPlayerList->AddActionSignalTarget(this);
 
 	m_HLTVSpectators = 0;
+	m_ReplaySpectators = 0;
 	
 	// update scoreboard instantly if on of these events occure
-	gameeventmanager->AddListener(this, "hltv_status", false );
-	gameeventmanager->AddListener(this, "server_spawn", false );
+	ListenForGameEvent( "hltv_status" );
+	ListenForGameEvent( "server_spawn" );
+
+	m_pImageList = NULL;
+
+	m_mapAvatarsToImageList.SetLessFunc( DefLessFunc( CSteamID ) );
+	m_mapAvatarsToImageList.RemoveAll();
 
 	g_pScoreboard = this;
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Destructor
+// Purpose: Constructor
 //-----------------------------------------------------------------------------
 CClientScoreBoardDialog::~CClientScoreBoardDialog()
 {
-	gameeventmanager->RemoveListener(this);
+	if ( NULL != m_pImageList )
+	{
+		delete m_pImageList;
+		m_pImageList = NULL;
+	}
 	g_pScoreboard = NULL;
 }
 
@@ -201,12 +212,53 @@ void CClientScoreBoardDialog::OnCommand( const char *command )
 // <-- Mirv: Catches the set channel button
 
 //-----------------------------------------------------------------------------
+// Call every frame
+//-----------------------------------------------------------------------------
+void CClientScoreBoardDialog::OnThink()
+{
+	BaseClass::OnThink();
+
+	// NOTE: this is necessary because of the way input works.
+	// If a key down message is sent to vgui, then it will get the key up message
+	// Sometimes the scoreboard is activated by other vgui menus, 
+	// sometimes by console commands. In the case where it's activated by
+	// other vgui menus, we lose the key up message because this panel
+	// doesn't accept keyboard input. It *can't* accept keyboard input
+	// because another feature of the dialog is that if it's triggered
+	// from within the game, you should be able to still run around while
+	// the scoreboard is up. That feature is impossible if this panel accepts input.
+	// because if a vgui panel is up that accepts input, it prevents the engine from
+	// receiving that input. So, I'm stuck with a polling solution.
+	// 
+	// Close key is set to non-invalid when something other than a keybind
+	// brings the scoreboard up, and it's set to invalid as soon as the 
+	// dialog becomes hidden.
+	if ( m_nCloseKey != BUTTON_CODE_INVALID )
+	{
+		if ( !g_pInputSystem->IsButtonDown( m_nCloseKey ) )
+		{
+			m_nCloseKey = BUTTON_CODE_INVALID;
+			gViewPortInterface->ShowPanel( PANEL_SCOREBOARD, false );
+			GetClientVoiceMgr()->StopSquelchMode();
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Called by vgui panels that activate the client scoreboard
+//-----------------------------------------------------------------------------
+void CClientScoreBoardDialog::OnPollHideCode( int code )
+{
+	m_nCloseKey = (ButtonCode_t)code;
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: clears everything in the scoreboard and all it's state
 //-----------------------------------------------------------------------------
-void CClientScoreBoardDialog::Reset( void )
+void CClientScoreBoardDialog::Reset()
 {
 	// clear
-	m_pPlayerList->RemoveAll();
+	m_pPlayerList->DeleteAllItems();
 	m_pPlayerList->RemoveAllSections();
 
 	//m_iSectionId = 0;
@@ -218,7 +270,7 @@ void CClientScoreBoardDialog::Reset( void )
 //-----------------------------------------------------------------------------
 // Purpose: adds all the team sections to the scoreboard
 //-----------------------------------------------------------------------------
-void CClientScoreBoardDialog::InitScoreboardSections( void )
+void CClientScoreBoardDialog::InitScoreboardSections()
 {
 	// Do this initially
 	m_hSections[ TEAM_BLUE ].m_iTeam = TEAM_BLUE;
@@ -235,42 +287,56 @@ void CClientScoreBoardDialog::InitScoreboardSections( void )
 void CClientScoreBoardDialog::ApplySchemeSettings( IScheme *pScheme )
 {
 	BaseClass::ApplySchemeSettings( pScheme );
-	ImageList *imageList = new ImageList( false );
+
+	if ( m_pImageList )
+		delete m_pImageList;
+	m_pImageList = new ImageList( false );
 
 	s_VoiceImage[ 0 ] = 0;	// index 0 is always blank
-	s_VoiceImage[ CVoiceStatus::VOICE_NEVERSPOKEN ] = imageList->AddImage( scheme( )->GetImage( "640_speaker1", true ) );
-	s_VoiceImage[ CVoiceStatus::VOICE_NOTTALKING ] = imageList->AddImage( scheme( )->GetImage( "640_speaker2", true ) );
-	s_VoiceImage[ CVoiceStatus::VOICE_TALKING ] = imageList->AddImage( scheme( )->GetImage( "640_speaker3", true ) );
-	s_VoiceImage[ CVoiceStatus::VOICE_BANNED ] = imageList->AddImage( scheme( )->GetImage( "640_voiceblocked", true ) );
-	s_VoiceImage[ CVoiceStatus::VOICE_BANNEDTEXT ] = imageList->AddImage( scheme( )->GetImage( "640_textblocked", true ) );		// |-- Mirv: Text ban
-	s_VoiceImage[ CVoiceStatus::VOICE_ALLOWEDTEXT ] = imageList->AddImage( scheme( )->GetImage( "640_textallowed", true ) );	// |-- DrEvil: Text allowed
+	s_VoiceImage[ CVoiceStatus::VOICE_NEVERSPOKEN ] = m_pImageList->AddImage( scheme( )->GetImage( "640_speaker1", true ) );
+	s_VoiceImage[ CVoiceStatus::VOICE_NOTTALKING ] = m_pImageList->AddImage( scheme( )->GetImage( "640_speaker2", true ) );
+	s_VoiceImage[ CVoiceStatus::VOICE_TALKING ] = m_pImageList->AddImage( scheme( )->GetImage( "640_speaker3", true ) );
+	s_VoiceImage[ CVoiceStatus::VOICE_BANNED ] = m_pImageList->AddImage( scheme( )->GetImage( "640_voiceblocked", true ) );
+	s_VoiceImage[ CVoiceStatus::VOICE_BANNEDTEXT ] = m_pImageList->AddImage( scheme( )->GetImage( "640_textblocked", true ) );		// |-- Mirv: Text ban
+	s_VoiceImage[ CVoiceStatus::VOICE_ALLOWEDTEXT ] = m_pImageList->AddImage( scheme( )->GetImage( "640_textallowed", true ) );		// |-- DrEvil: Text allowed
 
 	// --> Mirv: Channel images
 	//s_ChannelImage[0] = 0;
-	//s_ChannelImage[ CHANNEL::NONE ] = imageList->AddImage( scheme()->GetImage( "640_channelnone", true ) );
-	//s_ChannelImage[ CHANNEL::CHANNELA ] = imageList->AddImage( scheme()->GetImage( "640_channela", true ) );
-	//s_ChannelImage[ CHANNEL::CHANNELB ] = imageList->AddImage( scheme()->GetImage( "640_channelb", true ) );
+	//s_ChannelImage[ CHANNEL::NONE ] = m_pImageList->AddImage( scheme()->GetImage( "640_channelnone", true ) );
+	//s_ChannelImage[ CHANNEL::CHANNELA ] = m_pImageList->AddImage( scheme()->GetImage( "640_channela", true ) );
+	//s_ChannelImage[ CHANNEL::CHANNELB ] = m_pImageList->AddImage( scheme()->GetImage( "640_channelb", true ) );
 	// <-- Mirv: Channel images
 
-	TrackerImage = imageList->AddImage( scheme( )->GetImage( "640_scoreboardtracker", true ) );
+	TrackerImage = m_pImageList->AddImage( scheme( )->GetImage( "640_scoreboardtracker", true ) );
 
+	m_mapAvatarsToImageList.RemoveAll();
+
+	PostApplySchemeSettings( pScheme );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Does dialog-specific customization after applying scheme settings.
+//-----------------------------------------------------------------------------
+void CClientScoreBoardDialog::PostApplySchemeSettings( vgui::IScheme *pScheme )
+{
 	// --> Mirv: Image resizing made things a mess
 	// resize the images to our resolution
-/*	for (int i = 0; i < imageList->GetImageCount(); i++ )
+	/*for (int i = 0; i < m_pImageList->GetImageCount(); i++)
 	{
 		int wide, tall;
-		imageList->GetImage(i)->GetSize(wide, tall);
-		imageList->GetImage(i)->SetSize(scheme()->GetProportionalScaledValueEx( GetScheme(),wide), scheme()->GetProportionalScaledValueEx( GetScheme(),tall));
+		m_pImageList->GetImage(i)->GetSize(wide, tall);
+		m_pImageList->GetImage(i)->SetSize(scheme()->GetProportionalScaledValueEx( GetScheme(),wide), scheme()->GetProportionalScaledValueEx( GetScheme(),tall));
 	}*/
 	// <-- Mirv: Image resizing made things a mess
 
-	m_pPlayerList->SetImageList(imageList, false);
+	m_pPlayerList->SetImageList( m_pImageList, false );
 	m_pPlayerList->SetVisible( true );
 
 	m_pPlayerList->SetPaintBackgroundEnabled(false);
 	m_pPlayerList->SetBorder(NULL);
 
-	SetBgColor( Color( 0,0,0,0) );
+	// light up scoreboard a bit
+	SetBgColor( Color( 0,0,0,0 ) );
 	SetPaintBackgroundEnabled(true);
 	SetBorder(NULL);
 }
@@ -300,6 +366,18 @@ void ForceScoreboard()
 //-----------------------------------------------------------------------------
 void CClientScoreBoardDialog::ShowPanel(bool bShow)
 {
+	// Catch the case where we call ShowPanel before ApplySchemeSettings, eg when
+	// going from windowed <-> fullscreen
+	if ( m_pImageList == NULL )
+	{
+		InvalidateLayout( true, true );
+	}
+
+	if ( !bShow )
+	{
+		m_nCloseKey = BUTTON_CODE_INVALID;
+	}
+
 	if ( BaseClass::IsVisible() == bShow )
 		return;
 
@@ -311,18 +389,17 @@ void CClientScoreBoardDialog::ShowPanel(bool bShow)
 
 	if ( bShow )
 	{
-		if( m_iJumpKey == -1 ) // you need to lookup the jump key AFTER the engine has loaded
+		if (m_nJumpKey == -1) // you need to lookup the jump key AFTER the engine has loaded
 		{
-			m_iJumpKey = gameuifuncs->GetButtonCodeForBind("jump");
+			m_nJumpKey = gameuifuncs->GetButtonCodeForBind("jump");
 		}
 
 		//SetMouseInputEnabled(true);
 
 		Reset();
 		Update();
-
-		Activate();
-
+		SetVisible( true );
+		MoveToFront();
 		SetMouseInputEnabled(false);
 	}
 	else
@@ -345,17 +422,25 @@ void CClientScoreBoardDialog::FireGameEvent( IGameEvent *event )
 	}
 	else if ( Q_strcmp(type, "server_spawn") == 0 )
 	{
-		SetControlString("ServerName", event->GetString("hostname"));
-		MoveLabelToFront("ServerName");
+		// We'll post the message ourselves instead of using SetControlString()
+		// so we don't try to translate the hostname.
+		const char *hostname = event->GetString( "hostname" );
+		Panel *control = FindChildByName( "ServerName" );
+		if ( control )
+		{
+			PostMessage( control, new KeyValues( "SetText", "text", hostname ) );
+			control->MoveToFront();
+		}
 	}
 
 	if( IsVisible() )
 		Update();
+
 }
 
 bool CClientScoreBoardDialog::NeedsUpdate( void )
 {
-	return (m_fNextUpdateTime < gpGlobals->curtime);
+	return (m_fNextUpdateTime < gpGlobals->curtime);	
 }
 
 //-----------------------------------------------------------------------------
@@ -367,19 +452,20 @@ void CClientScoreBoardDialog::Update( void )
 	FillScoreBoard();
 
 	// grow the scoreboard to fit all the players
-//	int wide, tall;
-//	m_pPlayerList->GetContentSize(wide, tall);
-//	wide = GetWide();
-//	if (m_iDesiredHeight < tall)
-//	{
-//		SetSize(wide, tall);
-//		m_pPlayerList->SetSize(wide, tall);
-//	}
-//	else
-//	{
-//		SetSize(wide, m_iDesiredHeight);
-//		m_pPlayerList->SetSize(wide, m_iDesiredHeight);
-//	}
+	/*int wide, tall;
+	m_pPlayerList->GetContentSize(wide, tall);
+	tall += GetAdditionalHeight();
+	wide = GetWide();
+	if (m_iDesiredHeight < tall)
+	{
+		SetSize(wide, tall);
+		m_pPlayerList->SetSize(wide, tall);
+	}
+	else
+	{
+		SetSize(wide, m_iDesiredHeight);
+		m_pPlayerList->SetSize(wide, m_iDesiredHeight);
+	}*/
 
 	m_pMapName->SetText( GetFormattedMapName() );
 
@@ -392,11 +478,11 @@ void CClientScoreBoardDialog::Update( void )
 //-----------------------------------------------------------------------------
 // Purpose: Finds what section a team is in
 //-----------------------------------------------------------------------------
-int CClientScoreBoardDialog::FindSectionByTeam( int iTeam ) const
+int CClientScoreBoardDialog::FindSectionByTeam(int iTeam) const
 {
-	for( int i = 0; i < 8; i++ )
+	for (int i = 0; i < 8; i++)
 	{
-		if( m_hSections[ i ].m_iTeam == iTeam )
+		if (m_hSections[i].m_iTeam == iTeam)
 			return i;
 	}
 
@@ -406,76 +492,78 @@ int CClientScoreBoardDialog::FindSectionByTeam( int iTeam ) const
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CClientScoreBoardDialog::UpdatePlayerInfo( void )
+void CClientScoreBoardDialog::UpdatePlayerInfo()
 {
 	IGameResources *pGR = GameResources();
 	if( !pGR )
 		return;
 
-	int iSelectedRow = -1;
+	int selectedRow = -1;
+
 	// walk all the players and make sure they're in the scoreboard
 	for ( int i = 1; i <= gpGlobals->maxClients; ++i )
 	{
-		if( pGR->IsConnected( i ) )
+		if ( pGR->IsConnected( i ) )
 		{
-			// Add the player to the list
-			KeyValues *pPlayerData = new KeyValues( "data" );
-			GetPlayerScoreInfo( i, pPlayerData );
+			// add the player to the list
+			KeyValues *playerData = new KeyValues("data");
+			GetPlayerScoreInfo( i, playerData );
+			UpdatePlayerAvatar( i, playerData );
 
-			const char *pszOldName = pPlayerData->GetString( "name", "" );
-			int iBufSize = ( int )strlen( pszOldName ) * 2;
-			char *pszNewName = ( char * )_alloca( iBufSize );
+			const char *oldName = playerData->GetString("name","");
+			char newName[MAX_PLAYER_NAME_LENGTH];
 
-			UTIL_MakeSafeName( pszOldName, pszNewName, iBufSize );
+			UTIL_MakeSafeName( oldName, newName, MAX_PLAYER_NAME_LENGTH );
 
-			pPlayerData->SetString( "name", pszNewName );
+			playerData->SetString("name", newName);
 
-			int iItemId = FindItemIDForPlayerIndex( i );
-			int iPlayerTeam = pGR->GetTeam( i );
-			int iSectionId = FindSectionByTeam( iPlayerTeam );
+			int iItemID = FindItemIDForPlayerIndex( i );
+			int iPlayerTeam = pGR->GetTeam(i);
+			int iSectionId = FindSectionByTeam(iPlayerTeam);
+			
+			if ( pGR->IsLocalPlayer( i ) )
+				selectedRow = iItemID;
 
-			if( pGR->IsLocalPlayer( i ) )
-				iSelectedRow = iItemId;
-
-			if( iItemId == -1 )
+			if (iItemID == -1)
 			{
-				// Add a new row
-				iItemId = m_pPlayerList->AddItem( iSectionId, pPlayerData );
+				// add a new row
+				iItemID = m_pPlayerList->AddItem( iSectionId, playerData );
 			}
 			else
 			{
-				// Modify current row
-				m_pPlayerList->ModifyItem( iItemId, iSectionId, pPlayerData );
+				// modify the current row
+				m_pPlayerList->ModifyItem( iItemID, iSectionId, playerData );
 			}
 
 			Color cCol = pGR->GetTeamColor( iPlayerTeam );
 
 			// Set the row color based on players team
 			if( pGR->IsLocalPlayer( i ) )
-				m_pPlayerList->SetItemFgColor( iItemId, Color( cCol.r() * 0.6f, cCol.g() * 0.6f, cCol.b() * 0.6f, cCol.a() * 0.9/*local_row_alpha.GetFloat()*/ ), true );
+				m_pPlayerList->SetItemFgColor( iItemID, Color( cCol.r() * 0.6f, cCol.g() * 0.6f, cCol.b() * 0.6f, cCol.a() * 0.9/*local_row_alpha.GetFloat()*/ ), true );
 			else
-				m_pPlayerList->SetItemFgColor( iItemId, Color( cCol.r() * 0.6f, cCol.g() * 0.6f, cCol.b() * 0.6f, cCol.a() * 0.55/*row_alpha.GetFloat()*/ ) );
+				m_pPlayerList->SetItemFgColor( iItemID, Color( cCol.r() * 0.6f, cCol.g() * 0.6f, cCol.b() * 0.6f, cCol.a() * 0.55/*row_alpha.GetFloat()*/ ) );
 
-			pPlayerData->deleteThis();
+
+			playerData->deleteThis();
 		}
 		else
 		{
-			// Remove the player
-			int iItemId = FindItemIDForPlayerIndex( i );
+			// remove the player
+			int iItemID = FindItemIDForPlayerIndex( i );
 
-			if( iItemId != -1 )
-				m_pPlayerList->RemoveItem( iItemId );
+			if (iItemID != -1)
+				m_pPlayerList->RemoveItem(iItemID);
 		}
 	}
 
-	if( iSelectedRow != -1 )
-		m_pPlayerList->SetSelectedItem( iSelectedRow );
+	if ( selectedRow != -1 )
+		m_pPlayerList->SetSelectedItem(selectedRow);
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: adds the top header of the scoreboars
 //-----------------------------------------------------------------------------
-void CClientScoreBoardDialog::AddHeader( void )
+void CClientScoreBoardDialog::AddHeader()
 {
 	// We can get called back into here when teams
 	// get sorted so that's why part is commented
@@ -511,76 +599,97 @@ void CClientScoreBoardDialog::AddHeader( void )
 //-----------------------------------------------------------------------------
 // Purpose: Adds a new section to the scoreboard (i.e the team header)
 //-----------------------------------------------------------------------------
-int CClientScoreBoardDialog::AddSection( int iType, int iSection )
+int CClientScoreBoardDialog::AddSection(int iType, int iSection)
 {
+
 	int iRetval = -1;
 
-	if( iType == TYPE_BLANK )
+	switch (iType)
 	{
-		m_pPlayerList->AddSection( iSection, "" );
-		m_pPlayerList->SetSectionAlwaysVisible( iSection );
-		m_pPlayerList->AddColumnToSection( iSection, "name", "", 0, scheme()->GetProportionalScaledValue( NAME_WIDTH ) );
-	}
-	else if( iType == TYPE_HEADER )
-	{
-		m_pPlayerList->AddSection( iSection, "" );
-		m_pPlayerList->SetSectionAlwaysVisible( iSection );
-        m_pPlayerList->AddColumnToSection( iSection, "name" , "#FF_PlayerName" , 0 , scheme()->GetProportionalScaledValue( NAME_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "class" , "#FF_PlayerClass" , 0 , scheme()->GetProportionalScaledValue( CLASS_WIDTH ) );	// |-- Mirv: Current class
-		m_pPlayerList->AddColumnToSection( iSection, "fortpoints" , "#FF_PlayerFortPoints" , 0, scheme()->GetProportionalScaledValue( FORTPOINTS_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "score" , "#FF_PlayerScore" , 0, scheme()->GetProportionalScaledValue( SCORE_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "deaths" , "#FF_PlayerDeath" , 0, scheme()->GetProportionalScaledValue( DEATH_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "assists" , "#FF_PlayerAssist" , 0, scheme()->GetProportionalScaledValue( ASSIST_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "ping" , "#FF_PlayerPing" , 0, scheme()->GetProportionalScaledValue( PING_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "voice" , "#FF_PlayerVoice" , SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_CENTER, scheme( )->GetProportionalScaledValue( VOICE_WIDTH ) );
-		//m_pPlayerList->AddColumnToSection( iSection, "channel" , "#FF_PlayerChannel" , SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_CENTER, /*scheme( )->GetProportionalScaledValue(*/ CHANNEL_WIDTH /*)*/ );	// |-- Mirv: This should fix the messed up gfx settings
-	}
-	else if( iType == TYPE_TEAM )
-	{
-		m_pPlayerList->AddSection( iSection, "", StaticPlayerSortFunc_Score );
-		//m_pPlayerList->SetSectionAlwaysVisible( iSection );
-		m_pPlayerList->AddColumnToSection( iSection, "name", "#FF_Team", 0, scheme()->GetProportionalScaledValue( NAME_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "class", "", 0, scheme()->GetProportionalScaledValue( CLASS_WIDTH ) );	// |-- Mirv: Current class
-		m_pPlayerList->AddColumnToSection( iSection, "fortpoints", "", 0, scheme()->GetProportionalScaledValue( FORTPOINTS_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "score", "", 0, scheme()->GetProportionalScaledValue( SCORE_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "deaths", "", 0, scheme()->GetProportionalScaledValue( DEATH_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "assists", "", 0, scheme()->GetProportionalScaledValue( ASSIST_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "ping", "", 0, scheme()->GetProportionalScaledValue( PING_WIDTH ) );
+		case TYPE_BLANK:
+		{
+			m_pPlayerList->AddSection( iSection, "" );
+			m_pPlayerList->SetSectionAlwaysVisible( iSection );
+			m_pPlayerList->AddColumnToSection( iSection, "name", "", 0, scheme()->GetProportionalScaledValue( NAME_WIDTH ) );
+			break;
+		}
+		case TYPE_HEADER:
+		{
+			m_pPlayerList->AddSection( iSection, "" );
+			m_pPlayerList->SetSectionAlwaysVisible( iSection );
+			m_pPlayerList->AddColumnToSection( iSection, "name" , "#FF_PlayerName" , 0 , scheme()->GetProportionalScaledValue( NAME_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "class" , "#FF_PlayerClass" , 0 , scheme()->GetProportionalScaledValue( CLASS_WIDTH ) );	// |-- Mirv: Current class
+			m_pPlayerList->AddColumnToSection( iSection, "fortpoints" , "#FF_PlayerFortPoints" , 0, scheme()->GetProportionalScaledValue( FORTPOINTS_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "score" , "#FF_PlayerScore" , 0, scheme()->GetProportionalScaledValue( SCORE_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "deaths" , "#FF_PlayerDeath" , 0, scheme()->GetProportionalScaledValue( DEATH_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "assists" , "#FF_PlayerAssist" , 0, scheme()->GetProportionalScaledValue( ASSIST_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "ping" , "#FF_PlayerPing" , 0, scheme()->GetProportionalScaledValue( PING_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "voice" , "#FF_PlayerVoice" , SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_CENTER, scheme( )->GetProportionalScaledValue( VOICE_WIDTH ) );
+			//m_pPlayerList->AddColumnToSection( iSection, "channel" , "#FF_PlayerChannel" , SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_CENTER, /*scheme( )->GetProportionalScaledValue(*/ CHANNEL_WIDTH /*)*/ );	// |-- Mirv: This should fix the messed up gfx settings
+			break;
+		}
+		case TYPE_TEAM:
+		{
+			m_pPlayerList->AddSection( iSection, "", StaticPlayerSortFunc_Score );
+			//m_pPlayerList->SetSectionAlwaysVisible( iSection );
 
-		// --> Mirv: Voice and channel images
-		m_pPlayerList->AddColumnToSection( iSection, "voice", "", SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_CENTER, VOICE_WIDTH );
-		//m_pPlayerList->AddColumnToSection( iSection, "channel", "", SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_CENTER, CHANNEL_WIDTH );
-		// <-- Mirv: Voice and channel images
+			if (ShowAvatars())
+			{
+				m_pPlayerList->AddColumnToSection(iSection, "avatar", "", SectionedListPanel::COLUMN_IMAGE, scheme()->GetProportionalScaledValue( AVATAR_WIDTH ));
+			}
 
-		iRetval = iSection;
-	}
-	else if( iType == TYPE_SPECTATORS )
-	{
-		m_pPlayerList->AddSection( iSection, "", StaticPlayerSortFunc_Name );
-		//m_pPlayerList->SetSectionAlwaysVisible( iSection );
-		m_pPlayerList->AddColumnToSection( iSection, "name", "#FF_Spectators", 0, scheme()->GetProportionalScaledValue( NAME_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "class", "", 0, scheme()->GetProportionalScaledValue( CLASS_WIDTH ) );	// |-- Mirv: Current class
-		m_pPlayerList->AddColumnToSection( iSection, "fortpoints", "", 0, scheme()->GetProportionalScaledValue( FORTPOINTS_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "score", "", 0, scheme()->GetProportionalScaledValue( SCORE_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "deaths", "", 0, scheme()->GetProportionalScaledValue( DEATH_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "assists", "", 0, scheme()->GetProportionalScaledValue( ASSIST_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "ping", "", 0, scheme()->GetProportionalScaledValue( PING_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "name", "#FF_Team", 0, scheme()->GetProportionalScaledValue( NAME_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "class", "", 0, scheme()->GetProportionalScaledValue( CLASS_WIDTH ) );	// |-- Mirv: Current class
+			m_pPlayerList->AddColumnToSection( iSection, "fortpoints", "", 0, scheme()->GetProportionalScaledValue( FORTPOINTS_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "score", "", 0, scheme()->GetProportionalScaledValue( SCORE_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "deaths", "", 0, scheme()->GetProportionalScaledValue( DEATH_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "assists", "", 0, scheme()->GetProportionalScaledValue( ASSIST_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "ping", "", 0, scheme()->GetProportionalScaledValue( PING_WIDTH ) );
 
-		iRetval = TEAM_SPECTATOR;
-	}
-	else if( iType == TYPE_UNASSIGNED )
-	{
-		m_pPlayerList->AddSection( iSection, "" );
-		//m_pPlayerList->SetSectionAlwaysVisible( iSection );
-		m_pPlayerList->AddColumnToSection( iSection, "name", "#FF_Unassigned", 0, scheme()->GetProportionalScaledValue( NAME_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "class", "", 0, scheme()->GetProportionalScaledValue( CLASS_WIDTH ) );	// |-- Mirv: Current class
-		m_pPlayerList->AddColumnToSection( iSection, "fortpoints", "", 0, scheme()->GetProportionalScaledValue( FORTPOINTS_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "score", "", 0, scheme()->GetProportionalScaledValue( SCORE_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "deaths", "", 0, scheme()->GetProportionalScaledValue( DEATH_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "assists", "", 0, scheme()->GetProportionalScaledValue( ASSIST_WIDTH ) );
-		m_pPlayerList->AddColumnToSection( iSection, "ping", "", 0, scheme()->GetProportionalScaledValue( PING_WIDTH ) );
+			// --> Mirv: Voice and channel images
+			m_pPlayerList->AddColumnToSection( iSection, "voice", "", SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_CENTER, VOICE_WIDTH );
+			//m_pPlayerList->AddColumnToSection( iSection, "channel", "", SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_CENTER, CHANNEL_WIDTH );
+			// <-- Mirv: Voice and channel images
 
-		iRetval = TEAM_UNASSIGNED;
+			iRetval = iSection;
+			break;
+		}
+		case TYPE_SPECTATORS:
+		{
+			m_pPlayerList->AddSection( iSection, "", StaticPlayerSortFunc_Name );
+			//m_pPlayerList->SetSectionAlwaysVisible( iSection );
+
+			if (ShowAvatars())
+			{
+				m_pPlayerList->AddColumnToSection(iSection, "avatar", "", SectionedListPanel::COLUMN_IMAGE, scheme()->GetProportionalScaledValue( AVATAR_WIDTH ));
+			}
+
+			m_pPlayerList->AddColumnToSection( iSection, "name", "#FF_Spectators", 0, scheme()->GetProportionalScaledValue( NAME_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "class", "", 0, scheme()->GetProportionalScaledValue( CLASS_WIDTH ) );	// |-- Mirv: Current class
+			m_pPlayerList->AddColumnToSection( iSection, "fortpoints", "", 0, scheme()->GetProportionalScaledValue( FORTPOINTS_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "score", "", 0, scheme()->GetProportionalScaledValue( SCORE_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "deaths", "", 0, scheme()->GetProportionalScaledValue( DEATH_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "assists", "", 0, scheme()->GetProportionalScaledValue( ASSIST_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "ping", "", 0, scheme()->GetProportionalScaledValue( PING_WIDTH ) );
+
+			iRetval = TEAM_SPECTATOR;
+			break;
+		}
+		case TYPE_UNASSIGNED:
+		{
+			m_pPlayerList->AddSection( iSection, "" );
+			//m_pPlayerList->SetSectionAlwaysVisible( iSection );
+			m_pPlayerList->AddColumnToSection( iSection, "name", "#FF_Unassigned", 0, scheme()->GetProportionalScaledValue( NAME_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "class", "", 0, scheme()->GetProportionalScaledValue( CLASS_WIDTH ) );	// |-- Mirv: Current class
+			m_pPlayerList->AddColumnToSection( iSection, "fortpoints", "", 0, scheme()->GetProportionalScaledValue( FORTPOINTS_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "score", "", 0, scheme()->GetProportionalScaledValue( SCORE_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "deaths", "", 0, scheme()->GetProportionalScaledValue( DEATH_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "assists", "", 0, scheme()->GetProportionalScaledValue( ASSIST_WIDTH ) );
+			m_pPlayerList->AddColumnToSection( iSection, "ping", "", 0, scheme()->GetProportionalScaledValue( PING_WIDTH ) );
+
+			iRetval = TEAM_UNASSIGNED;
+			break;
+		}
 	}
 
 	return iRetval;
@@ -673,26 +782,26 @@ void CClientScoreBoardDialog::UpdateHeaders( void )
 //-----------------------------------------------------------------------------
 // Purpose: Used for sorting players
 //-----------------------------------------------------------------------------
-bool CClientScoreBoardDialog::StaticPlayerSortFunc_Score( vgui::SectionedListPanel *list, int itemID1, int itemID2 )
+bool CClientScoreBoardDialog::StaticPlayerSortFunc_Score(vgui::SectionedListPanel *list, int itemID1, int itemID2)
 {
-	KeyValues *it1 = list->GetItemData( itemID1 );
-	KeyValues *it2 = list->GetItemData( itemID2 );
-	Assert( it1 && it2 );
+	KeyValues *it1 = list->GetItemData(itemID1);
+	KeyValues *it2 = list->GetItemData(itemID2);
+	Assert(it1 && it2);
 
 	// first compare fortpoints
-	int v1 = it1->GetInt( "fortpoints" );
-	int v2 = it2->GetInt( "fortpoints" );
-	if( v1 > v2 )
+	int v1 = it1->GetInt("fortpoints");
+	int v2 = it2->GetInt("fortpoints");
+	if (v1 > v2)
 		return true;
-	else if( v1 < v2 )
+	else if (v1 < v2)
 		return false;
 
 	// next compare score
-	v1 = it1->GetInt( "score" );
-	v2 = it2->GetInt( "score" );
-	if( v1 > v2 )
+	v1 = it1->GetInt("score");
+	v2 = it2->GetInt("score");
+	if (v1 > v2)
 		return false;
-	else if( v1 < v2 )
+	else if (v1 < v2)
 		return true;
 
 	// the same, so compare itemID's (as a sentinel value to get deterministic sorts)
@@ -723,7 +832,7 @@ bool CClientScoreBoardDialog::StaticPlayerSortFunc_Name( vgui::SectionedListPane
 //-----------------------------------------------------------------------------
 // Purpose: Adds a new row to the scoreboard, from the playerinfo structure
 //-----------------------------------------------------------------------------
-bool CClientScoreBoardDialog::GetPlayerScoreInfo( int playerIndex, KeyValues *kv )
+bool CClientScoreBoardDialog::GetPlayerScoreInfo(int playerIndex, KeyValues *kv)
 {
 	IGameResources *pGR = GameResources();
 	if( !pGR )
@@ -789,9 +898,50 @@ bool CClientScoreBoardDialog::GetPlayerScoreInfo( int playerIndex, KeyValues *kv
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CClientScoreBoardDialog::UpdatePlayerAvatar( int playerIndex, KeyValues *kv )
+{
+	// Update their avatar
+	if ( kv && ShowAvatars() && steamapicontext->SteamFriends() && steamapicontext->SteamUtils() )
+	{
+		player_info_t pi;
+		if ( engine->GetPlayerInfo( playerIndex, &pi ) )
+		{
+			if ( pi.friendsID )
+			{
+				CSteamID steamIDForPlayer( pi.friendsID, 1, steamapicontext->SteamUtils()->GetConnectedUniverse(), k_EAccountTypeIndividual );
+
+				// See if we already have that avatar in our list
+				int iMapIndex = m_mapAvatarsToImageList.Find( steamIDForPlayer );
+				int iImageIndex;
+				if ( iMapIndex == m_mapAvatarsToImageList.InvalidIndex() )
+				{
+					CAvatarImage *pImage = new CAvatarImage();
+					pImage->SetAvatarSteamID( steamIDForPlayer );
+					pImage->SetAvatarSize( 16, 18 );	// Deliberately non scaling
+					iImageIndex = m_pImageList->AddImage( pImage );
+
+					m_mapAvatarsToImageList.Insert( steamIDForPlayer, iImageIndex );
+				}
+				else
+				{
+					iImageIndex = m_mapAvatarsToImageList[ iMapIndex ];
+				}
+
+				kv->SetInt( "avatar", iImageIndex );
+
+				CAvatarImage *pAvIm = (CAvatarImage *)m_pImageList->GetImage( iImageIndex );
+				pAvIm->UpdateFriendStatus();
+			}
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: reload the player list on the scoreboard
 //-----------------------------------------------------------------------------
-void CClientScoreBoardDialog::FillScoreBoard( void )
+void CClientScoreBoardDialog::FillScoreBoard()
 {
 	IGameResources *pGR = GameResources();
 	if( !pGR )
@@ -862,8 +1012,8 @@ void CClientScoreBoardDialog::FillScoreBoard( void )
 	UpdateHeaders();
 
 	// Update player info
-	UpdatePlayerInfo();	
-} 
+	UpdatePlayerInfo();
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: checks to see if we need to sort the teams
@@ -893,37 +1043,50 @@ bool CClientScoreBoardDialog::NeedToSortTeams( void ) const
 	return bSort;
 }
 
-int CClientScoreBoardDialog::FindItemIDForPlayerIndex( int playerIndex )
+//-----------------------------------------------------------------------------
+// Purpose: searches for the player in the scoreboard
+//-----------------------------------------------------------------------------
+int CClientScoreBoardDialog::FindItemIDForPlayerIndex(int playerIndex)
 {
-	for( int i = 0; i <= m_pPlayerList->GetHighestItemID(); i++)
+	for (int i = 0; i <= m_pPlayerList->GetHighestItemID(); i++)
 	{
-		if( m_pPlayerList->IsItemIDValid( i ) )
+		if (m_pPlayerList->IsItemIDValid(i))
 		{
-			KeyValues *kv = m_pPlayerList->GetItemData( i );
-			kv = kv->FindKey( m_iPlayerIndexSymbol );
-			if( kv && kv->GetInt() == playerIndex )
+			KeyValues *kv = m_pPlayerList->GetItemData(i);
+			kv = kv->FindKey(m_iPlayerIndexSymbol);
+			if (kv && kv->GetInt() == playerIndex)
 				return i;
 		}
 	}
-
 	return -1;
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Sets the text of a control by name
 //-----------------------------------------------------------------------------
-void CClientScoreBoardDialog::MoveLabelToFront( const char *textEntryName )
+void CClientScoreBoardDialog::MoveLabelToFront(const char *textEntryName)
 {
-	Label *entry = dynamic_cast< Label * >( FindChildByName( textEntryName ) );
-	if( entry )
+	Label *entry = dynamic_cast<Label *>(FindChildByName(textEntryName));
+	if (entry)
 	{
 		entry->MoveToFront();
 	}
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Center the dialog on the screen.  (vgui has this method on
+//			Frame, but we're an EditablePanel, need to roll our own.)
+//-----------------------------------------------------------------------------
+void CClientScoreBoardDialog::MoveToCenterOfScreen()
+{
+	int wx, wy, ww, wt;
+	surface()->GetWorkspaceBounds(wx, wy, ww, wt);
+	SetPos((ww - GetWide()) / 2, (wt - GetTall()) / 2);
+}
+
 void CClientScoreBoardDialog::OnKeyCodePressed( KeyCode code )
 {
-	if( ( m_iJumpKey != -1 ) && ( m_iJumpKey == code ) )
+	if( ( m_nJumpKey != -1 ) && ( m_nJumpKey == code ) )
 	{
 		SetMouseInputEnabled( true );
 	}

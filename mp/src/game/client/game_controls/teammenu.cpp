@@ -11,38 +11,39 @@
 /// Aug 15, 2005 Mirv: First creation
 
 #include "cbase.h"
-#include "teammenu.h"
-#include <networkstringtabledefs.h>
 #include <cdll_client_int.h>
+
+#include "teammenu.h"
 
 #include <vgui/IScheme.h>
 #include <vgui/ILocalize.h>
 #include <vgui/ISurface.h>
-#include <filesystem.h>
 #include <KeyValues.h>
-#include <convar.h>
 #include <vgui_controls/ImageList.h>
+#include <filesystem.h>
 
-#include <vgui_controls/TextEntry.h>
-#include <vgui_controls/Button.h>
 #include <vgui_controls/RichText.h>
+#include <vgui_controls/Label.h>
+#include <vgui_controls/Button.h>
+#include <vgui_controls/HTML.h>
 #include <vgui_controls/ImagePanel.h>
 
-#include "ff_menu_panel.h"
-
-#include <game/client/iviewport.h>
+#include "IGameUIFuncs.h" // for key bindings
 #include <igameresources.h>
+#include <game/client/iviewport.h>
+#include <stdlib.h> // MAX_PATH define
+#include <stdio.h>
+#include "byteswap.h"
 
-#include "IGameUIFuncs.h"
-#include "ienginevgui.h"
-
-#include "c_team.h"
-#include "ff_utils.h"
-
+#include <networkstringtabledefs.h>
 #include "ff_button.h"
+#include "ff_utils.h"
+#include "ienginevgui.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+
+extern IGameUIFuncs *gameuifuncs; // for key binding details
 
 using namespace vgui;
 
@@ -196,7 +197,7 @@ CON_COMMAND( hud_reloadteammenu, "hud_reloadteammenu" )
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CTeamMenu::CTeamMenu(IViewPort *pViewPort) : BaseClass(NULL, PANEL_TEAM) 
+CTeamMenu::CTeamMenu(IViewPort *pViewPort) : Frame(NULL, PANEL_TEAM )
 {
 	// initialize dialog
 	m_pViewPort = pViewPort;
@@ -241,17 +242,19 @@ CTeamMenu::CTeamMenu(IViewPort *pViewPort) : BaseClass(NULL, PANEL_TEAM)
 	gameeventmanager->AddListener(this, "server_spawn", false );
 
 	LoadControlSettings("Resource/UI/TeamMenu.res");
-	
 	Reset();
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Destructor
 //-----------------------------------------------------------------------------
-CTeamMenu::~CTeamMenu() 
+CTeamMenu::~CTeamMenu()
 {
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: sets the text color of the map description field
+//-----------------------------------------------------------------------------
 void CTeamMenu::ApplySchemeSettings(IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
@@ -263,7 +266,7 @@ void CTeamMenu::ApplySchemeSettings(IScheme *pScheme)
 //-----------------------------------------------------------------------------
 // Purpose: Run the client command if needed
 //-----------------------------------------------------------------------------
-void CTeamMenu::OnCommand(const char *command) 
+void CTeamMenu::OnCommand(const char *command)	
 {
 	//DevMsg("[Teammenu] Command: %s\n", command);
 
@@ -307,14 +310,6 @@ void CTeamMenu::OnCommand(const char *command)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Nothings
-//-----------------------------------------------------------------------------
-void CTeamMenu::SetData(KeyValues *data) 
-{
-}
-
-
-//-----------------------------------------------------------------------------
 // Purpose: Get the server name
 //-----------------------------------------------------------------------------
 void CTeamMenu::FireGameEvent( IGameEvent *event )
@@ -347,7 +342,7 @@ void CTeamMenu::OnKeyCodePressed(KeyCode code)
 
 	// Bug #0000540: Can't changeclass while changeteam menu is up
 	// Support bring the class menu back up if the team menu is showing
-	if(gameuifuncs->GetButtonCodeForBind("changeclass") == code &&
+	if( gameuifuncs->GetButtonCodeForBind("changeclass") == code &&
 		( C_BasePlayer::GetLocalPlayer()->GetTeamNumber() >= TEAM_BLUE ) ) 
 	{
 		m_pViewPort->ShowPanel( this, false );
@@ -373,14 +368,14 @@ void CTeamMenu::OnKeyCodeReleased(KeyCode code)
 //-----------------------------------------------------------------------------
 // Purpose: Show the panel or whatever
 //-----------------------------------------------------------------------------
-void CTeamMenu::ShowPanel(bool bShow) 
+void CTeamMenu::ShowPanel(bool bShow)
 {
-	if (BaseClass::IsVisible() == bShow) 
+	if ( BaseClass::IsVisible() == bShow )
 		return;
 
 	m_pViewPort->ShowBackGround(false);
 
-	if (bShow) 
+	if ( bShow )
 	{
 		Activate();
 		SetMouseInputEnabled(true);
@@ -410,7 +405,7 @@ void CTeamMenu::Reset()
 //-----------------------------------------------------------------------------
 // Purpose: Update the menu with everything
 //-----------------------------------------------------------------------------
-void CTeamMenu::Update() 
+void CTeamMenu::Update()
 {
 	// TODO: Some of these should only happen once per map
 	UpdateMapDescriptionText();
@@ -556,7 +551,7 @@ void CTeamMenu::UpdateMapDescriptionText()
 	const char *pszMapPath = VarArgs("maps/%s.txt", szMapName);
 
 	// If no map specific description exists then escape for now
-	if (!filesystem->FileExists(pszMapPath))
+	if (!g_pFullFileSystem->FileExists(pszMapPath))
 	{
 		m_pMapDescriptionHead->SetText("");
 		m_pMapDescriptionText->SetText("");
@@ -564,17 +559,17 @@ void CTeamMenu::UpdateMapDescriptionText()
 	}
 
 	// Read from local text from file
-	FileHandle_t f = filesystem->Open(pszMapPath, "rb", "GAME");
+	FileHandle_t f = g_pFullFileSystem->Open(pszMapPath, "rb", "GAME");
 
 	if (!f) 
 		return;
 
 	char szBuffer[2048];
 				
-	int size = min(filesystem->Size(f), sizeof(szBuffer) - 1);
+	int size = min(g_pFullFileSystem->Size(f), sizeof(szBuffer) - 1);
 
-	filesystem->Read(szBuffer, size, f);
-	filesystem->Close(f);
+	g_pFullFileSystem->Read(szBuffer, size, f);
+	g_pFullFileSystem->Close(f);
 
 	szBuffer[size] = 0;
 

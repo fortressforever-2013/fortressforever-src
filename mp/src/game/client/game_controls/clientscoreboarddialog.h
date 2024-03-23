@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -11,17 +11,17 @@
 #pragma once
 #endif
 
-#include <vgui_controls/Frame.h>
+#include <vgui_controls/EditablePanel.h>
 #include <game/client/iviewport.h>
-#include <igameevents.h>
-#include "FFSectionedListPanel.h"
+#include "GameEventListener.h"
 
-#define TYPE_UNASSIGNED     0   
-#define TYPE_TEAM           1   // a section for a single team  
-#define TYPE_SPECTATORS     2   // a section for a spectator group
+#define TYPE_NOTEAM			0	// NOTEAM must be zero :)
+#define TYPE_UNASSIGNED		0
+#define TYPE_TEAM			1	// a section for a single team
+#define TYPE_SPECTATORS		2	// a section for a spectator group
 #define TYPE_BLANK			3	// a blank section
 #define TYPE_HEADER			4	// the main header
-#define TYPE_NOTEAM         0	// NOTEAM must be zero :)
+#define TYPE_PLAYERS		5
 
 #define SCOREBOARD_NUMSECTIONS 8 // 6 teams, 1 blank section, 1 header section
 
@@ -75,28 +75,31 @@ struct ScoreboardSection_s
 //-----------------------------------------------------------------------------
 // Purpose: Game ScoreBoard
 //-----------------------------------------------------------------------------
-class CClientScoreBoardDialog : public vgui::Frame, public IViewPortPanel, public IGameEventListener2
+class CClientScoreBoardDialog : public vgui::EditablePanel, public IViewPortPanel, public CGameEventListener
 {
 private:
-	DECLARE_CLASS_SIMPLE( CClientScoreBoardDialog, vgui::Frame );
+	DECLARE_CLASS_SIMPLE( CClientScoreBoardDialog, vgui::EditablePanel );
 
 protected:
 // column widths at 640
-	enum {      NAME_WIDTH = 140, 
-		        CLASS_WIDTH = 60, 
-		   FORTPOINTS_WIDTH = 60, 
-		        SCORE_WIDTH = 35,  
-		        DEATH_WIDTH = 35, 
-				ASSIST_WIDTH = 35,
-		         PING_WIDTH = 30, 
-		        VOICE_WIDTH = 30, 
-		       CHANNEL_WIDTH = 0, 
-		       FRIENDS_WIDTH = 0 };
-	// total			   = 425  
+	enum {
+		AVATAR_WIDTH		= 14, // unfinished avatar implementation
+		NAME_WIDTH			= 140, 
+		CLASS_WIDTH			= 60, 
+		FORTPOINTS_WIDTH	= 60, 
+		SCORE_WIDTH			= 35,  
+		DEATH_WIDTH			= 35, 
+		ASSIST_WIDTH		= 35,
+		PING_WIDTH			= 30, 
+		VOICE_WIDTH			= 30, 
+		CHANNEL_WIDTH		= 0, 
+		FRIENDS_WIDTH		= 0,
+	};
+	// total			   = 439  
 
 public:
 	CClientScoreBoardDialog( IViewPort *pViewPort );
-	virtual ~CClientScoreBoardDialog();
+	~CClientScoreBoardDialog();
 
 	virtual const char *GetName( void ) { return PANEL_SCOREBOARD; }
 	virtual void SetData(KeyValues *data) {};
@@ -106,6 +109,18 @@ public:
 	virtual bool HasInputElements( void ) { return true; }
 	virtual void ShowPanel( bool bShow );
 
+	virtual bool ShowAvatars() 
+	{ 
+#ifdef CSS_PERF_TEST
+		return false;
+#endif
+#ifdef FF_SCOREBOARD_AVATARS
+		return true;
+#endif
+		return false;
+		//return IsPC(); 
+	}
+
 	// both vgui::Frame and IViewPortPanel define these, so explicitly define them here as passthroughs to vgui
 	vgui::VPANEL GetVPanel( void ) { return BaseClass::GetVPanel(); }
   	virtual bool IsVisible() { return BaseClass::IsVisible(); }
@@ -113,26 +128,34 @@ public:
  	
 	// IGameEventListener interface:
 	virtual void FireGameEvent( IGameEvent *event);
-			
 	virtual void OnCommand( const char *command ); // |-- Mirv: Catch channel changing
 
-
+	virtual void UpdatePlayerAvatar( int playerIndex, KeyValues *kv );
+			
 protected:
+	MESSAGE_FUNC_INT( OnPollHideCode, "PollHideCode", code );
+
 	// functions to override
 	virtual bool GetPlayerScoreInfo(int playerIndex, KeyValues *outPlayerInfo);
-	virtual void InitScoreboardSections( void );
-	virtual void UpdatePlayerInfo( void );
-	
+	virtual void InitScoreboardSections();
+	virtual void UpdatePlayerInfo();
+
+	virtual void OnThink();
+
 	// Add sections to the scoreboard
-	virtual void AddHeader( void );
-	virtual int  AddSection( int iType, int iSection );
-	virtual void UpdateHeaders( void );
+	virtual void AddHeader(); // add the start header of the scoreboard
+	virtual int AddSection(int iType, int iSection); // add a new section header for a team
+	virtual void UpdateHeaders(void);
+
+	virtual int GetAdditionalHeight() { return 0; }
 
 	// sorts players within a section
 	static bool StaticPlayerSortFunc_Score( vgui::SectionedListPanel *list, int itemID1, int itemID2 );
 	static bool StaticPlayerSortFunc_Name( vgui::SectionedListPanel *list, int itemID1, int itemID2 );
 
-	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
+	virtual void ApplySchemeSettings(vgui::IScheme *pScheme);
+
+	virtual void PostApplySchemeSettings( vgui::IScheme *pScheme );
 
 	void PaintBackground();
 
@@ -150,32 +173,45 @@ protected:
 	int s_ChannelImage[5];	// |-- Mirv: Channel Images
 	int TrackerImage;
 	int	m_HLTVSpectators;
+	int m_ReplaySpectators;
+	float m_fNextUpdateTime;
 
-	vgui::Label	 *m_pMapName;		// |-- Mulch: map name
+	vgui::Label* m_pMapName;		// |-- Mulch: map name
 
-	void MoveLabelToFront( const char *textEntryName );
+	void MoveLabelToFront(const char *textEntryName);
+	void MoveToCenterOfScreen();
+
+	vgui::ImageList				*m_pImageList;
+	CUtlMap<CSteamID,int>		m_mapAvatarsToImageList;
+
+	CPanelAnimationVar( int, m_iAvatarWidth, "avatar_width", "34" );		// Avatar width doesn't scale with resolution
+	CPanelAnimationVarAliasType( int, m_iNameWidth, "name_width", "136", "proportional_int" );
+	CPanelAnimationVarAliasType( int, m_iClassWidth, "class_width", "35", "proportional_int" );
+	CPanelAnimationVarAliasType( int, m_iScoreWidth, "score_width", "35", "proportional_int" );
+	CPanelAnimationVarAliasType( int, m_iDeathWidth, "death_width", "35", "proportional_int" );
+	CPanelAnimationVarAliasType( int, m_iPingWidth, "ping_width", "23", "proportional_int" );
 
 private:
 	int			m_iPlayerIndexSymbol;
 	int			m_iDesiredHeight;
 	IViewPort	*m_pViewPort;
-	float		m_fNextUpdateTime;
+	ButtonCode_t m_nCloseKey;
 
 	// BEG: Added by Mulchman for stuff
-	int			m_iJumpKey;
+	ButtonCode_t m_nJumpKey;
 
 	// methods
-	void FillScoreBoard( void );
-	bool NeedToSortTeams( void ) const;
-	int  FindSectionByTeam( int iTeam ) const;
+	void FillScoreBoard(void);
+	bool NeedToSortTeams(void) const;
+	int  FindSectionByTeam(int iTeam) const;
 
 protected:
-	ScoreboardSection_s m_hSections[ SCOREBOARD_NUMSECTIONS ];
+	ScoreboardSection_s m_hSections[SCOREBOARD_NUMSECTIONS];
 
-	virtual void OnKeyCodePressed( vgui::KeyCode code );
+	virtual void OnKeyCodePressed(vgui::KeyCode code);
 
 private:
-	MESSAGE_FUNC_PARAMS( OnItemSelected, "ItemSelected", data );
+	MESSAGE_FUNC_PARAMS(OnItemSelected, "ItemSelected", data);
 	// END: Added by Mulchman for stuff
 };
 

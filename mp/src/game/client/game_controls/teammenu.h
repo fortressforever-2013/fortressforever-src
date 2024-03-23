@@ -25,84 +25,77 @@
 #include <game/client/iviewport.h>
 #include <vgui/KeyCode.h>
 
-
 class TeamButton;
-
 
 namespace vgui
 {
-	class TextEntry;
-	class IScheme;
+	class RichText;
+	class HTML;
 	class FFButton;
 
-
 	//-----------------------------------------------------------------------------
-	// Purpose: displays the team menu
+	// Purpose: Displays the team menu
 	//-----------------------------------------------------------------------------
-
-	class CTeamMenu : public Frame, public IViewPortPanel, public IGameEventListener2
+	class CTeamMenu : public vgui::Frame, public IViewPortPanel, public IGameEventListener2
 	{
 	private:
-		DECLARE_CLASS_SIMPLE(CTeamMenu, Frame);
+		DECLARE_CLASS_SIMPLE( CTeamMenu, vgui::Frame );
 
 	public:
 		CTeamMenu(IViewPort *pViewPort);
 		virtual ~CTeamMenu();
 
-		virtual const char *GetName() { return PANEL_TEAM; }
-		virtual void SetData(KeyValues *data);
+		virtual const char *GetName( void ) { return PANEL_TEAM; }
+		virtual void SetData(KeyValues* data) {};
 		virtual void Reset();
 		virtual void Update();
-		virtual void ShowPanel(bool bShow);
+		virtual bool NeedsUpdate( void ) { return false; }
+		virtual bool HasInputElements( void ) { return true; }
+		virtual void ShowPanel( bool bShow );
 
-		virtual void OnKeyCodePressed(KeyCode code);
-		virtual void OnKeyCodeReleased(KeyCode code);
+		virtual void ApplySchemeSettings(vgui::IScheme* pScheme);
 
-		virtual bool IsVisible() 						{ return BaseClass::IsVisible(); }
-  		virtual void SetParent(VPANEL parent) 	{ BaseClass::SetParent(parent); }
-		virtual bool NeedsUpdate() 				{ return false; }
-		virtual bool HasInputElements() 			{ return true; }
+		virtual void FireGameEvent(IGameEvent* event);
 
-		virtual void ApplySchemeSettings(IScheme *pScheme);
+		virtual void OnKeyCodePressed(vgui::KeyCode code);
+		virtual void OnKeyCodeReleased(vgui::KeyCode code);
 
-		virtual void FireGameEvent( IGameEvent *event);
+		// both vgui::Frame and IViewPortPanel define these, so explicitly define them here as passthroughs to vgui
+		vgui::VPANEL GetVPanel( void ) { return BaseClass::GetVPanel(); }
+  		virtual bool IsVisible() { return BaseClass::IsVisible(); }
+		virtual void SetParent( vgui::VPANEL parent ) { BaseClass::SetParent( parent ); }
+	
+	protected:
 
-		// both Frame and IViewPortPanel define these, so explicitly define them here as passthroughs to vgui
-		VPANEL GetVPanel() 					{ return BaseClass::GetVPanel(); }
-
-	private:
-
-		void	UpdateMapDescriptionText();
-		void	UpdateServerInfo();
-		void	UpdateTeamButtons();
-
-	public:
+		void UpdateMapDescriptionText();
+		void UpdateServerInfo();
+		void UpdateTeamButtons();
 
 	protected:	
-		// vgui overrides
-		virtual void OnCommand(const char *command);
+			// vgui overrides
+			virtual void OnCommand(const char *command);
 
-		IViewPort	*m_pViewPort;
+			IViewPort	*m_pViewPort;
 
-		// ServerInfo elements
-		FFButton		*m_pServerInfoButton;
-		HTML			*m_pServerInfoHost;
+			// ServerInfo elements
+			FFButton		*m_pServerInfoButton;
+			HTML			*m_pServerInfoHost;
 
-		// MapDescription elements
-		Label			*m_pMapDescriptionHead;
-		RichText		*m_pMapDescriptionText;
+			// MapDescription elements
+			Label			*m_pMapDescriptionHead;
+			RichText		*m_pMapDescriptionText;
 
-		// ClassSelection elements
-		TeamButton		*m_pTeamButtons[4];
-		FFButton		*m_pSpectateButton;
-		FFButton		*m_pAutoAssignButton;
+			// ClassSelection elements
+			TeamButton		*m_pTeamButtons[4];
+			FFButton		*m_pSpectateButton;
+			FFButton		*m_pAutoAssignButton;
 		
-		// Other
-		FFButton		*m_pFlythroughButton;
+			// Other
+			FFButton		*m_pFlythroughButton;
 
-		FFButton		*m_pMapScreenshotButton;			// Click to display the map screenshot
+			FFButton		*m_pMapScreenshotButton;			// Click to display the map screenshot
 		
-		char			m_szServerName[255];
+			char			m_szServerName[255];
 	};
 }
 
