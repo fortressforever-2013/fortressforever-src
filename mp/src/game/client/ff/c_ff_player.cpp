@@ -228,7 +228,7 @@ bool CanStealMouseForAimSentry(void)
 //	string name = pTimer->GetTimerName();
 //	//DevMsg("OnTimerExpired(%s)\n",name.c_str());
 //	char buf[256];
-//	sprintf(buf,"OnTimerExpired(%s)\n",name.c_str());
+//	V_sprintf_safe(buf,"OnTimerExpired(%s)\n",name.c_str());
 //	internalCenterPrint->SetTextColor( 255, 255, 255, 255 );
 //	internalCenterPrint->Print( buf );
 //}
