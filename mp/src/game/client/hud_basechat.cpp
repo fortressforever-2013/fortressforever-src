@@ -39,6 +39,9 @@
 
 #define CHAT_WIDTH_PERCENTAGE 0.6f
 
+// customizable team colors in chat and in killfeed
+extern Color GetCustomClientColor(int);
+
 #ifndef _XBOX
 ConVar hud_saytext_time("hud_saytext_time", "12", FCVAR_ARCHIVE);
 ConVar cl_showtextmsg( "cl_showtextmsg", "1", 0, "Enable/disable text messages printing on the screen." );
@@ -1383,7 +1386,7 @@ Color CBaseHudChat::GetTextColorForClient( TextColor colorNum, int clientIndex )
 		break;
 
 	case COLOR_PLAYERNAME:
-		c = GetClientColor( clientIndex );
+		c = /*GetClientColor( clientIndex );*/ GetCustomClientColor( clientIndex );
 		break;
 
 	case COLOR_LOCATION:
@@ -1924,7 +1927,7 @@ void CBaseHudChat::ChatPrintf( int iPlayerIndex, int iFilter, const char *fmt, .
 	wchar_t *wbuf = static_cast<wchar_t *>( _alloca( bufSize ) );
 	if ( wbuf )
 	{
-		Color clrNameColor = GetClientColor( iPlayerIndex );
+		Color clrNameColor = /*GetClientColor( iPlayerIndex );*/ GetCustomClientColor( iPlayerIndex );
 
 		line->SetExpireTime();
 
