@@ -51,7 +51,7 @@ void CFFDiscordManager::Init()
 	handlers.joinRequest = OnDiscordJoinRequest;
 
 	char appid[255];
-	sprintf(appid, "%d", engine->GetAppID());
+	V_sprintf_safe(appid, "%d", engine->GetAppID());
 	Discord_Initialize(DISCORD_APP_ID, &handlers, 1, appid);
 
 	Reset();
@@ -140,7 +140,7 @@ void CFFDiscordManager::LevelInit(const char* mapname)
 
 	char buffer[256];
 	discordPresence.state = "In-Game";
-	sprintf(buffer, "Map: %s", mapname);
+	V_sprintf_safe(buffer, "Map: %s", mapname);
 	discordPresence.details = buffer;
 	discordPresence.largeImageKey = "logo-big";
 	discordPresence.startTimestamp = startTimestamp;
@@ -199,7 +199,7 @@ void CFFDiscordManager::UpdateGameData()
 	std::string scoresString = scoresStream.str();
 	const char* actualTeamScores = scoresString.c_str();
 
-	sprintf(stateStr, "Map: %s (%i/%i)", m_szCurrentMap, curPlayers, maxPlayers);
+	V_sprintf_safe(stateStr, "Map: %s (%i/%i)", m_szCurrentMap, curPlayers, maxPlayers);
 	Q_strncpy(detailsStr, actualTeamScores, 128);
 	detailsStr[127] = '\0';
 

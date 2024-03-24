@@ -170,7 +170,7 @@ public:
 				char character = pIcon->cCharacterInFont;
 
 				wchar_t unicode[2];
-				swprintf(unicode, L"%c", character);
+				V_snwprintf(unicode, sizeof(unicode), L"%c", character);
 
 				surface()->DrawSetTextColor(Color(255, 255, 255, 255));
 				surface()->DrawSetTextFont(hFont);
