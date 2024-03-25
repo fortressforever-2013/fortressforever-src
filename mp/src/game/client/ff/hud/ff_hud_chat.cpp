@@ -36,12 +36,41 @@ ConVar cl_chat_color_default("cl_chat_color_default", "255 170 0", FCVAR_ARCHIVE
 
 // unassigned shouldn't really be needed, right?
 //ConVar cl_teamcolor_unassigned("cl_teamcolor_unassigned", "204 204 204", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the unassigned team's color in chat and killfeed.");
-ConVar cl_teamcolor_spec("cl_teamcolor_spec", "0 200 200", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the spectator team's color in chat and killfeed.");
+ConVar cl_teamcolor_spec("cl_teamcolor_spec", "204 204 204", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the spectator team's color in chat and killfeed.");
 
-ConVar cl_teamcolor_blue("cl_teamcolor_blue", "56 100 171", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the blue team's color in chat and killfeed.");
-ConVar cl_teamcolor_red("cl_teamcolor_red", "188 0 0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the red team's color in chat and killfeed.");
-ConVar cl_teamcolor_yellow("cl_teamcolor_yellow", "202 173 33", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the yellow team's color in chat and killfeed.");
-ConVar cl_teamcolor_green("cl_teamcolor_green", "68 144 65", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the green team's color in chat and killfeed.");
+ConVar cl_teamcolor_blue("cl_teamcolor_blue", "153 204 255", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the blue team's color in chat and killfeed.");
+ConVar cl_teamcolor_red("cl_teamcolor_red", "255 63 63", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the red team's color in chat and killfeed.");
+ConVar cl_teamcolor_yellow("cl_teamcolor_yellow", "255 178 0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the yellow team's color in chat and killfeed.");
+ConVar cl_teamcolor_green("cl_teamcolor_green", "153 255 153", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the green team's color in chat and killfeed.");
+
+CON_COMMAND(cl_teamcolors_reset, "Resets the client's custom team color definitions.\nno args - Reset the team colors to the new team colors.\n\"old\" - Reset the team colors to use the old team colors.")
+{
+	if (args.ArgC() == 1)
+	{
+		cl_teamcolor_spec.SetValue("204 204 204");
+
+		cl_teamcolor_blue.SetValue("153 204 255");
+		cl_teamcolor_red.SetValue("255 63 63");
+		cl_teamcolor_yellow.SetValue("255 178 0");
+		cl_teamcolor_green.SetValue("153 255 153");
+
+		Msg("Team colors were successfully reset to use the new team colors!\n");
+	}
+	else
+	{
+		if (!stricmp(args[1], "old"))
+		{
+			cl_teamcolor_spec.SetValue("0 200 200");
+
+			cl_teamcolor_blue.SetValue("56 100 171");
+			cl_teamcolor_red.SetValue("188 0 0");
+			cl_teamcolor_yellow.SetValue("202 173 33");
+			cl_teamcolor_green.SetValue("68 144 65");
+
+			Msg("Team colors were successfully reset to use the old team colors!\n");
+		}
+	}
+}
 
 // customizable team colors!
 
