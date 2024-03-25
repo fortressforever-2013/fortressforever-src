@@ -102,6 +102,32 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+// Purpose: fix spectator menu not closing once and for all
+//-----------------------------------------------------------------------------
+class CSpecComboBox : public ComboBox
+{
+public:
+	CSpecComboBox(Panel* parent, const char* panelName, int numLines, bool allowEdit) : ComboBox(parent, panelName, numLines, allowEdit)
+	{
+		m_nDuckKey = BUTTON_CODE_INVALID;
+	}
+
+private:
+	virtual void OnKeyCodePressed(vgui::KeyCode code)
+	{
+		if ( m_nDuckKey == BUTTON_CODE_INVALID )
+			m_nDuckKey = gameuifuncs->GetButtonCodeForBind( "+duck" );
+
+		if ( m_nDuckKey == code )
+			Panel::OnKeyCodePressed( code );
+
+		return;
+	}
+
+	ButtonCode_t m_nDuckKey;
+};
+
+//-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
 CSpectatorMenu::CSpectatorMenu( IViewPort *pViewPort ) : Frame( NULL, PANEL_SPECMENU )
@@ -119,15 +145,15 @@ CSpectatorMenu::CSpectatorMenu( IViewPort *pViewPort ) : Frame( NULL, PANEL_SPEC
 
 	SetScheme("ClientScheme");
 
-	m_pPlayerList = new ComboBox(this, "playercombo", 10 , false);
+	m_pPlayerList = new CSpecComboBox(this, "playercombo", 10 , false);
 	HFont hFallbackFont = scheme()->GetIScheme( GetScheme() )->GetFont( "DefaultVerySmallFallBack", false );
 	if ( INVALID_FONT != hFallbackFont )
 	{
 		m_pPlayerList->SetUseFallbackFont( true, hFallbackFont );
 	}
 
-	m_pViewOptions = new ComboBox(this, "viewcombo", 10 , false );
-	m_pConfigSettings = new ComboBox(this, "settingscombo", 10 , false );	
+	m_pViewOptions = new CSpecComboBox(this, "viewcombo", 10 , false );
+	m_pConfigSettings = new CSpecComboBox(this, "settingscombo", 10 , false );
 
 	m_pLeftButton = new CSpecButton( this, "specprev");
 	m_pLeftButton->SetText("3");
