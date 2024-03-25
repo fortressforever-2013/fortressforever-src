@@ -2795,17 +2795,17 @@ bool CBasePlayer::IsValidObserverTarget(CBaseEntity * target)
 
 	if (target->IsPlayer())	// track players
 	{
-		CBasePlayer* player = ToBasePlayer(target);
+		CBasePlayer * player = ToBasePlayer( target );
 
 		/* Don't spec observers or players who haven't picked a class yet
-		if ( player->IsObserver() )
+ 		if ( player->IsObserver() )
 			return false;	*/
 
-		if (player == this)
+		if( player == this )
 			return false; // We can't observe ourselves.
 
 		// gibbed players have EF_NODRAW effect active, so make an exception for LIFE_DEAD players
-		if (player->m_lifeState != LIFE_DEAD && player->m_lifeState != LIFE_RESPAWNABLE && player->IsEffectActive(EF_NODRAW)) // don't watch invisible players
+		if ( player->m_lifeState != LIFE_DEAD && player->m_lifeState != LIFE_RESPAWNABLE && player->IsEffectActive( EF_NODRAW ) ) // don't watch invisible players
 			return false;
 
 		// 0001670: Player you are spectating changes when they die
@@ -2815,36 +2815,37 @@ bool CBasePlayer::IsValidObserverTarget(CBaseEntity * target)
 		//if ( player->m_lifeState == LIFE_RESPAWNABLE ) // target is dead, waiting for respawn
 			//return false;
 
-		if (player->m_lifeState == LIFE_DEAD || player->m_lifeState == LIFE_DYING)
+		if ( player->m_lifeState == LIFE_DEAD || player->m_lifeState == LIFE_DYING )
 		{
-			if ((player->m_flDeathTime + DEATH_ANIMATION_TIME) < gpGlobals->curtime)
+			if ( (player->m_flDeathTime + DEATH_ANIMATION_TIME ) < gpGlobals->curtime )
 			{
 				return false;	// allow watching until 3 seconds after death to see death animation
 			}
 		}
-
+		
 		// check forcecamera settings for active players
-		if (GetTeamNumber() != TEAM_SPECTATOR)
+		if ( GetTeamNumber() != TEAM_SPECTATOR )
 		{
-			switch (mp_forcecamera.GetInt())
+			switch ( mp_forcecamera.GetInt() )	
 			{
-			case OBS_ALLOW_ALL:	break;
-			case OBS_ALLOW_TEAM:	if (GetTeamNumber() != target->GetTeamNumber())
-				return false;
-				break;
-			case OBS_ALLOW_NONE:	return false;
+				case OBS_ALLOW_ALL	:	break;
+				case OBS_ALLOW_TEAM :	if ( GetTeamNumber() != target->GetTeamNumber() )
+											 return false;
+										break;
+				case OBS_ALLOW_NONE :	return false;
 			}
 		}
-		else if (target->Classify() == CLASS_INFOSCRIPT) // track info_ff_scripts
-		{
-			CFFInfoScript* pInfoScript = static_cast<CFFInfoScript*>(target);
-
-			if (pInfoScript->IsRemoved())
-				return false;
-		}
-		else
-			return false; // not one of the trackable entity types
 	}
+	else if (target->Classify() == CLASS_INFOSCRIPT) // track info_ff_scripts
+	{
+		CFFInfoScript* pInfoScript = static_cast<CFFInfoScript*>(target);
+
+		if (pInfoScript->IsRemoved())
+			return false;
+	}
+	else
+		return false; // not one of the trackable entity types
+	
 	return true;	// passed all test
 }
 
