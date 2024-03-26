@@ -18,7 +18,7 @@
 #include "c_team.h"
 #include "ff_gamerules.h"
 #include "ff_shareddefs.h"
-
+#include "ff_hud_chat.h" // custom team colors
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -30,9 +30,6 @@ ConVar hud_deathnotice_assister_color_modifier( "hud_deathnotice_assister_color_
 ConVar cl_spec_killbeep( "cl_spec_killbeep", "1", FCVAR_ARCHIVE, "Determines whether or not the kill beep gets played while spectating someone in first-person mode" );
 
 extern ConVar cl_killbeepwav;
-
-// customizable team colors
-extern Color GetCustomClientColor(int iPlayerIndex);
 
 #define MAX_OBJECTIVE_TEXT_LENGTH 48
 #define DEATHNOTICE_ASSIST_SEPARATOR L" + " // this is a widechar string constant
@@ -75,11 +72,11 @@ public:
 	virtual void Paint( void );
 	virtual void ApplySchemeSettings( vgui::IScheme *scheme );
 
-	void SetColorForNoticePlayer( int iTeamNumber, int iPlayerIndex = -1 );
+	void SetColorForNoticePlayer( int iTeamNumber );
 	void RetireExpiredDeathNotices( void );
 	void DrawObjectiveBackground( int xStart, int yStart, int xEnd, int yEnd );
 	void DrawHighlightBackground( int xStart, int yStart, int xEnd, int yEnd );
-	void DrawPlayerAndAssister( int &x, int &y, wchar_t* playerName, int iPlayerTeam, wchar_t* assisterName, int iAssisterTeam, int playerIndex = -1 );
+	void DrawPlayerAndAssister( int &x, int &y, wchar_t* playerName, int iPlayerTeam, wchar_t* assisterName, int iAssisterTeam );
 	
 	virtual void FireGameEvent( IGameEvent * event );
 
@@ -162,13 +159,9 @@ bool CHudDeathNotice::ShouldDraw( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CHudDeathNotice::SetColorForNoticePlayer( int iTeamNumber, int iPlayerIndex )
+void CHudDeathNotice::SetColorForNoticePlayer( int iTeamNumber )
 {
-	if (iPlayerIndex > 0) {
-		surface()->DrawSetTextColor( GetCustomClientColor( iPlayerIndex ) );
-		return;
-	}
-	surface()->DrawSetTextColor( GameResources()->GetTeamColor( iTeamNumber ) );
+	surface()->DrawSetTextColor( GetCustomClientColor( -1, iTeamNumber ) );
 }
 
 void CHudDeathNotice::DrawObjectiveBackground( int xStart, int yStart, int xEnd, int yEnd )
@@ -276,10 +269,7 @@ void CHudDeathNotice::Paint()
 			icon->DrawSelf( x, y - (iconTall / 4), iconWide, iconTall, DEATHNOTICE_COLOR_DEFAULT );
 			x += iconWide + 5;		// |-- Mirv: 5px gap
 
-			//SetColorForNoticePlayer( iVictimTeam );
-
-			// passing iVictimTeam as the first parameter instead of NULL, just in case...
-			SetColorForNoticePlayer( iVictimTeam, m_DeathNotices[i].Victim.iEntIndex );
+			SetColorForNoticePlayer( iVictimTeam );
 
 			// Draw victims name
 			surface()->DrawSetTextPos( x, y );
@@ -429,7 +419,7 @@ void CHudDeathNotice::Paint()
 				}
 
 				// Draw killer's name
-				DrawPlayerAndAssister( x, y, killer, iKillerTeam, hasAssister ? assister : NULL, iAssisterTeam, m_DeathNotices[i].Killer.iEntIndex);
+				DrawPlayerAndAssister( x, y, killer, iKillerTeam, hasAssister ? assister : NULL, iAssisterTeam );
 
 				x += 5;	// |-- Mirv: 5px gap
 			}
@@ -451,7 +441,7 @@ void CHudDeathNotice::Paint()
 			}
 
 			// Draw victims name
-			DrawPlayerAndAssister( x, y, victim, iVictimTeam, (m_DeathNotices[i].iSuicide && hasAssister) ? assister : NULL, iAssisterTeam, m_DeathNotices[i].Victim.iEntIndex);
+			DrawPlayerAndAssister( x, y, victim, iVictimTeam, (m_DeathNotices[i].iSuicide && hasAssister) ? assister : NULL, iAssisterTeam );
 
 			// draw a team colored buildable icon
 			if (iconBuildable)
@@ -466,12 +456,9 @@ void CHudDeathNotice::Paint()
 	RetireExpiredDeathNotices();
 }
 
-void CHudDeathNotice::DrawPlayerAndAssister( int &x, int &y, wchar_t* playerName, int iPlayerTeam, wchar_t* assisterName, int iAssisterTeam, int iPlayerIndex )
+void CHudDeathNotice::DrawPlayerAndAssister( int &x, int &y, wchar_t* playerName, int iPlayerTeam, wchar_t* assisterName, int iAssisterTeam )
 {
-	//SetColorForNoticePlayer( iPlayerTeam );
-
-	// passing iPlayerTeam as the first parameter instead of NULL, just in case...
-	SetColorForNoticePlayer( iPlayerTeam, iPlayerIndex );
+	SetColorForNoticePlayer( iPlayerTeam );
 	surface()->DrawSetTextPos( x, y );
 	surface()->DrawSetTextFont( m_hTextFont );
 	surface()->DrawUnicodeString( playerName );

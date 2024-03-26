@@ -113,24 +113,36 @@ Color GetClientColor(int clientIndex)
 }
 
 // made a whole different function for the customizable team colors
-Color GetCustomClientColor(int clientIndex)
+Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/)
 {
-	if (clientIndex == 0) // console msg
+	if (iPlayerIndex == 0) // console msg
 	{
 		return g_ColorConsole;
 	}
 	else
 	{
+		int iTeam;
+		int r, g, b;
+		bool bValid = false;
+		Color clr;
+
 		IGameResources* gr = GameResources();
 
 		if (!gr)
 			return GetDefaultChatColor();
 
-		int iTeamIndex = gr->GetTeam(clientIndex);
-		int r, g, b;
-		bool bValid = false;
+		if (iTeamIndex > 0) // prefer team index over player index
+			iTeam = iTeamIndex;
+		else if(iPlayerIndex > 0)
+			iTeam = gr->GetTeam(iPlayerIndex);
+		else
+		{
+			DevWarning("Unknown values passed to GetCustomClientColor!\n");
+			clr = Color(0, 0, 0, 255);
+			return clr;
+		}
 
-		switch (iTeamIndex)
+		switch (iTeam)
 		{
 			case TEAM_UNASSIGNED:
 				break;
@@ -167,7 +179,7 @@ Color GetCustomClientColor(int clientIndex)
 		g = clamp(g, 0, 255);
 		b = clamp(b, 0, 255);
 
-		Color clr = Color(r, g, b, 255);
+		clr = Color(r, g, b, 255);
 		return clr;
 	}
 }

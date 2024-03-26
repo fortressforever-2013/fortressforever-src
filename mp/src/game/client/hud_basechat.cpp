@@ -29,18 +29,14 @@
 #include "multiplay_gamerules.h"
 #include "voice_status.h"
 
-
 #include "game/client/iviewport.h"
-
 #include "c_ff_player.h"
+#include "ff_hud_chat.h" // custom team colors
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 #define CHAT_WIDTH_PERCENTAGE 0.6f
-
-// customizable team colors in chat and in killfeed
-extern Color GetCustomClientColor(int);
 
 #ifndef _XBOX
 ConVar hud_saytext_time("hud_saytext_time", "12", FCVAR_ARCHIVE);

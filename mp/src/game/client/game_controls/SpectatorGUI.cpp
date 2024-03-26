@@ -48,6 +48,8 @@ void AddSubKeyNamed( KeyValues *pKeys, const char *pszName );
 #include "ff_gamerules.h"
 #include "ff_utils.h"
 
+#include "ff_hud_chat.h" // custom team colors
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -676,7 +678,7 @@ void CSpectatorGUI::Update()
 
 	if ( playernum > 0 && playernum <= gpGlobals->maxClients && gr )
 	{
-		Color c = gr->GetTeamColor( gr->GetTeam(playernum) ); // Player's team color
+		Color c = /*gr->GetTeamColor( gr->GetTeam(playernum) );*/ GetCustomClientColor( playernum ); // Player's team color
 
 		m_pPlayerLabel->SetFgColor( c );
 		
@@ -707,7 +709,7 @@ void CSpectatorGUI::Update()
 	}
 
 	// update extra info field
-	wchar_t szEtxraInfo[1024];
+	wchar_t szExtraInfo[1024];
 	wchar_t szTitleLabel[1024];
 	char tempstr[128];
 
@@ -718,7 +720,7 @@ void CSpectatorGUI::Update()
 
 		// set spectator number and HLTV title
 		Q_snprintf(tempstr,sizeof(tempstr),"Spectators : %d", HLTVCamera()->GetNumSpectators() );
-		g_pVGuiLocalize->ConvertANSIToUnicode(tempstr,szEtxraInfo,sizeof(szEtxraInfo));
+		g_pVGuiLocalize->ConvertANSIToUnicode(tempstr,szExtraInfo,sizeof(szExtraInfo));
 		
 		Q_strncpy( tempstr, HLTVCamera()->GetTitleText(), sizeof(tempstr) );
 		g_pVGuiLocalize->ConvertANSIToUnicode(tempstr,szTitleLabel,sizeof(szTitleLabel));
@@ -733,13 +735,13 @@ void CSpectatorGUI::Update()
 
 		wchar_t wMapName[64];
 		g_pVGuiLocalize->ConvertANSIToUnicode(tempstr,wMapName,sizeof(wMapName));
-		g_pVGuiLocalize->ConstructString( szEtxraInfo,sizeof( szEtxraInfo ), g_pVGuiLocalize->Find("#Spec_Map" ),1, wMapName );*/
+		g_pVGuiLocalize->ConstructString( szExtraInfo,sizeof( szExtraInfo ), g_pVGuiLocalize->Find("#Spec_Map" ),1, wMapName );*/
 
-		g_pVGuiLocalize->ConvertANSIToUnicode( "", szEtxraInfo, sizeof(szEtxraInfo) );
+		g_pVGuiLocalize->ConvertANSIToUnicode( "", szExtraInfo, sizeof(szExtraInfo) );
 		g_pVGuiLocalize->ConvertANSIToUnicode( "", szTitleLabel, sizeof(szTitleLabel) );
 	}
 
-	SetLabelText("extrainfo", szEtxraInfo );
+	SetLabelText("extrainfo", szExtraInfo );
 	SetLabelText("titlelabel", szTitleLabel );
 }
 
