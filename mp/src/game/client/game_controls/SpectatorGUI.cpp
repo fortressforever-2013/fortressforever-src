@@ -67,14 +67,14 @@ CSpectatorGUI *g_pSpectatorGUI = NULL;
 // NB disconnect between localization text and observer mode enums
 static const char *s_SpectatorModes[] =
 {
-	"#Spec_Mode0",	// 	OBS_MODE_NONE = 0,	
-	"#Spec_Mode1",	// 	OBS_MODE_DEATHCAM,	
-	"",				// 	OBS_MODE_FREEZECAM,	
-	"#Spec_Mode2",	// 	OBS_MODE_FIXED,		
-	"#Spec_Mode3",	// 	OBS_MODE_IN_EYE,	
-	"#Spec_Mode4",	// 	OBS_MODE_CHASE,		
-	"#Spec_Mode_POI",	// 	OBS_MODE_POI, PASSTIME
+	"#Spec_Mode0",	// 	OBS_MODE_NONE = 0,
+	"#Spec_Mode1",	// 	OBS_MODE_DEATHCAM,
+	"",				// 	OBS_MODE_FREEZECAM,
+	"#Spec_Mode2",	// 	OBS_MODE_FIXED,
+	"#Spec_Mode3",	// 	OBS_MODE_IN_EYE,
+	"#Spec_Mode4",	// 	OBS_MODE_CHASE,
 	"#Spec_Mode5",	// 	OBS_MODE_ROAMING,
+	"#Spec_Mode_POI",	// 	OBS_MODE_POI, PASSTIME
 };
 
 using namespace vgui;

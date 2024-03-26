@@ -6683,6 +6683,13 @@ bool CBasePlayer::ClientCommand( const CCommand &args )
 			return true;
 		}
 
+		// not spectating anyone, or no players to spectate, force free roam
+		// no more getting stuck in air when spec_mode is changed while moving in free roam
+		if( GetObserverMode() == OBS_MODE_ROAMING && !GetObserverTarget() )
+		{
+			return true;
+		}
+
 		// not allowed to change spectator modes when mp_fadetoblack is being used
 		if ( mp_fadetoblack.GetBool() )
 		{

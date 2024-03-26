@@ -1499,7 +1499,7 @@ void C_BasePlayer::CalcChaseCamView(Vector& eyeOrigin, QAngle& eyeAngles, float&
 	if (target->IsPlayer())
 	{
 		// GetObserverCamOrigin() returns ragdoll pos if player is ragdolled
-		Vector origin = target->GetObserverCamOrigin();
+		origin = target->GetObserverCamOrigin();
 
 		C_BasePlayer* player = ToBasePlayer(target);
 
@@ -1522,7 +1522,6 @@ void C_BasePlayer::CalcChaseCamView(Vector& eyeOrigin, QAngle& eyeAngles, float&
 	}
 	else
 		origin = target->WorldSpaceCenter();
-	//VectorAdd( origin, GetChaseCamViewOffset( target ), origin );
 
 	QAngle viewangles;
 
