@@ -274,6 +274,8 @@ protected:
 	// cached information for bot use
 	int		m_BotTeamFlags;
 	int		m_BotGoalType;
+public:
+	virtual void	Precache();
 };
 
 #endif // TRIGGERS_H

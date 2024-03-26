@@ -1199,6 +1199,13 @@ CFuncFFScript::CFuncFFScript()
 	m_BotGoalType = Omnibot::kNone;
 }
 
+
+void CFuncFFScript::Precache()
+{
+	CFFLuaSC hPrecache;
+	_scriptman.RunPredicates_LUA(this, &hPrecache, "precache");
+}
+
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
