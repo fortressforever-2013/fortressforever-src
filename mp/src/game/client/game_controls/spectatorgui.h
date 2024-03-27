@@ -141,7 +141,7 @@ private:
 
 	vgui::ComboBox *m_pPlayerList;
 	vgui::ComboBox *m_pViewOptions;
-	vgui::ComboBox *m_pConfigSettings;
+	//vgui::ComboBox *m_pConfigSettings;
 
 	vgui::Button *m_pLeftButton;
 	vgui::Button *m_pRightButton;

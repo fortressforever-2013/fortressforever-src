@@ -155,7 +155,7 @@ CSpectatorMenu::CSpectatorMenu( IViewPort *pViewPort ) : Frame( NULL, PANEL_SPEC
 	}
 
 	m_pViewOptions = new CSpecComboBox(this, "viewcombo", 10 , false );
-	m_pConfigSettings = new CSpecComboBox(this, "settingscombo", 10 , false );
+	//m_pConfigSettings = new CSpecComboBox(this, "settingscombo", 10 , false );
 
 	m_pLeftButton = new CSpecButton( this, "specprev");
 	m_pLeftButton->SetText("3");
@@ -164,19 +164,19 @@ CSpectatorMenu::CSpectatorMenu( IViewPort *pViewPort ) : Frame( NULL, PANEL_SPEC
 
 	m_pPlayerList->SetText("");
 	m_pViewOptions->SetText("#Spec_Modes");
-	m_pConfigSettings->SetText("#Spec_Options");
+	//m_pConfigSettings->SetText("#Spec_Options");
 
 	m_pPlayerList->SetOpenDirection( Menu::UP );
 	m_pViewOptions->SetOpenDirection( Menu::UP );
-	m_pConfigSettings->SetOpenDirection( Menu::UP );
+	//m_pConfigSettings->SetOpenDirection( Menu::UP );
 
 	// create view config menu
-	CommandMenu * menu = new CommandMenu(m_pConfigSettings, "spectatormenu", gViewPortInterface);
-	menu->LoadFromFile( "Resource/spectatormenu.res" );
-	m_pConfigSettings->SetMenu( menu );	// attach menu to combo box
+	//CommandMenu * menu = new CommandMenu(m_pConfigSettings, "spectatormenu", gViewPortInterface);
+	//menu->LoadFromFile( "Resource/spectatormenu.res" );
+	//m_pConfigSettings->SetMenu( menu );	// attach menu to combo box
 
 	// create view mode menu
-	menu = new CommandMenu(m_pViewOptions, "spectatormodes", gViewPortInterface);
+	CommandMenu *menu = new CommandMenu(m_pViewOptions, "spectatormodes", gViewPortInterface);
 	menu->LoadFromFile("Resource/spectatormodes.res");
 	m_pViewOptions->SetMenu( menu );	// attach menu to combo box
 
@@ -188,13 +188,13 @@ void CSpectatorMenu::ApplySchemeSettings(IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
 	// need to MakeReadyForUse() on the menus so we can set their bg color before they are displayed
-	m_pConfigSettings->GetMenu()->MakeReadyForUse();
+	//m_pConfigSettings->GetMenu()->MakeReadyForUse();
 	m_pViewOptions->GetMenu()->MakeReadyForUse();
 	m_pPlayerList->GetMenu()->MakeReadyForUse();
 
 	if ( g_pSpectatorGUI )
 	{
-		m_pConfigSettings->GetMenu()->SetBgColor( g_pSpectatorGUI->GetBlackBarColor() );
+		//m_pConfigSettings->GetMenu()->SetBgColor( g_pSpectatorGUI->GetBlackBarColor() );
 		m_pViewOptions->GetMenu()->SetBgColor( g_pSpectatorGUI->GetBlackBarColor() );
 		m_pPlayerList->GetMenu()->SetBgColor( g_pSpectatorGUI->GetBlackBarColor() );
 	}
@@ -222,11 +222,11 @@ void CSpectatorMenu::OnTextChanged(KeyValues *data)
 
 	vgui::ComboBox *box = dynamic_cast<vgui::ComboBox *>( panel );
 
-	if( box == m_pConfigSettings) // don't change the text in the config setting combo
+	/*if (box == m_pConfigSettings) // don't change the text in the config setting combo
 	{
 		m_pConfigSettings->SetText("#Spec_Options");
 	}
-	else if ( box == m_pPlayerList )
+	else*/ if ( box == m_pPlayerList )
 	{
 		KeyValues *kv = box->GetActiveItemUserData();
 		if ( kv && GameResources() )
