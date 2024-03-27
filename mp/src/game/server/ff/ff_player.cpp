@@ -1,7 +1,6 @@
 //========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
-//
-// Purpose:		Player for HL1.
-//
+// TODO: Can the copyright above be updated?
+// Purpose:	HL1/TFC-based player class for Fortress Forever.
 // $NoKeywords: $
 //=============================================================================//
 
@@ -156,10 +155,10 @@ int g_iLimbs[CLASS_CIVILIAN + 1][5] = { { 0 } };
 //static ConVar jerkmulti( "ffdev_concuss_jerkmulti", "0.0004", 0, "Amount to jerk view on conc" );
 #define JERKMULTI 0.0004f
 
-ConVar ffdev_gibdamage("ffdev_gibdamage", "50", FCVAR_FF_FFDEV_REPLICATED, "If a players health is -(ffdev_gibdamage's value) or less after death, then they will gib instead of ragdoll");
+ConVar ffdev_gibdamage("ffdev_gibdamage", "50", FCVAR_FF_FFDEV_REPLICATED, "If a player's health is -(ffdev_gibdamage's value) or less after death, then they will gib instead of ragdoll");
 #define FFDEV_GIBDAMAGE ffdev_gibdamage.GetFloat()
 
-ConVar ffdev_gibdamage_explosions("ffdev_gibdamage_explosions", "30", FCVAR_FF_FFDEV_REPLICATED, "If a players health is -(ffdev_gibdamage's value) or less after death, then they will gib instead of ragdoll");
+ConVar ffdev_gibdamage_explosions("ffdev_gibdamage_explosions", "30", FCVAR_FF_FFDEV_REPLICATED, "If a players health is -(ffdev_gibdamage's value) or less after death from explosion, then they will gib instead of ragdoll");
 #define FFDEV_GIBDAMAGE_EXPLOSIONS ffdev_gibdamage_explosions.GetFloat()
 
 extern ConVar sv_maxspeed;
@@ -2273,7 +2272,7 @@ void CFFPlayer::CheatImpulseCommands( int iImpulse )
 		SetHealth(m_iMaxHealth);
 		m_iArmor = m_iMaxArmor;
 
-		m_iJetpackFuel		= 200.0f;
+		m_iJetpackFuel	= 200.0f;
 	}
 }
 
@@ -2596,7 +2595,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	// Check that they picked a valid class
 	if( !iClass )
 	{
-		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_NOSUCHCLASS" );
+		Warning("Invalid class\n");
 		return;
 	}
 
@@ -2627,14 +2626,14 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	// Class is disabled
 	if( class_limit == -1 )
 	{
-		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_DISABLED" );
+		Warning("CFFPlayer::PostBuildGenericThink - ERROR!!!\n");
 		return;
 	}
 
 	// Not enough space for this class
 	if( class_limit > 0 && iAlreadyThisClass >= class_limit )
 	{
-		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_NOSPACE" );
+		ClientPrint(this, HUD_PRINTCENTER, "#FF_ERROR_NOSPACE");
 		return;
 	}
 	
@@ -2647,7 +2646,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	{
 		if(hPlayerSwitchClass.GetBool() == false)
 		{
-			ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_CANTSWITCHCLASS" );
+			ClientPrint(this, HUD_PRINTCENTER, "#FF_ERROR_CANTSWITCHCLASS");
 			return;
 		}
 	}
@@ -2760,7 +2759,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 		// Couldn't find a valid team to join (because of limits)
 		if( iBestTeam < 0 )
 		{
-			ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_NOFREETEAM" );
+			ClientPrint(this, HUD_PRINTCENTER, "#FF_ERROR_NOFREETEAM");
 			return;
 		}
 
@@ -2771,7 +2770,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	// Couldn't find a team afterall
 	if( iTeam == 0 )
 	{
-		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_NOSUCHTEAM" );
+		Warning("Invalid team\n");
 		return;
 	}
 
@@ -2781,14 +2780,14 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	// This should stop teams being picked which aren't active
 	if( !pTeam )
 	{
-		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_NOSUCHTEAM" );
+		Warning("Team unavailable\n");
 		return;
 	}
 
 	// Check the team isn't full
 	if( pTeam->GetTeamLimits() != 0 && iTeamNumbers[iTeam] >= pTeam->GetTeamLimits() )
 	{
-		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_TEAMFULL" );
+		ClientPrint(this, HUD_PRINTCENTER, "#FF_ERROR_TEAMFULL");
 		return;
 	}
 
@@ -2798,7 +2797,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	// Are we already this team
 	if( GetTeamNumber() == iTeam )
 	{
-		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_ALREADYONTHISTEAM" );
+		ClientPrint(this, HUD_PRINTCENTER, "#FF_ERROR_ALREADYONTHISTEAM");
 		return;
 	}
 
