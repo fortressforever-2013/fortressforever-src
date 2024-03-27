@@ -2606,7 +2606,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	// If they're already this class, no class change needed. Just inform the player.
 	if (iClass == m_iNextClass && !bWasRandom)
 	{
-		ClientPrint(this, HUD_PRINTNOTIFY, "#FF_CHANGECLASS_LATER", Class_IntToString(iClass));
+		ClientPrint(this, HUD_PRINTCENTER, "#FF_CHANGECLASS_LATER", Class_IntToString(iClass));
 		return;
 	}
 
@@ -2686,7 +2686,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	else
 	{
 		// They didn't want to kill themselves, so let them know they're changing
-		ClientPrint(this, HUD_PRINTNOTIFY, "#FF_CHANGECLASS_LATER", Class_IntToString(iClass));
+		ClientPrint(this, HUD_PRINTCENTER, "#FF_CHANGECLASS_LATER", Class_IntToString(iClass));
 	}
 
 	// These next things are kind of lame... but when doing bot training
