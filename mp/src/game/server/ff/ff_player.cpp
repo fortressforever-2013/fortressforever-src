@@ -2528,6 +2528,12 @@ void CFFPlayer::ChangeTeam(int iTeamNum)
 
 void CFFPlayer::ChangeClass(const char *szNewClassName)
 {
+	if(args.ArgC() < 2)
+	{
+		Msg("Usage: class scout | sniper | soldier | demoman | medic | hwguy | pyro | spy | engineer | civilian\n");
+		return;
+	}
+
 	//const CFFPlayerClassInfo &pPlayerClassInfo = GetFFClassData();
 	CFFTeam *pTeam = GetGlobalFFTeam( GetTeamNumber() );
 
@@ -2719,13 +2725,13 @@ void CFFPlayer::Command_Class(const CCommand& args)
 
 void CFFPlayer::Command_Team(const CCommand& args)
 {
-	int iOldTeam = GetTeamNumber();
-
-	if( args.ArgC() < 1 )
+	if (args.ArgC() < 2) // if no team was specified
 	{
-		// no team specified
+		Msg("Usage: team spec | blue | red | yellow | green | auto\n");
 		return;
 	}
+
+	int iOldTeam = GetTeamNumber();
 
 	int iTeam = 0;
 	int iTeamNumbers[8] = {0};
@@ -2740,19 +2746,19 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	}
 
 	// Case insensitive compares for now
-	if( Q_stricmp( args.Arg( 1 ), "spec" ) == 0 )
+	if(!Q_stricmp(args.Arg(1), "spec"))
 		iTeam = FF_TEAM_SPEC;
-	else if( Q_stricmp( args.Arg( 1 ), "blue" ) == 0 )
+	else if(!Q_stricmp(args.Arg(1), "blue"))
 		iTeam = FF_TEAM_BLUE;
-	else if( Q_stricmp( args.Arg( 1 ), "red" ) == 0 )
+	else if(!Q_stricmp(args.Arg(1), "red"))
 		iTeam = FF_TEAM_RED;
-	else if( Q_stricmp( args.Arg( 1 ), "yellow" ) == 0 )
+	else if(!Q_stricmp(args.Arg(1), "yellow"))
 		iTeam = FF_TEAM_YELLOW;
-	else if( Q_stricmp( args.Arg( 1 ), "green" ) == 0 )
+	else if(!Q_stricmp(args.Arg(1), "green"))
 		iTeam = FF_TEAM_GREEN;
 
 	// Pick the team with least capacity to join
-	else if( Q_stricmp( args.Arg( 1 ), "auto" ) == 0 )
+	else if(!Q_stricmp( args.Arg( 1 ), "auto" ))
 	{
 		int iBestTeam = UTIL_PickRandomTeam();
 
