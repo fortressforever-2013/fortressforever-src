@@ -96,7 +96,7 @@ int Class_StringToInt( const char *szClassName )
 	else if( Q_stricmp( szClassName, "mancannon" ) == 0 )
 		return 13;
 	else
-		Warning( "Class_StringToInt :: No match!\n" );
+		DevWarning( "Class_StringToInt :: No match!\n" );
 
 	return 0;
 }
@@ -124,7 +124,7 @@ const char *Class_IntToString( int iClassIndex )
 		case 11: return "dispenser"; break;
 		case 12: return "sentrygun"; break;
 		case 13: return "mancannon"; break;
-		default: Warning( "Class_IntToString :: No match!\n" ); break;
+		default: DevWarning( "Class_IntToString :: No match!\n" ); break;
 	}
 
 	return "\0";
@@ -177,7 +177,7 @@ const char *Class_IntToPrintString( int iClassIndex )
 		case 11: return "Dispenser"; break;
 		case 12: return "SentryGun"; break;
 		case 13: return "ManCannon"; break;
-		default: Warning( "Class_IntToPrintString :: No match!\n" ); break;
+		default: DevWarning( "Class_IntToPrintString :: No match!\n" ); break;
 	}
 
 	return "\0";
