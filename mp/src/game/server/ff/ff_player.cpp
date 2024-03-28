@@ -5049,13 +5049,13 @@ void CFFPlayer::ThrowGrenade(float fTimer, float flSpeed)
 	{
 		case FF_GREN_PRIMEONE:
 			// Do they actually have a primary grenade?
-			if(!Q_strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None")) //Make the grenade if not "None"
+			if(Q_strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None")) //Make the grenade if not "None"
 				pGrenade = (CFFGrenadeBase *) CreateEntityByName(pPlayerClassInfo.m_szPrimaryClassName);
 			break;
 
 		case FF_GREN_PRIMETWO:
 			// Ditto, but for secondary grenades
-			if (!Q_strcmp( pPlayerClassInfo.m_szSecondaryClassName, "None"))
+			if (Q_strcmp( pPlayerClassInfo.m_szSecondaryClassName, "None"))
 				pGrenade = (CFFGrenadeBase *) CreateEntityByName(pPlayerClassInfo.m_szSecondaryClassName);			
 			break;
 	}
