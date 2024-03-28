@@ -2272,7 +2272,7 @@ void CFFPlayer::CheatImpulseCommands( int iImpulse )
 		SetHealth(m_iMaxHealth);
 		m_iArmor = m_iMaxArmor;
 
-		m_iJetpackFuel	= 200.0f;
+		m_iJetpackFuel = 200.0f;
 	}
 }
 
@@ -2528,12 +2528,6 @@ void CFFPlayer::ChangeTeam(int iTeamNum)
 
 void CFFPlayer::ChangeClass(const char *szNewClassName)
 {
-	if(args.ArgC() < 2)
-	{
-		Msg("Usage: class scout | sniper | soldier | demoman | medic | hwguy | pyro | spy | engineer | civilian\n");
-		return;
-	}
-
 	//const CFFPlayerClassInfo &pPlayerClassInfo = GetFFClassData();
 	CFFTeam *pTeam = GetGlobalFFTeam( GetTeamNumber() );
 
@@ -2632,14 +2626,14 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	// Class is disabled
 	if( class_limit == -1 )
 	{
-		Warning("CFFPlayer::PostBuildGenericThink - ERROR!!!\n");
+		Warning("That class is disallowed\n");
 		return;
 	}
 
 	// Not enough space for this class
 	if( class_limit > 0 && iAlreadyThisClass >= class_limit )
 	{
-		ClientPrint(this, HUD_PRINTCENTER, "#FF_ERROR_NOSPACE");
+		Warning("Class limit reached\n");
 		return;
 	}
 	
@@ -2713,9 +2707,9 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 
 void CFFPlayer::Command_Class(const CCommand& args)
 {
-	if(args.ArgC() < 1)
+	if (args.ArgC() != 1) // if no class was specified
 	{
-		// no class specified
+		Msg("Usage: class scout | sniper | soldier | demoman | medic | hwguy | pyro | spy | engineer | civilian\n");
 		return;
 	}
 
@@ -2725,9 +2719,9 @@ void CFFPlayer::Command_Class(const CCommand& args)
 
 void CFFPlayer::Command_Team(const CCommand& args)
 {
-	if (args.ArgC() < 2) // if no team was specified
+	if (args.ArgC() != 1) // if no team was specified
 	{
-		Msg("Usage: team spec | blue | red | yellow | green | auto\n");
+		Msg("Usage: team auto | spec | blue | red | yellow | green\n");
 		return;
 	}
 
@@ -2800,7 +2794,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	// [DEBUG] Check what team was picked
 	//DevMsg( "%d\n", iTeam );
 
-	// Are we already this team
+	// Are we already on this team
 	if( GetTeamNumber() == iTeam )
 	{
 		ClientPrint(this, HUD_PRINTCENTER, "#FF_ERROR_ALREADYONTHISTEAM");
@@ -2816,7 +2810,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	{
 		if(hPlayerSwitchTeam.GetBool() == false)
 		{
-			ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_SWITCHTOOSOON" );
+			ClientPrint(this, HUD_PRINTCENTER, "#FF_ERROR_SWITCHTOOSOON");
 			return;
 		}
 	}
