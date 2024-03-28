@@ -4815,7 +4815,7 @@ void CFFPlayer::Command_PrimeOne(const CCommand& args)
 	const CFFPlayerClassInfo &pPlayerClassInfo = GetFFClassData();
 
 	// we have a primary grenade type
-	if (!strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None" ))
+	if (strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None" ))
 	{
 		if(m_iPrimary > 0)
 		{
@@ -4860,7 +4860,7 @@ void CFFPlayer::Command_PrimeTwo(const CCommand& args)
     const CFFPlayerClassInfo &pPlayerClassInfo = GetFFClassData();
 
 	// we have a secondary grenade type
-	if (!strcmp( pPlayerClassInfo.m_szSecondaryClassName, "None" ))
+	if (strcmp( pPlayerClassInfo.m_szSecondaryClassName, "None" ))
 	{
 		if(m_iSecondary > 0)
 		{
@@ -5048,23 +5048,15 @@ void CFFPlayer::ThrowGrenade(float fTimer, float flSpeed)
 	switch (m_iGrenadeState)
 	{
 		case FF_GREN_PRIMEONE:
-			
-			// They don't actually have a primary grenade
-			if(!Q_strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None"))
-				return;
-
-			// Make the grenade
-			pGrenade = (CFFGrenadeBase *) CreateEntityByName(pPlayerClassInfo.m_szPrimaryClassName);
+			// Do they actually have a primary grenade?
+			if(Q_strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None")) //Make the grenade if not "None"
+				pGrenade = (CFFGrenadeBase *) CreateEntityByName(pPlayerClassInfo.m_szPrimaryClassName);
 			break;
 
 		case FF_GREN_PRIMETWO:
-
-			// They don't actually have a secondary grenade
-			if (!Q_strcmp( pPlayerClassInfo.m_szSecondaryClassName, "None"))
-				return;
-
-			// Make the grenade
-			pGrenade = (CFFGrenadeBase *) CreateEntityByName(pPlayerClassInfo.m_szSecondaryClassName);			
+			// Ditto, but for secondary grenades
+			if (Q_strcmp( pPlayerClassInfo.m_szSecondaryClassName, "None"))
+				pGrenade = (CFFGrenadeBase *) CreateEntityByName(pPlayerClassInfo.m_szSecondaryClassName);			
 			break;
 	}
 
