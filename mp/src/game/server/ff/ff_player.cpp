@@ -158,7 +158,7 @@ int g_iLimbs[CLASS_CIVILIAN + 1][5] = { { 0 } };
 ConVar ffdev_gibdamage("ffdev_gibdamage", "50", FCVAR_FF_FFDEV_REPLICATED, "If a player's health is -(ffdev_gibdamage's value) or less after death, then they will gib instead of ragdoll");
 #define FFDEV_GIBDAMAGE ffdev_gibdamage.GetFloat()
 
-ConVar ffdev_gibdamage_explosions("ffdev_gibdamage_explosions", "30", FCVAR_FF_FFDEV_REPLICATED, "If a players health is -(ffdev_gibdamage's value) or less after death from explosion, then they will gib instead of ragdoll");
+ConVar ffdev_gibdamage_explosions("ffdev_gibdamage_explosions", "30", FCVAR_FF_FFDEV_REPLICATED, "If a player's health is -(ffdev_gibdamage's value) or less after death from explosion, then they will gib instead of ragdoll");
 #define FFDEV_GIBDAMAGE_EXPLOSIONS ffdev_gibdamage_explosions.GetFloat()
 
 extern ConVar sv_maxspeed;
@@ -2045,10 +2045,10 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 	StopSound( "Player.DrownContinue" );
 
 	// Stop the saveme sounds upon death
-	StopSound( "infected.saveme" );
-	StopSound( "medical.saveme" );
-	StopSound( "maintenance.saveme" );
-	StopSound( "ammo.saveme" );
+	StopSound( "Infected.Saveme" );
+	StopSound( "Medical.Saveme" );
+	StopSound( "Maintenance.Saveme" );
+	StopSound( "Ammo.Saveme" );
 
 	// --> Mirv: Create backpack moved here to stop crash
 	CFFItemBackpack *pBackpack = (CFFItemBackpack *) CBaseEntity::Create( "ff_item_backpack", GetAbsOrigin(), GetAbsAngles());
@@ -2708,9 +2708,9 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 
 void CFFPlayer::Command_Class(const CCommand& args)
 {
-	if( args.ArgC() < 2 )
+	if( args.ArgC() != 2 )
 	{
-		Msg("Usage: class scout | sniper | soldier | demoman | medic | hwguy | pyro | spy | engineer | civilian | random\n");
+		Msg("Usage: class <scout | sniper | soldier | demoman | medic | hwguy | pyro | spy | engineer | civilian | random>\n");
 		return;
 	}
 
@@ -2720,9 +2720,9 @@ void CFFPlayer::Command_Class(const CCommand& args)
 
 void CFFPlayer::Command_Team(const CCommand& args)
 {
-	if ( args.ArgC() < 2 ) // if no team was specified
+	if ( args.ArgC() != 2 ) // if no team was specified
 	{
-		Msg("Usage: team spec | blue | red | yellow | green | random\n");
+		Msg("Usage: team <spec | blue | red | yellow | green | random>\n");
 		return;
 	}
 
@@ -3679,7 +3679,7 @@ void CFFPlayer::PostBuildGenericThink( void )
 			break;
 		}
 
-		if ( m_bStaticBuilding) 
+		if (m_bStaticBuilding) 
 		{
 			// Unlock the player
 			UnlockPlayer();
@@ -4715,75 +4715,73 @@ bool CFFPlayer::Cure( CFFPlayer *pCurer )
 
 void CFFPlayer::IncreaseBurnLevel( int iAmount )
 {
-	if (GetClassSlot() == CLASS_PYRO) // Pyros dont catch fire
+	if (GetClassSlot() != CLASS_PYRO) // Pyros dont catch fire
 	{
-		return;
-	}
+		int iOldBurnlevel = m_iBurnLevel;
+		m_iBurnLevel += iAmount;
 
-	int iOldBurnlevel = m_iBurnLevel;
-	m_iBurnLevel += iAmount;
+		CSingleUserRecipientFilter user((CBasePlayer*)this);
+		user.MakeReliable();
 
-	CSingleUserRecipientFilter user( (CBasePlayer *)this );
-	user.MakeReliable();
-	
-	float flBurnTime = FFDEV_PYRO_BURNTIME; 
-	switch (GetClassSlot())
-	{
+		float flBurnTime = FFDEV_PYRO_BURNTIME;
+		switch (GetClassSlot())
+		{
 		case CLASS_SCOUT:
 		case CLASS_MEDIC:
 		case CLASS_SPY:
-			flBurnTime *= 0.25; 
+			flBurnTime *= 0.25;
 			break;
-	}
+		}
 
-	// Tell the player they're on fire - status icons, sounds and flames
-	if (m_iBurnLevel > 200)
-	{
-		if (iOldBurnlevel <= 200) 
+		// Tell the player they're on fire - status icons, sounds and flames
+		if (m_iBurnLevel > 200)
+		{
+			if (iOldBurnlevel <= 200)
+			{
+				UserMessageBegin(user, "StatusIconUpdate");
+				WRITE_BYTE(FF_STATUSICON_BURNING2);
+				WRITE_FLOAT(0.0f);
+				MessageEnd();
+			}
+			UserMessageBegin(user, "StatusIconUpdate");
+			WRITE_BYTE(FF_STATUSICON_BURNING3);
+			WRITE_FLOAT(flBurnTime);
+			MessageEnd();
+
+			Ignite(false, FFDEV_FLAMESIZE_BURN3, false, flBurnTime);
+		}
+		else if (m_iBurnLevel > 100)
+		{
+			if (iOldBurnlevel <= 100)
+			{
+				UserMessageBegin(user, "StatusIconUpdate");
+				WRITE_BYTE(FF_STATUSICON_BURNING1);
+				WRITE_FLOAT(0.0f);
+				MessageEnd();
+			}
+			UserMessageBegin(user, "StatusIconUpdate");
+			WRITE_BYTE(FF_STATUSICON_BURNING2);
+			WRITE_FLOAT(flBurnTime);
+			MessageEnd();
+
+			Ignite(false, FFDEV_FLAMESIZE_BURN2, false, flBurnTime);
+		}
+		else // burn level 1
 		{
 			UserMessageBegin(user, "StatusIconUpdate");
-				WRITE_BYTE( FF_STATUSICON_BURNING2 );
-				WRITE_FLOAT( 0.0f );
+			WRITE_BYTE(FF_STATUSICON_BURNING1);
+			WRITE_FLOAT(flBurnTime);
 			MessageEnd();
+
+			Ignite(false, FFDEV_FLAMESIZE_BURN1, false, flBurnTime);
 		}
-		UserMessageBegin(user, "StatusIconUpdate");
-			WRITE_BYTE( FF_STATUSICON_BURNING3 );
-			WRITE_FLOAT( flBurnTime );
-		MessageEnd();
-
-		Ignite( false, FFDEV_FLAMESIZE_BURN3, false, flBurnTime );
-	}
-	else if (m_iBurnLevel > 100)
-	{
-		if (iOldBurnlevel <= 100) 
-		{
-			UserMessageBegin(user, "StatusIconUpdate");
-				WRITE_BYTE( FF_STATUSICON_BURNING1 );
-				WRITE_FLOAT( 0.0f );
-			MessageEnd();
-		}
-		UserMessageBegin(user, "StatusIconUpdate");
-			WRITE_BYTE( FF_STATUSICON_BURNING2 );
-			WRITE_FLOAT( flBurnTime );
-		MessageEnd();
-
-		Ignite( false, FFDEV_FLAMESIZE_BURN2, false, flBurnTime );
-	}
-	else // burn level 1
-	{
-		UserMessageBegin(user, "StatusIconUpdate");
-			WRITE_BYTE( FF_STATUSICON_BURNING1 );
-			WRITE_FLOAT( flBurnTime );
-		MessageEnd();
-
-		Ignite( false, FFDEV_FLAMESIZE_BURN1, false, flBurnTime );
 	}
 }
 
 // Toggle grenades (requested by defrag)
 void CFFPlayer::Command_ToggleOne(const CCommand& args)
 {
-	if( IsGrenadePrimed() )
+	if(IsGrenadePrimed())
 		Command_ThrowGren(args);
 	else
 		Command_PrimeOne(args);
@@ -4791,7 +4789,7 @@ void CFFPlayer::Command_ToggleOne(const CCommand& args)
 
 void CFFPlayer::Command_ToggleTwo(const CCommand& args)
 {
-	if( IsGrenadePrimed() )
+	if(IsGrenadePrimed())
 		Command_ThrowGren(args);
 	else
 		Command_PrimeTwo(args);
@@ -4817,7 +4815,7 @@ void CFFPlayer::Command_PrimeOne(const CCommand& args)
 	const CFFPlayerClassInfo &pPlayerClassInfo = GetFFClassData();
 
 	// we have a primary grenade type
-	if ( strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None" ) != 0 )
+	if (!strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None" ))
 	{
 		if(m_iPrimary > 0)
 		{
@@ -4862,7 +4860,7 @@ void CFFPlayer::Command_PrimeTwo(const CCommand& args)
     const CFFPlayerClassInfo &pPlayerClassInfo = GetFFClassData();
 
 	// we have a secondary grenade type
-	if ( strcmp( pPlayerClassInfo.m_szSecondaryClassName, "None" ) != 0 )
+	if (!strcmp( pPlayerClassInfo.m_szSecondaryClassName, "None" ))
 	{
 		if(m_iSecondary > 0)
 		{
@@ -5052,7 +5050,7 @@ void CFFPlayer::ThrowGrenade(float fTimer, float flSpeed)
 		case FF_GREN_PRIMEONE:
 			
 			// They don't actually have a primary grenade
-			if( Q_strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None" ) == 0 )
+			if(!Q_strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None"))
 				return;
 
 			// Make the grenade
@@ -5062,7 +5060,7 @@ void CFFPlayer::ThrowGrenade(float fTimer, float flSpeed)
 		case FF_GREN_PRIMETWO:
 
 			// They don't actually have a secondary grenade
-			if (Q_strcmp( pPlayerClassInfo.m_szSecondaryClassName, "None") == 0)
+			if (!Q_strcmp( pPlayerClassInfo.m_szSecondaryClassName, "None"))
 				return;
 
 			// Make the grenade
@@ -5589,7 +5587,7 @@ int CFFPlayer::OnTakeDamage_Alive(const CTakeDamageInfo &info)
 	}
 
 	//	Event: Spy, while cloaked, takes damage from SG
-	if ( m_bSGDamageHint && IsCloaked() && ( attacker->Classify() == CLASS_SENTRYGUN )  )
+	if ( m_bSGDamageHint && IsCloaked() && ( attacker->Classify() == CLASS_SENTRYGUN ) )
 	{
 		FF_SendHint( this, SPY_SGCLOAK, 1, PRIORITY_NORMAL, "#FF_HINT_SPY_SGCLOAK" );
 		m_bSGDamageHint = false; // Only do this hint once -- we don't want this hint sent every time this function is triggered!
@@ -6477,31 +6475,31 @@ void CFFPlayer::FinishDisguise()
 //-----------------------------------------------------------------------------
 void CFFPlayer::SetDisguise(int iTeam, int iClass, bool bInstant /* = false */)
 {
-	// If not a spy, abort
-	if( GetClassSlot() != CLASS_SPY )
-		return;
-
-	m_iNewSpyDisguise = iTeam;
-	m_iNewSpyDisguise += iClass << 4;
-
-	// set last spy disguise here
-	m_iLastSpyDisguise = m_iNewSpyDisguise;
-
-	m_iSpyDisguising++;	// Jiggles: For the client HUD disguise progress bar
-	
-	// TODO: Time logic
-	if (bInstant)
+	// Only Spies can disguise!
+	if (GetClassSlot() == CLASS_SPY)
 	{
-		m_flFinishDisguise = 0;
-	}
-	else
-	{
-		m_flFinishDisguise = gpGlobals->curtime + 3.5f;
-	}
+		m_iNewSpyDisguise = iTeam;
+		m_iNewSpyDisguise += iClass << 4;
 
-	// 50% longer when Cloaked
-	//if( IsCloaked() )
-	//	m_flFinishDisguise += 7.0f * 0.5f;
+		// set last spy disguise here
+		m_iLastSpyDisguise = m_iNewSpyDisguise;
+
+		m_iSpyDisguising++;	// Jiggles: For the client HUD disguise progress bar
+
+		// TODO: Time logic
+		if (bInstant)
+		{
+			m_flFinishDisguise = 0;
+		}
+		else
+		{
+			m_flFinishDisguise = gpGlobals->curtime + 3.5f;
+		}
+
+		// 50% longer when Cloaked
+		//if( IsCloaked() )
+		//	m_flFinishDisguise += 7.0f * 0.5f;
+	}
 }
 
 int CFFPlayer::AddHealth(unsigned int amount)
@@ -6956,7 +6954,7 @@ void CFFPlayer::FlashlightTurnOff()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Scouts and spys can uncover disguised spies (trackerid: #0000585)
+// Purpose: Scouts and spies can reveal disguised spies (trackerid: #0000585)
 //-----------------------------------------------------------------------------
 void CFFPlayer::Touch(CBaseEntity *pOther)
 {
@@ -6989,7 +6987,6 @@ void CFFPlayer::Touch(CBaseEntity *pOther)
 				gameeventmanager->FireEvent( pEvent );
 				DevMsg("event fired!");
 			}
-
 		}
 
 		// Will only let scouts uncloak dudes for the meantime
