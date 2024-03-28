@@ -2538,8 +2538,8 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	bool fInstantSwitch = strcmp(engine->GetClientConVarValue(engine->IndexOfEdict(edict()), "cl_classautokill"), "0") != 0;
 	bool bWasRandom = m_fRandomPC;
 
-	// They are picking the randompc slot
-	if( FStrEq( szNewClassName, "randompc" ) )
+	// They are picking the random slot
+	if( FStrEq( szNewClassName, "random" ) )
 	{
 		m_fRandomPC = true;
 
@@ -2593,7 +2593,8 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	int iClass = Class_StringToInt( szNewClassName );
 
 	// Check that they picked a valid class
-	if( !iClass )
+	// this is not funny, buildables are NOT playable classes!
+	if( !iClass || ( iClass < 1 || iClass > 10 ) )
 	{
 		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_CLASS_INVALID" );
 		return;
@@ -2709,7 +2710,7 @@ void CFFPlayer::Command_Class(const CCommand& args)
 {
 	if( args.ArgC() < 2 )
 	{
-		Msg("Usage: class scout | sniper | soldier | demoman | medic | hwguy | pyro | spy | engineer | civilian\n");
+		Msg("Usage: class scout | sniper | soldier | demoman | medic | hwguy | pyro | spy | engineer | civilian | random\n");
 		return;
 	}
 
