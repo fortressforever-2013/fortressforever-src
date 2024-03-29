@@ -158,7 +158,7 @@ int g_iLimbs[CLASS_CIVILIAN + 1][5] = { { 0 } };
 ConVar ffdev_gibdamage("ffdev_gibdamage", "50", FCVAR_FF_FFDEV_REPLICATED, "If a player's health is -(ffdev_gibdamage's value) or less after death, then they will gib instead of ragdoll");
 #define FFDEV_GIBDAMAGE ffdev_gibdamage.GetFloat()
 
-ConVar ffdev_gibdamage_explosions("ffdev_gibdamage_explosions", "30", FCVAR_FF_FFDEV_REPLICATED, "If a players health is -(ffdev_gibdamage's value) or less after death from explosion, then they will gib instead of ragdoll");
+ConVar ffdev_gibdamage_explosions("ffdev_gibdamage_explosions", "30", FCVAR_FF_FFDEV_REPLICATED, "If a player's health is -(ffdev_gibdamage's value) or less after death from explosion, then they will gib instead of ragdoll");
 #define FFDEV_GIBDAMAGE_EXPLOSIONS ffdev_gibdamage_explosions.GetFloat()
 
 extern ConVar sv_maxspeed;
@@ -2045,10 +2045,10 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 	StopSound( "Player.DrownContinue" );
 
 	// Stop the saveme sounds upon death
-	StopSound( "infected.saveme" );
-	StopSound( "medical.saveme" );
-	StopSound( "maintenance.saveme" );
-	StopSound( "ammo.saveme" );
+	StopSound( "Infected.Saveme" );
+	StopSound( "Medical.Saveme" );
+	StopSound( "Maintenance.Saveme" );
+	StopSound( "Ammo.Saveme" );
 
 	// --> Mirv: Create backpack moved here to stop crash
 	CFFItemBackpack *pBackpack = (CFFItemBackpack *) CBaseEntity::Create( "ff_item_backpack", GetAbsOrigin(), GetAbsAngles());
@@ -2708,9 +2708,9 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 
 void CFFPlayer::Command_Class(const CCommand& args)
 {
-	if( args.ArgC() < 2 )
+	if( args.ArgC() != 2 )
 	{
-		Msg("Usage: class scout | sniper | soldier | demoman | medic | hwguy | pyro | spy | engineer | civilian | random\n");
+		Msg("Usage: class <scout | sniper | soldier | demoman | medic | hwguy | pyro | spy | engineer | civilian | random>\n");
 		return;
 	}
 
@@ -2720,9 +2720,9 @@ void CFFPlayer::Command_Class(const CCommand& args)
 
 void CFFPlayer::Command_Team(const CCommand& args)
 {
-	if ( args.ArgC() < 2 ) // if no team was specified
+	if ( args.ArgC() != 2 ) // if no team was specified
 	{
-		Msg("Usage: team spec | blue | red | yellow | green | random\n");
+		Msg("Usage: team <spec | blue | red | yellow | green | random>\n");
 		return;
 	}
 
@@ -3679,7 +3679,7 @@ void CFFPlayer::PostBuildGenericThink( void )
 			break;
 		}
 
-		if ( m_bStaticBuilding) 
+		if (m_bStaticBuilding)
 		{
 			// Unlock the player
 			UnlockPlayer();
@@ -4817,7 +4817,7 @@ void CFFPlayer::Command_PrimeOne(const CCommand& args)
 	const CFFPlayerClassInfo &pPlayerClassInfo = GetFFClassData();
 
 	// we have a primary grenade type
-	if ( strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None" ) != 0 )
+	if (strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None" ))
 	{
 		if(m_iPrimary > 0)
 		{
@@ -4862,7 +4862,7 @@ void CFFPlayer::Command_PrimeTwo(const CCommand& args)
     const CFFPlayerClassInfo &pPlayerClassInfo = GetFFClassData();
 
 	// we have a secondary grenade type
-	if ( strcmp( pPlayerClassInfo.m_szSecondaryClassName, "None" ) != 0 )
+	if (strcmp( pPlayerClassInfo.m_szSecondaryClassName, "None" ))
 	{
 		if(m_iSecondary > 0)
 		{
@@ -5052,7 +5052,7 @@ void CFFPlayer::ThrowGrenade(float fTimer, float flSpeed)
 		case FF_GREN_PRIMEONE:
 			
 			// They don't actually have a primary grenade
-			if( Q_strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None" ) == 0 )
+			if (!Q_strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None" ))
 				return;
 
 			// Make the grenade
@@ -5062,7 +5062,7 @@ void CFFPlayer::ThrowGrenade(float fTimer, float flSpeed)
 		case FF_GREN_PRIMETWO:
 
 			// They don't actually have a secondary grenade
-			if (Q_strcmp( pPlayerClassInfo.m_szSecondaryClassName, "None") == 0)
+			if (!Q_strcmp( pPlayerClassInfo.m_szSecondaryClassName, "None" ))
 				return;
 
 			// Make the grenade
@@ -6956,7 +6956,7 @@ void CFFPlayer::FlashlightTurnOff()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Scouts and spys can uncover disguised spies (trackerid: #0000585)
+// Purpose: Scouts and spies can reveal disguised enemy spies (trackerid: #0000585)
 //-----------------------------------------------------------------------------
 void CFFPlayer::Touch(CBaseEntity *pOther)
 {
