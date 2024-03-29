@@ -6936,14 +6936,17 @@ int CFFPlayer::FlashlightIsOn()
 	return IsEffectActive(EF_DIMLIGHT);
 }
 
-
+extern ConVar flashlight;
 //-----------------------------------------------------------------------------
-// Purpose: Turn on the flashlight, taken from HL2MP
+// Purpose: Turn on the flashlight, if it's enabled
 //-----------------------------------------------------------------------------
 void CFFPlayer::FlashlightTurnOn()
 {
-	AddEffects(EF_DIMLIGHT);
-	EmitSound("HL2Player.FlashLightOn");
+	if( flashlight.GetBool() )
+	{
+		AddEffects(EF_DIMLIGHT);
+		EmitSound("HL2Player.FlashLightOn");
+	}
 }
 
 //-----------------------------------------------------------------------------
