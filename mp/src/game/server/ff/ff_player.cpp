@@ -2752,7 +2752,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 		iTeam = FF_TEAM_GREEN;
 
 	// Pick the team with least capacity to join
-	else if( !Q_stricmp( args[ 1 ], "random" ) )
+	else if( !Q_stricmp( args[ 1 ], "auto" ) || !Q_stricmp( args[ 1 ], "random" ) )
 	{
 		int iBestTeam = UTIL_PickRandomTeam();
 
