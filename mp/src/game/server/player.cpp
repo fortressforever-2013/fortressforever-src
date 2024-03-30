@@ -2133,6 +2133,7 @@ void CBasePlayer::ShowViewPortPanel( const char * name, bool bShow, KeyValues *d
 void CBasePlayer::PlayerDeathThink(void)
 {
 	float flForward;
+	extern ConVar forcerespawn;
 
 	SetNextThink( gpGlobals->curtime + 0.1f );
 
@@ -2234,10 +2235,8 @@ void CBasePlayer::PlayerDeathThink(void)
 
 	// display the ready to spawn message for two seconds after the respawn timer has expired
 	// but only if there actually was a delay in the first place -> Defrag
-	else if (fTimeDelta > -2.0f && m_flNextSpawnDelay > 0.01f)
-	{
+	else if (fTimeDelta > -2.0f && m_flNextSpawnDelay > 0.01f && !forcerespawn.GetBool())
 		ClientPrint(this, HUD_PRINTCENTER, "#FF_READYTOSPAWN");
-	}
 	else
 		// clear it out
 		ClientPrint(this, HUD_PRINTCENTER, "");
