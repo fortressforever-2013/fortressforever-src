@@ -2535,7 +2535,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	if( !pTeam )
 		return;
 
-	bool fInstantSwitch = strcmp(engine->GetClientConVarValue(engine->IndexOfEdict(edict()), "cl_classautokill"), "0") != 0;
+	bool fInstantSwitch = strcmp(engine->GetClientConVarValue(engine->IndexOfEdict(edict()), "cl_classautokill"), "0");
 	bool bWasRandom = m_fRandomPC;
 
 	// They are picking the random slot
@@ -2729,6 +2729,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	int iOldTeam = GetTeamNumber();
 	int iTeam = 0;
 	int iTeamNumbers[8] = {0};
+	extern ConVar mp_allowspectators;
 
     // Count the number of people each team
 	for( int i = 1; i <= gpGlobals->maxClients; i++ )
@@ -2740,8 +2741,14 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	}
 
 	// Case insensitive compares for now
-	if( !Q_stricmp( args[ 1 ], "spec" ) )
+	if (!Q_stricmp(args[1], "spec")) {
+		if (!mp_allowspectators.GetBool() && !IsHLTV() && !IsReplay())
+		{
+			ClientPrint(this, HUD_PRINTCENTER, "#Cannot_Be_Spectator");
+			return;
+		}
 		iTeam = FF_TEAM_SPEC;
+	}
 	else if( !Q_stricmp( args[ 1 ], "blue" ) )
 		iTeam = FF_TEAM_BLUE;
 	else if( !Q_stricmp( args[ 1 ], "red" ) )
