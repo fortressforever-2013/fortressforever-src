@@ -185,7 +185,7 @@ void CFFWeaponDeployDispenser::PrimaryAttack( void )
 		}
 		else
 		{
-			pPlayer->Command_BuikdDispenser();
+			pPlayer->Command_BuildDispenser();
 		}
 #endif
 	}
