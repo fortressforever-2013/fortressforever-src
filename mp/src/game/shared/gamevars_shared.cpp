@@ -37,7 +37,7 @@ ConVar mp_forcecamera(
 	
 ConVar mp_allowspectators(
 	"mp_allowspectators", 
-	"1.0", 
+	"1", 
 	FCVAR_REPLICATED,
 	"toggles whether the server allows spectator mode or not" );
 

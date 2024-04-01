@@ -2729,7 +2729,6 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	int iOldTeam = GetTeamNumber();
 	int iTeam = 0;
 	int iTeamNumbers[8] = {0};
-	extern ConVar mp_allowspectators;
 
     // Count the number of people each team
 	for( int i = 1; i <= gpGlobals->maxClients; i++ )
