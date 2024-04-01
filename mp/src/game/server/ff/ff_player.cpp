@@ -2377,9 +2377,13 @@ void CFFPlayer::Command_TestCommand(const CCommand& args)
 void CFFPlayer::Command_MapGuide( const CCommand& args )
 {
 	// Swap them to spectator class if needed
-	if (GetTeamNumber() != TEAM_SPECTATOR)
+	if (GetTeamNumber() != TEAM_SPECTATOR) //gonna make this < TEAM_BLUE ... --BreakinBenny
 	{
-		KillAndRemoveItems();
+/*		if (!mp_allowspectators.GetBool()) {
+			ClientPrint(this, HUD_PRINTCENTER, "#FF_ERROR_FLYTHROUGH");
+			return;
+		}
+*/		KillAndRemoveItems();
 		ChangeTeam(TEAM_SPECTATOR);
 		Spawn();
 	}

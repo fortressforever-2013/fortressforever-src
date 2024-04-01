@@ -266,18 +266,18 @@ void CTeamMenu::ApplySchemeSettings(IScheme *pScheme)
 //-----------------------------------------------------------------------------
 // Purpose: Run the client command if needed
 //-----------------------------------------------------------------------------
-void CTeamMenu::OnCommand(const char *command)	
+void CTeamMenu::OnCommand(const char *command)
 {
 	//DevMsg("[Teammenu] Command: %s\n", command);
 
-	if (Q_strcmp(command, "cancel") == 0) 
+	if (!Q_strcmp(command, "cancel"))
 	{
 		m_pViewPort->ShowPanel(this, false);
 		return;
 	}
 
 	// Create a new frame to display the Map Screenshot
-	if (Q_strcmp(command, "map shot") == 0) 
+	if (!Q_strcmp(command, "map shot"))
 	{
 		gViewPortInterface->ShowPanel(PANEL_MAP, true);
 		return;
@@ -285,22 +285,20 @@ void CTeamMenu::OnCommand(const char *command)
 
 	// Run the command
 	engine->ClientCmd(command);
-	
-	if (Q_strcmp(command, "serverinfo") == 0) 
+
+	if (!Q_strcmp(command, "serverinfo"))
 		return;
 
-	if (Q_strcmp(command, "jpeg") == 0)
-	{
+	if (!Q_strcmp(command, "jpeg"))
 		return;
-	}
 
 	// Hide this panel
 	m_pViewPort->ShowPanel(this, false);
 
-	if (Q_strcmp(command, "team spec") == 0) 
+	if (!Q_strcmp(command, "team spec") || !Q_strcmp(command, "spectate"))
 		return;
 
-	if (Q_strcmp(command, "mapguide") == 0) 
+	if (!Q_strcmp(command, "mapguide"))
 		return;
 
 	// Display the class panel now
@@ -316,10 +314,8 @@ void CTeamMenu::FireGameEvent( IGameEvent *event )
 {
 	const char * type = event->GetName();
 
-	if ( Q_strcmp(type, "server_spawn") == 0 )
-	{
+	if ( !Q_strcmp(type, "server_spawn") )
 		Q_strncpy( m_szServerName, event->GetString("hostname"), 255 );
-	}
 
 	if( IsVisible() )
 		Update();
@@ -471,9 +467,7 @@ void CTeamMenu::UpdateTeamButtons()
 
 		// one last check
 		if ( szTeamName )
-		{
 			pTeamButton->SetText(szTeamName);
-		}
 		else
 		{
 			// no name, just use the number
@@ -553,6 +547,7 @@ void CTeamMenu::UpdateMapDescriptionText()
 	// If no map specific description exists then escape for now
 	if (!g_pFullFileSystem->FileExists(pszMapPath))
 	{
+//		VarArgs("maps/default.txt", szMapName); "This fallback idea was inspired by Zombie Panic: Source" -BreakinBenny
 		m_pMapDescriptionHead->SetText("");
 		m_pMapDescriptionText->SetText("");
 		return;
