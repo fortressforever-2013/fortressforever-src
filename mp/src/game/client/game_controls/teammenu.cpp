@@ -466,14 +466,14 @@ void CTeamMenu::UpdateTeamButtons()
 		}
 
 		// one last check
-		if ( szTeamName )
-			pTeamButton->SetText(szTeamName);
-		else
+		if ( !szTeamName )
 		{
 			// no name, just use the number
 			V_snwprintf( szTeamName, sizeof(szTeamName), L"%c.", wchTeamNumber );
 			pTeamButton->SetText(szTeamName);
 		}
+		else
+			pTeamButton->SetText(szTeamName);
 
 		pTeamButton->SetHotkey(wchTeamNumber);
 	}
