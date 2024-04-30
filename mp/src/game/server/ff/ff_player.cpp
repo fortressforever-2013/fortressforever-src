@@ -2379,6 +2379,10 @@ void CFFPlayer::Command_MapGuide( const CCommand& args )
 	// Swap them to spectator class if needed
 	if (GetTeamNumber() != TEAM_SPECTATOR)
 	{
+		if (!mp_allowspectators.GetBool()) {
+			ClientPrint(this, HUD_PRINTCENTER, "#FF_ERROR_FLYTHROUGH");
+			return;
+		}
 		KillAndRemoveItems();
 		ChangeTeam(TEAM_SPECTATOR);
 		Spawn();
@@ -2535,7 +2539,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	if( !pTeam )
 		return;
 
-	bool fInstantSwitch = strcmp(engine->GetClientConVarValue(engine->IndexOfEdict(edict()), "cl_classautokill"), "0") != 0;
+	bool fInstantSwitch = strcmp(engine->GetClientConVarValue(engine->IndexOfEdict(edict()), "cl_classautokill"), "0");
 	bool bWasRandom = m_fRandomPC;
 
 	// They are picking the random slot
@@ -2740,8 +2744,14 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	}
 
 	// Case insensitive compares for now
-	if( !Q_stricmp( args[ 1 ], "spec" ) )
+	if (!Q_stricmp(args[1], "spec")) {
+		if (!mp_allowspectators.GetBool() && !IsHLTV() && !IsReplay())
+		{
+			ClientPrint(this, HUD_PRINTCENTER, "#FF_ERROR_FLYTHROUGH");
+			return;
+		}
 		iTeam = FF_TEAM_SPEC;
+	}
 	else if( !Q_stricmp( args[ 1 ], "blue" ) )
 		iTeam = FF_TEAM_BLUE;
 	else if( !Q_stricmp( args[ 1 ], "red" ) )
