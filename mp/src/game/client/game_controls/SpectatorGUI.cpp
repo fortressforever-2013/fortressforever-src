@@ -317,6 +317,8 @@ void CSpectatorMenu::ShowPanel(bool bShow)
 		Activate();
 		SetMouseInputEnabled( true );
 		SetKeyBoardInputEnabled( true );
+
+		SetCloseButtonVisible( false );
 	}
 	else
 	{

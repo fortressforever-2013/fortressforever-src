@@ -505,6 +505,8 @@ void CClassMenu::ShowPanel(bool bShow)
 		Update();
 
 		MoveToFront();
+
+		SetCloseButtonVisible( false );
 	}
 	else
 	{

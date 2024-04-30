@@ -385,6 +385,8 @@ void CTeamMenu::ShowPanel(bool bShow)
 		Update();
 
 		MoveToFront();
+
+		SetCloseButtonVisible( false );
 	}
 	else
 	{

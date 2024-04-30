@@ -871,7 +871,7 @@ void CFFPlayer::Precache()
 	PrecacheScriptSound("Player.SpyFall");
 	PrecacheScriptSound("Player.Deathbeep");
 	PrecacheScriptSound("Player.Ammotoss");
-	PrecacheScriptSound("speech.saveme");
+	//PrecacheScriptSound("speech.saveme");
 	PrecacheScriptSound("Player.bodysplat");
 	PrecacheScriptSound("Item.Toss");
 	PrecacheScriptSound("Player.Pain");
