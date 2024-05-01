@@ -350,10 +350,19 @@ CClassMenu::CClassMenu(IViewPort *pViewPort) : Frame(NULL, PANEL_CLASS)
 	m_pClassRoleSection = new Section(this, "ClassRoleSection");
 
 	m_pClassRole = new Label(this, "ClassRole", "");
+	
+	char panelName[12];
+	char text[12];
 
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 7; i++)
 	{
-		m_WepSlots[i] = new LoadoutLabel(this, VarArgs("WepSlot%d", i + 1), VarArgs("Weapon %d", i + 1));
+		memset(&panelName, 0, sizeof(panelName));
+		memset(&text, 0, sizeof(text));
+		
+		V_snprintf(panelName, sizeof(panelName), "WepSlot%i", i + 1);
+		V_snprintf(text, sizeof(text), "Weapon %i", i + 1);
+		
+		m_WepSlots[i] = new LoadoutLabel(this, panelName, text);
 	}
 
 	char* pszButtons[] = { "ScoutButton", "SniperButton", "SoldierButton", "DemomanButton", "MedicButton", "HwguyButton", "PyroButton", "SpyButton", "EngineerButton", "CivilianButton" };
@@ -408,7 +417,7 @@ void CClassMenu::SetClassInfoVisible(bool state)
 	m_pPrimaryGren->SetVisible(state);
 	m_pSecondaryGren->SetVisible(state);
 
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 7; i++)
 		m_WepSlots[i]->SetVisible(state);
 
 	m_pSpeed->SetVisible(state);
@@ -635,7 +644,7 @@ void CClassMenu::OnMouseOverMessage(KeyValues *data)
 //-----------------------------------------------------------------------------
 void CClassMenu::UpdateClassInfo(const char *pszClassName)
 {
-	if (Q_stricmp(pszClassName, "randompc") == 0)
+	if (Q_stricmp(pszClassName, "random") == 0)
 	{
 		SetClassInfoVisible(false);
 		return;
@@ -669,7 +678,7 @@ void CClassMenu::UpdateClassInfo(const char *pszClassName)
 
 	m_pClassRole->SetText( pClassInfo->m_szRole );
 
-	for (int i=0; i<8; i++)
+	for (int i = 0; i < 7; i++)
 		m_WepSlots[i]->SetVisible(false);
 
 	for (int i=0; i<pClassInfo->m_iNumWeapons && i<8; i++)
