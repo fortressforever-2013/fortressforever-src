@@ -731,7 +731,7 @@ void CClientScoreBoardDialog::UpdateHeaders( void )
 		}
 		else
 		{
-			V_snwprintf( szName, sizeof(szName), L"%s - (%i players)", szTeamName, iNumPlayers );
+			V_snwprintf( szName, sizeof(szName), L"%ls - (%i players)", szTeamName, iNumPlayers );
 			szTeamName = szName;
 		}
 
