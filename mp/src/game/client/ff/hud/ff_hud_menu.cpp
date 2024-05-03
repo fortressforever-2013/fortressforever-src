@@ -486,7 +486,7 @@ void CHudContextMenu::VidInit()
 			{
 				int len = Q_wcslen(localised) + 1;
 				pOption->wszText = new wchar_t [len];
-				Q_wcsncpy(pOption->wszText, localised, len * 2);	// Takes length in bytes
+				_snwprintf(pOption->wszText, (len * 2), L"%ls", localised);	// Takes length in bytes
 			}
 			else
 			{

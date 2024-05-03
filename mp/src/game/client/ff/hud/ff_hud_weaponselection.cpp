@@ -299,12 +299,12 @@ void CHudWeaponSelection::Paint()
 				if (pWeapon == pSelectedWeapon)
 				{
 					wchar_t text[128];
-					wchar_t *tempString = g_pVGuiLocalize->Find(weaponInfo.szPrintName);
+					wchar_t *wszTempString = g_pVGuiLocalize->Find(weaponInfo.szPrintName);
 
 					// setup our localized string
-					if ( tempString )
+					if ( wszTempString )
 					{
-						_snwprintf(text, sizeof(text)/sizeof(wchar_t) - 1, L"%s", tempString);
+						_snwprintf(text, sizeof(text)/sizeof(wchar_t) - 1, L"%ls", wszTempString);
 						text[sizeof(text)/sizeof(wchar_t) - 1] = 0;
 					}
 					else

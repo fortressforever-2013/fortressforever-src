@@ -450,32 +450,32 @@ void CTeamMenu::UpdateTeamButtons()
 		wchar_t wchTeamNumber = iTeamIndex + '1';
 
 		// Set the team name
-		wchar_t *szTeamName = g_pVGuiLocalize->Find( pGR->GetTeamName( iTeamID ) );
-		wchar_t	szName[ 256 ];
+		wchar_t *wszTeamName = g_pVGuiLocalize->Find( pGR->GetTeamName( iTeamID ) );
+		wchar_t	wszName[ 256 ];
 
-		if (szTeamName)
+		if (wszTeamName)
 		{
-			V_snwprintf( szName, sizeof(szName), L"%c. %s", wchTeamNumber, szTeamName );
-			szTeamName = szName;
+			V_snwprintf( wszName, sizeof(wszName), L"%c. %ls", wchTeamNumber, wszTeamName );
+			wszTeamName = wszName;
 		}
 		else
 		{
 			// No localized text or team name not a resource string
 			char szString[ 256 ];
 			Q_snprintf( szString, 256, "%c. %s", wchTeamNumber, pGR->GetTeamName( iTeamID ) );
-			g_pVGuiLocalize->ConvertANSIToUnicode( szString, szName, sizeof( szName ) );
-			szTeamName = szName;
+			g_pVGuiLocalize->ConvertANSIToUnicode( szString, wszName, sizeof( wszName ) );
+			wszTeamName = wszName;
 		}
 
 		// one last check
-		if ( !szTeamName )
+		if ( !wszTeamName )
 		{
 			// no name, just use the number
-			V_snwprintf( szTeamName, sizeof(szTeamName), L"%c.", wchTeamNumber );
-			pTeamButton->SetText(szTeamName);
+			V_snwprintf( wszTeamName, sizeof(wszTeamName), L"%c.", wchTeamNumber );
+			pTeamButton->SetText(wszTeamName);
 		}
 		else
-			pTeamButton->SetText(szTeamName);
+			pTeamButton->SetText(wszTeamName);
 
 		pTeamButton->SetHotkey(wchTeamNumber);
 	}
