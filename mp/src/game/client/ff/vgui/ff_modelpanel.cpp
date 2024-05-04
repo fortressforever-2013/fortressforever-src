@@ -87,9 +87,13 @@ void ModelPanel::Paint()
 //-----------------------------------------------------------------------------
 void ModelPanel::SetupPositioningAndLighting(Vector &vecOrigin)
 {
+	CBasePlayer *pLocalPlayer = CBasePlayer::GetLocalPlayer();
+	
+	vecOrigin = pLocalPlayer->EyePosition();
+	
 	CMatRenderContextPtr pRenderContext(materials);
 
-	pRenderContext->SetLightingOrigin(vec3_origin);
+	pRenderContext->SetLightingOrigin(vecOrigin);
 	pRenderContext->SetAmbientLight(0.4, 0.4, 0.4);
 
 	static Vector white[6] =
@@ -107,7 +111,7 @@ void ModelPanel::SetupPositioningAndLighting(Vector &vecOrigin)
 
 	Vector vecMins, vecMaxs;
 	m_hModel->GetRenderBounds(vecMins, vecMaxs);
-	LightDesc_t spotLight(vec3_origin + Vector(0, 0, 200), Vector(1, 1, 1), m_hModel->GetAbsOrigin() + Vector(0, 0, (vecMaxs.z - vecMins.z) * 0.75), 0.035, 0.873);
+	LightDesc_t spotLight(vecOrigin + Vector(0, 0, 200), Vector(1, 1, 1), m_hModel->GetAbsOrigin() + Vector(0, 0, (vecMaxs.z - vecMins.z) * 0.75), 0.035, 0.873);
 	g_pStudioRender->SetLocalLights(1, &spotLight);
 
 	// Move model in front of our view
