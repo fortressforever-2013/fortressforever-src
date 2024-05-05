@@ -154,7 +154,9 @@ void C_FFBuildableObject::OnDataChanged( DataUpdateType_t updateType )
 	BaseClass::OnDataChanged( updateType );
 
 	if( updateType == DATA_UPDATE_CREATED )
+	{
 		SetNextClientThink( CLIENT_THINK_ALWAYS );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -173,10 +175,22 @@ void C_FFBuildableObject::ClientThink( void )
 
 		switch( Classify() )
 		{
-			case CLASS_DISPENSER: flBuildDist = FF_BUILD_DISP_BUILD_DIST; break;
-			case CLASS_SENTRYGUN: flBuildDist = FF_BUILD_SG_BUILD_DIST; break;
-			case CLASS_DETPACK: flBuildDist = FF_BUILD_DET_BUILD_DIST; break;
-			case CLASS_MANCANNON: flBuildDist = FF_BUILD_MC_BUILD_DIST; break;
+			case CLASS_DISPENSER:
+				flBuildDist = FF_BUILD_DISP_BUILD_DIST;
+			break;
+
+			case CLASS_SENTRYGUN:
+				flBuildDist = FF_BUILD_SG_BUILD_DIST;
+			break;
+
+			case CLASS_DETPACK:
+				flBuildDist = FF_BUILD_DET_BUILD_DIST;
+			break;
+
+			case CLASS_MANCANNON:
+				flBuildDist = FF_BUILD_MC_BUILD_DIST;
+			break;
+
 			default: return; break;
 		}
 
@@ -233,7 +247,7 @@ int C_FFBuildableObject::DrawModel( int flags )
 				{
 					float flSabotageTime = clamp( m_flSabotageTime - gpGlobals->curtime, 0, FF_BUILD_SABOTAGE_TIMEOUT );
 					int iAlpha = 64 + (191 * (flSabotageTime / FF_BUILD_SABOTAGE_TIMEOUT) );
-					clr = g_PR->GetTeamColor( m_iSaboteurTeamNumber );
+					clr.SetColor( g_PR->GetTeamColor( m_iSaboteurTeamNumber ).r(), g_PR->GetTeamColor( m_iSaboteurTeamNumber ).g(), g_PR->GetTeamColor( m_iSaboteurTeamNumber ).b(), iAlpha );
 				}
 
 				color32 c = { clr.r(), clr.g(), clr.b(), clr.a() };
@@ -273,16 +287,15 @@ int C_FFBuildableObject::DrawModel( int flags )
 				case BUILD_MOVEABLE: pszMaterial = FF_BUILD_ERROR_MOVEABLE; break;
 				case BUILD_NEEDAMMO: pszMaterial = FF_BUILD_ERROR_NEEDAMMO; break;
 				case BUILD_ALREADYBUILT:
-				{	
-					switch(iEntityClass)
-					{
-					case CLASS_DISPENSER: pszMaterial = FF_BUILD_ERROR_ALREADYBUILTDISP; break;
-					case CLASS_SENTRYGUN: pszMaterial = FF_BUILD_ERROR_ALREADYBUILTSG; break;
-					case CLASS_MANCANNON: pszMaterial = FF_BUILD_ERROR_ALREADYBUILTMANCANNON; break;
-					}
-					
-				break;
+				{				
+					if(iEntityClass == CLASS_DISPENSER)
+						pszMaterial = FF_BUILD_ERROR_ALREADYBUILTDISP; 
+					else if(iEntityClass == CLASS_SENTRYGUN)
+						pszMaterial = FF_BUILD_ERROR_ALREADYBUILTSG;
+					else if( iEntityClass == CLASS_MANCANNON )
+						pszMaterial = FF_BUILD_ERROR_ALREADYBUILTMANCANNON;
 				}
+				break;
 			}
 
 			// If a valid material...
@@ -348,7 +361,9 @@ void C_FFDetpack::OnDataChanged( DataUpdateType_t updateType )
 	BaseClass::OnDataChanged( updateType );
 
 	if( updateType == DATA_UPDATE_CREATED )
+	{
 		SetNextClientThink( CLIENT_THINK_ALWAYS );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -364,6 +379,7 @@ C_FFDetpack *C_FFDetpack::CreateClientSideDetpack( const Vector& vecOrigin, cons
 	if( !pDetpack->InitializeAsClientEntity( FF_DETPACK_MODEL, RENDER_GROUP_TRANSLUCENT_ENTITY ) )
 	{
 		pDetpack->Release( );
+
 		return NULL;
 	}
 
@@ -417,7 +433,9 @@ void C_FFDispenser::OnDataChanged( DataUpdateType_t updateType )
 	BaseClass::OnDataChanged( updateType );
 
 	if( updateType == DATA_UPDATE_CREATED )
+	{
 		SetNextClientThink( CLIENT_THINK_ALWAYS );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -433,6 +451,7 @@ C_FFDispenser *C_FFDispenser::CreateClientSideDispenser( const Vector& vecOrigin
 	if( !pDispenser->InitializeAsClientEntity( FF_DISPENSER_MODEL, RENDER_GROUP_TRANSLUCENT_ENTITY ) )
 	{
 		pDispenser->Release( );
+
 		return NULL;
 	}
 
@@ -500,7 +519,9 @@ void C_FFSentryGun::OnDataChanged( DataUpdateType_t updateType )
 	BaseClass::OnDataChanged( updateType );
 
 	if( updateType == DATA_UPDATE_CREATED )
+	{
 		SetNextClientThink( CLIENT_THINK_ALWAYS );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -510,8 +531,8 @@ bool C_FFSentryGun::Upgrade()
 {
 	if( ( m_iLevel < 3 ) && m_bBuilt )
 		return true;
-		
-	return false;
+	else
+		return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -527,6 +548,7 @@ C_FFSentryGun *C_FFSentryGun::CreateClientSideSentryGun( const Vector& vecOrigin
 	if( !pSentryGun->InitializeAsClientEntity( FF_SENTRYGUN_MODEL, RENDER_GROUP_TRANSLUCENT_ENTITY ) )
 	{
 		pSentryGun->Release( );
+
 		return NULL;
 	}
 
@@ -637,7 +659,9 @@ void C_FFManCannon::OnDataChanged( DataUpdateType_t updateType )
 	BaseClass::OnDataChanged( updateType );
 
 	if( updateType == DATA_UPDATE_CREATED )
+	{
 		SetNextClientThink( CLIENT_THINK_ALWAYS );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -653,6 +677,7 @@ C_FFManCannon *C_FFManCannon::CreateClientSideManCannon( const Vector& vecOrigin
 	if( !pManCannon->InitializeAsClientEntity( FF_MANCANNON_MODEL, RENDER_GROUP_TRANSLUCENT_ENTITY ) )
 	{
 		pManCannon->Release();
+
 		return NULL;
 	}
 
@@ -703,7 +728,7 @@ int C_FFManCannon::DrawModel(int flags)
 				int teamnumber = GetTeamNumber();
 				float flCombatTime = clamp( gpGlobals->curtime - m_flLastDamage, 0, MANCANNON_COMBATCOOLDOWN );
 				int iAlpha = (255 * ( 1.0f - (flCombatTime / MANCANNON_COMBATCOOLDOWN) ) );
-				clr = g_PR->GetTeamColor( teamnumber ); 
+				clr.SetColor( g_PR->GetTeamColor( teamnumber ).r(), g_PR->GetTeamColor( teamnumber ).g(), g_PR->GetTeamColor( teamnumber ).b(), iAlpha );
 			}
 
 			color32 c = { clr.r(), clr.g(), clr.b(), clr.a() };
