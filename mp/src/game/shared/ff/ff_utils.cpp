@@ -183,6 +183,43 @@ const char *Class_IntToPrintString( int iClassIndex )
 	return "\0";
 }
 
+int Team_StringToInt( const char *szTeamName )
+{
+	if( Q_stricmp( szTeamName, "unassigned" ) == 0 )
+		return 0;
+	else if( Q_stricmp( szTeamName, "spectator" ) == 0 )
+		return 1;
+	else if( Q_stricmp( szTeamName, "blue" ) == 0 )
+		return 2;
+	else if( Q_stricmp( szTeamName, "red" ) == 0 )
+		return 3;
+	else if( Q_stricmp( szTeamName, "yellow" ) == 0 )
+		return 4;
+	else if( Q_stricmp( szTeamName, "green" ) == 0 )
+		return 5;
+	else
+		DevWarning( "Team_StringToInt :: No match!\n" );
+
+	return 0;
+}
+
+const char *Team_IntToString( int iTeamIndex )
+{
+	// yeah, the breaks aren't necessary but it's habit
+	switch( iTeamIndex )
+	{
+		case 0: return "unassigned"; break;
+		case 1: return "spectator"; break;
+		case 2: return "blue"; break;
+		case 3: return "red"; break;
+		case 4: return "yellow"; break;
+		case 5: return "green"; break;
+		default: DevWarning( "Team_IntToString :: No match!\n" ); break;
+	}
+
+	return "\0";
+}
+
 // get gren name for the given class
 const char *FF_GetPrimaryName( int iClassIndex )
 {

@@ -586,15 +586,6 @@ void BotAdd_f( const CCommand &args )
 
 	// Look at -frozen.
 	bool bFrozen = !!args.FindArg( "-frozen" );
-		
-	const char* szClassNames[] = {
-	"scout", "sniper", "soldier",
-	"demoman", "medic", "hwguy",
-	"pyro", "spy", "engineer",
-	"civilian"
-	};
-
-	const char* szTeamNames[] = { "blue", "red", "yellow", "green" };
 
 	// Ok, spawn all the bots.
 	while ( --count >= 0 )
@@ -603,16 +594,8 @@ void BotAdd_f( const CCommand &args )
 		int iClass = RandomInt( CLASS_SCOUT, CLASS_CIVILIAN );
 		char const *pVal = args.FindArg( "-class" );
 		if ( pVal )
-		{
-			for ( int i = CLASS_SCOUT; i < CLASS_CIVILIAN + 1; i++ )
-			{
-				if ( V_stricmp( pVal, szClassNames[i] ) == 0 )
-				{
-					iClass = i;
-					break;
-				}
-			}
-		}
+			iClass = Class_StringToInt( pVal );
+			
 		if ( args.FindArg( "-all" ) )
 			iClass = 9 - count;
 
@@ -625,16 +608,7 @@ void BotAdd_f( const CCommand &args )
 				iTeam = RandomInt( FIRST_GAME_TEAM, GetNumberOfTeams() - 1 );
 			}
 			else
-			{
-				for ( int i = 0; i < GetNumberOfTeams(); i++ )
-				{
-					if ( V_stricmp( pVal, szTeamNames[i] ) == 0 )
-					{
-						iTeam = i + 2;
-						break;
-					}
-				}
-			}
+				iTeam = Team_StringToInt( pVal );
 		}
 
 		char const *pName = args.FindArg( "-name" );

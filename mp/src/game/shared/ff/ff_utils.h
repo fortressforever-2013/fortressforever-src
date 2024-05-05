@@ -84,6 +84,9 @@ const char *Class_IntToString( int iClassIndex );
 const char *Class_IntToResourceString( int iClassIndex );
 const char *Class_IntToPrintString( int iClassIndex );
 
+int Team_StringToInt( const char *szTeamName );
+const char *Team_IntToString( int iTeamIndex );
+
 const char *FF_GetPrimaryName( int iClassIndex );
 const char *FF_GetSecondaryName( int iClassIndex );
 
