@@ -42,7 +42,7 @@ private:
 	DECLARE_CLASS_SIMPLE(CHudBuildState, Panel);
 
 	// Stuff we need to know
-	CPanelAnimationVar(vgui::HFont, m_hTextFont, "TextFont", "ChatFont");
+	CPanelAnimationVar(vgui::HFont, m_hTextFont, "TextFont", "BuildStateFont");
 
 	CPanelAnimationVarAliasType(float, text1_xpos, "text1_xpos", "8", "proportional_float");
 	CPanelAnimationVarAliasType(float, text1_ypos, "text1_ypos", "20", "proportional_float");
@@ -60,9 +60,9 @@ private:
 	CHudTexture	*m_pHudElementTexture;
 
 	// Results of localising strings
-	wchar_t m_szHealth[32];
-	wchar_t m_szAmmo[32];
-	wchar_t m_szNoRockets[32];
+	wchar_t m_wszHealth[32];
+	wchar_t m_wszAmmo[32];
+	wchar_t m_wszNoRockets[32];
 
 	// Icons
 	CHudTexture *m_pHudSentryLevel1;
@@ -75,13 +75,13 @@ private:
 	CHudTexture *m_pHudMedpacks;
 
 	// Lines of information
-	wchar_t m_szDispenser[128];
-	wchar_t m_szSentry[128];
-	wchar_t m_szManCannon[128];
-	wchar_t m_szDetpack[128];
-	wchar_t m_szPipes[128];
-	wchar_t m_szMedpacks[128];
-	wchar_t m_szCloak[128];
+	wchar_t m_wszDispenser[128];
+	wchar_t m_wszSentry[128];
+	wchar_t m_wszManCannon[128];
+	wchar_t m_wszDetpack[128];
+	wchar_t m_wszPipes[128];
+	wchar_t m_wszMedpacks[128];
+	wchar_t m_wszCloak[128];
 
 	bool m_bDrawDispenser;
 	bool m_bDrawSentry;
