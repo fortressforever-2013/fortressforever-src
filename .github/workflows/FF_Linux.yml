@@ -22,7 +22,7 @@ jobs:
         env:
           CC: gcc-9
           CXX: g++-9
-        run: cd mp/src;make -f Game_FF.mak server_ff
+        run: cd mp/src;make -f Game_FF.mak
 
       - name: Pack
         shell: bash
