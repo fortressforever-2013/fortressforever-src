@@ -495,8 +495,8 @@ IMPLEMENT_SERVERCLASS_ST_NOBASE( CFFRagdoll, DT_FFRagdoll )
 	SendPropVector( SENDINFO( m_vecRagdollVelocity ) ),
 
 	// State of player's limbs
-	SendPropInt(SENDINFO(m_fBodygroupState), 5, SPROP_UNSIGNED), //AfterShock: this uses 5 flags for limbs decapped, up to DECAP_RIGHT_LEG which is 1 << 4
-	SendPropInt(SENDINFO(m_nSkinIndex), 3, SPROP_UNSIGNED),
+	SendPropInt( SENDINFO( m_fBodygroupState ), 5, SPROP_UNSIGNED ), //AfterShock: this uses 5 flags for limbs decapped, up to DECAP_RIGHT_LEG which is 1 << 4
+	SendPropInt( SENDINFO( m_nSkinIndex ), 3, SPROP_UNSIGNED ),
 END_SEND_TABLE()
 
 // -------------------------------------------------------------------------------- //

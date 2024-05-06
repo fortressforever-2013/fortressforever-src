@@ -889,6 +889,8 @@ DEFINE_PRED_FIELD(m_bCanDoubleJump, FIELD_BOOLEAN, FTYPEDESC_OVERRIDE ),
 DEFINE_PRED_FIELD_TOL(m_flNextJumpTimeForDouble, FIELD_FLOAT, FTYPEDESC_OVERRIDE | FTYPEDESC_NOERRORCHECK, TD_MSECTOLERANCE)
 END_PREDICTION_DATA()
 
+static ConVar ragdoll_fadeaftertime("ragdoll_fadeaftertime", "5.0", FCVAR_ARCHIVE, "After this many seconds, the ragdoll will disappear.");
+
 class C_FFRagdoll : public C_BaseAnimatingOverlay
 {
 public:
@@ -911,18 +913,16 @@ public:
 	int GetPlayerEntIndex() const;
 	IRagdoll* GetIRagdoll() const;
 
-	void ImpactTrace(trace_t* pTrace, int iDamageType, char* pCustomImpactName);
-
-	void ClientThink();
+	void ImpactTrace(trace_t* pTrace, int iDamageType, const char* pCustomImpactName);
+	void UpdateOnRemove(void);
+	virtual void SetupWeights(const matrix3x4_t* pBoneToWorld, int nFlexWeightCount, float* pFlexWeights, float* pFlexDelayedWeights);
 
 private:
 
 	C_FFRagdoll(const C_FFRagdoll&) {}
 
-	void Interp_Copy(C_BaseAnimatingOverlay* pSourceEntity);
-
-	void CreateRagdoll();
-
+	void Interp_Copy(C_BaseAnimatingOverlay* pDestinationEntity);
+	void CreateFFRagdoll(void);
 
 private:
 
@@ -937,17 +937,18 @@ private:
 };
 
 
-IMPLEMENT_CLIENTCLASS_DT_NOBASE(C_FFRagdoll, DT_FFRagdoll, CFFRagdoll)
-RecvPropVector(RECVINFO(m_vecRagdollOrigin)),
-RecvPropEHandle(RECVINFO(m_hPlayer)),
-RecvPropInt(RECVINFO(m_nModelIndex)),
-RecvPropInt(RECVINFO(m_nForceBone)),
-RecvPropVector(RECVINFO(m_vecForce)),
-RecvPropVector(RECVINFO(m_vecRagdollVelocity)),
+IMPLEMENT_CLIENTCLASS_DT_NOBASE( C_FFRagdoll, DT_FFRagdoll, CFFRagdoll )
+	RecvPropVector( RECVINFO(m_vecRagdollOrigin) ),
+	RecvPropEHandle( RECVINFO( m_hPlayer ) ),
+	RecvPropInt( RECVINFO( m_nModelIndex ) ),
+	RecvPropInt( RECVINFO(m_nForceBone) ),
+	RecvPropVector( RECVINFO(m_vecForce) ),
+	RecvPropVector( RECVINFO( m_vecRagdollVelocity ) ),
 
-RecvPropInt(RECVINFO(m_fBodygroupState)),
-RecvPropInt(RECVINFO(m_nSkinIndex)),
+	RecvPropInt(RECVINFO(m_fBodygroupState)),
+	RecvPropInt(RECVINFO(m_nSkinIndex)),
 END_RECV_TABLE()
+
 
 
 C_FFRagdoll::C_FFRagdoll()
@@ -957,39 +958,44 @@ C_FFRagdoll::C_FFRagdoll()
 
 C_FFRagdoll::~C_FFRagdoll()
 {
-	PhysCleanupFrictionSounds(this);
+	PhysCleanupFrictionSounds( this );
+
+	if ( m_hPlayer )
+	{
+		m_hPlayer->CreateModelInstance();
+	}
 }
 
-void C_FFRagdoll::Interp_Copy(C_BaseAnimatingOverlay* pSourceEntity)
+void C_FFRagdoll::Interp_Copy( C_BaseAnimatingOverlay *pSourceEntity )
 {
-	if (!pSourceEntity)
+	if ( !pSourceEntity )
 		return;
 
-	VarMapping_t* pSrc = pSourceEntity->GetVarMapping();
-	VarMapping_t* pDest = GetVarMapping();
+	VarMapping_t *pSrc = pSourceEntity->GetVarMapping();
+	VarMapping_t *pDest = GetVarMapping();
 
 	// Find all the VarMapEntry_t's that represent the same variable.
-	for (int i = 0; i < pDest->m_Entries.Count(); i++)
+	for ( int i = 0; i < pDest->m_Entries.Count(); i++ )
 	{
-		VarMapEntry_t* pDestEntry = &pDest->m_Entries[i];
-		for (int j = 0; j < pSrc->m_Entries.Count(); j++)
+		VarMapEntry_t *pDestEntry = &pDest->m_Entries[i];
+		const char *pszName = pDestEntry->watcher->GetDebugName();
+		for ( int j=0; j < pSrc->m_Entries.Count(); j++ )
 		{
-			VarMapEntry_t* pSrcEntry = &pSrc->m_Entries[j];
-			if (!Q_strcmp(pSrcEntry->watcher->GetDebugName(),
-				pDestEntry->watcher->GetDebugName()))
+			VarMapEntry_t *pSrcEntry = &pSrc->m_Entries[j];
+			if ( !Q_strcmp( pSrcEntry->watcher->GetDebugName(), pszName ) )
 			{
-				pDestEntry->watcher->Copy(pSrcEntry->watcher);
+				pDestEntry->watcher->Copy( pSrcEntry->watcher );
 				break;
 			}
 		}
 	}
 }
 
-void C_FFRagdoll::ImpactTrace(trace_t* pTrace, int iDamageType, char* pCustomImpactName)
+void C_FFRagdoll::ImpactTrace( trace_t *pTrace, int iDamageType, const char *pCustomImpactName )
 {
-	IPhysicsObject* pPhysicsObject = VPhysicsGetObject();
+	IPhysicsObject *pPhysicsObject = VPhysicsGetObject();
 
-	if (!pPhysicsObject)
+	if( !pPhysicsObject )
 		return;
 
 	// --> Mirv: [TODO] Return on impact to invisible bodygroup
@@ -1007,7 +1013,7 @@ void C_FFRagdoll::ImpactTrace(trace_t* pTrace, int iDamageType, char* pCustomImp
 
 
 	dir *= 4000;  // adjust impact strenght
-	if (iDamageType & DMG_BLAST)
+	if ( iDamageType & DMG_BLAST )
 	{
 		Vector vecVelocity, vecAngularVelocity;
 		pPhysicsObject->CalculateVelocityOffset(dir, pTrace->endpos, &vecVelocity, &vecAngularVelocity);
@@ -1016,7 +1022,7 @@ void C_FFRagdoll::ImpactTrace(trace_t* pTrace, int iDamageType, char* pCustomImp
 	else
 	{
 		// apply force where we hit it
-		pPhysicsObject->ApplyForceOffset(dir, hitpos);
+		pPhysicsObject->ApplyForceOffset( dir, hitpos );
 	}
 
 	m_pRagdoll->ResetRagdollSleepAfterTime();
@@ -1024,96 +1030,92 @@ void C_FFRagdoll::ImpactTrace(trace_t* pTrace, int iDamageType, char* pCustomImp
 
 //static ConVar cl_ragdolltime("cl_ragdolltime", "25.0", FCVAR_ARCHIVE);
 
-void C_FFRagdoll::CreateRagdoll()
+void C_FFRagdoll::CreateFFRagdoll( void )
 {
 	// First, initialize all our data. If we have the player's entity on our client,
 	// then we can make ourselves start out exactly where the player is.
-	C_FFPlayer* pPlayer = dynamic_cast<C_FFPlayer*>(m_hPlayer.Get());
+	C_FFPlayer *pPlayer = dynamic_cast< C_FFPlayer* >( m_hPlayer.Get() );
 
-	if (pPlayer && !pPlayer->IsDormant())
+	if ( pPlayer && !pPlayer->IsDormant() )
 	{
 		// move my current model instance to the ragdoll's so decals are preserved.
-		pPlayer->SnatchModelInstance(this);
+		pPlayer->SnatchModelInstance( this );
 
-		VarMapping_t* varMap = GetVarMapping();
+		VarMapping_t *varMap = GetVarMapping();
 
 		// Copy all the interpolated vars from the player entity.
 		// The entity uses the interpolated history to get bone velocity.
 		bool bRemotePlayer = (pPlayer != C_BasePlayer::GetLocalPlayer());
-		if (bRemotePlayer)
+		if ( bRemotePlayer )
 		{
-			Interp_Copy(pPlayer);
+			Interp_Copy( pPlayer );
 
-			SetAbsAngles(pPlayer->GetRenderAngles());
+			SetAbsAngles( pPlayer->GetRenderAngles() );
 			GetRotationInterpolator().Reset();
 
 			m_flAnimTime = pPlayer->m_flAnimTime;
-			SetSequence(pPlayer->GetSequence());
+			SetSequence( pPlayer->GetSequence() );
 			m_flPlaybackRate = pPlayer->GetPlaybackRate();
 		}
 		else
 		{
 			// This is the local player, so set them in a default
 			// pose and slam their velocity, angles and origin
-			SetAbsOrigin(m_vecRagdollOrigin);
+			SetAbsOrigin( m_vecRagdollOrigin );
 
-			SetAbsAngles(pPlayer->GetRenderAngles());
+			SetAbsAngles( pPlayer->GetRenderAngles() );
 
-			SetAbsVelocity(m_vecRagdollVelocity);
+			SetAbsVelocity( m_vecRagdollVelocity );
 
 			int iSeq = LookupSequence("walk_lower");
-			if (iSeq == -1)
+			if ( iSeq == -1 )
 			{
 				// 7/3/2006 - Mulchman:
 				// Commented out because people are tired of getting this assert!
-				Warning("[C_FFRagdoll :: CreateRagdoll] Missing sequence walk_lower!\n");
+				Warning( "[C_FFRagdoll :: CreateRagdoll] Missing sequence walk_lower!\n" );
 
 				// Mulch: to start knowing what asserts are popping up for when testing stuff
 				// AssertMsg( false, "missing sequence walk_lower" ); 
 				//Assert( false );	// missing walk_lower?				
 				iSeq = 0;
 			}
+			
+			SetSequence( iSeq );	// walk_lower, basic pose
+			SetCycle( 0.0 );
 
-			SetSequence(iSeq);	// walk_lower, basic pose
-			SetCycle(0.0);
-
-			Interp_Reset(varMap);
+			Interp_Reset( varMap );
 		}
 
 		CFFWeaponBase* pWeapon = pPlayer->GetActiveFFWeapon();
 
 		// We can also spawn a valid weapon
-		if (pWeapon && pWeapon->GetWeaponID() < FF_WEAPON_DEPLOYDISPENSER)
+		if ( pWeapon && pWeapon->GetWeaponID() < FF_WEAPON_DEPLOYDISPENSER )
 		{
-			C_Gib* pGib = C_Gib::CreateClientsideGib(pWeapon->GetFFWpnData().szWorldModel, pWeapon->GetAbsOrigin(), GetAbsVelocity(), Vector(0, 0, 0), cl_gib_lifetime.GetFloat());
+			C_Gib* pGib = C_Gib::CreateClientsideGib( pWeapon->GetFFWpnData().szWorldModel, pWeapon->GetAbsOrigin(), GetAbsVelocity(), Vector(0, 0, 0), cl_gib_lifetime.GetFloat() );
 
-			if (pGib)
-			{
-				pGib->SetAbsAngles(pWeapon->GetAbsAngles());
-			}
+			if ( pGib )
+				pGib->SetAbsAngles( pWeapon->GetAbsAngles() );
 		}
 	}
 	else
 	{
 		// overwrite network origin so later interpolation will
 		// use this position
-		SetNetworkOrigin(m_vecRagdollOrigin);
+		SetNetworkOrigin( m_vecRagdollOrigin );
 
-		SetAbsOrigin(m_vecRagdollOrigin);
-		SetAbsVelocity(m_vecRagdollVelocity);
+		SetAbsOrigin( m_vecRagdollOrigin );
+		SetAbsVelocity( m_vecRagdollVelocity );
 
-		Interp_Reset(GetVarMapping());
-
+		Interp_Reset( GetVarMapping() );
+		
 	}
 
-	SetModelIndex(m_nModelIndex);
+	SetModelIndex( m_nModelIndex );
 	m_nSkin = m_nSkinIndex;
 
 	// TEMP to test blood streams!!
 	if (decap_test.GetBool())
-	{
 		m_fBodygroupState = 0xFFFFFFFF;
-	}
 
 	// Remove the correct parts of the body
 	if (m_fBodygroupState & DECAP_HEAD)
@@ -1127,11 +1129,20 @@ void C_FFRagdoll::CreateRagdoll()
 	if (m_fBodygroupState & DECAP_RIGHT_LEG)
 		SetBodygroup(5, 1);
 
-	// Turn it into a ragdoll.
 	// Make us a ragdoll..
 	m_nRenderFX = kRenderFxRagdoll;
 
-	BecomeRagdollOnClient();
+	matrix3x4_t boneDelta0[MAXSTUDIOBONES];
+	matrix3x4_t boneDelta1[MAXSTUDIOBONES];
+	matrix3x4_t currentBones[MAXSTUDIOBONES];
+	const float boneDt = 0.05f;
+
+	if ( pPlayer && !pPlayer->IsDormant() )
+		pPlayer->GetRagdollInitBoneArrays( boneDelta0, boneDelta1, currentBones, boneDt );
+	else
+		GetRagdollInitBoneArrays( boneDelta0, boneDelta1, currentBones, boneDt );
+
+	InitAsClientRagdoll( boneDelta0, boneDelta1, currentBones, boneDt );
 
 	// HACKHACK: Fix to allow laser beam to shine off ragdolls
 	SetSolid(SOLID_BBOX);
@@ -1143,23 +1154,13 @@ void C_FFRagdoll::CreateRagdoll()
 }
 
 
-void C_FFRagdoll::OnDataChanged(DataUpdateType_t type)
+void C_FFRagdoll::OnDataChanged( DataUpdateType_t type )
 {
-	BaseClass::OnDataChanged(type);
+	BaseClass::OnDataChanged( type );
 
-	if (type == DATA_UPDATE_CREATED)
+	if ( type == DATA_UPDATE_CREATED )
 	{
-		CreateRagdoll();
-
-		IPhysicsObject* pPhysicsObject = VPhysicsGetObject();
-		if (pPhysicsObject)
-		{
-			AngularImpulse aVelocity(0, 0, 0);
-			Vector vecExaggeratedVelocity = 3 * m_vecRagdollVelocity;
-			pPhysicsObject->AddVelocity(&vecExaggeratedVelocity, &aVelocity);
-		}
-
-		SetNextClientThink(CLIENT_THINK_ALWAYS);
+		CreateFFRagdoll();
 	}
 }
 
@@ -1168,11 +1169,52 @@ IRagdoll* C_FFRagdoll::GetIRagdoll() const
 	return m_pRagdoll;
 }
 
-C_BaseAnimating* C_FFPlayer::BecomeRagdollOnClient(bool bCopyEntity)
+C_BaseAnimating* C_FFPlayer::BecomeRagdollOnClient( bool bCopyEntity )
 {
 	// Let the C_CSRagdoll entity do this.
 	// m_builtRagdoll = true;
 	return NULL;
+}
+
+void C_FFRagdoll::UpdateOnRemove( void )
+{
+	VPhysicsSetObject( NULL );
+
+	BaseClass::UpdateOnRemove();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: clear out any face/eye values stored in the material system
+//-----------------------------------------------------------------------------
+void C_FFRagdoll::SetupWeights( const matrix3x4_t *pBoneToWorld, int nFlexWeightCount, float *pFlexWeights, float *pFlexDelayedWeights )
+{
+	BaseClass::SetupWeights( pBoneToWorld, nFlexWeightCount, pFlexWeights, pFlexDelayedWeights );
+
+	static float destweight[128];
+	static bool bIsInited = false;
+
+	CStudioHdr *hdr = GetModelPtr();
+	if ( !hdr )
+		return;
+
+	int nFlexDescCount = hdr->numflexdesc();
+	if ( nFlexDescCount )
+	{
+		Assert( !pFlexDelayedWeights );
+		memset( pFlexWeights, 0, nFlexWeightCount * sizeof(float) );
+	}
+
+	if ( m_iEyeAttachment > 0 )
+	{
+		matrix3x4_t attToWorld;
+		if (GetAttachment( m_iEyeAttachment, attToWorld ))
+		{
+			Vector local, tmp;
+			local.Init( 1000.0f, 0.0f, 0.0f );
+			VectorTransform( local, attToWorld, tmp );
+			modelrender->SetViewTarget( GetModelPtr(), GetBody(), tmp );
+		}
+	}
 }
 
 
@@ -1188,43 +1230,6 @@ IRagdoll* C_FFPlayer::GetRepresentativeRagdoll() const
 	{
 		return NULL;
 	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Check to see if we've entered the water and remove any flames
-//			if we have.
-//-----------------------------------------------------------------------------
-void C_FFRagdoll::ClientThink(void)
-{
-	/*
-	if( UTIL_PointContents( GetAbsOrigin() ) & MASK_WATER )
-	{
-		C_BaseEntity *pEntity = GetEffectEntity();
-
-		if( pEntity )
-		{
-			C_BaseEntity *pEffectEntity = pEntity->GetEffectEntity();
-			if( pEffectEntity )
-			{
-				Warning( "[Effect Entity Valid!]\n" );
-			}
-		}
-
-		C_EntityFlame *pFlame = ( C_EntityFlame * )GetEffectEntity();
-		if( pFlame )
-		{
-			// Just hide drawing it on our client
-			pFlame->SetRenderColorA( 0 );
-
-			// Stop playing its burning sound as well
-			pFlame->EmitSound( "General.StopBurning" );
-
-			return;
-		}
-	}
-
-	SetNextClientThink(gpGlobals->curtime + 0.3f);
-	*/
 }
 
 const unsigned char* GetEncryptionKey(void)
