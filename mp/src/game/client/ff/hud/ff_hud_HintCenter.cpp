@@ -422,6 +422,7 @@ void CHudHintCenter::VidInit( void )
 		m_pRichText->SetVerticalScrollbar( false );
 		m_pRichText->SetPos( text1_xpos, text1_ypos );
 		m_pRichText->SetSize( text1_wide, text1_tall );
+		m_pRichText->SetFont( m_hHintTextFont );
 
 		//m_pRichText->SetBorder( NULL );
 		//m_pRichText->InsertColorChange( m_TextColor );

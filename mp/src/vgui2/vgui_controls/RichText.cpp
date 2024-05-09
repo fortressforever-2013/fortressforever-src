@@ -243,8 +243,11 @@ void RichText::ApplySchemeSettings(IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
 	
-	_font = pScheme->GetFont("Default", IsProportional() );
-	m_hFontUnderline = pScheme->GetFont("DefaultUnderline", IsProportional() );
+	if( _font == INVALID_FONT )
+		_font = pScheme->GetFont("Default", IsProportional() );
+
+	if ( m_hFontUnderline == INVALID_FONT )
+		m_hFontUnderline = pScheme->GetFont("DefaultUnderline", IsProportional() );
 	
 	SetFgColor(GetSchemeColor("RichText.TextColor", pScheme));
 	SetBgColor(GetSchemeColor("RichText.BgColor", pScheme));
