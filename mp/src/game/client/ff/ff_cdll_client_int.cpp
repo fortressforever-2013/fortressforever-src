@@ -19,16 +19,6 @@ int CFFClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 	PopulateMissingClassConfigs();
 	PopulateMissingUserConfig();
 
-	// use the player's Steam friends name as their default name
-	// note: this is before config.cfg gets executed, so if there is any
-	// name specified in that cfg, that will take precedence
-	// 2013-CHANGELATER
-	/*ConVar *pNameCvar = (ConVar*) ConCommandBase::FindCommand("name");
-	if (pNameCvar)
-	{
-		pNameCvar->SetValue(SteamFriends()->GetPersonaName());
-	}*/
-
 	// initialize discord right away, so we can use join functionality
 	_discord.Init();
 	return ret;

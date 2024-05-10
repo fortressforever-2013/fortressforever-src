@@ -889,8 +889,6 @@ DEFINE_PRED_FIELD(m_bCanDoubleJump, FIELD_BOOLEAN, FTYPEDESC_OVERRIDE ),
 DEFINE_PRED_FIELD_TOL(m_flNextJumpTimeForDouble, FIELD_FLOAT, FTYPEDESC_OVERRIDE | FTYPEDESC_NOERRORCHECK, TD_MSECTOLERANCE)
 END_PREDICTION_DATA()
 
-static ConVar ragdoll_fadeaftertime("ragdoll_fadeaftertime", "5.0", FCVAR_ARCHIVE, "After this many seconds, the ragdoll will disappear.");
-
 class C_FFRagdoll : public C_BaseAnimatingOverlay
 {
 public:
