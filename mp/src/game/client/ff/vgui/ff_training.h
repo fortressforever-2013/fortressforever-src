@@ -37,7 +37,6 @@ private:
 
 	vgui::Button			*m_pOKButton;
 	vgui::Button			*m_pCancelButton;
-	vgui::Label				*m_pStatusLabel;
 
 };
 

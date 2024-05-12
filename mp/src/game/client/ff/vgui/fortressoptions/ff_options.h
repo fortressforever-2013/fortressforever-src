@@ -43,6 +43,8 @@ public:
 	CFFOptionsPanel(VPANEL parent);
 	void SetVisible(bool state);
 
+	virtual void FinishClose();
+
 private:
 	MESSAGE_FUNC_PARAMS(OnButtonCommand, "Command", data);
 	

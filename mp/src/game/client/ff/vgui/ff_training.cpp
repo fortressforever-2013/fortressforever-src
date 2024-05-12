@@ -20,7 +20,7 @@
 
 DEFINE_GAMEUI(CFFTrainingUI, CFFTrainingPanel, fftraining);
 
-CON_COMMAND(ff_training,NULL)
+CON_COMMAND( ff_training, NULL )
 {
 	//ToggleVisibility(ffirc->GetPanel());
 	fftraining->GetPanel()->SetVisible(true);
@@ -39,19 +39,13 @@ CFFTrainingPanel::CFFTrainingPanel( vgui::VPANEL parent ) : BaseClass( NULL, "FF
 
 	m_pOKButton = new Button(this, "OKButton", "", this, "OK");
 	m_pCancelButton = new Button(this, "CancelButton", "", this, "Cancel");
-	m_pStatusLabel = new vgui::Label(this, "StatusLabel", "");
-	m_pStatusLabel->SetVisible( false );
 
 	LoadControlSettings("Resource/UI/FFTraining.res");
 	//CenterThisPanelOnScreen();//keep in mind, hl2 supports widescreen 
 	
-	int nWide = GetWide();
-	int nTall = GetTall();
-
-	SetPos((ScreenWidth() - nWide) / 2, (ScreenHeight() - nTall) / 2);
+	SetPos((ScreenWidth() - GetWide()) / 2, (ScreenHeight() - GetTall()) / 2);
 
 	//Other useful options
-	SetVisible(false);//made visible on command later 
 	SetSizeable(false);
 	SetMoveable(true);
 } 
@@ -64,25 +58,19 @@ void CFFTrainingPanel::OnButtonCommand(KeyValues *data)
 {
 	const char *pszCommand = data->GetString("command");
 
-	// Play starts the mode
-	if (Q_strcmp(pszCommand, "OK") == 0)
+	if (Q_strcmp(pszCommand, "Cancel") == 0)
 	{
-		m_pStatusLabel->SetText("Loading...");
-		m_pStatusLabel->SetVisible( true );
-		engine->ClientCmd("sv_lan 1\n");
-		engine->ClientCmd("mp_timelimit 0\n");
-		engine->ClientCmd("sv_cheats 0\n");
-		engine->ClientCmd("progress_enable 1\n");
-		engine->ClientCmd("map ff_training\n");
-		// Just make it invisible now...
-		SetVisible(false);
-	}
-	else if (Q_strcmp(pszCommand, "Cancel") == 0)
-	{
-		// Now make invisible
-		SetVisible(false);
+		Close();
+		return;
 	}
 
+	engine->ClientCmd("sv_lan 1\n");
+	engine->ClientCmd("mp_timelimit 0\n");
+	engine->ClientCmd("sv_cheats 0\n");
+	engine->ClientCmd("progress_enable 1\n");
+	engine->ClientCmd("map ff_training\n");
+
+	Close();
 }
 
 //-----------------------------------------------------------------------------
@@ -95,10 +83,6 @@ void CFFTrainingPanel::SetVisible(bool state)
 	{
 		RequestFocus();
 		MoveToFront();
-	}
-	else
-	{
-		m_pStatusLabel->SetVisible( false );
 	}
 
 	BaseClass::SetVisible(state);

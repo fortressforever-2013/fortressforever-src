@@ -54,10 +54,6 @@ CFFOptionsPanel::CFFOptionsPanel(vgui::VPANEL parent) : BaseClass(NULL, "FFOptio
 	vgui::HScheme scheme = vgui::scheme()->LoadSchemeFromFile("resource/SourceScheme.res", "SourceScheme");
 	SetScheme(scheme);
 
-	// Centre this panel on the screen for consistency.
-	int nWide = GetWide();
-	int nTall = GetTall();
-
 	m_pCrosshairOptions = new CFFCrosshairOptions(this, "CrosshairOptions");
 	m_pTimerOptions = new CFFTimerOptions(this, "TimerOptions");
 	m_pMiscOptions1 = new CFFMiscOptions(this, "MiscOptions", "resource/Options1.vdf");
@@ -81,11 +77,13 @@ CFFOptionsPanel::CFFOptionsPanel(vgui::VPANEL parent) : BaseClass(NULL, "FFOptio
 	m_pCancelButton = new Button(this, "CancelButton", "", this, "Cancel");
 	m_pApplyButton = new Button(this, "ApplyButton", "", this, "Apply");
 
-	SetPos((ScreenWidth() - nWide) / 2, (ScreenHeight() - nTall) / 2);
+	LoadControlSettings("resource/ui/FFOptions.res");
+
+	// Centre this panel on the screen for consistency.
+	SetPos((ScreenWidth() - GetWide()) / 2, (ScreenHeight() - GetTall()) / 2);
+
 	SetVisible(false);
 	SetSizeable(false);
-
-	LoadControlSettings("resource/ui/FFOptions.res");
 }
 
 //-----------------------------------------------------------------------------
@@ -96,37 +94,23 @@ void CFFOptionsPanel::OnButtonCommand(KeyValues *data)
 {
 	const char *pszCommand = data->GetString("command");
 
-	// Both Apply and OK save the options window stuff
-	if (Q_strcmp(pszCommand, "Apply") == 0 || Q_strcmp(pszCommand, "OK") == 0)
+	if (Q_strcmp(pszCommand, "Cancel") == 0)
 	{
-		m_pCrosshairOptions->Apply();
-		m_pTimerOptions->Apply();
-		m_pMiscOptions1->Apply();
-		m_pMiscOptions2->Apply();
-		m_pMiscOptions3->Apply();
-		m_pMiscOptions4->Apply();
-		m_pDLightOptions->Apply();
-
-		// Apply doesn't quit the menu
-		if (pszCommand[0] == 'A')
-		{
-			return;
-		}
-	}
-	else
-	{
-		// Cancelled, so reset the settings
-		m_pCrosshairOptions->Reset();
-		m_pTimerOptions->Reset();
-		m_pMiscOptions1->Reset();
-		m_pMiscOptions2->Reset();
-		m_pMiscOptions3->Reset();
-		m_pMiscOptions4->Reset();
-		m_pDLightOptions->Reset();
+		Close();
+		return;
 	}
 
-	// Now make invisible
-	SetVisible(false);
+	m_pCrosshairOptions->Apply();
+	m_pTimerOptions->Apply();
+	m_pMiscOptions1->Apply();
+	m_pMiscOptions2->Apply();
+	m_pMiscOptions3->Apply();
+	m_pMiscOptions4->Apply();
+	m_pDLightOptions->Apply();
+
+	// Apply doesn't quit the menu
+	if (pszCommand[0] != 'A')
+		Close();
 }
 
 //-----------------------------------------------------------------------------
@@ -150,4 +134,16 @@ void CFFOptionsPanel::SetVisible(bool state)
 	}
 
 	BaseClass::SetVisible(state);
+}
+
+void CFFOptionsPanel::FinishClose()
+{
+	// Cancelled, so reset the settings
+	m_pCrosshairOptions->Reset();
+	m_pTimerOptions->Reset();
+	m_pMiscOptions1->Reset();
+	m_pMiscOptions2->Reset();
+	m_pMiscOptions3->Reset();
+	m_pMiscOptions4->Reset();
+	m_pDLightOptions->Reset();
 }
