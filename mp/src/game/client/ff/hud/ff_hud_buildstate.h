@@ -42,7 +42,7 @@ private:
 	DECLARE_CLASS_SIMPLE(CHudBuildState, Panel);
 
 	// Stuff we need to know
-	CPanelAnimationVar(vgui::HFont, m_hTextFont, "TextFont", "BuildStateFont");
+	CPanelAnimationVar(vgui::HFont, m_hTextFont, "TextFont", "ChatFont");
 
 	CPanelAnimationVarAliasType(float, text1_xpos, "text1_xpos", "8", "proportional_float");
 	CPanelAnimationVarAliasType(float, text1_ypos, "text1_ypos", "20", "proportional_float");
