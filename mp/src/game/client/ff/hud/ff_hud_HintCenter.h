@@ -49,8 +49,6 @@ public:
 	CPanelAnimationVar( vgui::HFont, m_hIconFontGlow, "IconFontGlow", "HudHintCenterIconGlow" );
 	CPanelAnimationVar( vgui::HFont, m_hTextFont, "TextFont", "HUD_TextSmall" );
 
-	CPanelAnimationVar( vgui::HFont, m_hHintTextFont, "HintTextFont", "HUD_HintText" );
-
 	CPanelAnimationVarAliasType( float, text1_xpos, "text1_xpos", "34", "proportional_float" );
 	CPanelAnimationVarAliasType( float, text1_ypos, "text1_ypos", "10", "proportional_float" );
 	CPanelAnimationVarAliasType( float, text1_wide, "text1_wide", "220", "proportional_float" );
