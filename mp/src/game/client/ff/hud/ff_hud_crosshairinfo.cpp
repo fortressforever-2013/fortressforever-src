@@ -529,9 +529,9 @@ void CHudCrosshairInfo::OnTick( void )
 					g_pVGuiLocalize->ConvertANSIToUnicode( szArmor, wszArmor, sizeof( wszArmor ) );
 					
 					if (bOwnBuildable)
-						_snwprintf( m_pText, 255, L"Your Sentry Gun: Level %s - Health: %s Ammo: %s", wszLevel, wszHealth , wszArmor );
+						_snwprintf( m_pText, 255, L"Your Sentry Gun: Level %ls - Health: %ls Ammo: %ls", wszLevel, wszHealth , wszArmor );
 					else
-						_snwprintf( m_pText, 255, L"(%s) %s - H: %s", wszClass, wszName, wszHealth );
+						_snwprintf( m_pText, 255, L"(%ls) %ls - H: %ls", wszClass, wszName, wszHealth );
 				}
 				else if (CROSSHAIRTYPE == CROSSHAIRTYPE_DETPACK)
 				{
@@ -544,9 +544,9 @@ void CHudCrosshairInfo::OnTick( void )
                     g_pVGuiLocalize->ConvertANSIToUnicode( szFuseTime, wszFuseTime, sizeof( wszFuseTime ) );
 					
 					if (bOwnBuildable)
-						_snwprintf( m_pText, 255, L"Your %s Second Detpack", wszFuseTime );
+						_snwprintf( m_pText, 255, L"Your %ls Second Detpack", wszFuseTime );
 					else
-						_snwprintf( m_pText, 255, L"(%s) %s", wszClass, wszName );
+						_snwprintf( m_pText, 255, L"(%ls) %ls", wszClass, wszName );
 				}
 				//Jumppad displayed here -GreenMushy
 				else if( CROSSHAIRTYPE == CROSSHAIRTYPE_MANCANNON )
@@ -558,9 +558,9 @@ void CHudCrosshairInfo::OnTick( void )
 					g_pVGuiLocalize->ConvertANSIToUnicode( szHealth, wszHealth, sizeof( wszHealth ) );
 
 					if (bOwnBuildable)
-						_snwprintf( m_pText, 255, L"Your Jump Pad - Health: %s", wszHealth );
+						_snwprintf( m_pText, 255, L"Your Jump Pad - Health: %ls", wszHealth );
 					else
-						_snwprintf( m_pText, 255, L"(%s) %s - H: %s", wszClass, wszName, wszHealth );
+						_snwprintf( m_pText, 255, L"(%ls) %ls - H: %ls", wszClass, wszName, wszHealth );
 				}
 				// else CROSSHAIRTYPE_NORMAL
 				else if( ( iHealth != -1 ) && ( iArmor != -1 ) )
@@ -574,7 +574,7 @@ void CHudCrosshairInfo::OnTick( void )
                        g_pVGuiLocalize->ConvertANSIToUnicode( szHealth, wszHealth, sizeof( wszHealth ) );
 					g_pVGuiLocalize->ConvertANSIToUnicode( szArmor, wszArmor, sizeof( wszArmor ) );
 
-					_snwprintf( m_pText, 255, L"(%s) %s - H: %s, A: %s", wszClass, wszName, wszHealth, wszArmor );
+					_snwprintf( m_pText, 255, L"(%ls) %ls - H: %ls, A: %ls", wszClass, wszName, wszHealth, wszArmor );
 				}
 				else if ( iHealth != -1 )
 				{
@@ -585,10 +585,10 @@ void CHudCrosshairInfo::OnTick( void )
 
 					g_pVGuiLocalize->ConvertANSIToUnicode( szHealth, wszHealth, sizeof( wszHealth ) );
 
-					_snwprintf( m_pText, 255, L"(%s) %s - H: %s", wszClass, wszName, wszHealth );
+					_snwprintf( m_pText, 255, L"(%ls) %ls - H: %ls", wszClass, wszName, wszHealth );
 				}
 				else
-					_snwprintf( m_pText, 255, L"(%s) %s", wszClass, wszName );
+					_snwprintf( m_pText, 255, L"(%ls) %ls", wszClass, wszName );
 
 				if( hud_centerid.GetInt() )
 				{
