@@ -506,9 +506,9 @@ void CHudCrosshairInfo::OnTick( void )
 					g_pVGuiLocalize->ConvertANSIToUnicode( szNails, wszNails, sizeof( wszNails ) );
 					
 					if (bOwnBuildable)
-						_snwprintf( m_pText, 255, L"Your Dispenser - Cells(%s) Rkts(%s) Nls(%s) Shls(%s) Armr(%s)", wszCells, wszRockets, wszNails, wszShells, wszArmor );
+						_snwprintf( m_pText, 255, L"Your Dispenser - Cells(%ls) Rkts(%ls) Nls(%ls) Shls(%ls) Armr(%ls)", wszCells, wszRockets, wszNails, wszShells, wszArmor );
 					else
-						_snwprintf( m_pText, 255, L"(%s) %s - H: %s", wszClass, wszName, wszHealth );
+						_snwprintf( m_pText, 255, L"(%ls) %ls - H: %ls", wszClass, wszName, wszHealth );
 				}
 				else if (CROSSHAIRTYPE == CROSSHAIRTYPE_SENTRYGUN)
 				{
