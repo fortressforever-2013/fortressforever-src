@@ -80,8 +80,8 @@ private:
 	void StopBarrelRotationSound();
 	CSoundPatch *m_sndBarrelRotation;
 
-	//void StopLoopShotSound();
-	//CSoundPatch *m_sndLoopShot;
+	void StopLoopShotSound();
+	CSoundPatch *m_sndLoopShot;
 
 #endif
 

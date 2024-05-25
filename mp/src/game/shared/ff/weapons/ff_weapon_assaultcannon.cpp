@@ -174,7 +174,7 @@ CFFWeaponAssaultCannon::CFFWeaponAssaultCannon()
 	m_flBarrelRotationStopTimer = 0.0f;
 #ifdef CLIENT_DLL
 	m_sndBarrelRotation = NULL;
-	//m_sndLoopShot = NULL;
+	m_sndLoopShot = NULL;
 #endif
 }
 
@@ -186,7 +186,7 @@ CFFWeaponAssaultCannon::~CFFWeaponAssaultCannon()
 #ifdef CLIENT_DLL
 
 	StopBarrelRotationSound();
-	//StopLoopShotSound();
+	StopLoopShotSound();
 
 #endif
 }
@@ -234,7 +234,7 @@ bool CFFWeaponAssaultCannon::Holster(CBaseCombatWeapon *pSwitchingTo)
 
 #ifdef CLIENT_DLL
 	StopBarrelRotationSound();
-	//StopLoopShotSound();
+	StopLoopShotSound();
 #endif
 
 	//m_fFireState = 0;
@@ -268,7 +268,7 @@ void CFFWeaponAssaultCannon::Drop( const Vector& vecVelocity )
 
 #ifdef CLIENT_DLL
 	StopBarrelRotationSound();
-	//StopLoopShotSound();
+	StopLoopShotSound();
 #endif
 
 	return BaseClass::Drop( vecVelocity );
@@ -506,7 +506,7 @@ void CFFWeaponAssaultCannon::ItemPostFrame()
 
 #ifdef CLIENT_DLL
 				StopBarrelRotationSound();
-				//StopLoopShotSound();
+				StopLoopShotSound();
 #endif
 
 				HandleFireOnEmpty();
@@ -554,7 +554,7 @@ void CFFWeaponAssaultCannon::ItemPostFrame()
 
 #ifdef CLIENT_DLL
 			StopBarrelRotationSound();
-			//StopLoopShotSound();
+			StopLoopShotSound();
 #endif
 
 #ifdef GAME_DLL
@@ -589,7 +589,7 @@ void CFFWeaponAssaultCannon::ItemPostFrame()
 void CFFWeaponAssaultCannon::Precache() 
 {
 	PrecacheScriptSound("Assaultcannon.single_shot");
-	//PrecacheScriptSound("Assaultcannon.loop_shot");
+	PrecacheScriptSound("Assaultcannon.loop_shot");
 	PrecacheScriptSound("Assaultcannon.Windup");
 	PrecacheScriptSound("Assaultcannon.Winddown");
 	PrecacheScriptSound("assaultcannon.rotate");
@@ -741,16 +741,16 @@ void CFFWeaponAssaultCannon::StopBarrelRotationSound()
 }
 
 // stop the spinning sound
-//void CFFWeaponAssaultCannon::StopLoopShotSound()
-//{
-//	if (m_sndLoopShot)
-//	{
-//		// fade and die
-//		//CSoundEnvelopeController::GetController().SoundFadeOut( m_sndLoopShot, 0.05f, true );
-//		CSoundEnvelopeController::GetController().SoundDestroy(m_sndLoopShot);
-//		m_sndLoopShot = NULL;
-//	}
-//}
+void CFFWeaponAssaultCannon::StopLoopShotSound()
+{
+	if (m_sndLoopShot)
+	{
+		// fade and die
+		//CSoundEnvelopeController::GetController().SoundFadeOut( m_sndLoopShot, 0.05f, true );
+		CSoundEnvelopeController::GetController().SoundDestroy(m_sndLoopShot);
+		m_sndLoopShot = NULL;
+	}
+}
 #endif
 //-----------------------------------------------------------------------------
 // Purpose: Keep the barrels spinning
@@ -824,29 +824,29 @@ void CFFWeaponAssaultCannon::UpdateBarrelRotation()
 				CSoundEnvelopeController::GetController().SoundChangePitch( m_sndBarrelRotation, flPitch, 0.05f );
 			}
 
-			//if (m_bFiring)
-			//{
-			//	float flVolume = FLerp( FF_AC_LOOPSHOTSOUND_VOLUME_LOW, FF_AC_LOOPSHOTSOUND_VOLUME_HIGH, flPercent );
-			//	float flPitch = FLerp( FF_AC_LOOPSHOTSOUND_PITCH_LOW, FF_AC_LOOPSHOTSOUND_PITCH_HIGH, flPercent );
-			//
-			//	// also setup and play the loop shot sound if it's not setup yet
-			//	if (!m_sndLoopShot)
-			//	{
-			//		CPASAttenuationFilter filter( this );
-			//		m_sndLoopShot = (CSoundEnvelopeController::GetController()).SoundCreate( filter, entindex(), "assaultcannon.loop_shot" );
-			//		CSoundEnvelopeController::GetController().Play( m_sndLoopShot, flVolume, flPitch );
-			//	}
-			//	// modify the spinning sound if it exists
-			//	else
-			//	{
-			//		CSoundEnvelopeController::GetController().SoundChangeVolume( m_sndLoopShot, flVolume, 0.05f );
-			//		CSoundEnvelopeController::GetController().SoundChangePitch( m_sndLoopShot, flPitch, 0.05f );
-			//	}
-			//}
-			//else
-			//{
-			//	StopLoopShotSound();
-			//}
+			if (m_bFiring)
+			{
+				float flVolume = FLerp( FF_AC_LOOPSHOTSOUND_VOLUME_LOW, FF_AC_LOOPSHOTSOUND_VOLUME_HIGH, flPercent );
+				float flPitch = FLerp( FF_AC_LOOPSHOTSOUND_PITCH_LOW, FF_AC_LOOPSHOTSOUND_PITCH_HIGH, flPercent );
+
+				// also setup and play the loop shot sound if it's not setup yet
+				if (!m_sndLoopShot)
+				{
+					CPASAttenuationFilter filter( this );
+					m_sndLoopShot = (CSoundEnvelopeController::GetController()).SoundCreate( filter, entindex(), "assaultcannon.loop_shot" );
+					CSoundEnvelopeController::GetController().Play( m_sndLoopShot, flVolume, flPitch );
+				}
+				// modify the spinning sound if it exists
+				else
+				{
+					CSoundEnvelopeController::GetController().SoundChangeVolume( m_sndLoopShot, flVolume, 0.05f );
+					CSoundEnvelopeController::GetController().SoundChangePitch( m_sndLoopShot, flPitch, 0.05f );
+				}
+			}
+			else
+			{
+				StopLoopShotSound();
+			}
 		}
 		else
 		{
