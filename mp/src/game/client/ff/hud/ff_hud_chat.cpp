@@ -132,7 +132,7 @@ Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/)
 		if (!gr)
 			return GetDefaultChatColor();
 
-		if (iTeamIndex > 0) // prefer team index over player index
+		if (iTeamIndex >= 0) // prefer team index over player index
 			iTeam = iTeamIndex;
 		else if(iPlayerIndex > 0)
 			iTeam = gr->GetTeam(iPlayerIndex);
