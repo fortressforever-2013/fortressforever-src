@@ -191,7 +191,7 @@ void CHudDeathNotice::Paint()
 	int yStart = GetClientModeFFNormal()->GetDeathMessageStartHeight();
 
 	surface()->DrawSetTextFont( m_hTextFont );
-	surface()->DrawSetTextColor( GameResources()->GetTeamColor( 0 ) );
+	surface()->DrawSetTextColor( GetCustomClientColor( -1, 0 ) );
 
 	int iCount = m_DeathNotices.Count();
 	for ( int i = 0; i < iCount; i++ )
@@ -447,7 +447,7 @@ void CHudDeathNotice::Paint()
 			if (iconBuildable)
 			{
 				x += 5;
-				iconBuildable->DrawSelf( x, y - (iconBuildableTall / 4), iconBuildableWide, iconBuildableTall, Color(GameResources()->GetTeamColor(iVictimTeam)) );
+				iconBuildable->DrawSelf( x, y - (iconBuildableTall / 4), iconBuildableWide, iconBuildableTall, GetCustomClientColor( -1, iVictimTeam ) );
 			}
 		}
 	}
@@ -469,7 +469,7 @@ void CHudDeathNotice::DrawPlayerAndAssister( int &x, int &y, wchar_t* playerName
 		surface()->DrawUnicodeString( DEATHNOTICE_ASSIST_SEPARATOR );
 		
 		float assisterColorModifier = hud_deathnotice_assister_color_modifier.GetFloat();
-		Color assisterColor = GameResources()->GetTeamColor( iAssisterTeam );
+		Color assisterColor = GetCustomClientColor( -1, iAssisterTeam );
 		assisterColor.SetColor(
 			assisterColor.r() * assisterColorModifier, 
 			assisterColor.g() * assisterColorModifier, 

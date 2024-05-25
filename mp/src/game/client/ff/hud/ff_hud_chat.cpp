@@ -34,8 +34,7 @@ ConVar cl_chat_color_default("cl_chat_color_default", "255 170 0", FCVAR_ARCHIVE
 
 // customizable team colors!
 
-// unassigned shouldn't really be needed, right?
-//ConVar cl_teamcolor_unassigned("cl_teamcolor_unassigned", "204 204 204", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the unassigned team's color in chat and killfeed.");
+ConVar cl_teamcolor_unassigned("cl_teamcolor_unassigned", "204 204 204", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the unassigned team's color in chat and killfeed.");
 ConVar cl_teamcolor_spec("cl_teamcolor_spec", "204 204 204", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the spectator team's color in chat and killfeed.");
 
 ConVar cl_teamcolor_blue("cl_teamcolor_blue", "153 204 255", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the blue team's color in chat and killfeed.");
@@ -70,6 +69,8 @@ CON_COMMAND(cl_teamcolors_reset, "Resets the client's custom team color definiti
 			Msg("Team colors were successfully reset to use the old team colors!\n");
 		}
 	}
+
+	cl_teamcolor_unassigned.SetValue("204 204 204");
 }
 
 // customizable team colors!
@@ -145,6 +146,7 @@ Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/)
 		switch (iTeam)
 		{
 			case TEAM_UNASSIGNED:
+				bValid = sscanf(cl_teamcolor_unassigned.GetString(), "%i %i %i", &r, &g, &b) == 3;
 				break;
 			case TEAM_SPECTATOR:
 			{
