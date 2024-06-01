@@ -86,12 +86,7 @@ $Project "Client (FF)"
 		}
 		
 		$Folder "HUD"
-		{
-			$Folder "UI"
-			{
-				
-			}
-			
+		{			
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_addarmor.cpp"
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_addhealth.cpp"
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_ammo.cpp"
@@ -146,7 +141,6 @@ $Project "Client (FF)"
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_teamscores.cpp"
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_weaponinfo.cpp"
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_weaponselection.cpp"
-			
 		}
 		
 		$Folder "Temporary Entities"
@@ -196,7 +190,6 @@ $Project "Client (FF)"
 			$File "$SRCDIR\game\client\ff\vgui\ff_vgui_timer.h"
 			$File "$SRCDIR\game\client\ff\vgui\vgui_rootpanel_ff.cpp"
 			$File "$SRCDIR\game\client\ff\vgui\vgui_rootpanel_ff.h"
-			
 		}
 		
 		$File "$SRCDIR\game\client\ff\clientmode_ff.cpp"
@@ -240,7 +233,6 @@ $Project "Client (FF)"
 		$File "$SRCDIR\game\client\ff\ProxyOverpressure.cpp"
 		$File "$SRCDIR\game\client\ff\ProxySlowfield.cpp"
 		$File "$SRCDIR\game\client\ff\ProxyTeam.cpp"
-
 	}
 
 	$Folder	"Link Libraries"
