@@ -45,7 +45,7 @@ bool NPC_CheckBrushExclude( CBaseEntity *pEntity, CBaseEntity *pBrush );
 #include "ff_team.h"
 #include "ff_player.h"
 #include "te_effect_dispatch.h"
-#include "ff_item_flag.h"
+#include "ff_info_script.h"
 
 //bool NPC_CheckBrushExclude(CBaseEntity* pEntity, CBaseEntity* pBrush);
 #endif

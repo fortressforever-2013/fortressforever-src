@@ -9,7 +9,7 @@
 #include "ff_lualib.h"
 #include "ff_player.h"
 #include "ff_projectile_base.h"
-#include "ff_item_flag.h"
+#include "ff_info_script.h"
 #include "ff_triggerclip.h"
 #include "ff_utils.h"
 

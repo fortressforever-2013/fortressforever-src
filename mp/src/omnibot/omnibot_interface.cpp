@@ -7,7 +7,7 @@
 #include "filesystem.h"
 #include "Color.h"
 #include "world.h"
-#include "ff_item_flag.h"
+#include "ff_info_script.h"
 #include "triggers.h"
 #include "movevars_shared.h"
 #include "nav.h"

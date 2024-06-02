@@ -12,7 +12,7 @@
 #include "ff_team.h"
 #include "ff_grenade_base.h"
 #include "ff_player.h"
-#include "ff_item_flag.h"
+#include "ff_info_script.h"
 
 #include "beam_shared.h"
 #include "player.h"

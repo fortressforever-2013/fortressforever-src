@@ -7,7 +7,7 @@
 #include "ff_luacontext.h"
 #include "ff_lualib.h"
 #include "ff_utils.h"
-#include "ff_item_flag.h"
+#include "ff_info_script.h"
 #include "triggers.h"
 #include "stringregistry.h"
 

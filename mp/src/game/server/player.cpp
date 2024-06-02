@@ -86,7 +86,7 @@
 #include "ff_player.h"
 
 // For spectating info scripts
-#include "ff_item_flag.h"
+#include "ff_info_script.h"
 
 // Forward declare
 class CFFPlayer;

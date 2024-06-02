@@ -9,7 +9,7 @@
 #include "ff_entity_system.h"
 #include "ff_gamerules.h"
 #include "ff_grenade_base.h"
-#include "ff_item_flag.h"
+#include "ff_info_script.h"
 #include "ff_triggerclip.h"
 #include "ff_player.h"
 #include "ff_utils.h"

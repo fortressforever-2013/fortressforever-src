@@ -31,7 +31,7 @@
 	#include "ilagcompensationmanager.h"
 	#include "EntityFlame.h"
 
-	#include "ff_item_flag.h"
+	#include "ff_info_script.h"
 	#include "ff_entity_system.h"	// Entity system
 	#include "ff_scriptman.h"
 	#include "ff_luacontext.h"

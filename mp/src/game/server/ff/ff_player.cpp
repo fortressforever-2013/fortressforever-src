@@ -20,7 +20,7 @@
 #include "soundent.h"
 #include "nav_mesh.h"
 
-#include "ff_item_flag.h"
+#include "ff_info_script.h"
 #include "ff_utils.h"
 #include "ff_grenade_base.h"
 #include "ff_buildableobjects_shared.h"

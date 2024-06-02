@@ -24,7 +24,7 @@
 	#include "ff_player.h"
 	#include "ff_playercommand.h"
 	#include "ff_sentrygun.h"
-	#include "ff_item_flag.h"
+	#include "ff_info_script.h"
 	#include "ff_entity_system.h"
 	#include "ff_scriptman.h"
 	#include "ff_luacontext.h"
