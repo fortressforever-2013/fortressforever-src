@@ -215,9 +215,6 @@ void CFFScriptManager::MakeEnvironmentSafe()
 	lua_pushstring(L, "loaders");
 	lua_gettable(L, -2); // get _G.package.loaders
 	lua_pushnil(L);
-	lua_rawseti(L, -2, 4); // _G.package.loaders[4] = nil
-	lua_pushnil(L);
-	lua_rawseti(L, -2, 3); // _G.package.loaders[3] = nil
 	lua_pop(L, 2); // pop _G.package.loaders and _G.package
 }
 
