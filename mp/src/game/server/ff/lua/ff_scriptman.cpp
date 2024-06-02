@@ -53,7 +53,7 @@ static int print(lua_State *L)
 		lua_call(L, 1, 1);
 		s = lua_tostring(L, -1);  /* get result */
 		if (s == NULL)
-			return luaL_error(L, LUA_QL("tostring") " must return a string to " LUA_QL("print"));
+			return luaL_error(L, "'tostring' must return a string to 'print'");
 		if (i>1)
 			Msg("\t");
 		Msg("%s", s);
@@ -103,7 +103,7 @@ bool CFFScriptManager::Init()
 
 	// initialize VM
 	LuaMsg("Attempting to start the Lua VM...\n");
-	L = lua_open();
+	L = luaL_newstate();
 
 	// no need to continue if VM failed to initialize
 	if(!L)
@@ -163,9 +163,11 @@ void CFFScriptManager::SetupEnvironmentForFF()
 		Q_strncat( szLuaSearchPaths, fullpath, sizeof(szLuaSearchPaths) );
 	}
 	
+	lua_rawgeti(L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
+
 	// set package.path; this is equivelent to the Lua code: _G.package["path"] = szLuaSearchPaths
 	lua_pushstring(L, "package");
-	lua_gettable(L, LUA_GLOBALSINDEX); // get _G.package
+	lua_gettable(L, -2); // get _G.package
 	lua_pushstring(L, "path");
 	lua_pushstring(L, szLuaSearchPaths);
 	lua_settable(L, -3); // -3 is the package table
@@ -766,7 +768,7 @@ CON_COMMAND( lua_dostring, "Run a server-side Lua string in the global environme
 		lua_insert(L, 1);
 		if (lua_pcall(L, lua_gettop(L)-1, 0, 0) != 0)
 		Warning("%s", lua_pushfstring(L,
-							"error calling " LUA_QL("print") " (%s)",
+							"error calling 'print' (%s)",
 							lua_tostring(L, -1)));
 	}
 	lua_settop(L, 0);  /* clear stack */
