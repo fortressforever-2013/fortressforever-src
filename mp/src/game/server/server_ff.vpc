@@ -19,7 +19,7 @@ $Configuration
 {
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	"$BASE;$THIRDPARTY\LuaBridge3,$THIRDPARTY\lua-5.1.5\include,$SRCDIR\game\shared\ff\grenades,$SRCDIR\game\shared\ff\projectiles,$SRCDIR\game\shared\ff\weapons,$SRCDIR\game\shared\ff,.\ff\buildables,.\ff\lua,.\ff,$SRCDIR\omnibot"
+		$AdditionalIncludeDirectories	"$BASE;$THIRDPARTY\LuaBridge3,$THIRDPARTY\lua-5.4.6\include,$SRCDIR\game\shared\ff\grenades,$SRCDIR\game\shared\ff\projectiles,$SRCDIR\game\shared\ff\weapons,$SRCDIR\game\shared\ff,.\ff\buildables,.\ff\lua,.\ff,$SRCDIR\omnibot"
 		$PreprocessorDefinitions		"$BASE;FF;FF_DLL;GAME_DLL;SDK2013CE" // maybe change all instances of GAME_DLL to FF_DLL in the future
 		
 		$AdditionalOptions					"$BASE /std:c++17"
