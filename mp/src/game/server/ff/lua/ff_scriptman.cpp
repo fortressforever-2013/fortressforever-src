@@ -208,17 +208,17 @@ void CFFScriptManager::MakeEnvironmentSafe()
 	const char* ppszUnsafeLibraries[] = { "io", NULL };
 	RemoveVarsFromGlobal( ppszUnsafeLibraries );
 
-	// require can load .dll/.so, need to disable the loaders that search for them
+	// require can load .dll/.so, need to disable the searchers that search for them
 	// the third index checks package.cpath and loads .so/.dll files
 	// the fourth index is an all-in-one loader that can load .so/.dll files
 	lua_getglobal(L, LUA_LOADLIBNAME);
-	lua_pushstring(L, "loaders");
-	lua_gettable(L, -2); // get _G.package.loaders
+	lua_pushstring(L, "searchers");
+	lua_gettable(L, -2); // get _G.package.searchers
 	lua_pushnil(L);
-	lua_rawseti(L, -2, 4); // _G.package.loaders[4] = nil
+	lua_rawseti(L, -2, 4); // _G.package.searchers[4] = nil
 	lua_pushnil(L);
-	lua_rawseti(L, -2, 3); // _G.package.loaders[3] = nil
-	lua_pop(L, 2); // pop _G.package.loaders and _G.package
+	lua_rawseti(L, -2, 3); // _G.package.searchers[3] = nil
+	lua_pop(L, 2); // pop _G.package.searchers and _G.package
 }
 
 /** Loads a Lua file into a function that is pushed on the top of the Lua stack (only when the file is succesfully loaded)
