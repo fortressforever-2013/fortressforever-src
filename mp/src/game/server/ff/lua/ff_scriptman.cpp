@@ -171,7 +171,7 @@ void CFFScriptManager::SetupEnvironmentForFF()
 	lua_pushstring(L, "path");
 	lua_pushstring(L, szLuaSearchPaths);
 	lua_settable(L, -3); // -3 is the package table
-	lua_pop(L, 1); // pop _G.package
+	lua_pop(L, 2); // pop _G.package
 
 	// YoYo178: I don't think this is needed anymore since now FF uses LuaBridge3
 	// instead of luabind...
