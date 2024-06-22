@@ -118,6 +118,9 @@ bool CFFScriptManager::Init()
 	// make the standard libraries safe
 	MakeEnvironmentSafe();
 
+	// allow throwing exceptions for LuaBridge3
+	luabridge::enableExceptions(L);
+
 	LuaMsg("Lua VM initialization successful.\n");
 	return true;
 }

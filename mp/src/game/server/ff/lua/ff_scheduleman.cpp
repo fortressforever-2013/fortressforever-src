@@ -153,9 +153,9 @@ bool CFFScheduleCallback::Update()
 			else if (m_nParams == 4)
 				m_function(m_params[0], m_params[1], m_params[2], m_params[3]);
 		}
-		catch (...)
+		catch ( const luabridge::LuaException& e )
 		{
-
+			_scriptman.LuaWarning("%s\n", e.what());
 		}
 
 		// repeat only so many times
