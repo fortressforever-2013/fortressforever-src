@@ -4183,7 +4183,20 @@ void CFFPlayer::LuaAddEffect( int iEffect, float flEffectDuration, float flIconD
 			break;
 			
 			case LUA_EF_LEGSHOT: AddSpeedEffect( SE_LEGSHOT, flEffectDuration, flSpeed, SEM_BOOLEAN, FF_STATUSICON_LEGINJURY, flIconDuration, true ); break;
-			case LUA_EF_TRANQ: AddSpeedEffect( SE_TRANQ, flEffectDuration, flSpeed, SEM_BOOLEAN | SEM_HEALABLE, FF_STATUSICON_TRANQUILIZED, flIconDuration, true ); break;
+			case LUA_EF_TRANQ:
+			{
+				AddSpeedEffect(SE_TRANQ, flEffectDuration, flSpeed, SEM_BOOLEAN | SEM_HEALABLE, FF_STATUSICON_TRANQUILIZED, flIconDuration, true);
+
+				CSingleUserRecipientFilter user(this);
+				user.MakeReliable();
+
+				UserMessageBegin(user, "FFViewEffect");
+				WRITE_BYTE(FF_VIEWEFFECT_TRANQUILIZED);
+				WRITE_FLOAT(flEffectDuration);
+				MessageEnd();
+			}
+			break;
+
 			case LUA_EF_ACSPINUP: AddSpeedEffect( SE_ASSAULTCANNON, flEffectDuration, flSpeed, SEM_BOOLEAN, -1, -1.0f, true );  break;
 			case LUA_EF_SNIPERRIFLE: AddSpeedEffect( SE_SNIPERRIFLE, flEffectDuration, flSpeed, SEM_BOOLEAN, -1, -1.0f, true ); break;
 			case LUA_EF_SPEED_LUA1: AddSpeedEffect( SE_LUA1, flEffectDuration, flSpeed, SEM_ACCUMULATIVE, -1, -1.0f, true ); break;
