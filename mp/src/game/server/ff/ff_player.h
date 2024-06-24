@@ -629,13 +629,15 @@ public:
 public:
 
 	// BEG: Added by Mulchman for radio tagging
-	bool IsRadioTagged( void ) const { return m_bRadioTagged; }
-	void SetRadioTagged( CFFPlayer *pWhoTaggedMe, float flStartTime, float flDuration );
+	bool IsRadioTagged( void ) const { return m_bRadioTagged; };
+	bool IsRadioTaggedFromLUA( void ) const { return m_bRadioTaggedFromLUA; };
+	void SetRadioTagged( CFFPlayer *pWhoTaggedMe, float flStartTime, float flDuration, bool bFromLUA = false );
 	void SetUnRadioTagged( void );
 	int GetTeamNumOfWhoTaggedMe( void ) const;
 	CFFPlayer *GetPlayerWhoTaggedMe( void );
 protected:
 	bool m_bRadioTagged;
+	bool m_bRadioTaggedFromLUA;
 	float m_flRadioTaggedStartTime;
 	float m_flRadioTaggedDuration;
 

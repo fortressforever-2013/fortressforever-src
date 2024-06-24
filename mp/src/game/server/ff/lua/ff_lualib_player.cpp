@@ -40,6 +40,13 @@ namespace FFLib
 	{
 		return pPlayer->FlashlightIsOn() != 0;
 	}
+
+	// helper function for MarkRadioTag, so it knows when it's called from LUA
+	// this basically allows for radio tag to still work if pWhoTaggedMe is null.
+	void SetRadioTagged(CFFPlayer* pPlayer, CFFPlayer* pWhoTaggedMe, float flStartTime, float flDuration)
+	{
+		pPlayer->SetRadioTagged(pWhoTaggedMe, flStartTime, flDuration, true);
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -114,7 +121,7 @@ void CFFLuaLib::InitPlayer(lua_State* L)
 			.addFunction("IsDucking", &CFFPlayer::IsDucking)
 			.addFunction("IsBot", &CFFPlayer::IsBot)
 			.addFunction("IsFlashlightOn", &FFLib::IsFlashlightOn)
-			.addFunction("MarkRadioTag", &CFFPlayer::SetRadioTagged)
+			.addFunction("MarkRadioTag", &FFLib::SetRadioTagged)
 			//.addFunction("RemoveAmmo",			(void(CFFPlayer::*)(int, const char*))&CFFPlayer::RemoveAmmo)
 			.addFunction("OwnsWeaponType", &CFFPlayer::LuaOwnsWeaponType)
 			.addFunction("RemoveAllAmmo", &CFFPlayer::LuaRemoveAllAmmo)

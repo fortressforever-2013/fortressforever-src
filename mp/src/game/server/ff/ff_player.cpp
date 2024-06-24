@@ -538,6 +538,7 @@ CFFPlayer::CFFPlayer()
 	m_flBuildTime = 0.0f;
 
 	m_bRadioTagged = false;
+	m_bRadioTaggedFromLUA = false;
 	m_flRadioTaggedStartTime = 0.0f;
 	m_flRadioTaggedDuration = RADIOTAG_DRAW_DURATION;
 
@@ -694,6 +695,7 @@ void CFFPlayer::PreThink(void)
 	if( m_bRadioTagged && ( ( m_flRadioTaggedStartTime + m_flRadioTaggedDuration ) < gpGlobals->curtime ) )
 	{
 		m_bRadioTagged = false;
+		m_bRadioTaggedFromLUA = false;
 		m_pWhoTaggedMe = NULL;
 	}
 
@@ -2012,10 +2014,11 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 			CFFPlayer *pKiller2 = ToFFPlayer( pKiller );
 			// AfterShock - scoring system: If the dead player was radio tagged, award 100 points to the tagging player
 			// Do not award points to the tagger if the tagger is also the killer.
-			if ( !(pTagger == pKiller2) )
+
+			if ( pTagger )
 			{
 				// fixed typo (wasn't compiling).  Also made above comment a bit less ambiguous -> Defrag
-				if( pTagger )
+				if ( pTagger != pKiller2 )
 					pTagger->AddFortPoints( 50, "#FF_FORTPOINTS_TEAMMATERADIOTAGKILL" );
 			}
 		}
@@ -2026,6 +2029,7 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 
 	// Reset the tag...
 	m_bRadioTagged = false;
+	m_bRadioTaggedFromLUA = false;
 
 	// EDIT: Let's not use strings if we don't have to...
 	// Find any items that we are in control of and drop them
@@ -3101,11 +3105,15 @@ void CFFPlayer::FindRadioTaggedPlayers( void )
 		if( !pPlayer->IsRadioTagged() )
 			continue;
 
-		// Bug #0000517: Enemies see radio tag.
-		// Only want to show players whom people on our team have tagged or
-		// players whom allies have tagged
-		if( g_pGameRules->PlayerRelationship( this, ToFFPlayer( pPlayer->GetPlayerWhoTaggedMe() ) ) != GR_TEAMMATE )
-			continue;
+		// if tagged from lua then skip the player/team check entirely
+		if( !pPlayer->IsRadioTaggedFromLUA() )
+		{
+			// Bug #0000517: Enemies see radio tag.
+			// Only want to show players whom people on our team have tagged or
+			// players whom allies have tagged
+			if( g_pGameRules->PlayerRelationship( this, ToFFPlayer( pPlayer->GetPlayerWhoTaggedMe() ) ) != GR_TEAMMATE )
+				continue;
+		}
 
 		// Get their origin
 		Vector vecPlayerOrigin = pPlayer->GetFeetOrigin();
@@ -4167,7 +4175,7 @@ void CFFPlayer::LuaAddEffect( int iEffect, float flEffectDuration, float flIconD
 			case LUA_EF_CONC: Concuss( flEffectDuration, flIconDuration ); break;
 			case LUA_EF_GAS: Gas( flEffectDuration, flIconDuration, NULL); break;
 			case LUA_EF_INFECT: Infect( this ); break;
-			case LUA_EF_RADIOTAG: SetRadioTagged( NULL, gpGlobals->curtime, flEffectDuration ); break;
+			case LUA_EF_RADIOTAG: SetRadioTagged( NULL, gpGlobals->curtime, flEffectDuration, true ); break;
 
 			case LUA_EF_HEADSHOT:
 			{
@@ -5474,6 +5482,7 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 void CFFPlayer::SetUnRadioTagged( void )
 {
 	m_bRadioTagged = false;
+	m_bRadioTaggedFromLUA = false;
 	m_pWhoTaggedMe = NULL;
 	m_flRadioTaggedStartTime = 0.0f;
 	m_flRadioTaggedDuration = 0.0f;	
@@ -5491,9 +5500,10 @@ void CFFPlayer::SetUnRadioTagged( void )
 //-----------------------------------------------------------------------------
 // Purpose: Set a player as being "radio tagged"
 //-----------------------------------------------------------------------------
-void CFFPlayer::SetRadioTagged( CFFPlayer *pWhoTaggedMe, float flStartTime, float flDuration )
+void CFFPlayer::SetRadioTagged( CFFPlayer *pWhoTaggedMe, float flStartTime, float flDuration, bool bFromLUA /* = false */)
 {
 	m_bRadioTagged = true;
+	m_bRadioTaggedFromLUA = bFromLUA;
 	m_pWhoTaggedMe = pWhoTaggedMe;
 	m_flRadioTaggedStartTime = flStartTime;
 	m_flRadioTaggedDuration = flDuration;
