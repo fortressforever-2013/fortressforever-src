@@ -19,6 +19,8 @@ IMPLEMENT_SERVERCLASS_ST(CFFTeam, DT_FFTeam)
 	SendPropInt( SENDINFO( m_iMaxPlayers ) ),
 	SendPropBool( SENDINFO( m_bFFA ) ),
 	SendPropArray3( SENDINFO_ARRAY3(m_iClasses), SendPropInt( SENDINFO_ARRAY(m_iClasses), 4 ) ),
+
+	SendPropString( SENDINFO( m_szTeamIcon ) ),
 	
 	// <-- Mirv: Some limits that the client needs to know about for the menu
 END_SEND_TABLE()
@@ -28,6 +30,9 @@ LINK_ENTITY_TO_CLASS( ff_team_manager, CFFTeam );
 // --> Mirv: Class restrictions
 extern ConVar cr_scout, cr_sniper, cr_soldier, cr_demoman, cr_medic, cr_hwguy, cr_pyro, cr_spy, cr_engineer;
 // <-- Mirv: Class restrictions
+
+// from teammenu.cpp
+const char* pszInsignias[] = { "hud_team_blue", "hud_team_red", "hud_team_yellow", "hud_team_green" };
 
 //-----------------------------------------------------------------------------
 // Purpose: Get a pointer to the specified TF team manager
@@ -48,7 +53,16 @@ void CFFTeam::Init( const char *pName, int iNumber )
 	// --> Mirv: Some default settings
 	memset( &m_iClasses, -1, sizeof( m_iClasses ) );	// Jiggles: All classes start as "disallowed" so players can't pick
 														//			a disallowed class in the time it takes to update the client menu
+	memset( m_szTeamIcon.GetForModify(), 0, sizeof( m_szTeamIcon ) );
+
 	m_iAllies = 0;										// no allies
+
+	// set default team icons
+	if ( m_iTeamNum < TEAM_BLUE || m_iTeamNum > TEAM_GREEN )
+		Q_strncpy( m_szTeamIcon.GetForModify(), "dummystring", 128 ); // just in case someone accesses unassigned or spectator's icon
+	else
+		ResetTeamIcon();
+
 	// <-- Mirv: Some default settings
 
 	// Only detect changes every half-second.
@@ -126,3 +140,24 @@ void CFFTeam::UpdateLimits( void )
 	m_iClasses.Set( 10, m_iClassesMap[10] );
 }
 // <-- Mirv: Some allies and avail classes functions
+
+void CFFTeam::ResetTeamIcon(void)
+{
+	if ( m_iTeamNum < TEAM_BLUE || m_iTeamNum > TEAM_GREEN )
+		return;
+
+	Q_strncpy( m_szTeamIcon.GetForModify(), pszInsignias[m_iTeamNum - TEAM_BLUE], 128);
+}
+
+void CFFTeam::SetTeamIcon( const char* szIcon )
+{
+	if ( m_iTeamNum < TEAM_BLUE || m_iTeamNum > TEAM_GREEN )
+		return;
+
+	Q_strncpy( m_szTeamIcon.GetForModify(), szIcon, 128 );
+}
+
+const char* CFFTeam::GetTeamIcon( void )
+{
+	return m_szTeamIcon;
+}

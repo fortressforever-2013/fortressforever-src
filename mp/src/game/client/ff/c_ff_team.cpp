@@ -24,6 +24,8 @@ IMPLEMENT_CLIENTCLASS_DT(C_FFTeam, DT_FFTeam, CFFTeam)
 	RecvPropBool( RECVINFO( m_bFFA ) ),
 	RecvPropArray3( RECVINFO_ARRAY(m_iClasses), RecvPropInt( RECVINFO(m_iClasses[0]))),
 	// <-- Mirv: Some limits that the client needs to know about for the menu
+
+	RecvPropString( RECVINFO( m_szTeamIcon ) ),
 END_RECV_TABLE()
 
 //-----------------------------------------------------------------------------
@@ -32,6 +34,7 @@ END_RECV_TABLE()
 C_FFTeam::C_FFTeam() : C_Team()
 {
 	memset( &m_iClasses, 0, sizeof(m_iClasses) );	// |-- Mirv: Classes
+	memset( m_szTeamIcon, 0, sizeof( m_szTeamIcon ) );
 }
 
 //-----------------------------------------------------------------------------
@@ -77,6 +80,10 @@ int C_FFTeam::GetAlliedTeams( int (&iAlliedTeams)[TEAM_COUNT] )
 	return iCount;
 }
 // <--
+char* C_FFTeam::GetTeamIcon( void )
+{
+	return m_szTeamIcon;
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Get a pointer to the specified TF team manager

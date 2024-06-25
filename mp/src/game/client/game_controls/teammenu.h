@@ -70,6 +70,7 @@ namespace vgui
 		void UpdateMapDescriptionText();
 		void UpdateServerInfo();
 		void UpdateTeamButtons();
+		void UpdateTeamIcons();
 
 	protected:	
 			// vgui overrides

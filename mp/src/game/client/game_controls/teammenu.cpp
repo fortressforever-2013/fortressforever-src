@@ -130,9 +130,23 @@ public:
 		Assert(iTeamID >= TEAM_BLUE && iTeamID <= TEAM_GREEN);
 		m_iTeamID = iTeamID;
 
-		const char *pszInsignias[] = { "hud_team_blue", "hud_team_red", "hud_team_yellow", "hud_team_green" };
+		UpdateTeamIcon(iTeamID);
+	}
+
+	//-----------------------------------------------------------------------------
+	// Purpose: Update teams' icons
+	//-----------------------------------------------------------------------------
+	void UpdateTeamIcon(int iTeamID)
+	{
+		const char* pszInsignias[] = { "hud_team_blue", "hud_team_red", "hud_team_yellow", "hud_team_green" };
+		CFFTeam* pFFTeam = GetGlobalFFTeam(iTeamID);
+
 		m_pTeamInsignia->SetShouldScaleImage(true);
-		m_pTeamInsignia->SetImage(pszInsignias[m_iTeamID - TEAM_BLUE]);
+
+		if (pFFTeam)
+			m_pTeamInsignia->SetImage(pFFTeam->GetTeamIcon());
+		else
+			m_pTeamInsignia->SetImage(pszInsignias[iTeamID - TEAM_BLUE]);
 	}
 
 	//-----------------------------------------------------------------------------
@@ -409,6 +423,7 @@ void CTeamMenu::Update()
 	UpdateMapDescriptionText();
 	UpdateServerInfo();
 	UpdateTeamButtons();
+	UpdateTeamIcons();
 	// When a map 1st loads, the image proxy is in front of the button (so you can't click it) -- this seems to fix that
 	m_pMapScreenshotButton->SetZPos( 10 );
 }
@@ -591,4 +606,13 @@ void CTeamMenu::UpdateMapDescriptionText()
 	
 	szBuffer[iEndOfHead] = 0;
 	m_pMapDescriptionHead->SetText(szBuffer);
+}
+
+
+void CTeamMenu::UpdateTeamIcons()
+{
+	for ( int iTeamID = 0; iTeamID < 4; iTeamID++ )
+	{
+		m_pTeamButtons[iTeamID]->UpdateTeamIcon(iTeamID + TEAM_BLUE);
+	}
 }

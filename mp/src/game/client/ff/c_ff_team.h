@@ -41,6 +41,10 @@ public:
 	bool IsFFA() { return m_bFFA; };
 	void SetFFA( bool bFFA ) { m_bFFA = bFFA; };
 
+	// LUA custom team icons
+	char* GetTeamIcon( void );
+	char m_szTeamIcon[128];
+
 private:
 
 	int		m_iClasses[12];

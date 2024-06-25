@@ -16,7 +16,6 @@
 #include "utlvector.h"
 #include "team.h"
 
-
 //-----------------------------------------------------------------------------
 // Purpose: Team Manager
 //-----------------------------------------------------------------------------
@@ -39,6 +38,8 @@ public:
 
 	CNetworkVar( int, m_iMaxPlayers );
 
+	CNetworkString( m_szTeamIcon, 128 );
+
 private:
 	CNetworkVar( bool, m_bFFA );
 	
@@ -60,6 +61,11 @@ public:
 	bool IsFFA() { return m_bFFA; };
 	void SetFFA( bool bFFA ) { m_bFFA = bFFA; };
 	// <-- Mirv: Team classes available and allies
+
+	// LUA custom team icons
+	void SetTeamIcon( const char* szIcon );
+	void ResetTeamIcon( void );
+	const char* GetTeamIcon( void );
 };
 
 
