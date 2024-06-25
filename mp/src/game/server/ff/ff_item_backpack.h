@@ -60,6 +60,8 @@ public:
 	virtual Class_T Classify( void ) { return CLASS_BACKPACK; }
 	virtual bool CanClipOwnerEntity( void ) const { return true; }
 
+	bool m_bIsDeathBag;
+
 private:
 	int m_iAmmoCounts[ MAX_AMMO_SLOTS ];
 	int m_iGren1;

@@ -29,6 +29,7 @@ class CFFPlayer;
 class CFFInfoScript;
 class CBeam;
 class CTakeDamageInfo;
+class CFFItemBackpack;
 
 namespace luabridge {
 	class LuaRef;
@@ -69,6 +70,7 @@ public:
 	void Push(Vector vector);
 	void Push(QAngle angle);
 	void Push(const CTakeDamageInfo* pInfo);
+	void Push(CFFItemBackpack* pEntity);
 
 	// pushes a parameter by reference in preparation for a function call
 	void PushRef(CTakeDamageInfo& info);

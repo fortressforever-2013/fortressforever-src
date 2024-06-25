@@ -2086,6 +2086,26 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 		pBackpack->SetAmmoCount( GetAmmoDef()->Index( AMMO_NAILS ), 100 );
 		pBackpack->SetAmmoCount( GetAmmoDef()->Index( AMMO_CELLS ), 30 );
 
+		pBackpack->m_bIsDeathBag = true;
+		
+		// allow discards by default
+		bool bDiscardAllowed = true;
+
+		// player_ondiscard( player_entity, backpack_entity, is_death_bag )
+		CFFLuaSC hContext( 0 );
+		hContext.Push(this);
+		hContext.Push(pBackpack);
+		hContext.Push(pBackpack->m_bIsDeathBag);
+
+		if ( _scriptman.RunPredicates_LUA(NULL, &hContext, "player_ondiscard") )
+		{
+			bDiscardAllowed = hContext.GetBool();
+		}
+
+		if ( !bDiscardAllowed )
+		{
+			UTIL_Remove(pBackpack);
+		}
 	}
 	// <-- Mirv: Create backpack moved here to stop crash
 
@@ -3803,6 +3823,11 @@ void CFFPlayer::Command_Discard(const CCommand& args)
 	// if any of these are flagged as true, then we have a weapon that uses this ammo type and thus retain it (no discard allowed).  
 	bool bKeepAmmo[MAX_AMMO_TYPES] = { false };
 
+	int iShells = 0;
+	int iNails = 0;
+	int iCells = 0;
+	int iRockets = 0;
+
 	// Check we have the ammo to discard first
 	if ( GetClassSlot() != CLASS_ENGINEER )
 	{
@@ -3833,7 +3858,6 @@ void CFFPlayer::Command_Discard(const CCommand& args)
 				if( pBackpack )
 				{
 					pBackpack->SetAmmoCount( iAmmoNum, GetAmmoCount( iAmmoNum ));
-					RemoveAmmo( GetAmmoCount( iAmmoNum), iAmmoNum );
 				}
 			}
 		}
@@ -3841,10 +3865,10 @@ void CFFPlayer::Command_Discard(const CCommand& args)
 	// We're an engineer
 	else
 	{
-		int iShells = min(GetAmmoCount(AMMO_SHELLS), 40); // Default 20, 2 per unit
-		int iNails = min(GetAmmoCount(AMMO_NAILS), 20); // Default 20, 1 per unit
-		int iCells = min(GetAmmoCount(AMMO_CELLS), 20); // Default 10, 2 per unit
-		int iRockets = min(GetAmmoCount(AMMO_ROCKETS), 20); // Default 10, 2 per unit
+		iShells = min(GetAmmoCount(AMMO_SHELLS), 40); // Default 20, 2 per unit
+		iNails = min(GetAmmoCount(AMMO_NAILS), 20); // Default 20, 1 per unit
+		iCells = min(GetAmmoCount(AMMO_CELLS), 20); // Default 10, 2 per unit
+		iRockets = min(GetAmmoCount(AMMO_ROCKETS), 20); // Default 10, 2 per unit
 
 		// We have at least 1 of one type of ammo
 		if (iShells || iNails || iCells || iRockets)
@@ -3857,11 +3881,6 @@ void CFFPlayer::Command_Discard(const CCommand& args)
 				pBackpack->SetAmmoCount(GetAmmoDef()->Index(AMMO_NAILS), iNails);
 				pBackpack->SetAmmoCount(GetAmmoDef()->Index(AMMO_CELLS), iCells);
 				pBackpack->SetAmmoCount(GetAmmoDef()->Index(AMMO_ROCKETS), iRockets);
-
-				RemoveAmmo(iShells, AMMO_SHELLS);
-				RemoveAmmo(iNails, AMMO_NAILS);
-				RemoveAmmo(iCells, AMMO_CELLS);
-				RemoveAmmo(iRockets, AMMO_ROCKETS);
 			}
 		}
 	}
@@ -3886,6 +3905,48 @@ void CFFPlayer::Command_Discard(const CCommand& args)
 
 		pBackpack->SetAbsVelocity(vForward);
 		pBackpack->SetAbsOrigin(GetAbsOrigin());
+
+		pBackpack->m_bIsDeathBag = false;
+
+		// allow discards by default
+		bool bDiscardAllowed = true;
+
+		// player_ondiscard( player_entity, backpack_entity, is_death_bag )
+		CFFLuaSC hContext( 0 );
+		hContext.Push(this);
+		hContext.Push(pBackpack);
+		hContext.Push(pBackpack->m_bIsDeathBag);
+
+		if ( _scriptman.RunPredicates_LUA(NULL, &hContext, "player_ondiscard") )
+		{
+			bDiscardAllowed = hContext.GetBool();
+		}
+
+		if ( !bDiscardAllowed )
+		{
+			UTIL_Remove(pBackpack);
+			return;
+		}
+
+		// remove ammo only if lua allows throwing bags
+		if ( GetClassSlot() != CLASS_ENGINEER )
+		{
+			for( int iAmmoNum = 0; iAmmoNum < MAX_AMMO_TYPES; iAmmoNum++ )
+			{
+				// Only discard ammo that we do not want to keep.  I.e. discard = ! keep
+				if ( !bKeepAmmo[iAmmoNum] && GetAmmoCount( iAmmoNum ) > 0)
+				{
+					RemoveAmmo( GetAmmoCount( iAmmoNum ), iAmmoNum );
+				}
+			}
+		}
+		else
+		{
+			RemoveAmmo(iShells, AMMO_SHELLS);
+			RemoveAmmo(iNails, AMMO_NAILS);
+			RemoveAmmo(iCells, AMMO_CELLS);
+			RemoveAmmo(iRockets, AMMO_ROCKETS);
+		}
 
 		// Play a sound
 		EmitSound("Item.Toss");

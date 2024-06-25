@@ -19,6 +19,10 @@
 #include "cbase.h"
 #include "ff_item_backpack.h"
 #include "ff_gamerules.h"
+
+#include "ff_luacontext.h"
+#include "ff_scriptman.h"
+
 #include "tier0/memdbgon.h"
 
 #define ITEM_PICKUP_BOX_BLOAT		24
@@ -104,6 +108,20 @@ void CFFItemBackpack::RestockTouch( CBaseEntity *pPlayer )
 
 		// TODO: only pickup ammo the class can carry
 		// TODO: for the ammo the class can carry, only pickup up to its max carry
+
+		bool bAllowedPickup = true;
+
+		// player_onpickupdiscarded( player_entity, backpack_entity, is_death_bag )
+		CFFLuaSC hContext(0);
+		hContext.Push(pFFPlayer);
+		hContext.Push(this);
+		hContext.Push(m_bIsDeathBag);
+
+		if ( _scriptman.RunPredicates_LUA(NULL, &hContext, "player_onpickupdiscarded" ) )
+			bAllowedPickup = hContext.GetBool();
+
+		if ( !bAllowedPickup )
+			return;
 
 		int ammotaken = 0;
 

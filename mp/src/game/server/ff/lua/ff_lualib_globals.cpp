@@ -221,6 +221,12 @@ namespace FFLib
 		return IsOfClass( pEntity, CLASS_TURRET );
 	}
 
+	// is the entity a backpack
+	bool IsBackpack( CBaseEntity* pEntity )
+	{
+		return IsOfClass( pEntity, CLASS_BACKPACK );
+	}
+
 	void ChatToAll(const char *szMessage)
 	{
 		CBroadcastRecipientFilter filter;

@@ -12,6 +12,7 @@
 #include "ff_triggerclip.h"
 #include "ff_projectile_base.h"
 #include "ff_team.h"
+#include "ff_item_backpack.h"
 
 #include "triggers.h"
 
@@ -120,6 +121,20 @@ void CFFLuaLib::InitBase(lua_State* L)
 
 		// CFFProjectileBase
 		.deriveClass<CFFProjectileBase, CBaseEntity>("Projectile")
+		.endClass()
+
+		// CFFItemBackpack
+		.deriveClass<CFFItemBackpack, CBaseEntity>("Backpack")
+			.addFunction("GetAmmoCount",		&CFFItemBackpack::GetAmmoCount)
+			.addFunction("SetAmmoCount",		&CFFItemBackpack::SetAmmoCount)
+			.addFunction("GetGren1",			&CFFItemBackpack::GetGren1)
+			.addFunction("SetGren1",			&CFFItemBackpack::SetGren1)
+			.addFunction("GetGren2",			&CFFItemBackpack::GetGren2)
+			.addFunction("SetGren2",			&CFFItemBackpack::SetGren2)
+			.addFunction("GetHealth",			&CFFItemBackpack::GetHealth)
+			.addFunction("SetHealth",			&CFFItemBackpack::SetHealth)
+			.addFunction("GetArmor",			&CFFItemBackpack::GetArmor)
+			.addFunction("SetArmor",			&CFFItemBackpack::SetArmor)
 		.endClass()
 
 		// CFFInfoScript

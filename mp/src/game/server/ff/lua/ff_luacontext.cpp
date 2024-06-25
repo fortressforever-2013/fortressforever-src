@@ -19,6 +19,8 @@
 #include "team.h"
 #include "takedamageinfo.h"
 
+#include "ff_item_backpack.h"
+
 // Lua includes
 extern "C"
 {
@@ -131,6 +133,7 @@ void CFFLuaSC::Push(CBeam* pEntity) { m_params.AddToTail(SETOBJECT(pEntity)); }
 void CFFLuaSC::Push(Vector vector) { m_params.AddToTail(SETOBJECT(vector)); }
 void CFFLuaSC::Push(QAngle angle) { m_params.AddToTail(SETOBJECT(angle)); }
 void CFFLuaSC::Push(const CTakeDamageInfo* pInfo) { m_params.AddToTail(SETOBJECT(pInfo)); }
+void CFFLuaSC::Push(CFFItemBackpack* pEntity) { m_params.AddToTail(SETOBJECT(pEntity)); }
 
 //---------------------------------------------------------------------------
 void CFFLuaSC::PushRef(luabridge::LuaRef& luaObject) { m_params.AddToTail(SETOBJECTREF(luaObject)); }
