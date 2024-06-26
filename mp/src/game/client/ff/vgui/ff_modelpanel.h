@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/09/22
-	created:	22:9:2006   17:24
-	filename: 	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_modelpanel.h
+	created:	22:9:2006	17:24
+	filename:	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_modelpanel.h
 	file path:	f:\ff-svn\code\trunk\cl_dll\ff\vgui
 	file base:	ff_modelpanel
 	file ext:	h

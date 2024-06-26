@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/08/14
-	created:	14:8:2006   11:08
-	filename: 	f:\ff-svn\code\trunk\game_shared\ff\ff_grenade_base.cpp
+	created:	14:8:2006	11:08
+	filename:	f:\ff-svn\code\trunk\game_shared\ff\ff_grenade_base.cpp
 	file path:	f:\ff-svn\code\trunk\game_shared\ff
 	file base:	ff_grenade_base
 	file ext:	cpp
@@ -301,10 +301,7 @@ LINK_ENTITY_TO_CLASS(grenade_ff_base, CFFGrenadeBase);
 		// through it.
 		bool breakthrough = false;
 
-		if (trace.m_pEnt && FClassnameIs(trace.m_pEnt, "func_breakable"))
-			breakthrough = true;
-
-		if (trace.m_pEnt && FClassnameIs(trace.m_pEnt, "func_breakable_surf"))
+		if ((trace.m_pEnt && FClassnameIs(trace.m_pEnt, "func_breakable")) || (trace.m_pEnt && FClassnameIs(trace.m_pEnt, "func_breakable_surf")))
 			breakthrough = true;
 
 		if (breakthrough)
@@ -372,14 +369,14 @@ LINK_ENTITY_TO_CLASS(grenade_ff_base, CFFGrenadeBase);
 		// stop if on ground
 		if (trace.plane.normal[2] > 0.7)
 		{		
-			//if (vecVelocity[2] < 800 * gpGlobals->frametime && trace.m_pEnt->IsStandable())
-			//{
-			//	// we're rolling on the ground, add static friction.
-			//	//SetGroundEntity(trace.m_pEnt);	//pmove->onground = trace.ent;
-			//	vecVelocity[2] = 0;
-			//	SetLocalAngularVelocity(vec3_angle);
-			//}
-
+			/*if (vecVelocity[2] < 800 * gpGlobals->frametime && trace.m_pEnt->IsStandable())
+			{
+				// we're rolling on the ground, add static friction.
+				//SetGroundEntity(trace.m_pEnt);	//pmove->onground = trace.ent;
+				vecVelocity[2] = 0;
+				SetLocalAngularVelocity(vec3_angle);
+			}
+			*/
 			float speed = DotProduct(vecVelocity, vecVelocity);
 
 			if (speed < (30 * 30))
@@ -492,7 +489,7 @@ LINK_ENTITY_TO_CLASS(grenade_ff_base, CFFGrenadeBase);
 				Vector vecNormal = pTrace->plane.normal;
 				surfacedata_t *pdata = physprops->GetSurfaceData( pTrace->surface.surfaceProps );	
 				CPASFilter filter( vecAbsOrigin );
-				te->Explosion( filter, -1.0, // don't apply cl_interp delay
+				te->Explosion( filter, -1.0,	// don't apply cl_interp delay
 					&vecAbsOrigin, 
 					! ( contents & MASK_WATER ) ? g_sModelIndexFireball : g_sModelIndexWExplosion, 
 					m_flDamage / 160, 
@@ -509,7 +506,7 @@ LINK_ENTITY_TO_CLASS(grenade_ff_base, CFFGrenadeBase);
 			else
 			{
 				CPASFilter filter( vecAbsOrigin );
-				te->Explosion( filter, -1.0, // don't apply cl_interp delay
+				te->Explosion( filter, -1.0,	// don't apply cl_interp delay
 					&vecAbsOrigin, 
 					! ( contents & MASK_WATER ) ? g_sModelIndexFireball : g_sModelIndexWExplosion, 
 					m_flDamage / 160, 
@@ -664,7 +661,7 @@ LINK_ENTITY_TO_CLASS(grenade_ff_base, CFFGrenadeBase);
 //		float flRotation = gpGlobals->curtime * target_rotation.GetFloat() - anglemod(m_flSpawnTime);
 		float flRotation = anglemod(gpGlobals->curtime  - m_flSpawnTime) * target_rotation.GetFloat();
 
-		/*if (pMaterialBlur)
+/*		if (pMaterialBlur)
 		{
 			color32 colblur = col;
 			colblur.r *= 0.5f;
@@ -673,8 +670,8 @@ LINK_ENTITY_TO_CLASS(grenade_ff_base, CFFGrenadeBase);
 			colblur.a *= 0.6f;
 			materials->Bind(pMaterialBlur);
 			DrawSpriteRotated(GetAbsOrigin(), flSize, flSize, colblur, flRotation);
-		}*/
-
+		}
+*/
 		// Just display the blur material as that has all the stuff in one
 		if (pMaterialBlur)
 		{

@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/09/22
-	created:	22:9:2006   17:25
-	filename: 	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_modelpanel.cpp
+	created:	22:9:2006	17:25
+	filename:	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_modelpanel.cpp
 	file path:	f:\ff-svn\code\trunk\cl_dll\ff\vgui
 	file base:	ff_modelpanel
 	file ext:	cpp
@@ -174,7 +174,7 @@ void ModelPanel::DrawModels()
 //-----------------------------------------------------------------------------
 void ModelPanel::SetModel(const char *pszModelName)
 {
-	if (m_hModel == NULL || Q_strcmp(pszModelName, m_szModelName) != 0)
+	if (m_hModel == NULL || Q_strcmp(pszModelName, m_szModelName))
 	{
 		if (m_hModel)
 			m_hModel->Remove();
@@ -272,13 +272,13 @@ void PlayerModelPanel::SetClass(const char *pszClassname)
 	SetModel(pClassInfo->m_szModel);
 	SetWeaponModel(pWeaponInfo->szWorldModel);
 	SetAnimations("idle_lower", VarArgs("idle_upper_%s", pWeaponInfo->m_szAnimExtension));
+	//BREAKINBENNY: If we swap this for a menupose animation, the model should be compiled with the animation
+	// embedded into the model, not the shared animation model. (Last for 1 frame, don't loop, "ACT_MENUPOSE")
 
 	IGameResources *pGR = GameResources();
 
 	if (pGR)
-	{
 		m_hModel->m_nSkin = pGR->GetTeam(pLocalPlayer->entindex()) - TEAM_BLUE;
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -349,7 +349,7 @@ void PlayerModelPanel::DrawModels()
 //-----------------------------------------------------------------------------
 void PlayerModelPanel::SetWeaponModel(const char *pszWeaponModelName)
 {
-	if (m_hWeaponModel == NULL || Q_strcmp(pszWeaponModelName, m_szWeaponModelName) != 0)
+	if (m_hWeaponModel == NULL || Q_strcmp(pszWeaponModelName, m_szWeaponModelName))
 	{
 		if (m_hWeaponModel)
 			m_hWeaponModel->Remove();

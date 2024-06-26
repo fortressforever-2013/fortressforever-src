@@ -100,15 +100,8 @@ void CFFGrenadeNapalmlet::ResolveFlyCollisionCustom( trace_t &trace, Vector &vec
 	// through it.
 	bool breakthrough = false;
 
-	if( trace.m_pEnt && FClassnameIs( trace.m_pEnt, "func_breakable" ) )
-	{
+	if(( trace.m_pEnt && FClassnameIs( trace.m_pEnt, "func_breakable" ) ) || ( trace.m_pEnt && FClassnameIs( trace.m_pEnt, "func_breakable_surf" ) ))
 		breakthrough = true;
-	}
-
-	if( trace.m_pEnt && FClassnameIs( trace.m_pEnt, "func_breakable_surf" ) )
-	{
-		breakthrough = true;
-	}
 
 	if (breakthrough)
 	{
@@ -203,7 +196,7 @@ void CFFGrenadeNapalmlet::FlameThink()
 	}
 
 	// Bug #0001664: Pyro napalm flames in water shouldnt exist
-	if( GetWaterLevel() != 0  )
+	if( GetWaterLevel() != 0 )
 	{
 		UTIL_Remove(this);
 		return;
