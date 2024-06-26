@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/09/28
-	created:	28:9:2006   13:03
-	filename: 	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_gamemodes.cpp
+	created:	28:9:2006	13:03
+	filename:	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_gamemodes.cpp
 	file path:	f:\ff-svn\code\trunk\cl_dll\ff\vgui
 	file base:	ff_gamemodes
 	file ext:	cpp
@@ -241,9 +241,7 @@ private:
 			int iRet = 0;
 
 			for (int i = 0; i < 9; i++)
-			{
 				iRet += (m_pClasses[i]->IsSelected() ? (1 << i) : 0);
-			}
 
 			return iRet;
 		}
@@ -266,14 +264,12 @@ private:
 		{
 			const char *pszCommand = data->GetString("command");
 
-			if (Q_strcmp(pszCommand, "OK") == 0)
+			if (!Q_strcmp(pszCommand, "OK"))
 			{
 				CFFScenarioGameMode *parent = dynamic_cast <CFFScenarioGameMode *> (GetParent());
 
 				if (parent)
-				{
 					parent->UpdateAllowedClasses(m_iCurrentTeam, GetCheckBoxes());
-				}
 			}
 
 			CloseModal();
@@ -400,7 +396,7 @@ public:
 			{
 				m_nMaxPlayers[i] = m_iMapEnabledClasses[i] = m_iAllowedClasses[i] = 0;
 				Q_strcpy(m_szRoles[i], "0");
-                SetTeamEnabled(i, false);
+				SetTeamEnabled(i, false);
 			}
 		}
 
@@ -430,9 +426,7 @@ private:
 	MESSAGE_FUNC_PARAMS(OnUpdateCombos, "TextChanged", data)
 	{
 		if (data->GetPtr("panel") == m_pMaps)
-		{
 			LoadSettingsForMap(m_pMaps->GetActiveItemUserData()->GetString("name"));
-		}
 	}
 
 	//-----------------------------------------------------------------------------
@@ -454,16 +448,16 @@ private:
 	//-----------------------------------------------------------------------------
 	int GetTeamIndex(const char *pszTeamString)
 	{
-		if (Q_strncmp(pszTeamString, "Blue", 4) == 0)
+		if (!Q_strncmp(pszTeamString, "Blue", 4))
 			return 0;
 		
-		if (Q_strncmp(pszTeamString, "Red", 3) == 0)
+		if (!Q_strncmp(pszTeamString, "Red", 3))
 			return 1;
 
-		if (Q_strncmp(pszTeamString, "Yellow", 6) == 0)
+		if (!Q_strncmp(pszTeamString, "Yellow", 6))
 			return 2;
 
-		if (Q_strncmp(pszTeamString, "Green", 5) == 0)
+		if (!Q_strncmp(pszTeamString, "Green", 5))
 			return 3;
 
 		Assert(0);
@@ -514,7 +508,7 @@ private:
 
 private:
 
-    CFFAllowedClasses	*m_pAllowed;
+	CFFAllowedClasses	*m_pAllowed;
 
 	ComboBox	*m_pMaps;
 	ComboBox	*m_pBotNumbers[4];
@@ -585,14 +579,12 @@ void CFFGameModesPanel::OnButtonCommand(KeyValues *data)
 	const char *pszCommand = data->GetString("command");
 
 	// Play starts the mode
-	if (Q_strcmp(pszCommand, "OK") == 0)
+	if (!Q_strcmp(pszCommand, "OK"))
 	{
 		CFFGameModesPage *pActivePanel = dynamic_cast <CFFGameModesPage *> (m_pPropertyPages->GetActivePage());
 
 		if (pActivePanel)
-		{
 			pActivePanel->Play();
-		}
 	}
 	else
 	{

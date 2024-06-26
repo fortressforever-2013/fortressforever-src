@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/09/28
-	created:	28:9:2006   13:03
-	filename: 	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_gamemodes.h
+	created:	28:9:2006	13:03
+	filename:	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_gamemodes.h
 	file path:	f:\ff-svn\code\trunk\cl_dll\ff\vgui
 	file base:	ff_gamemodes
 	file ext:	h

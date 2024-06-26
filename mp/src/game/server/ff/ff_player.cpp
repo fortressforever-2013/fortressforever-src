@@ -1,5 +1,5 @@
 //========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
-// TODO: Can the copyright above be updated?
+// TODO: Can the copyright be updated?
 // Purpose:	HL1/TFC-based player class for Fortress Forever.
 // $NoKeywords: $
 //=============================================================================//
@@ -821,9 +821,7 @@ void CFFPlayer::PostThink()
 	BaseClass::PostThink();
 
 	if( GetTeamNumber() < TEAM_BLUE )
-	{
 		MoveTowardsMapGuide();
-	}
 	else
 	{
 		QAngle angles = GetLocalAngles();
@@ -874,15 +872,15 @@ void CFFPlayer::Precache()
 	PrecacheScriptSound("Player.Deathbeep");
 	PrecacheScriptSound("Player.Ammotoss");
 	//PrecacheScriptSound("speech.saveme");
-	PrecacheScriptSound("Player.bodysplat");
+	PrecacheScriptSound("Player.Bodysplat");
 	PrecacheScriptSound("Item.Toss");
 	PrecacheScriptSound("Player.Pain");
 	PrecacheScriptSound("Player.Flameout");
-	PrecacheScriptSound("medical.saveme");
-	PrecacheScriptSound("maintenance.saveme");
-	PrecacheScriptSound("infected.saveme");
-	PrecacheScriptSound("ammo.saveme");
-	PrecacheScriptSound("overpressure.explode");
+	PrecacheScriptSound("Medical.Saveme");
+	PrecacheScriptSound("maintenance.Saveme");
+	PrecacheScriptSound("Infected.Saveme");
+	PrecacheScriptSound("Ammo.Saveme");
+	PrecacheScriptSound("Overpressure.Explode");
 	
 	// Precache gib sound -> Defrag
 	PrecacheScriptSound("Player.Gib");
@@ -928,9 +926,7 @@ void CFFPlayer::Precache()
 	}
 
 	for (int i = 0; i < 8; i++)
-	{
 		PrecacheModel(UTIL_VarArgs("models/gibs/gib%d.mdl", (i + 1)));
-	}
 
 	BaseClass::Precache();
 }
@@ -1104,18 +1100,14 @@ ReturnSpot:
 
 			// If we got a spawn spot and we're spec, it's valid
 			if( GetTeamNumber() < TEAM_BLUE )
-			{
 				goto ReturnSpot;
-			}
 
 			// is this spot valid according to the game rules?
 			if( FFGameRules()->IsSpawnPointValid( pSpot, ( CBasePlayer * )this ) )
 			{
 				// See if the spot is clear
 				if( FFGameRules()->IsSpawnPointClear( pSpot, ( CBasePlayer * )this ) )
-				{
 					goto ReturnSpot;
-				}
 				else
 				{
 					// Not clear, so perhaps later we'll gib the guy here
@@ -1958,9 +1950,7 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 	m_iBurnLevel = 0;
 
 	for (int i = 0; i < NUM_SPEED_EFFECTS; i++)
-	{
 		RemoveSpeedEffectByIndex( i );
-	}
 
 	m_fLastHealTick = 0.0f;
 	m_fLastInfectedTick = 0.0f;
@@ -2169,7 +2159,7 @@ void CFFPlayer::CreateRagdollEntity(const CTakeDamageInfo *info)
 			pPrevRagdollFlame->Extinguish();
 	}
 
-	pRagdoll->m_fBodygroupState = m_fBodygroupState; // Allows decapitation
+	pRagdoll->m_fBodygroupState = m_fBodygroupState;	// Allows decapitation
 	pRagdoll->m_nSkinIndex = m_nSkin;
 	pRagdoll->m_vecRagdollOrigin = GetAbsOrigin();
 	pRagdoll->m_nModelIndex = m_nModelIndex;
@@ -2201,14 +2191,10 @@ void CFFPlayer::CreateRagdollEntity(const CTakeDamageInfo *info)
 	// not everything that gets here has an info
 	// when we change class we dont have an inflictor either
 	pRagdoll->m_vecRagdollVelocity = GetAbsVelocity();
-	if ( info ) 
-	{
+	if ( info )
 		pRagdoll->m_vecForce = info->GetDamageForce();
-	}
 	else
-	{
 		pRagdoll->m_vecForce = Vector(0, 0, 0);
-	}
 
 	// remove the ragdoll after a time
 	pRagdoll->SetNextThink( gpGlobals->curtime + 5.0f );
@@ -2234,9 +2220,7 @@ void CFFPlayer::DoAnimationEvent( PlayerAnimEvent_t event )
 		case 2:
 			//If the player is below their (specified) bunnyhop cap, do a jump animation.
 			if( (float)nSpeed < ( this->MaxSpeed() * jcap ) )
-			{
 				m_PlayerAnimState->DoAnimationEvent( event );
-			}
 			break;
 		default:
 			//Always do the animation event if previous stuff wasnt hit
@@ -2245,9 +2229,7 @@ void CFFPlayer::DoAnimationEvent( PlayerAnimEvent_t event )
 		}
 	}
 	else
-	{
 		m_PlayerAnimState->DoAnimationEvent( event );
-	}
 	TE_PlayerAnimEvent( this, event );	// Send to any clients who can see this guy.
 }
 
@@ -2306,7 +2288,7 @@ bool CFFPlayer::PlayerHasSkillCommand(const char *szCommand)
 
 	for ( int i = 0; i < pPlayerClassInfo.m_iNumSkills; i++ )
 	{
-		if( strcmp( pPlayerClassInfo.m_aSkills[i], szCommand ) == 0 )
+		if( !strcmp( pPlayerClassInfo.m_aSkills[i], szCommand ) )
 			return true;
 	}
 
@@ -2331,9 +2313,7 @@ void CFFPlayer::SetObjectiveEntity( const CBaseEntity *pEntity )
 		m_hObjectiveEntity->DispatchUpdateTransmitState();
 	}
 	else
-	{
 		SetObjectiveOrigin( Vector( 0, 0, INVALID_OBJECTIVE_LOCATION ) );
-	}
 }
 
 //Set a player's location.
@@ -2494,7 +2474,7 @@ int CFFPlayer::ActivateClass()
 		if (cClassesAvailable[iClassIndex] <= 0)
 		{
 			m_iNextClass = GetClassSlot();
-			ClientPrint(this, HUD_PRINTNOTIFY, "#FF_ERROR_CLASS_NOLONGERAVAILABLE");
+			ClientPrint(this, HUD_PRINTCENTER, "#FF_ERROR_CLASS_NOLONGERAVAILABLE");
 			return GetClassSlot();
 		}
 	}
@@ -2624,7 +2604,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	// this is not funny, buildables are NOT playable classes!
 	if( !iClass || ( iClass < 1 || iClass > 10 ) )
 	{
-		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_CLASS_INVALID" );
+		Warning( "#FF_ERROR_CLASS_INVALID\n" );
 		return;
 	}
 
@@ -2635,7 +2615,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	// If they're already this class, no class change needed. Just inform the player.
 	if (iClass == m_iNextClass && !bWasRandom)
 	{
-		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_CHANGECLASS_LATER", Class_IntToString( iClass ) );
+		ClientPrint( this, HUD_PRINTCENTER, "#FF_CHANGECLASS_LATER", Class_IntToString( iClass ) );
 		return;
 	}
 
@@ -2655,14 +2635,14 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	// Class is disabled
 	if( class_limit == -1 )
 	{
-		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_CLASS_DISABLED" );
+		ClientPrint( this, HUD_PRINTCENTER, "#FF_ERROR_CLASS_DISABLED" );
 		return;
 	}
 
 	// Not enough space for this class
 	if( class_limit > 0 && iAlreadyThisClass >= class_limit )
 	{
-		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_CLASS_OCCUPIED" );
+		ClientPrint( this, HUD_PRINTCENTER, "#FF_ERROR_CLASS_OCCUPIED" );
 		return;
 	}
 	
@@ -2673,9 +2653,9 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	hPlayerSwitchClass.Push(iClass);
 	if(_scriptman.RunPredicates_LUA( NULL, &hPlayerSwitchClass, "player_switchclass" ))
 	{
-		if(hPlayerSwitchClass.GetBool() == false)
+		if(!hPlayerSwitchClass.GetBool())
 		{
-			ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_CLASS_CANTSWITCH" );
+			ClientPrint( this, HUD_PRINTCENTER, "#FF_ERROR_CLASS_CANTSWITCH" );
 			return;
 		}
 	}
@@ -2748,7 +2728,7 @@ void CFFPlayer::Command_Class(const CCommand& args)
 
 void CFFPlayer::Command_Team(const CCommand& args)
 {
-	if ( args.ArgC() != 2 ) // if no team was specified
+	if ( args.ArgC() != 2 )	// if no team was specified
 	{
 		Msg("Usage: team <spec | blue | red | yellow | green | random>\n");
 		return;
@@ -2793,7 +2773,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 		// Couldn't find a valid team to join (because of limits)
 		if( iBestTeam < 0 )
 		{
-			ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_TEAM_NOFREETEAM" );
+			ClientPrint( this, HUD_PRINTCENTER, "#FF_ERROR_TEAM_NOFREETEAM" );
 			return;
 		}
 
@@ -2804,7 +2784,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	// Couldn't find a team afterall
 	if( iTeam == 0 )
 	{
-		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_TEAM_INVALID" );
+		Warning( "#FF_ERROR_TEAM_INVALID\n" );
 		return;
 	}
 
@@ -2814,14 +2794,14 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	// This should stop teams being picked which aren't active
 	if( !pTeam )
 	{
-		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_TEAM_INVALID" );
+		Warning( "#FF_ERROR_TEAM_INVALID\n" );
 		return;
 	}
 
 	// Check the team isn't full
 	if( pTeam->GetTeamLimits() != 0 && iTeamNumbers[iTeam] >= pTeam->GetTeamLimits() )
 	{
-		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_TEAM_FULL" );
+		ClientPrint( this, HUD_PRINTCENTER, "#FF_ERROR_TEAM_FULL" );
 		return;
 	}
 
@@ -2831,7 +2811,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	// Are we already on this team
 	if( GetTeamNumber() == iTeam )
 	{
-		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_TEAM_ALREADYONTHISTEAM" );
+		ClientPrint( this, HUD_PRINTCENTER, "#FF_ERROR_TEAM_ALREADYONTHISTEAM" );
 		return;
 	}
 
@@ -2842,9 +2822,9 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	hPlayerSwitchTeam.Push(iTeam);
 	if(_scriptman.RunPredicates_LUA( NULL, &hPlayerSwitchTeam, "player_switchteam" ))
 	{
-		if(hPlayerSwitchTeam.GetBool() == false)
+		if(!hPlayerSwitchTeam.GetBool())
 		{
-			ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_TEAM_CANTSWITCH" );
+			ClientPrint( this, HUD_PRINTCENTER, "#FF_ERROR_TEAM_CANTSWITCH" );
 			return;
 		}
 	}
@@ -3255,14 +3235,14 @@ void CFFPlayer::Command_BuildDetpack(const CCommand& args)
 		}
 
 		// Bug #0000453: Detpack timer can't be anything other than multiples of five
-//		if( m_iDetpackTime % 5 != 0 )
-//		{
-//			// Round it to the nearest multiple of 5
-//			int iMultiple = (int)(((float)m_iDetpackTime + 2.5f) / 5.0f);
-//			m_iDetpackTime = iMultiple * 5;
-//			DevMsg( "[Detpack Timer] Fuse length must be a multiple of 5! Resetting to nearest multiple %d.\n", m_iDetpackTime );
-//		}
-	}
+/*		if( m_iDetpackTime % 5 != 0 )
+		{
+			// Round it to the nearest multiple of 5
+			int iMultiple = (int)(((float)m_iDetpackTime + 2.5f) / 5.0f);
+			m_iDetpackTime = iMultiple * 5;
+			DevMsg( "[Detpack Timer] Fuse length must be a multiple of 5! Resetting to nearest multiple %d.\n", m_iDetpackTime );
+		}
+*/	}
 
 	//m_bCancelledBuild = false;
 	m_iWantBuild = FF_BUILD_DETPACK;
@@ -3624,9 +3604,7 @@ void CFFPlayer::PreBuildGenericThink( void )
 			}
 		}
 		else
-		{
 			ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_MULTIPLEBUILDS" );
-		}
 	}
 }
 
@@ -4710,7 +4688,7 @@ bool CFFPlayer::Infect( CFFPlayer *pInfector )
 		m_hInfector = pInfector;
 		m_iInfectedTeam = pInfector->GetTeamNumber();
 
-		EmitSound( "Player.cough" );	// |-- Mirv: [TODO] Change to something more suitable
+		EmitSound( "Player.Cough" );	// |-- Mirv: [TODO] Change to something more suitable
 
 		// And now.. an effect
 		CSingleUserRecipientFilter user(this);
@@ -4807,7 +4785,7 @@ bool CFFPlayer::Cure( CFFPlayer *pCurer )
 
 void CFFPlayer::IncreaseBurnLevel( int iAmount )
 {
-	if (GetClassSlot() == CLASS_PYRO) // Pyros dont catch fire
+	if (GetClassSlot() == CLASS_PYRO)	// Pyros dont catch fire
 	{
 		return;
 	}
@@ -5254,7 +5232,7 @@ static float DamageForce( const Vector &size, float damage )
 { 
 	float force = damage * ((32 * 32 * 72.0) / (size.x * size.y * size.z)) * 5;
 
-	if ( force > 1000.0) 
+	if ( force > 1000.0)
 	{
 		force = 1000.0;
 	}
@@ -6166,7 +6144,7 @@ int CFFPlayer::Heal(CFFPlayer *pHealer, float flHealth, bool healToFull)
 		MessageEnd();
 
 		// [TODO] A better sound
-		EmitSound( "medkit.hit" );
+		EmitSound( "Medkit.Hit" );
 	}
 
 	// And removes any adverse speed effects
