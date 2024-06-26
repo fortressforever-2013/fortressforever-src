@@ -88,6 +88,7 @@ OUTPUTS:
 #include "tier0/vprof.h"
 
 #include "ff_luacontext.h"
+#include "triggers.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -384,6 +385,125 @@ void CBaseEntityOutput::FireOutput(variant_t Value, CBaseEntity *pActivator, CBa
 	}
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Fires the event, causing a sequence of action to occur in other ents.
+// Input  : pActivator - Entity that initiated this sequence of actions.
+//			pCaller - Entity that is actually causing the event.
+//-----------------------------------------------------------------------------
+void CBaseEntityOutput::FireOutput(variant_t Value, CBaseEntity *pActivator, CBaseTrigger *pCaller, float fDelay)
+{
+	//
+	// Iterate through all eventactions and fire them off.
+	//
+	CEventAction *ev = m_ActionList;
+	CEventAction *prev = NULL;
+	
+	while (ev != NULL)
+	{
+		if (ev->m_iParameter == NULL_STRING)
+		{
+			//
+			// Post the event with the default parameter.
+			//
+			g_EventQueue.AddEvent( pCaller, STRING(ev->m_iTargetInput), Value, ev->m_flDelay + fDelay, pActivator, pCaller, ev->m_iIDStamp );
+		}
+		else
+		{
+			//
+			// Post the event with a parameter override.
+			//
+			variant_t ValueOverride;
+			ValueOverride.SetString( ev->m_iParameter );
+			g_EventQueue.AddEvent( pCaller, STRING(ev->m_iTargetInput), ValueOverride, ev->m_flDelay, pActivator, pCaller, ev->m_iIDStamp );
+		}
+
+		if ( ev->m_flDelay )
+		{
+			char szBuffer[256];
+			Q_snprintf( szBuffer,
+						sizeof(szBuffer),
+						"(%0.2f) output: (%s,%s) -> (%s,%s,%.1f)(%s)\n",
+#ifdef TF_DLL
+						engine->GetServerTime(),
+#else
+						gpGlobals->curtime,
+#endif
+						pCaller ? STRING(pCaller->m_iClassname) : "NULL",
+						pCaller ? STRING(pCaller->GetEntityName()) : "NULL",
+						STRING(ev->m_iTarget),
+						STRING(ev->m_iTargetInput),
+						ev->m_flDelay,
+						STRING(ev->m_iParameter) );
+
+			DevMsg( 2, "%s", szBuffer );
+			ADD_DEBUG_HISTORY( HISTORY_ENTITY_IO, szBuffer );
+		}
+		else
+		{
+			char szBuffer[256];
+			Q_snprintf( szBuffer,
+						sizeof(szBuffer),
+						"(%0.2f) output: (%s,%s) -> (%s,%s)(%s)\n",
+#ifdef TF_DLL
+						engine->GetServerTime(),
+#else
+						gpGlobals->curtime,
+#endif
+						pCaller ? STRING(pCaller->m_iClassname) : "NULL",
+						pCaller ? STRING(pCaller->GetEntityName()) : "NULL", STRING(ev->m_iTarget),
+						STRING(ev->m_iTargetInput),
+						STRING(ev->m_iParameter) );
+
+			DevMsg( 2, "%s", szBuffer );
+			ADD_DEBUG_HISTORY( HISTORY_ENTITY_IO, szBuffer );
+		}
+
+		if ( pCaller && pCaller->m_debugOverlays & OVERLAY_MESSAGE_BIT)
+		{
+			pCaller->DrawOutputOverlay(ev);
+		}
+
+		//
+		// Remove the event action from the list if it was set to be fired a finite
+		// number of times (and has been).
+		//
+		bool bRemove = false;
+		if (ev->m_nTimesToFire != EVENT_FIRE_ALWAYS)
+		{
+			ev->m_nTimesToFire--;
+			if (ev->m_nTimesToFire == 0)
+			{
+				char szBuffer[256];
+				Q_snprintf( szBuffer, sizeof(szBuffer), "Removing from action list: (%s,%s) -> (%s,%s)\n", pCaller ? STRING(pCaller->m_iClassname) : "NULL", pCaller ? STRING(pCaller->GetEntityName()) : "NULL", STRING(ev->m_iTarget), STRING(ev->m_iTargetInput));
+				DevMsg( 2, "%s", szBuffer );
+				ADD_DEBUG_HISTORY( HISTORY_ENTITY_IO, szBuffer );
+				bRemove = true;
+			}
+		}
+
+		if (!bRemove)
+		{
+			prev = ev;
+			ev = ev->m_pNext;
+		}
+		else
+		{
+			if (prev != NULL)
+			{
+				prev->m_pNext = ev->m_pNext;
+			}
+			else
+			{
+				m_ActionList = ev->m_pNext;
+			}
+
+			CEventAction *next = ev->m_pNext;
+			delete ev;
+			ev = next;
+		}
+	}
+}
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Parameterless firing of an event
@@ -397,6 +517,17 @@ void COutputEvent::FireOutput(CBaseEntity *pActivator, CBaseEntity *pCaller, flo
 	CBaseEntityOutput::FireOutput(Val, pActivator, pCaller, fDelay);
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Same function as above, but takes in a CBaseTrigger* for pCaller instead of CBaseEntity*
+// Input  : pActivator - 
+//			pCaller - 
+//-----------------------------------------------------------------------------
+void COutputEvent::FireOutput(CBaseEntity* pActivator, CBaseTrigger* pCaller, float fDelay)
+{
+	variant_t Val;
+	Val.Set(FIELD_VOID, NULL);
+	CBaseEntityOutput::FireOutput(Val, pActivator, pCaller, fDelay);
+}
 
 void CBaseEntityOutput::ParseEventAction( const char *EventData )
 {

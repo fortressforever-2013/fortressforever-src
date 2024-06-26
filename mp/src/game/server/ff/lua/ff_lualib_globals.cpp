@@ -1680,7 +1680,7 @@ namespace FFLib
 
 		COutputEvent event;
 		event.ParseEventAction(szAction);
-		event.FireOutput(NULL, NULL);
+		event.FireOutput(NULL, static_cast<CBaseEntity*>(NULL));
 
 		Omnibot::Notify_FireOutput(szTargetEntityName, szTargetInputName);
 	}
@@ -1702,7 +1702,7 @@ namespace FFLib
 
 		COutputEvent event;
 		event.ParseEventAction(szAction);
-		event.FireOutput(NULL, NULL);
+		event.FireOutput(NULL, static_cast<CBaseEntity*>(NULL));
 
 		Omnibot::Notify_FireOutput(szTargetEntityName, szTargetInputName);
 	}
@@ -1726,7 +1726,7 @@ namespace FFLib
 
 		COutputEvent event;
 		event.ParseEventAction(szAction);
-		event.FireOutput(NULL, NULL, delay);
+		event.FireOutput(NULL, static_cast<CBaseEntity*>(NULL), delay);
 
 		Omnibot::Notify_FireOutput(szTargetEntityName, szTargetInputName);
 	}
@@ -1752,7 +1752,7 @@ namespace FFLib
 
 		COutputEvent event;
 		event.ParseEventAction(szAction);
-		event.FireOutput(NULL, NULL, delay);
+		event.FireOutput(NULL, static_cast<CBaseEntity*>(NULL), delay);
 
 		Omnibot::Notify_FireOutput(szTargetEntityName, szTargetInputName);
 	}
