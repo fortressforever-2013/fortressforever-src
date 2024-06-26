@@ -19,7 +19,6 @@
 
 #define EVENT_FIRE_ALWAYS	-1
 
-class CBaseTrigger;
 
 //-----------------------------------------------------------------------------
 // Purpose: A COutputEvent consists of an array of these CEventActions. 
@@ -75,11 +74,6 @@ public:
 	fieldtype_t ValueFieldType() { return m_Value.FieldType(); }
 
 	void FireOutput( variant_t Value, CBaseEntity *pActivator, CBaseEntity *pCaller, float fDelay = 0 );
-
-	// exception for triggers, so they are passed themselves instead of their entity name
-	// this prevents the issue where all the triggers emitted an output when only a
-	// single trigger was triggered
-	void FireOutput( variant_t Value, CBaseEntity* pActivator, CBaseTrigger* pCaller, float fDelay = 0 );
 
 	/// Delete every single action in the action list. 
 	void DeleteAllElements( void ) ;
@@ -185,11 +179,6 @@ class COutputEvent : public CBaseEntityOutput
 public:
 	// void Firing, no parameter
 	void FireOutput( CBaseEntity *pActivator, CBaseEntity *pCaller, float fDelay = 0 );
-
-	// exception for triggers, so they are passed themselves instead of their entity name
-	// this prevents the issue where all the triggers emitted an output when only a
-	// single trigger was triggered
-	void FireOutput( CBaseEntity* pActivator, CBaseTrigger* pCaller, float fDelay = 0 );
 };
 
 
