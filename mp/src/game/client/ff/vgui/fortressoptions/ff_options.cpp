@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/08/29
-	created:	29:8:2006   18:39
-	filename: 	cl_dll\ff\vgui\ff_options\ff_options.cpp
+	created:	29:8:2006	18:39
+	filename:	cl_dll\ff\vgui\ff_options\ff_options.cpp
 	file path:	cl_dll\ff\vgui\ff_options
 	file base:	ff_options
 	file ext:	cpp
@@ -30,7 +30,7 @@ using namespace vgui;
 // LNK2005
 //ConVar hud_takesshots( "hud_takesshots", "0", FCVAR_ARCHIVE | FCVAR_USERINFO, "Takes a screenshot at the end of each map if set to 1 (0 to disable)" );
 
-// memdbgon must be the last include file in a .cpp file!!! 
+// memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 // Jiggles: End Miscellaneous Options Tab
@@ -94,7 +94,7 @@ void CFFOptionsPanel::OnButtonCommand(KeyValues *data)
 {
 	const char *pszCommand = data->GetString("command");
 
-	if (Q_strcmp(pszCommand, "Cancel") == 0)
+	if (!Q_strcmp(pszCommand, "Cancel"))
 	{
 		Close();
 		return;

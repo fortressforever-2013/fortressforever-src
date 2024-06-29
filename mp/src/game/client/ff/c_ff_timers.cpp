@@ -99,9 +99,7 @@ C_FFTimer* C_FFTimerManager::Create( std::string strName, float flDuration )
 			pTimer = new C_FFTimer(strName, flDuration);
 			//DevMsg("0x%X\n",pTimer);
 			if(pTimer)
-			{
 				m_vecTimers.push_back(pTimer);
-			}
 		}
 		return pTimer;
 	}

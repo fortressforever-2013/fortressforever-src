@@ -82,7 +82,8 @@
 #define FF_SENTRYGUN_GIB3B_MODEL			"models/buildable/sg/gibs/3b.mdl"
 #define FF_SENTRYGUN_GIB3C_MODEL			"models/buildable/sg/gibs/3c.mdl"
 #define FF_SENTRYGUN_GIB3D_MODEL			"models/buildable/sg/gibs/3d.mdl"
-#define FF_SENTRYGUN_GIB3E_MODEL			"models/buildable/sg/gibs/3e.mdl"
+//#define FF_SENTRYGUN_GIB3E_MODEL			"models/buildable/sg/gibs/3e.mdl"
+//BREAKINBENNY: GIB3E COMMENTED OUT because model doesn't exist!
 #define FF_SENTRYGUN_BUILD_SOUND			"Sentry.One"
 #define FF_SENTRYGUN_UNBUILD_SOUND			"Sentry.unbuild"
 #define FF_SENTRYGUN_EXPLODE_SOUND			"Sentry.Explode"
@@ -261,7 +262,7 @@ public:
 	virtual int	BloodColor( void ) { return BLOOD_COLOR_MECH; } // |-- Mirv: Don't bleed
 	virtual int	GetTeamNumber();	// |-- Mirv: Easy team id accessor	
 	bool IsBuilt( void	) const { return m_bBuilt; }
- 
+
 	CNetworkHandle( CBaseEntity, m_hOwner );
 
 	CFFPlayer *GetOwnerPlayer( void );
@@ -441,8 +442,8 @@ protected:
 	char	m_BuildableLocation[1024];
 public:
 		virtual void DetonateThink();
-		virtual void DetonateNextFrame() 
-		{ 
+		virtual void DetonateNextFrame()
+		{
 			if( m_bMarkedForDetonation )
 				return;
 
@@ -463,7 +464,7 @@ class CFFDetpack : public CFFBuildableObject
 public:
 	DECLARE_CLASS( CFFDetpack, CFFBuildableObject )
 
-#ifdef CLIENT_DLL 
+#ifdef CLIENT_DLL
 	
 	DECLARE_CLIENTCLASS()
 #else
@@ -604,8 +605,8 @@ public:
 	virtual void MaliciouslySabotage(CFFPlayer *pSaboteur);
 	virtual void Detonate();
 
-    bool CloseEnoughToDismantle( CFFPlayer *pPlayer);
-    void Dismantle( CFFPlayer *pPlayer);
+	bool CloseEnoughToDismantle( CFFPlayer *pPlayer);
+	void Dismantle( CFFPlayer *pPlayer);
 
 	CNetworkVar( unsigned int, m_iAmmoPercent );
 
@@ -653,7 +654,7 @@ class CFFSentryGun : public CFFBuildableObject
 public:
 	DECLARE_CLASS( CFFSentryGun, CFFBuildableObject )
 
-#ifdef CLIENT_DLL 
+#ifdef CLIENT_DLL
 	DECLARE_CLIENTCLASS()
 #else
 	DECLARE_SERVERCLASS()

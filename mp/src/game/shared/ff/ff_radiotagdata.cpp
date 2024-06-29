@@ -2,7 +2,7 @@
 // ======== A modification for Half-Life 2 =======
 //
 // @file ff_radiotagdata.cpp
-// @author Patrick O'Leary (Mulchman) 
+// @author Patrick O'Leary (Mulchman)
 // @date 9/20/2006
 // @brief Radio tag data wrapper
 //
@@ -93,10 +93,8 @@ void CFFRadioTagData::OnDataChanged( DataUpdateType_t updateType )
 {
 	BaseClass::OnDataChanged( updateType );
 
-	if( updateType == DATA_UPDATE_CREATED ) 
-	{
+	if( updateType == DATA_UPDATE_CREATED )
 		SetNextClientThink( CLIENT_THINK_ALWAYS );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -155,9 +153,7 @@ int CFFRadioTagData::UpdateTransmitState( void )
 void CFFRadioTagData::ClearVisible( void )
 {
 	for( int i = 0; i < MAX_PLAYERS + 1; i++ )
-	{
 		m_bVisible.Set( i, 0 );
-	}
 }
 
 //-----------------------------------------------------------------------------

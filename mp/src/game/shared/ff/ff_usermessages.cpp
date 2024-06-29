@@ -74,7 +74,7 @@ void RegisterUserMessages()
 	usermessages->Register( "SentryGun_Destroyed", -1 );
 
 	usermessages->Register("FF_BuildTimer", -1);
-  
+
 	// used to send a status icon
 	usermessages->Register( "StatusIconUpdate", -1 );
 
@@ -89,4 +89,3 @@ void RegisterUserMessages()
 	// dexter: tell client it can stop any grenade timers
 	usermessages->Register("FFStopGrenTimers", 1);
 }
-

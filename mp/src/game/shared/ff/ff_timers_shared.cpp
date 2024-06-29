@@ -5,9 +5,9 @@
 /// @author Shawn Smith (L0ki)
 /// @date May 13, 2005
 /// @brief implementation of the base class for the client and server timers
-/// 
+///
 /// implements the shared base class for client and server timers
-/// 
+///
 /// Revisions
 /// ---------
 /// May 13, 2005	L0ki: Initial Creation

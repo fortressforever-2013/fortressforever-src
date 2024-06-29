@@ -60,7 +60,7 @@ private:
 
 public:
 
-	CHudRadar( const char *pElementName ) : CHudElement( pElementName ), vgui::Panel( NULL, "HudRadar" ) 
+	CHudRadar( const char *pElementName ) : CHudElement( pElementName ), vgui::Panel( NULL, "HudRadar" )
 	{
 		// Set our parent window
 		SetParent( g_pClientMode->GetViewport() );

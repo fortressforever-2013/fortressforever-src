@@ -96,7 +96,7 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_rocket);
 		return BaseClass::ShouldPredict();
 	}
 
-	extern short	g_sModelIndexFireball;		// (in combatweapon.cpp) holds the index for the fireball 
+	extern short	g_sModelIndexFireball;		// (in combatweapon.cpp) holds the index for the fireball
 	extern short	g_sModelIndexWExplosion;	// (in combatweapon.cpp) holds the index for the underwater explosion
 
 	//-----------------------------------------------------------------------------
@@ -136,9 +136,7 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_rocket);
 
 		// Pull out of the wall a bit
 		if ( pTrace->fraction != 1.0 )
-		{
 			SetLocalOrigin( pTrace->endpos + (pTrace->plane.normal * 32.0f) );	// |-- Mirv: 32 units used in TFC
-		}
 
 		Vector vecAbsOrigin = GetAbsOrigin();
 		int contents = UTIL_PointContents ( vecAbsOrigin );
@@ -233,7 +231,7 @@ void CFFProjectileRocket::CreateSmokeTrail()
 				m_pDLight->color.g = 192;
 				m_pDLight->color.b = 64;
 				m_pDLight->color.exponent = 4;
-				m_pDLight->style = 6; // 0 through 12 (0 = normal, 1 = flicker, 5 = gentle pulse, 6 = other flicker);
+				m_pDLight->style = 6;	// 0 through 12 (0 = normal, 1 = flicker, 5 = gentle pulse, 6 = other flicker);
 			}
 		}
 	}
@@ -243,7 +241,7 @@ void CFFProjectileRocket::CreateSmokeTrail()
 	//-----------------------------------------------------------------------------
 	void CFFProjectileRocket::UpdateDLight()
 	{
-		if (m_pDLight) // I'm scared, daddy...of NULL pointers.
+		if (m_pDLight)	// I'm scared, daddy...of NULL pointers.
 		{
 			// keep the light attached and alive
 			m_pDLight->origin = GetAbsOrigin();
@@ -257,7 +255,7 @@ void CFFProjectileRocket::CreateSmokeTrail()
 //----------------------------------------------------------------------------
 // Purpose: Spawn a rocket, set up model, size, etc
 //----------------------------------------------------------------------------
-void CFFProjectileRocket::Spawn() 
+void CFFProjectileRocket::Spawn()
 {
 	BaseClass::Spawn();
 
@@ -276,7 +274,7 @@ void CFFProjectileRocket::Spawn()
 	SetCollisionGroup(COLLISION_GROUP_ROCKET);
 
 	// Set the correct think & touch for the nail
-	SetTouch(&CFFProjectileRocket::ExplodeTouch); // No we're going to explode when we touch something
+	SetTouch(&CFFProjectileRocket::ExplodeTouch);	// No we're going to explode when we touch something
 	SetThink(NULL);		// no thinking!
 
 	// Next think
@@ -289,10 +287,10 @@ void CFFProjectileRocket::Spawn()
 //----------------------------------------------------------------------------
 // Purpose: Precache the rocket model
 //----------------------------------------------------------------------------
-void CFFProjectileRocket::Precache() 
+void CFFProjectileRocket::Precache()
 {
 	PrecacheModel(ROCKET_MODEL);
-	PrecacheScriptSound("rocket.fly");
+	PrecacheScriptSound("Rocket.Fly");
 
 	BaseClass::Precache();
 }
@@ -300,12 +298,12 @@ void CFFProjectileRocket::Precache()
 //----------------------------------------------------------------------------
 // Purpose: Create a new rocket
 //----------------------------------------------------------------------------
-CFFProjectileRocket * CFFProjectileRocket::CreateRocket(const CBaseEntity *pSource, const Vector &vecOrigin, const QAngle &angAngles, CBaseEntity *pentOwner, const int iDamage, const int iDamageRadius, const int iSpeed) 
+CFFProjectileRocket * CFFProjectileRocket::CreateRocket(const CBaseEntity *pSource, const Vector &vecOrigin, const QAngle &angAngles, CBaseEntity *pentOwner, const int iDamage, const int iDamageRadius, const int iSpeed)
 {
 	CFFProjectileRocket *pRocket;
 	
 #ifdef PREDICTED_ROCKETS
-	if (pentOwner->IsPlayer()) 
+	if (pentOwner->IsPlayer())
 	{
 		pRocket = (CFFProjectileRocket *) CREATE_PREDICTED_ENTITY("ff_projectile_rocket");
 		pRocket->SetPlayerSimulated(ToBasePlayer(pentOwner));
@@ -338,6 +336,5 @@ CFFProjectileRocket * CFFProjectileRocket::CreateRocket(const CBaseEntity *pSour
 	//pRocket->EmitSound("rocket.fly");
 	// this is being swapped over to the client -mirv
 
-	return pRocket; 
+	return pRocket;
 }
-

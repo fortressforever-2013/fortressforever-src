@@ -31,7 +31,7 @@ class CFFWeaponMedkit : public CFFWeaponMeleeBase
 {
 public:
 	DECLARE_CLASS(CFFWeaponMedkit, CFFWeaponMeleeBase);
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 
 	CFFWeaponMedkit();
@@ -51,13 +51,13 @@ private:
 // CFFWeaponMedkit tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponMedkit, DT_FFWeaponMedkit) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponMedkit, DT_FFWeaponMedkit)
 
-BEGIN_NETWORK_TABLE(CFFWeaponMedkit, DT_FFWeaponMedkit) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFWeaponMedkit, DT_FFWeaponMedkit)
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponMedkit) 
-END_PREDICTION_DATA() 
+BEGIN_PREDICTION_DATA(CFFWeaponMedkit)
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_medkit, CFFWeaponMedkit);
 PRECACHE_WEAPON_REGISTER(ff_weapon_medkit);
@@ -69,15 +69,15 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_medkit);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponMedkit::CFFWeaponMedkit() 
+CFFWeaponMedkit::CFFWeaponMedkit()
 {
 	m_flNextSecondaryAttack = 0;
 }
 
 void CFFWeaponMedkit::Precache()
 {
-	PrecacheScriptSound("medkit.hit");
-	PrecacheScriptSound("medkit.infect");
+	PrecacheScriptSound("Medkit.Hit");
+	PrecacheScriptSound("Medkit.Infect");
 
 	BaseClass::Precache();
 }
@@ -85,7 +85,7 @@ void CFFWeaponMedkit::Precache()
 //----------------------------------------------------------------------------
 // Purpose: Implement impact function
 //----------------------------------------------------------------------------
-void CFFWeaponMedkit::Hit(trace_t &traceHit, Activity nHitActivity) 
+void CFFWeaponMedkit::Hit(trace_t &traceHit, Activity nHitActivity)
 {
 	//DevMsg("[CFFWeaponMedkit] Hit\n");
 
@@ -93,13 +93,13 @@ void CFFWeaponMedkit::Hit(trace_t &traceHit, Activity nHitActivity)
 
 	CBaseEntity	*pHitEntity = traceHit.m_pEnt;
 
-	if (pHitEntity != NULL && pHitEntity->IsPlayer()) 
+	if (pHitEntity != NULL && pHitEntity->IsPlayer())
 	{
 		CFFPlayer *pTarget = ToFFPlayer(pHitEntity);
 		//DevMsg("[medkit] hit other player.. team: %d(mine: %d) \n", pPlayer->GetTeamNumber(), pTarget->GetTeamNumber());
 
 		// check if they are allies
-		if (g_pGameRules->PlayerRelationship(pPlayer, pTarget) == GR_TEAMMATE) 
+		if (g_pGameRules->PlayerRelationship(pPlayer, pTarget) == GR_TEAMMATE)
 		{
 			//DevMsg("[medkit] Same Team\n");
 			// if they are same team, then cure the player
@@ -138,7 +138,7 @@ void CFFWeaponMedkit::Hit(trace_t &traceHit, Activity nHitActivity)
 			CTakeDamageInfo info(this, GetOwner(), GetFFWpnData().m_flDamage, bitsDamageType);
 			info.SetDamageForce(hitDirection * MELEE_IMPACT_FORCE);
 
-			pHitEntity->DispatchTraceAttack(info, hitDirection, &traceHit); 
+			pHitEntity->DispatchTraceAttack(info, hitDirection, &traceHit);
 			ApplyMultiDamage();
 
 			WeaponSound_t wpnSound = SINGLE;

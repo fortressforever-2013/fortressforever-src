@@ -49,9 +49,7 @@ void C_Sparkler::OnDataChanged( DataUpdateType_t updateType )
 
 		// Obtain a reference handle to our particle's desired material
 		if ( m_hEmitter.IsValid() )
-		{
 			m_hMaterial = m_hEmitter->GetPMaterial( "effects/yellowflare" );
-		}
 
 		// Spawn 128 particles per second
 		m_tParticleTimer.Init( 128 );
@@ -121,7 +119,7 @@ void C_Sparkler::ClientThink( void )
 
 // ============================================================================
 //
-//   Dispatch Effect version
+//	Dispatch Effect version
 //
 // ============================================================================
 

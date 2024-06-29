@@ -65,18 +65,18 @@ extern ConVar cl_ffdlight_flamethrower;
 // Behaviour
 enum
 {
-	SMOKE, 
-	FLAME_JET, 
+	SMOKE,
+	FLAME_JET,
 	FLAME_LICK
 };
 
 // Appearance
 enum
 {
-	TEX_FLAME_NORMAL, 
-	TEX_SMOKE, 
-	TEX_FLAME_SMALL1, 
-	TEX_FLAME_SMALL2, 
+	TEX_FLAME_NORMAL,
+	TEX_SMOKE,
+	TEX_FLAME_SMALL1,
+	TEX_FLAME_SMALL2,
 	TEX_FLAME_SPLASH
 };
 
@@ -134,7 +134,7 @@ C_FFFlameJet::C_FFFlameJet()
 //----------------------------------------------------------------------------
 // Purpose: Destructor
 //----------------------------------------------------------------------------
-C_FFFlameJet::~C_FFFlameJet() 
+C_FFFlameJet::~C_FFFlameJet()
 {
 	Cleanup();
 }
@@ -152,14 +152,12 @@ void C_FFFlameJet::Cleanup( void )
 // Purpose: Called after a data update has occured
 // Input  : bnewentity - 
 //----------------------------------------------------------------------------
-void C_FFFlameJet::OnDataChanged(DataUpdateType_t updateType) 
+void C_FFFlameJet::OnDataChanged(DataUpdateType_t updateType)
 {
 	BaseClass::OnDataChanged(updateType);
 
-	if (updateType == DATA_UPDATE_CREATED) 
-	{
+	if (updateType == DATA_UPDATE_CREATED)
 		Start(ParticleMgr(), NULL);
-	}
 
 	m_ParticleEffect.SetParticleCullRadius(max(m_StartSize, m_EndSize));
 
@@ -262,7 +260,7 @@ void C_FFFlameJet::Update(float fTimeDelta)
 		// lerp between pitch of eye and weapon angles.  The bigger the eye angle bias, the more the flamethrower jet's
 		// velocity heads out along the eye angles.  Set it to 1.0f to make it use the eye angles.  Set it to 0 to use model angles.
 		// I reckon something along the lines of 0.75 to 0.8 would be good.
-        float fBlendedPitch = angAngles.x * fEyeAngleBias + angWeapon.x * ( 1.0f - fEyeAngleBias );
+		float fBlendedPitch = angAngles.x * fEyeAngleBias + angWeapon.x * ( 1.0f - fEyeAngleBias );
 		angAngles.x = fBlendedPitch;
 	}
 
@@ -284,9 +282,7 @@ void C_FFFlameJet::Update(float fTimeDelta)
 	}
 
 	if( ( tr.contents & CONTENTS_WATER ) || ( tr.contents & CONTENTS_SLIME ) )
-	{
 		return;
-	}
 
 	Vector forward, right, up;
 	AngleVectors(angAngles, &forward, &right, &up);
@@ -300,15 +296,15 @@ void C_FFFlameJet::Update(float fTimeDelta)
 
 	// Temp
 
-	m_SpreadSpeed	= 100; // ffdev_flame_spreadspeed.GetInt(); // 100;
-	m_Speed			= 1200; // ffdev_flame_speed.GetInt(); // 1200;
-	m_StartSize		= 2; // ffdev_flame_startsize.GetInt(); // 3;
-	m_EndSize		= 192; // ffdev_flame_endsize.GetInt(); // 192;
+	m_SpreadSpeed	= 100;	// ffdev_flame_spreadspeed.GetInt(); // 100;
+	m_Speed			= 1200;	// ffdev_flame_speed.GetInt(); // 1200;
+	m_StartSize		= 2;	// ffdev_flame_startsize.GetInt(); // 3;
+	m_EndSize		= 192;	// ffdev_flame_endsize.GetInt(); // 192;
 
 	// dlight scale
 	float flDLightScale = cl_ffdlight_flamethrower.GetFloat();
 
-	if (m_bEmit && m_ParticleEffect.WasDrawnPrevFrame()) 
+	if (m_bEmit && m_ParticleEffect.WasDrawnPrevFrame())
 	{
 		// update the existing muzzle light
 		if (m_pDLight)
@@ -341,7 +337,7 @@ void C_FFFlameJet::Update(float fTimeDelta)
 		}
 
 		float tempDelta = fTimeDelta;
-		while (m_ParticleSpawn.NextEvent(tempDelta)) 
+		while (m_ParticleSpawn.NextEvent(tempDelta))
 		{
 			// Make a new particle.
 			// Passing 128 as a third argument because these flame particles are bigger than MAX_PARTICLE_SIZE (96)
@@ -448,7 +444,7 @@ inline void RenderParticle_ColorSizeAngle(
 		return;
 
 	CMeshBuilder *pBuilder = pDraw->GetMeshBuilder();
-	if (!pBuilder) 
+	if (!pBuilder)
 		return;
 
 	unsigned char ubColor[4];
@@ -463,32 +459,32 @@ inline void RenderParticle_ColorSizeAngle(
 	pBuilder->Position3f(pos.x + (-ca + sa) * size, pos.y + (-sa - ca) * size, pos.z);
 	pBuilder->Color4ubv(ubColor);
 	pBuilder->TexCoord2f(0, 0, 1);
- 	pBuilder->AdvanceVertex();
+	pBuilder->AdvanceVertex();
 
 	pBuilder->Position3f(pos.x + (-ca - sa) * size, pos.y + (-sa + ca) * size, pos.z);
 	pBuilder->Color4ubv(ubColor);
 	pBuilder->TexCoord2f(0, 0, 0);
- 	pBuilder->AdvanceVertex();
+	pBuilder->AdvanceVertex();
 
 	pBuilder->Position3f(pos.x + (ca - sa) * size, pos.y + (sa + ca) * size, pos.z);
 	pBuilder->Color4ubv(ubColor);
 	pBuilder->TexCoord2f(0, 1, 0);
- 	pBuilder->AdvanceVertex();
+	pBuilder->AdvanceVertex();
 
 	pBuilder->Position3f(pos.x + (ca + sa) * size, pos.y + (sa - ca) * size, pos.z);
 	pBuilder->Color4ubv(ubColor);
 	pBuilder->TexCoord2f(0, 1, 1);
- 	pBuilder->AdvanceVertex();
+	pBuilder->AdvanceVertex();
 
 }
 
 //----------------------------------------------------------------------------
 // Purpose: Render all the particles
 //----------------------------------------------------------------------------
-void C_FFFlameJet::RenderParticles(CParticleRenderIterator *pIterator) 
+void C_FFFlameJet::RenderParticles(CParticleRenderIterator *pIterator)
 {
 	const C_FFFlameJetParticle *pParticle = (const C_FFFlameJetParticle *) pIterator->GetFirst();
-	while (pParticle) 
+	while (pParticle)
 	{
 		// Render.
 		Vector tPos;
@@ -499,7 +495,7 @@ void C_FFFlameJet::RenderParticles(CParticleRenderIterator *pIterator)
 		float alpha = 0.3f; // ffdev_flame_alpha.GetFloat(); // 0.3f; // 0.95f; // 180.0f;
 
 		// Fade out everything in its last moments
-		if (/*pParticle->m_Type != SMOKE &&*/ pParticle->m_Dietime - pParticle->m_Lifetime < /*ffdev_flame_fadeout_time.GetFloat()*/ 0.2f ) 
+		if (/*pParticle->m_Type != SMOKE &&*/ pParticle->m_Dietime - pParticle->m_Lifetime < /*ffdev_flame_fadeout_time.GetFloat()*/ 0.2f )
 		{
 			alpha *= ((pParticle->m_Dietime - pParticle->m_Lifetime) / /*ffdev_flame_fadeout_time.GetFloat()*/ 0.2f );
 
@@ -509,7 +505,7 @@ void C_FFFlameJet::RenderParticles(CParticleRenderIterator *pIterator)
 		}
 
 		// Fade in smoke after a delay
-		if (pParticle->m_Type == SMOKE && pParticle->m_Lifetime < /*ffdev_flame_fadeout_time.GetFloat()*/ 0.2f ) 
+		if (pParticle->m_Type == SMOKE && pParticle->m_Lifetime < /*ffdev_flame_fadeout_time.GetFloat()*/ 0.2f )
 		{
 			alpha *= pParticle->m_Lifetime / 0.2f /*ffdev_flame_fadeout_time.GetFloat()*/;
 		}
@@ -518,7 +514,7 @@ void C_FFFlameJet::RenderParticles(CParticleRenderIterator *pIterator)
 		float col = random->RandomFloat(0.3f, 0.5f);
 
 		// Smoke should generally be darker
-		if (pParticle->m_Type == SMOKE) 
+		if (pParticle->m_Type == SMOKE)
 		{
 			col = random->RandomFloat(0.1f, 0.2f);
 		}
@@ -566,10 +562,9 @@ void C_FFFlameJet::SimulateParticles(CParticleSimulateIterator *pIterator)
 		pParticle->m_Lifetime += pIterator->GetTimeDelta();
 
 		// Should this particle die?
-		if (pParticle->m_Lifetime > pParticle->m_Dietime) 
-		{
+		if (pParticle->m_Lifetime > pParticle->m_Dietime)
 			pIterator->RemoveParticle(pParticle);
-		}
+
 		// Do stuff to this particle
 		else 
 		{
@@ -582,7 +577,7 @@ void C_FFFlameJet::SimulateParticles(CParticleSimulateIterator *pIterator)
 				pParticle->m_Pos = pParticle->m_Origin + (pParticle->m_Velocity * (pParticle->m_Collisiontime - 0.01f));
 				pParticle->m_Type = FLAME_LICK;
 
-				// Some crossproducts (really!) 
+				// Some crossproducts (really!)
 				Vector cp1 = CrossProduct(pParticle->m_Velocity, pParticle->m_HitSurfaceNormal);
 				Vector cp2 = CrossProduct(pParticle->m_HitSurfaceNormal, cp1);
 
@@ -627,7 +622,7 @@ void C_FFFlameJet::SimulateParticles(CParticleSimulateIterator *pIterator)
 			if ( gpGlobals->curtime >= pParticle->m_fDLightDieTime )
 				pParticle->m_pDLight = NULL;
 			else
-                pParticle->m_pDLight->origin = pParticle->m_Pos;
+				pParticle->m_pDLight->origin = pParticle->m_Pos;
 		}
 
 		pParticle = (C_FFFlameJetParticle *) pIterator->GetNext();

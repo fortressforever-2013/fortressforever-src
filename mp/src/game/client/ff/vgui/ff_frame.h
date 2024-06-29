@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/09/13
-	created:	13:9:2006   18:30
-	filename: 	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_frame.cpp
+	created:	13:9:2006	18:30
+	filename:	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_frame.cpp
 	file path:	f:\ff-svn\code\trunk\cl_dll\ff\vgui
 	file base:	ff_frame
 	file ext:	cpp

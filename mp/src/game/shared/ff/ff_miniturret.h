@@ -2,7 +2,7 @@
 // ======== A modification for Half-Life 2 =======
 //
 // @file ff_turret.h
-// @author Patrick O'Leary (Mulchman) 
+// @author Patrick O'Leary (Mulchman)
 // @date 5/1/2006
 // @brief Turret class (for respawn turrets)
 //
@@ -87,9 +87,9 @@ public:
 //
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED( FFMiniTurretLaserDot, DT_FFMiniTurretLaserDot ) 
+IMPLEMENT_NETWORKCLASS_ALIASED( FFMiniTurretLaserDot, DT_FFMiniTurretLaserDot )
 
-BEGIN_NETWORK_TABLE( CFFMiniTurretLaserDot, DT_FFMiniTurretLaserDot ) 
+BEGIN_NETWORK_TABLE( CFFMiniTurretLaserDot, DT_FFMiniTurretLaserDot )
 #ifdef CLIENT_DLL
 	RecvPropBool( RECVINFO( m_bIsOn ) ),
 #else
@@ -154,15 +154,15 @@ protected:
 //
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED( FFMiniTurretLaserBeam, DT_FFMiniTurretLaserBeam ) 
+IMPLEMENT_NETWORKCLASS_ALIASED( FFMiniTurretLaserBeam, DT_FFMiniTurretLaserBeam )
 
-BEGIN_NETWORK_TABLE( CFFMiniTurretLaserBeam, DT_FFMiniTurretLaserBeam ) 
+BEGIN_NETWORK_TABLE( CFFMiniTurretLaserBeam, DT_FFMiniTurretLaserBeam )
 #ifdef CLIENT_DLL
 	RecvPropBool( RECVINFO( m_bIsOn ) ),
 #else
 	SendPropBool( SENDINFO( m_bIsOn ) ),
 #endif
-END_NETWORK_TABLE() 
+END_NETWORK_TABLE()
 
 #ifdef GAME_DLL
 BEGIN_DATADESC( CFFMiniTurretLaserBeam )
@@ -236,11 +236,11 @@ protected:
 	// <-- Shared code
 
 #ifdef CLIENT_DLL 
-	virtual void OnDataChanged( DataUpdateType_t updateType ) 
+	virtual void OnDataChanged( DataUpdateType_t updateType )
 	{
 		BaseClass::OnDataChanged( updateType );
 
-		if( updateType == DATA_UPDATE_CREATED ) 
+		if( updateType == DATA_UPDATE_CREATED )
 		{
 			SetNextClientThink( CLIENT_THINK_ALWAYS );
 		}

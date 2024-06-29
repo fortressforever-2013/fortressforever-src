@@ -118,12 +118,12 @@ void CFFProjectileDart::Precache()
 //----------------------------------------------------------------------------
 // Purpose: Touch function for a dart
 //----------------------------------------------------------------------------
-void CFFProjectileDart::DartTouch(CBaseEntity *pOther) 
+void CFFProjectileDart::DartTouch(CBaseEntity *pOther)
 {
 	if (!pOther->IsSolid() || pOther->IsSolidFlagSet(FSOLID_VOLUME_CONTENTS) || !g_pGameRules->ShouldCollide(GetCollisionGroup(), pOther->GetCollisionGroup())) 
 		return;
 
-	if (pOther->m_takedamage != DAMAGE_NO) 
+	if (pOther->m_takedamage != DAMAGE_NO)
 	{
 		trace_t	tr, tr2;
 		tr = BaseClass::GetTouchTrace();
@@ -143,9 +143,7 @@ void CFFProjectileDart::DartTouch(CBaseEntity *pOther)
 
 		// Damage force is nerf'd against player
 		if (pOther->IsPlayer())
-		{
 			dmgInfo.ScaleDamageForce(0.0f);
-		}
 
 		pOther->DispatchTraceAttack(dmgInfo, vecNormalizedVel, &tr);
 		
@@ -153,7 +151,7 @@ void CFFProjectileDart::DartTouch(CBaseEntity *pOther)
 		ApplyMultiDamage();
 
 		// Apply the tranq'ed flag here
-		if (pOther->IsPlayer()) 
+		if (pOther->IsPlayer())
 		{
 			CFFPlayer *pPlayer = ToFFPlayer(pOther);
 
@@ -182,7 +180,7 @@ void CFFProjectileDart::DartTouch(CBaseEntity *pOther)
 #endif
 
 		//Adrian: keep going through the glass.
-		if (pOther->GetCollisionGroup() == COLLISION_GROUP_BREAKABLE_GLASS) 
+		if (pOther->GetCollisionGroup() == COLLISION_GROUP_BREAKABLE_GLASS)
 			 return;
 
 		SetAbsVelocity(Vector(0, 0, 0));
@@ -197,9 +195,9 @@ void CFFProjectileDart::DartTouch(CBaseEntity *pOther)
 
 		UTIL_TraceLine(GetAbsOrigin(), 	GetAbsOrigin() + vForward * 128, MASK_OPAQUE, pOther, COLLISION_GROUP_NONE, &tr2);
 
-		if (tr2.fraction != 1.0f) 
+		if (tr2.fraction != 1.0f)
 		{
-			if (tr2.m_pEnt == NULL || (tr2.m_pEnt && tr2.m_pEnt->GetMoveType() == MOVETYPE_NONE)) 
+			if (tr2.m_pEnt == NULL || (tr2.m_pEnt && tr2.m_pEnt->GetMoveType() == MOVETYPE_NONE))
 			{
 				CEffectData	data;
 
@@ -223,10 +221,8 @@ void CFFProjectileDart::DartTouch(CBaseEntity *pOther)
 		float speed = VectorNormalize(vecDir);
 
 		// Spark if we hit an entity which wasn't human(ie. player) 
-		if (!pOther->IsPlayer() && UTIL_PointContents(GetAbsOrigin()) != CONTENTS_WATER && speed > 500) 
-		{
-            g_pEffects->Sparks(GetAbsOrigin());
-		}
+		if (!pOther->IsPlayer() && UTIL_PointContents(GetAbsOrigin()) != CONTENTS_WATER && speed > 500)
+			g_pEffects->Sparks(GetAbsOrigin());
 
 #ifdef GAME_DLL
 		Remove();
@@ -238,7 +234,7 @@ void CFFProjectileDart::DartTouch(CBaseEntity *pOther)
 		tr = BaseClass::GetTouchTrace();
 
 		// See if we struck the world
-		if (pOther->GetMoveType() == MOVETYPE_NONE && ! (tr.surface.flags & SURF_SKY)) 
+		if (pOther->GetMoveType() == MOVETYPE_NONE && ! (tr.surface.flags & SURF_SKY))
 		{
 			EmitSound("Dart.HitWorld");
 
@@ -278,18 +274,14 @@ void CFFProjectileDart::DartTouch(CBaseEntity *pOther)
 			SetNextThink(gpGlobals->curtime + 2.0f);
 
 			// Shoot some sparks
-			if (UTIL_PointContents(GetAbsOrigin()) != CONTENTS_WATER && speed > 500) 
-			{
+			if (UTIL_PointContents(GetAbsOrigin()) != CONTENTS_WATER && speed > 500)
 				g_pEffects->Sparks(GetAbsOrigin());
-			}
 		}
 		else
 		{
 			// Put a mark unless we've hit the sky
-			if ((tr.surface.flags & SURF_SKY) == false) 
-			{
+			if ((tr.surface.flags & SURF_SKY) == false)
 				UTIL_ImpactTrace(&tr, DMG_BULLET);
-			}
 
 #ifdef GAME_DLL
 			Remove();
@@ -301,7 +293,7 @@ void CFFProjectileDart::DartTouch(CBaseEntity *pOther)
 //----------------------------------------------------------------------------
 // Purpose: Make a trail of bubbles
 //----------------------------------------------------------------------------
-void CFFProjectileDart::BubbleThink() 
+void CFFProjectileDart::BubbleThink()
 {
 	QAngle angNewAngles;
 
@@ -310,7 +302,7 @@ void CFFProjectileDart::BubbleThink()
 
 	SetNextThink(gpGlobals->curtime + 0.1f);
 
-	if (GetWaterLevel() == 0) 
+	if (GetWaterLevel() == 0)
 		return;
 
 #ifdef GAME_DLL
@@ -321,7 +313,7 @@ void CFFProjectileDart::BubbleThink()
 //----------------------------------------------------------------------------
 // Purpose: Create a new dart
 //----------------------------------------------------------------------------
-CFFProjectileDart *CFFProjectileDart::CreateDart(const CBaseEntity *pSource, const Vector &vecOrigin, const QAngle &angAngles, CBasePlayer *pentOwner, const int iDamage, const int iSpeed) 
+CFFProjectileDart *CFFProjectileDart::CreateDart(const CBaseEntity *pSource, const Vector &vecOrigin, const QAngle &angAngles, CBasePlayer *pentOwner, const int iDamage, const int iSpeed)
 {
 	CFFProjectileDart *pDart = (CFFProjectileDart *) CreateEntityByName("ff_projectile_dart");
 
@@ -334,7 +326,7 @@ CFFProjectileDart *CFFProjectileDart::CreateDart(const CBaseEntity *pSource, con
 	Vector vecForward;
 	AngleVectors(angAngles, &vecForward);
 
-	vecForward *= NAIL_SPEED;//ffdev_nail_speed.GetFloat();		// iSpeed;
+	vecForward *= NAIL_SPEED;//ffdev_nail_speed.GetFloat();	// iSpeed;
 
 	// Set the speed and the initial transmitted velocity
 	pDart->SetAbsVelocity(vecForward);

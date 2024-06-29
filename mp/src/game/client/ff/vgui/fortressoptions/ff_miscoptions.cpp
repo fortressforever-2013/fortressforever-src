@@ -19,7 +19,7 @@ extern IFileSystem **pFilesystem;
 #include <vgui_controls/Button.h>
 */
 
-// memdbgon must be the last include file in a .cpp file!!! 
+// memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 //-----------------------------------------------------------------------------
@@ -66,7 +66,7 @@ void CFFMiscOptions::Apply()
 		{
 			// Only replace the cvar with this option if it is not a custom one
 			const char *pszValue = cb->GetActiveItemUserData()->GetString("value");
-			if (Q_strncmp(pszValue, "custom", 6) != 0)
+			if (Q_strncmp(pszValue, "custom", 6))
 				pCvar->SetValue(pszValue);
 		}
 		else if (CFFInputSlider *slider = dynamic_cast <CFFInputSlider *> (pChild))
@@ -118,7 +118,7 @@ void CFFMiscOptions::Load()
 			Q_strcpy(szCaption, pszCaption);
 
 		// A little separator
-		if (Q_strncmp(pszName, "heading", 7) == 0)
+		if (!Q_strncmp(pszName, "heading", 7))
 		{
 			Label *l = new Label(this, "label", szCaption);
 
@@ -131,7 +131,7 @@ void CFFMiscOptions::Load()
 		}
 
 		// Boolean is just a simple checkbox
-		else if (Q_strncmp(pszType, "boolean", 7) == 0)
+		else if (!Q_strncmp(pszType, "boolean", 7))
 		{
 			CheckButton *cb = new CheckButton(this, pszName, szCaption);
 
@@ -144,7 +144,7 @@ void CFFMiscOptions::Load()
 			iYCoords += ROW_HEIGHT;
 		}
 		// Discrete is a combobox with a label
-		else if (Q_strncmp(pszType, "discrete", 8) == 0)
+		else if (!Q_strncmp(pszType, "discrete", 8))
 		{
 			KeyValues *kvValues = kvOption->FindKey("values", false);
 			int nValues = 0;
@@ -209,7 +209,7 @@ void CFFMiscOptions::Load()
 			iYCoords += ROW_HEIGHT;
 		}
 		// Slider is a slider with a label
-		else if (Q_strncmp(pszType, "slider", 6) == 0)
+		else if (!Q_strncmp(pszType, "slider", 6))
 		{
 			CFFInputSlider *slider = new CFFInputSlider(this, pszName, VarArgs("%sInput", pszName));
 
@@ -256,9 +256,7 @@ void CFFMiscOptions::Load()
 
 		// This is a bad show old chap
 		if (CheckButton *cb = dynamic_cast <CheckButton *> (pChild))
-		{
 			cb->SetSelected(pCvar->GetBool());
-		}
 		else if (ComboBox *cb = dynamic_cast <ComboBox *> (pChild))
 		{
 			int option = GetComboBoxOption(cb, pCvar->GetString());
@@ -304,9 +302,7 @@ void CFFMiscOptions::Load()
 			}*/
 		}
 		else if (CFFInputSlider *slider = dynamic_cast <CFFInputSlider *> (pChild))
-		{
 			slider->SetValue(pCvar->GetInt());
-		}
 	}
 }
 
@@ -318,9 +314,8 @@ int CFFMiscOptions::GetComboBoxOption(ComboBox *cb, const char *value, const cha
 	{
 		KeyValues *kvItem = cb->GetItemUserData(i);
 		const char *pszItemValue = kvItem->GetString(keyname);
-		if (kvItem && Q_strncmp(pszItemValue, value, l) == 0) {
+		if (kvItem && !Q_strncmp(pszItemValue, value, l))
 			return i;
-		}
 	}
 	return -1;
 }

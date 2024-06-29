@@ -48,7 +48,7 @@ static int g_iMiniTurretBeam, g_iMiniTurretHalo, g_iMiniTurretDot;
 //-----------------------------------------------------------------------------
 // Purpose: Create the laser dot
 //-----------------------------------------------------------------------------
-CFFMiniTurretLaserDot *CFFMiniTurretLaserDot::Create( const Vector& vecOrigin, CBaseEntity *pOwner ) 
+CFFMiniTurretLaserDot *CFFMiniTurretLaserDot::Create( const Vector& vecOrigin, CBaseEntity *pOwner )
 {
 #ifdef GAME_DLL
 	CFFMiniTurretLaserDot *pLaser = ( CFFMiniTurretLaserDot * )CBaseEntity::Create( "env_ffminiturretlaserdot", vecOrigin, QAngle( 0, 0, 0 ) );
@@ -156,11 +156,11 @@ void CFFMiniTurretLaserDot::OnObjectThink( void )
 //-----------------------------------------------------------------------------
 // Purpose: Setup our sprite reference
 //-----------------------------------------------------------------------------
-void CFFMiniTurretLaserDot::OnDataChanged( DataUpdateType_t updateType ) 
+void CFFMiniTurretLaserDot::OnDataChanged( DataUpdateType_t updateType )
 {
 	BaseClass::OnDataChanged( updateType );
 
-	if( updateType == DATA_UPDATE_CREATED ) 
+	if( updateType == DATA_UPDATE_CREATED )
 	{
 		SetNextClientThink( CLIENT_THINK_ALWAYS );
 	}	
@@ -200,7 +200,7 @@ CFFMiniTurretLaserBeam::~CFFMiniTurretLaserBeam( void )
 //-----------------------------------------------------------------------------
 // Purpose: Create the laser beam
 //-----------------------------------------------------------------------------
-CFFMiniTurretLaserBeam *CFFMiniTurretLaserBeam::Create( const Vector& vecOrigin, CBaseEntity *pOwner ) 
+CFFMiniTurretLaserBeam *CFFMiniTurretLaserBeam::Create( const Vector& vecOrigin, CBaseEntity *pOwner )
 {
 #ifdef GAME_DLL
 	CFFMiniTurretLaserBeam *pObject = ( CFFMiniTurretLaserBeam * )CBaseEntity::Create( "env_ffminiturretlaserbeam", vecOrigin, QAngle( 0, 0, 0 ) );
@@ -227,7 +227,7 @@ CFFMiniTurretLaserBeam *CFFMiniTurretLaserBeam::Create( const Vector& vecOrigin,
 //-----------------------------------------------------------------------------
 // Purpose: Setup our sprite reference
 //-----------------------------------------------------------------------------
-void CFFMiniTurretLaserBeam::OnDataChanged( DataUpdateType_t updateType ) 
+void CFFMiniTurretLaserBeam::OnDataChanged( DataUpdateType_t updateType )
 {
 	BaseClass::OnDataChanged( updateType );
 
@@ -294,7 +294,7 @@ void CFFMiniTurretLaserBeam::ClientThink( void )
 //
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED( FFMiniTurret, DT_FFMiniTurret ) 
+IMPLEMENT_NETWORKCLASS_ALIASED( FFMiniTurret, DT_FFMiniTurret )
 
 BEGIN_NETWORK_TABLE( CFFMiniTurret, DT_FFMiniTurret )
 #ifdef CLIENT_DLL 
@@ -864,9 +864,7 @@ void CFFMiniTurret::OnActiveThink( void )
 	if( !bEnemyVisible /*|| ( flDistToEnemy > FF_MINITURRET_RANGE )*/ )
 	{
 		if( m_flLastSight )
-		{
 			m_flLastSight = gpGlobals->curtime + 0.5f;
-		}
 		else if( gpGlobals->curtime > m_flLastSight )
 		{
 			// Should we look for a new target?
@@ -1003,7 +1001,7 @@ bool CFFMiniTurret::IsTargetVisible( CBaseEntity *pTarget )
 	UTIL_TraceLine( EyePosition(), vecTarget, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr );
 	//UTIL_TraceLine( vecOrigin, vecTarget, MASK_PLAYERSOLID, this, COLLISION_GROUP_PLAYER, &tr );
 
-	/*if ( TURRET_DEBUG )
+/*	if ( TURRET_DEBUG )
 	{
 		int r = 0, g = 0, b = 0;
 		if(tr.fraction < 1.f)
@@ -1011,8 +1009,8 @@ bool CFFMiniTurret::IsTargetVisible( CBaseEntity *pTarget )
 		else
 			g = 255;
 		debugoverlay->AddLineOverlay(vecOrigin, vecTarget, r, g, b, false, 0.1f);
-	}*/
-
+	}
+*/
 	// What did our trace hit?
 	// Miniturrets honestly don't care about startsolid, they actually do start in a solid
 	if( /* tr.startsolid || ( tr.fraction != 1.0f ) ||*/ !tr.m_pEnt || FF_TraceHitWorld( &tr ) )

@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/01/31
-	created:	31:1:2006   0:43
-	filename: 	f:\cvs\code\cl_dll\ff\ProxyTeam.cpp
+	created:	31:1:2006	0:43
+	filename:	f:\cvs\code\cl_dll\ff\ProxyTeam.cpp
 	file path:	f:\cvs\code\cl_dll\ff
 	file base:	ProxyTeam
 	file ext:	cpp
@@ -19,7 +19,7 @@
 #include "tier0/memdbgon.h"
 
 //-----------------------------------------------------------------------------
-// Returns the player team id(from 0 to 4) 
+// Returns the player team id(from 0 to 4)
 //-----------------------------------------------------------------------------
 class CProxyTeam : public CResultProxy
 {
@@ -27,9 +27,9 @@ public:
 	virtual void OnBind(void *pC_BaseEntity);
 };
 
-void CProxyTeam::OnBind(void *pC_BaseEntity) 
+void CProxyTeam::OnBind(void *pC_BaseEntity)
 {
-	if (!pC_BaseEntity) 
+	if (!pC_BaseEntity)
 		return;
 
 	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayerOrObserverTarget();

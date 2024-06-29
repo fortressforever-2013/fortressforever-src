@@ -28,7 +28,7 @@
 #define ANIM_TOPSPEED_RUN			250
 #define ANIM_TOPSPEED_RUN_CROUCH	85
 
-#define ANGLE_BEFORE_TURN_LEGS		60 // changed from 30 -> 60 for rebo
+#define ANGLE_BEFORE_TURN_LEGS		60	// changed from 30 -> 60 for rebo
 
 #define DEFAULT_IDLE_NAME "idle_upper_"
 #define DEFAULT_CROUCH_IDLE_NAME "crouch_idle_upper_"
@@ -183,9 +183,7 @@ void CFFPlayerAnimState::DoAnimationEvent( PlayerAnimEvent_t event )
 		}
 	}
 	else
-	{
 		Assert( !"CFFPlayerAnimState::DoAnimationEvent" );
-	}
 }
 
 int CFFPlayerAnimState::CalcReloadLayerSequence()
@@ -237,9 +235,7 @@ int CFFPlayerAnimState::CalcReloadLayerSequence()
 		if ( flCurCycle > 1 )
 		{
 			if ( bWaitAtEnd )
-			{
 				flCurCycle = 1;
-			}
 			else
 			{
 				// Not firing anymore.
@@ -288,7 +284,7 @@ int CFFPlayerAnimState::CalcAimLayerSequence( float *flCycle, float *flAimSequen
 		switch ( GetCurrentMainSequenceActivity() )
 		{
 			case ACT_CROUCHIDLE:
-			case ACT_RUN_CROUCH: // Jiggles: We need this case for proper blending to crouch-idle instead of standing-idle
+			case ACT_RUN_CROUCH:	// Jiggles: We need this case for proper blending to crouch-idle instead of standing-idle
 				return CalcSequenceIndex( "%s%s", DEFAULT_CROUCH_IDLE_NAME, pSuffix );
 			case ACT_HOVER:
 				return CalcSequenceIndex( "%s%s", DEFAULT_SWIM_IDLE_NAME, pSuffix );
@@ -331,7 +327,6 @@ int CFFPlayerAnimState::CalcAimLayerSequence( float *flCycle, float *flAimSequen
 		}
 	}
 }
-
 
 
 const char* CFFPlayerAnimState::GetWeaponSuffix()
@@ -448,9 +443,7 @@ Activity CFFPlayerAnimState::CalcMainActivity()
 	float flOuterSpeed = GetOuterXYSpeed();
 
 	if ( HandleJumping() )
-	{
 		return ACT_HOP;
-	}
 	else
 	{
 		Activity idealActivity = ACT_IDLE;
@@ -474,7 +467,7 @@ Activity CFFPlayerAnimState::CalcMainActivity()
 					// FF TODO: play separate animations run/walk while cloaked?  all sneaky and shit
 					if ( pPlayer )
 					{	
-						if ( pPlayer->GetFlags() & FL_INWATER ) // But not if we're swimming!
+						if ( pPlayer->GetFlags() & FL_INWATER )	// But not if we're swimming!
 							idealActivity = ACT_SWIM;
 						else if ( pPlayer->IsCloaked() )
 							idealActivity = ACT_WALK;
@@ -538,9 +531,7 @@ void CFFPlayerAnimState::ClearAnimationLayers()
 
 	m_pOuter->SetNumAnimOverlays( NUM_LAYERS_WANTED );
 	for ( int i=0; i < m_pOuter->GetNumAnimOverlays(); i++ )
-	{
 		m_pOuter->GetAnimOverlay( i )->SetOrder( CBaseAnimatingOverlay::MAX_OVERLAYS );
-	}
 }
 
 

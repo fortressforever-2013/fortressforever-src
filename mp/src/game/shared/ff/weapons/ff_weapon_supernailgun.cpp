@@ -52,13 +52,13 @@ private:
 // CFFWeaponSuperNailgun tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponSuperNailgun, DT_FFWeaponSuperNailgun) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponSuperNailgun, DT_FFWeaponSuperNailgun)
 
-BEGIN_NETWORK_TABLE(CFFWeaponSuperNailgun, DT_FFWeaponSuperNailgun) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFWeaponSuperNailgun, DT_FFWeaponSuperNailgun)
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponSuperNailgun) 
-END_PREDICTION_DATA() 
+BEGIN_PREDICTION_DATA(CFFWeaponSuperNailgun)
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_supernailgun, CFFWeaponSuperNailgun);
 PRECACHE_WEAPON_REGISTER(ff_weapon_supernailgun);
@@ -70,14 +70,14 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_supernailgun);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponSuperNailgun::CFFWeaponSuperNailgun() 
+CFFWeaponSuperNailgun::CFFWeaponSuperNailgun()
 {
 }
 
 //----------------------------------------------------------------------------
 // Purpose: Fire a nail
 //----------------------------------------------------------------------------
-void CFFWeaponSuperNailgun::Fire() 
+void CFFWeaponSuperNailgun::Fire()
 {
 	CFFPlayer *pPlayer = GetPlayerOwner();
 	const CFFWeaponInfo &pWeaponInfo = GetFFWpnData();

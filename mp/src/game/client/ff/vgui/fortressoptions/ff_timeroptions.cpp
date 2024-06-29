@@ -96,10 +96,8 @@ void CFFTimerOptions::Load()
 		int nLength = strlen(cl_timerwav.GetString());
 
 		// This is our timer file
-		if (Q_strncmp(pFilename, cl_timerwav.GetString(), nLength) == 0)
-		{
+		if (!Q_strncmp(pFilename, cl_timerwav.GetString(), nLength))
 			iCurrent = iNew;
-		}
 
 		pFilename = (*pFilesystem)->FindNext(findHandle);
 	}
@@ -125,10 +123,8 @@ void CFFTimerOptions::Load()
 		int nLength = strlen(cl_killbeepwav.GetString());
 
 		// This is our timer file
-		if (Q_strncmp(pFilename2, cl_killbeepwav.GetString(), nLength) == 0)
-		{
+		if (!Q_strncmp(pFilename2, cl_killbeepwav.GetString(), nLength))
 			iCurrent2 = iNew;
-		}
 
 		pFilename2 = (*pFilesystem)->FindNext(findHandle2);
 	}
@@ -142,22 +138,18 @@ void CFFTimerOptions::OnButtonCommand(KeyValues *data)
 {
 	const char *pszCommand = data->GetString("command");
 
-	if (Q_strcmp(pszCommand, "Play") == 0)
+	if (!Q_strcmp(pszCommand, "Play"))
 	{
 		const char *pszTimer = m_pTimers->GetActiveItemUserData()->GetString("file");
 
 		if (pszTimer)
-		{
 			engine->ClientCmd(VarArgs("play timers/%s\n", pszTimer));
-		}
 	}
-	else if (Q_strcmp(pszCommand, "Play2") == 0)
+	else if (!Q_strcmp(pszCommand, "Play2"))
 	{
 		const char *pszBeep = m_pBeeps->GetActiveItemUserData()->GetString("file");
 
 		if (pszBeep)
-		{
 			engine->ClientCmd(VarArgs("play player/deathbeep/%s\n", pszBeep));
-		}
 	}
 }

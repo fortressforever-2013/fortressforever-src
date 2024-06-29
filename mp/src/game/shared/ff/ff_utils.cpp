@@ -69,31 +69,31 @@ int Class_StringToInt( const char *szClassName )
 	// trying to do so in the order of most popular
 	// classes to least popular [eh, kind of...]
 	
-	if( Q_stricmp( szClassName, "scout" ) == 0 )
+	if( !Q_stricmp( szClassName, "scout" ) )
 		return 1;
-	else if( Q_stricmp( szClassName, "sniper" ) == 0 )
+	else if( !Q_stricmp( szClassName, "sniper" ) )
 		return 2;
-	else if( Q_stricmp( szClassName, "soldier" ) == 0 )
+	else if( !Q_stricmp( szClassName, "soldier" ) )
 		return 3;
-	else if( Q_stricmp( szClassName, "demoman" ) == 0 )
+	else if( !Q_stricmp( szClassName, "demoman" ) )
 		return 4;
-	else if( Q_stricmp( szClassName, "medic" ) == 0 )
+	else if( !Q_stricmp( szClassName, "medic" ) )
 		return 5;
-	else if( Q_stricmp( szClassName, "hwguy" ) == 0 )
+	else if( !Q_stricmp( szClassName, "hwguy" ) )
 		return 6;
-	else if( Q_stricmp( szClassName, "pyro" ) == 0 )
+	else if( !Q_stricmp( szClassName, "pyro" ) )
 		return 7;
-	else if( Q_stricmp( szClassName, "spy" ) == 0 )
+	else if( !Q_stricmp( szClassName, "spy" ) )
 		return 8;
-	else if( Q_stricmp( szClassName, "engineer" ) == 0 )
+	else if( !Q_stricmp( szClassName, "engineer" ) )
 		return 9;
-	else if( Q_stricmp( szClassName, "civilian" ) == 0 )
+	else if( !Q_stricmp( szClassName, "civilian" ) )
 		return 10;
-	else if( Q_stricmp( szClassName, "dispenser" ) == 0 )
+	else if( !Q_stricmp( szClassName, "dispenser" ) )
 		return 11;
-	else if( Q_stricmp( szClassName, "sentrygun" ) == 0 )
+	else if( !Q_stricmp( szClassName, "sentrygun" ) )
 		return 12;
-	else if( Q_stricmp( szClassName, "mancannon" ) == 0 )
+	else if( !Q_stricmp( szClassName, "mancannon" ) )
 		return 13;
 	else
 		DevWarning( "Class_StringToInt :: No match!\n" );
@@ -185,17 +185,17 @@ const char *Class_IntToPrintString( int iClassIndex )
 
 int Team_StringToInt( const char *szTeamName )
 {
-	if( Q_stricmp( szTeamName, "unassigned" ) == 0 )
+	if( !Q_stricmp( szTeamName, "unassigned" ) )
 		return 0;
-	else if( Q_stricmp( szTeamName, "spectator" ) == 0 )
+	else if( !Q_stricmp( szTeamName, "spectator" ) )
 		return 1;
-	else if( Q_stricmp( szTeamName, "blue" ) == 0 )
+	else if( !Q_stricmp( szTeamName, "blue" ) )
 		return 2;
-	else if( Q_stricmp( szTeamName, "red" ) == 0 )
+	else if( !Q_stricmp( szTeamName, "red" ) )
 		return 3;
-	else if( Q_stricmp( szTeamName, "yellow" ) == 0 )
+	else if( !Q_stricmp( szTeamName, "yellow" ) )
 		return 4;
-	else if( Q_stricmp( szTeamName, "green" ) == 0 )
+	else if( !Q_stricmp( szTeamName, "green" ) )
 		return 5;
 	else
 		DevWarning( "Team_StringToInt :: No match!\n" );
@@ -408,9 +408,7 @@ int FF_NumPlayers( )
 	{
 		CFFPlayer *pPlayer = ToFFPlayer( UTIL_PlayerByIndex(i) );
 		if (pPlayer && pPlayer->IsPlayer())
-		{
 			ct++;
-		}
 	}
 
 	return ct;
@@ -501,7 +499,7 @@ void FF_HudHint(
 //		Server side: Sends a HudHint message to the client
 //
 void FF_SendHint( 
-#ifndef CLIENT_DLL 
+#ifndef CLIENT_DLL
 				CFFPlayer *pPlayer,
 #endif
 				unsigned short wID,
@@ -948,8 +946,8 @@ bool FF_IsAirshot( CBaseEntity *pEntity, float flThresholdMultiplier/*=1.0f*/ )
 char *UTIL_GetFormattedMapName( void )
 {	
 	static char szText[ 256 ];
-	Q_strcpy( szText, engine->GetLevelName() + 5 ); // Skip the "maps/" part
-	szText[ ( int )strlen( szText ) - 4 ] = '\0'; // Skip the ".bsp" part
+	Q_strcpy( szText, engine->GetLevelName() + 5 );	// Skip the "maps/" part
+	szText[ ( int )strlen( szText ) - 4 ] = '\0';	// Skip the ".bsp" part
 
 	return szText;
 }
@@ -972,8 +970,8 @@ void UTIL_GetTeamNumbers(char nTeamNumbers[4])
 		return;
 #endif
 
-	// Now loop through the players and take different branches to find out 
-	// what team they are on.
+	// Now loop through the players and take different
+	// branches to find out what team they are on.
 	for (int iClient = 1; iClient <= gpGlobals->maxClients; iClient++)
 	{
 #ifdef GAME_DLL
@@ -992,9 +990,7 @@ void UTIL_GetTeamNumbers(char nTeamNumbers[4])
 
 		// Finally add this team if it is valid
 		if (iTeamIndex >= 0 && iTeamIndex < 4)
-		{
 			nTeamNumbers[iTeamIndex]++;
-		}
 	}
 }
 
@@ -1083,9 +1079,7 @@ int UTIL_GetTeamSpaces(char nSpacesRemaining[4])
 		nSpacesRemaining[iTeamIndex] = max(nSpacesRemaining[iTeamIndex], 0);
 
 		if (nSpacesRemaining[iTeamIndex] > 0)
-		{
 			nFreeTeams++;
-		}
 	}
 
 	return nFreeTeams;
@@ -1128,9 +1122,7 @@ void UTIL_GetClassNumbers(int iTeam, char nClassNumbers[10])
 
 		// Finally add this Class if it is valid
 		if (iClassIndex >= 0 && iClassIndex < 10)
-		{
 			nClassNumbers[iClassIndex]++;
-		}
 	}
 }
 
@@ -1219,9 +1211,7 @@ int UTIL_GetClassSpaces(int iTeamID, char nSpacesRemaining[10])
 		nSpacesRemaining[iClassIndex] = max(nSpacesRemaining[iClassIndex], 0);
 
 		if (nSpacesRemaining[iClassIndex] > 0)
-		{
 			nFreeClasses++;
-		}
 	}
 
 	return nFreeClasses;
@@ -1276,13 +1266,9 @@ int UTIL_PickRandomTeam()
 			if(teamNumber >= FF_TEAM_BLUE)
 			{
 				if(iPlayersOnTeam[teamNumber - FF_TEAM_BLUE] == -1)
-				{
 					iPlayersOnTeam[teamNumber - FF_TEAM_BLUE] = 1;
-				}
 				else
-				{
 					++iPlayersOnTeam[teamNumber - FF_TEAM_BLUE];
-				}
 			}
 		}
 	}
@@ -1357,18 +1343,12 @@ int UTIL_PickRandomTeam()
 		{
 			//if the team with the lowest score matched the size of the emptiest team 
 			if(flFullnessOfTeam[iTeamWithLowestScore - FF_TEAM_BLUE] == flFullnessOfTeam[iEmptiestTeam - FF_TEAM_BLUE])
-			{
 				iBestTeam = iTeamWithLowestScore;
-			}
 			else
-			{
 				iBestTeam = iEmptiestTeam;
-			}
 		}
 		else
-		{
 			iBestTeam = iTeamWithLowestScore;
-		}
 	}
 	else
 	{
@@ -1379,7 +1359,7 @@ int UTIL_PickRandomTeam()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Works out the position & angles of the info intermission.  
+// Purpose: Works out the position & angles of the info intermission.
 // In: pointers to existing vector & angles to be filled out.
 // Returns: Nonzero for success, 0 for failure.
 //-----------------------------------------------------------------------------
@@ -1434,9 +1414,7 @@ int UTIL_GetIntermissionData( Vector *pPosition, QAngle *pAngles )
 		return 0;
 	}
 }
-
 #endif
-
 
 #ifdef GAME_DLL
 
@@ -1453,6 +1431,4 @@ void FF_SendStopGrenTimerMessage(CFFPlayer *target)
 		WRITE_BYTE(0xFF);
 	MessageEnd();	
 }
-
 #endif
-

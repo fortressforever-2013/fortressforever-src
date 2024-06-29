@@ -55,13 +55,13 @@ private:
 // CFFWeaponSpanner tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponSpanner, DT_FFWeaponSpanner) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponSpanner, DT_FFWeaponSpanner)
 
-BEGIN_NETWORK_TABLE(CFFWeaponSpanner, DT_FFWeaponSpanner) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFWeaponSpanner, DT_FFWeaponSpanner)
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponSpanner) 
-END_PREDICTION_DATA() 
+BEGIN_PREDICTION_DATA(CFFWeaponSpanner)
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_spanner, CFFWeaponSpanner);
 PRECACHE_WEAPON_REGISTER(ff_weapon_spanner);
@@ -73,7 +73,7 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_spanner);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponSpanner::CFFWeaponSpanner() 
+CFFWeaponSpanner::CFFWeaponSpanner()
 {
 }
 
@@ -97,7 +97,7 @@ bool CFFWeaponSpanner::CanBeSelected()
 //----------------------------------------------------------------------------
 // Purpose: Implement impact function
 //----------------------------------------------------------------------------
-void CFFWeaponSpanner::Hit(trace_t &traceHit, Activity nHitActivity) 
+void CFFWeaponSpanner::Hit(trace_t &traceHit, Activity nHitActivity)
 {
 	// Get the player who is swinging us...
 	CFFPlayer *pPlayer = ToFFPlayer(GetOwner());
@@ -113,10 +113,10 @@ void CFFWeaponSpanner::Hit(trace_t &traceHit, Activity nHitActivity)
 		return;
 
 	// Hit a player
-	if (pHitEntity->IsPlayer()) 
+	if (pHitEntity->IsPlayer())
 	{
 		// If it's dead, who cares
-		if (!pHitEntity->IsAlive()) 
+		if (!pHitEntity->IsAlive())
 			return;
 
 		CFFPlayer *pHitPlayer = ToFFPlayer(pHitEntity);
@@ -173,14 +173,14 @@ void CFFWeaponSpanner::Hit(trace_t &traceHit, Activity nHitActivity)
 			bool bFriendly = ( g_pGameRules->PlayerRelationship( pPlayer, ToFFPlayer( pDispenser->m_hOwner.Get() ) ) == GR_TEAMMATE );
 
 			// If the dispenser is mine, a team mates, or an allies, don't hurt it, ever
-			if( bMine || bFriendly ) 
+			if( bMine || bFriendly )
 			{
 				// DrEvil: Added IsBuilt check to fix upgrading when build in progress
 				if(!pDispenser->IsBuilt())
 					return;
 
 				// If it's damaged, restore it's health on the first clang
-				if( pDispenser->NeedsHealth() ) 
+				if( pDispenser->NeedsHealth() )
 				{
 					// We get 5 health for each cell
 					int iHealthGiven = min( pDispenser->NeedsHealth(), FF_REPAIRAMOUNTPERCELL_DISPENSER * pPlayer->GetAmmoCount( AMMO_CELLS ) );
@@ -223,12 +223,12 @@ void CFFWeaponSpanner::Hit(trace_t &traceHit, Activity nHitActivity)
 				return;
 			}
 		}
-		else if (pHitEntity->Classify() == CLASS_SENTRYGUN) 
+		else if (pHitEntity->Classify() == CLASS_SENTRYGUN)
 		{
 			CFFSentryGun *pSentryGun = (CFFSentryGun *) pHitEntity;
 			WeaponSound( SPECIAL1 );
 
-			// Is the sentrygun mine(is pPlayer the owner?) 
+			// Is the sentrygun mine(is pPlayer the owner?)
 			bool bMine = ( pPlayer == ToFFPlayer( pSentryGun->m_hOwner.Get() ) );
 
 			// Is the sentrygun a teammates or an allies? (changes depending on friendlyfire value) 

@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/08/29
-	created:	29:8:2006   18:46
-	filename: 	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_gameui.h
+	created:	29:8:2006	18:46
+	filename:	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_gameui.h
 	file path:	f:\ff-svn\code\trunk\cl_dll\ff\vgui
 	file base:	ff_gameui
 	file ext:	h

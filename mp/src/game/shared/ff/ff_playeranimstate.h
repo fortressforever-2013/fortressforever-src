@@ -25,7 +25,7 @@
 	#define CFFPlayer C_FFPlayer
 #else
 	class CBaseAnimatingOverlay;
-	class CFFWeaponBase; 
+	class CFFWeaponBase;
 	class CFFPlayer;
 #endif
 

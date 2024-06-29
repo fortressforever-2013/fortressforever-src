@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/01/31
-	created:	31:1:2006   0:42
-	filename: 	f:\cvs\code\cl_dll\ff\ProxyAmmo.cpp
+	created:	31:1:2006	0:42
+	filename:	f:\cvs\code\cl_dll\ff\ProxyAmmo.cpp
 	file path:	f:\cvs\code\cl_dll\ff
 	file base:	ProxyAmmo
 	file ext:	cpp
@@ -20,7 +20,7 @@
 #include "tier0/memdbgon.h"
 
 //-----------------------------------------------------------------------------
-// Returns ammo in active weapon(from 0 to 200) 
+// Returns ammo in active weapon(from 0 to 200)
 //-----------------------------------------------------------------------------
 class CProxyAmmo : public CResultProxy
 {
@@ -70,13 +70,9 @@ void CProxyAmmo::OnBind(void *pC_BaseEntity)
 
 	// Make sure we report the right ammo
 	if (pWeapon->UsesClipsForAmmo1())
-	{
 		iAmmo = pWeapon->m_iClip1;
-	}
 	else
-	{
 		iAmmo = pPlayer->GetAmmoCount(pWeapon->GetPrimaryAmmoType());
-	}
 
 	// Ammo has gone up, use a linear change
 	// Should probably take the frame rate into account here
@@ -88,9 +84,7 @@ void CProxyAmmo::OnBind(void *pC_BaseEntity)
 		// tick. This means that it's probably been holstered and should show the 
 		// correct value when it comes up.
 		if (flDelta >= 0.0f && flDelta < 1.0f)
-		{
 			iAmmo = m_iPreviousValue + 1;
-		}
 	}
 
 	// Store the previous value of this before we screw it up
@@ -105,13 +99,9 @@ void CProxyAmmo::OnBind(void *pC_BaseEntity)
 	}
 
 	if (pPlayer && pPlayer->GetActiveFFWeapon())
-	{
 		SetFloatResult(iAmmo);
-	}
 	else
-	{
 		SetFloatResult(0);
-	}
 
 	m_flLastTick = gpGlobals->curtime;
 }

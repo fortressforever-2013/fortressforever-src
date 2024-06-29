@@ -507,17 +507,13 @@ void C_FFSpyCloakMaterialProxy::OnBind(void* pC_BaseEntity)
 		if (pViewModel)
 		{
 			if (pViewModel->IsViewModel())
-			{
 				pPlayer = C_FFPlayer::GetLocalFFPlayerOrObserverTarget();
-			}
 		}
 
 		// Weapon
 		C_FFWeaponBase* pWeapon = dynamic_cast<C_FFWeaponBase*>(pEntity);
 		if (pWeapon && !pPlayer)
-		{
 			pPlayer = pWeapon->GetPlayerOwner();
-		}
 	}
 
 	// No valid player, quit

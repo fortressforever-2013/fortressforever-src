@@ -81,7 +81,7 @@ protected:
 	void Cleanup() 
 	{
 #ifdef CLIENT_DLL
-		if (m_pBuildable) 
+		if (m_pBuildable)
 		{
 			m_pBuildable->Remove();
 			m_pBuildable = NULL;
@@ -94,13 +94,13 @@ protected:
 // CFFWeaponDeployDispenser tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponDeployDispenser, DT_FFWeaponDeployDispenser) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponDeployDispenser, DT_FFWeaponDeployDispenser)
 
-BEGIN_NETWORK_TABLE(CFFWeaponDeployDispenser, DT_FFWeaponDeployDispenser) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFWeaponDeployDispenser, DT_FFWeaponDeployDispenser)
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponDeployDispenser) 
-END_PREDICTION_DATA() 
+BEGIN_PREDICTION_DATA(CFFWeaponDeployDispenser)
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_deploydispenser, CFFWeaponDeployDispenser);
 PRECACHE_WEAPON_REGISTER(ff_weapon_deploydispenser);
@@ -138,12 +138,10 @@ void CFFWeaponDeployDispenser::ItemPostFrame()
 		m_flNextPrimaryAttack = gpGlobals->curtime;
 
 	if ((pOwner->m_nButtons & IN_ATTACK || pOwner->m_afButtonPressed & IN_ATTACK) && (m_flNextPrimaryAttack <= gpGlobals->curtime))
-	{
-			PrimaryAttack();
-	}
+		PrimaryAttack();
 
 	// -----------------------
-	//  Reload pressed / Clip Empty
+	//	Reload pressed / Clip Empty
 	// -----------------------
 	if (pOwner->m_nButtons & IN_RELOAD && UsesClipsForAmmo1() && !m_bInReload)
 	{
@@ -159,9 +157,7 @@ void CFFWeaponDeployDispenser::ItemPostFrame()
 	{
 		// no fire buttons down or reloading
 		if (!ReloadOrSwitchWeapons() && (m_bInReload == false))
-		{
 			WeaponIdle();
-		}
 	}
 }
 
@@ -203,9 +199,7 @@ void CFFWeaponDeployDispenser::WeaponIdle( void )
 		{
 			CFFBuildableInfo hBuildInfo( pPlayer, FF_BUILD_DISPENSER );
 			if( !m_pBuildable )
-			{
 				m_pBuildable = CFFDispenser::CreateClientSideDispenser( hBuildInfo.GetBuildOrigin(), hBuildInfo.GetBuildAngles() );
-			}
 			else
 			{
 				m_pBuildable->SetAbsOrigin( hBuildInfo.GetBuildOrigin() );
@@ -219,7 +213,7 @@ void CFFWeaponDeployDispenser::WeaponIdle( void )
 	}
 }
 
-bool CFFWeaponDeployDispenser::Holster(CBaseCombatWeapon *pSwitchingTo) 
+bool CFFWeaponDeployDispenser::Holster(CBaseCombatWeapon *pSwitchingTo)
 {
 	Cleanup();
 
@@ -296,13 +290,9 @@ bool CFFWeaponDeployDispenser::CanBeSelected( void )
 		}
 
 		if (pDispenser->CloseEnoughToDismantle(pPlayer))
-		{
-            pDispenser->Dismantle(pPlayer);
-		}
+			pDispenser->Dismantle(pPlayer);
 		else
-        {
-            ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_TOOFARAWAY");
-        }
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_TOOFARAWAY");
 	}
 
 	CON_COMMAND(detdispenser, "Detonates dispenser")
@@ -359,7 +349,7 @@ bool CFFWeaponDeployDispenser::CanBeSelected( void )
 		// Bug #0000333: Buildable Behavior (non build slot) while building
 		if( pPlayer->IsBuilding() && ( pPlayer->GetCurrentBuild() == FF_BUILD_DISPENSER ) )
 		{
-            ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEMIDBUILD" );
+			ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEMIDBUILD" );
 			return;
 		}
 
@@ -368,7 +358,7 @@ bool CFFWeaponDeployDispenser::CanBeSelected( void )
 		// can't do owt to it 'cause it doesn't exist!
 		if (!pDispenser)
 		{
-            ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_NODISPENSER");
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_NODISPENSER");
 			return;
 		}
 
@@ -388,12 +378,8 @@ bool CFFWeaponDeployDispenser::CanBeSelected( void )
 
 		//The previous IsBuilt function didnt seem to work so i removed it -GreenMushy
 		if (pDispenser->CloseEnoughToDismantle(pPlayer))
-		{
-            pDispenser->Dismantle(pPlayer);
-		}
+			pDispenser->Dismantle(pPlayer);
 		else
-        {
 			pDispenser->DetonateNextFrame();
-        }
 	}
 #endif

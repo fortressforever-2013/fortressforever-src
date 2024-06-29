@@ -85,7 +85,7 @@ BEGIN_DATADESC(CFFProjectileRail)
 	DEFINE_THINKFUNC( DieThink ),
 	DEFINE_THINKFUNC( RailThink ),
 	DEFINE_ENTITYFUNC( RailTouch ), 
-END_DATADESC() 
+END_DATADESC()
 #endif
 
 //=============================================================================
@@ -108,7 +108,7 @@ CFFProjectileRail::CFFProjectileRail()
 //----------------------------------------------------------------------------
 // Purpose: Precache the rail model
 //----------------------------------------------------------------------------
-void CFFProjectileRail::Precache( void ) 
+void CFFProjectileRail::Precache( void )
 {
 	PrecacheModel(RAIL_MODEL);
 
@@ -161,7 +161,7 @@ CFFProjectileRail *CFFProjectileRail::CreateRail( const CBaseEntity *pSource, co
 //----------------------------------------------------------------------------
 // Purpose: Spawn a rail, set up model, size, etc
 //----------------------------------------------------------------------------
-void CFFProjectileRail::Spawn( void ) 
+void CFFProjectileRail::Spawn( void )
 {
 	// Setup
 	SetModel(RAIL_MODEL);
@@ -217,7 +217,7 @@ void CFFProjectileRail::Spawn( void )
 void CFFProjectileRail::RailTouch( CBaseEntity *pOther ) 
 {
 	// FF TODO: fix the problem with rails and other projectiles touching COLLISION_GROUP_TRIGGERONLY (apparently the elevator door in dustbowl is in this collision group...which is weird)
-	if( !pOther->IsSolid() || pOther->IsSolidFlagSet( FSOLID_VOLUME_CONTENTS ) || !g_pGameRules->ShouldCollide( GetCollisionGroup(), pOther->GetCollisionGroup() ) ) 
+	if( !pOther->IsSolid() || pOther->IsSolidFlagSet( FSOLID_VOLUME_CONTENTS ) || !g_pGameRules->ShouldCollide( GetCollisionGroup(), pOther->GetCollisionGroup() ) )
 		return;
 
 	trace_t	tr;
@@ -230,7 +230,7 @@ void CFFProjectileRail::RailTouch( CBaseEntity *pOther )
 	}
 
 	// If the object we touch takes damage
-	if( pOther->m_takedamage != DAMAGE_NO ) 
+	if( pOther->m_takedamage != DAMAGE_NO )
 	{
 		Vector	vecNormalizedVel = GetAbsVelocity();
 		VectorNormalize( vecNormalizedVel );
@@ -263,9 +263,9 @@ void CFFProjectileRail::RailTouch( CBaseEntity *pOther )
 		trace_t	tr2;
 		UTIL_TraceLine( GetAbsOrigin(), GetAbsOrigin() + vForward * 128, MASK_OPAQUE, pOther, COLLISION_GROUP_NONE, &tr2 );
 
-		if( tr2.fraction != 1.0f ) 
+		if( tr2.fraction != 1.0f )
 		{
-			if( tr2.m_pEnt && ( tr2.m_pEnt->GetMoveType() == MOVETYPE_NONE ) ) 
+			if( tr2.m_pEnt && ( tr2.m_pEnt->GetMoveType() == MOVETYPE_NONE ) )
 			{
 				CEffectData	data;
 
@@ -277,8 +277,8 @@ void CFFProjectileRail::RailTouch( CBaseEntity *pOther )
 			}
 		}
 
-		// Spark & leave decal if we hit an entity which wasn't human(ie. player) 
-		if( !pOther->IsPlayer() && UTIL_PointContents( GetAbsOrigin() ) != CONTENTS_WATER ) 
+		// Spark & leave decal if we hit an entity which wasn't human(ie. player)
+		if( !pOther->IsPlayer() && UTIL_PointContents( GetAbsOrigin() ) != CONTENTS_WATER )
 		{
 			UTIL_ImpactTrace( &tr, DMG_BULLET );
 			g_pEffects->Sparks( GetAbsOrigin() );
@@ -316,7 +316,7 @@ void CFFProjectileRail::RailTouch( CBaseEntity *pOther )
 	{
 		// See if we struck the world, make a mark, and then try to bounce
 		// Bug #0000181: Railgun shot is absorbed by doors on ff_dev_ctf
-		if( /*pOther->GetMoveType() == MOVETYPE_NONE &&*/ !( tr.surface.flags & SURF_SKY ) ) 
+		if( /*pOther->GetMoveType() == MOVETYPE_NONE &&*/ !( tr.surface.flags & SURF_SKY ) )
 		{
 			EmitSound( "Rail.HitWorld" );
 
@@ -354,9 +354,7 @@ void CFFProjectileRail::RailTouch( CBaseEntity *pOther )
 
 					// update the trail
 					if (m_pTrail)
-					{
 						m_pTrail->SetColor(g_uchRailColors[m_iNumBounces][0], g_uchRailColors[m_iNumBounces][1], g_uchRailColors[m_iNumBounces][2]);
-					}
 
 					// BOUNCE BONUS DAMAGE!
 					m_flDamage *= RAIL_BOUNCEDAMAGEFACTOR;
@@ -463,7 +461,7 @@ void CFFProjectileRail::SetupEnd( Vector end )
 //----------------------------------------------------------------------------
 // Purpose: DIE!
 //----------------------------------------------------------------------------
-void CFFProjectileRail::DieThink( void ) 
+void CFFProjectileRail::DieThink( void )
 {
 	SetThink(NULL);
 	Remove();
@@ -473,15 +471,15 @@ void CFFProjectileRail::DieThink( void )
 //----------------------------------------------------------------------------
 // Purpose: Make a trail of bubbles
 //----------------------------------------------------------------------------
-void CFFProjectileRail::RailThink( void ) 
+void CFFProjectileRail::RailThink( void )
 {
 	float flDisance = abs(Vector(GetAbsOrigin() - m_vecSameOriginCheck).Length());
 	if (flDisance < 2)
 	{
 		m_flSameOriginCheckTimer += gpGlobals->frametime;
 
-		// FF TODO: need to fix the actual problem in the top return in the touch, 
-		// which has something to do with COLLISION_GROUP_TRIGGERONLY...but I'm 
+		// FF TODO: need to fix the actual problem in the top return in the touch,
+		// which has something to do with COLLISION_GROUP_TRIGGERONLY...but I'm
 		// too tired to fix that shit right now, so it's "TODO" later.
 
 		// Have we really been basically sitting still?  Then, DIE!

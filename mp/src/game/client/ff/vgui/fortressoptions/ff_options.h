@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/08/29
-	created:	29:8:2006   18:35
-	filename: 	cl_dll\ff\vgui\ff_options\ff_options.h
+	created:	29:8:2006	18:35
+	filename:	cl_dll\ff\vgui\ff_options\ff_options.h
 	file path:	cl_dll\ff\vgui\ff_options
 	file base:	ff_options
 	file ext:	h

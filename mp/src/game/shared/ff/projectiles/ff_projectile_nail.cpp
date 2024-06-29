@@ -59,7 +59,7 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_nail);
 	//----------------------------------------------------------------------------
 	// Purpose: Spawn a nail, set up model, size, etc
 	//----------------------------------------------------------------------------
-	void CFFProjectileNail::Spawn() 
+	void CFFProjectileNail::Spawn()
 	{
 		// Setup
 		//SetModel(NAIL_MODEL);
@@ -71,7 +71,7 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_nail);
 		m_iDamageType = DMG_BULLET | DMG_NEVERGIB;
 		
 		// Set the correct think & touch for the nail
-		SetTouch(&CFFProjectileNail::NailTouch);		// |-- Mirv: Account for GCC strictness
+		SetTouch(&CFFProjectileNail::NailTouch);	// |-- Mirv: Account for GCC strictness
 		SetThink(&CFFProjectileNail::BubbleThink);	// |-- Mirv: Account for GCC strictness
 
 		// Next think(ie. how bubbly it'll be) 
@@ -91,7 +91,7 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_nail);
 //----------------------------------------------------------------------------
 // Purpose: Precache the nail model
 //----------------------------------------------------------------------------
-void CFFProjectileNail::Precache() 
+void CFFProjectileNail::Precache()
 {
 	PrecacheModel(NAIL_MODEL);
 
@@ -118,7 +118,7 @@ void CFFProjectileNail::NailTouch(CBaseEntity *pOther)
 	tr = BaseClass::GetTouchTrace();
 
 	// This entity can take damage, so deal it out
-	if (pOther->m_takedamage != DAMAGE_NO) 
+	if (pOther->m_takedamage != DAMAGE_NO)
 	{
 #ifdef GAME_DLL
 		Vector	vecNormalizedVel = GetAbsVelocity();
@@ -134,9 +134,7 @@ void CFFProjectileNail::NailTouch(CBaseEntity *pOther)
 		dmgInfo.SetDamagePosition(tr.endpos);
 
 		if (pOther->IsPlayer())
-		{
 			dmgInfo.ScaleDamageForce( FF_NAIL_PUSHMULTIPLIER );
-		}
 		else if( ( pOther->Classify() == CLASS_SENTRYGUN ) && m_bNailGrenadeNail )
 		{
 			// Modify the damage +- cvar value
@@ -165,9 +163,9 @@ void CFFProjectileNail::NailTouch(CBaseEntity *pOther)
 //----------------------------------------------------------------------------
 // Purpose: Make a trail of bubbles
 //----------------------------------------------------------------------------
-void CFFProjectileNail::BubbleThink() 
+void CFFProjectileNail::BubbleThink()
 {
-	if (GetWaterLevel() == 0) 
+	if (GetWaterLevel() == 0)
 		return;
 
 	QAngle angNewAngles;

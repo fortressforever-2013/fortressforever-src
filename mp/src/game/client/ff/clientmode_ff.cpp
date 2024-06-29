@@ -164,7 +164,7 @@ void ClientModeFFNormal::FireGameEvent( IGameEvent *pEvent )
 {
 	const char *pszEventName = pEvent->GetName();
 
-	if( Q_strcmp( "ff_restartround", pszEventName ) == 0 )
+	if( !Q_strcmp( "ff_restartround", pszEventName ) )
 	{
 		// Set up current round offset for client
 		//float flCurtime = pEvent->GetFloat( "curtime" );
@@ -180,7 +180,7 @@ void ClientModeFFNormal::FireGameEvent( IGameEvent *pEvent )
 		// Stop any looping sounds
 		enginesound->StopAllSounds( true );
 
-		Soundscape_OnStopAllSounds(); // Tell the soundscape system
+		Soundscape_OnStopAllSounds();	// Tell the soundscape system
 	}
 
 	BaseClass::FireGameEvent( pEvent );

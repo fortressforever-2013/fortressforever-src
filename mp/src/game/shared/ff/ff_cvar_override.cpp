@@ -19,8 +19,8 @@ enum EFFCVOverrideFlags
 struct CFFConVarDefaultOverrideEntry
 {
 	EFFCVOverrideFlags nFlags; // flags
-	const char *pszName;       // ConVar name
-	const char *pszValue;      // new default value
+	const char *pszName;	// ConVar name
+	const char *pszValue;	// new default value
 };
 
 static CFFConVarDefaultOverrideEntry s_FFConVarOverrideEntries[] =
@@ -116,9 +116,7 @@ void runDLUrlWrangling()
 {
 	ConVarRef refDLUrl("sv_downloadurl");
 	if (!refDLUrl.IsValid())
-	{
 		return;
-	}
 	ConVar* DLUrlPtr = static_cast<ConVar*>(refDLUrl.GetLinkedConVar());
 
 	DLUrlPtr->InstallChangeCallback(sv_downloadurl_changed);
@@ -135,9 +133,7 @@ void CFFConVarDefaultOverride::PostInit()
 bool CFFConVarDefaultOverride::Init()
 {
 	for ( const auto& entry : s_FFConVarOverrideEntries )
-	{
 		OverrideDefault( entry );
-	}
 
 #ifdef GAME_DLL
 	/* ensure that server-side clock correction is ACTUALLY limited to 2 tick-intervals */
@@ -146,7 +142,6 @@ bool CFFConVarDefaultOverride::Init()
 #endif
 	return true;
 }
-
 
 
 void CFFConVarDefaultOverride::OverrideDefault( const CFFConVarDefaultOverrideEntry& entry )
@@ -185,4 +180,3 @@ void CFFConVarDefaultOverride::OverrideDefault( const CFFConVarDefaultOverrideEn
 	DevMsg( "[%s] CFFConVarDefaultOverride: \"%s\" was \"%s\"/\"%s\", now \"%s\"/\"%s\"\n", DLLName(), entry.pszName,
 		strOldDefault.Get(), strOldValue.Get(), pConVar->GetDefault(), pConVar->GetString() );
 }
-

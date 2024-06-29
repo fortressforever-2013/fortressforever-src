@@ -17,8 +17,8 @@
 //
 //	05/10/2005, Mulchman:
 //		Moved some generic buildable stuff over here so it can be used
-//		easily on both the client and server - mainly to comply
-//		w/ the new buildable object slots (dispenser & sg slot on engy).
+//		easily on both the client and server - mainly to comply w/
+//		the new buildable object slots (dispenser & sg slot on engy).
 //		Modified the build code a bunch, too - completely overhauled.
 //
 //	06/08/2005, Mulchman:

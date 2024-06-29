@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/08/07
-	created:	7:8:2006   22:02
-	filename: 	f:\ff-svn\code\trunk_current\cl_dll\ff\ProxyCharge.cpp
+	created:	7:8:2006	22:02
+	filename:	f:\ff-svn\code\trunk_current\cl_dll\ff\ProxyCharge.cpp
 	file path:	f:\ff-svn\code\trunk_current\cl_dll\ff
 	file base:	ProxyCharge
 	file ext:	cpp

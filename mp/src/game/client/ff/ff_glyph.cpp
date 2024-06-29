@@ -40,7 +40,7 @@ void CacheGlyphs( void )
 			g_ClassGlyphs[ i ].m_pTexture = new CHudTexture( );
 			
 			// Jiggles: For the distance glyphs
-			g_ClassGlyphs[ i ].m_pDistTexture = new CHudTexture( );  
+			g_ClassGlyphs[ i ].m_pDistTexture = new CHudTexture( );
 			g_ClassGlyphs[ i ].m_pDistTexture->textureId = vgui::surface( )->CreateNewTextureID( );
 
 			g_ClassGlyphs[ i ].m_pTexture->textureId = vgui::surface( )->CreateNewTextureID( );			

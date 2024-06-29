@@ -41,7 +41,7 @@ void C_FFHintTimer::ResetTimer(void)
 
 void C_FFHintTimer::Pause(void)
 {
-	if (m_bPaused)  // Already paused
+	if (m_bPaused)	// Already paused
 		return;
 
 	m_flPausedTime = gpGlobals->curtime;
@@ -49,7 +49,7 @@ void C_FFHintTimer::Pause(void)
 }
 void C_FFHintTimer::Unpause(void)
 {
-	if (!m_bPaused)  // Already unpaused
+	if (!m_bPaused)	// Already unpaused
 		return;
 
 	// Just add in the time the timer was paused to the duration
@@ -85,9 +85,7 @@ C_FFHintTimer* C_FFHintTimerManager::Create(std::string strName, float flDuratio
 		pTimer = new C_FFHintTimer(strName, flDuration);
 		//DevMsg("0x%X\n",pTimer);
 		if (pTimer)
-		{
 			m_vecTimers.push_back(pTimer);
-		}
 		//}
 		return pTimer;
 	}

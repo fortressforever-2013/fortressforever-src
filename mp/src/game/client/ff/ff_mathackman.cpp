@@ -17,7 +17,7 @@
 CFFMathackManager _mathackman;
 
 bool MathackModelLessFunc( const int &lhs, const int &rhs )	
-{ 
+{
 	return lhs < rhs; 
 }
 
@@ -171,9 +171,7 @@ void CFFMathackManager::Update()
 	{
 		if (!((m_models.Element(it)).m_bIsMathacked) && 
 			((m_models.Element(it)).m_flLastChecked <= 0.0f || gpGlobals->curtime >= (m_models.Element(it)).m_flLastChecked + MATHACK_CHECKINTERVAL) )
-		{
 			(m_models.Element(it)).CheckForMathack();
-		}
 		it = m_models.NextInorder(it);
 	}
 }

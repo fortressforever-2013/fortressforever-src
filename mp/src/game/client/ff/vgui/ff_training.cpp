@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/09/28
-	created:	28:9:2006   13:03
-	filename: 	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_gamemodes.cpp
+	created:	28:9:2006	13:03
+	filename:	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_gamemodes.cpp
 	file path:	f:\ff-svn\code\trunk\cl_dll\ff\vgui
 	file base:	ff_gamemodes
 	file ext:	cpp
@@ -15,7 +15,7 @@
 #include "ff_training.h"
 #include <vgui_controls/Button.h>
 #include <vgui_controls/Label.h>
-// memdbgon must be the last include file in a .cpp file!!! 
+// memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 DEFINE_GAMEUI(CFFTrainingUI, CFFTrainingPanel, fftraining);
@@ -58,7 +58,7 @@ void CFFTrainingPanel::OnButtonCommand(KeyValues *data)
 {
 	const char *pszCommand = data->GetString("command");
 
-	if (Q_strcmp(pszCommand, "Cancel") == 0)
+	if (!Q_strcmp(pszCommand, "Cancel"))
 	{
 		Close();
 		return;

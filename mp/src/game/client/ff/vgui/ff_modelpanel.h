@@ -76,5 +76,4 @@ namespace vgui
 		char m_szUpperAnim[128];
 	};
 }
-
 #endif

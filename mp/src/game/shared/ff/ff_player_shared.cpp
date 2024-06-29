@@ -376,9 +376,7 @@ void CFFPlayer::FireBullet(
 			if( player->LuaRunEffect( LUA_EF_LEGSHOT, pShooter, &flDuration, &flIconDuration, &flSpeed ) )
 			{
 				if (g_pGameRules->PlayerRelationship(pShooter, player) == GR_NOTTEAMMATE)
-				{
 					player->AddSpeedEffect( SE_LEGSHOT, flDuration, flSpeed, SEM_ACCUMULATIVE| SEM_HEALABLE, FF_STATUSICON_LEGINJURY, flIconDuration );
-				}
 			}
 #endif
 		}			
@@ -388,9 +386,7 @@ void CFFPlayer::FireBullet(
 	int iDamageType = DMG_BULLET | DMG_NEVERGIB;
 
 	if (flSniperRifleCharge && FF_IsAirshot( tr.m_pEnt ))
-	{
 		iDamageType |= DMG_AIRSHOT;
-	}
 
 	if (bDoEffects) // Only once every 0.3 seconds
 	{
@@ -408,9 +404,7 @@ void CFFPlayer::FireBullet(
 				data.m_flScale = random->RandomFloat(8, 12);
 
 				if (waterTrace.contents & CONTENTS_SLIME)
-				{
 					data.m_fFlags |= FX_WATER_IN_SLIME;
-				}
 
 				DispatchEffect("gunshotsplash", data);
 			}
@@ -454,14 +448,10 @@ void CFFPlayer::FireBullet(
 	info.ScaleDamageForce(flScale * flScale * flScale);
 
 	if (tr.m_pEnt->IsPlayer())
-	{
 		info.ScaleDamageForce(0.01f);
-	}
 
 	if (bHeadshot)
-	{
 		info.SetDamageCustom(DAMAGETYPE_HEADSHOT);
-	}
 
 	tr.m_pEnt->DispatchTraceAttack(info, vecDir, &tr);
 
@@ -541,22 +531,20 @@ void CFFPlayer::PlayJumpSound(Vector &vecOrigin, surfacedata_t *psurface, float 
 #ifdef GAME_DLL
 	// Don't send to self
 	if (gpGlobals->maxClients > 1)
-	{
 		filter.RemoveRecipient(this);
-	}
 #endif
 
 	EmitSound_t ep;
 	ep.m_nChannel = CHAN_BODY;
 #ifdef CLIENT_DLL
-	ep.m_pSoundName = "Player.ClientJump"; //params.soundname;
+	ep.m_pSoundName = "Player.ClientJump";	//params.soundname;
 #else
-	ep.m_pSoundName = "Player.Jump"; //params.soundname;
+	ep.m_pSoundName = "Player.Jump";	//params.soundname;
 #endif
 	ep.m_flVolume = fvol;
-	ep.m_SoundLevel = SNDLVL_70dB; // params.soundlevel;
+	ep.m_SoundLevel = SNDLVL_70dB;	// params.soundlevel;
 	ep.m_nFlags = 0;
-	ep.m_nPitch = PITCH_NORM; // params.pitch;
+	ep.m_nPitch = PITCH_NORM;	// params.pitch;
 	ep.m_pOrigin = &vecOrigin;
 
 	EmitSound(filter, entindex(), ep);
@@ -639,9 +627,7 @@ void CFFPlayer::PlayerUse()
 		CFFLuaSC hContext( 0 );
 		hContext.Push( this );
 		if( _scriptman.RunPredicates_LUA( NULL, &hContext, "player_onuse" ) && !hContext.DidReturnNil() && !hContext.GetBool() )
-		{
 			return;
-		}
 	}
 #endif
 
@@ -707,7 +693,7 @@ void CFFPlayer::ClassSpecificSkill()
 			{
 				SwapToWeapon(FF_WEAPON_SUPERSHOTGUN);
 			}
-			else 
+			else
 			{
 				SwapToWeapon(FF_WEAPON_ASSAULTCANNON);
 			}*/
@@ -735,10 +721,8 @@ void CFFPlayer::ClassSpecificSkill()
 		case CLASS_ENGINEER:
 		case CLASS_SPY:
 			// Bug #0001683: Can use engineer radial menu when dead.  This seems to put an end to it -> Defrag
-			if( IsAlive()  )
-			{
+			if( IsAlive() )
 				HudContextShow(true);
-			}			
 			break;
 
 #endif
@@ -1155,13 +1139,9 @@ void CFFPlayer::FireBullets(const FireBulletsInfo_t &info)
 			// Now some more damage stuff
 			int nActualDamageType = nDamageType;
 			if (flActualDamage == 0.0)
-			{
 				flActualDamage = g_pGameRules->GetAmmoDamage(pAttacker, tr.m_pEnt, info.m_iAmmoType);
-			}
 			else
-			{
 				nActualDamageType = nDamageType | ((flActualDamage > 16) ? DMG_ALWAYSGIB : DMG_NEVERGIB);
-			}
 
 			// Now do the impacts from this shot
 			if (!bHitWater || ((info.m_nFlags & FIRE_BULLETS_DONT_HIT_UNDERWATER) == 0))
@@ -1174,9 +1154,7 @@ void CFFPlayer::FireBullets(const FireBulletsInfo_t &info)
 
 				// Reduce push for players
 				if (tr.m_pEnt->IsPlayer())
-				{
 					dmgInfo.ScaleDamageForce(0.01f);
-				}
 
 				tr.m_pEnt->DispatchTraceAttack(dmgInfo, vecDir, &tr);
 
@@ -1324,9 +1302,8 @@ bool CFFPlayer::HandleShotImpactingWater(const FireBulletsInfo_t &info, const Ve
 		data.m_vNormal = waterTrace.plane.normal;
 		data.m_flScale = random->RandomFloat(nMinSplashSize, nMaxSplashSize) * flSplashModifier;	// |-- Mirv: Modify splashes by shot count
 		if (waterTrace.contents & CONTENTS_SLIME)
-		{
 			data.m_fFlags |= FX_WATER_IN_SLIME;
-		}
+
 		DispatchEffect("gunshotsplash", data);
 	}
 
@@ -1649,9 +1626,7 @@ void CFFPlayer::Cloak( void )
 void CFFPlayer::Overpressure( void )
 {
 	if (!IsAlive())
-	{
 		return;
-	}
 
 #ifdef CLIENT_DLL
 	if( prediction->InPrediction() && !prediction->IsFirstTimePredicted() )
@@ -1664,14 +1639,14 @@ void CFFPlayer::Overpressure( void )
 	DispatchEffect(OVERPRESSURE_EFFECT, data);
 
 	// Play a sound
-	EmitSoundShared("overpressure.explode");
+	EmitSoundShared("Overpressure.Explode");
 
 #ifdef CLIENT_DLL
 	FF_SendHint( HWGUY_OVERPRESS, 3, PRIORITY_NORMAL, "#FF_HINT_HWGUY_OVERPRESS" );
 #endif
 
 #ifdef GAME_DLL
-	Extinguish(); // Overpressure stops you burning
+	Extinguish();	// Overpressure stops you burning
 #endif
 
 	for (int i=1; i<=gpGlobals->maxClients; i++)
@@ -1688,7 +1663,7 @@ void CFFPlayer::Overpressure( void )
 		if (pPlayer->IsStaticBuilding())
 			continue;
 #ifdef GAME_DLL
-		pPlayer->Extinguish(); // Overpressure extinguishes fire from everyone
+		pPlayer->Extinguish();	// Overpressure extinguishes fire from everyone
 #endif
 		// Ignore people that can't take damage (teammates when friendly fire is off)
 		if (OVERPRESSURE_IGNOREFRIENDLY && !g_pGameRules->FCanTakeDamage( pPlayer, this ))
@@ -1837,9 +1812,7 @@ void CFFPlayer::SharedPreThink( void )
 void CFFPlayer::JetpackRechargeThink( void )
 {
 	if (GetClassSlot() != CLASS_PYRO)
-	{
 		return;
-	}
 
 	if (m_flJetpackNextFuelRechargeTime < gpGlobals->curtime)
 	{
@@ -1860,7 +1833,7 @@ bool CFFPlayer::CanJetpack()
 		return false;
 	}
 
-	if (GetFlags() & FL_ONGROUND) // no jetpacking on ground
+	if (GetFlags() & FL_ONGROUND)	// no jetpacking on ground
 	{
 		return false;
 	}
@@ -1947,7 +1920,7 @@ void CFFPlayer::Command_AmmoMe(const CCommand& args)
 		m_flSaveMeTime = gpGlobals->curtime + 5.0f;
 
 		// Call for ammo
-		EmitSoundShared("ammo.saveme");
+		EmitSoundShared("Ammo.Saveme");
 	}
 }
 
@@ -1965,9 +1938,9 @@ void CFFPlayer::Command_SaveMe(const CCommand& args)
 		m_flSaveMeTime = gpGlobals->curtime + 5.0f;
 
 		if (IsInfected())
-			EmitSoundShared( "infected.saveme" );
+			EmitSoundShared( "Infected.saveme" );
 		else
-			EmitSoundShared( "medical.saveme" );
+			EmitSoundShared( "Medical.saveme" );
 
 #ifdef GAME_DLL
 		// Hint Code -- Event: Allied player within 1000 units calls for medic
@@ -1979,7 +1952,7 @@ void CFFPlayer::Command_SaveMe(const CCommand& args)
 				CFFPlayer *player = ToFFPlayer( ent );
 				// Only alive friendly medics within 1000 units are sent this hint
 				if( player && ( player != this ) && player->IsAlive() && ( g_pGameRules->PlayerRelationship( this, player ) == GR_TEAMMATE ) && ( player->GetClassSlot() == CLASS_MEDIC ) )
-					FF_SendHint( player, MEDIC_GOHEAL, 5, PRIORITY_NORMAL, "#FF_HINT_MEDIC_GOHEAL" );  // Go heal that dude!
+					FF_SendHint( player, MEDIC_GOHEAL, 5, PRIORITY_NORMAL, "#FF_HINT_MEDIC_GOHEAL" );	// Go heal that dude!
 			}
 		}
 		// End Hint Code
@@ -2000,7 +1973,7 @@ void CFFPlayer::Command_EngyMe(const CCommand& args)
 		// Set the time we can do another engyme at
 		m_flSaveMeTime = gpGlobals->curtime + 5.0f;
 
-		EmitSoundShared("maintenance.saveme");
+		EmitSoundShared("Maintenance.Saveme");
 
 		// Hint Code -- Event: Allied player within 1000 units calls for engy
 #ifdef GAME_DLL
@@ -2012,7 +1985,7 @@ void CFFPlayer::Command_EngyMe(const CCommand& args)
 				CFFPlayer *player = ToFFPlayer( ent );
 				// Only alive friendly engies within 1000 units are sent this hint
 				if( player && ( player != this ) && player->IsAlive() && ( g_pGameRules->PlayerRelationship( this, player ) == GR_TEAMMATE ) && ( player->GetClassSlot() == CLASS_ENGINEER ) )
-					FF_SendHint( player, ENGY_GOSMACK, 5, PRIORITY_NORMAL, "#FF_HINT_ENGY_GOSMACK" );  // Go wrench that dude!
+					FF_SendHint( player, ENGY_GOSMACK, 5, PRIORITY_NORMAL, "#FF_HINT_ENGY_GOSMACK" );	// Go wrench that dude!
 			}
 		}
 		// End Hint Code

@@ -80,9 +80,7 @@ bool CFFWeaponBaseClip::Reload()
 {
 	// Check that StartReload was called first
 	if (!m_bInReload)
-	{
 		Warning("ERROR: Shotgun Reload called incorrectly!\n");
-	}
 
 	CBaseCombatCharacter *pOwner  = GetOwner();
 
@@ -270,9 +268,7 @@ void CFFWeaponBaseClip::ItemPostFrame()
 {
 	CFFPlayer *pOwner = GetPlayerOwner();
 	if (!pOwner)
-	{
 		return;
-	}
 
 	if (m_bInReload)
 	{
@@ -332,9 +328,7 @@ void CFFWeaponBaseClip::ItemPostFrame()
 			// If the firing button was just pressed, reset the firing time
 			CBasePlayer *pPlayer = ToBasePlayer(GetOwner());
 			if (pPlayer && pPlayer->m_afButtonPressed & IN_ATTACK)
-			{
 				m_flNextPrimaryAttack = gpGlobals->curtime;
-			}
 			PrimaryAttack();
 		}
 	}
@@ -344,7 +338,7 @@ void CFFWeaponBaseClip::ItemPostFrame()
 		// reload when reload is pressed, or if no buttons are down and weapon is empty.
 		StartReload();
 	}
-	else 
+	else
 	{
 		// no fire buttons down
 		m_bFireOnEmpty = false;
@@ -374,9 +368,7 @@ void CFFWeaponBaseClip::ItemPostFrame()
 			bool bAutoReload = false;
 #ifdef CLIENT_DLL
 			if ( auto_reload.GetBool() )
-			{
 				bAutoReload = true;
-			}
 #else
 			if ( Q_atoi( engine->GetClientConVarValue( pOwner->entindex(), "cl_autoreload" ) ) != 0 )
 			{

@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2007/08/16
-	created:	16:8:2007   9:56
-	filename: 	c:\ffsvn\code\cl_dll\ff\ProxyMap.cpp
+	created:	16:8:2007	9:56
+	filename:	c:\ffsvn\code\cl_dll\ff\ProxyMap.cpp
 	file path:	c:\ffsvn\code\cl_dll\ff
 	file base:	ProxyMap
 	file ext:	cpp
@@ -45,9 +45,9 @@ bool CProxyMapTexture::Init(IMaterial *pMaterial, KeyValues *pKeyValues)
 	return true;
 }
 
-void CProxyMapTexture::OnBind(void *pC_BaseEntity) 
+void CProxyMapTexture::OnBind(void *pC_BaseEntity)
 {
-	if (Q_strcmp(m_szLevelName, engine->GetLevelName()) == 0)
+	if (!Q_strcmp(m_szLevelName, engine->GetLevelName()))
 		return;
 
 	Q_strcpy(m_szLevelName, engine->GetLevelName());

@@ -42,7 +42,7 @@ class CFFWeaponMeleeBase : public CFFWeaponBase
 {
 public:
 	DECLARE_CLASS(CFFWeaponMeleeBase, CFFWeaponBase);
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 
 	CFFWeaponMeleeBase();
@@ -53,13 +53,13 @@ public:
 	//Attack functions
 	virtual	void	PrimaryAttack();
 
-	virtual	float	GetFireRate() 								{	return	0.2f;	}
-	virtual float	GetRange() 								{	return	32.0f;	}
+	virtual	float	GetFireRate()								{	return	0.2f;	}
+	virtual	float	GetRange()								{	return	32.0f;	}
 	virtual	float	GetDamageForActivity(Activity hitActivity) 	{	return	1.0f;	}
 
 protected:
 	virtual	void	ImpactEffect(trace_t &trace);
-	virtual void	Hit(trace_t &traceHit, Activity nHitActivity);
+	virtual	void	Hit(trace_t &traceHit, Activity nHitActivity);
 
 private:
 	bool			ImpactWater(const Vector &start, const Vector &end);

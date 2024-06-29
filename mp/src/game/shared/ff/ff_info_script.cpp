@@ -51,7 +51,7 @@
 // Class CFFInfoScript
 //
 //=============================================================================
-IMPLEMENT_NETWORKCLASS_ALIASED( FFInfoScript, DT_FFInfoScript ) 
+IMPLEMENT_NETWORKCLASS_ALIASED( FFInfoScript, DT_FFInfoScript )
 
 BEGIN_NETWORK_TABLE( CFFInfoScript, DT_FFInfoScript )
 #ifdef GAME_DLL

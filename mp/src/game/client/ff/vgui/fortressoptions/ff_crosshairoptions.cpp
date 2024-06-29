@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/08/29
-	created:	29:8:2006   18:35
-	filename: 	cl_dll\ff\vgui\ff_options\ff_crosshairoptions.cpp
+	created:	29:8:2006	18:35
+	filename:	cl_dll\ff\vgui\ff_options\ff_crosshairoptions.cpp
 	file path:	cl_dll\ff\vgui\ff_crosshairoptions
 	file base:	ff_crosshairoptions
 	file ext:	cpp
@@ -18,7 +18,7 @@
 #include "cbase.h"
 #include "ff_crosshairoptions.h"
 
-// memdbgon must be the last include file in a .cpp file!!! 
+// memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 CFFCrosshairOptions *g_pCrosshairOptions = NULL;
@@ -180,9 +180,7 @@ void CFFCrosshairOptions::AllowWeaponSelection(bool state)
 	m_pOuterUseGlobal->SetEnabled(state);
 
 	if (!state && m_pCrosshairComboBox->GetActiveItem() != FF_CROSSHAIR_GLOBAL)
-	{
 		m_pCrosshairComboBox->ActivateItemByRow(FF_CROSSHAIR_GLOBAL);
-	}
 	
 	m_pCrosshairComboBox->SetEnabled(state);
 }
@@ -390,18 +388,14 @@ void CFFCrosshairOptions::GetCrosshair(FFWeaponID iWeapon, char &innerChar, Colo
 	CrosshairInfo_t *pCrosshair = &cinfo;
 
 	if (cinfo.innerUseGlobal || m_bForceGlobalCrosshair)
-	{
 		pCrosshair = &m_sCrosshairInfo[FF_CROSSHAIR_GLOBAL];
-	}
 
 	innerChar = pCrosshair->innerChar;
 	innerCol = Color(pCrosshair->innerR, pCrosshair->innerG, pCrosshair->innerB, pCrosshair->innerA);
 	innerSize = pCrosshair->innerScale;
 
 	if (!cinfo.outerUseGlobal && !m_bForceGlobalCrosshair)
-	{
 		pCrosshair = &cinfo;
-	}
 
 	outerChar = pCrosshair->outerChar;
 	outerCol = Color(pCrosshair->outerR, pCrosshair->outerG, pCrosshair->outerB, pCrosshair->outerA);
@@ -417,18 +411,14 @@ void CFFCrosshairOptions::GetHitCrosshair(char &innerChar, Color &innerCol, int 
 	CrosshairInfo_t *pCrosshair = &cinfo;
 
 	if (cinfo.innerUseGlobal || m_bForceGlobalCrosshair)
-	{
 		pCrosshair = &m_sCrosshairInfo[FF_CROSSHAIR_GLOBAL];
-	}
 
 	innerChar = pCrosshair->innerChar;
 	innerCol = Color(pCrosshair->innerR, pCrosshair->innerG, pCrosshair->innerB, pCrosshair->innerA);
 	innerSize = pCrosshair->innerScale;
 
 	if (!cinfo.outerUseGlobal && !m_bForceGlobalCrosshair)
-	{
 		pCrosshair = &cinfo;
-	}
 
 	outerChar = pCrosshair->outerChar;
 	outerCol = Color(pCrosshair->outerR, pCrosshair->outerG, pCrosshair->outerB, pCrosshair->outerA);
@@ -492,9 +482,7 @@ void CFFCrosshairOptions::UpdateCrosshairs()
 
 	// If they have inner globals selected, point to the globals for this
 	if (cinfo.innerUseGlobal || m_bForceGlobalCrosshair)
-	{
 		pDrawCrosshair = &m_sCrosshairInfo[FF_CROSSHAIR_GLOBAL];
-	}
 
 	m_pInnerCrosshair->SetFont(m_hPrimaryCrosshairs[clamp(pDrawCrosshair->innerScale, 1, CROSSHAIR_SIZES) - 1]);
 
@@ -503,9 +491,7 @@ void CFFCrosshairOptions::UpdateCrosshairs()
 
 	// Now point to the other crosshair (if we're not using global)
 	if (!cinfo.outerUseGlobal && !m_bForceGlobalCrosshair)
-	{
 		pDrawCrosshair = &cinfo;
-	}
 
 	m_pOuterCrosshair->SetFont(m_hSecondaryCrosshairs[clamp(pDrawCrosshair->outerScale, 1, CROSSHAIR_SIZES) - 1]);
 
@@ -542,9 +528,7 @@ void CFFCrosshairOptions::UpdateSliders()
 	{
 		KeyValues *kv = m_pInnerCharacter->GetItemUserData(i);
 		if (kv->GetString("character")[0] == cinfo.innerChar)
-		{
 			m_pInnerCharacter->ActivateItemByRow(i);
-		}
 	}
 	
 	// Find the correct outer shape
@@ -552,9 +536,7 @@ void CFFCrosshairOptions::UpdateSliders()
 	{
 		KeyValues *kv = m_pOuterCharacter->GetItemUserData(i);
 		if (kv->GetString("character")[0] == cinfo.outerChar)
-		{
 			m_pOuterCharacter->ActivateItemByRow(i);
-		}
 	}
 }
 
@@ -582,9 +564,7 @@ void CFFCrosshairOptions::OnUpdateCombos(KeyValues *data)
 {
 	// Make sure the sliders are set correct
 	if (data->GetPtr("panel") == m_pCrosshairComboBox)
-	{
 		UpdateSliders();
-	}
 
 	UpdateCrosshairs();
 }

@@ -31,7 +31,7 @@ class CFFWeaponSuperShotgun : public CFFWeaponBaseClip
 {
 public:
 	DECLARE_CLASS(CFFWeaponSuperShotgun, CFFWeaponBaseClip);
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 	
 	CFFWeaponSuperShotgun();
@@ -47,13 +47,13 @@ private:
 // CFFWeaponSuperShotgun tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponSuperShotgun, DT_FFWeaponSuperShotgun) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponSuperShotgun, DT_FFWeaponSuperShotgun)
 
-BEGIN_NETWORK_TABLE(CFFWeaponSuperShotgun, DT_FFWeaponSuperShotgun) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFWeaponSuperShotgun, DT_FFWeaponSuperShotgun)
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponSuperShotgun) 
-END_PREDICTION_DATA() 
+BEGIN_PREDICTION_DATA(CFFWeaponSuperShotgun)
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_supershotgun, CFFWeaponSuperShotgun);
 PRECACHE_WEAPON_REGISTER(ff_weapon_supershotgun);
@@ -65,14 +65,14 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_supershotgun);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponSuperShotgun::CFFWeaponSuperShotgun() 
+CFFWeaponSuperShotgun::CFFWeaponSuperShotgun()
 {
 }
 
 //----------------------------------------------------------------------------
 // Purpose: Fire shotgun pellets
 //----------------------------------------------------------------------------
-void CFFWeaponSuperShotgun::Fire() 
+void CFFWeaponSuperShotgun::Fire()
 {
 	CFFPlayer *pPlayer = GetPlayerOwner();
 	const CFFWeaponInfo &pWeaponInfo = GetFFWpnData();

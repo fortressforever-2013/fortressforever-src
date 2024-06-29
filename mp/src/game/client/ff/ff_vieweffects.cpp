@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/08/17
-	created:	17:8:2006   18:43
-	filename: 	f:\ff-svn\code\trunk\cl_dll\ff\ff_vieweffects.cpp
+	created:	17:8:2006	18:43
+	filename:	f:\ff-svn\code\trunk\cl_dll\ff\ff_vieweffects.cpp
 	file path:	f:\ff-svn\code\trunk\cl_dll\ff
 	file base:	ff_vieweffects
 	file ext:	cpp
@@ -55,9 +55,7 @@ void AddNewDurationFromNow(float &flStart, float &flDuration, float flNewDuratio
 		// If we haven't even finihed fading in, adjust the start time so that we
 		// continue fading out from this point
 		if (flElapsed < flFadeInTime)
-		{
 			flStart -= flFadeInTime - flElapsed;
-		}
 
 		// Phew!
 		return;
@@ -157,9 +155,8 @@ public:
 CFFViewEffectsMgr::CFFViewEffectsMgr()
 {
 	for (int i = 0; i < FF_VIEWEFFECT_MAX; i++)
-	{
 		m_pViewEffects[i] = NULL;
-	}
+
 	m_nViewEffects = 0;
 }
 
@@ -171,9 +168,7 @@ void CFFViewEffectsMgr::Init()
 	HOOK_MESSAGE(FFViewEffect);
 
 	for (unsigned int i = 0; i < m_nViewEffects; i++)
-	{
 		m_pViewEffects[i]->Init();
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -182,9 +177,7 @@ void CFFViewEffectsMgr::Init()
 void CFFViewEffectsMgr::LevelInit()
 {
 	for (unsigned int i = 0; i < m_nViewEffects; i++)
-	{
 		m_pViewEffects[i]->LevelInit();
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -193,9 +186,7 @@ void CFFViewEffectsMgr::LevelInit()
 void CFFViewEffectsMgr::Reset()
 {
 	for (unsigned int i = 0; i < m_nViewEffects; i++)
-	{
 		m_pViewEffects[i]->Reset();
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -231,9 +222,7 @@ void CFFViewEffectsMgr::Message(bf_read &msg)
 	if (iId == FF_VIEWEFFECT_MAX)
 	{
 		for (unsigned int i = 0; i < m_nViewEffects; i++)
-		{
 			m_pViewEffects[i]->Reset();
-		}
 
 		return;
 	}
@@ -314,16 +303,12 @@ public:
 
 		float flAmount = 0.2f;
 
-#define M_PI_2     1.57079632679489661923
+#define M_PI_2	1.57079632679489661923
 
 		if (flElapsed <= M_PI_2)
-		{
 			flAmount = 0.05f + 0.15f * sinf(flElapsed);
-		}
 		else if (flRemaining <= M_PI_2)
-		{
 			flAmount = 0.05f + 0.15f * sinf(flRemaining);
-		}
 
 		float wide = width;
 		float tall = height;
@@ -388,9 +373,7 @@ public:
 		AddNewDurationFromNow(m_flStart, m_flDuration, flNewDuration, M_PI_2, M_PI_2);
 
 		if (g_pMaterialSystemHardwareConfig->GetDXSupportLevel() < 90)
-		{
 			Warning("*** FF Error *** Not yet implemented for < dx9!\n");
-		}
 		else
 		{
 			KeyValues* pKeys = new KeyValues("keys");
@@ -457,9 +440,7 @@ public:
 		return;
 
 		if (g_pMaterialSystemHardwareConfig->GetDXSupportLevel() < 90)
-		{
 			Warning("*** FF Error *** Not yet implemented for < dx9!\n");
-		}
 		else
 		{
 			KeyValues *pKeys = new KeyValues("keys");
@@ -515,9 +496,7 @@ public:
 	void Message(bf_read &msg)
 	{
 		if (g_pMaterialSystemHardwareConfig->GetDXSupportLevel() < 90)
-		{
 			Warning("*** FF Error *** Not yet implemented for < dx9!\n");
-		}
 		else
 		{
 			KeyValues *pKeys = new KeyValues("keys");
@@ -591,9 +570,7 @@ public:
 			m_flAmount = min(m_flAmount, m_flTargetAmount);
 		}
 		else
-		{
 			m_flAmount = m_flTargetAmount;
-		}
 
 		CMatRenderContextPtr pMatRenderContext(g_pMaterialSystem);
 		IMesh *pMesh = pMatRenderContext->GetDynamicMesh(true, NULL, NULL, m_WhiteAdditiveMaterial);
@@ -654,8 +631,8 @@ public:
 	}
 
 	//-----------------------------------------------------------------------------
-	// Purpose: Expects a DAMAGE AMOUNT as a BYTE.
-	//			This will be added onto the current damage (which gradually fades)
+	// Purpose: Expects a DAMAGE AMOUNT as a BYTE. This will be
+	//		added onto the current damage (which gradually fades)
 	//-----------------------------------------------------------------------------
 	void Message(bf_read &msg)
 	{

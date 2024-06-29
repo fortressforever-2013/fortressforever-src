@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/08/12
-	created:	12:8:2006   15:39
-	filename: 	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_panel.cpp
+	created:	12:8:2006	15:39
+	filename:	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_panel.cpp
 	file path:	f:\ff-svn\code\trunk\cl_dll\ff\vgui
 	file base:	ff_panel
 	file ext:	cpp
@@ -91,13 +91,13 @@ namespace vgui
 	{
 		if( !engine->IsInGame() )
 		{
-			m_pFFPlayer = NULL; // not in game so make m_pFFPlayer NULL!
+			m_pFFPlayer = NULL;	// not in game so make m_pFFPlayer NULL!
 			return;
 		}
 
 		m_pFFPlayer = CFFPlayer::GetLocalFFPlayer();
 
-		if (!m_pFFPlayer) 
+		if (!m_pFFPlayer)
 			return;
 
 		if( cl_teamcolourhud.GetBool() )

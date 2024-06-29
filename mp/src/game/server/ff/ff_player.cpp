@@ -239,9 +239,7 @@ extern ConVar mp_friendlyfire_armorstrip;
 			CFFModelTemp::Create( args.Arg(1), vecOrigin, vecAngles );
 		}
 		else
-		{
 			ClientPrint(UTIL_GetCommandClient(), HUD_PRINTCONSOLE, "Usage: model_temp <model> <distance_in_front_of_player>\n");
-		}
 	}
 #endif
 
@@ -562,9 +560,8 @@ CFFPlayer::CFFPlayer()
 	m_flSpeedModifierChangeTime = 0;
 
 	for (int i=0; i<NUM_SPEED_EFFECTS; i++)
-	{
 		RemoveSpeedEffectByIndex( i );
-	}
+
 	m_fLastHealTick = 0.0f;
 	m_fLastInfectedTick = 0.0f;
 	m_bInfected = false;
@@ -835,13 +832,9 @@ void CFFPlayer::PostThink()
 	}
 
 	if ( m_nButtons & (IN_ATTACK | IN_ATTACK2) )
-	{
 		m_bRequireRePressBuildable = true;
-	}
 	else
-	{
 		m_bRequireRePressBuildable = false;
-	}
 }
 
 
@@ -877,7 +870,7 @@ void CFFPlayer::Precache()
 	PrecacheScriptSound("Player.Pain");
 	PrecacheScriptSound("Player.Flameout");
 	PrecacheScriptSound("Medical.Saveme");
-	PrecacheScriptSound("maintenance.Saveme");
+	PrecacheScriptSound("Maintenance.Saveme");
 	PrecacheScriptSound("Infected.Saveme");
 	PrecacheScriptSound("Ammo.Saveme");
 	PrecacheScriptSound("Overpressure.Explode");
@@ -2088,14 +2081,10 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 		hContext.Push(pBackpack->m_bIsDeathBag);
 
 		if ( _scriptman.RunPredicates_LUA(NULL, &hContext, "player_ondiscard") )
-		{
 			bDiscardAllowed = hContext.GetBool();
-		}
 
 		if ( !bDiscardAllowed )
-		{
 			UTIL_Remove(pBackpack);
-		}
 	}
 	// <-- Mirv: Create backpack moved here to stop crash
 
@@ -2112,7 +2101,7 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 	for (int i = 0; i < MAX_WEAPONS; i++)
 	{
 		if ( m_hMyWeapons[i] )
-			m_hMyWeapons[i]->SetTouch( NULL ); //touching other peoples private parts is naughty.
+			m_hMyWeapons[i]->SetTouch( NULL );	//touching other peoples private parts is naughty.
 	}
 
 	if (!ShouldGib(info))
@@ -2563,9 +2552,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 		{
 			// if we're changing class twice in 5 seconds, then add a respawn delay as if they typed kill in console
 			if (gpGlobals->curtime - m_flLastClassSwitch <= CHANGECLASS_GRACEPERIOD)
-			{
 				SetRespawnDelay( CHANGECLASS_GRACEPERIOD - (gpGlobals->curtime - m_flLastClassSwitch) );
-			}
 
 			m_flLastClassSwitch = gpGlobals->curtime;
 
@@ -2578,9 +2565,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 		{
 			// if we're changing class twice in 5 seconds, then add a respawn delay as if they typed kill in console
 			if (gpGlobals->curtime - m_flLastClassSwitch <= CHANGECLASS_GRACEPERIOD)
-			{
 				SetRespawnDelay( CHANGECLASS_GRACEPERIOD - (gpGlobals->curtime - m_flLastClassSwitch) );
-			}
 
 			m_flLastClassSwitch = gpGlobals->curtime;
 
@@ -2671,9 +2656,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 		
 		// if we're changing class twice in 5 seconds, then add a respawn delay as if they typed kill in console
 		if (gpGlobals->curtime - m_flLastClassSwitch <= CHANGECLASS_GRACEPERIOD)
-		{
 			SetRespawnDelay( CHANGECLASS_GRACEPERIOD - (gpGlobals->curtime - m_flLastClassSwitch) );
-		}
 
 		m_flLastClassSwitch = gpGlobals->curtime;
 
@@ -2839,9 +2822,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	// In Event_Killed(), the uncloak call is only made when the player is a spy, so the uncloak stuff wasn't being called.  Do it here instead.
 
 	if( GetClassSlot() == CLASS_SPY )
-	{
 		Uncloak( true );
-	}
 
 	// set their class to unassigned, so that they don't spawn
 	// immediately when changing teams

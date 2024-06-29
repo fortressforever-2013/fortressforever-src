@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2004/12/26
-	created:	26:12:2004   19:24
-	filename: 	c:\Cvs\FortressForever\FortressForever\src\dlls\ff\ff_playercommand.h
+	created:	26:12:2004	19:24
+	filename:	c:\Cvs\FortressForever\FortressForever\src\dlls\ff\ff_playercommand.h
 	file path:	c:\Cvs\FortressForever\FortressForever\src\dlls\ff
 	file base:	ff_playercommand
 	file ext:	h
@@ -81,7 +81,7 @@ class CPlayerCommand
 public:
 	CPlayerCommand(std::string strCommand, PLAYERCMD_FUNC_TYPE pfn, unsigned int uiFlags);
 	std::string m_strCommand;		// the actual console command that the player has to bind or type (case sensitive)
-    PLAYERCMD_FUNC_TYPE m_pfn;		// pointer to the command function inside the CFFPlayer class
+	PLAYERCMD_FUNC_TYPE m_pfn;		// pointer to the command function inside the CFFPlayer class
 	unsigned int m_uiFlags;			// bitfield of FF_CMD defines
 private:
 	CPlayerCommand(void);
@@ -96,7 +96,7 @@ public:
 	~CPlayerCommands(void);
 
 	void RegisterCommand(CPlayerCommand *pNewCmd);
-    bool ProcessCommand(CBaseEntity* pEntity, const CCommand& args);
+	bool ProcessCommand(CBaseEntity* pEntity, const CCommand& args);
 
 private:
 	// map of commands
@@ -106,4 +106,3 @@ private:
 extern CPlayerCommands *g_pPlayerCommands;
 
 #endif
-

@@ -26,7 +26,7 @@ class CFFWeaponKnife : public CFFWeaponMeleeBase
 {
 public:
 	DECLARE_CLASS(CFFWeaponKnife, CFFWeaponMeleeBase);
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 
 	CFFWeaponKnife();
@@ -45,13 +45,13 @@ private:
 // CFFWeaponKnife tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponKnife, DT_FFWeaponKnife) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponKnife, DT_FFWeaponKnife)
 
-BEGIN_NETWORK_TABLE(CFFWeaponKnife, DT_FFWeaponKnife) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFWeaponKnife, DT_FFWeaponKnife)
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponKnife) 
-END_PREDICTION_DATA() 
+BEGIN_PREDICTION_DATA(CFFWeaponKnife)
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_knife, CFFWeaponKnife);
 PRECACHE_WEAPON_REGISTER(ff_weapon_knife);
@@ -66,7 +66,7 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_knife);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponKnife::CFFWeaponKnife() 
+CFFWeaponKnife::CFFWeaponKnife()
 {
 }
 
@@ -91,7 +91,7 @@ bool CFFWeaponKnife::Deploy()
 //----------------------------------------------------------------------------
 // Purpose: Implement impact function
 //----------------------------------------------------------------------------
-void CFFWeaponKnife::Hit(trace_t &traceHit, Activity nHitActivity) 
+void CFFWeaponKnife::Hit(trace_t &traceHit, Activity nHitActivity)
 {
 	//DevMsg("[CFFWeaponKnife] Hit\n");
 #ifdef GAME_DLL
@@ -99,11 +99,11 @@ void CFFWeaponKnife::Hit(trace_t &traceHit, Activity nHitActivity)
 
 	CBaseEntity	*pHitEntity = traceHit.m_pEnt;
 
-	if (pHitEntity != NULL && pHitEntity->IsPlayer()) 
+	if (pHitEntity != NULL && pHitEntity->IsPlayer())
 	{
 		CFFPlayer *pTarget = ToFFPlayer(pHitEntity);
 
-		if (g_pGameRules->FCanTakeDamage(pPlayer, pTarget)) 
+		if (g_pGameRules->FCanTakeDamage(pPlayer, pTarget))
 		{
 			// check to see if we got a backstab
 
@@ -120,7 +120,7 @@ void CFFWeaponKnife::Hit(trace_t &traceHit, Activity nHitActivity)
 
 			// see if they are facing the same direction
 			float angle = vFacing.Dot(vDisplacement);
-			if (angle > KNIFE_BACKSTAB_ANGLE) // cos(45deg) 
+			if (angle > KNIFE_BACKSTAB_ANGLE)	// cos(45deg)
 			{
 				//DevMsg("BACKSTAB!!!!!\n");
 				// we get to totally kerplown this guy
@@ -138,7 +138,7 @@ void CFFWeaponKnife::Hit(trace_t &traceHit, Activity nHitActivity)
 				info.SetDamageForce(hitDirection * MELEE_IMPACT_FORCE);
 				info.SetDamageCustom(DAMAGETYPE_BACKSTAB);
 
-				pHitEntity->DispatchTraceAttack(info, hitDirection, &traceHit); 
+				pHitEntity->DispatchTraceAttack(info, hitDirection, &traceHit);
 				ApplyMultiDamage();
 
 				// Is the guy dead? If so then take his clothes because we are cool
@@ -156,9 +156,7 @@ void CFFWeaponKnife::Hit(trace_t &traceHit, Activity nHitActivity)
 
 					// Ragdoll should die very soon
 					if (pRagdoll)
-					{
 						pRagdoll->SetNextThink(gpGlobals->curtime + 2.5f);
-					}
 				}
 				else
 				{
@@ -185,11 +183,11 @@ void CFFWeaponKnife::Hit(trace_t &traceHit, Activity nHitActivity)
 
 	CBaseEntity	*pHitEntity = traceHit.m_pEnt;
 
-	if (pHitEntity != NULL && pHitEntity->IsPlayer()) 
+	if (pHitEntity != NULL && pHitEntity->IsPlayer())
 	{
 		CFFPlayer *pTarget = ToFFPlayer(pHitEntity);
 
-		if (g_pGameRules->FCanTakeDamage(pPlayer, pTarget)) 
+		if (g_pGameRules->FCanTakeDamage(pPlayer, pTarget))
 		{
 			// we scored a hit, so play the knife slash sound
 			WeaponSound(SPECIAL2);

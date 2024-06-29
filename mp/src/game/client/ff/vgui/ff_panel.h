@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/08/12
-	created:	12:8:2006   15:18
-	filename: 	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_panel.h
+	created:	12:8:2006	15:18
+	filename:	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_panel.h
 	file path:	f:\ff-svn\code\trunk\cl_dll\ff\vgui
 	file base:	ff_panel
 	file ext:	h
@@ -23,7 +23,7 @@ namespace vgui
 {
 	class FFPanel : public Panel
 	{
-		DECLARE_CLASS_SIMPLE( FFPanel, Panel ); 
+		DECLARE_CLASS_SIMPLE( FFPanel, Panel );
 
 	public:
 		FFPanel() : BaseClass() { InitFFPanel(); }
@@ -52,5 +52,4 @@ namespace vgui
 		void OnTick();
 	};
 }
-
 #endif

@@ -2,7 +2,7 @@
 // ======== A modification for Half-Life 2 =======
 //
 // @file ff_radiotagdata.h
-// @author Patrick O'Leary (Mulchman) 
+// @author Patrick O'Leary (Mulchman)
 // @date 9/20/2006
 // @brief Radio tag data wrapper
 //

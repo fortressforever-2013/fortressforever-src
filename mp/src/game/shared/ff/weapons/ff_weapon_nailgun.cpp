@@ -33,7 +33,7 @@ class CFFWeaponNailgun : public CFFWeaponBase
 {
 public:
 	DECLARE_CLASS(CFFWeaponNailgun, CFFWeaponBase);
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 	
 	CFFWeaponNailgun();
@@ -52,13 +52,13 @@ private:
 // CFFWeaponNailgun tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponNailgun, DT_FFWeaponNailgun) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponNailgun, DT_FFWeaponNailgun)
 
-BEGIN_NETWORK_TABLE(CFFWeaponNailgun, DT_FFWeaponNailgun) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFWeaponNailgun, DT_FFWeaponNailgun)
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponNailgun) 
-END_PREDICTION_DATA() 
+BEGIN_PREDICTION_DATA(CFFWeaponNailgun)
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_nailgun, CFFWeaponNailgun);
 PRECACHE_WEAPON_REGISTER(ff_weapon_nailgun);
@@ -70,14 +70,14 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_nailgun);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponNailgun::CFFWeaponNailgun() 
+CFFWeaponNailgun::CFFWeaponNailgun()
 {
 }
 
 //----------------------------------------------------------------------------
 // Purpose: Fire a nail
 //----------------------------------------------------------------------------
-void CFFWeaponNailgun::Fire() 
+void CFFWeaponNailgun::Fire()
 {
 	CFFPlayer *pPlayer = GetPlayerOwner();
 	const CFFWeaponInfo &pWeaponInfo = GetFFWpnData();

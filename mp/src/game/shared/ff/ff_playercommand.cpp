@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2004/12/26
-	created:	26:12:2004   19:25
-	filename: 	c:\Cvs\FortressForever\FortressForever\src\dlls\ff\ff_playercommand.cpp
+	created:	26:12:2004	19:25
+	filename:	c:\Cvs\FortressForever\FortressForever\src\dlls\ff\ff_playercommand.cpp
 	file path:	c:\Cvs\FortressForever\FortressForever\src\dlls\ff
 	file base:	ff_playercommand
 	file ext:	cpp
@@ -168,7 +168,7 @@ FF_SHARED_COMMAND( smartcloak, &CFFPlayer::Command_SpySmartCloak, CC_SpySmartClo
 
 // --> Mirv: Toggle grenades (requested by defrag)
 FF_SHARED_COMMAND( toggleone, &CFFPlayer::Command_ToggleOne, CC_ToggleOne, "Primes and throws primary grenade on subsequent touches", FF_CMD_ALIVE | FF_CMD_CLOAKED | FF_CMD_PREMATCH );
-FF_SHARED_COMMAND( toggletwo, &CFFPlayer::Command_ToggleTwo, CC_ToggleTwo, "Primes and throws secondary grendae on subsequent touches", FF_CMD_ALIVE | FF_CMD_CLOAKED | FF_CMD_PREMATCH );
+FF_SHARED_COMMAND( toggletwo, &CFFPlayer::Command_ToggleTwo, CC_ToggleTwo, "Primes and throws secondary grenade on subsequent touches", FF_CMD_ALIVE | FF_CMD_CLOAKED | FF_CMD_PREMATCH );
 // <-- Mirv: Toggle grenades (requested by defrag)
 
 //-- Added by L0ki -------------------------------------------------------

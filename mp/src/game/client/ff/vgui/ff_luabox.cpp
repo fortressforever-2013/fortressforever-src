@@ -18,7 +18,7 @@ namespace vgui
 		BaseClass::ApplySchemeSettings( pScheme );
 	}
 
-	void FFLuaBox::Paint() 
+	void FFLuaBox::Paint()
 	{
 		if(m_iBorderWidth > 0)
 		{
@@ -44,5 +44,4 @@ namespace vgui
 
 		BaseClass::Paint();
 	}
-
 }

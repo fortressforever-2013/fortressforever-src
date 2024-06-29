@@ -35,7 +35,7 @@ private:
 
 		bool		LoadFromFile(const char * fileName);	// load menu from file (via KeyValues)
 		void		UpdateMenu();	// call to update all menu items, check buttons etc
-		void		RebuildMenu();  // rebuilds menu respecting changed game state (map, team etc)
+		void		RebuildMenu();	// rebuilds menu respecting changed game state (map, team etc)
 		void		ClearMenu();	// destroy menu
 	
 	public:

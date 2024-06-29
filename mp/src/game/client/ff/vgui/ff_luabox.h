@@ -1,6 +1,6 @@
 /********************************************************************
 	created:	2006/02/04
-	created:	4:2:2006   15:58
+	created:	4:2:2006	15:58
 	file ext:	h
 	author:		squeek
 	
@@ -39,7 +39,7 @@ namespace vgui
 		virtual void Paint( );
 
 	protected:
-		virtual void ApplySchemeSettings( IScheme *pScheme  );
+		virtual void ApplySchemeSettings( IScheme *pScheme );
 
 		Color m_BoxColor;
 		Color m_BorderColor;

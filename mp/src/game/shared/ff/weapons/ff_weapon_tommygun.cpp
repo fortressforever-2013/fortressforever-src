@@ -10,8 +10,8 @@
 // ---------
 //	7/21/2006	Mulchman:
 //		First version
-//  ?/??/????	Mirv:
-//		Reloading logic sorted 
+//	?/??/????	Mirv:
+//		Reloading logic sorted
 
 
 #include "cbase.h"
@@ -36,7 +36,7 @@ class CFFWeaponTommygun : public CFFWeaponBaseClip
 {
 public:
 	DECLARE_CLASS(CFFWeaponTommygun, CFFWeaponBaseClip);
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 	
 	CFFWeaponTommygun();
@@ -60,13 +60,13 @@ private:
 // CFFWeaponTommygun tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponTommygun, DT_FFWeaponTommygun) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponTommygun, DT_FFWeaponTommygun)
 
-BEGIN_NETWORK_TABLE(CFFWeaponTommygun, DT_FFWeaponTommygun) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFWeaponTommygun, DT_FFWeaponTommygun)
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponTommygun) 
-END_PREDICTION_DATA() 
+BEGIN_PREDICTION_DATA(CFFWeaponTommygun)
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_tommygun, CFFWeaponTommygun);
 PRECACHE_WEAPON_REGISTER(ff_weapon_tommygun);
@@ -78,7 +78,7 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_tommygun);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponTommygun::CFFWeaponTommygun() 
+CFFWeaponTommygun::CFFWeaponTommygun()
 {
 	m_bReloadsSingly = false;
 }
@@ -86,7 +86,7 @@ CFFWeaponTommygun::CFFWeaponTommygun()
 //----------------------------------------------------------------------------
 // Purpose: Fire a bullet
 //----------------------------------------------------------------------------
-void CFFWeaponTommygun::Fire() 
+void CFFWeaponTommygun::Fire()
 {
 	CFFPlayer *pPlayer = GetPlayerOwner();
 

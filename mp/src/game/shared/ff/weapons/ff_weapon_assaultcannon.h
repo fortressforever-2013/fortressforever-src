@@ -60,7 +60,7 @@ public:
 
 	virtual void GetHeatLevel(int _firemode, float &_current, float &_max) 
 	{
-		_current = m_flChargeTime; 
+		_current = m_flChargeTime;
 		_max = FF_AC_MAXCHARGETIME;
 	}
 private:

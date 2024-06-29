@@ -42,13 +42,13 @@ private:
 // CFFWeaponCrowbar tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponCrowbar, DT_FFWeaponCrowbar) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponCrowbar, DT_FFWeaponCrowbar)
 
-BEGIN_NETWORK_TABLE(CFFWeaponCrowbar, DT_FFWeaponCrowbar) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFWeaponCrowbar, DT_FFWeaponCrowbar)
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponCrowbar) 
-END_PREDICTION_DATA() 
+BEGIN_PREDICTION_DATA(CFFWeaponCrowbar)
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_crowbar, CFFWeaponCrowbar);
 PRECACHE_WEAPON_REGISTER(ff_weapon_crowbar);
@@ -60,6 +60,6 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_crowbar);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponCrowbar::CFFWeaponCrowbar() 
+CFFWeaponCrowbar::CFFWeaponCrowbar()
 {
 }

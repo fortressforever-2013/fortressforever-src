@@ -38,11 +38,11 @@ class CFFWeaponDeployManCannon : public CFFWeaponBase
 {
 public:
 	DECLARE_CLASS( CFFWeaponDeployManCannon, CFFWeaponBase );
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 
 	CFFWeaponDeployManCannon( void );
-#ifdef CLIENT_DLL 
+#ifdef CLIENT_DLL
 	~CFFWeaponDeployManCannon( void ) { Cleanup(); }
 #endif
 
@@ -138,12 +138,10 @@ void CFFWeaponDeployManCannon::ItemPostFrame()
 		m_flNextPrimaryAttack = gpGlobals->curtime;
 
 	if ((pOwner->m_nButtons & (IN_ATTACK | IN_ATTACK2) || pOwner->m_afButtonPressed & (IN_ATTACK | IN_ATTACK2)) && (m_flNextPrimaryAttack <= gpGlobals->curtime))
-	{
-			PrimaryAttack();
-	}
+		PrimaryAttack();
 
 	// -----------------------
-	//  Reload pressed / Clip Empty
+	//	Reload pressed / Clip Empty
 	// -----------------------
 	if (pOwner->m_nButtons & IN_RELOAD && UsesClipsForAmmo1() && !m_bInReload)
 	{
@@ -159,9 +157,7 @@ void CFFWeaponDeployManCannon::ItemPostFrame()
 	{
 		// no fire buttons down or reloading
 		if (!ReloadOrSwitchWeapons() && (m_bInReload == false))
-		{
 			WeaponIdle();
-		}
 	}
 }
 
@@ -232,9 +228,7 @@ void CFFWeaponDeployManCannon::WeaponIdle( void )
 		{
 			CFFBuildableInfo hBuildInfo( pPlayer, FF_BUILD_MANCANNON );
 			if( !m_pBuildable )
-			{
 				m_pBuildable = CFFManCannon::CreateClientSideManCannon( hBuildInfo.GetBuildOrigin(), hBuildInfo.GetBuildAngles() );
-			}
 			else
 			{
 				m_pBuildable->SetAbsOrigin( hBuildInfo.GetBuildOrigin() );
@@ -243,9 +237,7 @@ void CFFWeaponDeployManCannon::WeaponIdle( void )
 			m_pBuildable->SetBuildError( hBuildInfo.BuildResult() );
 		}
 		else
-		{
 			Cleanup();
-		}
 
 		// The player just released the attack button
 		if( m_bInSetTimerMenu /* pPlayer->m_afButtonReleased & IN_ATTACK */ )
@@ -275,9 +267,7 @@ bool CFFWeaponDeployManCannon::Holster( CBaseCombatWeapon *pSwitchingTo )
 	if( pSwitchingTo != NULL )
 	{
 		if( ((CFFWeaponBase*)pSwitchingTo)->GetWeaponID() != FF_WEAPON_JUMPGUN )
-		{
 			ToFFPlayer(GetOwnerEntity())->SetLastFFWeapon( (CFFWeaponBase*)pSwitchingTo );
-		}
 	}
 #endif
 
@@ -317,9 +307,7 @@ bool CFFWeaponDeployManCannon::CanBeSelected( void )
 		return false;
 
 	if( pPlayer->GetManCannon() )
-	{
 		return false;
-	}
 
 	return BaseClass::CanBeSelected();
 }
@@ -327,7 +315,7 @@ bool CFFWeaponDeployManCannon::CanBeSelected( void )
 //----------------------------------------------------------------------------
 // Purpose: Send special hint on man cannon deploy
 //----------------------------------------------------------------------------
-bool CFFWeaponDeployManCannon::Deploy() 
+bool CFFWeaponDeployManCannon::Deploy()
 {
 #ifdef CLIENT_DLL	
 	FF_SendHint( DEMOMAN_DETPACK, 1, PRIORITY_LOW, "#FF_HINT_SCOUT_MANCANNON" );

@@ -15,7 +15,7 @@
 #include "cbase.h"
 #include "ff_weapon_baseclip.h"
 
-#ifdef CLIENT_DLL 
+#ifdef CLIENT_DLL
 	#define CFFWeaponShotgun C_FFWeaponShotgun
 	#include "c_ff_player.h"
 #else
@@ -31,7 +31,7 @@ class CFFWeaponShotgun : public CFFWeaponBaseClip
 {
 public:
 	DECLARE_CLASS(CFFWeaponShotgun, CFFWeaponBaseClip);
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 	
 	CFFWeaponShotgun();
@@ -47,13 +47,13 @@ private:
 // CFFWeaponShotgun tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponShotgun, DT_FFWeaponShotgun) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponShotgun, DT_FFWeaponShotgun)
 
-BEGIN_NETWORK_TABLE(CFFWeaponShotgun, DT_FFWeaponShotgun) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFWeaponShotgun, DT_FFWeaponShotgun)
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponShotgun) 
-END_PREDICTION_DATA() 
+BEGIN_PREDICTION_DATA(CFFWeaponShotgun)
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_shotgun, CFFWeaponShotgun);
 PRECACHE_WEAPON_REGISTER(ff_weapon_shotgun);
@@ -65,14 +65,14 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_shotgun);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponShotgun::CFFWeaponShotgun() 
+CFFWeaponShotgun::CFFWeaponShotgun()
 {
 }
 
 //----------------------------------------------------------------------------
 // Purpose: Fire shotgun pellets
 //----------------------------------------------------------------------------
-void CFFWeaponShotgun::Fire() 
+void CFFWeaponShotgun::Fire()
 {
 	CFFPlayer *pPlayer = GetPlayerOwner();
 	const CFFWeaponInfo &pWeaponInfo = GetFFWpnData();	

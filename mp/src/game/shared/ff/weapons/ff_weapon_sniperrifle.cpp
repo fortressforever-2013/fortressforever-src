@@ -36,21 +36,21 @@ static int g_iBeam, g_iHalo;
 // CFFWeaponLaserDot tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponLaserDot, DT_FFWeaponLaserDot) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponLaserDot, DT_FFWeaponLaserDot)
 
-BEGIN_NETWORK_TABLE(CFFWeaponLaserDot, DT_FFWeaponLaserDot) 
+BEGIN_NETWORK_TABLE(CFFWeaponLaserDot, DT_FFWeaponLaserDot)
 #ifdef CLIENT_DLL
-	RecvPropFloat(RECVINFO(m_flStartTime)) 
+	RecvPropFloat(RECVINFO(m_flStartTime))
 #else
-	SendPropFloat(SENDINFO(m_flStartTime)) 
+	SendPropFloat(SENDINFO(m_flStartTime))
 #endif
-END_NETWORK_TABLE() 
+END_NETWORK_TABLE()
 
 LINK_ENTITY_TO_CLASS(env_fflaserdot, CFFWeaponLaserDot);
 
-BEGIN_DATADESC(CFFWeaponLaserDot) 
+BEGIN_DATADESC(CFFWeaponLaserDot)
 	DEFINE_FIELD(m_bIsOn, 				FIELD_BOOLEAN), 
-END_DATADESC() 
+END_DATADESC()
 
 //=============================================================================
 // CFFWeaponLaserDot implementation
@@ -61,12 +61,12 @@ END_DATADESC()
 // Input  : &origin - 
 // Output : CFFWeaponLaserDot
 //-----------------------------------------------------------------------------
-CFFWeaponLaserDot *CFFWeaponLaserDot::Create(const Vector &origin, CBaseEntity *pOwner) 
+CFFWeaponLaserDot *CFFWeaponLaserDot::Create(const Vector &origin, CBaseEntity *pOwner)
 {
 #ifdef GAME_DLL
 	CFFWeaponLaserDot *pLaserDot = (CFFWeaponLaserDot *) CBaseEntity::Create("env_fflaserdot", origin, QAngle(0, 0, 0));
 
-	if (pLaserDot == NULL) 
+	if (pLaserDot == NULL)
 		return NULL;
 
 	pLaserDot->SetRenderMode((RenderMode_t) 9);
@@ -100,7 +100,7 @@ CFFWeaponLaserDot *CFFWeaponLaserDot::Create(const Vector &origin, CBaseEntity *
 // Purpose: Need to recompute the collision bounds to include the player too
 //			so that the laser dot is active on the client at the right times
 //-----------------------------------------------------------------------------
-void CFFWeaponLaserDot::SetLaserPosition(const Vector &origin) 
+void CFFWeaponLaserDot::SetLaserPosition(const Vector &origin)
 {
 	SetAbsOrigin(origin);
 
@@ -167,14 +167,14 @@ void CFFWeaponLaserDot::SetLaserPosition(const Vector &origin)
 	//-----------------------------------------------------------------------------
 	// Purpose: Draw our sprite
 	//-----------------------------------------------------------------------------
-	int CFFWeaponLaserDot::DrawModel(int flags) 
+	int CFFWeaponLaserDot::DrawModel(int flags)
 	{
 		//See if we should draw
-		if (!IsVisible() || (m_bReadyToDraw == false)) 
+		if (!IsVisible() || (m_bReadyToDraw == false))
 			return 0;
 
 		//Must be a sprite
-		if (modelinfo->GetModelType(GetModel()) != mod_sprite) 
+		if (modelinfo->GetModelType(GetModel()) != mod_sprite)
 		{
 			assert(0);
 			return 0;
@@ -189,7 +189,7 @@ void CFFWeaponLaserDot::SetLaserPosition(const Vector &origin)
 		CFFPlayer *pOwner = ToFFPlayer(GetOwnerEntity());
 
 		// We're going to predict it using the players' angles
-		if (pOwner != NULL && pOwner->IsDormant() == false) 
+		if (pOwner != NULL && pOwner->IsDormant() == false)
 		{
 			// Take the eye position and direction
 			vecAttachment = pOwner->Weapon_ShootPosition();
@@ -206,7 +206,7 @@ void CFFWeaponLaserDot::SetLaserPosition(const Vector &origin)
 				fDrawDot = false;
 
 			// Okay so beams. yes.
-			if (!pOwner->IsLocalPlayer()) 
+			if (!pOwner->IsLocalPlayer())
 			{
 				Vector v1 = tr.endpos - tr.startpos;
 				Vector v2 = C_BasePlayer::GetLocalPlayer()->EyePosition() - tr.startpos;
@@ -284,14 +284,12 @@ void CFFWeaponLaserDot::SetLaserPosition(const Vector &origin)
 	//-----------------------------------------------------------------------------
 	// Purpose: Setup our sprite reference
 	//-----------------------------------------------------------------------------
-	void CFFWeaponLaserDot::OnDataChanged(DataUpdateType_t updateType) 
+	void CFFWeaponLaserDot::OnDataChanged(DataUpdateType_t updateType)
 	{
 		BaseClass::OnDataChanged( updateType );
 
-		if (updateType == DATA_UPDATE_CREATED) 
-		{
+		if (updateType == DATA_UPDATE_CREATED)
 			SetNextClientThink( CLIENT_THINK_ALWAYS );
-		}
 	}
 #endif
 
@@ -303,9 +301,9 @@ void CFFWeaponLaserDot::SetLaserPosition(const Vector &origin)
 // CFFWeaponSniperRifle tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponSniperRifle, DT_FFWeaponSniperRifle) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponSniperRifle, DT_FFWeaponSniperRifle)
 
-BEGIN_NETWORK_TABLE(CFFWeaponSniperRifle, DT_FFWeaponSniperRifle) 
+BEGIN_NETWORK_TABLE(CFFWeaponSniperRifle, DT_FFWeaponSniperRifle)
 #ifdef CLIENT_DLL
 	RecvPropTime(RECVINFO(m_flFireStartTime)),
 	RecvPropBool(RECVINFO(m_bInFire)),
@@ -313,14 +311,14 @@ BEGIN_NETWORK_TABLE(CFFWeaponSniperRifle, DT_FFWeaponSniperRifle)
 	SendPropTime(SENDINFO(m_flFireStartTime)),
 	SendPropBool(SENDINFO(m_bInFire)),
 #endif
-END_NETWORK_TABLE() 
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponSniperRifle) 
+BEGIN_PREDICTION_DATA(CFFWeaponSniperRifle)
 #ifdef CLIENT_DLL
 	DEFINE_PRED_FIELD(m_flFireStartTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
 	DEFINE_PRED_FIELD(m_bInFire, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
 #endif
-END_PREDICTION_DATA() 
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_sniperrifle, CFFWeaponSniperRifle);
 PRECACHE_WEAPON_REGISTER(ff_weapon_sniperrifle);
@@ -329,7 +327,7 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_sniperrifle);
 // CFFWeaponSniperRifle implementation
 //=============================================================================
 
-CFFWeaponSniperRifle::CFFWeaponSniperRifle() 
+CFFWeaponSniperRifle::CFFWeaponSniperRifle()
 {
 	m_bZoomed = false;
 	m_bInFire = false;
@@ -341,7 +339,7 @@ CFFWeaponSniperRifle::CFFWeaponSniperRifle()
 #endif
 }
 
-CFFWeaponSniperRifle::~CFFWeaponSniperRifle() 
+CFFWeaponSniperRifle::~CFFWeaponSniperRifle()
 {
 #ifdef GAME_DLL
 	if (m_hLaserDot != NULL) 
@@ -352,7 +350,7 @@ CFFWeaponSniperRifle::~CFFWeaponSniperRifle()
 #endif
 }
 
-void CFFWeaponSniperRifle::Precache() 
+void CFFWeaponSniperRifle::Precache()
 {
 	BaseClass::Precache();
 
@@ -363,14 +361,14 @@ void CFFWeaponSniperRifle::Precache()
 	g_iBeam = PrecacheModel(SNIPER_BEAM);
 	g_iHalo = PrecacheModel(SNIPER_HALO);
 
-	PrecacheScriptSound("SniperRifle.zoom_out");
-	PrecacheScriptSound("SniperRifle.zoom_in");
+	PrecacheScriptSound("SniperRifle.Zoom_out");
+	PrecacheScriptSound("SniperRifle.Zoom_in");
 
 	PrecacheScriptSound("Sniper.Hit");
 	PrecacheScriptSound("Sniper.Gib");
 }
 
-bool CFFWeaponSniperRifle::Deploy() 
+bool CFFWeaponSniperRifle::Deploy()
 {
 	m_bZoomed = false;
 	m_bInFire = false;
@@ -383,7 +381,7 @@ bool CFFWeaponSniperRifle::Deploy()
 	return BaseClass::Deploy();
 }
 
-bool CFFWeaponSniperRifle::Holster(CBaseCombatWeapon *pSwitchingTo) 
+bool CFFWeaponSniperRifle::Holster(CBaseCombatWeapon *pSwitchingTo)
 {
 	// 0001569: Sniper rifle charge/Quickswap
 	// Commented out these two lines.  If these are set to false when the function starts, then the holstering logic
@@ -429,14 +427,14 @@ bool CFFWeaponSniperRifle::Holster(CBaseCombatWeapon *pSwitchingTo)
 	return BaseClass::Holster(pSwitchingTo);
 }
 
-void CFFWeaponSniperRifle::PrimaryAttack() 
+void CFFWeaponSniperRifle::PrimaryAttack()
 {
 	// Yes stuff will go in here
 	//BaseClass::PrimaryAttack();
 	// See: ItemBusyFrame / ItemPostFrame
 }
 
-void CFFWeaponSniperRifle::Fire() 
+void CFFWeaponSniperRifle::Fire()
 {
 	CFFPlayer *pPlayer = GetPlayerOwner();
 	const CFFWeaponInfo &pWeaponInfo = GetFFWpnData();	
@@ -490,7 +488,7 @@ void CFFWeaponSniperRifle::Fire()
 // Purpose: 
 //			TODO: Really need to fix this!!!!
 //-----------------------------------------------------------------------------
-void CFFWeaponSniperRifle::ToggleZoom() 
+void CFFWeaponSniperRifle::ToggleZoom()
 {
 #ifdef CLIENT_DLL
 	if (m_flNextZoomTime > gpGlobals->curtime)
@@ -506,7 +504,7 @@ void CFFWeaponSniperRifle::ToggleZoom()
 	if (pPlayer)
 	{
 		CSingleUserRecipientFilter filter(pPlayer);
-		EmitSound(filter, pPlayer->entindex(), m_bZoomed ? "SniperRifle.zoom_in" : "SniperRifle.zoom_out");
+		EmitSound(filter, pPlayer->entindex(), m_bZoomed ? "SniperRifle.Zoom_in" : "SniperRifle.Zoom_out");
 	}
 
 	// Set the fov cvar (which we ignore on the client) so that the server is up
@@ -539,7 +537,7 @@ void CFFWeaponSniperRifle::ItemPostFrame()
 	// Added check so this doesn't go crazy.
 	CFFPlayer *pPlayer = GetPlayerOwner();
 
-	if (pPlayer && pPlayer->GetAmmoCount(GetPrimaryAmmoType()) <= 0) 
+	if (pPlayer && pPlayer->GetAmmoCount(GetPrimaryAmmoType()) <= 0)
 		HandleFireOnEmpty();
 
 	if (!(pPlayer->m_nButtons & IN_ATTACK))
@@ -548,7 +546,7 @@ void CFFWeaponSniperRifle::ItemPostFrame()
 
 
 // ---------------------------------------------------------------------------
-void CFFWeaponSniperRifle::CheckFire() 
+void CFFWeaponSniperRifle::CheckFire()
 {
 	CFFPlayer *pPlayer = ToFFPlayer(GetOwner());
 	
@@ -558,11 +556,11 @@ void CFFWeaponSniperRifle::CheckFire()
 		// Using m_afButtonReleased to catch the button being released rather than
 		// just testing for IN_ATTACK not being pressed. This way we don't think we've
 		// fird multiple times due to the latency of m_bInFire being changed by server
-		//if (! (pPlayer->m_nButtons & IN_ATTACK)) 
+		//if (! (pPlayer->m_nButtons & IN_ATTACK))
 		if (pPlayer->m_afButtonReleased & IN_ATTACK)
 		{
 			// Make sure we're on the ground
-			if (pPlayer->GetFlags() & FL_ONGROUND) 
+			if (pPlayer->GetFlags() & FL_ONGROUND)
 			{
 				BaseClass::PrimaryAttack();
 			}
@@ -594,22 +592,22 @@ void CFFWeaponSniperRifle::CheckFire()
 	}
 	else
 	{
-		if (pPlayer->m_nButtons & IN_ATTACK) 
+		if (pPlayer->m_nButtons & IN_ATTACK)
 		{
 			// we shouldn't let them fire just yet
-			if (m_flNextPrimaryAttack > gpGlobals->curtime) 
+			if (m_flNextPrimaryAttack > gpGlobals->curtime)
 				return;
 
 			// make sure they're not going too fast
-			if (pPlayer->GetAbsVelocity().LengthSqr() > 400) 
+			if (pPlayer->GetAbsVelocity().LengthSqr() > 400)
 				return;
 
 			// don't allow charge when going up
-			if (pPlayer->GetAbsVelocity().z > 0) 
+			if (pPlayer->GetAbsVelocity().z > 0)
 				return;
 
 			// make sure they have ammo
-			if (pPlayer->GetAmmoCount(GetPrimaryAmmoType()) <= 0) 
+			if (pPlayer->GetAmmoCount(GetPrimaryAmmoType()) <= 0)
 				return;
 
 			// make sure the player is slow
@@ -627,25 +625,25 @@ void CFFWeaponSniperRifle::CheckFire()
 	}
 }
 
-void CFFWeaponSniperRifle::CheckZoomToggle() 
+void CFFWeaponSniperRifle::CheckZoomToggle()
 {
 	CBasePlayer *pPlayer = ToBasePlayer(GetOwner());
 	
-	if (pPlayer->m_afButtonPressed & IN_ATTACK2) 
+	if (pPlayer->m_afButtonPressed & IN_ATTACK2)
 	{
 		//DevMsg("[sniper rifle] Toggling Zoom!\n");
 		ToggleZoom();
 	}
 }
 
-void CFFWeaponSniperRifle::Spawn() 
+void CFFWeaponSniperRifle::Spawn()
 {
 	// Okay putting the predicted sprite creation in here doesn't work
 	// because it can't find the owner, understandably.
 	BaseClass::Spawn();
 }
 
-void CFFWeaponSniperRifle::UpdateLaserPosition() 
+void CFFWeaponSniperRifle::UpdateLaserPosition()
 {
 #ifdef GAME_DLL
 	CFFPlayer *pPlayer = GetPlayerOwner();
@@ -653,11 +651,11 @@ void CFFWeaponSniperRifle::UpdateLaserPosition()
 /*
 	CBaseViewModel *pBeamEnt = static_cast<CBaseViewModel *> (pOwner->GetViewModel());
 
-	if (m_hLaserBeam == NULL) 
+	if (m_hLaserBeam == NULL)
 	{
 		m_hLaserBeam = CBeam::BeamCreate(RPG_BEAM_SPRITE, 1.0f);
 
-		if (m_hLaserBeam == NULL) 
+		if (m_hLaserBeam == NULL)
 		{
 			// We were unable to create the beam
 			Assert(0);
@@ -666,8 +664,8 @@ void CFFWeaponSniperRifle::UpdateLaserPosition()
 
 		m_hLaserBeam->EntsInit(pBeamEnt, pBeamEnt);
 
-		int     startAttachment = LookupAttachment("laser");
-		int endAttachment       = LookupAttachment("laser_end");
+		int	startAttachment	= LookupAttachment("laser");
+		int	endAttachment	= LookupAttachment("laser_end");
 
 		m_hLaserBeam->FollowEntity(pBeamEnt);
 		m_hLaserBeam->SetStartAttachment(startAttachment);
@@ -727,9 +725,7 @@ float CFFWeaponSniperRifle::GetFOV()
 	C_FFPlayer *pPlayer = GetPlayerOwner();
 
 	if (!pPlayer)
-	{
 		return -1;
-	}
 
 	float deltaTime = (float) (gpGlobals->tickcount * gpGlobals->interval_per_tick - m_flZoomTime) * 5.0f;
 
@@ -737,20 +733,14 @@ float CFFWeaponSniperRifle::GetFOV()
 	{
 		// Random negative business
 		if (deltaTime < 0)
-		{
 			return (m_bZoomed ? -1 : SNIPERRIFLE_ZOOMFOV);
-		}
 
 		float flFOV;
 
 		if (m_bZoomed)
-		{
 			flFOV = SimpleSplineRemapVal(deltaTime, 0.0f, 1.0f, default_fov.GetFloat(), SNIPERRIFLE_ZOOMFOV);
-		}
 		else
-		{
 			flFOV = SimpleSplineRemapVal(deltaTime, 0.0f, 1.0f, SNIPERRIFLE_ZOOMFOV, default_fov.GetFloat());
-		}
 
 		return flFOV;
 	}

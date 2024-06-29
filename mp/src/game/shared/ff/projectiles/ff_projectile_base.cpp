@@ -23,7 +23,7 @@
 	#include "iinput.h"
 #endif 
 
-extern short	g_sModelIndexFireball;		// (in combatweapon.cpp) holds the index for the fireball 
+extern short	g_sModelIndexFireball;		// (in combatweapon.cpp) holds the index for the fireball
 extern short	g_sModelIndexWExplosion;	// (in combatweapon.cpp) holds the index for the underwater explosion
 extern short	g_sModelIndexSmoke;			// (in combatweapon.cpp) holds the index for the smoke cloud
 
@@ -32,13 +32,13 @@ extern short	g_sModelIndexSmoke;			// (in combatweapon.cpp) holds the index for 
 //=============================================================================
 
 #ifdef GAME_DLL
-	BEGIN_DATADESC(CFFProjectileBase) 
-	END_DATADESC() 
+	BEGIN_DATADESC(CFFProjectileBase)
+	END_DATADESC()
 #endif
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFProjectileBase, DT_FFProjectileBase) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFProjectileBase, DT_FFProjectileBase)
 
-BEGIN_NETWORK_TABLE(CFFProjectileBase, DT_FFProjectileBase) 
+BEGIN_NETWORK_TABLE(CFFProjectileBase, DT_FFProjectileBase)
 /*	#ifdef CLIENT_DLL
 		RecvPropVector(RECVINFO(m_vecInitialVelocity)) 
 	#else
@@ -61,19 +61,17 @@ END_NETWORK_TABLE()
 
 	//----------------------------------------------------------------------------
 	// Purpose: When the rocket enters the client's PVS, add the flight sound
-	//			to it. This is done here rather than PostDataUpdate because 
+	//			to it. This is done here rather than PostDataUpdate because
 	//			origins (needed for emitsound) are not valid there
 	//----------------------------------------------------------------------------
-	void CFFProjectileBase::OnDataChanged(DataUpdateType_t type) 
+	void CFFProjectileBase::OnDataChanged(DataUpdateType_t type)
 	{
 		BaseClass::OnDataChanged(type);
 
 		if (type == DATA_UPDATE_CREATED)
 		{
 			if (GetFlightSound())
-			{
 				EmitSound(GetFlightSound());
-			}
 
 		}
 	
@@ -116,8 +114,8 @@ END_NETWORK_TABLE()
 			interpolator.AddToHead(changeTime - 1.0f, &vecCurOrigin, false);
 
 			vecCurOrigin = GetLocalOrigin() - GetAbsVelocity() * 0.5f;
-			interpolator.AddToHead(changeTime - 0.5f, &vecCurOrigin, false);*/
-
+			interpolator.AddToHead(changeTime - 0.5f, &vecCurOrigin, false);
+*/
 			// Add the current sample.
 			vecCurOrigin = GetLocalOrigin();
 			interpolator.AddToHead(changeTime, &vecCurOrigin, false);
@@ -127,8 +125,6 @@ END_NETWORK_TABLE()
 
 			vecCurOrigin = GetLocalOrigin() + GetAbsVelocity() * 1.0f;
 			interpolator.AddToHead(changeTime + 1.0f, &vecCurOrigin, false);
-
-
 		}
 	}
 
@@ -167,9 +163,7 @@ END_NETWORK_TABLE()
 	void CFFProjectileBase::CleanUp()
 	{
 		if (GetFlightSound())
-		{
 			StopSound(GetFlightSound());
-		}
 	}
 
 #else
@@ -204,7 +198,7 @@ END_NETWORK_TABLE()
 		if ( !edict() )
 			return true;
 
-		// position 
+		// position
 		if (GetAbsOrigin().x >= MAX_COORD_INTEGER) return false;
 		if (GetAbsOrigin().y >= MAX_COORD_INTEGER) return false;
 		if (GetAbsOrigin().z >= MAX_COORD_INTEGER) return false;
@@ -219,7 +213,7 @@ END_NETWORK_TABLE()
 //----------------------------------------------------------------------------
 // Purpose: Keep track of when spawned
 //----------------------------------------------------------------------------
-void CFFProjectileBase::Spawn() 
+void CFFProjectileBase::Spawn()
 {
 	m_flSpawnTime = gpGlobals->curtime;
 	m_flNextBounceSoundTime = gpGlobals->curtime;

@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/08/07
-	created:	7:8:2006   22:02
-	filename: 	f:\ff-svn\code\trunk_current\cl_dll\ff\ProxySlowfield.cpp
+	created:	7:8:2006	22:02
+	filename:	f:\ff-svn\code\trunk_current\cl_dll\ff\ProxySlowfield.cpp
 	file path:	f:\ff-svn\code\trunk_current\cl_dll\ff
 	file base:	ProxySlowfield
 	file ext:	cpp
@@ -24,9 +24,9 @@
 //extern ConVar ffdev_slowfield_radius_outer;
 //extern ConVar ffdev_slowfield_radius_inner;
 //extern ConVar ffdev_slowfield_radius_power;
-#define SLOWFIELD_RADIUS_OUTER 176 //ffdev_slowfield_radius_outer.GetFloat()
-#define SLOWFIELD_RADIUS_INNER 64 //ffdev_slowfield_radius_inner.GetFloat()
-#define SLOWFIELD_RADIUS_POWER 1 //ffdev_slowfield_radius_power.GetFloat()
+#define SLOWFIELD_RADIUS_OUTER 176	//ffdev_slowfield_radius_outer.GetFloat()
+#define SLOWFIELD_RADIUS_INNER 64	//ffdev_slowfield_radius_inner.GetFloat()
+#define SLOWFIELD_RADIUS_POWER 1	//ffdev_slowfield_radius_power.GetFloat()
 
 //-----------------------------------------------------------------------------
 // Returns charge of current weapon
@@ -69,9 +69,7 @@ void CProxySlowfieldSlow::OnBind(void *pC_BaseEntity)
 	//if we're scaling between outer and inner radius (linear!!)
 	//don't allow divide by zero or for inner/outer to be reversed
 	if(flDistance > SLOWFIELD_RADIUS_INNER && (SLOWFIELD_RADIUS_OUTER - SLOWFIELD_RADIUS_INNER) > 0.0f)
-	{
 		flResultVar = 1.0f - (flDistance - SLOWFIELD_RADIUS_INNER)/(SLOWFIELD_RADIUS_OUTER - SLOWFIELD_RADIUS_INNER);
-	}
 
 	flResultVar = clamp( flResultVar, 0.0f, 1.0f );
 	

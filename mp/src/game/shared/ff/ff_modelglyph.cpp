@@ -29,13 +29,13 @@
 // Class CFFModelGlyph tables
 //
 //=============================================================================
-IMPLEMENT_NETWORKCLASS_ALIASED( FFModelGlyph, DT_FFModelGlyph ) 
+IMPLEMENT_NETWORKCLASS_ALIASED( FFModelGlyph, DT_FFModelGlyph )
 
 BEGIN_NETWORK_TABLE( CFFModelGlyph, DT_FFModelGlyph )
-#ifdef CLIENT_DLL 
+#ifdef CLIENT_DLL
 #else
 #endif
-END_NETWORK_TABLE() 
+END_NETWORK_TABLE()
 
 BEGIN_PREDICTION_DATA( CFFModelGlyph )
 END_PREDICTION_DATA()
@@ -97,9 +97,7 @@ void CFFModelGlyph::Spawn( void )
 void CFFModelGlyph::OnObjectThink( void )
 {
 	if( ( gpGlobals->curtime >= m_flLifeTime ) && ( m_flLifeTime != -1 ) )
-	{
 		UTIL_Remove( this );
-	}
 	else
 	{
 		StudioFrameAdvance();
@@ -112,14 +110,12 @@ void CFFModelGlyph::OnObjectThink( void )
 //-----------------------------------------------------------------------------
 // Purpose: Make the client think always
 //-----------------------------------------------------------------------------
-void CFFModelGlyph::OnDataChanged( DataUpdateType_t updateType ) 
+void CFFModelGlyph::OnDataChanged( DataUpdateType_t updateType )
 {
 	BaseClass::OnDataChanged( updateType );
 
-	if( updateType == DATA_UPDATE_CREATED ) 
-	{
+	if( updateType == DATA_UPDATE_CREATED )
 		SetNextClientThink( CLIENT_THINK_ALWAYS );
-	}	
 }
 
 //-----------------------------------------------------------------------------
@@ -135,13 +131,13 @@ void CFFModelGlyph::ClientThink( void )
 // Class CFFSaveMe tables
 //
 //=============================================================================
-IMPLEMENT_NETWORKCLASS_ALIASED( FFSaveMe, DT_FFSaveMe ) 
+IMPLEMENT_NETWORKCLASS_ALIASED( FFSaveMe, DT_FFSaveMe )
 
 BEGIN_NETWORK_TABLE( CFFSaveMe, DT_FFSaveMe )
-#ifdef CLIENT_DLL 
+#ifdef CLIENT_DLL
 #else
 #endif
-END_NETWORK_TABLE() 
+END_NETWORK_TABLE()
 
 BEGIN_PREDICTION_DATA( CFFSaveMe )
 END_PREDICTION_DATA()

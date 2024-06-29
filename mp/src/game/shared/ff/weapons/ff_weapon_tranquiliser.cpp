@@ -34,7 +34,7 @@ class CFFWeaponTranquiliser : public CFFWeaponBase
 {
 public:
 	DECLARE_CLASS(CFFWeaponTranquiliser, CFFWeaponBase);
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 	
 	CFFWeaponTranquiliser();
@@ -54,13 +54,13 @@ private:
 // CFFWeaponTranquiliser tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponTranquiliser, DT_FFWeaponTranquiliser) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponTranquiliser, DT_FFWeaponTranquiliser)
 
-BEGIN_NETWORK_TABLE(CFFWeaponTranquiliser, DT_FFWeaponTranquiliser) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFWeaponTranquiliser, DT_FFWeaponTranquiliser)
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponTranquiliser) 
-END_PREDICTION_DATA() 
+BEGIN_PREDICTION_DATA(CFFWeaponTranquiliser)
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_tranq, CFFWeaponTranquiliser);
 PRECACHE_WEAPON_REGISTER(ff_weapon_tranq);
@@ -72,7 +72,7 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_tranq);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponTranquiliser::CFFWeaponTranquiliser() 
+CFFWeaponTranquiliser::CFFWeaponTranquiliser()
 {
 }
 
@@ -93,7 +93,7 @@ bool CFFWeaponTranquiliser::Deploy()
 //----------------------------------------------------------------------------
 // Purpose: Fire a dart
 //----------------------------------------------------------------------------
-void CFFWeaponTranquiliser::Fire() 
+void CFFWeaponTranquiliser::Fire()
 {
 	CFFPlayer *pPlayer = GetPlayerOwner();
 	const CFFWeaponInfo &pWeaponInfo = GetFFWpnData();	

@@ -41,7 +41,7 @@ extern "C"
 //-----------------------------------------------------------------------------
 // Network tables
 //-----------------------------------------------------------------------------
-IMPLEMENT_NETWORKCLASS_ALIASED( FFTriggerClip, DT_FFTriggerClip ) 
+IMPLEMENT_NETWORKCLASS_ALIASED( FFTriggerClip, DT_FFTriggerClip )
 
 BEGIN_NETWORK_TABLE( CFFTriggerClip, DT_FFTriggerClip )
 #ifdef CLIENT_DLL 
@@ -49,7 +49,7 @@ BEGIN_NETWORK_TABLE( CFFTriggerClip, DT_FFTriggerClip )
 #else
 	SendPropInt( SENDINFO( m_iClipMask ) ),
 #endif
-END_NETWORK_TABLE() 
+END_NETWORK_TABLE()
 
 #ifdef GAME_DLL
 LINK_ENTITY_TO_CLASS( trigger_ff_clip, CFFTriggerClip );
@@ -178,15 +178,13 @@ void CFFTriggerClip::Spawn( void )
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
-void CFFTriggerClip::OnDataChanged( DataUpdateType_t updateType ) 
+void CFFTriggerClip::OnDataChanged( DataUpdateType_t updateType )
 {
 	// NOTE: We MUST call the base classes' implementation of this function
 	BaseClass::OnDataChanged( updateType );
 
-	if( updateType == DATA_UPDATE_CREATED ) 
-	{
+	if( updateType == DATA_UPDATE_CREATED )
 		SetNextClientThink( CLIENT_THINK_ALWAYS );
-	}
 }
 
 #else

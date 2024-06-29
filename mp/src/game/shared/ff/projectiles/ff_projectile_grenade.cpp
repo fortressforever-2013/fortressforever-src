@@ -28,13 +28,13 @@
 
 	BEGIN_DATADESC(CFFProjectileGrenade) 
 		DEFINE_THINKFUNC(GrenadeThink), 
-	END_DATADESC() 
+	END_DATADESC()
 #endif
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFProjectileGrenade, DT_FFProjectileGrenade) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFProjectileGrenade, DT_FFProjectileGrenade)
 
-BEGIN_NETWORK_TABLE(CFFProjectileGrenade, DT_FFProjectileGrenade) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFProjectileGrenade, DT_FFProjectileGrenade)
+END_NETWORK_TABLE()
 
 LINK_ENTITY_TO_CLASS(ff_projectile_gl, CFFProjectileGrenade);
 PRECACHE_WEAPON_REGISTER(ff_projectile_gl);
@@ -82,11 +82,11 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_gl);
 	//----------------------------------------------------------------------------
 	// Purpose: Spawn a grenade, set up model, size, etc
 	//----------------------------------------------------------------------------
-	void CFFProjectileGrenade::Spawn() 
+	void CFFProjectileGrenade::Spawn()
 	{
 		// Setup
 		SetModel(GRENADE_MODEL);
-		m_nSkin = 1;	// Blue skin(#2) 
+		m_nSkin = 1;	// Blue skin(#2)
 
 		SetSolidFlags(FSOLID_NOT_STANDABLE);
 		SetMoveType(MOVETYPE_FLYGRAVITY, MOVECOLLIDE_FLY_CUSTOM);
@@ -116,13 +116,13 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_gl);
 	//----------------------------------------------------------------------------
 	// Purpose: Handles the bouncing of grenades
 	//----------------------------------------------------------------------------
-	void CFFProjectileGrenade::ResolveFlyCollisionCustom(trace_t &trace, Vector &vecVelocity) 
+	void CFFProjectileGrenade::ResolveFlyCollisionCustom(trace_t &trace, Vector &vecVelocity)
 	{
 		//Assume all surfaces have the same elasticity
 		float flSurfaceElasticity = 1.0;
 
 		//Don't bounce off of players with perfect elasticity
-		if (trace.m_pEnt && trace.m_pEnt->IsPlayer()) 
+		if (trace.m_pEnt && trace.m_pEnt->IsPlayer())
 		{
 			// Explode on contact with people	
 			if (ExplodeOnHitPlayer()) 
@@ -157,7 +157,7 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_gl);
 		flTotalElasticity = clamp(flTotalElasticity, 0.0f, 0.9f);
 
 		// UNDONE: A backoff of 2.0f is a reflection
-		// In HL it seems to use an overbounce of 1.5, so we're using 
+		// In HL it seems to use an overbounce of 1.5, so we're using
 		// 1.0 + default elasticity = 1.5
 		Vector vecAbsVelocity;
 		PhysicsClipVelocity(GetAbsVelocity(), trace.plane.normal, vecAbsVelocity, 1.0f + GetElasticity());
@@ -179,12 +179,12 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_gl);
 		vecAbsVelocity.x *= flNewSpeed;
 		vecAbsVelocity.y *= flNewSpeed;
 
-		// Get the total velocity(player + conveyors, etc.) 
+		// Get the total velocity(player + conveyors, etc.)
 		VectorAdd(vecAbsVelocity, GetBaseVelocity(), vecVelocity);
 		float flSpeedSqr = DotProduct(vecVelocity, vecVelocity);
 
 		// Stop if on ground.
-		if (trace.plane.normal.z > 0.7f) 			// Floor
+		if (trace.plane.normal.z > 0.7f)			// Floor
 		{
 			// Verify that we have an entity.
 			CBaseEntity *pEntity = trace.m_pEnt;
@@ -193,12 +193,10 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_gl);
 			SetAbsVelocity(vecAbsVelocity);
 
 			// Fix for #0001538: pipes bounce indefinitely (with tickrate 33)
-			if (flSpeedSqr < (50 * 50) || (vecAbsVelocity.x == 0.0f && flSpeedSqr < (70*70))) 
+			if (flSpeedSqr < (50 * 50) || (vecAbsVelocity.x == 0.0f && flSpeedSqr < (70*70)))
 			{
-				if (pEntity->IsStandable()) 
-				{
+				if (pEntity->IsStandable())
 					SetGroundEntity(pEntity);
-				}
 
 				// Reset velocities.
 				SetAbsVelocity(vec3_origin);
@@ -241,21 +239,18 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_gl);
 				SetLocalAngularVelocity(vec3_angle);
 			}
 			else
-			{
 				SetAbsVelocity(vecAbsVelocity);
-			}
 		}
 		
 		BounceSound();
 	}
-
 
 #endif
 
 //----------------------------------------------------------------------------
 // Purpose: Precache the grenade model
 //----------------------------------------------------------------------------
-void CFFProjectileGrenade::Precache() 
+void CFFProjectileGrenade::Precache()
 {
 	PrecacheModel(GRENADE_MODEL);
 	BaseClass::Precache();
@@ -288,8 +283,8 @@ CFFProjectileGrenade * CFFProjectileGrenade::CreateGrenade(const CBaseEntity *pS
 	pGrenade->SetElasticity(GetGrenadeElasticity());
 #endif
 
-	//pGrenade->SetDamage(iDamage); 
-	pGrenade->SetDamage(FF_PROJECTILE_GREN_NORMALDMG);//AfterShock: cvar for damage while we test direct damage bonus
+	//pGrenade->SetDamage(iDamage);
+	pGrenade->SetDamage(FF_PROJECTILE_GREN_NORMALDMG);	//AfterShock: cvar for damage while we test direct damage bonus
 	pGrenade->SetDamageRadius(iDamageRadius);
 
 	pGrenade->m_bIsLive = true;
@@ -302,7 +297,7 @@ CFFProjectileGrenade * CFFProjectileGrenade::CreateGrenade(const CBaseEntity *pS
 
 	pGrenade->SetLocalAngularVelocity(RandomAngle(-400, 400));
 
-	return pGrenade; 
+	return pGrenade;
 }
 
 //----------------------------------------------------------------------------
@@ -311,14 +306,14 @@ CFFProjectileGrenade * CFFProjectileGrenade::CreateGrenade(const CBaseEntity *pS
 void CFFProjectileGrenade::GrenadeThink() 
 {
 	// Remove if we're nolonger in the world
-	if (!IsInWorld()) 
+	if (!IsInWorld())
 	{
 		Remove();
 		return;
 	}
 
 	// Blow up if we've reached the end of our fuse
-	if (gpGlobals->curtime > m_flDetonateTime) 
+	if (gpGlobals->curtime > m_flDetonateTime)
 	{
 		Detonate();
 		return;
@@ -336,8 +331,8 @@ void CFFProjectileGrenade::GrenadeThink()
 
 	// BEG: Mulch - don't slow down in water
 //	
-//	// Slow down in water(need to fix this, will slow to a halt) 
-//	if (GetWaterLevel() != 0) 
+//	// Slow down in water(need to fix this, will slow to a halt)
+//	if (GetWaterLevel() != 0)
 //	{
 //		SetAbsVelocity(GetAbsVelocity() * 0.5);
 //	}

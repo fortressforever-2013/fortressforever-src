@@ -41,7 +41,7 @@ class CFFWeaponRPG : public CFFWeaponBaseClip
 {
 public:
 	DECLARE_CLASS(CFFWeaponRPG, CFFWeaponBaseClip);
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 	
 	CFFWeaponRPG();
@@ -60,21 +60,21 @@ private:
 // CFFWeaponRPG tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponRPG, DT_FFWeaponRPG) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponRPG, DT_FFWeaponRPG)
 
-BEGIN_NETWORK_TABLE(CFFWeaponRPG, DT_FFWeaponRPG) 
+BEGIN_NETWORK_TABLE(CFFWeaponRPG, DT_FFWeaponRPG)
 #ifdef CLIENT_DLL
 RecvPropBool(RECVINFO(m_fStartedReloading)),
 #else
 SendPropBool(SENDINFO(m_fStartedReloading)),
 #endif
-END_NETWORK_TABLE() 
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponRPG) 
+BEGIN_PREDICTION_DATA(CFFWeaponRPG)
 #ifdef CLIENT_DLL
 DEFINE_PRED_FIELD(m_fStartedReloading, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
 #endif
-END_PREDICTION_DATA() 
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_rpg, CFFWeaponRPG);
 PRECACHE_WEAPON_REGISTER(ff_weapon_rpg);
@@ -86,7 +86,7 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_rpg);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponRPG::CFFWeaponRPG() 
+CFFWeaponRPG::CFFWeaponRPG()
 {
 	m_fStartedReloading = false;
 }
@@ -94,7 +94,7 @@ CFFWeaponRPG::CFFWeaponRPG()
 //----------------------------------------------------------------------------
 // Purpose: Fire a rocket
 //----------------------------------------------------------------------------
-void CFFWeaponRPG::Fire() 
+void CFFWeaponRPG::Fire()
 {
 	CFFPlayer *pPlayer = GetPlayerOwner();
 	const CFFWeaponInfo &pWeaponInfo = GetFFWpnData();
@@ -116,7 +116,7 @@ void CFFWeaponRPG::Fire()
 //----------------------------------------------------------------------------
 // Purpose: Override animations
 //----------------------------------------------------------------------------
-bool CFFWeaponRPG::SendWeaponAnim(int iActivity) 
+bool CFFWeaponRPG::SendWeaponAnim(int iActivity)
 {
 	// If we have some unexpected clip amount, escape quick
 	if (m_iClip1 < 0 || m_iClip1 > 6) 

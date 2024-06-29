@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/08/16
-	created:	16:8:2006   18:35
-	filename: 	f:\ff-svn\code\trunk\cl_dll\ff\ff_screenspaceeffects.cpp
+	created:	16:8:2006	18:35
+	filename:	f:\ff-svn\code\trunk\cl_dll\ff\ff_screenspaceeffects.cpp
 	file path:	f:\ff-svn\code\trunk\cl_dll\ff
 	file base:	ff_screenspaceeffects
 	file ext:	cpp
@@ -34,7 +34,7 @@ CLIENTEFFECT_REGISTER_BEGIN(PrecacheFrontbuffer)
 CLIENTEFFECT_MATERIAL("frontbuffer.vmt")
 CLIENTEFFECT_REGISTER_END()
 
-#define M_PI_2     1.57079632679489661923
+#define M_PI_2	1.57079632679489661923
 
 extern void AddNewDurationFromNow(float &flStart, float &flDuration, float flNewDuration, float flFadeInTime, float flFadeOutTime);
 
@@ -150,14 +150,10 @@ void CBaseEffect::Enable(bool bEnable)
 		bEnable = false;
 	}
 	else
-	{
 		m_bEnable = bEnable;
-	}
 
 	if (m_bEnable)
-	{
 		AddNewDurationFromNow(m_flStart, m_flDuration, m_flNextDuration, M_PI_2, M_PI_2);
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -440,9 +436,7 @@ void CMotionBlur::Render(int x, int y, int w, int h)
 	pVar = pMatScreen->FindVar( "$alpha", &bFound, false );
 
 	if (pVar)
-	{
 		pVar->SetFloatValue(flBlur * 0.6f);
-	}
 
 	// Set the texture to our buffer
 	pVar = pMatScreen->FindVar("$basetexture", &bFound, false);
@@ -460,9 +454,7 @@ void CMotionBlur::Render(int x, int y, int w, int h)
 
 	// Set back to original place
 	if (pVar)
-	{
 		pVar->SetTextureValue(pOriginalTexture);
-	}
 }
 
 //-----------------------------------------------------------------------------

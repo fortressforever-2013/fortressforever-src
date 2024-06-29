@@ -57,7 +57,7 @@
 
 			if ( vEndPos.DistToSqr( pSound->m_vPos ) < 300*300 )
 			{
-				if ( Q_stricmp( pSound->m_SoundName, pSoundName ) == 0 )
+				if ( !Q_stricmp( pSound->m_SoundName, pSoundName ) )
 					return;
 			}
 		}
@@ -77,7 +77,6 @@
 		Assert( g_GroupedSounds.Count() == 0 );
 		SetImpactSoundRoute( ShotgunImpactSoundGroup );
 	}
-
 
 	void EndGroupingSounds()
 	{
@@ -220,4 +219,3 @@ void FX_FireBullets(
 
 	EndGroupingSounds();
 }
-

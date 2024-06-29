@@ -42,13 +42,13 @@ private:
 // CFFWeaponUmbrella tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponUmbrella, DT_FFWeaponUmbrella) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponUmbrella, DT_FFWeaponUmbrella)
 
-BEGIN_NETWORK_TABLE(CFFWeaponUmbrella, DT_FFWeaponUmbrella) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFWeaponUmbrella, DT_FFWeaponUmbrella)
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponUmbrella) 
-END_PREDICTION_DATA() 
+BEGIN_PREDICTION_DATA(CFFWeaponUmbrella)
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_umbrella, CFFWeaponUmbrella);
 PRECACHE_WEAPON_REGISTER(ff_weapon_umbrella);
@@ -60,6 +60,6 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_umbrella);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponUmbrella::CFFWeaponUmbrella() 
+CFFWeaponUmbrella::CFFWeaponUmbrella()
 {
 }

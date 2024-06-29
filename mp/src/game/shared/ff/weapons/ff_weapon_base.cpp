@@ -49,7 +49,7 @@ const char *s_WeaponAliasInfo[] =
 	"autorifle", 		// FF_WEAPON_AUTORIFLE
 	"sniperrifle", 		// FF_WEAPON_SNIPERRIFLE
 
-	"flamethrower", 	// FF_WEAPON_FLAMETHROWER, 
+	"flamethrower", 	// FF_WEAPON_FLAMETHROWER,
 	"incendiarycannon", // FF_WEAPON_INCENDIARYCANNON
 
 	"railgun", 			// FF_WEAPON_RAILGUN
@@ -299,9 +299,7 @@ void CFFWeaponBase::Drop( const Vector& vecVelocity )
 	SetTouch( NULL );
 
 	if( hl2_episodic.GetBool() )
-	{
 		RemoveSpawnFlags( SF_WEAPON_NO_PLAYER_PICKUP );
-	}
 
 	IPhysicsObject *pObj = VPhysicsGetObject();
 	if ( pObj != NULL )
@@ -310,9 +308,7 @@ void CFFWeaponBase::Drop( const Vector& vecVelocity )
 		pObj->AddVelocity( &vecVelocity, &angImp );
 	}
 	else
-	{
 		SetAbsVelocity( vecVelocity );
-	}
 
 	SetNextThink( gpGlobals->curtime + 1.0f );
 	SetOwnerEntity( NULL );
@@ -456,9 +452,7 @@ int CFFWeaponBase::DrawModel( int flags )
 			return 1;
 
 		if( !pPlayer->IsCloaked() )
-		{
 			ReleaseOverrideMaterial(FF_CLOAK_MATERIAL);
-		}
 		else
 		{
 			// don't draw if cloaked and basically not moving
@@ -507,9 +501,7 @@ ShadowType_t CFFWeaponBase::ShadowCastType( void )
 			return SHADOWS_NONE;
 		}
 		else
-		{
 			return SHADOWS_RENDER_TO_TEXTURE_DYNAMIC;
-		}
 	}
 
 	return BaseClass::ShadowCastType();
@@ -587,9 +579,7 @@ void CFFWeaponBase::ItemPostFrame()
 	m_fFireDuration = (pOwner->m_nButtons & IN_ATTACK) ? (m_fFireDuration + gpGlobals->frametime) : 0.0f;
 
 	if (UsesClipsForAmmo1())
-	{
 		CheckReload();
-	}
 
 	bool bFired = false;
 
@@ -678,15 +668,13 @@ void CFFWeaponBase::ItemPostFrame()
 	}
 
 	// -----------------------
-	//  No buttons down
+	//	No buttons down
 	// -----------------------
 	if (! ((pOwner->m_nButtons & IN_ATTACK) || /* (pOwner->m_nButtons & IN_ATTACK2) ||*/ (pOwner->m_nButtons & IN_RELOAD))) // |-- Mirv: Removed attack2 so things can continue while in menu
 	{
 		// no fire buttons down or reloading
 		if (!ReloadOrSwitchWeapons() && (m_bInReload == false))
-		{
 			WeaponIdle();
-		}
 	}
 }
 
@@ -699,9 +687,7 @@ CFFWeaponBase::~CFFWeaponBase()
 	C_FFPlayer *pOwner = GetPlayerOwner();
 
 	if (pOwner && pOwner->m_pOldActiveWeapon == this)
-	{
 		pOwner->m_pOldActiveWeapon = NULL;
-	}
 #endif
 }
 

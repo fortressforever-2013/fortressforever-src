@@ -42,14 +42,12 @@ static CFFPlayerClassInfo g_NullClass;
 // Input  : *name - 
 // Output : CFFPlayerClassInfo
 //----------------------------------------------------------------------------
-static PLAYERCLASS_FILE_INFO_HANDLE FindPlayerClassInfoSlot(const char *name) 
+static PLAYERCLASS_FILE_INFO_HANDLE FindPlayerClassInfoSlot(const char *name)
 {
 	// Complain about duplicately defined metaclass names...
 	unsigned short lookup = m_PlayerClassInfoDatabase.Find(name);
-	if (lookup != m_PlayerClassInfoDatabase.InvalidIndex()) 
-	{
+	if (lookup != m_PlayerClassInfoDatabase.InvalidIndex())
 		return lookup;
-	}
 
 	CFFPlayerClassInfo *insert = CreatePlayerClassInfo();
 
@@ -61,7 +59,7 @@ static PLAYERCLASS_FILE_INFO_HANDLE FindPlayerClassInfoSlot(const char *name)
 //----------------------------------------------------------------------------
 // Purpose: Find a playerclass slot, assuming the playerclass's data has already been loaded.
 //----------------------------------------------------------------------------
-PLAYERCLASS_FILE_INFO_HANDLE LookupPlayerClassInfoSlot(const char *name) 
+PLAYERCLASS_FILE_INFO_HANDLE LookupPlayerClassInfoSlot(const char *name)
 {
 	return m_PlayerClassInfoDatabase.Find(name);
 }
@@ -74,14 +72,14 @@ static CFFPlayerClassInfo gNullPlayerClassInfo;
 // Input  : handle - 
 // Output : CFFPlayerClassInfo
 //----------------------------------------------------------------------------
-CFFPlayerClassInfo *GetFilePlayerClassInfoFromHandle(PLAYERCLASS_FILE_INFO_HANDLE handle) 
+CFFPlayerClassInfo *GetFilePlayerClassInfoFromHandle(PLAYERCLASS_FILE_INFO_HANDLE handle)
 {
-	if (handle < 0 || handle >= m_PlayerClassInfoDatabase.Count()) 
+	if (handle < 0 || handle >= m_PlayerClassInfoDatabase.Count())
 	{
 		return &gNullPlayerClassInfo;
 	}
 
-	if (handle == m_PlayerClassInfoDatabase.InvalidIndex()) 
+	if (handle == m_PlayerClassInfoDatabase.InvalidIndex())
 	{
 		return &gNullPlayerClassInfo;
 	}
@@ -93,7 +91,7 @@ CFFPlayerClassInfo *GetFilePlayerClassInfoFromHandle(PLAYERCLASS_FILE_INFO_HANDL
 // Purpose: 
 // Output : PLAYERCLASS_FILE_INFO_HANDLE
 //----------------------------------------------------------------------------
-PLAYERCLASS_FILE_INFO_HANDLE GetInvalidPlayerClassInfoHandle() 
+PLAYERCLASS_FILE_INFO_HANDLE GetInvalidPlayerClassInfoHandle()
 {
 	return (PLAYERCLASS_FILE_INFO_HANDLE) m_PlayerClassInfoDatabase.InvalidIndex();
 }
@@ -103,10 +101,10 @@ PLAYERCLASS_FILE_INFO_HANDLE GetInvalidPlayerClassInfoHandle()
 // Purpose: 
 //----------------------------------------------------------------------------
 #if 0
-void ResetFilePlayerClassInfoDatabase() 
+void ResetFilePlayerClassInfoDatabase()
 {
-	int c = m_PlayerClassInfoDatabase.Count(); 
-	for (int i = 0; i < c; ++i) 
+	int c = m_PlayerClassInfoDatabase.Count();
+	for (int i = 0; i < c; ++i)
 	{
 		delete m_PlayerClassInfoDatabase[ i ];
 	}
@@ -121,7 +119,7 @@ void ResetFilePlayerClassInfoDatabase()
 //----------------------------------------------------------------------------
 // Purpose: Precaches all the playerclass_ *.txt files
 //----------------------------------------------------------------------------
-void PrecacheFilePlayerClassInfoDatabase(IFileSystem *filesystem, const unsigned char *pICEKey) 
+void PrecacheFilePlayerClassInfoDatabase(IFileSystem *filesystem, const unsigned char *pICEKey)
 {
 	if (m_PlayerClassInfoDatabase.Count()) 
 		return;
@@ -165,10 +163,8 @@ KeyValues * ReadEncryptedKVPlayerClassFile(IFileSystem *filesystem, const char *
 
 	const char *pSearchPath = "MOD";
 
-	if (pICEKey == NULL) 
-	{
+	if (pICEKey == NULL)
 		pSearchPath = "GAME";
-	}
 
 	// Open the playerclass data file, and abort if we can't
 	KeyValues *pKV = new KeyValues("PlayerClassDatafile");
@@ -201,7 +197,7 @@ KeyValues * ReadEncryptedKVPlayerClassFile(IFileSystem *filesystem, const char *
 
 		MemFreeScratch();
 
-		if (!retOK) 
+		if (!retOK)
 		{
 			pKV->deleteThis();
 			return NULL;
@@ -227,9 +223,9 @@ KeyValues * ReadEncryptedKVPlayerClassFile(IFileSystem *filesystem, const char *
 // Output:  true  - if data2 successfully read
 //			false - if data load fails
 //-----------------------------------------------------------------------------
-bool ReadPlayerClassDataFromFileForSlot(IFileSystem * filesystem, const char *szPlayerClassName, PLAYERCLASS_FILE_INFO_HANDLE *phandle, const unsigned char *pICEKey) 
+bool ReadPlayerClassDataFromFileForSlot(IFileSystem * filesystem, const char *szPlayerClassName, PLAYERCLASS_FILE_INFO_HANDLE *phandle, const unsigned char *pICEKey)
 {
-	if (!phandle) 
+	if (!phandle)
 	{
 		Assert(0);
 		return false;
@@ -237,7 +233,7 @@ bool ReadPlayerClassDataFromFileForSlot(IFileSystem * filesystem, const char *sz
 
 	char szRealPlayerClassName[128] = "";
 
-	if (Q_strncmp(szPlayerClassName, "ff_playerclass_", 15) != 0)
+	if (Q_strncmp(szPlayerClassName, "ff_playerclass_", 15))
 	{
 		Q_strncpy(szRealPlayerClassName, "ff_playerclass_", 100);
 	}
@@ -377,13 +373,13 @@ void CFFPlayerClassInfo::Parse(KeyValues *pKeyValuesData, const char *szPlayerCl
 	for (KeyValues *pArmaments = pWeaponData->GetFirstValue(); pArmaments; pArmaments = pArmaments->GetNextValue()) 
 	{
 		// This is a weapon
-		if (strcmp(pArmaments->GetName(), "weapon") == 0) 
+		if (!strcmp(pArmaments->GetName(), "weapon"))
 		{
 			//m_vecWeapons.push_back(pArmaments->GetString());
-			if (m_iNumWeapons < MAX_WEAPONS_PER_CLASS) 
+			if (m_iNumWeapons < MAX_WEAPONS_PER_CLASS)
 				Q_strncpy(m_aWeapons[m_iNumWeapons++], pArmaments->GetString(), MAX_PLAYERCLASS_STRING);
 		}
-		else if (strcmp(pArmaments->GetName(), "skill") == 0) 
+		else if (!strcmp(pArmaments->GetName(), "skill"))
 		{
 			//m_vecSkills.push_back(pArmaments->GetString());
 			if (m_iNumSkills < MAX_WEAPONS_PER_CLASS) 
@@ -398,7 +394,7 @@ void CFFPlayerClassInfo::Parse(KeyValues *pKeyValuesData, const char *szPlayerCl
 	{
 		//DevMsg("Ammo: %s Amount: %i\n", pAmmo->GetName(), pAmmo->GetInt());
 
-		if (m_iNumAmmos < MAX_WEAPONS_PER_CLASS) 
+		if (m_iNumAmmos < MAX_WEAPONS_PER_CLASS)
 		{
 			Q_strncpy(m_aAmmos[ m_iNumAmmos ].m_szAmmoType, pAmmo->GetName(), MAX_PLAYERCLASS_STRING);
 			m_aAmmos[ m_iNumAmmos ].m_iAmount = pAmmo->GetInt();
@@ -413,26 +409,26 @@ void CFFPlayerClassInfo::Parse(KeyValues *pKeyValuesData, const char *szPlayerCl
 	int iMaxNumAmmos = 0;
 
 	// This will go through the values for ammo amounts the player spawns with
-	for (KeyValues *pAmmo = pMaxAmmoData->GetFirstValue(); pAmmo; pAmmo = pAmmo->GetNextValue()) 
+	for (KeyValues *pAmmo = pMaxAmmoData->GetFirstValue(); pAmmo; pAmmo = pAmmo->GetNextValue())
 	{
 		//DevMsg("Ammo: %s Amount: %i\n", pAmmo->GetName(), pAmmo->GetInt());
 
-		if (iMaxNumAmmos < MAX_WEAPONS_PER_CLASS) 
+		if (iMaxNumAmmos < MAX_WEAPONS_PER_CLASS)
 		{			
 			const char *pszAmmo = pAmmo->GetName();
 			int iVal = pAmmo->GetInt();
 
-			if (Q_strcmp(AMMO_SHELLS, pszAmmo) == 0) 
+			if (!Q_strcmp(AMMO_SHELLS, pszAmmo))
 				m_iMaxShells = iVal;
-			else if (Q_strcmp(AMMO_CELLS, pszAmmo) == 0) 
+			else if (!Q_strcmp(AMMO_CELLS, pszAmmo))
 				m_iMaxCells = iVal;
-			else if (Q_strcmp(AMMO_NAILS, pszAmmo) == 0) 
+			else if (!Q_strcmp(AMMO_NAILS, pszAmmo))
 				m_iMaxNails = iVal;
-			else if (Q_strcmp(AMMO_ROCKETS, pszAmmo) == 0) 
+			else if (!Q_strcmp(AMMO_ROCKETS, pszAmmo))
 				m_iMaxRockets = iVal;
-			else if (Q_strcmp(AMMO_DETPACK, pszAmmo) == 0) 
+			else if (!Q_strcmp(AMMO_DETPACK, pszAmmo))
 				m_iMaxDetpack = iVal;
-			else if (Q_strcmp(AMMO_MANCANNON, pszAmmo) == 0)
+			else if (!Q_strcmp(AMMO_MANCANNON, pszAmmo))
 				m_iMaxManCannon = iVal;
 
 			iMaxNumAmmos++;
@@ -443,7 +439,7 @@ void CFFPlayerClassInfo::Parse(KeyValues *pKeyValuesData, const char *szPlayerCl
 //----------------------------------------------------------------------------
 // Purpose: Create a new class info for this player
 //----------------------------------------------------------------------------
-CFFPlayerClassInfo * CreatePlayerClassInfo() 
+CFFPlayerClassInfo * CreatePlayerClassInfo()
 {
 	return new CFFPlayerClassInfo;
 }

@@ -55,9 +55,9 @@ public:
 	
 	CFFWeaponDeploySentryGun( void );
 #ifdef CLIENT_DLL 
-	~CFFWeaponDeploySentryGun( void ) 
-	{ 
-		Cleanup(); 
+	~CFFWeaponDeploySentryGun( void )
+	{
+		Cleanup();
 	}
 #endif
 
@@ -79,10 +79,10 @@ protected:
 	CFFSentryGun *m_pBuildable;
 #endif
 
-	void Cleanup() 
+	void Cleanup()
 	{
 #ifdef CLIENT_DLL
-		if (m_pBuildable) 
+		if (m_pBuildable)
 		{
 			m_pBuildable->Remove();
 			m_pBuildable = NULL;
@@ -95,13 +95,13 @@ protected:
 // CFFWeaponDeploySentryGun tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponDeploySentryGun, DT_FFWeaponDeploySentryGun) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponDeploySentryGun, DT_FFWeaponDeploySentryGun)
 
-BEGIN_NETWORK_TABLE(CFFWeaponDeploySentryGun, DT_FFWeaponDeploySentryGun) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFWeaponDeploySentryGun, DT_FFWeaponDeploySentryGun)
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponDeploySentryGun) 
-END_PREDICTION_DATA() 
+BEGIN_PREDICTION_DATA(CFFWeaponDeploySentryGun)
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_deploysentrygun, CFFWeaponDeploySentryGun);
 PRECACHE_WEAPON_REGISTER(ff_weapon_deploysentrygun);
@@ -113,7 +113,7 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_deploysentrygun);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponDeploySentryGun::CFFWeaponDeploySentryGun( void ) 
+CFFWeaponDeploySentryGun::CFFWeaponDeploySentryGun( void )
 {
 #ifdef CLIENT_DLL
 	m_pBuildable = NULL;
@@ -144,7 +144,7 @@ void CFFWeaponDeploySentryGun::ItemPostFrame()
 	}
 
 	// -----------------------
-	//  Reload pressed / Clip Empty
+	//	Reload pressed / Clip Empty
 	// -----------------------
 	if (pOwner->m_nButtons & IN_RELOAD && UsesClipsForAmmo1() && !m_bInReload)
 	{
@@ -160,18 +160,16 @@ void CFFWeaponDeploySentryGun::ItemPostFrame()
 	{
 		// no fire buttons down or reloading
 		if (!ReloadOrSwitchWeapons() && (m_bInReload == false))
-		{
 			WeaponIdle();
-		}
 	}
 }
 
 //----------------------------------------------------------------------------
-// Purpose: Handles whatever should be done when they fire(build, aim, etc) 
+// Purpose: Handles whatever should be done when they fire(build, aim, etc)
 //----------------------------------------------------------------------------
-void CFFWeaponDeploySentryGun::PrimaryAttack( void ) 
+void CFFWeaponDeploySentryGun::PrimaryAttack( void )
 {
-	if (m_flNextPrimaryAttack < gpGlobals->curtime) 
+	if (m_flNextPrimaryAttack < gpGlobals->curtime)
 	{
 		m_flNextPrimaryAttack = gpGlobals->curtime + 0.5f;
 
@@ -187,11 +185,11 @@ void CFFWeaponDeploySentryGun::PrimaryAttack( void )
 //----------------------------------------------------------------------------
 // Purpose: Checks validity of ground at this point or whatever
 //----------------------------------------------------------------------------
-void CFFWeaponDeploySentryGun::WeaponIdle( void ) 
+void CFFWeaponDeploySentryGun::WeaponIdle( void )
 {
-	if (m_flTimeWeaponIdle < gpGlobals->curtime) 
+	if (m_flTimeWeaponIdle < gpGlobals->curtime)
 	{
-#ifdef CLIENT_DLL 
+#ifdef CLIENT_DLL
 		C_FFPlayer *pPlayer = GetPlayerOwner();
 
 		// If we've built and we're not building pop out wrench
@@ -202,9 +200,7 @@ void CFFWeaponDeploySentryGun::WeaponIdle( void )
 		{
 			CFFBuildableInfo hBuildInfo( pPlayer, FF_BUILD_SENTRYGUN );
 			if( !m_pBuildable )
-			{
 				m_pBuildable = CFFSentryGun::CreateClientSideSentryGun( hBuildInfo.GetBuildOrigin(), hBuildInfo.GetBuildAngles() );
-			}
 			else
 			{
 				m_pBuildable->SetAbsOrigin( hBuildInfo.GetBuildOrigin() );
@@ -218,7 +214,7 @@ void CFFWeaponDeploySentryGun::WeaponIdle( void )
 	}
 }
 
-bool CFFWeaponDeploySentryGun::Holster(CBaseCombatWeapon *pSwitchingTo) 
+bool CFFWeaponDeploySentryGun::Holster(CBaseCombatWeapon *pSwitchingTo)
 {
 	Cleanup();
 
@@ -243,7 +239,7 @@ bool CFFWeaponDeploySentryGun::CanBeSelected( void )
 	{
 		CFFPlayer *pPlayer = ToFFPlayer(UTIL_GetCommandClient());
 
-		if (!pPlayer) 
+		if (!pPlayer)
 			return;
 
 		if( ! pPlayer->IsAlive() )
@@ -260,7 +256,7 @@ bool CFFWeaponDeploySentryGun::CanBeSelected( void )
 
 		CFFSentryGun *pSentry = pPlayer->GetSentryGun();
 
-		if (!pSentry) 
+		if (!pSentry)
 		{
 			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_NOSENTRY");
 			return;
@@ -304,7 +300,7 @@ bool CFFWeaponDeploySentryGun::CanBeSelected( void )
 
 		CFFSentryGun *pSentry = pPlayer->GetSentryGun();
 
-		if (!pSentry) 
+		if (!pSentry)
 		{
 			ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_NOSENTRYTODISMANTLE" );
 			return;
@@ -317,7 +313,7 @@ bool CFFWeaponDeploySentryGun::CanBeSelected( void )
 		}
 
 		// Close enough to dismantle
-		if ((pPlayer->GetAbsOrigin() - pSentry->GetAbsOrigin()).LengthSqr() < 6400.0f) 
+		if ((pPlayer->GetAbsOrigin() - pSentry->GetAbsOrigin()).LengthSqr() < 6400.0f)
 		{
 			pPlayer->GiveAmmo(pSentry->GetLevel() * 65, AMMO_CELLS, true);
 
@@ -339,11 +335,11 @@ bool CFFWeaponDeploySentryGun::CanBeSelected( void )
 			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_TOOFARAWAY");
 	}
 
-	CON_COMMAND(detsentry, "Detonates sentrygun") 
+	CON_COMMAND(detsentry, "Detonates sentrygun")
 	{
 		CFFPlayer *pPlayer = ToFFPlayer(UTIL_GetCommandClient());
 
-		if (!pPlayer) 
+		if (!pPlayer)
 			return;
 
 		if( ! pPlayer->IsAlive() )
@@ -361,9 +357,9 @@ bool CFFWeaponDeploySentryGun::CanBeSelected( void )
 
 		CFFSentryGun *pSentry = pPlayer->GetSentryGun();
 
-		if (!pSentry) 
+		if (!pSentry)
 		{
-            ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_NOSENTRYTODET");
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_NOSENTRYTODET");
 			return;
 		}
 
@@ -380,7 +376,7 @@ bool CFFWeaponDeploySentryGun::CanBeSelected( void )
 	{
 		CFFPlayer *pPlayer = ToFFPlayer(UTIL_GetCommandClient());
 
-		if (!pPlayer) 
+		if (!pPlayer)
 			return;
 
 		if( ! pPlayer->IsAlive() )
@@ -398,9 +394,9 @@ bool CFFWeaponDeploySentryGun::CanBeSelected( void )
 
 		CFFSentryGun *pSentry = pPlayer->GetSentryGun();
 
-		if (!pSentry) 
+		if (!pSentry)
 		{
-            ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_NOSENTRY" );
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_NOSENTRY" );
 			return;
 		}
 
@@ -411,7 +407,7 @@ bool CFFWeaponDeploySentryGun::CanBeSelected( void )
 		}
 
 		// Close enough to dismantle
-		if ((pPlayer->GetAbsOrigin() - pSentry->GetAbsOrigin()).LengthSqr() < 6400.0f) 
+		if ((pPlayer->GetAbsOrigin() - pSentry->GetAbsOrigin()).LengthSqr() < 6400.0f)
 		{
 			pPlayer->GiveAmmo(pSentry->GetLevel() * 65, AMMO_CELLS, true);
 

@@ -41,7 +41,7 @@ class CFFWeaponDeployDetpack : public CFFWeaponBase
 {
 public:
 	DECLARE_CLASS( CFFWeaponDeployDetpack, CFFWeaponBase );
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 	
 	CFFWeaponDeployDetpack( void );
@@ -130,9 +130,7 @@ void CFFWeaponDeployDetpack::ItemPostFrame()
 		m_flNextPrimaryAttack = gpGlobals->curtime;
 
 	if ((pOwner->m_nButtons & IN_ATTACK || pOwner->m_afButtonPressed & IN_ATTACK) && (m_flNextPrimaryAttack <= gpGlobals->curtime))
-	{
-			PrimaryAttack();
-	}
+		PrimaryAttack();
 
 	// -----------------------
 	//  Reload pressed / Clip Empty
@@ -151,9 +149,7 @@ void CFFWeaponDeployDetpack::ItemPostFrame()
 	{
 		// no fire buttons down or reloading
 		if (!ReloadOrSwitchWeapons() && (m_bInReload == false))
-		{
 			WeaponIdle();
-		}
 	}
 }
 
@@ -204,9 +200,7 @@ void CFFWeaponDeployDetpack::WeaponIdle( void )
 		{
 			CFFBuildableInfo hBuildInfo( pPlayer, FF_BUILD_DETPACK );
 			if( !m_pBuildable )
-			{
 				m_pBuildable = CFFDetpack::CreateClientSideDetpack( hBuildInfo.GetBuildOrigin(), hBuildInfo.GetBuildAngles() );
-			}
 			else
 			{
 				m_pBuildable->SetAbsOrigin( hBuildInfo.GetBuildOrigin() );

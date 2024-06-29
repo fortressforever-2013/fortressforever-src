@@ -20,7 +20,7 @@
 #pragma once
 #endif
 
-#ifdef CLIENT_DLL 
+#ifdef CLIENT_DLL
 	#define CFFModelGlyph C_FFModelGlyph
 	#define CFFSaveMe C_FFSaveMe
 #include "c_baseanimating.h"
@@ -87,7 +87,7 @@ public:
 	virtual void	Spawn( void );
 	// --> Shared code
 
-#ifdef CLIENT_DLL 
+#ifdef CLIENT_DLL
 	virtual bool	ShouldDraw( void );
 #endif
 };

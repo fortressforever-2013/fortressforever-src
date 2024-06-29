@@ -12,7 +12,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-#define	TRACER_SPEED			5000 
+#define	TRACER_SPEED			5000
 
 static ConVar cl_tracers("cl_tracers", "1");
 
@@ -128,9 +128,7 @@ void SGTracerCallback( const CEffectData &data )
 	
 	// Use default velocity if none specified
 	if ( !flVelocity )
-	{
 		flVelocity = TRACER_SPEED;
-	}
 
 	// Do tracer effect
 	FX_Tracer( (Vector&)vecStart, (Vector&)data.m_vOrigin, flVelocity, bWhiz );
@@ -152,4 +150,3 @@ void SGTracerSoundCallback( const CEffectData &data )
 }
 
 DECLARE_CLIENT_EFFECT( "SGTracerSound", SGTracerSoundCallback );
-

@@ -62,7 +62,7 @@ namespace vgui
 
 		// both vgui::Frame and IViewPortPanel define these, so explicitly define them here as passthroughs to vgui
 		vgui::VPANEL GetVPanel( void ) { return BaseClass::GetVPanel(); }
-  		virtual bool IsVisible() { return BaseClass::IsVisible(); }
+		virtual bool IsVisible() { return BaseClass::IsVisible(); }
 		virtual void SetParent( vgui::VPANEL parent ) { BaseClass::SetParent( parent ); }
 	
 	protected:
@@ -94,7 +94,7 @@ namespace vgui
 			// Other
 			FFButton		*m_pFlythroughButton;
 
-			FFButton		*m_pMapScreenshotButton;			// Click to display the map screenshot
+			FFButton		*m_pMapScreenshotButton;	// Click to display the map screenshot
 		
 			char			m_szServerName[255];
 	};

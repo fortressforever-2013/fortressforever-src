@@ -11,7 +11,7 @@
 // viewport interface for the rest of the dll
 #include <game/client/iviewport.h>
 
-#include <utlqueue.h> // a vector based queue template to manage our VGUI menu queue
+#include <utlqueue.h>	// a vector based queue template to manage our VGUI menu queue
 #include <vgui_controls/Frame.h>
 #include "vguitextwindow.h"
 #include "vgui/ISurface.h"
@@ -29,7 +29,7 @@ class CBaseViewport : public vgui::EditablePanel, public IViewPort, public IGame
 {
 	DECLARE_CLASS_SIMPLE( CBaseViewport, vgui::EditablePanel );
 
-public: 
+public:
 	CBaseViewport();
 	virtual ~CBaseViewport();
 
@@ -60,10 +60,10 @@ public:
 #endif
 	virtual AnimationController *GetAnimationController() { return m_pAnimController; }
 
-	virtual void ShowBackGround(bool bShow) 
-	{ 
+	virtual void ShowBackGround(bool bShow)
+	{
 #ifndef _XBOX
-		m_pBackGround->SetVisible( bShow ); 
+		m_pBackGround->SetVisible( bShow );
 #endif
 	}
 
@@ -102,7 +102,7 @@ protected:
 			SetBgColor(pScheme->GetColor("ViewportBG", Color( 0,0,0,0 ) )); 
 		}
 
-		virtual void PerformLayout() 
+		virtual void PerformLayout()
 		{
 			int w,h;
 			GetHudSize(w, h);
@@ -113,7 +113,7 @@ protected:
 			BaseClass::PerformLayout();
 		}
 
-		virtual void OnMousePressed(MouseCode code) { }// don't respond to mouse clicks
+		virtual void OnMousePressed(MouseCode code) { }	// don't respond to mouse clicks
 		virtual vgui::VPANEL IsWithinTraverse( int x, int y, bool traversePopups )
 		{
 			return ( vgui::VPANEL )0;
@@ -124,12 +124,12 @@ protected:
 protected:
 
 	virtual void Paint();
-	virtual void OnThink(); 
+	virtual void OnThink();
 	virtual void OnScreenSizeChanged(int iOldWide, int iOldTall);
 	void PostMessageToPanel( IViewPortPanel* pPanel, KeyValues *pKeyValues );
 
 protected:
-	IGameUIFuncs*		m_GameuiFuncs; // for key binding details
+	IGameUIFuncs*		m_GameuiFuncs;	// for key binding details
 	IGameEventManager2*	m_GameEventManager;
 #ifndef _XBOX
 	CBackGroundPanel	*m_pBackGround;
@@ -138,7 +138,7 @@ protected:
 
 	CUtlStack<IViewPortPanel*> m_LastActivePanelStack;
 	
-	bool				m_bHasParent; // Used to track if child windows have parents or not.
+	bool				m_bHasParent;	// Used to track if child windows have parents or not.
 	bool				m_bInitialized;
 	IViewPortPanel		*m_pActivePanel;
 	IViewPortPanel		*m_pLastActivePanel;
@@ -146,6 +146,5 @@ protected:
 	vgui::AnimationController *m_pAnimController;
 	int					m_OldSize[2];
 };
-
 
 #endif

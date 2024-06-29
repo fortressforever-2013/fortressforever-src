@@ -2,7 +2,7 @@
 // ======== A modification for Half-Life 2 =======
 //
 // @file ff_buildableobjects_shared.cpp
-// @author Patrick O'Leary(Mulchman) 
+// @author Patrick O'Leary(Mulchman)
 // @date 06/08/2005
 // @brief Shared code for buildable objects
 //
@@ -12,9 +12,9 @@
 //		This file First created
 // 22/01/2006, Mirv:
 //		Rewritten a lot of this, an instance of this object will now hold all the information
-//		needed to put a buildable on the ground(including pre-working out the orientation 
-//		and whether or not the orientation is okay, since that is now part of this class) 
-//		 (Previously calculating the orientation was left until last and not part of the
+//		needed to put a buildable on the ground(including pre-working out the orientation
+//		and whether or not the orientation is okay, since that is now part of this class)
+//		(Previously calculating the orientation was left until last and not part of the
 //		buildable spot validation).
 //		Also now the SG orients away from walls.
 //
@@ -106,7 +106,7 @@ const char *g_pszFFSentryGunGibModelsL3[] =
 	FF_SENTRYGUN_GIB3C_MODEL,
 	FF_SENTRYGUN_GIB3D_MODEL,
 	FF_SENTRYGUN_GIB3D_MODEL,
-	FF_SENTRYGUN_GIB3E_MODEL,
+//	FF_SENTRYGUN_GIB3E_MODEL,
 	FF_SENTRYGUN_GIBTRIPOD_MODEL,
 	NULL
 };
@@ -127,7 +127,7 @@ const char *g_pszFFSentryGunGibModels[] =
 	FF_SENTRYGUN_GIB3C_MODEL,
 	FF_SENTRYGUN_GIB3D_MODEL,
 	FF_SENTRYGUN_GIB3D_MODEL,
-	FF_SENTRYGUN_GIB3E_MODEL,
+//	FF_SENTRYGUN_GIB3E_MODEL,
 	FF_SENTRYGUN_GIBTRIPOD_MODEL,
 	NULL
 };
@@ -135,13 +135,13 @@ const char *g_pszFFSentryGunGibModels[] =
 // Array of char *'s to sounds
 const char *g_pszFFSentryGunSounds[] =
 {
-	FF_SENTRYGUN_BUILD_SOUND, 
-	FF_SENTRYGUN_EXPLODE_SOUND, 
-	"Sentry.Fire", 
-	"Sentry.Spot", 
-	"Sentry.Scan", 
-	"Sentry.Two", 
-	"Sentry.Three", 
+	FF_SENTRYGUN_BUILD_SOUND,
+	FF_SENTRYGUN_EXPLODE_SOUND,
+	"Sentry.Fire",
+	"Sentry.Spot",
+	"Sentry.Scan",
+	"Sentry.Two",
+	"Sentry.Three",
 	"Sentry.Aim",
 	FF_SENTRYGUN_UNBUILD_SOUND,
 	"Spanner.HitSG",
@@ -209,7 +209,7 @@ const char *g_pszFFManCannonSounds[] =
 // Purpose: Constructor - initializes a bunch of stuff and figures out if
 //			we can build here or not!
 //-----------------------------------------------------------------------------
-CFFBuildableInfo::CFFBuildableInfo( CFFPlayer *pPlayer, int iBuildObject ) 
+CFFBuildableInfo::CFFBuildableInfo( CFFPlayer *pPlayer, int iBuildObject )
 {
 	// Default
 	m_BuildResult = BUILD_ERROR;
@@ -497,7 +497,7 @@ void CFFBuildableInfo::GetBuildError( void )
 // Purpose: Returns a proper angle orientation for the buidlable depending
 //			on the approximate ground normal
 //-----------------------------------------------------------------------------
-QAngle OrientToVectors(const Vector &vecGroundNormal, const Vector &vecPlayerForward) 
+QAngle OrientToVectors(const Vector &vecGroundNormal, const Vector &vecPlayerForward)
 {
 	// Get correct forward & right vector
 	Vector vecUp = vecGroundNormal;
@@ -524,7 +524,7 @@ QAngle OrientToVectors(const Vector &vecGroundNormal, const Vector &vecPlayerFor
 // Purpose: Vectors must be	0 1
 //							2 3
 //-----------------------------------------------------------------------------
-void ComputeRectangularPlane(const Vector &v0, const Vector &v1, const Vector &v2, const Vector &v3, Vector &vOut) 
+void ComputeRectangularPlane(const Vector &v0, const Vector &v1, const Vector &v2, const Vector &v3, Vector &vOut)
 {
 	Vector vecOne = v0 - v3;
 	Vector vecTwo = v2 - v1;
@@ -540,7 +540,7 @@ void ComputeRectangularPlane(const Vector &v0, const Vector &v1, const Vector &v
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-Vector GetMiddle(const Vector *v1, const Vector *v2, const Vector *v3 = NULL, const Vector *v4 = NULL) 
+Vector GetMiddle(const Vector *v1, const Vector *v2, const Vector *v3 = NULL, const Vector *v4 = NULL)
 {
 	float c = 2.0f;
 	Vector vecMiddle = *v1 + *v2;
@@ -564,7 +564,7 @@ Vector GetMiddle(const Vector *v1, const Vector *v2, const Vector *v3 = NULL, co
 //-----------------------------------------------------------------------------
 // Purpose: Sees if a buildable can be placed on the ground
 //-----------------------------------------------------------------------------
-BuildInfoResult_t CFFBuildableInfo::CanOrientToGround( void ) 
+BuildInfoResult_t CFFBuildableInfo::CanOrientToGround( void )
 {
 	Vector vecNormal, vecGround;
 	float flTestDist = 64.0f;
@@ -605,7 +605,7 @@ BuildInfoResult_t CFFBuildableInfo::CanOrientToGround( void )
 			// Loop through and do traces from each corner of the dispenser to the ground
 			// The mask is normal PLAYER_SOLID minus PLAYER_CLIP as we don't want to build on those(Bug #0000185: Buildable objects can be built on clips.) 
 			// HACK Changed to COLLISION_GROUP_PROJECTILE so it doesn't clip healthpacks (Bug #0000242: SG/Disp when building clips on health pack.)
-			for( int i = 0; i < 4; i++ ) 
+			for( int i = 0; i < 4; i++ )
 			{
 				UTIL_TraceLine(vecCorners[i], vecCorners[i] - Vector(0, 0, flTestDist), CONTENTS_SOLID|CONTENTS_MOVEABLE|CONTENTS_WINDOW|CONTENTS_MONSTER|CONTENTS_GRATE, m_pPlayer, COLLISION_GROUP_BUILDABLE_BUILDING, &tr[i]);				
 
@@ -635,7 +635,7 @@ BuildInfoResult_t CFFBuildableInfo::CanOrientToGround( void )
 				MASK_SHOT, NULL, COLLISION_GROUP_NONE, &tr_fwd );
 
 			// If we hit a wall then we want to face towards us instead
-			if( tr_fwd.DidHit() ) 
+			if( tr_fwd.DidHit() )
 			{				
 				m_vecPlayerForward *= -1;
 				// Redo the right vector (was making the normal negative later on)
@@ -673,9 +673,9 @@ BuildInfoResult_t CFFBuildableInfo::CanOrientToGround( void )
 			trace_t tr[3];
 
 			// Loop through and do traces from each corner of the sentry to the ground
-			// The mask is normal PLAYER_SOLID minus PLAYER_CLIP and CONTENTS_MOVEABLE as we don't want to build on those(Bug #0000185: Buildable objects can be built on clips.) 
+			// The mask is normal PLAYER_SOLID minus PLAYER_CLIP and CONTENTS_MOVEABLE as we don't want to build on those(Bug #0000185: Buildable objects can be built on clips.)
 			// HACK Changed to COLLISION_GROUP_PROJECTILE so it doesn't clip healthpacks (Bug #0000242: SG/Disp when building clips on health pack.)
-			for (int i = 0; i < 3; i++) 
+			for (int i = 0; i < 3; i++)
 			{
 				UTIL_TraceLine(vecFeet[i], vecFeet[i] - Vector(0, 0, flTestDist), CONTENTS_SOLID|CONTENTS_MOVEABLE|CONTENTS_WINDOW|CONTENTS_MONSTER|CONTENTS_GRATE, m_pPlayer, COLLISION_GROUP_BUILDABLE_BUILDING, &tr[i]);
 
@@ -911,7 +911,7 @@ void SentryGunGib_Callback(const CEffectData &data)
 			++iGib;
 		}
 	}
-	else if (data.m_nDamageType == 2) //HACK: Using m_nDamageType as SG level
+	else if (data.m_nDamageType == 2)	//HACK: Using m_nDamageType as SG level
 	{
 		while (g_pszFFSentryGunGibModelsL2[iGib])
 		{
@@ -925,7 +925,7 @@ void SentryGunGib_Callback(const CEffectData &data)
 			++iGib;
 		}
 	}
-	else if (data.m_nDamageType == 3) //HACK: Using m_nDamageType as SG level
+	else if (data.m_nDamageType == 3)	//HACK: Using m_nDamageType as SG level
 	{
 		while (g_pszFFSentryGunGibModelsL3[iGib])
 		{

@@ -108,9 +108,7 @@ bool CFFGameMovement::CheckJumpButton(void)
 {
 	CFFPlayer *ffplayer = ToFFPlayer(player);
 	if(ffplayer == NULL)
-	{
 		return BaseClass::CheckJumpButton();
-	}
 
 	if (player->pl.deadflag)
 	{
@@ -134,7 +132,7 @@ bool CFFGameMovement::CheckJumpButton(void)
 		// swimming, not jumping
 		SetGroundEntity( NULL );
 
-		if(player->GetWaterType() == CONTENTS_WATER)    // We move up a certain amount
+		if(player->GetWaterType() == CONTENTS_WATER)	// We move up a certain amount
 			mv->m_vecVelocity[2] = 100;
 		else if (player->GetWaterType() == CONTENTS_SLIME)
 			mv->m_vecVelocity[2] = 80;
@@ -179,14 +177,14 @@ bool CFFGameMovement::CheckJumpButton(void)
 			// part of the jump
 			mv->m_nButtons &= ~IN_JUMP;
 		}
-//		else
-//		{
-//			if(ffplayer->m_iLocalSkiState == 0)
-//			{
-//				ffplayer->StartSkiing();
-//			}
-//		}
-		return false;		// in air, so no effect
+/*		else
+		{
+			if(ffplayer->m_iLocalSkiState == 0)
+			{
+				ffplayer->StartSkiing();
+			}
+		}
+*/		return false;		// in air, so no effect
 	}
 
 	// caes: do pogo stick!
@@ -198,9 +196,7 @@ bool CFFGameMovement::CheckJumpButton(void)
 	
 #ifdef CLIENT_DLL
 	if ( mv->m_nOldButtons & IN_JUMP && cl_bunnyhop_disablepogojump.GetBool() )
-	{
 		return false;		// don't pogo stick
-	}
 #else
 	if ( mv->m_nOldButtons & IN_JUMP && (Q_atoi( engine->GetClientConVarValue( player->entindex(), "cl_jumpqueue" ) ) ) )
 	{
@@ -243,9 +239,7 @@ bool CFFGameMovement::CheckJumpButton(void)
 
 	float fGroundFactor = 1.0f;
 	if (player->m_pSurfaceData)
-	{
-		fGroundFactor = player->m_pSurfaceData->game.jumpFactor; 
-	}
+		fGroundFactor = player->m_pSurfaceData->game.jumpFactor;
 
 	// This following dynamic cap is documented here:
 	//		http://www.madabouthats.org/code-tf2/viewtopic.php?t=2360
@@ -256,7 +250,7 @@ bool CFFGameMovement::CheckJumpButton(void)
 	float pcfactor = BHOP_PCFACTOR;
 	float speed = FastSqrt(mv->m_vecVelocity[0] * mv->m_vecVelocity[0] + mv->m_vecVelocity[1] * mv->m_vecVelocity[1]);
 
-	if (speed > cap_soft) // apply soft cap
+	if (speed > cap_soft)	// apply soft cap
 	{
 		if (speed > cap_mid) // Slow down even more if above mid cap
 			pcfactor = BHOP_PCFACTOR_MID;
@@ -302,7 +296,7 @@ bool CFFGameMovement::CheckJumpButton(void)
 		if (flHorizontalSpeed > 0)
 			vecVelocity /= flHorizontalSpeed;
 
-        float flDotProduct = DotProduct(vecVelocity, pm.plane.normal);
+		float flDotProduct = DotProduct(vecVelocity, pm.plane.normal);
 #ifdef GAME_DLL
 		float flRampSlideDotProduct = DotProduct(mv->m_vecVelocity, pm.plane.normal);
 #endif
@@ -486,13 +480,9 @@ void CFFGameMovement::FullBuildMove( void )
 
 	// Was jump button pressed?
 	if( mv->m_nButtons & IN_JUMP )
-	{
 		CheckJumpButton();
-	}
 	else
-	{
 		mv->m_nOldButtons &= ~IN_JUMP;
-	}
 
 	// Reset these so we stay in place
 	mv->m_flSideMove = 0.0f;
@@ -503,13 +493,9 @@ void CFFGameMovement::FullBuildMove( void )
 	CheckVelocity();
 
 	if( pPlayer->GetGroundEntity() != NULL )
-	{
 		WalkMove();
-	}
 	else
-	{
-		AirMove();  // Take into account movement when in air.
-	}
+		AirMove();	// Take into account movement when in air.
 
 	CategorizePosition();
 
@@ -538,7 +524,7 @@ void CFFGameMovement::WalkMove( void )
 	if( !pFFPlayer )
 		return;
 
-	AngleVectors (mv->m_vecViewAngles, &forward, &right, &up);  // Determine movement angles
+	AngleVectors (mv->m_vecViewAngles, &forward, &right, &up);	// Determine movement angles
 
 	CHandle< CBaseEntity > oldground;
 	oldground = player->GetGroundEntity();
@@ -652,7 +638,7 @@ void CFFGameMovement::WalkMove( void )
 	}
 
 	// If we are jumping out of water, don't do anything more.
-	if ( player->m_flWaterJumpTime )         
+	if ( player->m_flWaterJumpTime )
 	{
 		// Now pull the base velocity back out.   Base velocity is set if you are on a moving object, like a conveyor (or maybe another monster?)
 		VectorSubtract( mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
@@ -774,13 +760,13 @@ void CFFGameMovement::Friction( void )
 		trace_t pm;
 
 		//
-		// NOTE: added a "1.0f" to the player minimum (bbox) value so that the 
-		//       trace starts just inside of the bounding box, this make sure
-		//       that we don't get any collision epsilon (on surface) errors.
-		//		 The significance of the 16 below is this is how many units out front we are checking
-		//		 to see if the player box would fall.  The 49 is the number of units down that is required
-		//		 to be considered a fall.  49 is derived from 1 (added 1 from above) + 48 the max fall 
-		//		 distance a player can fall and still jump back up.
+		// NOTE: added a "1.0f" to the player minimum (bbox) value so that the trace starts
+		//	just inside of the bounding box, this make sure that we don't get any collision
+		//	epsilon (on surface) errors. The significance of the 16 below is this is how
+		//	many units out front we are checking to see if the player box would fall. The
+		//	49 is the number of units down that is required to be considered a fall. 49 is
+		//	derived from 1 (added 1 from above) + 48 the max fall distance a player can fall
+		//	and still jump back up.
 		//
 		//		 UNDONE: In some cases there are still problems here.  Specifically, no collision check is
 		//		 done so 16 units in front of the player could be inside a volume or past a collision point.
@@ -849,7 +835,7 @@ void CFFGameMovement::Friction( void )
 	newvel[2] = mv->m_vecVelocity[2] * newspeed;
 
 	VectorCopy( newvel, mv->m_vecVelocity );
- 	mv->m_outWishVel -= (1.f-newspeed) * mv->m_vecVelocity;
+	mv->m_outWishVel -= (1.f-newspeed) * mv->m_vecVelocity;
 }
 
 //-----------------------------------------------------------------------------

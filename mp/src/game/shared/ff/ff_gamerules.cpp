@@ -116,7 +116,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 #else
 	void *SendProxy_FFGameRules( const SendProp *pProp, const void *pStructBase, const void *pData, CSendProxyRecipients *pRecipients, int objectID )
 	{
-        CFFGameRules *pRules = FFGameRules();
+		CFFGameRules *pRules = FFGameRules();
 		Assert( pRules );
 		pRecipients->SetAllRecipients();
 		return pRules;
@@ -140,7 +140,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 		// Update the team limits
 		for( int i = 0; i < g_Teams.Count(); i++ )
 		{
-            CFFTeam *pTeam = (CFFTeam *) GetGlobalTeam( i );
+			CFFTeam *pTeam = (CFFTeam *) GetGlobalTeam( i );
 
 			pTeam->UpdateLimits();
 		}
@@ -728,8 +728,8 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 							continue;
 					}				
 
-					// Please don't change the order. They're set up hopefully
-					// to work correctly.
+					// Please don't change the order. They're
+					// set up hopefully to work correctly.
 
 					// 1 or more changeclass flags was set
 					if( iChangeClassValidClasses.Count() > 0 )
@@ -1236,7 +1236,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 				CFFPlayer *pPlayer = ToFFPlayer(pEntity);
 				float flBodyTargetOffset = vecSpot.z - pPlayer->GetAbsOrigin().z;
 
-                float dH = vecDisplacement.Length2D() - pPlayer->GetPlayerMaxs().x;	// Half of model width
+				float dH = vecDisplacement.Length2D() - pPlayer->GetPlayerMaxs().x;	// Half of model width
 				float dV = fabs(vecDisplacement.z - flBodyTargetOffset) - pPlayer->GetPlayerMaxs().z; // Half of model height
 
 				// Inside our model bounds
@@ -1360,7 +1360,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 				// if it exists
 				if (adjustedInfo.GetReportedPosition() != vec3_origin)
 				{
-                    vecDirection = vecSpot - adjustedInfo.GetReportedPosition();
+					vecDirection = vecSpot - adjustedInfo.GetReportedPosition();
 					vecDirection.NormalizeInPlace();
 
 #ifdef GAME_DLL
@@ -1376,9 +1376,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 
 			// Now deal the damage
 			if (pEntity->IsPlayer())
-			{
 				pEntity->TakeDamage(adjustedInfo);
-			}
 			else
 			{
 				adjustedInfo.ScaleDamageForce(100.0f);
@@ -1662,7 +1660,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 
 			// Another important thing to do is to make sure that mirvlet = mirv
 			// in the death messages
-			if (Q_strncmp(pszWeapon, "ff_grenade_mirvlet", 18) == 0)
+			if (!Q_strncmp(pszWeapon, "ff_grenade_mirvlet", 18))
 			{
 				pszWeapon = "ff_grenade_mirv";
 			}
@@ -1704,23 +1702,23 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 			//UTIL_LogPrintf( " killer_weapon_name: %s\n", pszWeapon );
 
 			// strip the NPC_* or weapon_* from the inflictor's classname
-			if( Q_strnicmp( pszWeapon, "weapon_", 7 ) == 0 )
+			if( !Q_strnicmp( pszWeapon, "weapon_", 7 ) )
 			{
 				//UTIL_LogPrintf( "  begins with weapon_, removing\n" );
 				pszWeapon += 7;
 			}
-			else if( Q_strnicmp( pszWeapon, "NPC_", 8 ) == 0 )
+			else if( !Q_strnicmp( pszWeapon, "NPC_", 8 ) )
 			{
 				//UTIL_LogPrintf( "  begins with NPC_, removing\n" );
 				pszWeapon += 8;
 			}
-			else if( Q_strnicmp( pszWeapon, "func_", 5 ) == 0 )
+			else if( !Q_strnicmp( pszWeapon, "func_", 5 ) )
 			{
 				//UTIL_LogPrintf( "  begins with func_, removing\n" );
 				pszWeapon += 5;
 			}
 			// BEG: Added by Mulchman for FF_ entities
-			else if( Q_strnicmp( pszWeapon, "ff_", 3 ) == 0 )
+			else if( !Q_strnicmp( pszWeapon, "ff_", 3 ) )
 			{
 				//UTIL_LogPrintf( "  begins with ff_, removing\n" );
 				pszWeapon += 3;

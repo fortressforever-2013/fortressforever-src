@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/09/13
-	created:	13:9:2006   13:02
-	filename: 	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_menu_panel.h
+	created:	13:9:2006	13:02
+	filename:	f:\ff-svn\code\trunk\cl_dll\ff\vgui\ff_menu_panel.h
 	file path:	f:\ff-svn\code\trunk\cl_dll\ff\vgui
 	file base:	ff_menu_panel
 	file ext:	h
@@ -95,5 +95,4 @@ namespace vgui
 		bool	m_bHideShadow;
 	};
 }
-
 #endif

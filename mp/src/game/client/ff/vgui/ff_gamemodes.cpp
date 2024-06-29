@@ -207,9 +207,7 @@ private:
 			const char *pszAllowedCheckboxes[] = { "ScoutChk", "SniperChk", "SoldierChk", "DemomanChk", "MedicChk", "HwguyChk", "PyroChk", "SpyChk", "EngineerChk" };
 
 			for (int i = 0; i < ARRAYSIZE(pszAllowedCheckboxes); i++)
-			{
 				m_pClasses[i] = new CheckButton(this, pszAllowedCheckboxes[i], pszAllowedCheckboxes[i]);
-			}
 
 			new Button(this, "OKButton", "", this, "OK");
 			new Button(this, "CancelButton", "", this, "Cancel");

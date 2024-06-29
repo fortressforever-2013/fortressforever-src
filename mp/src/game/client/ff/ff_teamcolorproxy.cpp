@@ -10,7 +10,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-class CTeamColorProxy; // forward definition
+class CTeamColorProxy;	// forward definition
 
 class CTeamColorRegenerator : public ITextureRegenerator
 {
@@ -53,8 +53,8 @@ void CTeamColorProxy::GenerateTeamTexture(ITexture* pTexture, IVTFTexture* pVTFT
 	// Gets a pointer to the start of the texture memory.
 	unsigned char* imageData = pVTFTexture->ImageData();
 
-	//NOTE: the format of any texture using the IVTFTexture interface appears to be in BGRX8888 everytime
-	//      despite what you set it at in the VTF, so keep that in mind.
+	//NOTE: the format of any texture using the IVTFTexture interface appears to be in
+	//	BGRX8888 everytime despite what you set it at in the VTF, so keep that in mind.
 
 	// Lets place our texture width and height in local vars.
 	int height = pVTFTexture->Height();
@@ -120,7 +120,7 @@ void CTeamColorProxy::GenerateTeamTexture(ITexture* pTexture, IVTFTexture* pVTFT
 			{
 				float temp1, temp2, tempr, tempg, tempb;
 
-				//Set the temporary values      
+				//Set the temporary values
 				if (l < 0.5) temp2 = l * (1 + s);
 				else temp2 = (l + s) - (l * s);
 				temp1 = 2 * l - temp2;
@@ -130,19 +130,19 @@ void CTeamColorProxy::GenerateTeamTexture(ITexture* pTexture, IVTFTexture* pVTFT
 				tempb = h - 1.0 / 3.0;
 				if (tempb < 0) tempb++;
 
-				//Red     
+				//Red
 				if (tempr < 1.0 / 6.0) r = temp1 + (temp2 - temp1) * 6.0 * tempr;
 				else if (tempr < 0.5) r = temp2;
 				else if (tempr < 2.0 / 3.0) r = temp1 + (temp2 - temp1) * ((2.0 / 3.0) - tempr) * 6.0;
 				else r = temp1;
 
-				//Green       
+				//Green
 				if (tempg < 1.0 / 6.0) g = temp1 + (temp2 - temp1) * 6.0 * tempg;
 				else if (tempg < 0.5) g = temp2;
 				else if (tempg < 2.0 / 3.0) g = temp1 + (temp2 - temp1) * ((2.0 / 3.0) - tempg) * 6.0;
 				else g = temp1;
 
-				//Blue    
+				//Blue
 				if (tempb < 1.0 / 6.0) b = temp1 + (temp2 - temp1) * 6.0 * tempb;
 				else if (tempb < 0.5) b = temp2;
 				else if (tempb < 2.0 / 3.0) b = temp1 + (temp2 - temp1) * ((2.0 / 3.0) - tempb) * 6.0;
@@ -176,27 +176,25 @@ CTeamColorProxy::CTeamColorProxy()
 CTeamColorProxy::~CTeamColorProxy()
 {
 	if (m_pTexture != NULL)
-	{
 		m_pTexture->SetTextureRegenerator(NULL);
-	}
 }
 
 bool CTeamColorProxy::Init(IMaterial* pMaterial, KeyValues* pKeyValues)
 {
 	bool found;
 
-	m_pTextureVar = pMaterial->FindVar("$basetexture", &found, false);  // Get a reference to our base texture variable
+	m_pTextureVar = pMaterial->FindVar("$basetexture", &found, false);	// Get a reference to our base texture variable
 	if (!found)
 	{
 		m_pTextureVar = NULL;
 		return false;
 	}
 
-	m_pTexture = m_pTextureVar->GetTextureValue();  // Now grab a ref to the actual texture
+	m_pTexture = m_pTextureVar->GetTextureValue();	// Now grab a ref to the actual texture
 	if (m_pTexture != NULL)
 	{
-		m_pTextureRegen = new CTeamColorRegenerator(this);  // Here we create our regenerator
-		m_pTexture->SetTextureRegenerator(m_pTextureRegen); // And here we attach it to the texture.
+		m_pTextureRegen = new CTeamColorRegenerator(this);	// Here we create our regenerator
+		m_pTexture->SetTextureRegenerator(m_pTextureRegen);	// And here we attach it to the texture.
 	}
 
 	return true;

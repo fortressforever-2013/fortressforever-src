@@ -66,9 +66,9 @@ public:
 
 	bool	IsOn() const		{ return m_bIsOn; }
 
-	void	TurnOn() 		{ m_bIsOn = true; }
-	void	TurnOff() 		{ m_bIsOn = false; }
-	void	Toggle() 		{ m_bIsOn = !m_bIsOn; }
+	void	TurnOn()	{ m_bIsOn = true; }
+	void	TurnOff()	{ m_bIsOn = false; }
+	void	Toggle()	{ m_bIsOn = !m_bIsOn; }
 
 	int		ObjectCaps() { return (BaseClass::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_DONT_SAVE; }
 

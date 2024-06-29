@@ -25,8 +25,8 @@ public:
 	void StartTimer(void);
 	void ResetTimer(void);
 
-	// Jiggles: Added pausing functions for certain hints that are triggered after playing
-	//			a character class for X minutes
+	// Jiggles: Added pausing functions for certain hints that are triggered
+	//			after playing a character class for X minutes
 
 	bool IsPaused(void) { return m_bPaused; }
 	void Pause(void);

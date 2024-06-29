@@ -31,13 +31,13 @@ extern short	g_sModelIndexSmoke;			// (in combatweapon.cpp) holds the index for 
 #ifdef GAME_DLL
 BEGIN_DATADESC(CFFProjectilePipebomb)
 	DEFINE_THINKFUNC(PipebombThink), 
-END_DATADESC() 
+END_DATADESC()
 #endif
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFProjectilePipebomb, DT_FFProjectilePipebomb) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFProjectilePipebomb, DT_FFProjectilePipebomb)
 
-BEGIN_NETWORK_TABLE(CFFProjectilePipebomb, DT_FFProjectilePipebomb) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFProjectilePipebomb, DT_FFProjectilePipebomb)
+END_NETWORK_TABLE()
 
 LINK_ENTITY_TO_CLASS(ff_projectile_pl, CFFProjectilePipebomb);
 PRECACHE_WEAPON_REGISTER(ff_projectile_pl);
@@ -111,7 +111,7 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_pl);
 	}
 #endif
 
-void CFFProjectilePipebomb::Precache( void ) 
+void CFFProjectilePipebomb::Precache( void )
 {
 
 	BaseClass::Precache();
@@ -121,10 +121,10 @@ void CFFProjectilePipebomb::Precache( void )
 //----------------------------------------------------------------------------
 // Purpose: Spawn like a normal grenade but replace skin
 //----------------------------------------------------------------------------
-void CFFProjectilePipebomb::Spawn() 
+void CFFProjectilePipebomb::Spawn()
 {
 	BaseClass::Spawn();
-	m_nSkin = 0;			// Green skin(#1) 
+	m_nSkin = 0;			// Green skin(#1)
 
 	m_flSpawnTime = gpGlobals->curtime;
 
@@ -227,10 +227,10 @@ void CFFProjectilePipebomb::Explode( trace_t *pTrace, int bitsDamageType )
 //----------------------------------------------------------------------------
 // Purpose: Draw model with different skin
 //----------------------------------------------------------------------------
-int CFFProjectilePipebomb::DrawModel(int flags) 
+int CFFProjectilePipebomb::DrawModel(int flags)
 {
 	if (fAltSkin) 
-		m_nSkin = 2;		// Yellow skin(#3) 
+		m_nSkin = 2;		// Yellow skin(#3)
 
 	return BaseClass::DrawModel(flags);
 }
@@ -252,12 +252,12 @@ void CFFProjectilePipebomb::DestroyAllPipes(CBaseEntity *pOwner, bool force)
 	MessageEnd();
 
 	// Detonate all the pipes belonging to us
-	CFFProjectilePipebomb *pPipe = NULL; 
+	CFFProjectilePipebomb *pPipe = NULL;
 
 	// Detonate any pipes belonging to us
-	while ((pPipe = (CFFProjectilePipebomb *) gEntList.FindEntityByClassT(pPipe, CLASS_PIPEBOMB)) != NULL) 
+	while ((pPipe = (CFFProjectilePipebomb *) gEntList.FindEntityByClassT(pPipe, CLASS_PIPEBOMB)) != NULL)
 	{
-		if (pPipe->GetOwnerEntity() == pOwner && !pPipe->IsDetonated()) 
+		if (pPipe->GetOwnerEntity() == pOwner && !pPipe->IsDetonated())
 			pPipe->DetonatePipe(force);
 	}
 #endif
@@ -300,7 +300,7 @@ CFFProjectilePipebomb * CFFProjectilePipebomb::CreatePipebomb(const CBaseEntity 
 
 	pPipebomb->m_bIsLive = false;
 
-	pPipebomb->SetThrower(pentOwner); 
+	pPipebomb->SetThrower(pentOwner);
 
 	pPipebomb->SetGravity(GetGrenadeGravity());
 	pPipebomb->SetFriction(GetGrenadeFriction());
@@ -312,16 +312,16 @@ CFFProjectilePipebomb * CFFProjectilePipebomb::CreatePipebomb(const CBaseEntity 
 	int i = 0;
 
 	// Make sure there aren't already too many pipes
-	while ((pPipe = (CFFProjectilePipebomb *) gEntList.FindEntityByClassT(pPipe, CLASS_PIPEBOMB)) != NULL) 
+	while ((pPipe = (CFFProjectilePipebomb *) gEntList.FindEntityByClassT(pPipe, CLASS_PIPEBOMB)) != NULL)
 	{
-		if (pPipe->GetOwnerEntity() == pPipebomb->GetOwnerEntity()) 
+		if (pPipe->GetOwnerEntity() == pPipebomb->GetOwnerEntity())
 		{
 			i++;
 
-			if (!pOldestPipe) 
+			if (!pOldestPipe)
 				pOldestPipe = pPipe;
 
-			if (pPipe->m_flSpawnTime < pOldestPipe->m_flSpawnTime) 
+			if (pPipe->m_flSpawnTime < pOldestPipe->m_flSpawnTime)
 				pOldestPipe = pPipe;
 		}
 	}
@@ -347,7 +347,7 @@ CFFProjectilePipebomb * CFFProjectilePipebomb::CreatePipebomb(const CBaseEntity 
 //----------------------------------------------------------------------------
 // Purpose: Grenade think function
 //----------------------------------------------------------------------------
-void CFFProjectilePipebomb::DecrementHUDCount() 
+void CFFProjectilePipebomb::DecrementHUDCount()
 {
 #ifdef GAME_DLL
 	// tell the client (demoman) to decrement the hud pipe count
@@ -364,13 +364,11 @@ void CFFProjectilePipebomb::DecrementHUDCount()
 //----------------------------------------------------------------------------
 // Purpose: Pipe think function
 //----------------------------------------------------------------------------
-void CFFProjectilePipebomb::PipebombThink() 
+void CFFProjectilePipebomb::PipebombThink()
 {
 	// Remove if we're nolonger in the world
-	if (!IsInWorld() || gpGlobals->curtime > m_flDetonateTime) 
-	{
+	if (!IsInWorld() || gpGlobals->curtime > m_flDetonateTime)
 		DecrementHUDCount();
-	}
 
 	BaseClass::GrenadeThink();
 }

@@ -14,9 +14,9 @@
 #include "ff_mapguide.h"
 #include "tier0/memdbgon.h"
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFMapGuide, DT_FFMapGuide) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFMapGuide, DT_FFMapGuide)
 
-BEGIN_NETWORK_TABLE(CFFMapGuide, DT_FFMapGuide) 
+BEGIN_NETWORK_TABLE(CFFMapGuide, DT_FFMapGuide)
 #ifdef CLIENT_DLL
 	RecvPropFloat(RECVINFO(m_flWait)),
 	RecvPropFloat(RECVINFO(m_flTime)),
@@ -38,7 +38,7 @@ END_DATADESC();
 LINK_ENTITY_TO_CLASS(path_mapguide, CFFMapGuide);
 PRECACHE_REGISTER(path_mapguide);
 
-CFFMapGuide::CFFMapGuide() 
+CFFMapGuide::CFFMapGuide()
 {
 	m_iNarrationFile = NULL_STRING;
 	m_iCurveEntity = NULL_STRING;
@@ -55,7 +55,7 @@ void CFFMapGuide::Precache()
 		PrecacheSound(STRING(m_iNarrationFile));
 }
 
-void CFFMapGuide::Spawn() 
+void CFFMapGuide::Spawn()
 {
 	Precache();
 

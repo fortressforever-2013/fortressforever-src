@@ -93,7 +93,7 @@ class CFFWeaponJumpgun : public CFFWeaponBase
 {
 public:
 	DECLARE_CLASS( CFFWeaponJumpgun, CFFWeaponBase );
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 	
 	CFFWeaponJumpgun( void );
@@ -329,7 +329,7 @@ bool CFFWeaponJumpgun::Holster( CBaseCombatWeapon *pSwitchingTo )
 //----------------------------------------------------------------------------
 void CFFWeaponJumpgun::Precache( void )
 {
-	PrecacheScriptSound( "railgun.single_shot" );		// SINGLE
+	PrecacheScriptSound( "Railgun.Single_shot" );		// SINGLE
 	m_iShockwaveTexture = PrecacheModel( "sprites/lgtning.vmt" );	
 
 	BaseClass::Precache();
@@ -364,7 +364,7 @@ void CFFWeaponJumpgun::Fire( void )
 	if (!JUMPGUN_VERTICALSETVELOCITY && !JUMPGUN_HORIZONTALSETVELOCITY)
 		pPlayer->ApplyAbsVelocityImpulse(Vector(horizPush.x, horizPush.y, JUMPGUN_VERTICALPUSH) * flPercent);
 	else if (JUMPGUN_VERTICALSETVELOCITY && JUMPGUN_HORIZONTALSETVELOCITY)
-	    pPlayer->SetAbsVelocity(Vector(horizPush.x, horizPush.y, JUMPGUN_VERTICALPUSH) * flPercent);
+		pPlayer->SetAbsVelocity(Vector(horizPush.x, horizPush.y, JUMPGUN_VERTICALPUSH) * flPercent);
 	else
 	{
 		if (JUMPGUN_VERTICALSETVELOCITY)
@@ -373,9 +373,7 @@ void CFFWeaponJumpgun::Fire( void )
 			pPlayer->SetAbsVelocity(Vector(vecVelocity.x, vecVelocity.y, JUMPGUN_VERTICALPUSH * flPercent));
 		}
 		else
-		{
 			pPlayer->ApplyAbsVelocityImpulse(Vector(0, 0, JUMPGUN_VERTICALPUSH) * flPercent);
-		}
 		
 		if (JUMPGUN_HORIZONTALSETVELOCITY)
 		{
@@ -383,9 +381,7 @@ void CFFWeaponJumpgun::Fire( void )
 			pPlayer->SetAbsVelocity(Vector(horizPush.x * flPercent, horizPush.y * flPercent, vecVelocity.z));
 		}
 		else
-		{
 			pPlayer->ApplyAbsVelocityImpulse(Vector(horizPush.x, horizPush.y, 0) * flPercent);
-		}
 	}
 
 	if (m_bMuzzleFlash)
@@ -461,7 +457,7 @@ void CFFWeaponJumpgun::ItemPostFrame( void )
 	}
 #endif
 
-    if ((pPlayer->m_nButtons & IN_ATTACK) && (m_flNextPrimaryAttack <= gpGlobals->curtime))
+	if ((pPlayer->m_nButtons & IN_ATTACK) && (m_flNextPrimaryAttack <= gpGlobals->curtime))
 	{
 		CANCEL_IF_BUILDING();
 		CANCEL_IF_CLOAKED();

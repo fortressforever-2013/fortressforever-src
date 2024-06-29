@@ -155,7 +155,7 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_assaultcannon);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponAssaultCannon::CFFWeaponAssaultCannon() 
+CFFWeaponAssaultCannon::CFFWeaponAssaultCannon()
 {
 	m_flChargeTime = 0.0f;
 	m_flLastTick = m_flDeployTick = m_flNextSecondaryAttack = gpGlobals->curtime;
@@ -181,7 +181,7 @@ CFFWeaponAssaultCannon::CFFWeaponAssaultCannon()
 //----------------------------------------------------------------------------
 // Purpose: Destructor
 //----------------------------------------------------------------------------
-CFFWeaponAssaultCannon::~CFFWeaponAssaultCannon() 
+CFFWeaponAssaultCannon::~CFFWeaponAssaultCannon()
 {
 #ifdef CLIENT_DLL
 
@@ -194,7 +194,7 @@ CFFWeaponAssaultCannon::~CFFWeaponAssaultCannon()
 //----------------------------------------------------------------------------
 // Purpose: When holstered we need to stop any sounds + remove speed effects
 //----------------------------------------------------------------------------
-bool CFFWeaponAssaultCannon::Holster(CBaseCombatWeapon *pSwitchingTo) 
+bool CFFWeaponAssaultCannon::Holster(CBaseCombatWeapon *pSwitchingTo)
 {
 	// Bug #0000499: Oddity with assault cannon
 	// Moved this up to here so it gets called and remove it if its set
@@ -327,7 +327,7 @@ bool CFFWeaponAssaultCannon::Deploy()
 	CFFPlayer *pOwner = ToFFPlayer(GetOwner());
 	if (pOwner)
 		if ( pOwner->m_nButtons & IN_ATTACK || pOwner->m_afButtonPressed & IN_ATTACK )
-			m_flTriggerPressed = gpGlobals->curtime; // set this if we come into this while +attacking
+			m_flTriggerPressed = gpGlobals->curtime;	// set this if we come into this while +attacking
 	
 	m_iBarrelRotation = -69;
 	m_flBarrelRotationValue = 0.0f;
@@ -342,7 +342,7 @@ bool CFFWeaponAssaultCannon::Deploy()
 //----------------------------------------------------------------------------
 // Purpose: Fires bullets
 //----------------------------------------------------------------------------
-void CFFWeaponAssaultCannon::Fire() 
+void CFFWeaponAssaultCannon::Fire()
 {
 	Assert(0);
 	CFFPlayer *pPlayer = GetPlayerOwner();
@@ -397,9 +397,7 @@ void CFFWeaponAssaultCannon::UpdateChargeTime()
 			float flTimeLeft = flTimeHeld - flTimeSinceRelease;
 
 			if (flTimeLeft > 0 && flTimeLeft < m_flMaxChargeTime)
-			{
 				m_flTriggerPressed = gpGlobals->curtime - flTimeLeft;
-			}
 			else
 				m_flTriggerPressed = gpGlobals->curtime;
 		}
@@ -544,9 +542,7 @@ void CFFWeaponAssaultCannon::ItemPostFrame()
 				m_flChargeTime = 0;
 		}
 		else
-		{
 			WeaponIdle();
-		}
 		
 		if (m_bFiring)
 		{
@@ -588,11 +584,11 @@ void CFFWeaponAssaultCannon::ItemPostFrame()
 //----------------------------------------------------------------------------
 void CFFWeaponAssaultCannon::Precache() 
 {
-	PrecacheScriptSound("Assaultcannon.single_shot");
-	PrecacheScriptSound("Assaultcannon.loop_shot");
-	PrecacheScriptSound("Assaultcannon.Windup");
-	PrecacheScriptSound("Assaultcannon.Winddown");
-	PrecacheScriptSound("assaultcannon.rotate");
+	PrecacheScriptSound("AssaultCannon.Single_shot");
+	PrecacheScriptSound("AssaultCannon.Loop_shot");
+	PrecacheScriptSound("AssaultCannon.Windup");
+	PrecacheScriptSound("AssaultCannon.Winddown");
+	PrecacheScriptSound("AssaultCannon.Rotate");
 	BaseClass::Precache();
 }
 
@@ -844,9 +840,7 @@ void CFFWeaponAssaultCannon::UpdateBarrelRotation()
 				}
 			}
 			else
-			{
 				StopLoopShotSound();
-			}
 		}
 		else
 		{

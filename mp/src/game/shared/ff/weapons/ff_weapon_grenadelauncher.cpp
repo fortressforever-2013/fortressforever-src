@@ -16,7 +16,7 @@
 #include "ff_weapon_baseclip.h"
 #include "ff_projectile_grenade.h"
 
-#ifdef CLIENT_DLL 
+#ifdef CLIENT_DLL
 	#define CFFWeaponGrenadeLauncher C_FFWeaponGrenadeLauncher
 	#include "c_ff_player.h"
 	#include "ff_utils.h"
@@ -33,7 +33,7 @@ class CFFWeaponGrenadeLauncher : public CFFWeaponBaseClip
 {
 public:
 	DECLARE_CLASS(CFFWeaponGrenadeLauncher, CFFWeaponBaseClip);
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 	
 	CFFWeaponGrenadeLauncher();
@@ -56,13 +56,13 @@ private:
 // CFFWeaponGrenadeLauncher tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponGrenadeLauncher, DT_FFWeaponGrenadeLauncher) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponGrenadeLauncher, DT_FFWeaponGrenadeLauncher)
 
-BEGIN_NETWORK_TABLE(CFFWeaponGrenadeLauncher, DT_FFWeaponGrenadeLauncher) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFWeaponGrenadeLauncher, DT_FFWeaponGrenadeLauncher)
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponGrenadeLauncher) 
-END_PREDICTION_DATA() 
+BEGIN_PREDICTION_DATA(CFFWeaponGrenadeLauncher)
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_grenadelauncher, CFFWeaponGrenadeLauncher);
 PRECACHE_WEAPON_REGISTER(ff_weapon_grenadelauncher);
@@ -74,7 +74,7 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_grenadelauncher);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponGrenadeLauncher::CFFWeaponGrenadeLauncher() 
+CFFWeaponGrenadeLauncher::CFFWeaponGrenadeLauncher()
 {
 	m_fIsSwitching = false;
 }
@@ -82,7 +82,7 @@ CFFWeaponGrenadeLauncher::CFFWeaponGrenadeLauncher()
 //----------------------------------------------------------------------------
 // Purpose: Fires a grenade
 //----------------------------------------------------------------------------
-void CFFWeaponGrenadeLauncher::Fire() 
+void CFFWeaponGrenadeLauncher::Fire()
 {
 	CFFPlayer *pPlayer = GetPlayerOwner();
 	const CFFWeaponInfo &pWeaponInfo = GetFFWpnData();
@@ -115,7 +115,7 @@ void CFFWeaponGrenadeLauncher::Fire()
 //----------------------------------------------------------------------------
 // Purpose: Keep ammo acounts the same
 //----------------------------------------------------------------------------
-bool CFFWeaponGrenadeLauncher::Reload() 
+bool CFFWeaponGrenadeLauncher::Reload()
 {
 	bool b = BaseClass::Reload();
 
@@ -128,7 +128,7 @@ bool CFFWeaponGrenadeLauncher::Reload()
 //----------------------------------------------------------------------------
 // Purpose: Override animations
 //----------------------------------------------------------------------------
-bool CFFWeaponGrenadeLauncher::SendWeaponAnim(int iActivity) 
+bool CFFWeaponGrenadeLauncher::SendWeaponAnim(int iActivity)
 {
 	// If we have some unexpected clip amount, escape quick
 	if (m_iClip1 < 0 || m_iClip1 > 6) 
@@ -199,8 +199,8 @@ void CFFWeaponGrenadeLauncher::Synchronise()
 	if( !pPlayer )
 		return;
 
-	// We could probably just do GetWeapon(2) 
-	for (int i = 0; i < MAX_WEAPON_SLOTS; i++) 
+	// We could probably just do GetWeapon(2)
+	for (int i = 0; i < MAX_WEAPON_SLOTS; i++)
 	{
 		CFFWeaponBase *w = dynamic_cast<CFFWeaponBase *> (pPlayer->GetWeapon(i)); // This gets holstered weapon numbers. 0=crowbar, 1=shotgun, (gren launcher is deployed), 2=pipelauncher 3=detpack
 
@@ -213,11 +213,10 @@ void CFFWeaponGrenadeLauncher::Synchronise()
 }
 
 
-
 //----------------------------------------------------------------------------
 // Purpose: Send special hint on launcher deploy
 //----------------------------------------------------------------------------
-bool CFFWeaponGrenadeLauncher::Deploy() 
+bool CFFWeaponGrenadeLauncher::Deploy()
 {
 
 #ifdef CLIENT_DLL	

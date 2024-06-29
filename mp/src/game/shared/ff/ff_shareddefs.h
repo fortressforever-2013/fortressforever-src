@@ -44,16 +44,16 @@
 
 enum FFPlayerGrenadeState
 {
-    FF_GREN_NONE,
-    FF_GREN_PRIMEONE,
-    FF_GREN_PRIMETWO
+	FF_GREN_NONE,
+	FF_GREN_PRIMEONE,
+	FF_GREN_PRIMETWO
 };
 
 enum FFStatusIconTypes
 {
-    FF_STATUSICON_CONCUSSION,
-    FF_STATUSICON_INFECTION,
-    FF_STATUSICON_LEGINJURY,
+	FF_STATUSICON_CONCUSSION,
+	FF_STATUSICON_INFECTION,
+	FF_STATUSICON_LEGINJURY,
 	FF_STATUSICON_TRANQUILIZED,
 	FF_STATUSICON_HALLUCINATIONS,
 	FF_STATUSICON_BURNING,
@@ -176,6 +176,6 @@ enum DamageTypes_t
 };
 
 //extern ConVar sniperrifle_chargetime;
-#define FF_SNIPER_MAXCHARGE 5.0f //sniperrifle_chargetime.GetFloat()
+#define FF_SNIPER_MAXCHARGE 5.0f	//sniperrifle_chargetime.GetFloat()
 
 #endif // FF_SHAREDDEFS_H

@@ -47,9 +47,9 @@
 #include "ff_hud_chat.h"
 #include "ff_discordman.h"
 
-#include "collisionutils.h" // hlstriker: For player avoidance
+#include "collisionutils.h"	// hlstriker: For player avoidance
 #include "history_resource.h" // squeek: For adding grens to the ammo pickups on the right
-#include "ff_mathackman.h" // squeek: For mathack manager update in ClientThink
+#include "ff_mathackman.h"	// squeek: For mathack manager update in ClientThink
 
 #if defined( CFFPlayer )
 #undef CFFPlayer
@@ -213,30 +213,30 @@ bool CanStealMouseForAimSentry(void)
 	return g_StealMouseForAimSentry;
 }
 
-//bool g_StealMouseForCloak = false;
-//void SetStealMouseForCloak( bool bValue )
-//{
-//	g_StealMouseForCloak = bValue;
-//}
-//bool CanStealMouseForCloak( void )
-//{
-//	return g_StealMouseForCloak;
-//}
-
-//void OnTimerExpired(C_FFTimer *pTimer)
-//{
-//	string name = pTimer->GetTimerName();
-//	//DevMsg("OnTimerExpired(%s)\n",name.c_str());
-//	char buf[256];
-//	V_sprintf_safe(buf,"OnTimerExpired(%s)\n",name.c_str());
-//	internalCenterPrint->SetTextColor( 255, 255, 255, 255 );
-//	internalCenterPrint->Print( buf );
-//}
-
+/*bool g_StealMouseForCloak = false;
+void SetStealMouseForCloak( bool bValue )
+{
+	g_StealMouseForCloak = bValue;
+}
+bool CanStealMouseForCloak( void )
+{
+	return g_StealMouseForCloak;
+}
+*/
+/*void OnTimerExpired(C_FFTimer *pTimer)
+{
+	string name = pTimer->GetTimerName();
+	//DevMsg("OnTimerExpired(%s)\n",name.c_str());
+	char buf[256];
+	V_sprintf_safe(buf,"OnTimerExpired(%s)\n",name.c_str());
+	internalCenterPrint->SetTextColor( 255, 255, 255, 255 );
+	internalCenterPrint->Print( buf );
+}
+*/
 
 // Jiggles: Called 7 seconds after the first time the player spawns as a class, when
-//			a player has logged 10 minutes (total) as a Soldier, and when a player has
-//			logged 5 minutes (total) as a Pyro
+//		a player has logged 10 minutes (total) as a Soldier, and when a player has
+//		logged 5 minutes (total) as a Pyro
 void OnHintTimerExpired(C_FFHintTimer* pHintTimer)
 {
 	std::string name = pHintTimer->GetTimerName();
@@ -267,7 +267,7 @@ void OnHintTimerExpired(C_FFHintTimer* pHintTimer)
 		FF_SendHint(ENGY_SPAWN, 1, PRIORITY_NORMAL, "#FF_HINT_ENGY_SPAWN");
 }
 
-//  Jiggles: I figure there are enough compares already in the above function
+//	Jiggles: I figure there are enough compares already in the above function
 void OnDisguiseHintTimerExpired(C_FFHintTimer* pHintTimer)
 {
 	FF_SendHint(SPY_NODISGUISE, 5, PRIORITY_NORMAL, "#FF_HINT_SPY_NODISGUISE");
@@ -713,9 +713,7 @@ public:
 				case 2:
 					//If the player is below their (specified) bunnyhop cap, do a jump animation.
 					if ((float)nSpeed < (pPlayer->MaxSpeed() * cl_jimmyleg_cap.GetFloat()))
-					{
 						pPlayer->DoAnimationEvent((PlayerAnimEvent_t)m_iEvent.Get());
-					}
 					break;
 				default:
 					//Always do the animation event if previous stuff wasnt hit
@@ -724,9 +722,7 @@ public:
 				}
 			}
 			else
-			{
 				pPlayer->DoAnimationEvent((PlayerAnimEvent_t)m_iEvent.Get());
-			}
 		}
 	}
 
@@ -746,9 +742,7 @@ void RecvProxy_PrimeTime(const CRecvProxyData* pData, void* pStruct, void* pOut)
 {
 	// Unpack the data.
 	if (!engine->IsConnected() || !engine->IsInGame())
-	{
 		return;
-	}
 	C_FFPlayer* pLocalPlayer = C_FFPlayer::GetLocalFFPlayer();
 	if (pLocalPlayer)
 	{
@@ -959,9 +953,7 @@ C_FFRagdoll::~C_FFRagdoll()
 	PhysCleanupFrictionSounds( this );
 
 	if ( m_hPlayer )
-	{
 		m_hPlayer->CreateModelInstance();
-	}
 }
 
 void C_FFRagdoll::Interp_Copy( C_BaseAnimatingOverlay *pSourceEntity )
@@ -1010,7 +1002,7 @@ void C_FFRagdoll::ImpactTrace( trace_t *pTrace, int iDamageType, const char *pCu
 	TraceBleed(20, dir, pTrace, DMG_BLAST);
 
 
-	dir *= 4000;  // adjust impact strenght
+	dir *= 4000;	// adjust impact strength
 	if ( iDamageType & DMG_BLAST )
 	{
 		Vector vecVelocity, vecAngularVelocity;
@@ -1073,7 +1065,7 @@ void C_FFRagdoll::CreateFFRagdoll( void )
 				Warning( "[C_FFRagdoll :: CreateRagdoll] Missing sequence walk_lower!\n" );
 
 				// Mulch: to start knowing what asserts are popping up for when testing stuff
-				// AssertMsg( false, "missing sequence walk_lower" ); 
+				// AssertMsg( false, "missing sequence walk_lower" );
 				//Assert( false );	// missing walk_lower?				
 				iSeq = 0;
 			}
@@ -1148,7 +1140,7 @@ void C_FFRagdoll::CreateFFRagdoll( void )
 	SetCollisionGroup(COLLISION_GROUP_WEAPON);
 
 	m_pBloodStreamEmitter = CBloodStream::Create(this, "BloodStream");
-	m_pBloodStreamEmitter->SetDieTime(gpGlobals->curtime + 25.0);//cl_ragdolltime.GetFloat());
+	m_pBloodStreamEmitter->SetDieTime(gpGlobals->curtime + 25.0);	//cl_ragdolltime.GetFloat());
 }
 
 
@@ -1157,9 +1149,7 @@ void C_FFRagdoll::OnDataChanged( DataUpdateType_t type )
 	BaseClass::OnDataChanged( type );
 
 	if ( type == DATA_UPDATE_CREATED )
-	{
 		CreateFFRagdoll();
-	}
 }
 
 IRagdoll* C_FFRagdoll::GetIRagdoll() const
@@ -1225,9 +1215,7 @@ IRagdoll* C_FFPlayer::GetRepresentativeRagdoll() const
 		return pRagdoll->GetIRagdoll();
 	}
 	else
-	{
 		return NULL;
-	}
 }
 
 const unsigned char* GetEncryptionKey(void)
@@ -1428,7 +1416,7 @@ C_FFPlayer::~C_FFPlayer()
 
 C_FFPlayer* C_FFPlayer::GetLocalFFPlayer()
 {
-	// Assert thrown from here sometimes, validate 
+	// Assert thrown from here sometimes, validate
 	// C_BasePlayer::GetLocalPlayer() first
 	if (C_BasePlayer::GetLocalPlayer())
 		return ToFFPlayer(C_BasePlayer::GetLocalPlayer());
@@ -1508,9 +1496,7 @@ void C_FFPlayer::PreThink(void)
 
 	// Clear hallucinations if time
 	if (m_iHallucinationIndex && m_flHallucinationFinish < gpGlobals->curtime)
-	{
 		m_iHallucinationIndex = 0;
-	}
 
 	BaseClass::PreThink();
 }
@@ -1526,9 +1512,8 @@ void C_FFPlayer::PostThink(void)
 void C_FFPlayer::Precache()
 {
 	for (int i = 1; i <= 8; i++)
-	{
 		PrecacheModel(VarArgs("models/gibs/gib%d.mdl", i));
-	}
+
 	PrecacheScriptSound("Player.RampslideMetal");
 }
 
@@ -1836,7 +1821,7 @@ RenderGroup_t C_FFPlayer::GetRenderGroup()
 	if (IsCloaked())
 		return RENDER_GROUP_TRANSLUCENT_ENTITY;
 	else
-		return RENDER_GROUP_TWOPASS; // BaseClass::GetRenderGroup();
+		return RENDER_GROUP_TWOPASS;	// BaseClass::GetRenderGroup();
 }
 
 //-----------------------------------------------------------------------------
@@ -2058,24 +2043,16 @@ void C_FFPlayer::DrawPlayerIcons()
 				if (i % 4 >= 2)
 				{
 					if (i % 2)
-					{
 						DrawSprite(vecOrigin + vecDirection * radius - vecVerticalOffset, spriteSize, spriteSize, c);
-					}
 					else
-					{
 						DrawSprite(vecOrigin + vecDirection * radius + vecVerticalOffset2, spriteSize, spriteSize, c);
-					}
 				}
 				else
 				{
 					if (i % 2)
-					{
 						DrawSprite(vecOrigin + vecDirection * radius - vecVerticalOffset2, spriteSize, spriteSize, c);
-					}
 					else
-					{
 						DrawSprite(vecOrigin + vecDirection * radius + vecVerticalOffset, spriteSize, spriteSize, c);
-					}
 				}
 			}
 		}
@@ -2125,9 +2102,7 @@ int C_FFPlayer::DrawModel(int flags)
 	}
 
 	if (!IsCloaked())
-	{
 		ReleaseOverrideMaterial(FF_CLOAK_MATERIAL);
-	}
 	else
 	{
 		// don't draw if cloaked and basically not moving
@@ -2150,19 +2125,13 @@ int C_FFPlayer::DrawModel(int flags)
 			// It doesn't really matter if this is actually odd or even, 
 			// we just need to differentiate between half of them
 			if (nSkin & 1)
-			{
 				nSkin = pLocalPlayer->GetTeamNumber() - TEAM_BLUE;
-			}
 			else
-			{
 				nSkin = GetTeamNumber() - TEAM_BLUE;
-			}
 
 			// This player's skin needs changing
 			if (m_nSkin != nSkin)
-			{
 				m_nSkin = nSkin;
-			}
 		}
 	}
 	else
@@ -2171,9 +2140,7 @@ int C_FFPlayer::DrawModel(int flags)
 
 		// Make sure hallucinations are reset!
 		if (m_nSkin != nRealSkin)
-		{
 			m_nSkin = nRealSkin;
-		}
 	}
 
 	return BaseClass::DrawModel(flags);
@@ -2357,13 +2324,9 @@ void C_FFPlayer::CalcViewModelView(const Vector& eyeOrigin, const QAngle& eyeAng
 const QAngle& C_FFPlayer::GetRenderAngles(void)
 {
 	if (IsRagdoll())
-	{
 		return vec3_angle;
-	}
 	else
-	{
 		return m_PlayerAnimState->GetRenderAngles();
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -2404,9 +2367,7 @@ void C_FFPlayer::PostDataUpdate(DataUpdateType_t updateType)
 
 		// If this is the local player then do normal spawny stuff.
 		if (IsLocalPlayer())
-		{
 			Spawn();
-		}
 	}
 
 	BaseClass::PostDataUpdate(updateType);
@@ -2902,7 +2863,7 @@ void TimerChange_Callback(IConVar* var, const char* pOldValue, float flOldValue)
 
 	// No need to do any checking if it's default because it should always
 	// be there
-	if (Q_strcmp(pszTimerString, "default") == 0)
+	if (!Q_strcmp(pszTimerString, "default"))
 	{
 		Q_strcpy(g_szTimerFile, "timers/default.wav");
 		return;
@@ -2963,7 +2924,7 @@ void KillBeepChange_Callback(IConVar* var, const char* pOldValue, float flOldVal
 
 	// No need to do any checking if it's default because it should always
 	// be there
-	if (Q_strcmp(pszTimerString, "deathbeep1") == 0)
+	if (!Q_strcmp(pszTimerString, "deathbeep1"))
 	{
 		Q_strcpy(g_szKillBeepFile, "player/deathbeep/deathbeep1.wav");
 		return;
@@ -3106,9 +3067,7 @@ void C_FFPlayer::AddEntity()
 		}
 
 		else if (m_pFlashlightBeam)
-		{
 			ReleaseFlashlight();
-		}
 	}
 }
 
@@ -3120,9 +3079,7 @@ bool C_FFPlayer::ShouldReceiveProjectedTextures(int flags)
 		return false;
 
 	if (flags & SHADOW_FLAGS_FLASHLIGHT)
-	{
 		return true;
-	}
 
 	return BaseClass::ShouldReceiveProjectedTextures(flags);
 }
@@ -3132,9 +3089,7 @@ void C_FFPlayer::NotifyShouldTransmit(ShouldTransmitState_t state)
 	if (state == SHOULDTRANSMIT_END)
 	{
 		if (m_pFlashlightBeam != NULL)
-		{
 			ReleaseFlashlight();
-		}
 	}
 
 	BaseClass::NotifyShouldTransmit(state);
@@ -3438,22 +3393,16 @@ void C_FFPlayer::AvoidPlayers(CUserCmd* pCmd)
 	// Move away from the other player/object.
 	Vector vecSeparationVelocity;
 	if (vecDelta.Dot(vecPush) < 0)
-	{
 		vecSeparationVelocity = vecPush * flPushStrength;
-	}
 	else
-	{
 		vecSeparationVelocity = vecPush * -flPushStrength;
-	}
 
 	// Don't allow the max push speed to be greater than the max player speed.
 	float flMaxPlayerSpeed = MaxSpeed();
 	float flCropFraction = 1.33333333f;
 
 	if ((GetFlags() & FL_DUCKING) && (GetGroundEntity() != NULL))
-	{
 		flMaxPlayerSpeed *= flCropFraction;
-	}
 
 	float flMaxPlayerSpeedSqr = flMaxPlayerSpeed * flMaxPlayerSpeed;
 
@@ -3492,19 +3441,13 @@ void C_FFPlayer::AvoidPlayers(CUserCmd* pCmd)
 
 	float flForwardScale = 1.0f;
 	if (pCmd->forwardmove > fabs(cl_forwardspeed.GetFloat()))
-	{
 		flForwardScale = fabs(cl_forwardspeed.GetFloat()) / pCmd->forwardmove;
-	}
 	else if (pCmd->forwardmove < -fabs(cl_backspeed.GetFloat()))
-	{
 		flForwardScale = fabs(cl_backspeed.GetFloat()) / fabs(pCmd->forwardmove);
-	}
 
 	float flSideScale = 1.0f;
 	if (fabs(pCmd->sidemove) > fabs(cl_sidespeed.GetFloat()))
-	{
 		flSideScale = fabs(cl_sidespeed.GetFloat()) / fabs(pCmd->sidemove);
-	}
 
 	float flScale = min(flForwardScale, flSideScale);
 	pCmd->forwardmove *= flScale;
@@ -3514,18 +3457,18 @@ void C_FFPlayer::AvoidPlayers(CUserCmd* pCmd)
 }
 // <-- hlstriker
 
-//CON_COMMAND(ffdev_hallucinate, "hallucination!")
-//{
-//	C_FFPlayer *pPlayer = ToFFPlayer(CBasePlayer::GetLocalPlayer());
-//	pPlayer->m_iHallucinationIndex++;
-//}
-//
-//CON_COMMAND(ffdev_hallucinatereset, "okay stop")
-//{
-//	C_FFPlayer *pPlayer = ToFFPlayer(CBasePlayer::GetLocalPlayer());
-//	pPlayer->m_iHallucinationIndex = 0;
-//}
+/*CON_COMMAND(ffdev_hallucinate, "hallucination!")
+{
+	C_FFPlayer *pPlayer = ToFFPlayer(CBasePlayer::GetLocalPlayer());
+	pPlayer->m_iHallucinationIndex++;
+}
 
+CON_COMMAND(ffdev_hallucinatereset, "okay stop")
+{
+	C_FFPlayer *pPlayer = ToFFPlayer(CBasePlayer::GetLocalPlayer());
+	pPlayer->m_iHallucinationIndex = 0;
+}
+*/
 //-----------------------------------------------------------------------------
 // Purpose: This is a bit of a mis-use of the effects system
 //-----------------------------------------------------------------------------
@@ -3578,9 +3521,7 @@ void Gib_Callback(const CEffectData& data)
 			C_Gib* pGib = C_Gib::CreateClientsideGib(pWeapon->GetFFWpnData().szWorldModel, pWeapon->GetAbsOrigin(), vecGibForce, RandomAngularImpulse(-90, 90), cl_gib_lifetime.GetFloat());
 
 			if (pGib)
-			{
 				pGib->SetAbsAngles(pWeapon->GetAbsAngles());
-			}
 		}
 	}
 
@@ -3604,9 +3545,7 @@ void Gib_Callback(const CEffectData& data)
 		C_Gib* pGib = C_Gib::CreateClientsideGib(pszGibModel, vecGibSpawn, vecGibForce, RandomAngularImpulse(-90, 90), cl_gib_lifetime.GetFloat());
 
 		if (pGib)
-		{
 			pGib->LeaveBloodDecal(true);
-		}
 
 	}
 

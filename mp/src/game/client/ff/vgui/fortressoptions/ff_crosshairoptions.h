@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/08/29
-	created:	29:8:2006   18:35
-	filename: 	cl_dll\ff\vgui\ff_options\ff_crosshairoptions.h
+	created:	29:8:2006	18:35
+	filename:	cl_dll\ff\vgui\ff_options\ff_crosshairoptions.h
 	file path:	cl_dll\ff\vgui\ff_crosshairoptions
 	file base:	ff_crosshairoptions
 	file ext:	h
@@ -134,7 +134,7 @@ private:
 
 private:
 
-    CFFInputSlider	*m_pInnerScale, *m_pOuterScale;
+	CFFInputSlider	*m_pInnerScale, *m_pOuterScale;
 	CFFInputSlider	*m_pInnerRed, *m_pOuterRed;
 	CFFInputSlider	*m_pInnerGreen, *m_pOuterGreen;
 	CFFInputSlider	*m_pInnerBlue, *m_pOuterBlue;

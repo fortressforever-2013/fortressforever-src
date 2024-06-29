@@ -41,7 +41,7 @@ class CFFWeaponAutoRifle : public CFFWeaponBase
 {
 public:
 	DECLARE_CLASS(CFFWeaponAutoRifle, CFFWeaponBase);
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 	
 	CFFWeaponAutoRifle();
@@ -60,13 +60,13 @@ private:
 // CFFWeaponAutoRifle tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponAutoRifle, DT_FFWeaponAutoRifle) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponAutoRifle, DT_FFWeaponAutoRifle)
 
-BEGIN_NETWORK_TABLE(CFFWeaponAutoRifle, DT_FFWeaponAutoRifle) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFWeaponAutoRifle, DT_FFWeaponAutoRifle)
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponAutoRifle) 
-END_PREDICTION_DATA() 
+BEGIN_PREDICTION_DATA(CFFWeaponAutoRifle)
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_autorifle, CFFWeaponAutoRifle);
 PRECACHE_WEAPON_REGISTER(ff_weapon_autorifle);
@@ -78,13 +78,13 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_autorifle);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponAutoRifle::CFFWeaponAutoRifle() 
+CFFWeaponAutoRifle::CFFWeaponAutoRifle()
 {
 }
 
 
 // 1325: Identical to the base class, except for the ConVars
-void CFFWeaponAutoRifle::PrimaryAttack() 
+void CFFWeaponAutoRifle::PrimaryAttack()
 {
 	CANCEL_IF_BUILDING();
 	CANCEL_IF_CLOAKED();
@@ -130,7 +130,7 @@ void CFFWeaponAutoRifle::PrimaryAttack()
 	if (pPlayer->GetAmmoCount(m_iPrimaryAmmoType) <= 0)
 	{
 		// HEV suit - indicate out of ammo condition
-		pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0); 
+		pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
 	}
 
 	//Add our view kick in
@@ -141,7 +141,7 @@ void CFFWeaponAutoRifle::PrimaryAttack()
 //----------------------------------------------------------------------------
 // Purpose: Fires a single bullet
 //----------------------------------------------------------------------------
-void CFFWeaponAutoRifle::Fire() 
+void CFFWeaponAutoRifle::Fire()
 {
 	CFFPlayer *pPlayer = GetPlayerOwner();
 	const CFFWeaponInfo &pWeaponInfo = GetFFWpnData();

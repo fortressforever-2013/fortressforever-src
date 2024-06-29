@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/08/17
-	created:	17:8:2006   18:45
-	filename: 	f:\ff-svn\code\trunk\cl_dll\ff\ff_vieweffects.h
+	created:	17:8:2006	18:45
+	filename:	f:\ff-svn\code\trunk\cl_dll\ff\ff_vieweffects.h
 	file path:	f:\ff-svn\code\trunk\cl_dll\ff
 	file base:	ff_vieweffects
 	file ext:	h

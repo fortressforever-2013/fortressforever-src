@@ -48,7 +48,7 @@ class CFFWeaponPipeLauncher : public CFFWeaponBaseClip
 {
 public:
 	DECLARE_CLASS(CFFWeaponPipeLauncher, CFFWeaponBaseClip);
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 	
 	CFFWeaponPipeLauncher();
@@ -75,13 +75,13 @@ private:
 // CFFWeaponPipeLauncher tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponPipeLauncher, DT_FFWeaponPipeLauncher) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponPipeLauncher, DT_FFWeaponPipeLauncher)
 
-BEGIN_NETWORK_TABLE(CFFWeaponPipeLauncher, DT_FFWeaponPipeLauncher) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFWeaponPipeLauncher, DT_FFWeaponPipeLauncher)
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponPipeLauncher) 
-END_PREDICTION_DATA() 
+BEGIN_PREDICTION_DATA(CFFWeaponPipeLauncher)
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_pipelauncher, CFFWeaponPipeLauncher);
 PRECACHE_WEAPON_REGISTER(ff_weapon_pipelauncher);
@@ -93,7 +93,7 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_pipelauncher);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponPipeLauncher::CFFWeaponPipeLauncher() 
+CFFWeaponPipeLauncher::CFFWeaponPipeLauncher()
 {
 	m_fIsSwitching = false;
 
@@ -105,7 +105,7 @@ CFFWeaponPipeLauncher::CFFWeaponPipeLauncher()
 //----------------------------------------------------------------------------
 // Purpose: Fire a pipebomb
 //----------------------------------------------------------------------------
-void CFFWeaponPipeLauncher::Fire() 
+void CFFWeaponPipeLauncher::Fire()
 {
 	CFFPlayer *pPlayer = GetPlayerOwner();
 	const CFFWeaponInfo &pWeaponInfo = GetFFWpnData();
@@ -161,7 +161,7 @@ void CFFWeaponPipeLauncher::Fire()
 //----------------------------------------------------------------------------
 // Purpose: Keep ammo counts the same
 //----------------------------------------------------------------------------
-bool CFFWeaponPipeLauncher::Reload() 
+bool CFFWeaponPipeLauncher::Reload()
 {
 	bool bRet = BaseClass::Reload();
 
@@ -174,7 +174,7 @@ bool CFFWeaponPipeLauncher::Reload()
 //----------------------------------------------------------------------------
 // Purpose: Override animations
 //----------------------------------------------------------------------------
-bool CFFWeaponPipeLauncher::SendWeaponAnim(int iActivity) 
+bool CFFWeaponPipeLauncher::SendWeaponAnim(int iActivity)
 {
 	// If we have some unexpected clip amount, escape quick
 	if (m_iClip1 < 0 || m_iClip1 > 6) 
@@ -247,7 +247,7 @@ void CFFWeaponPipeLauncher::Synchronise()
 	// We could probably just do GetWeapon(2) 
 	for (int i = 0; i < MAX_WEAPON_SLOTS; i++) 
 	{
-		CFFWeaponBase *w = dynamic_cast<CFFWeaponBase *> (pPlayer->GetWeapon(i)); // This gets holstered weapon numbers. 0=crowbar, 1=shotgun, (pipelauncher is deployed), 2=grenlauncher 3=detpack
+		CFFWeaponBase *w = dynamic_cast<CFFWeaponBase *> (pPlayer->GetWeapon(i));	// This gets holstered weapon numbers. 0=crowbar, 1=shotgun, (pipelauncher is deployed), 2=grenlauncher 3=detpack
 
 		if (w && w->GetWeaponID() == FF_WEAPON_GRENADELAUNCHER)
 		{
@@ -261,7 +261,7 @@ void CFFWeaponPipeLauncher::Synchronise()
 //----------------------------------------------------------------------------
 // Purpose: Send special hint on launcher deploy
 //----------------------------------------------------------------------------
-bool CFFWeaponPipeLauncher::Deploy() 
+bool CFFWeaponPipeLauncher::Deploy()
 {
 
 #ifdef CLIENT_DLL	
@@ -270,4 +270,3 @@ bool CFFWeaponPipeLauncher::Deploy()
 	
 	return BaseClass::Deploy();
 }
-

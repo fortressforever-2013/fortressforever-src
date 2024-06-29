@@ -19,7 +19,7 @@ class CFFWeaponIC : public CFFWeaponBaseClip
 {
 public:
 	DECLARE_CLASS(CFFWeaponIC, CFFWeaponBaseClip);
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 	
 	CFFWeaponIC();
@@ -36,13 +36,13 @@ private:
 // CFFWeaponIC tables
 //=============================================================================
 
-IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponIC, DT_FFWeaponIC) 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponIC, DT_FFWeaponIC)
 
-BEGIN_NETWORK_TABLE(CFFWeaponIC, DT_FFWeaponIC) 
-END_NETWORK_TABLE() 
+BEGIN_NETWORK_TABLE(CFFWeaponIC, DT_FFWeaponIC)
+END_NETWORK_TABLE()
 
-BEGIN_PREDICTION_DATA(CFFWeaponIC) 
-END_PREDICTION_DATA() 
+BEGIN_PREDICTION_DATA(CFFWeaponIC)
+END_PREDICTION_DATA()
 
 LINK_ENTITY_TO_CLASS(ff_weapon_ic, CFFWeaponIC);
 PRECACHE_WEAPON_REGISTER(ff_weapon_ic);
@@ -54,7 +54,7 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_ic);
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-CFFWeaponIC::CFFWeaponIC() 
+CFFWeaponIC::CFFWeaponIC()
 {
 }
 
@@ -76,10 +76,10 @@ bool CFFWeaponIC::Deploy()
 //----------------------------------------------------------------------------
 // Purpose: Fire a rocket
 //----------------------------------------------------------------------------
-void CFFWeaponIC::Fire() 
+void CFFWeaponIC::Fire()
 {
 	CFFPlayer *pPlayer = GetPlayerOwner();
- 	const CFFWeaponInfo &pWeaponInfo = GetFFWpnData();
+	const CFFWeaponInfo &pWeaponInfo = GetFFWpnData();
 
 	Vector	vForward, vRight, vUp;
 	pPlayer->EyeVectors(&vForward, &vRight, &vUp);

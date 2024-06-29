@@ -48,7 +48,7 @@ class CFFProjectilePipebomb : public CFFProjectileGrenade
 {
 public:
 	DECLARE_CLASS(CFFProjectilePipebomb, CFFProjectileGrenade);
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 
 	void PipebombThink();
 	// Override precache because we want a different model
@@ -87,7 +87,7 @@ public:
 	bool m_bIsDetonated;
 
 	// Override projectile_base so object isn't removed
-	int TakeEmp( void ) { return m_flDamage; } 
+	int TakeEmp( void ) { return m_flDamage; }
 
 	void CreateProjectileEffects();
 
@@ -99,6 +99,5 @@ public:
 
 	CHandle<CSprite>		m_hMainGlow;
 };
-
 
 #endif // FF_PROJECTILE_PIPEBOMB_H

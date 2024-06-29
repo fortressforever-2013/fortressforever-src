@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/08/29
-	created:	29:8:2006   18:35
-	filename: 	cl_dll\ff\vgui\ff_options\ff_dlightoptions.h
+	created:	29:8:2006	18:35
+	filename:	cl_dll\ff\vgui\ff_options\ff_dlightoptions.h
 	file path:	cl_dll\ff\vgui\ff_dlightoptions
 	file base:	ff_dlightoptions
 	file ext:	h

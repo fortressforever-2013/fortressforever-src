@@ -47,7 +47,7 @@ public:
 	CFFProjectileDart() {}
 	CFFProjectileDart(const CFFProjectileDart&) {}
 #else
-	DECLARE_DATADESC(); 
+	DECLARE_DATADESC();
 	virtual void Spawn();
 #endif
 

@@ -114,7 +114,7 @@ class CFFWeaponRailgun : public CFFWeaponBase
 {
 public:
 	DECLARE_CLASS( CFFWeaponRailgun, CFFWeaponBase );
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 	
 	CFFWeaponRailgun( void );
@@ -274,12 +274,12 @@ bool CFFWeaponRailgun::Holster( CBaseCombatWeapon *pSwitchingTo )
 //----------------------------------------------------------------------------
 void CFFWeaponRailgun::Precache( void )
 {
-	PrecacheScriptSound( "railgun.single_shot" );		// SINGLE
-	PrecacheScriptSound( "railgun.charged_shot" );		// WPN_DOUBLE
-	PrecacheScriptSound( "railgun.chargeloop" );		// SPECIAL1
-	PrecacheScriptSound( "railgun.halfcharge" );		// SPECIAL2 - half charge notification
-	PrecacheScriptSound( "railgun.fullcharge" );		// SPECIAL3 - full charge notification
-	PrecacheScriptSound( "railgun.overcharge" );		// BURST - overcharge
+	PrecacheScriptSound( "Railgun.Single_shot" );		// SINGLE
+	PrecacheScriptSound( "Railgun.Charged_shot" );		// WPN_DOUBLE
+	PrecacheScriptSound( "Railgun.Chargeloop" );		// SPECIAL1
+	PrecacheScriptSound( "Railgun.Halfcharge" );		// SPECIAL2 - half charge notification
+	PrecacheScriptSound( "Railgun.Fullcharge" );		// SPECIAL3 - full charge notification
+	PrecacheScriptSound( "Railgun.Overcharge" );		// BURST - overcharge
 
 	BaseClass::Precache();
 }
@@ -343,13 +343,9 @@ void CFFWeaponRailgun::Fire( void )
 
 	// MUST call sound before removing a round from the clip of a CMachineGun
 	if (gpGlobals->curtime - m_flStartTime >= RAILGUN_MAXCHARGETIME)
-	{
 		WeaponSound(WPN_DOUBLE);
-	}
 	else
-	{
 		WeaponSound(SINGLE);
-	}
 
 	m_flStartTime = 0.0f;
 
@@ -456,9 +452,7 @@ void CFFWeaponRailgun::ItemPostFrame(void)
 		else
 		{
 			if ((pPlayer->m_afButtonPressed & IN_ATTACK) || (pPlayer->m_afButtonReleased & IN_ATTACK2))
-			{
 				m_flNextPrimaryAttack = gpGlobals->curtime;
-			}
 
 			if (m_flStartTime <= 0)
 			{
@@ -484,9 +478,7 @@ void CFFWeaponRailgun::ItemPostFrame(void)
 	{
 		// no fire buttons down or reloading
 		if (!ReloadOrSwitchWeapons() && (m_bInReload == false))
-		{
 			WeaponIdle();
-		}
 	}
 }
 
