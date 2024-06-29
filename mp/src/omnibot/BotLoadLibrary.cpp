@@ -204,9 +204,7 @@ eomnibot_error Omnibot_LoadLibrary(int version, const char *lib, const char *pat
 		memset(&g_BotFunctions, 0, sizeof(g_BotFunctions));
 		pfnGetBotFuncs = (pfnGetFunctionsFromDLL)GetProcAddress(g_BotLibrary, "ExportBotFunctionsFromDLL");
 		if(pfnGetBotFuncs == 0)
-		{
 			r = BOT_ERROR_CANTGETBOTFUNCTIONS;
-		} 
 		else
 		{
 			r = pfnGetBotFuncs(&g_BotFunctions, sizeof(g_BotFunctions));

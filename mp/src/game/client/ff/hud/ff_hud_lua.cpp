@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/07/07
-	created:	7:7:2006   15:46
-	filename: 	f:\ff-svn\code\trunk\cl_dll\ff\ff_hud_lua.cpp
+	created:	7:7:2006	15:46
+	filename:	f:\ff-svn\code\trunk\cl_dll\ff\ff_hud_lua.cpp
 	file path:	f:\ff-svn\code\trunk\cl_dll\ff
 	file base:	ff_hud_lua
 	file ext:	cpp
@@ -631,9 +631,8 @@ bool CHudLua::TranslateKeyCommand( const char *szMessage, char *szTranslated, in
 
 				// This shouldn't happen unless someone used %bind% incorrectly
 				if ( szMessage[i] == '\0' || iKeyIndex > 30 )
-				{
 					return false;
-				}
+
 				// We've got the whole command -- now find out what key it's bound to
 				if ( szMessage[i] == '%' )
 				{
@@ -749,7 +748,7 @@ void CHudLua::HudTimer(int hudIdentifier, int iX, int iY, float flValue, float f
 	case 6 : //HUD_ALIGNX_LEFT_STRINGEND :
 		iProperXPosition = scaledX - scaledW;
 		break;
-	case 0 : //HUD_ALIGNX_LEFT : 
+	case 0 : //HUD_ALIGNX_LEFT :
 	default :
 		iProperXPosition = scaledX;
 		break;
@@ -768,7 +767,7 @@ void CHudLua::HudTimer(int hudIdentifier, int iX, int iY, float flValue, float f
 	case 4 : //HUD_ALIGNY_CENTER :
 		iProperYPosition = (ScreenHeight() / 2) - (scaledH / 2) + scaledY;
 		break;
-	case 0 : //HUD_ALIGNY_TOP : 
+	case 0 : //HUD_ALIGNY_TOP :
 	default :
 		iProperYPosition = scaledY;
 		break;
@@ -795,9 +794,7 @@ Panel *CHudLua::GetHudElement(int hudIdentifier, HudElementType_t iType)
 
 	// Return existing one
 	if (m_sHudElements[hudIdentifier].pPanel)
-	{
 		return m_sHudElements[hudIdentifier].pPanel;
-	}
 
 	Panel *pPanel = NULL;
 	char szPanelName[16];
@@ -892,9 +889,7 @@ Panel *CHudLua::GetHudElement(int hudIdentifier, HudElementType_t iType)
 void CHudLua::RemoveElement(int hudIdentifier)
 {
 	if (m_sHudElements[hudIdentifier].pPanel != NULL)
-	{
 		m_sHudElements[hudIdentifier].pPanel->SetVisible(false);
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -904,7 +899,7 @@ void CHudLua::FireGameEvent( IGameEvent *pEvent )
 {
 	const char *pszEventName = pEvent->GetName();
 
-	if( Q_strcmp( "ff_restartround", pszEventName ) == 0 )
+	if( !Q_strcmp( "ff_restartround", pszEventName ) )
 	{
 		// Clear all hud stuff
 		VidInit();
@@ -914,21 +909,21 @@ void CHudLua::FireGameEvent( IGameEvent *pEvent )
 //-----------------------------------------------------------------------------
 // Purpose: Should we draw? (Are we ingame? have we picked a class, etc)
 //-----------------------------------------------------------------------------
-bool CHudLua::ShouldDraw() 
-{ 
-	if( !engine->IsInGame() ) 
-		return false; 
+bool CHudLua::ShouldDraw()
+{
+	if( !engine->IsInGame() )
+		return false;
 
 	if ( !hud_lua.GetBool() )
 		return false;
 
-	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer(); 
+	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
-	if( !pPlayer ) 
-		return false; 
+	if( !pPlayer )
+		return false;
 
 	if( pPlayer->GetTeamNumber() == TEAM_UNASSIGNED || (!FF_HasPlayerPickedClass( pPlayer ) && !FF_IsPlayerSpec( pPlayer )) )
-		return false; 
+		return false;
 
-	return true; 
-} 
+	return true;
+}

@@ -74,9 +74,9 @@ DECLARE_HUD_MESSAGE(CHudDamageIndicator, Damage);
 
 enum
 {
-	DAMAGE_ANY, 
-	DAMAGE_LOW, 
-	DAMAGE_HIGH, 
+	DAMAGE_ANY,
+	DAMAGE_LOW,
+	DAMAGE_HIGH,
 };
 
 #define ANGLE_ANY	0.0f
@@ -118,7 +118,7 @@ static DamageAnimation_t g_DamageAnimations[] =
 
 	// fall through to front damage
 	{ "HudTakeDamageFront", 		DMG_ANY, 	ANGLE_ANY, 	ANGLE_ANY, 	DAMAGE_ANY }, 
-	{ NULL }, 
+	{ NULL },
 };
 
 
@@ -349,14 +349,12 @@ void CHudDamageIndicator::MsgFunc_Damage(bf_read &msg)
 	}
 
 	// UNDONE: ignore damage without direction
-	// this should never happen, unless it's drowning damage, 
+	// this should never happen, unless it's drowning damage,
 	// or the player is forcibly killed, handled above
 	if (vecFrom == vec3_origin && ! (bitsDamage & DMG_DROWN))
 	{
 		if (totalDamageTaken > 0)
-		{
 			g_pClientMode->GetViewportAnimationController()->StartAnimationSequence("HudTakeDamageAll");
-		}
 		
 		return;
 	}
@@ -366,20 +364,16 @@ void CHudDamageIndicator::MsgFunc_Damage(bf_read &msg)
 
 	int damageType = DAMAGE_ANY;
 	if (totalDamageTaken > 60)
-	{
 		damageType = DAMAGE_HIGH;
-	}
 	else if (totalDamageTaken > 30)
-	{
 		damageType = DAMAGE_LOW;
-	}
 /*
 	// if we have no suit, all damage is high
 	if (!pPlayer->IsSuitEquipped())
 	{
 		damageType = DAMAGE_HIGH;
-	}*/
-
+	}
+*/
 	if (totalDamageTaken > 0)
 	{
 		// see which quandrant the effect is in
@@ -391,7 +385,7 @@ void CHudDamageIndicator::MsgFunc_Damage(bf_read &msg)
 		for (; dmgAnim->name != NULL; ++dmgAnim)
 		{
 			// If this anim needs special damage type and this damage doesnt match that type
-			if (dmgAnim->bitsDamage && ! (bitsDamage & dmgAnim->bitsDamage)) 
+			if (dmgAnim->bitsDamage && ! (bitsDamage & dmgAnim->bitsDamage))
 				continue;
 
 			if (dmgAnim->angleMinimum && angle < dmgAnim->angleMinimum)
@@ -409,9 +403,7 @@ void CHudDamageIndicator::MsgFunc_Damage(bf_read &msg)
 		}
 
 		if (dmgAnim->name)
-		{
 			g_pClientMode->GetViewportAnimationController()->StartAnimationSequence(dmgAnim->name);
-		}
 	}
 }
 

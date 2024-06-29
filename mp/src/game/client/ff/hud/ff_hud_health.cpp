@@ -126,9 +126,7 @@ void CHudHealth::UpdateDisplay()
 
 	// Hullucination
 	if (m_pFFPlayer->m_iHallucinationIndex)
-	{
 		iHealth = m_pFFPlayer->m_iHallucinationIndex * 4;
-	}
 
 	// Only update the fade if we've changed health
 	if ( iHealth == m_iHealth )
@@ -142,9 +140,7 @@ void CHudHealth::UpdateDisplay()
 	// Health went up
 	{
 		if( flHealthPercent < 0.25f )
-		{
 			g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "HealthIncreaseBelow25" );
-		}
 		else
 		{
 			if( flHealthPercent >= 1.0f )
@@ -157,9 +153,7 @@ void CHudHealth::UpdateDisplay()
 	// Health went down or didn't change
 	{
 		if( flHealthPercent < 0.25f )
-		{
 			g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "HealthBelow25" );
-		}
 	}
 
 	m_iHealth = iHealth;

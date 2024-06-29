@@ -279,7 +279,7 @@ void ClearStatusIcons()
 		Assert(0);
 		return;
 	}
-    
+
 	for (int i = 0; i < FF_STATUSICON_MAX; i++)
 	{
 		g_pStatusIcons->sStatusIcons[i].m_flStart = gpGlobals->curtime;

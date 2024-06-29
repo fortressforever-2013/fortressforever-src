@@ -63,9 +63,7 @@ bool CFFMapEntityFilter::ShouldCreateEntity( const char *pszClassname )
 
 	// Don't recreate the preserved entities.
 	if( !FindInList( g_MapEntityFilterKeepList, pszClassname ) )
-	{
 		return true;
-	}
 	else
 	{
 		// Increment our iterator since it's not going to call CreateNextEntity for this ent.
@@ -142,7 +140,7 @@ bool FindInList( const char *s_List[], const char *compare )
 
 	while( s_List[index] )
 	{
-		if( Q_strcmp( s_List[index], compare ) == 0 )
+		if( !Q_strcmp( s_List[index], compare ) )
 			return true;
 
 		index++;

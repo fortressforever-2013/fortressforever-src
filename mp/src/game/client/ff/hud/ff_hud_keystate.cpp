@@ -53,12 +53,12 @@ public:
 
 	bool IsKeyPressedByPlayer(C_FFPlayer *pPlayer) { return pPlayer->m_nButtons & m_buttonBit; }
 
-	virtual void Paint() 
+	virtual void Paint()
 	{
-		C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayerOrAnyObserverTarget(); 
+		C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayerOrAnyObserverTarget();
 
-		if ( !pPlayer ) 
-			return; 
+		if ( !pPlayer )
+			return;
 
 		int textWidth, textHeight;
 		surface()->GetTextSize(m_font, m_text, textWidth, textHeight);
@@ -219,15 +219,15 @@ void CHudKeyState::PerformLayout()
 	}
 }
 
-bool CHudKeyState::ShouldDraw() 
+bool CHudKeyState::ShouldDraw()
 {
-	if( !CHudElement::ShouldDraw() ) 
+	if( !CHudElement::ShouldDraw() )
 		return false;
 
 	C_FFPlayer *pLocalPlayer = C_FFPlayer::GetLocalFFPlayer();
 	C_FFPlayer *pTarget = C_FFPlayer::GetLocalFFPlayerOrAnyObserverTarget();
 
-	if( !pTarget ) 
+	if( !pTarget )
 		return false;
 
 	bool isSpectating = pLocalPlayer->IsObserver();
@@ -237,5 +237,5 @@ bool CHudKeyState::ShouldDraw()
 	if ( isSpectating && !isSpectatingSomeone )
 		return false;
 
-	return isSpectating ? hud_keystate_spec.GetBool() : hud_keystate.GetBool(); 
-} 
+	return isSpectating ? hud_keystate_spec.GetBool() : hud_keystate.GetBool();
+}

@@ -124,9 +124,7 @@ void CFFTimerManager::Update()
 			m_timers.RemoveAt(itDeleteMe);
 		}
 		else
-		{
 			it = m_timers.NextInorder(it);
-		}
 	}
 }
 
@@ -142,10 +140,8 @@ float CFFTimerManager::GetTime(const char* szTimerName)
 		CFFTimer* pTimer = m_timers.Element(it);
 		return pTimer->GetTime();
 	}
-	else 
-	{
+	else
 		return 0.0f;
-	}
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -160,10 +156,8 @@ float CFFTimerManager::GetIncrement(const char* szTimerName)
 		CFFTimer* pTimer = m_timers.Element(it);
 		return pTimer->GetIncrement();
 	}
-	else 
-	{
+	else
 		return 0.0f;
-	}
 }
 
 /////////////////////////////////////////////////////////////////////////////

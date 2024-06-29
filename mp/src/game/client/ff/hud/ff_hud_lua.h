@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/07/07
-	created:	7:7:2006   15:46
-	filename: 	f:\ff-svn\code\trunk\cl_dll\ff\ff_hud_lua.h
+	created:	7:7:2006	15:46
+	filename:	f:\ff-svn\code\trunk\cl_dll\ff\ff_hud_lua.h
 	file path:	f:\ff-svn\code\trunk\cl_dll\ff
 	file base:	ff_hud_lua
 	file ext:	h
@@ -74,6 +74,5 @@ private:
 	HudElement_t		m_sHudElements[MAX_HUD_ELEMENTS];
 	int					m_nHudElements;
 };
-
 
 #endif

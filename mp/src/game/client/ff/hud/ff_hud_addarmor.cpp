@@ -115,13 +115,9 @@ void CHudPlayerAddArmor::MsgFunc_PlayerAddArmor( bf_read &msg )
 
 	// play animation (new points value)
 	if(ptVal > 0)
-	{
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "NewAddArmor" );
-	}
 	else
-	{
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "NewSubtractArmor" );
-	}
 
 	m_flStartTime = gpGlobals->curtime;
 	m_flDuration = 3.0f;
@@ -130,11 +126,11 @@ void CHudPlayerAddArmor::MsgFunc_PlayerAddArmor( bf_read &msg )
 //-----------------------------------------------------------------------------
 // Purpose: Draw stuff!
 //-----------------------------------------------------------------------------
-void CHudPlayerAddArmor::Paint() 
+void CHudPlayerAddArmor::Paint()
 {
-	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer(); 
-	if ( !pPlayer ) 
-		return; 
+	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if ( !pPlayer )
+		return;
 
 	if(!hud_addarmor.GetBool())
 		return;
@@ -142,7 +138,7 @@ void CHudPlayerAddArmor::Paint()
 	if ( m_flStartTime + m_flDuration < gpGlobals->curtime )
 		return;
 
-	FFPanel::Paint(); // Draws the background glyphs 
+	FFPanel::Paint(); // Draws the background glyphs
 
 	if( m_pTextArmor[ 0 ] != '\0' )
 	{
@@ -152,6 +148,5 @@ void CHudPlayerAddArmor::Paint()
 
 		for( wchar_t *wch = m_pTextArmor; *wch != 0; wch++ )
 			surface()->DrawUnicodeChar( *wch );
-
 	}
 }

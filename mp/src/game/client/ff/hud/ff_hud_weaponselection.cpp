@@ -46,7 +46,7 @@ public:
 	virtual void SelectWeaponSlot( int iSlot );
 
 	virtual C_BaseCombatWeapon	*GetSelectedWeapon( void )
-	{ 
+	{
 		return m_hSelectedWeapon;
 	}
 
@@ -62,7 +62,7 @@ protected:
 	virtual void ApplySchemeSettings(vgui::IScheme *pScheme);
 
 	virtual bool IsWeaponSelectable()
-	{ 
+	{
 		if (IsInSelectionMode())
 			return true;
 
@@ -76,7 +76,7 @@ private:
 	void FastWeaponSwitch( int iWeaponSlot );
 
 	virtual	void SetSelectedWeapon( C_BaseCombatWeapon *pWeapon ) 
-	{ 
+	{
 		m_hSelectedWeapon = pWeapon;
 	}
 
@@ -135,9 +135,7 @@ void CHudWeaponSelection::OnWeaponPickup( C_BaseCombatWeapon *pWeapon )
 	// add to pickup history
 	CHudHistoryResource *pHudHR = GET_HUDELEMENT( CHudHistoryResource );
 	if ( pHudHR )
-	{
 		pHudHR->AddToHistory( pWeapon );
-	}
 }
 
 #define SELECTION_TIMEOUT_THRESHOLD		5.0f	// Seconds
@@ -180,9 +178,8 @@ bool CHudWeaponSelection::ShouldDraw()
 	if ( !pPlayer )
 	{
 		if ( IsInSelectionMode() )
-		{
 			HideSelection();
-		}
+
 		return false;
 	}
 
@@ -322,7 +319,7 @@ void CHudWeaponSelection::Paint()
 					{
 						for (wchar_t *pch = text; *pch != 0; pch++)
 						{
-							if (*pch == '\n') 
+							if (*pch == '\n')
 							{
 								// newline character, drop to the next line
 								if (slen > maxslen)
@@ -433,7 +430,7 @@ void CHudWeaponSelection::Paint()
 		}
 
 		// reset position
-		ypos = (largeBoxTall / 2) + m_flBoxGap; // moving them down some...hopefully not too much
+		ypos = (largeBoxTall / 2) + m_flBoxGap;	// moving them down some...hopefully not too much
 		xpos += m_flBoxGap;
 	}
 }
@@ -607,9 +604,7 @@ void CHudWeaponSelection::CycleToNextWeapon( void )
 		// open selection at the current place
 		pNextWeapon = pPlayer->GetActiveWeapon();
 		if ( pNextWeapon )
-		{
 			pNextWeapon = FindNextWeaponInWeaponSelection( pNextWeapon->GetSlot(), pNextWeapon->GetPosition() );
-		}
 	}
 
 	if ( !pNextWeapon )
@@ -623,9 +618,7 @@ void CHudWeaponSelection::CycleToNextWeapon( void )
 		SetSelectedWeapon( pNextWeapon );
 
 		if ( !IsInSelectionMode() )
-		{
 			OpenSelection();
-		}
 
 		// Play the "cycle to next weapon" sound
 		pPlayer->EmitSound( "Player.WeaponSelectionMoveSlot" );
@@ -657,9 +650,7 @@ void CHudWeaponSelection::CycleToPrevWeapon( void )
 		// open selection at the current place
 		pNextWeapon = pPlayer->GetActiveWeapon();
 		if ( pNextWeapon )
-		{
 			pNextWeapon = FindPrevWeaponInWeaponSelection( pNextWeapon->GetSlot(), pNextWeapon->GetPosition() );
-		}
 	}
 
 	if ( !pNextWeapon )
@@ -673,9 +664,7 @@ void CHudWeaponSelection::CycleToPrevWeapon( void )
 		SetSelectedWeapon( pNextWeapon );
 
 		if ( !IsInSelectionMode() )
-		{
 			OpenSelection();
-		}
 
 		// Play the "cycle to next weapon" sound
 		pPlayer->EmitSound( "Player.WeaponSelectionMoveSlot" );
@@ -781,16 +770,12 @@ void CHudWeaponSelection::SelectWeaponSlot( int iSlot )
 
 	// start later in the list
 	if ( IsInSelectionMode() && pActiveWeapon && pActiveWeapon->GetSlot() == iSlot )
-	{
 		slotPos = pActiveWeapon->GetPosition() + 1;
-	}
 
 	// find the weapon in this slot
 	pActiveWeapon = GetNextActivePos( iSlot, slotPos );
 	if ( !pActiveWeapon )
-	{
 		pActiveWeapon = GetNextActivePos( iSlot, 0 );
-	}
 
 	if ( pActiveWeapon != NULL )
 	{

@@ -161,9 +161,7 @@ void CFFMiniTurretLaserDot::OnDataChanged( DataUpdateType_t updateType )
 	BaseClass::OnDataChanged( updateType );
 
 	if( updateType == DATA_UPDATE_CREATED )
-	{
 		SetNextClientThink( CLIENT_THINK_ALWAYS );
-	}	
 }
 #endif
 
@@ -231,10 +229,8 @@ void CFFMiniTurretLaserBeam::OnDataChanged( DataUpdateType_t updateType )
 {
 	BaseClass::OnDataChanged( updateType );
 
-	if( updateType == DATA_UPDATE_CREATED ) 
-	{
+	if( updateType == DATA_UPDATE_CREATED )
 		SetNextClientThink( CLIENT_THINK_ALWAYS );
-	}	
 }
 
 //-----------------------------------------------------------------------------
@@ -525,7 +521,7 @@ void CFFMiniTurret::Spawn( void )
 
 	// Set our state
 	m_bEnabled = true;
-	m_bActive = false; // don't start deployed ever
+	m_bActive = false;	// don't start deployed ever
 	m_flPingTime = gpGlobals->curtime;
 
 	SetThink( &CFFMiniTurret::OnAutoSearchThink );
@@ -1210,7 +1206,7 @@ void CFFMiniTurret::Shoot( const Vector &vecSrc, const Vector &vecDirToEnemy, bo
 //-----------------------------------------------------------------------------
 // Purpose: Muzzle flash effect
 //-----------------------------------------------------------------------------
-void CFFMiniTurret::DoMuzzleFlash( void ) 
+void CFFMiniTurret::DoMuzzleFlash( void )
 {
 	CEffectData data;
 

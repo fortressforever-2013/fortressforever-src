@@ -253,9 +253,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 			}
 		}
 		else
-		{
 			Warning( "Gamerules error!\n" );
-		}
 	}
 	static ConCommand ff_restartround( "ff_restartround", CC_FF_RestartRound, "Restarts the round in progress." );
 	
@@ -587,9 +585,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 					pCur = pTemp;
 				}
 				else
-				{
 					pCur = gEntList.NextEnt( pCur );
-				}
 			}
 
 			// Really remove the entities so we can have access to their slots below.
@@ -739,29 +735,19 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 					}
 
 					if( pbFlags[ AT_CHANGETEAM_BLUE ] )
-					{
 						pPlayer->ChangeTeam( FF_TEAM_BLUE );
-					}
 
 					if( pbFlags[ AT_CHANGETEAM_RED ] )
-					{
 						pPlayer->ChangeTeam( FF_TEAM_RED );
-					}
 
 					if( pbFlags[ AT_CHANGETEAM_YELLOW ] )
-					{
 						pPlayer->ChangeTeam( FF_TEAM_YELLOW );
-					}
 
 					if( pbFlags[ AT_CHANGETEAM_GREEN ] )
-					{
 						pPlayer->ChangeTeam( FF_TEAM_GREEN );
-					}
 
 					if( pbFlags[ AT_CHANGETEAM_SPEC ] )
-					{
 						pPlayer->ChangeTeam( FF_TEAM_SPEC );
-					}
 
 					if( pbFlags[ AT_DROP_ITEMS ] || pbFlags[ AT_THROW_ITEMS ] )
 					{
@@ -774,9 +760,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 					}
 
 					if( pbFlags[ AT_FORCE_THROW_ITEMS ] )
-					{
 						pPlayer->Command_DropItems();
-					}
 
 					if( pbFlags[ AT_FORCE_DROP_ITEMS ] )
 					{
@@ -837,9 +821,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 					}
 
 					if( pbFlags[ AT_STOP_PRIMED_GRENS ] )
-					{
 						pPlayer->RemovePrimedGrenades();
-					}
 
 					if( pbFlags[ AT_RELOAD_CLIPS ] && !pbFlags[ AT_KILL_PLAYERS ] && !pbFlags[ AT_RESPAWN_PLAYERS ] )
 					{
@@ -850,19 +832,13 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 					}
 
 					if( pbFlags[ AT_ALLOW_RESPAWN ] )
-					{
 						pPlayer->SetRespawnable( true );
-					}
 
 					if( pbFlags[ AT_DISALLOW_RESPAWN ] )
-					{
 						pPlayer->SetRespawnable( false );
-					}
 
 					if( pbFlags[ AT_KILL_PLAYERS ] )
-					{
 						pPlayer->KillPlayer();
-					}
 
 					if( pbFlags[ AT_RESPAWN_PLAYERS ] )
 					{
@@ -880,28 +856,20 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 					}
 
 					if( pbFlags[ AT_REMOVE_RAGDOLLS ] )
-					{						
+					{
 					}
 
 					if( pbFlags[ AT_REMOVE_PACKS ] )
-					{
 						pPlayer->RemoveBackpacks();
-					}
 
 					if( pbFlags[ AT_REMOVE_PROJECTILES ] )
-					{
 						pPlayer->RemoveProjectiles();
-					}
 
 					if( pbFlags[ AT_REMOVE_BUILDABLES ] )
-					{
 						pPlayer->RemoveBuildables();
-					}
 
 					if( pbFlags[ AT_REMOVE_DECALS ] )
-					{
 						engine->ClientCommand( pPlayer->edict(), "r_cleardecals" );
-					}					
 				}
 			}
 
@@ -912,9 +880,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 				{
 					CFFInfoScript *pFFScript = dynamic_cast< CFFInfoScript * >( pEntity );
 					if( pFFScript && pFFScript->IsDropped() )
-					{
 						pFFScript->ForceReturn();
-					}
 
 					pEntity = gEntList.FindEntityByClassT( pEntity, CLASS_INFOSCRIPT );
 				}
@@ -922,9 +888,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 		}
 
 		if( pbFlags[ AT_END_MAP ] )
-		{
 			GoToIntermission();
-		}
 	}
 
 	void CFFGameRules::GoToIntermission()
@@ -991,9 +955,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 							return false;
 					}
 					else if( FF_IsBuildableObject( ent ) )
-					{
 						return false;
-					}
 				}
 			}
 		}
@@ -1136,15 +1098,11 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 
 		// Spy can fall twice as far without hurting
 		if (bIsSpy)
-		{
 			flMaxSafe *= 1.412;
-		}
 
 		// Escape if they shouldn't be taking damage.
 		if (pPlayer->m_Local.m_flFallVelocity < flMaxSafe)
-		{
 			return 0;
-		}
 
 		// Speed is a good approximation for now of a class's weight
 		// Therefore bigger base damage for slower classes
@@ -1157,14 +1115,10 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 
 		// Spies only take half damage too
 		if ((bIsSpy) || (pFFPlayer->GetClassSlot() == 1))
-		{
 			flDmg *= 0.5f;
-		}
 
 		if (pFFPlayer->IsJetpacking())
-		{
 			flDmg *= 0.75f;
-		}
 		
 		return flDmg;
 	} 
@@ -1522,9 +1476,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 						Q_snprintf( sztimeleft, sizeof(sztimeleft), "%d:%02.0f", iMinutes, flSeconds );
 					}
 					else
-					{
 						Q_snprintf( sztimeleft, sizeof(sztimeleft), "%d", ( int )flTimeLeft );
-					}
 
 					UTIL_ClientPrintAll( HUD_PRINTCENTER, "#FF_PREMATCH", sztimeleft );
 				}
@@ -1635,28 +1587,20 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 					{
 						// If the inflictor is the killer,  then it must be their current weapon doing the damage
 						if( pScorer->GetActiveWeapon() )
-						{
 							pszWeapon = pScorer->GetActiveWeapon()->GetDeathNoticeName();
-						}
 					}
 					else
-					{
-						pszWeapon = STRING( pInflictor->m_iClassname );  // it's just that easy
-					}
+						pszWeapon = STRING( pInflictor->m_iClassname );	// it's just that easy
 				}
 			}
 			else
-			{
 				pszWeapon = STRING( pInflictor->m_iClassname );
-			}
 
 			// --> Mirv: Special case for projectiles
 			CFFProjectileBase *pProjectile = dynamic_cast<CFFProjectileBase *> (pInflictor);
 
 			if (pProjectile && pProjectile->m_iSourceClassname != NULL_STRING)
-			{
 				pszWeapon = STRING(pProjectile->m_iSourceClassname);
-			}
 
 			// Another important thing to do is to make sure that mirvlet = mirv
 			// in the death messages
@@ -1685,7 +1629,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 				pszWeapon = "ff_grenade_gas";
 				break;
 			case DAMAGETYPE_HEADSHOT:
-				pszWeapon = "BOOM_HEADSHOT"; // BOOM HEADSHOT!  AAAAAAAAHHHH!
+				pszWeapon = "BOOM_HEADSHOT";	// BOOM HEADSHOT!  AAAAAAAAHHHH!
 				break;
 			case DAMAGETYPE_SENTRYGUN_DET:
 				pszWeapon  = "sg_det";
@@ -1926,9 +1870,7 @@ bool CFFGameRules::ShouldCollide( int collisionGroup0, int collisionGroup1 )
 	{
 #ifdef CLIENT_DLL
 		if (collisionGroup1 == COLLISION_GROUP_LASER)
-		{
 			return true;
-		}
 #endif
 
 		return false;
@@ -2100,9 +2042,7 @@ bool CFFGameRules::FCanTakeDamage( CBaseEntity *pVictim, CBaseEntity *pAttacker 
 #endif
 
 	if ( !pVictim )
-	{
 		return false;
-	}
 
 	// Don't affect players who are chilling out
     if( pVictim->IsPlayer() )
@@ -2184,9 +2124,7 @@ int CFFGameRules::IsTeam1AlliedToTeam2( int iTeam1, int iTeam2 )
 	// There is a spectator involved here. We let specs be allies for
 	// scoreboard stuff and possibly something else I'm forgetting.
 	if (iTeam1 < TEAM_BLUE || iTeam2 < TEAM_BLUE)
-	{
 		return GR_TEAMMATE;
-	}
 
 	// Returns GR_TEAMMATE if iTeam1 is allied to iTeam2
 	Assert( ( iTeam1 >= TEAM_BLUE ) && ( iTeam1 <= TEAM_GREEN ) );
@@ -2288,24 +2226,16 @@ const char *CFFGameRules::GetChatFormat( bool bTeamOnly, CBasePlayer *pPlayer )
 	if ( bTeamOnly )
 	{
 		if ( pFFPlayer->GetTeamNumber() == TEAM_SPECTATOR )
-		{
 			pszFormat = "FF_Chat_Spec";
-		}
 		else
-		{
 			pszFormat = "FF_Chat_Team";
-		}
 	}
 	else
 	{	
 		if ( pFFPlayer->GetTeamNumber() == TEAM_SPECTATOR )
-		{
-			pszFormat = "FF_Chat_AllSpec";	
-		}
+			pszFormat = "FF_Chat_AllSpec";
 		else
-		{
-			pszFormat = "FF_Chat_All";	
-		}
+			pszFormat = "FF_Chat_All";
 	}
 
 	return pszFormat;

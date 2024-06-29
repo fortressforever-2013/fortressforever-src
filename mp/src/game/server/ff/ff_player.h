@@ -366,7 +366,7 @@ public:
 	// ---> end of FF server-side player command handlers
 
 protected:
-    // Beg: Added by Mulchman for building objects and such
+	// Beg: Added by Mulchman for building objects and such
 	CNetworkHandle( CFFDispenser, m_hDispenser );
 	CNetworkHandle( CFFSentryGun, m_hSentryGun );
 	CNetworkHandle( CFFDetpack, m_hDetpack );
@@ -383,7 +383,7 @@ protected:
 	// Tells us if the player cancelled building
 	//CNetworkVar( bool, m_bCancelledBuild );
 	// Tells us when we can call the postbuildgenericthink
-    float m_flBuildTime;
+	float m_flBuildTime;
 
 	// Origin of where we started to build at
 	Vector m_vecBuildOrigin;
@@ -426,16 +426,16 @@ public:
 	void SetLocation(int entindex, const char *szNewLocation, int iNewLocationTeam);
 	void RemoveLocation( int entindex );
 	const char *GetLocation( void ) const
-	{ 
+	{
 		if(m_Locations.Count() > 0)
 			return m_Locations[0].locationname;
 		else
 			return m_szLastLocation;
 	}
 	int GetLocationTeam( void ) const
-	{ 
+	{
 		if(m_Locations.Count() > 0)
-			return m_Locations[0].team; 
+			return m_Locations[0].team;
 		else
 			return m_iLastLocationTeam;
 	}
@@ -450,7 +450,7 @@ public:
 	// is longer than flDelay then flDelay is ignored and
 	// the longer delay is used. It also checks the entity
 	// system & mp_spawndelay for any global delays.
-    void SetRespawnDelay( float flDelay = 0.0f );
+	void SetRespawnDelay( float flDelay = 0.0f );
 
 	// Only for LUA to use to set player specific spawn delays
 	void LUA_SetPlayerRespawnDelay( float flDelay ) { m_fl_LuaSet_PlayerRespawnDelay = max( 0.0f, flDelay ); SetRespawnDelay(); }
@@ -508,11 +508,11 @@ public:
 	void LuaFreezePlayer(bool _freeze) 
 	{
 		if(_freeze)
-			AddFlag( FL_FROZEN ); 
+			AddFlag( FL_FROZEN );
 		else
 			RemoveFlag( FL_FROZEN );
 	}
-	bool LuaIsPlayerFrozen() 
+	bool LuaIsPlayerFrozen()
 	{
 		return !!( GetFlags() & FL_FROZEN );
 	}
@@ -525,7 +525,7 @@ public:
 	}
 
 	void ReloadClips( void );
- 
+
 	void AddSpeedEffect(SpeedEffectType type, float duration, float speed, int mod = 0, int iIcon = -1, float flIconDuration = -1, bool bLuaAdded = false);
 	bool IsSpeedEffectSet( SpeedEffectType type );
 	void RemoveSpeedEffect(SpeedEffectType type, bool bLuaAdded = false);
@@ -553,7 +553,7 @@ protected:
 
 public:
 	bool IsSliding( void ) const { return m_bSliding; }
-	void StartSliding( float flDuration, float flIconDuration );  // start the overpressure friction/acceleration effect
+	void StartSliding( float flDuration, float flIconDuration );	// start the overpressure friction/acceleration effect
 	CNetworkVar( float, m_flSlidingTime );
 protected:
 	void StopSliding( void ); // stop the overpressure friction/acceleration effect
@@ -595,7 +595,7 @@ private:
 	float m_flImmuneTime;							// Mulch: immunity: time in the future of when the immunity ends
 	int m_iInfectedTeam;							// Mulch: team the medic who infected us was on
 	float m_fNextInfectedTickDamage;				// Infection damage to deal the next tick
-    float m_flLastOverHealthTick;					// Mulch: last time we took health cause health > maxhealth
+	float m_flLastOverHealthTick;					// Mulch: last time we took health cause health > maxhealth
 	int m_nNumInfectDamage;
 	
 	// A hack flag to put on a player who was infected and tried to
@@ -603,7 +603,7 @@ private:
 	// note this so we can acredit the guy who infected him when we
 	// get to gamerules. If we didn't have to note this properly in
 	// a hud death msg (and logs) it'd be a lot easier.
-	bool m_bSpecialInfectedDeath; 
+	bool m_bSpecialInfectedDeath;
 
 private:
 
@@ -645,7 +645,7 @@ protected:
 	CNetworkHandle( CFFRadioTagData, m_hRadioTagData );
 
 	// This is here so that when someone tags us w/ a radiotag and
-	// we die while tagged by that person, we can award that player 
+	// we die while tagged by that person, we can award that player
 	// their extra point
 	EHANDLE	m_pWhoTaggedMe;
 
@@ -690,7 +690,7 @@ public:
 	// --> Mirv: Various things
 	void Command_SetChannel(const CCommand& args = CCommand());
 	int m_iChannel;
-    float m_flMancannonTime;		// Last time the player was affected (pushed) by a jump pad
+	float m_flMancannonTime;		// Last time the player was affected (pushed) by a jump pad
 	float m_flMancannonDetTime;		// Used to allow the Scout to det his jump pad
 
 	// BEG: Spy cloak stuff
@@ -850,12 +850,10 @@ protected:
 	float m_flPipebombShotTime;
 
 public:
-	void SetDisguisable( bool bDisguisable ) 
+	void SetDisguisable( bool bDisguisable )
 	{
 		if( !bDisguisable )
-		{
 			ResetDisguise();
-		}
 
 		m_bDisguisable = bDisguisable;
 	}

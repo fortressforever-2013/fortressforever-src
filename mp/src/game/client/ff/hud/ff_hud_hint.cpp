@@ -67,7 +67,7 @@ static char szMapPath[MAX_PATH];
 DECLARE_HUDELEMENT( CHudHint );
 DECLARE_HUD_MESSAGE( CHudHint, FF_HudHint );
 
-CHudHint::CHudHint( const char *pElementName ) : CHudElement( pElementName ), vgui::Panel( NULL, "HudHint" ) 
+CHudHint::CHudHint( const char *pElementName ) : CHudElement( pElementName ), vgui::Panel( NULL, "HudHint" )
 {
 	// Set our parent window
 	SetParent( g_pClientMode->GetViewport() );
@@ -346,7 +346,7 @@ void HudHintLoad(const char *pMapName)
 	Q_snprintf(szMapPath, MAX_PATH - 1, "cache/%s.txt", pMapName);
 
 	// Only load general hints if empty, since we keep them as a running record
-    if (sGeneralHints.Count() == 0)
+	if (sGeneralHints.Count() == 0)
 		LoadHints("cache/hints.txt", sGeneralHints);
 
 	// Always clear and load the map, since it has probably changed

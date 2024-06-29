@@ -17,7 +17,7 @@ private:
 	float	m_flStartTime;
 	float	m_flDuration;
 
-	CHudTexture *m_pIconTexture; // the one being used
+	CHudTexture *m_pIconTexture;	// the one being used
 
 	CHudTexture *m_pDispenserIconTexture;
 	CHudTexture *m_pSentrygunIconTexture;

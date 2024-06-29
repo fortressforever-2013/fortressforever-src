@@ -13,7 +13,7 @@
 #include "iclientvehicle.h"
 #include "ammodef.h"
 #include "ff_utils.h"
-#include "ff_shareddefs.h" //added to use colors stored within!
+#include "ff_shareddefs.h"	//added to use colors stored within!
 
 #include <KeyValues.h>
 #include <vgui/ISurface.h>
@@ -25,9 +25,9 @@
 #include <vgui/ILocalize.h>
 
 // ELMO *** 
-#define BHOP_CAP_SOFT 1.4f // as defined in ff_gamemovement.cpp
-#define BHOP_CAP_MID 1.55f // as defined in ff_gamemovement.cpp
-#define BHOP_CAP_HARD 1.71f // as defined in ff_gamemovement.cpp
+#define BHOP_CAP_SOFT 1.4f	// as defined in ff_gamemovement.cpp
+#define BHOP_CAP_MID 1.55f	// as defined in ff_gamemovement.cpp
+#define BHOP_CAP_HARD 1.71f	// as defined in ff_gamemovement.cpp
 // *** ELMO
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -148,13 +148,12 @@ void CHudSpeedometer::OnThink()
 
 		m_flNextUpdate = gpGlobals->curtime + 0.1;
 	}
-	
-} 
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Draw stuff!
 //-----------------------------------------------------------------------------
-void CHudSpeedometer::Paint() 
+void CHudSpeedometer::Paint()
 {
 	if (!hud_speedometer.GetBool() && !hud_speedometer_avg.GetBool())
 		return;
@@ -171,14 +170,14 @@ void CHudSpeedometer::Paint()
 	// regular speedometer
 	if( hud_speedometer.GetBool() )
 	{
-		if( m_iVelocity > BHOP_CAP_HARD * maxVelocity && hud_speedometer_color.GetInt() > 0) // above hard cap
+		if( m_iVelocity > BHOP_CAP_HARD * maxVelocity && hud_speedometer_color.GetInt() > 0)	// above hard cap
 			speedColor = INTENSITYSCALE_COLOR_RED;
-		else if(m_iVelocity-1  > BHOP_CAP_SOFT * maxVelocity && hud_speedometer_color.GetInt() > 0) // above soft cap
+		else if(m_iVelocity-1  > BHOP_CAP_SOFT * maxVelocity && hud_speedometer_color.GetInt() > 0)	// above soft cap
 			if(hud_speedometer_color.GetInt() == 2)
 				speedColor = ColorFade( m_iVelocity, BHOP_CAP_SOFT*maxVelocity, BHOP_CAP_HARD*maxVelocity, INTENSITYSCALE_COLOR_ORANGE, INTENSITYSCALE_COLOR_RED );
 			else
 				speedColor = INTENSITYSCALE_COLOR_ORANGE;	
-		else if( m_iVelocity > maxVelocity && hud_speedometer_color.GetInt() > 0) // above max run speed
+		else if( m_iVelocity > maxVelocity && hud_speedometer_color.GetInt() > 0)	// above max run speed
 			if(hud_speedometer_color.GetInt() == 2)
 				if( m_iVelocity > (maxVelocity+3*(BHOP_CAP_SOFT*maxVelocity - maxVelocity)/4) && hud_speedometer_color.GetInt() > 0) // above max run speed
 					speedColor = ColorFade( m_iVelocity, maxVelocity+3*(BHOP_CAP_SOFT*maxVelocity - maxVelocity)/4, BHOP_CAP_SOFT*maxVelocity, INTENSITYSCALE_COLOR_YELLOW, INTENSITYSCALE_COLOR_ORANGE );

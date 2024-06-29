@@ -142,21 +142,15 @@ void CHudArmor::UpdateDisplay()
 	// Armor went up
 	{
 		if( flArmorPercent < 0.25f )
-		{
 			g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "ArmorIncreaseBelow25" );
-		}
 		else
-		{
 			g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "ArmorIncrease" );
-		}		
 	}
 	else
 	// Armor went down or didn't change
 	{
 		if( flArmorPercent < 0.25f )
-		{
 			g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "ArmorBelow25" );
-		}
 	}
 
 	m_iArmor = iArmor;

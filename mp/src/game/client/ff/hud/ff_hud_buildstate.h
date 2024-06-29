@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/02/04
-	created:	4:2:2006   18:34
-	filename: 	f:\cvs\code\cl_dll\ff\ff_hud_buildstate.h
+	created:	4:2:2006	18:34
+	filename:	f:\cvs\code\cl_dll\ff\ff_hud_buildstate.h
 	file path:	f:\cvs\code\cl_dll\ff
 	file base:	ff_hud_buildstate
 	file ext:	h
@@ -15,8 +15,8 @@
 //#include "ff_hud_hint.h"
 #include "hud_macros.h"
 
-#include "iclientmode.h" //to set panel parent as the cliends viewport
-#include "c_ff_player.h" //required to cast base player
+#include "iclientmode.h"	//to set panel parent as the cliends viewport
+#include "c_ff_player.h"	//required to cast base player
 
 #include <vgui_controls/Panel.h>
 #include <vgui/ISurface.h>
@@ -94,8 +94,8 @@ private:
 	int m_iHealthPerc, m_iAmmoPerc;
 	bool m_fNoRockets;
 	int m_iSentryLevel;
-    float m_flManCannonTimeoutTime;
-    float m_flDetpackDetonateTime;
+	float m_flManCannonTimeoutTime;
+	float m_flDetpackDetonateTime;
 	int m_iNumPipes;
 	int m_iNumMedpacks;
 	float m_flMedpackRegenPercent;

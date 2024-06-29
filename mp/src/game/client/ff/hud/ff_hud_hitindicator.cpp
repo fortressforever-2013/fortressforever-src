@@ -112,7 +112,7 @@ void CHudHitIndicator::ApplySchemeSettings( IScheme *scheme )
 	// <-- Mirv
 
 
-    SetSize( ScreenWidth(), ScreenHeight() );
+	SetSize( ScreenWidth(), ScreenHeight() );
 }
 
 extern void GetHitCrosshair(char &innerChar, Color &innerCol, int &innerSize, char &outerChar, Color &outerCol, int &outerSize);	// |-- squeek
@@ -277,4 +277,3 @@ void CHudHitIndicator::SetCrosshairAngle( const QAngle& angle )
 {
 	VectorCopy( angle, m_vecCrossHairOffsetAngle );
 }
-

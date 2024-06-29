@@ -550,11 +550,11 @@ void CFFGameMovement::WalkMove( void )
 	}
 	else
 	{
-		forward[2] = 0;
-		right[2]   = 0;
+		forward[2]	= 0;
+		right[2]	= 0;
 		
-		VectorNormalize (forward);  // Normalize remainder of vectors.
-		VectorNormalize (right);    // 
+		VectorNormalize (forward);	// Normalize remainder of vectors.
+		VectorNormalize (right);	// 
 	}
 
 	for (int i=0 ; i<2 ; i++)       // Determine x and y parts of velocity
@@ -711,9 +711,7 @@ void CFFGameMovement::AirMove( void )
 		AirAccelerate ( wishdir, wishspeed, accel );
 	}
 	else
-	{
 		AirAccelerate( wishdir, wishspeed, sv_airaccelerate.GetFloat() );
-	}
 
 	// Add in any base velocity to the current velocity.
 	VectorAdd(mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
@@ -747,9 +745,7 @@ void CFFGameMovement::Friction( void )
 	
 	// If too slow, return
 	if (speed < 0.1f)
-	{
 		return;
-	}
 
 	drop = 0;
 
@@ -780,9 +776,7 @@ void CFFGameMovement::Friction( void )
 			// We don't actually need this trace.
 		}
 		else
-		{
 			TracePlayerBBox( start, stop, PlayerSolidMask(), COLLISION_GROUP_PLAYER_MOVEMENT, pm ); 
-		}
 
 		if (pFFPlayer->IsSliding())
 		{
@@ -882,10 +876,8 @@ bool CFFGameMovement::IsRampSliding( CFFPlayer *pPlayer )
 					vecVelocity /= flHorizontalSpeed;
 
 				float flDotProduct = DotProduct(vecVelocity, pm.plane.normal);
-				if (flDotProduct < -0.15f) // On an upwards ramp
-				{
+				if (flDotProduct < -0.15f)	// On an upwards ramp
 					return true;
-				}
 			}
 		}
 		

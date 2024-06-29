@@ -142,8 +142,8 @@ public:
 	void RemoveSchedule(const char* szScheduleName);
 
 private:
-	// list of schedules. key is the checksum of an identifying name; it
-	// isnt necessarily the name of the lua function to call
+	// list of schedules. key is the checksum of an identifying name;
+	// it isn't necessarily the name of the lua function to call
 	CUtlMap<CRC32_t, CFFScheduleCallback*>	m_schedules;
 };
 

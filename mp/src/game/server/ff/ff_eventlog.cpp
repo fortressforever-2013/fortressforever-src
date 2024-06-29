@@ -445,16 +445,15 @@ public:
 		
 		// BEG: ff_restartround
 		if( !Q_strncmp( name, "ff_restartround", Q_strlen( "ff_restartround" ) ) )
-		{
 			UTIL_LogPrintf( "Round restarted\n");
-		}
+
 		// END: ff_restartround
 
 		// BEG: LUA events
 		if( !Q_strncmp( name, "luaevent", Q_strlen( "luaevent" ) ) )
 		{
-			// WARNING: lua doesnt give you player IDs, it gives you player index. 
-			//          This is why we use PlayerByIndex and GetPlayerUserId unlike other logging calls. - AfterShock
+			// WARNING: lua doesnt give you player IDs, it gives you player index.  This is why
+			// we use PlayerByIndex and GetPlayerUserId unlike other logging calls. - AfterShock
 			const int ownerid = event->GetInt( "userid2" ); // owner is typically the victim 
 			const int attackerid = event->GetInt( "userid" ); // attacker is typically the one triggering the event
 			const char *eventName = event->GetString( "eventname" );
@@ -471,17 +470,11 @@ public:
 			char bracket2[50];
 
 			if (strlen(key0))
-			{
 				Q_snprintf(bracket0, sizeof(bracket0)," (%s \"%s\")", key0, value0);
-			}
 			if (strlen(key1))
-			{
 				Q_snprintf(bracket1, sizeof(bracket1), " (%s \"%s\")", key1, value1);
-			}
 			if (strlen(key2))
-			{
 				Q_snprintf(bracket2, sizeof(bracket2), " (%s \"%s\")", key2, value2);
-			}
 			
 			bool bNoAttacker = ( attackerid == 0 );
 			bool bNoVictim = ( ownerid == 0 );
@@ -524,7 +517,7 @@ public:
 						strlen(key0) ? bracket0 : "", 
 						strlen(key1) ? bracket1 : "", 
 						strlen(key2) ? bracket2 : "" );
-				} 
+				}
 			}
 			else
 			{
@@ -572,14 +565,10 @@ public:
 		// END: lua event
 
 		if ( BaseClass::PrintEvent( event ) )
-		{
 			return true;
-		}
 	
-		if ( Q_strcmp(event->GetName(), "ff_") == 0 )
-		{
+		if ( !Q_strcmp(event->GetName(), "ff_") )
 			return PrintFFEvent( event );
-		}
 
 		return false;
 	}
@@ -603,4 +592,3 @@ IGameSystem* GameLogSystem()
 {
 	return &g_FFEventLog;
 }
-

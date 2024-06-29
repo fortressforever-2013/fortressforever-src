@@ -133,8 +133,8 @@ void CHudHintCenter::AddHudHint( unsigned short hintID, short NumShow, short hin
 
 	// Ignore hints that are less important than the one currently showing
 	if ( hintPriority < m_iLastHintPriority )
-	{  
-		if ( gpGlobals->curtime < m_flLastHintDuration  )
+	{
+		if ( gpGlobals->curtime < m_flLastHintDuration )
 			return;
 	}
 	// Also ignore equally-important hints that come in too "quickly"
@@ -151,7 +151,7 @@ void CHudHintCenter::AddHudHint( unsigned short hintID, short NumShow, short hin
 	{
 		HintInfo structHintInfo( hintID, NumShow );
 		foundIndex = m_HintVector.Find( structHintInfo );
-		if (  foundIndex < 0 )  // Hint not shown yet
+		if ( foundIndex < 0 )	// Hint not shown yet
 		{
 			if ( structHintInfo.m_ShowCount != -1 ) // -1 is reserved for "infinite" hints
 				structHintInfo.m_ShowCount--;
@@ -159,7 +159,7 @@ void CHudHintCenter::AddHudHint( unsigned short hintID, short NumShow, short hin
 		}
 		else if ( m_HintVector[ foundIndex ].m_ShowCount > 0 )
 			m_HintVector[ foundIndex ].m_ShowCount--;
-		else if (  m_HintVector[ foundIndex ].m_ShowCount != -1 )  // Hint has been shown enough times -- ignore it
+		else if (  m_HintVector[ foundIndex ].m_ShowCount != -1 )	// Hint has been shown enough times -- ignore it
 			return;
 	}
 	m_iLastHintPriority = hintPriority;
@@ -167,7 +167,7 @@ void CHudHintCenter::AddHudHint( unsigned short hintID, short NumShow, short hin
 	
 	// Save some of the old hints -- note that this will cut them off at an arbitrary point
 	//char oldHintString[HINT_HISTORY];
-	//m_pRichText->GetText( 0, oldHintString, sizeof( oldHintString ) ); 
+	//m_pRichText->GetText( 0, oldHintString, sizeof( oldHintString ) );
 	wchar_t *pszTemp = g_pVGuiLocalize->Find( pszMessage );
 	wchar_t szUnlocalizedStr[4096];
 	if( !pszTemp )
@@ -182,8 +182,8 @@ void CHudHintCenter::AddHudHint( unsigned short hintID, short NumShow, short hin
 	// But we will allow this for map hints, because each map hint could be different
 	if ( hintID != m_iLastHintID || !hintID )
 		m_HintStringsVector.AddToTail( pszTemp );
-	if ( m_HintStringsVector.Count() > HINT_HISTORY ) 
-		m_HintStringsVector.Remove( 0 );  // Remove the oldest hint
+	if ( m_HintStringsVector.Count() > HINT_HISTORY )
+		m_HintStringsVector.Remove( 0 );	// Remove the oldest hint
 
 	m_iCurrentHintIndex = m_HintStringsVector.Count() - 1;
 	m_iLastHintID = hintID;	
@@ -194,7 +194,7 @@ void CHudHintCenter::AddHudHint( unsigned short hintID, short NumShow, short hin
 	Q_snprintf( szHintCtr, sizeof( szHintCtr ), "%i/%i", m_iCurrentHintIndex + 1, m_HintStringsVector.Count() );
 	g_pVGuiLocalize->ConvertANSIToUnicode( szHintCtr, m_szHintCounter, sizeof(m_szHintCounter) );
 
-	if (  foundIndex < 0 || m_bHintKeyHeld )  // Hint hasn't been shown yet or user is holding down the hint key
+	if ( foundIndex < 0 || m_bHintKeyHeld )	// Hint hasn't been shown yet or user is holding down the hint key
 	{
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "OpenHintCenter" );
 
@@ -345,7 +345,6 @@ bool CHudHintCenter::TranslateKeyCommand( wchar_t *psHintMessage )
 		m_pRichText->InsertChar( psHintMessage[i] );
 		i++;
 	}
-
 }
 
 
@@ -414,8 +413,7 @@ void CHudHintCenter::VidInit( void )
 	m_pHudIconGlow->cCharacterInFont = 'G';
 
 
-
-	 //Set up the rich text box that will contain the hud hint stuff
+	//Set up the rich text box that will contain the hud hint stuff
 	if (!m_pRichText)
 	{
 		m_pRichText = new RichText(this, "HudHintText");
@@ -451,8 +449,6 @@ void CHudHintCenter::VidInit( void )
 	m_flLastHintDuration = 0.0f;
 	m_iLastHintPriority = 0;
 }
-
-
 
 
 
@@ -594,12 +590,12 @@ void CHudHintCenter::KeyUp( void )
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Catch the next/previous hint buttons. 
+// Purpose: Catch the next/previous hint buttons.
 //-----------------------------------------------------------------------------
 void CHudHintCenter::OnCommand( const char *command )
 {
 	// The Next Hint button was pressed
-	if ( Q_strcmp( command, "Next" ) == 0 )
+	if ( !Q_strcmp( command, "Next" ) )
 	{
 		if ( m_pRichText )
 		{	// Don't fall off the end!
@@ -617,7 +613,7 @@ void CHudHintCenter::OnCommand( const char *command )
 		}
 	}
 	// The Previous Hint button was pressed
-	else if ( Q_strcmp( command, "Prev" ) == 0 )
+	else if ( !Q_strcmp( command, "Prev" ) )
 	{
 		if ( m_pRichText )
 		{	// Don't fall off the beginning!
@@ -635,4 +631,3 @@ void CHudHintCenter::OnCommand( const char *command )
 		}
 	}
 }
-

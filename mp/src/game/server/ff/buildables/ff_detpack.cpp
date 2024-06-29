@@ -205,8 +205,8 @@ void CFFDetpack::OnObjectTouch( CBaseEntity *pOther )
 		return;
 
 	// Skip if not scout
-    if( pPlayer->GetClassSlot() != 1 )
-        return;
+	if( pPlayer->GetClassSlot() != 1 )
+		return;
 
 	// Skip if on the same team
 	//if( !g_pGameRules->FCanTakeDamage( ( ( CFFPlayer * )m_hOwner.Get() ), pPlayer ) )

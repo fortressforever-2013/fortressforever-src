@@ -52,14 +52,14 @@ void CFFTeam::Init( const char *pName, int iNumber )
 
 	// --> Mirv: Some default settings
 	memset( &m_iClasses, -1, sizeof( m_iClasses ) );	// Jiggles: All classes start as "disallowed" so players can't pick
-														//			a disallowed class in the time it takes to update the client menu
+														// a disallowed class in the time it takes to update the client menu
 	memset( m_szTeamIcon.GetForModify(), 0, sizeof( m_szTeamIcon ) );
 
 	m_iAllies = 0;										// no allies
 
 	// set default team icons
 	if ( m_iTeamNum < TEAM_BLUE || m_iTeamNum > TEAM_GREEN )
-		Q_strncpy( m_szTeamIcon.GetForModify(), "dummystring", 128 ); // just in case someone accesses unassigned or spectator's icon
+		Q_strncpy( m_szTeamIcon.GetForModify(), "dummystring", 128 );	// just in case someone accesses unassigned or spectator's icon
 	else
 		ResetTeamIcon();
 

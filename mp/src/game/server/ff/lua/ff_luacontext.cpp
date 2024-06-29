@@ -70,9 +70,7 @@ CFFLuaSC::CFFLuaSC( int iArgs, ... )
 	try
 	{
 		for( int i = 0; i < iArgs; i++ )
-		{
 			Push( va_arg( ap, CBaseEntity* ) );
-		}
 	}
 	catch( ... )
 	{
@@ -94,9 +92,7 @@ void CFFLuaSC::SetParams( int iArgs, ... )
 	try
 	{
 		for( int i = 0; i < iArgs; i++ )
-		{
 			Push( va_arg( ap, CBaseEntity* ) );
-		}
 	}
 	catch( ... )
 	{

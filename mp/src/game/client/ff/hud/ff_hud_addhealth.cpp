@@ -115,13 +115,9 @@ void CHudPlayerAddHealth::MsgFunc_PlayerAddHealth( bf_read &msg )
 
 	// play animation (new points value)
 	if(ptVal > 0)
-	{
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "NewAddHealth" );
-	}
 	else
-	{
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "NewSubtractHealth" );
-	}
 
 	m_flStartTime = gpGlobals->curtime;
 	m_flDuration = 3.0f;
@@ -142,7 +138,7 @@ void CHudPlayerAddHealth::Paint()
 	if ( m_flStartTime + m_flDuration < gpGlobals->curtime )
 		return;
 
-	FFPanel::Paint(); // Draws the background glyphs 
+	FFPanel::Paint(); // Draws the background glyphs
 
 	if( m_pTextHealth[ 0 ] != '\0' )
 	{
@@ -152,6 +148,5 @@ void CHudPlayerAddHealth::Paint()
 
 		for( wchar_t *wch = m_pTextHealth; *wch != 0; wch++ )
 			surface()->DrawUnicodeChar( *wch );
-
 	}
 }

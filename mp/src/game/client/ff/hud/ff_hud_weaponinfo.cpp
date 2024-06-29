@@ -95,7 +95,7 @@ void CHudWeaponInfo::VidInit( void )
 //-----------------------------------------------------------------------------
 // Purpose: Get stuff!
 //-----------------------------------------------------------------------------
-void CHudWeaponInfo::OnTick() 
+void CHudWeaponInfo::OnTick()
 {
 	BaseClass::OnTick();
 
@@ -142,8 +142,8 @@ void CHudWeaponInfo::OnTick()
 //-----------------------------------------------------------------------------
 // Purpose: Draw stuff!
 //-----------------------------------------------------------------------------
-void CHudWeaponInfo::Paint() 
-{ 
+void CHudWeaponInfo::Paint()
+{
 	if(m_pWeaponIcon)
 	{
 		// for widescreen stuff we take width scaled, then subtract the X not scaled (as we dont stretch the hud)
@@ -152,7 +152,5 @@ void CHudWeaponInfo::Paint()
 	}
 
 	if(m_pAmmoIcon)
-	{
 		m_pAmmoIcon->DrawSelf(ammo_xpos, ammo_ypos, GetFgColor());
-	}
 }

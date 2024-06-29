@@ -16,7 +16,7 @@
 
 void CServerGameClients::GetPlayerLimits( int& minplayers, int& maxplayers, int &defaultMaxPlayers ) const
 {
-	minplayers = 2;  // Force multiplayer.
+	minplayers = 2;	// Force multiplayer.
 	maxplayers = MAX_PLAYERS;
 	defaultMaxPlayers = 16;
 }
@@ -37,5 +37,3 @@ void CServerGameDLL::LevelInit_ParseAllEntities( const char *pMapEntities )
 	CMapLoadEntityFilter filter;
 	MapEntity_ParseAllEntities( pMapEntities, &filter );
 }
-
-

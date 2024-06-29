@@ -55,8 +55,8 @@ void CFFPlayerMove::StartCommand( CBasePlayer *player, CUserCmd *cmd )
 
 //-----------------------------------------------------------------------------
 // Purpose: This is called pre player movement and copies all the data necessary
-//          from the player for movement. (Server-side, the client-side version
-//          of this code can be found in prediction.cpp.)
+// from the player for movement. (Server-side, the client-side version of this
+// of this code can be found in prediction.cpp.)
 //-----------------------------------------------------------------------------
 void CFFPlayerMove::SetupMove( CBasePlayer *player, CUserCmd *ucmd, IMoveHelper *pHelper, CMoveData *move )
 {
@@ -64,17 +64,15 @@ void CFFPlayerMove::SetupMove( CBasePlayer *player, CUserCmd *ucmd, IMoveHelper 
 
 	IServerVehicle *pVehicle = player->GetVehicle();
 	if (pVehicle && gpGlobals->frametime != 0)
-	{
-		pVehicle->SetupMove( player, ucmd, pHelper, move ); 
-	}
+		pVehicle->SetupMove( player, ucmd, pHelper, move );
 }
 
 
 //-----------------------------------------------------------------------------
 // Purpose: This is called post player movement to copy back all data that
-//          movement could have modified and that is necessary for future
-//          movement. (Server-side, the client-side version of this code can 
-//          be found in prediction.cpp.)
+// movement could have modified and that is necessary for future movement.
+// (Server-side, the client-side version of this code can be found in
+// be found in prediction.cpp.)
 //-----------------------------------------------------------------------------
 void CFFPlayerMove::FinishMove( CBasePlayer *player, CUserCmd *ucmd, CMoveData *move )
 {
@@ -83,7 +81,5 @@ void CFFPlayerMove::FinishMove( CBasePlayer *player, CUserCmd *ucmd, CMoveData *
 
 	IServerVehicle *pVehicle = player->GetVehicle();
 	if (pVehicle && gpGlobals->frametime != 0)
-	{
 		pVehicle->FinishMove( player, ucmd, move );
-	}
 }

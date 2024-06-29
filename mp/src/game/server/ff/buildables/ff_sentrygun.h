@@ -44,15 +44,15 @@
 #define SG_BC_YAW			"aim_yaw"
 #define SG_BC_PITCH			"aim_pitch"
 #define SG_BC_BARREL_ROTATE	"barrel_rotate"
-//#define	SG_RANGE			1200
-#define	SG_MAX_WAIT			5
+//#define SG_RANGE			1200
+#define SG_MAX_WAIT			5
 #define SG_SHORT_WAIT		2.0		// Used for FAST_RETIRE spawnflag
-#define	SG_PING_TIME		10.0f	// LPB!!
+#define SG_PING_TIME		10.0f	// LPB!!
 
 #define SG_MAX_PITCH		90.0f
-#define SG_MIN_PITCH		-85.0f//-90.0f
-#define SG_MIN_ANIMATED_PITCH		-30.0f//-33.0f (caes: changed to -30 so animation doesn't go up again at end)
-#define SG_SCAN_HALFWIDTH	30.0f//40.0f
+#define SG_MIN_PITCH		-85.0f //-90.0f
+#define SG_MIN_ANIMATED_PITCH -30.0f //-33.0f (caes: changed to -30 so animation doesn't go up again at end)
+#define SG_SCAN_HALFWIDTH	30.0f //40.0f
 
 //extern ConVar sg_health_lvl1;
 //#define SG_HEALTH_LEVEL1	sg_health_lvl1.GetInt()
@@ -60,6 +60,5 @@
 //#define SG_HEALTH_LEVEL2	sg_health_lvl2.GetInt()
 //extern ConVar sg_health_lvl3;
 //#define SG_HEALTH_LEVEL3	sg_health_lvl3.GetInt()
-
 
 #endif // FF_SENTRYGUN_H

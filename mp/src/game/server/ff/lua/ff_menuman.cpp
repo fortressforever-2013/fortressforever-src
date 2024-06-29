@@ -122,9 +122,7 @@ void CFFLuaMenu::Display(IRecipientFilter &filter)
 	char *szMenuString = new char[512];
 
 	if (*m_szMenuTitle)
-	{
 		Q_snprintf(szMenuString, MAX_MENU_STRING, "%s\n", m_szMenuTitle);
-	}
 
 	for (int i=1; i<10; i++)
 	{
@@ -155,9 +153,7 @@ void CFFLuaMenu::Display(IRecipientFilter &filter)
 			szMenuString[240] = '\0';
 		}
 		else
-		{
 			bMoreToCome = false;
-		}
 
 		UserMessageBegin(filter, "ShowMenu");
 			WRITE_WORD(optionBits);
@@ -435,9 +431,7 @@ void CFFLuaMenuManager::Update()
 			// nothing
 		}
 		else
-		{
 			it = m_menus.NextInorder(it);
-		}
 	}
 }
 

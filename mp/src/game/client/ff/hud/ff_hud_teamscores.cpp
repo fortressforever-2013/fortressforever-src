@@ -100,13 +100,13 @@ void CHudTeamScores::VidInit( void )
 //-----------------------------------------------------------------------------
 // Purpose: Draw stuff!
 //-----------------------------------------------------------------------------
-void CHudTeamScores::Paint() 
-{ 
-	FFPanel::Paint(); // Draws the background glyphs 
+void CHudTeamScores::Paint()
+{
+	FFPanel::Paint();	// Draws the background glyphs
 
-	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer(); 
-	if ( !pPlayer ) 
-		return; 
+	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if ( !pPlayer )
+		return;
 
 	IGameResources *pGR = GameResources();
 	if( !pGR )

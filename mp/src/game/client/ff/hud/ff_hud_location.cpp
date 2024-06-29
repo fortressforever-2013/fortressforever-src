@@ -8,7 +8,7 @@
 //
 //	REVISIONS
 //	---------
-//	02/20/2006, Mulchman: 
+//	02/20/2006, Mulchman:
 //		First created
 
 #include "cbase.h"

@@ -73,9 +73,9 @@ public:
 	void Paint( void );
 
 	void Reset( void )
-	{ 
+	{
 		if( m_flDrawTime != 0.0f )
-			m_flDrawTime = 0.0f; 
+			m_flDrawTime = 0.0f;
 	}
 
 protected:
@@ -318,9 +318,7 @@ void CHudCrosshairInfo::OnTick( void )
 							iArmor = -1;
 						}
 						else
-						{
 							iArmor = -1;
-						}
 					//}
 				}
 				else
@@ -455,7 +453,7 @@ void CHudCrosshairInfo::OnTick( void )
 							}
 							// Jiggles: Don't draw anything if we're looking at a cloaked enemy spy
 							if( pHitPlayer->IsCloaked() )
-								return;  
+								return;
 						}
 					}					
 				}
@@ -482,9 +480,7 @@ void CHudCrosshairInfo::OnTick( void )
 				if( pszTemp )
 					wcscpy( wszClass, pszTemp );
 				else
-				{
 					wcscpy( wszClass, L"CLASS" );	// TODO: fix to show English version of class name :/
-				}
 				
 				if (CROSSHAIRTYPE == CROSSHAIRTYPE_DISPENSER)
 				{
@@ -498,7 +494,7 @@ void CHudCrosshairInfo::OnTick( void )
 					
 					wchar_t wszHealth[ 10 ], wszArmor[ 10 ], wszRockets[ 10 ], wszCells[ 10 ], wszShells[ 10 ], wszNails[ 10 ];
 
-                    g_pVGuiLocalize->ConvertANSIToUnicode( szHealth, wszHealth, sizeof( wszHealth ) );
+					g_pVGuiLocalize->ConvertANSIToUnicode( szHealth, wszHealth, sizeof( wszHealth ) );
 					g_pVGuiLocalize->ConvertANSIToUnicode( szArmor, wszArmor, sizeof( wszArmor ) );
 					g_pVGuiLocalize->ConvertANSIToUnicode( szRockets, wszRockets, sizeof( wszRockets ) );
 					g_pVGuiLocalize->ConvertANSIToUnicode( szCells, wszCells, sizeof( wszCells ) );
@@ -522,7 +518,7 @@ void CHudCrosshairInfo::OnTick( void )
 					
 					wchar_t wszHealth[ 10 ], wszRockets[ 10 ], wszShells[ 10 ], wszLevel[ 10 ], wszArmor[ 10 ];
 
-                    g_pVGuiLocalize->ConvertANSIToUnicode( szHealth, wszHealth, sizeof( wszHealth ) );
+					g_pVGuiLocalize->ConvertANSIToUnicode( szHealth, wszHealth, sizeof( wszHealth ) );
 					g_pVGuiLocalize->ConvertANSIToUnicode( szRockets, wszRockets, sizeof( wszRockets ) );
 					g_pVGuiLocalize->ConvertANSIToUnicode( szLevel, wszLevel, sizeof( wszLevel ) );
 					g_pVGuiLocalize->ConvertANSIToUnicode( szShells, wszShells, sizeof( wszShells ) );
@@ -541,7 +537,7 @@ void CHudCrosshairInfo::OnTick( void )
 					
 					wchar_t wszFuseTime[ 10 ];
 
-                    g_pVGuiLocalize->ConvertANSIToUnicode( szFuseTime, wszFuseTime, sizeof( wszFuseTime ) );
+					g_pVGuiLocalize->ConvertANSIToUnicode( szFuseTime, wszFuseTime, sizeof( wszFuseTime ) );
 					
 					if (bOwnBuildable)
 						_snwprintf( m_pText, 255, L"Your %ls Second Detpack", wszFuseTime );
@@ -571,7 +567,7 @@ void CHudCrosshairInfo::OnTick( void )
 					
 					wchar_t wszHealth[ 10 ], wszArmor[ 10 ];
 
-                       g_pVGuiLocalize->ConvertANSIToUnicode( szHealth, wszHealth, sizeof( wszHealth ) );
+					g_pVGuiLocalize->ConvertANSIToUnicode( szHealth, wszHealth, sizeof( wszHealth ) );
 					g_pVGuiLocalize->ConvertANSIToUnicode( szArmor, wszArmor, sizeof( wszArmor ) );
 
 					_snwprintf( m_pText, 255, L"(%ls) %ls - H: %ls, A: %ls", wszClass, wszName, wszHealth, wszArmor );

@@ -236,15 +236,11 @@ void CFFDispenser::OnObjectTouch( CBaseEntity *pOther )
 					{
 						// If the player hasn't touched us within some time...
 						if( ( m_flLastTouch + 0.5f ) < gpGlobals->curtime )
-						{
 							bDispense = true;
-						}
 					}
 					// Someone new touched us...
 					else
-					{
 						bDispense = true;
-					}
 				}
 
 				// Give the player junk if we need to
@@ -342,7 +338,7 @@ void CFFDispenser::OnObjectTouch( CBaseEntity *pOther )
 
 					SendStatsToBot();
 
-					EmitSound( "Dispenser.omnomnom" );
+					EmitSound( "Dispenser.Omnomnom" );
 				}
 			}
 		}
@@ -428,9 +424,9 @@ void CFFDispenser::Dispense( CFFPlayer *pPlayer )
 	VPROF_BUDGET( "CFFDispenser::Dispense", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
 	if( pPlayer->GetClassSlot() == CLASS_ENGINEER )
-		DispenseHelper( pPlayer, m_iCells.GetForModify(), 75, AMMO_CELLS ); // Engies get 75 cells
+		DispenseHelper( pPlayer, m_iCells.GetForModify(), 75, AMMO_CELLS );	// Engies get 75 cells
 	else
-    	DispenseHelper( pPlayer, m_iCells.GetForModify(), m_iGiveCells, AMMO_CELLS ); // Everyone else gets 10 cells
+		DispenseHelper( pPlayer, m_iCells.GetForModify(), m_iGiveCells, AMMO_CELLS );	// Everyone else gets 10 cells
 	DispenseHelper( pPlayer, m_iNails.GetForModify(), m_iGiveNails, AMMO_NAILS );
 	DispenseHelper( pPlayer, m_iShells.GetForModify(), m_iGiveShells, AMMO_SHELLS );
 	DispenseHelper( pPlayer, m_iRockets.GetForModify(), m_iGiveRockets, AMMO_ROCKETS );
@@ -626,7 +622,7 @@ void CFFDispenser::SpawnGibs()
 	CEffectData data;
 		data.m_nEntIndex = entindex();
 		data.m_vOrigin = GetAbsOrigin();
-		data.m_nMaterial = clamp( pOwner->GetTeamNumber() + 1 - TEAM_BLUE, 0, 4 ); // using this for skin, not sure what it's meant to be used for
+		data.m_nMaterial = clamp( pOwner->GetTeamNumber() + 1 - TEAM_BLUE, 0, 4 );	// using this for skin, not sure what it's meant to be used for
 	DispatchEffect("DispenserGib", data);
 }
 
@@ -666,10 +662,10 @@ void CFFDispenser::PhysicsSimulate()
 		m_iLastState = iState;
 	}
 }
-    
+
 bool CFFDispenser::CloseEnoughToDismantle( CFFPlayer *pPlayer)
 {
-    return (pPlayer->GetAbsOrigin() - GetAbsOrigin()).LengthSqr() < 6400.0f;
+	return (pPlayer->GetAbsOrigin() - GetAbsOrigin()).LengthSqr() < 6400.0f;
 }
 
 void CFFDispenser::Dismantle( CFFPlayer *pPlayer)
@@ -679,7 +675,7 @@ void CFFDispenser::Dismantle( CFFPlayer *pPlayer)
 
 	// Bug #0000426: Buildables Dismantle Sounds Missing
 	CPASAttenuationFilter sndFilter( this );
-	EmitSound( sndFilter, entindex(), "Dispenser.unbuild" );
+	EmitSound( sndFilter, entindex(), "Dispenser.Unbuild" );
 
 	// Fire an event.
 	IGameEvent *pEvent = gameeventmanager->CreateEvent("dispenser_dismantled");		

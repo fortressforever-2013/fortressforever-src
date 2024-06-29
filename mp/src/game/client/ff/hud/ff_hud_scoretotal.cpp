@@ -123,22 +123,22 @@ void CHudPlayerTotalScore::MsgFunc_SetPlayerTotalFortPoints( bf_read &msg )
 //-----------------------------------------------------------------------------
 // Purpose: Draw stuff!
 //-----------------------------------------------------------------------------
-void CHudPlayerTotalScore::Paint() 
-{ 
+void CHudPlayerTotalScore::Paint()
+{
 
-	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer(); 
-      if ( !pPlayer ) 
-         return; 
-
-	  if(!hud_fortpoints_total.GetBool())
+	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if ( !pPlayer )
 		return;
 
-   FFPanel::Paint(); // Draws the background glyphs 
-      
+	if(!hud_fortpoints_total.GetBool())
+		return;
+
+	FFPanel::Paint();	// Draws the background glyphs
+
 		if( m_pTextTotalScore[ 0 ] != '\0' )
 		{
 
-			/*
+		/*
 			surface()->DrawSetTextFont( m_hTotalScoreFontBG );
 			//surface()->DrawSetTextColor( Color(0,0,0,255) );
 			surface()->DrawSetTextColor( Color(0,0,1,255) );
@@ -146,7 +146,7 @@ void CHudPlayerTotalScore::Paint()
 
 			for( wchar_t *wch = m_pTextTotalScore; *wch != 0; wch++ )
 				surface()->DrawUnicodeChar( *wch );
-	*/
+		*/
 			surface()->DrawSetTextFont( m_hTotalScoreFont );
 			surface()->DrawSetTextColor( GetFgColor() );
 			surface()->DrawSetTextPos( TotalScoreFont_xpos, TotalScoreFont_ypos );
@@ -157,14 +157,14 @@ void CHudPlayerTotalScore::Paint()
 		}
 		if( m_pTextTotalDesc[ 0 ] != '\0' )
 		{
-			/*
+		/*
 			surface()->DrawSetTextFont( m_hTotalDescFontBG );
 			surface()->DrawSetTextColor( Color(0,0,0,255) );
 			surface()->DrawSetTextPos( TotalDescFont_xpos, TotalDescFont_ypos );
 
 			for( wchar_t *wch = m_pTextTotalDesc; *wch != 0; wch++ )
 				surface()->DrawUnicodeChar( *wch );
-*/
+		*/
 			surface()->DrawSetTextFont( m_hTotalDescFont );
 			surface()->DrawSetTextColor( GetFgColor() );
 			surface()->DrawSetTextPos( TotalDescFont_xpos, TotalDescFont_ypos );

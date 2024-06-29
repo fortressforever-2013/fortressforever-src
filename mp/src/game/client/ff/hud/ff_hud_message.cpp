@@ -47,7 +47,7 @@ private:
 
 public:
 
-	CHudGameMessage( const char *pElementName ) : CHudElement( pElementName ), vgui::Panel( NULL, "HudGameMessage" ) 
+	CHudGameMessage( const char *pElementName ) : CHudElement( pElementName ), vgui::Panel( NULL, "HudGameMessage" )
 	{
 		// Set our parent window
 		SetParent( g_pClientMode->GetViewport() );
@@ -255,9 +255,7 @@ void CHudGameMessage::RetireExpiredMessages( void )
 	for ( int i = iSize-1; i >= 0; i-- )
 	{
 		if ( m_Messages[i].flStartTime + m_Messages[i].flDuration < gpGlobals->curtime )
-		{
 			m_Messages.Remove(i);
-		}
 	}
 }
 

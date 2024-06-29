@@ -18,7 +18,7 @@
 #include "c_team.h"
 #include "ff_gamerules.h"
 #include "ff_shareddefs.h"
-#include "ff_hud_chat.h" // custom team colors
+#include "ff_hud_chat.h"	// custom team colors
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -44,11 +44,11 @@ struct DeathNoticePlayer
 };
 
 // Contents of each entry in our list of death notices
-struct DeathNoticeItem 
+struct DeathNoticeItem
 {
 	DeathNoticePlayer	Killer;
-	DeathNoticePlayer   Victim;
-	DeathNoticePlayer   Assister;
+	DeathNoticePlayer	Victim;
+	DeathNoticePlayer	Assister;
 	CHudTexture *iconDeath; // draws before victims name
 	CHudTexture *iconBuildable; // draws after victim name, if it exists
 	CHudTexture *iconObjective; // draws before "victims" name
@@ -213,9 +213,7 @@ void CHudDeathNotice::Paint()
 			int iVictimTeam = 0;
 
 			if( g_PR )
-			{
 				iVictimTeam = g_PR->GetTeam( m_DeathNotices[i].Victim.iEntIndex );
-			}
 
 			g_pVGuiLocalize->ConvertANSIToUnicode( m_DeathNotices[i].Victim.szName, victim, sizeof( victim ) );
 			g_pVGuiLocalize->ConvertANSIToUnicode( m_DeathNotices[i].objectiveText, objectivetext, sizeof( objectivetext ) );
@@ -245,9 +243,7 @@ void CHudDeathNotice::Paint()
 				x =	GetWide() - victimStringWidth - iconWide - 5;
 			}
 			else
-			{
 				x = 0;
-			}
 			
 			// --> Mirv: Shove over a bit
 			y += 16;
@@ -304,18 +300,14 @@ void CHudDeathNotice::Paint()
 				iKillerTeam = g_PR->GetTeam( m_DeathNotices[i].Killer.iEntIndex );
 				iVictimTeam = g_PR->GetTeam( m_DeathNotices[i].Victim.iEntIndex );
 				if (hasAssister)
-				{
 					iAssisterTeam = g_PR->GetTeam( m_DeathNotices[i].Assister.iEntIndex );
-				}
 			}
 
 			g_pVGuiLocalize->ConvertANSIToUnicode( m_DeathNotices[i].Victim.szName, victim, sizeof( victim ) );
 			g_pVGuiLocalize->ConvertANSIToUnicode( m_DeathNotices[i].Killer.szName, killer, sizeof( killer ) );
 			
 			if ( hasAssister )
-			{
 				g_pVGuiLocalize->ConvertANSIToUnicode( m_DeathNotices[i].Assister.szName, assister, sizeof( assister ) );
-			}
 
 			// Get the local position for this notice
 			int victimStringWidth = UTIL_ComputeStringWidth( m_hTextFont, victim );
@@ -392,9 +384,7 @@ void CHudDeathNotice::Paint()
 				x -= iconModifierWide ? iconModifierWide + 5 : 0;
 			}
 			else
-			{
 				x = 0;
-			}
 			
 			// --> Mirv: Shove over a bit
 			y += 16;
@@ -414,9 +404,7 @@ void CHudDeathNotice::Paint()
 			if ( !m_DeathNotices[i].iSuicide )
 			{
 				if ( m_bRightJustify )
-				{
 					x -= killerAndAssisterStringWidth;
-				}
 
 				// Draw killer's name
 				DrawPlayerAndAssister( x, y, killer, iKillerTeam, hasAssister ? assister : NULL, iAssisterTeam );
@@ -493,9 +481,7 @@ void CHudDeathNotice::RetireExpiredDeathNotices( void )
 	for ( int i = iSize-1; i >= 0; i-- )
 	{
 		if ( m_DeathNotices[i].flDisplayTime < gpGlobals->curtime )
-		{
 			m_DeathNotices.Remove(i);
-		}
 	}
 }
 
@@ -621,18 +607,12 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 			}	
 
 			if( bTriggerHurt )	// copy different string if it's a trigger_hurt death (see above)
-			{
 				Q_snprintf( fullkilledwith, sizeof(fullkilledwith), "death_%s", tempTriggerHurtString );
-			}
 			else
-			{
 				Q_snprintf( fullkilledwith, sizeof(fullkilledwith), "death_%s", killedwith );
-			}		
 		}
 		else
-		{
 			fullkilledwith[0] = 0;
-		}
 
 		// Get the names of the players
 		const char *killer_name = g_PR->GetPlayerName( killer );
@@ -690,7 +670,7 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 				deathMsg.iconBuildable = gHUD.GetIcon("death_weapon_deploysentrygun");
 			bBuildableKilled = true;
 		}
-		else if( !Q_strcmp( event->GetName(), "dispenser_killed" ) ) 
+		else if( !Q_strcmp( event->GetName(), "dispenser_killed" ) )
 		{
 			deathMsg.iconBuildable = gHUD.GetIcon("death_weapon_deploydispenser");
 			bBuildableKilled = true;
@@ -719,17 +699,17 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 
 		// 0000336: If we have a Detpack...
 		// NOTE: may need these changes for the SG and Dispenser in order for the death status icons to work right
-		if (Q_stricmp(killedwith, "Detpack") == 0)
+		if (!Q_stricmp(killedwith, "Detpack"))
 		{
 			deathMsg.iconDeath = gHUD.GetIcon("death_weapon_deploydetpack");
 		}
 		// 0001292: If we have a Dispenser
-		else if (Q_stricmp(killedwith, "Dispenser") == 0)
+		else if (!Q_stricmp(killedwith, "Dispenser"))
 		{
 			deathMsg.iconDeath = gHUD.GetIcon("death_weapon_deploydispenser");
 		}
 		// 0001292: If we have a Sentrygun
-		else if (Q_stricmp(killedwith, "Sentrygun") == 0)
+		else if (!Q_stricmp(killedwith, "Sentrygun"))
 		{
 			if (sglevel_killer == 1)
 				deathMsg.iconDeath = gHUD.GetIcon("death_sentrygun_level1");
@@ -741,21 +721,21 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 				deathMsg.iconDeath = gHUD.GetIcon("death_weapon_deploysentrygun");
 		}
 		// only 1 weapon can kill with a headshot
-		else if (Q_stricmp(killedwith, "BOOM_HEADSHOT") == 0)
+		else if (!Q_stricmp(killedwith, "BOOM_HEADSHOT"))
 		{
 			// need the _weapon_sniperrifle in case people create "death_notice" entries in other weapon scripts...we just want the sniper rifle's
 			deathMsg.iconDeath = gHUD.GetIcon("death_BOOM_HEADSHOT_weapon_sniperrifle");
 			bHeadshot = true;
 		}
 		// only 1 weapon can kill with a backstab
-		else if (Q_stricmp(killedwith, "backstab") == 0)
+		else if (!Q_stricmp(killedwith, "backstab"))
 		{
 			// need the _weapon_knife in case people create "death_notice" entries in other weapon scripts...we just want the knife's
 			deathMsg.iconDeath = gHUD.GetIcon("death_backstab_weapon_knife");
 			bBackstab = true;
 		}
 		// sg det
-		else if (Q_stricmp(killedwith, "sg_det") == 0)
+		else if (!Q_stricmp(killedwith, "sg_det"))
 		{
 			if (sglevel_killer == 1)
 				deathMsg.iconDeath = gHUD.GetIcon("death_sentrygun_level1_det");
@@ -766,19 +746,19 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 			else
 				deathMsg.iconDeath = gHUD.GetIcon("death_weapon_deploysentrygun");
 		}
-		else if (Q_stricmp(killedwith, "grenade_napalmlet") == 0)
+		else if (!Q_stricmp(killedwith, "grenade_napalmlet"))
 		{
 			deathMsg.iconDeath = gHUD.GetIcon("death_grenade_napalm");
 		}
-		else if (Q_stricmp(killedwith, "headcrush") == 0)
+		else if (!Q_stricmp(killedwith, "headcrush"))
 		{
 			deathMsg.iconDeath = gHUD.GetIcon("death_headcrush");
 		}
-		else if (Q_stricmp(killedwith, "weapon_railgun_bounce1") == 0)
+		else if (!Q_stricmp(killedwith, "weapon_railgun_bounce1"))
 		{
 			deathMsg.iconDeath = gHUD.GetIcon("death_railgun_bounce1");
 		}
-		else if (Q_stricmp(killedwith, "weapon_railgun_bounce2") == 0)
+		else if (!Q_stricmp(killedwith, "weapon_railgun_bounce2"))
 		{
 			deathMsg.iconDeath = gHUD.GetIcon("death_railgun_bounce2");
 		}
@@ -896,6 +876,3 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 
 	Msg( "%s", sDeathMsg );
 }
-
-
-

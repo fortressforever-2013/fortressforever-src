@@ -14,7 +14,7 @@ private:
 		float m_flStartTime;
 		float m_flDuration;
 
-		timer_s(float s, float d) 
+		timer_s(float s, float d)
 		{
 			m_flStartTime = s;
 			m_flDuration = d;

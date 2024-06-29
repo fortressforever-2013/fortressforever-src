@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/02/12
-	created:	12:2:2006   1:03
-	filename: 	f:\ff-svn\code\trunk\cl_dll\ff\ff_hud_menu.cpp
+	created:	12:2:2006	1:03
+	filename:	f:\ff-svn\code\trunk\cl_dll\ff\ff_hud_menu.cpp
 	file path:	f:\ff-svn\code\trunk\cl_dll\ff
 	file base:	ff_hud_menu
 	file ext:	cpp
@@ -464,11 +464,11 @@ menu_t CallMenu = { ARRAYSIZE(CallOptionList), CallOptionList, "saveme" };
 
 menu_t Menus[] = { EngineerMenu, DemomanMenu, SpyMenu, ClassDMenu, FriendlyDMenu, EnemyDMenu, CallMenu };
 
-CHudContextMenu::~CHudContextMenu() 
+CHudContextMenu::~CHudContextMenu()
 {
 }
 
-void CHudContextMenu::VidInit() 
+void CHudContextMenu::VidInit()
 {
 	m_fVisible = false;
 	g_pHudContextMenu = this;
@@ -498,7 +498,7 @@ void CHudContextMenu::VidInit()
 	}
 }
 
-void CHudContextMenu::Init() 
+void CHudContextMenu::Init()
 {
 }
 
@@ -506,7 +506,7 @@ void CHudContextMenu::DoCommand(const char *cmd)
 {
 	if (m_nLayer == 0)	// Is this check really needed anyway?
 	{
-		if( cm_aimsentry.GetBool() && ( strcmp( cmd, "aimsentry" ) == 0 ) )
+		if( cm_aimsentry.GetBool() && ( !strcmp( cmd, "aimsentry" ) ) )
 		{
 			// Special case for aimsentry - we "bind" attack1 to
 			// aimsentry so they can NOW click anywhere to aim
@@ -527,8 +527,8 @@ void CHudContextMenu::DoCommand(const char *cmd)
 		Q_strcat(szCmdBuffer, cmd, MAX_CMD_LEN);
 		engine->ClientCmd(szCmdBuffer);
 
-		//  Jiggles: The player used the menu to disguise!  Good for him/her!
-		//				Note: This logic assumes there is only disguise functionality in our 2nd menu level				
+		//	Jiggles: The player used the menu to disguise!  Good for him/her!
+		//	Note: This logic assumes there is only disguise functionality in our 2nd menu level				
 		g_FFHintTimers.DeleteTimer( "DisHint" );
 	}
 }
@@ -640,9 +640,9 @@ void CHudContextMenu::SetMenu()
 	SetPos(0, 0);
 }
 
-void CHudContextMenu::Paint() 
+void CHudContextMenu::Paint()
 {
-	if (!m_fVisible) 
+	if (!m_fVisible)
 		return;
 
 	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
@@ -801,7 +801,7 @@ void CHudContextMenu::ProgressToNextMenu(int iOption)
 	SetMenu();
 }
 
-void CHudContextMenu::MouseMove(float *x, float *y) 
+void CHudContextMenu::MouseMove(float *x, float *y)
 {
 	if (!m_fVisible || !cm_usemouse.GetBool())
 		return;
@@ -826,7 +826,7 @@ void CHudContextMenu::MouseMove(float *x, float *y)
 	// If capturing mouse then reset any x,y movement so that the player stays stationary
 	// Turning this off isn't very handy since you don't want to be moving around if you're
 	// going for the aim sentry option
-	if (cm_capturemouse.GetBool()) 
+	if (cm_capturemouse.GetBool())
 	{
 		*x = 0;
 		*y = 0;
@@ -888,15 +888,15 @@ int HudContextMenuInput(int down, int keynum, const char *pszCurrentBinding)
 	return 1;
 }
 
-void HudContextMenuInput(float *x, float *y) 
+void HudContextMenuInput(float *x, float *y)
 {
 	if (g_pHudContextMenu) 
 		g_pHudContextMenu->MouseMove(x, y);
 }
 
-void HudContextShow(bool visible) 
+void HudContextShow(bool visible)
 {
-	if (!g_pHudContextMenu) 
+	if (!g_pHudContextMenu)
 		return;
 
 	if (prediction->InPrediction() && !prediction->IsFirstTimePredicted())
@@ -910,7 +910,7 @@ void HudContextShow(bool visible)
 
 void HudContextShowCalls(bool visible)
 {
-	if (!g_pHudContextMenu) 
+	if (!g_pHudContextMenu)
 		return;
 
 	if (visible)

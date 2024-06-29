@@ -338,13 +338,9 @@ void CFFScriptManager::LevelInit(const char* szMapName)
 		LuaMsg( "sv_mapluasuffix set to %s | loading maps\\%s__%s__.lua\n", sv_mapluasuffix.GetString(), szMapName, sv_mapluasuffix.GetString() );
 
 		if ( filesystem->FileExists( UTIL_VarArgs( "maps/%s__%s__.lua", szMapName, sv_mapluasuffix.GetString() ) ) )
-		{
 			Q_snprintf( filename, sizeof(filename), "maps/%s__%s__.lua", szMapName, sv_mapluasuffix.GetString() );
-		}
 		else
-		{
 			LuaMsg( "maps\\%s__%s__.lua not found | reverting to maps\\%s.lua\n", szMapName, sv_mapluasuffix.GetString(), szMapName);
-		}
 	}
 
 	if ( !filename[0] )
@@ -370,9 +366,7 @@ void CFFScriptManager::LevelInit(const char* szMapName)
 			LoadFile(globalscript_filename);
 		}
 		else
-		{
 			LuaMsg("global script maps\\globalscripts\\%s.lua not found - nothing loaded post map lua.\n", szGlobalLuaScript );
-		}
 	}
 
 	// spawn the helper entity
@@ -764,7 +758,7 @@ CON_COMMAND( lua_dostring, "Run a server-side Lua string in the global environme
 		lua_pop(L, 1);
 		return;
 	}
-	if (status == 0 && lua_gettop(L) > 0) {  /* any result to print? */
+	if (status == 0 && lua_gettop(L) > 0) {	/* any result to print? */
 		lua_getglobal(L, "print");
 		lua_insert(L, 1);
 		if (lua_pcall(L, lua_gettop(L)-1, 0, 0) != 0)

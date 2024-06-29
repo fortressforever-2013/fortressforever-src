@@ -115,8 +115,6 @@ void CHudObjectiveIcon::VidInit( void )
 
 	// Cache the glyphs!
 	CacheTextures();
-
-
 }
 
 void CHudObjectiveIcon::Init( void )
@@ -235,7 +233,7 @@ void CHudObjectiveIcon::Paint( void )
 			trace_t		tr;
 			UTIL_TraceLine ( vecOrigin + Vector( 0, 0, 80 ), vecObjectiveOrigin + Vector( 0, 0, 80 ), MASK_VISIBLE, pPlayer, COLLISION_GROUP_NONE, & tr);
 			
-			if( tr.fraction != 1.0 )  // Trace hit something -- the objective is not visible (hopefully!)
+			if( tr.fraction != 1.0 )	// Trace hit something -- the objective is not visible (hopefully!)
 			{
 				surface()->DrawSetTextureFile( m_pObscuredIconTexture->textureId, OBJECTIVE_ICON_TEXTURE_OBSCURED, true, false );
 				surface()->DrawSetTexture( m_pObscuredIconTexture->textureId );
@@ -310,9 +308,7 @@ void CHudObjectiveIcon::Paint( void )
 			else
 				m_pArrow->SetColor( Color( 255, 255, 255, 255 ) );
 
-			m_pArrow->DoPaint(xposLeft, yposLeft, iArrowSize, iArrowSize, angle); 
-			
-
+			m_pArrow->DoPaint(xposLeft, yposLeft, iArrowSize, iArrowSize, angle);
 		}
 	}
 }
@@ -361,5 +357,4 @@ float CHudObjectiveIcon::GetObjectiveAngle( const Vector &vecDelta )
 	flRotation *= 180 / M_PI;
 
 	return flRotation;
-
 }

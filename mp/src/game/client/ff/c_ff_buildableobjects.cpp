@@ -154,9 +154,7 @@ void C_FFBuildableObject::OnDataChanged( DataUpdateType_t updateType )
 	BaseClass::OnDataChanged( updateType );
 
 	if( updateType == DATA_UPDATE_CREATED )
-	{
 		SetNextClientThink( CLIENT_THINK_ALWAYS );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -422,9 +420,7 @@ void C_FFDispenser::OnDataChanged( DataUpdateType_t updateType )
 	BaseClass::OnDataChanged( updateType );
 
 	if( updateType == DATA_UPDATE_CREATED )
-	{
 		SetNextClientThink( CLIENT_THINK_ALWAYS );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -507,9 +503,7 @@ void C_FFSentryGun::OnDataChanged( DataUpdateType_t updateType )
 	BaseClass::OnDataChanged( updateType );
 
 	if( updateType == DATA_UPDATE_CREATED )
-	{
 		SetNextClientThink( CLIENT_THINK_ALWAYS );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -634,9 +628,7 @@ void C_FFManCannon::OnDataChanged( DataUpdateType_t updateType )
 	BaseClass::OnDataChanged( updateType );
 
 	if( updateType == DATA_UPDATE_CREATED )
-	{
 		SetNextClientThink( CLIENT_THINK_ALWAYS );
-	}
 }
 
 //-----------------------------------------------------------------------------

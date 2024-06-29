@@ -1,7 +1,7 @@
 /********************************************************************
 	created:	2006/02/12
-	created:	12:2:2006   1:04
-	filename: 	F:\ff-svn\code\trunk\cl_dll\ff\ff_hud_menu.h
+	created:	12:2:2006	1:04
+	filename:	F:\ff-svn\code\trunk\cl_dll\ff\ff_hud_menu.h
 	file path:	F:\ff-svn\code\trunk\cl_dll\ff
 	file base:	ff_hud_menu
 	file ext:	h
@@ -62,9 +62,9 @@ typedef struct menu_s {
 	int MenuOption##id()
 
 #define ADD_MENU_BRANCH(id, name, icon, command, nextmenu) \
-        int MenuOption##id(); \
-        MenuOption id = MenuOption(name, icon, command, &MenuOption##id, nextmenu);      \
-        int MenuOption##id() \
+		int MenuOption##id(); \
+		MenuOption id = MenuOption(name, icon, command, &MenuOption##id, nextmenu);	\
+		int MenuOption##id() \
 
 class CHudContextMenu : public CHudElement, public vgui::Panel
 {
@@ -90,7 +90,7 @@ private:
 	CPanelAnimationVar(vgui::HFont, m_hMenuIcon, "DisguiseFont", "ClassGlyphs");
 
 public:
-	CHudContextMenu(const char *pElementName) : CHudElement(pElementName), vgui::Panel(NULL, "HudRadialMenu") 
+	CHudContextMenu(const char *pElementName) : CHudElement(pElementName), vgui::Panel(NULL, "HudRadialMenu")
 	{
 		SetParent(g_pClientMode->GetViewport());
 		m_flLastCommand = 0.0f;

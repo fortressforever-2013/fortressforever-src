@@ -1353,9 +1353,7 @@ Vector CFFInfoScript::LUA_GetOrigin( void ) const
 		return vecOrigin;
 	}
 	else
-	{
 		return GetAbsOrigin();
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1365,13 +1363,9 @@ void CFFInfoScript::LUA_SetOrigin( const Vector& vecOrigin )
 {
 	IPhysicsObject *pObject = VPhysicsGetObject();
 	if( pObject )
-	{
 		pObject->SetPosition( vecOrigin, LUA_GetAngles(), true );
-	}
 	else
-	{
 		SetAbsOrigin( vecOrigin );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1389,9 +1383,7 @@ QAngle CFFInfoScript::LUA_GetAngles( void ) const
 		return vecAngles;
 	}
 	else
-	{
 		return GetAbsAngles();
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1401,13 +1393,9 @@ void CFFInfoScript::LUA_SetAngles( const QAngle& vecAngles )
 {
 	IPhysicsObject *pObject = VPhysicsGetObject();
 	if( pObject )
-	{
 		pObject->SetPosition( LUA_GetOrigin(), vecAngles, true );
-	}
 	else
-	{
 		SetAbsAngles( vecAngles );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1433,9 +1421,7 @@ const char * CFFInfoScript::LUA_GetModel()
 {
 	const model_t *model = GetModel();
 	if (model)
-	{
 		return modelinfo->GetModelName( model );
-	}
 	return NULL;
 }
 
@@ -1484,9 +1470,7 @@ void CFFInfoScript::PhysicsSimulate()
 		UTIL_SetSize( this, m_vecTouchMins, m_vecTouchMaxs );
 	}
 	else
-	{
 		BaseClass::PhysicsSimulate();
-	}
 	
 	if (VISUALIZE_INFOSCRIPT_SIZES)
 		DrawBBoxOverlay();

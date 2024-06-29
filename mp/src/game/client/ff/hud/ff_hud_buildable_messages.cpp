@@ -129,7 +129,7 @@ void CHudBuildableMessages::MsgFunc_Dispenser_TouchEnemy( bf_read &msg )
 		// DevMsg( "[Dispenser] %s\n", szText );
 
 		// the "@1" means there's no message set
-		if( Q_strcmp( szText, "@1" ) == 0 )
+		if( !Q_strcmp( szText, "@1" ) )
 			return;
 
 		m_flStartTime = gpGlobals->curtime;
@@ -203,10 +203,10 @@ void CHudBuildableMessages::Paint( void )
 
 	// Draw our text
 	surface()->DrawSetTextFont( hFont ); // set the font	
-	//surface()->DrawSetTextColor( 255, 255, 255, 255 ); // white
+	//surface()->DrawSetTextColor( 255, 255, 255, 255 );	// white
 	surface()->DrawSetTextColor( GetFgColor() );
 	surface()->DrawSetTextPos( 4, 4 ); // x,y position
-	surface()->DrawPrintText( m_pText, wcslen( m_pText ) ); // print text
+	surface()->DrawPrintText( m_pText, wcslen( m_pText ) );	// print text
 }
 
 void CHudBuildableMessages::CalculateWidthHeight( void )
@@ -227,7 +227,7 @@ void CHudBuildableMessages::CalculateWidthHeight( void )
 
 	// Get our current x/y position of this 'panel'
 	int x, y;
-    GetPos( x, y );
+	GetPos( x, y );
 
 	// Set a new position - centered on the screen w/ the same y val
 	SetPos( ( iScreenWide / 2 ) - ( iWide / 2 ), y );

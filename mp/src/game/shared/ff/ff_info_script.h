@@ -98,7 +98,7 @@ public:
 
 	virtual void	UpdateOnRemove( void );
 
-	virtual Vector	EyePosition( void ) { return WorldSpaceCenter(); } // squeek: for spectating info scripts
+	virtual Vector	EyePosition( void ) { return WorldSpaceCenter(); }	// squeek: for spectating info scripts
 
 	virtual Class_T	Classify( void ) { return CLASS_INFOSCRIPT; }
 
@@ -297,9 +297,7 @@ public:
 		if( m_pFFScript )
 		{
 			if( m_pFFScript->HasAnimations() )
-			{
 				m_pFFScript->StudioFrameAdvance();
-			}
 		}
 
 		SetNextThink( gpGlobals->curtime );

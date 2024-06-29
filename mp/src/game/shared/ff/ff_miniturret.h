@@ -95,7 +95,7 @@ BEGIN_NETWORK_TABLE( CFFMiniTurretLaserDot, DT_FFMiniTurretLaserDot )
 #else
 	SendPropBool( SENDINFO( m_bIsOn ) ),
 #endif
-END_NETWORK_TABLE() 
+END_NETWORK_TABLE()
 
 #ifdef GAME_DLL
 BEGIN_DATADESC( CFFMiniTurretLaserDot )
@@ -142,7 +142,7 @@ public:
 
 	CNetworkVar( bool, m_bIsOn );
 
-#ifdef CLIENT_DLL 
+#ifdef CLIENT_DLL
 protected:
 	CBeam *m_pBeam;
 #endif
@@ -241,9 +241,7 @@ protected:
 		BaseClass::OnDataChanged( updateType );
 
 		if( updateType == DATA_UPDATE_CREATED )
-		{
 			SetNextClientThink( CLIENT_THINK_ALWAYS );
-		}
 	}
 
 	// The model is all of a sudden drawing stupid ass shadows eventhough
@@ -258,7 +256,7 @@ public:
 	virtual int		OnTakeDamage( const CTakeDamageInfo &info ) { return 0; }
 	virtual int		VPhysicsTakeDamage( const CTakeDamageInfo &info ) { return 0; }
 
-	const char		*GetTracerType( void ) { return "ACTracer"; } // TODO: Change
+	const char		*GetTracerType( void ) { return "ACTracer"; }	// TODO: Change
 
 	// Think functions
 	void			OnObjectThink( void );	// Not a think function

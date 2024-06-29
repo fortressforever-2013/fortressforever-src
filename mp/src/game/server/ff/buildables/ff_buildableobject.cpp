@@ -840,9 +840,7 @@ void CFFBuildableObject::SpawnGib( const char *szGibModel, bool bFlame, bool bDi
 		// Add a flame to the gib
 		CEntityFlame *pFlame = CEntityFlame::Create( pChunk, false );
 		if( pFlame != NULL )
-		{
 			pFlame->SetLifetime( pChunk->m_lifeTime );
-		}
 	}
 
 	// Make the next think function the die one (to get rid of the damn things)
@@ -910,10 +908,8 @@ void CFFBuildableObject::DoExplosion( void )
 	else
 		Warning( "CFFBuildableObject::DoExplosion - ERROR - NO EXPLOSION SOUND (might want to add one)!\n" );
 
-	if ( m_ppszGibModels[0] ) 
-	{
+	if ( m_ppszGibModels[0] )
 		SpawnGibs();
-	}
 
 	// Mirv: Moved explosion damage logic into the derived classes
 	DoExplosionDamage();
@@ -976,11 +972,11 @@ int CFFBuildableObject::OnTakeDamage( const CTakeDamageInfo &info )
 		switch( Classify() )
 		{
 			case CLASS_DISPENSER: 
-				FF_SendHint( pOwner, ENGY_DISPDAMAGED, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_DISPDAMAGED" ); 
+				FF_SendHint( pOwner, ENGY_DISPDAMAGED, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_DISPDAMAGED" );
 				m_flOnTakeDamageHintTime = gpGlobals->curtime + 10.0f; 
 				break;
 			case CLASS_SENTRYGUN: 
-				FF_SendHint( pOwner, ENGY_SGDAMAGED, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_SGDAMAGED" ); 
+				FF_SendHint( pOwner, ENGY_SGDAMAGED, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_SGDAMAGED" );
 				m_flOnTakeDamageHintTime = gpGlobals->curtime + 10.0f;
 				break;
 		}
@@ -1005,9 +1001,7 @@ int CFFBuildableObject::OnTakeDamage( const CTakeDamageInfo &info )
 	{
 		CFFPlayer *pAttacker = ToFFPlayer( adjustedDamage.GetAttacker() );
 		if( pAttacker )
-		{
 			pAttacker->m_flHitTime = gpGlobals->curtime;
-		}
 	}
 
 	// Just extending this to send events to the bots.
@@ -1024,4 +1018,3 @@ void CFFBuildableObject::SetLocation(const char *_loc)
 {
 	Q_strncpy(m_BuildableLocation, _loc?_loc:"", sizeof(m_BuildableLocation));
 }
-

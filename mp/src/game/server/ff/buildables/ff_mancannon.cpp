@@ -69,11 +69,11 @@ void CFFManCannon::Spawn( void )
 	CFFBuildableObject::Spawn();
 
 	//Sets the team color -GreenMushy
-	CFFPlayer *pOwner = ToFFPlayer( m_hOwner.Get() ); //static_cast< CFFPlayer * >( m_hOwner.Get() );
+	CFFPlayer *pOwner = ToFFPlayer( m_hOwner.Get() );	//static_cast< CFFPlayer * >( m_hOwner.Get() );
 	if( pOwner ) 
-		m_nSkin = ( pOwner->GetTeamNumber() - 1 ); 
+		m_nSkin = ( pOwner->GetTeamNumber() - 1 );
 
-	m_bTakesDamage = true;//Making the jumppad take damage -GreenMushy
+	m_bTakesDamage = true;	//Making the jumppad take damage -GreenMushy
 	m_flLastClientUpdate = 0;
 	m_iLastState = 0;
 	m_iCombatState = JUMPPAD_IDLE;
@@ -172,7 +172,7 @@ void CFFManCannon::OnObjectTouch( CBaseEntity *pOther )
 
 	CFFPlayer *pPlayer = ToFFPlayer( pOther );
 
-	if( g_pGameRules->PlayerRelationship( GetOwnerPlayer(), pPlayer ) == GR_NOTTEAMMATE )//Team orients it -GreenMushy
+	if( g_pGameRules->PlayerRelationship( GetOwnerPlayer(), pPlayer ) == GR_NOTTEAMMATE )	//Team orients it -GreenMushy
 		return;
 
 	if( !pPlayer )

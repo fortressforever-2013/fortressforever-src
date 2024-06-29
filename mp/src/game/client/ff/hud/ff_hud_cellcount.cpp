@@ -143,9 +143,7 @@ void CHudCellCount::OnThink()
 
 	// Only update the fade if we've changed cell count
 	if ( newCells == m_iCellCount )
-	{
 		return;
-	}
 
 	// Play appropriate animation whether cell count has gone up or down
 	if( newCells > m_iCellCount )

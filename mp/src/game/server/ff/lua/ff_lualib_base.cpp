@@ -86,12 +86,12 @@ void CFFLuaLib::InitBase(lua_State* L)
 				overload<const char*, int>(&CBaseEntity::SetModel)
 			)
 
-            .addFunction("StartTrail",
+			.addFunction("StartTrail",
 				overload<int>(&CBaseEntity::StartTrail),
 				overload<int, float, float, float>(&CBaseEntity::StartTrail)
 			)
 
-            .addFunction("StopTrail",           &CBaseEntity::StopTrail)
+			.addFunction("StopTrail",			&CBaseEntity::StopTrail)
 			.addFunction("SetSkin",				&CBaseEntity::SetSkin)
 			.addFunction("GetOrigin",			&CBaseEntity::LUA_GetAbsOrigin)
 			.addFunction("SetOrigin",			&CBaseEntity::SetAbsOrigin)
@@ -164,7 +164,7 @@ void CFFLuaLib::InitBase(lua_State* L)
 			.addFunction("SetAngles",			&CFFInfoScript::LUA_SetAngles)
 			.addFunction("SetBotGoalInfo",		&CFFInfoScript::SetBotGoalInfo)
 			.addFunction("SpawnBot",			&CFFInfoScript::SpawnBot)
-			.addFunction("SetModel",			&CFFInfoScript::LUA_SetModel) // Leave this!
+			.addFunction("SetModel",			&CFFInfoScript::LUA_SetModel)	// Leave this!
 			.addFunction("GetModel",			&CFFInfoScript::LUA_GetModel)
 			.addFunction("SetStartOrigin",		&CFFInfoScript::LUA_SetStartOrigin)
 			.addFunction("GetStartOrigin",		&CFFInfoScript::LUA_GetStartOrigin)
@@ -184,7 +184,7 @@ void CFFLuaLib::InitBase(lua_State* L)
 			.addFunction("Remove", &CFuncFFScript::LuaRemove)
 			.addFunction("Restore", &CFuncFFScript::LuaRestore)
 			.addFunction("IsTouching", &CFuncFFScript::IsTouching)
-			//.addFunction("SetLocation",		&CFuncFFScript::LuaSetLocation)
+			//.addFunction("SetLocation", &CFuncFFScript::LuaSetLocation)
 			.addFunction("SetBotGoalInfo", &CFuncFFScript::SetBotGoalInfo)
 		.endClass()
 

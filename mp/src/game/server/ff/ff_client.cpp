@@ -9,7 +9,7 @@
 
 ===== tf_client.cpp ========================================================
 
-  HL2 client/server game specific stuff
+	HL2 client/server game specific stuff
 
 */
 
@@ -154,7 +154,7 @@ void respawn( CBaseEntity *pEdict, bool fCopyCorpse )
 		pEdict->Spawn();
 	}
 	else
-	{       // restart the entire server
+	{		// restart the entire server
 		engine->ServerCommand("reload\n");
 	}
 }

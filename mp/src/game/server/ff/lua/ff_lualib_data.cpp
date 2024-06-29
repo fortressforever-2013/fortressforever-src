@@ -109,10 +109,10 @@ namespace FFLib
 	// write a non-table value to the buffer
 	bool LuaData_SaveValue(const luabridge::LuaRef& data, CUtlBuffer& buffer)
 	{
-		if (buffer.IsText()) // must be a binary buffer
+		if (buffer.IsText())	// must be a binary buffer
 			return false;
 
-		if (!buffer.IsValid()) // must be valid, no overflows etc
+		if (!buffer.IsValid())	// must be valid, no overflows etc
 			return false;
 
 		if (!data.isValid())
@@ -177,10 +177,10 @@ namespace FFLib
 	// write a table to the buffer
 	bool LuaData_SaveTable(const luabridge::LuaRef& data, CUtlBuffer& buffer)
 	{
-		if (buffer.IsText()) // must be a binary buffer
+		if (buffer.IsText())	// must be a binary buffer
 			return false;
 
-		if (!buffer.IsValid()) // must be valid, no overflows etc
+		if (!buffer.IsValid())	// must be valid, no overflows etc
 			return false;
 
 		if (!data.isValid() || !data.isTable())
@@ -239,10 +239,10 @@ namespace FFLib
 	// load a non-table lua value from the buffer
 	bool LuaData_LoadValue(luabridge::LuaRef& data, CUtlBuffer& buffer)
 	{
-		if (buffer.IsText()) // must be a binary buffer
+		if (buffer.IsText())	// must be a binary buffer
 			return false;
 
-		if (!buffer.IsValid()) // must be valid, no overflows etc
+		if (!buffer.IsValid())	// must be valid, no overflows etc
 			return false;
 
 		lua_State* L = _scriptman.GetLuaState();

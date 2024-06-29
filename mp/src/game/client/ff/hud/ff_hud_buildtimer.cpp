@@ -24,17 +24,17 @@ using namespace vgui;
 DECLARE_HUDELEMENT(CHudBuildTimer);
 DECLARE_HUD_MESSAGE(CHudBuildTimer, FF_BuildTimer);
 
-CHudBuildTimer::CHudBuildTimer(const char *pElementName) : CHudElement(pElementName), BaseClass(NULL, "HudBuildTimer") 
+CHudBuildTimer::CHudBuildTimer(const char *pElementName) : CHudElement(pElementName), BaseClass(NULL, "HudBuildTimer")
 {
 	SetParent( g_pClientMode->GetViewport() );
 	SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED );
 }
 
-CHudBuildTimer::~CHudBuildTimer() 
+CHudBuildTimer::~CHudBuildTimer()
 {
 }
 
-void CHudBuildTimer::Init() 
+void CHudBuildTimer::Init()
 {
 	HOOK_HUD_MESSAGE(CHudBuildTimer, FF_BuildTimer);
 	
@@ -66,14 +66,14 @@ void CHudBuildTimer::Reset()
 	SetPaintBackgroundEnabled(false);
 }
 
-void CHudBuildTimer::SetBuildTimer(int iBuildType, float flDuration) 
+void CHudBuildTimer::SetBuildTimer(int iBuildType, float flDuration)
 {
 	if(m_iBuildType != iBuildType)
 	{
 		m_iBuildType = iBuildType;
 		switch(iBuildType)
 		{
-		case FF_BUILD_NONE: //cancel build timer
+		case FF_BUILD_NONE:	//cancel build timer
 			Reset();
 			return;
 		case FF_BUILD_DISPENSER:
@@ -105,7 +105,7 @@ void CHudBuildTimer::SetBuildTimer(int iBuildType, float flDuration)
 	}
 }
 
-void CHudBuildTimer::MsgFunc_FF_BuildTimer(bf_read &msg) 
+void CHudBuildTimer::MsgFunc_FF_BuildTimer(bf_read &msg)
 {
 	int type = msg.ReadShort();
 	float duration = msg.ReadFloat();
@@ -123,17 +123,17 @@ void CHudBuildTimer::OnTick()
 		return;
 	}
 
-	if ( gpGlobals->curtime > m_flStartTime + m_flDuration ) 
+	if ( gpGlobals->curtime > m_flStartTime + m_flDuration )
 	{
 		float iFadeLength = g_pClientMode->GetViewportAnimationController()->GetAnimationSequenceLength("FadeOutBuildTimer");
 		// Begin to fade
-		if (m_fVisible) 
+		if (m_fVisible)
 		{
 			m_fVisible = false;
 			g_pClientMode->GetViewportAnimationController()->StartAnimationSequence("FadeOutBuildTimer");
 		}
 		// Fading time is over
-		else if ( gpGlobals->curtime > m_flStartTime + m_flDuration + iFadeLength) 
+		else if ( gpGlobals->curtime > m_flStartTime + m_flDuration + iFadeLength)
 		{
 			SetPaintEnabled(false);
 			SetPaintBackgroundEnabled(false);
@@ -146,7 +146,7 @@ void CHudBuildTimer::OnTick()
 	}
 }
 
-void CHudBuildTimer::PaintBackground() 
+void CHudBuildTimer::PaintBackground()
 {
 	// Draw progress bar background
 	if(cl_teamcolourhud.GetBool())
@@ -161,12 +161,12 @@ void CHudBuildTimer::PaintBackground()
 	surface()->DrawOutlinedRect(bar_xpos-2, bar_ypos-2, bar_xpos + bar_width+2, bar_ypos + bar_height+2);
 }
 
-void CHudBuildTimer::Paint() 
+void CHudBuildTimer::Paint()
 {
 	if(m_pIconTexture)
 	{
-		int iconWide = 32.0f; //m_pIconTexture->Width();
-		int iconTall = 32.0f; //m_pIconTexture->Height();
+		int iconWide = 32.0f;	//m_pIconTexture->Width();
+		int iconTall = 32.0f;	//m_pIconTexture->Height();
 		
 		m_pIconTexture->DrawSelf( bar_xpos - 2/*boarderwidth*/ - iconWide - icon_offset, bar_ypos + bar_height/2 - iconTall/2, iconWide, iconTall, m_HudForegroundColour );
 	}

@@ -168,8 +168,8 @@ void CFFConVarDefaultOverride::OverrideDefault( const CFFConVarDefaultOverrideEn
 		return;
 	}
 
-	CUtlString strOldDefault( pConVar->GetDefault() );
-	CUtlString strOldValue  ( pConVar->GetString()  );
+	CUtlString strOldDefault( pConVar->GetDefault()	);
+	CUtlString strOldValue  ( pConVar->GetString()	);
 
 	/* override the convar's default, and if it was at the default, keep it there */
 	bool bWasDefault = FStrEq( pConVar->GetString(), pConVar->GetDefault() );

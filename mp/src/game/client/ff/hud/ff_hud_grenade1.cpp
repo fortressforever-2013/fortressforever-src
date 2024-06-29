@@ -56,7 +56,7 @@ CHudGrenade1::CHudGrenade1(const char *pElementName) : BaseClass(NULL, "HudGrena
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CHudGrenade1::Init() 
+void CHudGrenade1::Init()
 {
 	m_iGrenade		= -1;
 	m_iClass		= 0;
@@ -68,7 +68,7 @@ void CHudGrenade1::Init()
 //-----------------------------------------------------------------------------
 // Purpose: Resets hud after save/restore
 //-----------------------------------------------------------------------------
-void CHudGrenade1::Reset() 
+void CHudGrenade1::Reset()
 {
 	BaseClass::Reset();
 
@@ -79,11 +79,11 @@ void CHudGrenade1::Reset()
 //-----------------------------------------------------------------------------
 // Purpose: called every frame to get Grenade info from the weapon
 //-----------------------------------------------------------------------------
-void CHudGrenade1::OnTick() 
+void CHudGrenade1::OnTick()
 {
 	BaseClass::OnTick();
 
-	if (!m_pFFPlayer) 
+	if (!m_pFFPlayer)
 	{
 		SetPaintEnabled(false);
 		SetPaintBackgroundEnabled(false);
@@ -136,7 +136,7 @@ void CHudGrenade1::OnTick()
 		SetGrenade(iGrenade1, false);
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence("ClassHasGrenades");
 
-		if ( strcmp( pClassInfo->m_szPrimaryClassName, "None" ) != 0 )
+		if ( strcmp( pClassInfo->m_szPrimaryClassName, "None" ) )
 		{
 			const char *grenade_name = pClassInfo->m_szPrimaryClassName;
 
@@ -167,15 +167,15 @@ void CHudGrenade1::OnTick()
 //-----------------------------------------------------------------------------
 // Purpose: Updates Grenade display
 //-----------------------------------------------------------------------------
-void CHudGrenade1::SetGrenade(int iGrenade, bool playAnimation) 
+void CHudGrenade1::SetGrenade(int iGrenade, bool playAnimation)
 {
-	if (iGrenade != m_iGrenade) 
+	if (iGrenade != m_iGrenade)
 	{
-		if (iGrenade == 0) 
+		if (iGrenade == 0)
 		{
 			g_pClientMode->GetViewportAnimationController()->StartAnimationSequence("GrenadeEmpty");
 		}
-		else if (iGrenade < m_iGrenade) 
+		else if (iGrenade < m_iGrenade)
 		{
 			// Grenade has decreased
 			g_pClientMode->GetViewportAnimationController()->StartAnimationSequence("GrenadeDecreased");
@@ -191,7 +191,7 @@ void CHudGrenade1::SetGrenade(int iGrenade, bool playAnimation)
 	SetDisplayValue(m_iGrenade);
 }
 
-void CHudGrenade1::Paint() 
+void CHudGrenade1::Paint()
 {
 	if(m_pIconTexture)
 	{

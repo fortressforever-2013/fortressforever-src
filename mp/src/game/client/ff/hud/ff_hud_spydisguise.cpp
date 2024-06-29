@@ -288,7 +288,7 @@ void CHudSpyDisguise2::Paint( void )
 		if(pPlayer->m_DisguisedWeapons[iClass][iSlot].szWeaponClassName[0] != NULL)
 			disguisedWeaponName = pPlayer->m_DisguisedWeapons[iClass][iSlot].szWeaponClassName;
 		
-		if( Q_strnicmp( disguisedWeaponName, "ff_", 3 ) == 0 )
+		if( !Q_strnicmp( disguisedWeaponName, "ff_", 3 ) )
 		{
 			//UTIL_LogPrintf( "  begins with ff_, removing\n" );
 			disguisedWeaponName += 3;

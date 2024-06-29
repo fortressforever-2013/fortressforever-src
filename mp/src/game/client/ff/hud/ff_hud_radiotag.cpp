@@ -191,7 +191,7 @@ void CHudRadioTag::Paint( void )
 				trace_t		tr;
 				UTIL_TraceLine ( vecOrigin + Vector( 0, 0, 80 ), vecPlayerOrigin + Vector( 0, 0, 80 ), MASK_VISIBLE, pPlayer, COLLISION_GROUP_NONE, & tr);
 				
-				if( tr.fraction != 1.0 )  // Trace hit something -- the player is not visible (hopefully!)
+				if( tr.fraction != 1.0 )	// Trace hit something -- the player is not visible (hopefully!)
 				{
 					surface()->DrawSetTextureFile( g_ClassGlyphs[ iIndex ].m_pDistTexture->textureId, g_ClassGlyphs[ iIndex ].m_szDistMaterial, true, false );
 					surface()->DrawSetTexture( g_ClassGlyphs[ iIndex ].m_pDistTexture->textureId );

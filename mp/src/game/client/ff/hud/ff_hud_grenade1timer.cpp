@@ -25,17 +25,17 @@ CHudGrenade1Timer *g_pGrenade1Timer = NULL;
 
 DECLARE_HUDELEMENT(CHudGrenade1Timer);
 
-CHudGrenade1Timer::CHudGrenade1Timer(const char *pElementName) : CHudElement(pElementName), BaseClass(NULL, "HudGrenade1Timer") 
+CHudGrenade1Timer::CHudGrenade1Timer(const char *pElementName) : CHudElement(pElementName), BaseClass(NULL, "HudGrenade1Timer")
 {
 	SetParent( g_pClientMode->GetViewport() );
 	SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED );
 }
 
-CHudGrenade1Timer::~CHudGrenade1Timer() 
+CHudGrenade1Timer::~CHudGrenade1Timer()
 {
 }
 
-void CHudGrenade1Timer::Init() 
+void CHudGrenade1Timer::Init()
 {
 	g_pGrenade1Timer = this;
 	ivgui()->AddTickSignal( GetVPanel(), 100 );
@@ -43,10 +43,10 @@ void CHudGrenade1Timer::Init()
 	ResetTimer();
 }
 
-void CHudGrenade1Timer::SetTimer(float duration) 
+void CHudGrenade1Timer::SetTimer(float duration)
 {
 	// Fade it in if needed
-	if (!m_fVisible) 
+	if (!m_fVisible)
 	{
 		m_fVisible = true;
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence("FadeInGrenade1Timer");
@@ -82,7 +82,7 @@ int CHudGrenade1Timer::ActiveTimerCount( void ) const
 	return m_Timers.Count();
 }
 
-void CHudGrenade1Timer::MsgFunc_FF_Grenade1Timer(bf_read &msg) 
+void CHudGrenade1Timer::MsgFunc_FF_Grenade1Timer(bf_read &msg)
 {
 	float duration = msg.ReadFloat();
 
@@ -93,14 +93,14 @@ void CHudGrenade1Timer::OnTick()
 {
 	BaseClass::OnTick();
 
-	if (!m_pFFPlayer) 
+	if (!m_pFFPlayer)
 	{
 		SetPaintEnabled(false);
 		SetPaintBackgroundEnabled(false);
 		return;
 	}
 	
-	if (!hud_grenadetimers.GetBool()) 
+	if (!hud_grenadetimers.GetBool())
 	{
 		SetPaintEnabled(false);
 		SetPaintBackgroundEnabled(false);
@@ -137,7 +137,7 @@ void CHudGrenade1Timer::OnTick()
 		if (!pClassInfo)
 			return;
 
-		if ( strcmp( pClassInfo->m_szPrimaryClassName, "None" ) != 0 )
+		if ( strcmp( pClassInfo->m_szPrimaryClassName, "None" ) )
 		{
 			const char *grenade_name = pClassInfo->m_szPrimaryClassName;
 
@@ -162,7 +162,7 @@ void CHudGrenade1Timer::OnTick()
 	{
 		float iFadeLength = g_pClientMode->GetViewportAnimationController()->GetAnimationSequenceLength("FadeOutGrenade1Timer");
 		// Begin to fade
-		if (m_fVisible) 
+		if (m_fVisible)
 		{
 			m_fVisible = false;
 			g_pClientMode->GetViewportAnimationController()->StartAnimationSequence("FadeOutGrenade1Timer");
@@ -181,7 +181,7 @@ void CHudGrenade1Timer::OnTick()
 	}
 }
 
-void CHudGrenade1Timer::PaintBackground() 
+void CHudGrenade1Timer::PaintBackground()
 {
 	// Draw progress bar background
 	if(cl_teamcolourhud.GetBool())
@@ -196,7 +196,7 @@ void CHudGrenade1Timer::PaintBackground()
 	surface()->DrawOutlinedRect(bar_xpos-2, bar_ypos-2, bar_xpos + bar_width+2, bar_ypos + bar_height+2);
 }
 
-void CHudGrenade1Timer::Paint() 
+void CHudGrenade1Timer::Paint()
 {
 	if(m_pIconTexture)
 	{
@@ -213,15 +213,13 @@ void CHudGrenade1Timer::Paint()
 
 	CFFPlayer *pPlayer = ToFFPlayer(CBasePlayer::GetLocalPlayer());
 
-	for (int i = m_Timers.Head(); i != m_Timers.InvalidIndex(); i = m_Timers.Next(i)) 
+	for (int i = m_Timers.Head(); i != m_Timers.InvalidIndex(); i = m_Timers.Next(i))
 	{
 		bool bIsLastTimer = (m_Timers.Next(i) == m_Timers.InvalidIndex());
 		timer_t *timer = &m_Timers.Element(i);
 
-		if (gpGlobals->curtime > timer->m_flStartTime + timer->m_flDuration) 
-		{
+		if (gpGlobals->curtime > timer->m_flStartTime + timer->m_flDuration)
 			timer_to_remove = i;
-		}
 		else
 		{
 			float amount = clamp((gpGlobals->curtime - timer->m_flStartTime) / timer->m_flDuration, 0, 1.0f);

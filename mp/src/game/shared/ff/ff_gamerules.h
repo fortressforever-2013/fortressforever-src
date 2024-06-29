@@ -104,9 +104,9 @@ public:
 
 	virtual int		PlayerRelationship(CBaseEntity *pPlayer, CBaseEntity *pTarget);
 
-	// Changed to incorporate buildables and to stop the fugly casting. 
-	// Previously, with FCanPlayerTakeDamage(), everything had to be cast down. 
-	// You can now pass players, sentries & dispensers to the function.  
+	// Changed to incorporate buildables and to stop the fugly casting.
+	// Previously, with FCanPlayerTakeDamage(), everything had to be cast down.
+	// You can now pass players, sentries & dispensers to the function.
 	virtual bool	FCanTakeDamage( CBaseEntity *pVictim, CBaseEntity *pAttacker);
 
 	virtual bool	IsTeamplay( void ) { return false;	}

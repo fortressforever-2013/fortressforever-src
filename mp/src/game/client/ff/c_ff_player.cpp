@@ -9,7 +9,7 @@
 #include "c_ff_player.h"
 #include "ff_weapon_base.h"
 #include "ff_playerclass_parse.h"
-#include "ff_grenade_parse.h" //for parseing ff gren txts
+#include "ff_grenade_parse.h"	//for parseing ff gren txts
 #include "c_basetempentity.h"
 #include "ff_buildableobjects_shared.h"
 #include "ff_utils.h"
@@ -1596,7 +1596,7 @@ void C_FFPlayer::Spawn(void)
 		}
 
 		// Intro to the Hint Center -- display on first spawn (delayed 2 seconds for the hint sound to play properly)
-		if (g_FFHintTimers.FindTimer("intro") == NULL) // Setup timer
+		if (g_FFHintTimers.FindTimer("intro") == NULL)	// Setup timer
 		{
 			C_FFHintTimer* pIntroHintTimer = g_FFHintTimers.Create("intro", 2.0f);
 			if (pIntroHintTimer)
@@ -1616,11 +1616,11 @@ void C_FFPlayer::Spawn(void)
 		{
 			pHintTimer->SetHintExpiredCallback(OnHintTimerExpired, false);
 			pHintTimer->StartTimer();
-			if (GetClassSlot() != CLASS_SOLDIER) // Pause the timer if player isn't a Soldier
+			if (GetClassSlot() != CLASS_SOLDIER)	// Pause the timer if player isn't a Soldier
 				pHintTimer->Pause();
 		}
 	}
-	else if (GetClassSlot() == CLASS_SOLDIER) // Unpause the timer if the player is now a Soldier
+	else if (GetClassSlot() == CLASS_SOLDIER)	// Unpause the timer if the player is now a Soldier
 		pHintTimer->Unpause();
 	else
 		pHintTimer->Pause();
@@ -1634,11 +1634,11 @@ void C_FFPlayer::Spawn(void)
 		{
 			pMedHintTimer->SetHintExpiredCallback(OnHintTimerExpired, false);
 			pMedHintTimer->StartTimer();
-			if (GetClassSlot() != CLASS_MEDIC) // Pause the timer if player isn't a Medic
+			if (GetClassSlot() != CLASS_MEDIC)	// Pause the timer if player isn't a Medic
 				pMedHintTimer->Pause();
 		}
 	}
-	else if (GetClassSlot() == CLASS_MEDIC) // Unpause the timer if the player is now a Medic
+	else if (GetClassSlot() == CLASS_MEDIC)	// Unpause the timer if the player is now a Medic
 		pMedHintTimer->Unpause();
 	else
 		pMedHintTimer->Pause();
@@ -1652,29 +1652,29 @@ void C_FFPlayer::Spawn(void)
 		{
 			pICHintTimer->SetHintExpiredCallback(OnHintTimerExpired, false);
 			pICHintTimer->StartTimer();
-			if (GetClassSlot() != CLASS_PYRO) // Pause the timer if player isn't a Pyro
+			if (GetClassSlot() != CLASS_PYRO)	// Pause the timer if player isn't a Pyro
 				pICHintTimer->Pause();
 		}
 	}
-	else if (GetClassSlot() == CLASS_PYRO) // Unpause the timer if the player is now a Pyro
+	else if (GetClassSlot() == CLASS_PYRO)	// Unpause the timer if the player is now a Pyro
 		pICHintTimer->Unpause();
 	else
 		pICHintTimer->Pause();
 
 	// Spy Disguise Hint -- triggered after player has logged 5 minutes (total) as a Spy w/o disguising
 	C_FFHintTimer* pSpyHintTimer = g_FFHintTimers.FindTimer("DisHint");
-	if (pSpyHintTimer == NULL) // Setup timer
+	if (pSpyHintTimer == NULL)	// Setup timer
 	{
 		pSpyHintTimer = g_FFHintTimers.Create("DisHint", 300.0f);
 		if (pSpyHintTimer)
 		{
 			pSpyHintTimer->SetHintExpiredCallback(OnDisguiseHintTimerExpired, false);
 			pSpyHintTimer->StartTimer();
-			if (GetClassSlot() != CLASS_SPY) // Pause the timer if player isn't a Spy
+			if (GetClassSlot() != CLASS_SPY)	// Pause the timer if player isn't a Spy
 				pSpyHintTimer->Pause();
 		}
 	}
-	else if (GetClassSlot() == CLASS_SPY) // Unpause the timer if the player is now a Spy
+	else if (GetClassSlot() == CLASS_SPY)	// Unpause the timer if the player is now a Spy
 		pSpyHintTimer->Unpause();
 	else
 		pSpyHintTimer->Pause();
@@ -1682,36 +1682,36 @@ void C_FFPlayer::Spawn(void)
 
 	// Event: Player goes for 10 minutes without issuing the "lastinv" weapon switch command
 	C_FFHintTimer* pLastInvHintTimer = g_FFHintTimers.FindTimer("LI");
-	if (pLastInvHintTimer == NULL) // Setup timer
+	if (pLastInvHintTimer == NULL)	// Setup timer
 	{
 		pLastInvHintTimer = g_FFHintTimers.Create("LI", 600.0f);
 		if (pLastInvHintTimer)
 		{
 			pLastInvHintTimer->SetHintExpiredCallback(OnLastInvHintTimerExpired, false);
 			pLastInvHintTimer->StartTimer();
-			if (GetClassSlot() <= 0) // Pause the timer if player isn't a player class
+			if (GetClassSlot() <= 0)	// Pause the timer if player isn't a player class
 				pLastInvHintTimer->Pause();
 		}
 	}
-	else if (GetClassSlot() > 0) // Unpause the timer if the player is now a valid player class
+	else if (GetClassSlot() > 0)	// Unpause the timer if the player is now a valid player class
 		pLastInvHintTimer->Unpause();
 	else
 		pLastInvHintTimer->Pause();
 
 	// Event: Player plays for 4 minutes -- tell the player about the "change class" and "change team" commands
 	C_FFHintTimer* pChangeToCTimer = g_FFHintTimers.FindTimer("CToC");
-	if (pChangeToCTimer == NULL) // Setup timer
+	if (pChangeToCTimer == NULL)	// Setup timer
 	{
 		pChangeToCTimer = g_FFHintTimers.Create("CToC", 240.0f);
 		if (pChangeToCTimer)
 		{
 			pChangeToCTimer->SetHintExpiredCallback(OnChangeToCTimerExpired, false);
 			pChangeToCTimer->StartTimer();
-			if (GetClassSlot() <= 0) // Pause the timer if player isn't a player class
+			if (GetClassSlot() <= 0)	// Pause the timer if player isn't a player class
 				pChangeToCTimer->Pause();
 		}
 	}
-	else if (GetClassSlot() > 0) // Unpause the timer if the player is now a valid player class
+	else if (GetClassSlot() > 0) //	Unpause the timer if the player is now a valid player class
 		pChangeToCTimer->Unpause();
 	else
 		pChangeToCTimer->Pause();
@@ -1719,18 +1719,18 @@ void C_FFPlayer::Spawn(void)
 
 	// Event: Player plays for 2 minutes -- tell the player about the Map key
 	C_FFHintTimer* pMapHintTimer = g_FFHintTimers.FindTimer("MAP");
-	if (pMapHintTimer == NULL) // Setup timer
+	if (pMapHintTimer == NULL)	// Setup timer
 	{
 		pMapHintTimer = g_FFHintTimers.Create("MAP", 120.0f);
 		if (pMapHintTimer)
 		{
 			pMapHintTimer->SetHintExpiredCallback(OnMapHintTimerExpired, false);
 			pMapHintTimer->StartTimer();
-			if (GetClassSlot() <= 0) // Pause the timer if player isn't a player class
+			if (GetClassSlot() <= 0)	// Pause the timer if player isn't a player class
 				pMapHintTimer->Pause();
 		}
 	}
-	else if (GetClassSlot() > 0) // Unpause the timer if the player is now a valid player class
+	else if (GetClassSlot() > 0)	// Unpause the timer if the player is now a valid player class
 		pMapHintTimer->Unpause();
 	else
 		pMapHintTimer->Pause();
@@ -2419,17 +2419,13 @@ void C_FFPlayer::OnDataChanged(DataUpdateType_t type)
 			{
 				CFFGrenadeInfo* pGrenInfo = GetFileGrenadeInfoFromHandle(hGrenInfo);
 				if (pGrenInfo)
-				{
 					pIcon = pGrenInfo->iconAmmo;
-				}
 			}
 
 			// We got more grenades. Add it to the ammo history
 			CHudHistoryResource* pHudHR = GET_HUDELEMENT(CHudHistoryResource);
 			if (pHudHR)
-			{
 				pHudHR->AddIconToHistory(HISTSLOT_AMMO, -1, NULL, abs(m_iPrimary - m_iOldPrimary), pIcon);
-			}
 		}
 
 		if (m_iSecondary > m_iOldSecondary)
@@ -2442,17 +2438,13 @@ void C_FFPlayer::OnDataChanged(DataUpdateType_t type)
 			{
 				CFFGrenadeInfo* pGrenInfo = GetFileGrenadeInfoFromHandle(hGrenInfo);
 				if (pGrenInfo)
-				{
 					pIcon = pGrenInfo->iconAmmo;
-				}
 			}
 
 			// We got more grenades. Add it to the ammo history
 			CHudHistoryResource* pHudHR = GET_HUDELEMENT(CHudHistoryResource);
 			if (pHudHR)
-			{
 				pHudHR->AddIconToHistory(HISTSLOT_AMMO, -1, NULL, abs(m_iSecondary - m_iOldSecondary), pIcon);
-			}
 		}
 
 		// Sometimes the server changes our weapon for us (eg. if we run out of ammo).
@@ -2480,9 +2472,7 @@ void C_FFPlayer::OnDataChanged(DataUpdateType_t type)
 		static char localLifeState = LIFE_DEAD;
 
 		if (localLifeState == LIFE_ALIVE && m_lifeState > LIFE_ALIVE)
-		{
 			Death();
-		}
 
 		localLifeState = m_lifeState;
 	}
@@ -2715,14 +2705,10 @@ void C_FFPlayer::Simulate()
 			// would conflict with also locking it above a certain point. So we have to
 			// remove it from the conc'ed angle itself.
 			if (flTotalAngle > 90.0f)
-			{
 				m_angConced.x -= flTotalAngle - 90.0f;
-			}
 		}
 		else
-		{
 			m_angConced = vec3_angle;
-		}
 	}
 }
 
@@ -2747,9 +2733,7 @@ void C_FFPlayer::DoAnimationEvent(PlayerAnimEvent_t event)
 		case 1:
 			//If the player is below their (specified) jimmyleg cap, do a jump animation.  Otherwise, do nothing ( and continue running )
 			if ((float)nSpeed < (this->MaxSpeed() * jcap))
-			{
 				m_PlayerAnimState->DoAnimationEvent(event);
-			}
 			break;
 		default:
 			//Always do the animation event if previous stuff wasnt hit
@@ -2781,9 +2765,7 @@ ShadowType_t C_FFPlayer::ShadowCastType(void)
 		return SHADOWS_NONE;
 	}
 	else
-	{
 		return SHADOWS_RENDER_TO_TEXTURE_DYNAMIC;
-	}
 }
 
 //-----------------------------------------------------------------------------

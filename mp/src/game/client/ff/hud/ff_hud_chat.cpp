@@ -98,10 +98,8 @@ Color GetDefaultChatColor()
 
 Color GetClientColor(int clientIndex)
 {
-	if (clientIndex == 0) // console msg
-	{
+	if (clientIndex == 0)	// console msg
 		return g_ColorConsole;
-	}
 	else
 	{
 		IGameResources* gr = GameResources();
@@ -116,10 +114,8 @@ Color GetClientColor(int clientIndex)
 // made a whole different function for the customizable team colors
 Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/)
 {
-	if (iPlayerIndex == 0) // console msg
-	{
+	if (iPlayerIndex == 0)	// console msg
 		return g_ColorConsole;
-	}
 	else
 	{
 		int iTeam;
@@ -303,8 +299,8 @@ int CHudChat::GetChatInputOffset(void)
 		return m_iFontHeight;
 	}
 	else
-		return 0;*/
-
+		return 0;
+	*/
 	// For now lets not shift text around when we're writing.
 	// It is a bit jumpy and doesn't look so good.
 	return m_iFontHeight;
@@ -312,10 +308,8 @@ int CHudChat::GetChatInputOffset(void)
 
 Color CHudChat::GetClientColor(int clientIndex)
 {
-	if (clientIndex == 0) // console msg
-	{
+	if (clientIndex == 0)	// console msg
 		return g_ColorYellow;
-	}
 	else if (g_PR)
 	{
 		switch (g_PR->GetTeam(clientIndex))
@@ -368,7 +362,7 @@ void ClientPrintMsg(C_BasePlayer* player, int msg_dest, const char* msg_name, co
 			{
 				if (i)
 				{
-					StripEndNewlineFromString(tmpStr);  // these strings are meant for subsitution into the main strings, so cull the automatic end newlines
+					StripEndNewlineFromString(tmpStr);	// these strings are meant for subsitution into the main strings, so cull the automatic end newlines
 				}
 				g_pVGuiLocalize->ConvertANSIToUnicode(tmpStr, szBuf[i], sizeof(szBuf[i]));
 			}
@@ -436,9 +430,7 @@ wchar_t* ReadLocalizedRadioCommandString(bf_read& msg, wchar_t* pOut, int outSiz
 		pOut[outSize / sizeof(wchar_t) - 1] = 0;
 	}
 	else
-	{
 		g_pVGuiLocalize->ConvertANSIToUnicode(szString, pOut, outSize);
-	}
 
 	if (bStripNewline)
 		StripEndNewlineFromString(pOut);

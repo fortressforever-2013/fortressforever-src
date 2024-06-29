@@ -94,15 +94,15 @@ float tex_coords[5][4] = {	{ 0, 		0.25f, 		0, 			0.5f }, 	   // normal flame
 // Expose to the particle app
 EXPOSE_PROTOTYPE_EFFECT(FlameJet, C_FFFlameJet);
 
-IMPLEMENT_CLIENTCLASS_DT(C_FFFlameJet, DT_FFFlameJet, CFFFlameJet) 
+IMPLEMENT_CLIENTCLASS_DT(C_FFFlameJet, DT_FFFlameJet, CFFFlameJet)
 	RecvPropInt(RECVINFO(m_bEmit), 0), 
-END_RECV_TABLE() 
+END_RECV_TABLE()
 
 LINK_ENTITY_TO_CLASS(env_flamejet, C_FFFlameJet);
 
-CLIENTEFFECT_REGISTER_BEGIN(PrecacheFlameJet) 
+CLIENTEFFECT_REGISTER_BEGIN(PrecacheFlameJet)
 CLIENTEFFECT_MATERIAL("effects/flame") 
-CLIENTEFFECT_REGISTER_END() 
+CLIENTEFFECT_REGISTER_END()
 
 //=============================================================================
 // C_FFFlameJet implementation
@@ -111,7 +111,7 @@ CLIENTEFFECT_REGISTER_END()
 //----------------------------------------------------------------------------
 // Purpose: Constructor
 //----------------------------------------------------------------------------
-C_FFFlameJet::C_FFFlameJet() 
+C_FFFlameJet::C_FFFlameJet()
 {
 	m_pParticleMgr	= NULL;
 	m_hMaterialFlame = m_hMaterialSmoke = INVALID_MATERIAL_HANDLE;
@@ -128,7 +128,7 @@ C_FFFlameJet::C_FFFlameJet()
 
 	m_pDLight = NULL;
 
-	m_ParticleEffect.SetAlwaysSimulate(false); // Don't simulate outside the PVS or frustum.
+	m_ParticleEffect.SetAlwaysSimulate(false);	// Don't simulate outside the PVS or frustum.
 }
 
 //----------------------------------------------------------------------------
@@ -144,7 +144,7 @@ C_FFFlameJet::~C_FFFlameJet()
 //----------------------------------------------------------------------------
 void C_FFFlameJet::Cleanup( void )
 {
-	if( m_pParticleMgr ) 
+	if( m_pParticleMgr )
 		m_pParticleMgr->RemoveEffect( &m_ParticleEffect );
 }
 
@@ -218,7 +218,7 @@ bool C_FFFlameJet::GetPropEditInfo(RecvTable **ppTable, void **ppObj)
 //-----------------------------------------------------------------------------
 void C_FFFlameJet::Update(float fTimeDelta) 
 {
-	if (!m_pParticleMgr) 
+	if (!m_pParticleMgr)
 	{
 		assert(false);
 		return;
@@ -515,9 +515,7 @@ void C_FFFlameJet::RenderParticles(CParticleRenderIterator *pIterator)
 
 		// Smoke should generally be darker
 		if (pParticle->m_Type == SMOKE)
-		{
 			col = random->RandomFloat(0.1f, 0.2f);
-		}
 
 		float r = 1.0f, g = 1.0f, b = 1.0f;
 
@@ -553,11 +551,11 @@ void C_FFFlameJet::RenderParticles(CParticleRenderIterator *pIterator)
 //----------------------------------------------------------------------------
 // Purpose: Simulate the particles, this function is quite messy atm
 //----------------------------------------------------------------------------
-void C_FFFlameJet::SimulateParticles(CParticleSimulateIterator *pIterator) 
+void C_FFFlameJet::SimulateParticles(CParticleSimulateIterator *pIterator)
 {
 	C_FFFlameJetParticle *pParticle = (C_FFFlameJetParticle *) pIterator->GetFirst();
 
-	while (pParticle) 
+	while (pParticle)
 	{
 		pParticle->m_Lifetime += pIterator->GetTimeDelta();
 
@@ -571,7 +569,7 @@ void C_FFFlameJet::SimulateParticles(CParticleSimulateIterator *pIterator)
 			pParticle->m_flRoll += pParticle->m_flRollDelta * pIterator->GetTimeDelta();
 			pParticle->m_Pos = pParticle->m_Pos + pParticle->m_Velocity * pIterator->GetTimeDelta();
 
-			if (pParticle->m_Lifetime > pParticle->m_Collisiontime && pParticle->m_Type != FLAME_LICK) 
+			if (pParticle->m_Lifetime > pParticle->m_Collisiontime && pParticle->m_Type != FLAME_LICK)
 			{
 				// Pull out of the surface
 				pParticle->m_Pos = pParticle->m_Origin + (pParticle->m_Velocity * (pParticle->m_Collisiontime - 0.01f));
@@ -585,7 +583,7 @@ void C_FFFlameJet::SimulateParticles(CParticleSimulateIterator *pIterator)
 				float normal_len = pParticle->m_HitSurfaceNormal.Length();
 
 				// Save from the dreaded divide by zero
-				if (!normal_len) 
+				if (!normal_len)
 					normal_len += 0.01f;
 
 				pParticle->m_Velocity = cp2 / normal_len;

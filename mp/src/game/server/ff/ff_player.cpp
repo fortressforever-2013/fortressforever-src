@@ -5898,11 +5898,8 @@ void CFFPlayer::Concuss(float flDuration, float flIconDuration, const QAngle *vi
 		WRITE_FLOAT( flIconDuration );
 	MessageEnd();		
 	
-
 	if (viewjerk)
-	{
 		ViewPunch((*viewjerk) * JERKMULTI * flDistance);
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -5918,7 +5915,7 @@ void CFFPlayer::Ignite( bool bNPCOnly, float flSize, bool bCalledByLevelDesigner
 {
 	AddFlag( FL_ONFIRE );
 
-	SetFlameSpritesLifetime(flameLifetime, flSize); // NOTE: This calls Extinguish on the player when the CEntityFlame lifetime runs out
+	SetFlameSpritesLifetime(flameLifetime, flSize);	// NOTE: This calls Extinguish on the player when the CEntityFlame lifetime runs out
 
 	m_OnIgnite.FireOutput( this, this );
 }
@@ -5927,9 +5924,7 @@ void CFFPlayer::Ignite( bool bNPCOnly, float flSize, bool bCalledByLevelDesigner
 {
 	float flFlameLifetime = FFDEV_PYRO_BURNTIME;
 	if (GetClassSlot() == CLASS_MEDIC)
-	{
 		flFlameLifetime *= 0.5;
-	}
 
 	Ignite(bNPCOnly, flSize, bCalledByLevelDesigner, flFlameLifetime);
 }
