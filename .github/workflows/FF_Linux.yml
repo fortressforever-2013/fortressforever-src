@@ -10,7 +10,7 @@ jobs:
         
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Configure dependencies
         shell: bash
         run: sudo apt update && sudo apt install -y g++-9-multilib gcc-9-multilib
@@ -29,7 +29,7 @@ jobs:
         run: tar cJfv Linux.tar.xz mp/game/FortressForever2013/bin
 
       - name: Upload product
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: FF_2013
           path: Linux.tar.xz
