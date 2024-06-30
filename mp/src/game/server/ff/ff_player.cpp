@@ -2463,7 +2463,7 @@ int CFFPlayer::ActivateClass()
 		if (cClassesAvailable[iClassIndex] <= 0)
 		{
 			m_iNextClass = GetClassSlot();
-			ClientPrint(this, HUD_PRINTCENTER, "#FF_ERROR_CLASS_NOLONGERAVAILABLE");
+			ClientPrint(this, HUD_PRINTNOTIFY, "#FF_ERROR_CLASS_NOLONGERAVAILABLE");
 			return GetClassSlot();
 		}
 	}
@@ -2589,7 +2589,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	// this is not funny, buildables are NOT playable classes!
 	if( !iClass || ( iClass < 1 || iClass > 10 ) )
 	{
-		Warning( "#FF_ERROR_CLASS_INVALID\n" );
+		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_CLASS_INVALID" );
 		return;
 	}
 
@@ -2600,7 +2600,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	// If they're already this class, no class change needed. Just inform the player.
 	if (iClass == m_iNextClass && !bWasRandom)
 	{
-		ClientPrint( this, HUD_PRINTCENTER, "#FF_CHANGECLASS_LATER", Class_IntToString( iClass ) );
+		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_CHANGECLASS_LATER", Class_IntToString( iClass ) );
 		return;
 	}
 
@@ -2620,14 +2620,14 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	// Class is disabled
 	if( class_limit == -1 )
 	{
-		ClientPrint( this, HUD_PRINTCENTER, "#FF_ERROR_CLASS_DISABLED" );
+		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_CLASS_DISABLED" );
 		return;
 	}
 
 	// Not enough space for this class
 	if( class_limit > 0 && iAlreadyThisClass >= class_limit )
 	{
-		ClientPrint( this, HUD_PRINTCENTER, "#FF_ERROR_CLASS_OCCUPIED" );
+		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_CLASS_OCCUPIED" );
 		return;
 	}
 	
@@ -2640,7 +2640,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	{
 		if(!hPlayerSwitchClass.GetBool())
 		{
-			ClientPrint( this, HUD_PRINTCENTER, "#FF_ERROR_CLASS_CANTSWITCH" );
+			ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_CLASS_CANTSWITCH" );
 			return;
 		}
 	}
@@ -2756,7 +2756,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 		// Couldn't find a valid team to join (because of limits)
 		if( iBestTeam < 0 )
 		{
-			ClientPrint( this, HUD_PRINTCENTER, "#FF_ERROR_TEAM_NOFREETEAM" );
+			ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_TEAM_NOFREETEAM" );
 			return;
 		}
 
@@ -2767,7 +2767,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	// Couldn't find a team afterall
 	if( iTeam == 0 )
 	{
-		Warning( "#FF_ERROR_TEAM_INVALID\n" );
+		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_TEAM_INVALID" );
 		return;
 	}
 
@@ -2777,14 +2777,14 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	// This should stop teams being picked which aren't active
 	if( !pTeam )
 	{
-		Warning( "#FF_ERROR_TEAM_INVALID\n" );
+		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_TEAM_INVALID" );
 		return;
 	}
 
 	// Check the team isn't full
 	if( pTeam->GetTeamLimits() != 0 && iTeamNumbers[iTeam] >= pTeam->GetTeamLimits() )
 	{
-		ClientPrint( this, HUD_PRINTCENTER, "#FF_ERROR_TEAM_FULL" );
+		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_TEAM_FULL" );
 		return;
 	}
 
@@ -2794,7 +2794,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	// Are we already on this team
 	if( GetTeamNumber() == iTeam )
 	{
-		ClientPrint( this, HUD_PRINTCENTER, "#FF_ERROR_TEAM_ALREADYONTHISTEAM" );
+		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_TEAM_ALREADYONTHISTEAM" );
 		return;
 	}
 
@@ -2807,7 +2807,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	{
 		if(!hPlayerSwitchTeam.GetBool())
 		{
-			ClientPrint( this, HUD_PRINTCENTER, "#FF_ERROR_TEAM_CANTSWITCH" );
+			ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_TEAM_CANTSWITCH" );
 			return;
 		}
 	}
