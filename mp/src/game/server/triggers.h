@@ -61,6 +61,8 @@ public:
 	void UpdateOnRemove( void );
 	void TouchTest(  void );
 
+	virtual Class_T Classify( void ) { return CLASS_TRIGGER; }
+
 	// Input handlers
 	virtual void InputEnable( inputdata_t &inputdata );
 	virtual void InputDisable( inputdata_t &inputdata );

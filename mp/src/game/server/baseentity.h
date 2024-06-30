@@ -226,6 +226,7 @@ enum Class_T
 	CLASS_TURRET,
 	CLASS_BACKPACK,
 	CLASS_INFOSCRIPT,
+	CLASS_TRIGGER, // see https://github.com/fortressforever-2013/fortressforever-src/issues/34
 	CLASS_TRIGGERSCRIPT,
 	CLASS_TRIGGER_CLIP,
 	CLASS_TEAMSPAWN,
