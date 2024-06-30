@@ -78,8 +78,6 @@ public:
 	virtual void EndTouchAll() {}
 	bool IsTouching( CBaseEntity *pOther );
 
-	virtual Class_T Classify() { return CLASS_TRIGGER; }
-
 	CBaseEntity *GetTouchedEntityOfType( const char *sClassName );
 
 	int	 DrawDebugTextOverlays(void);
