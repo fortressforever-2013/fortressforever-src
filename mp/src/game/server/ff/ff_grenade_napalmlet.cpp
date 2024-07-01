@@ -100,12 +100,7 @@ void CFFGrenadeNapalmlet::ResolveFlyCollisionCustom( trace_t &trace, Vector &vec
 	// through it.
 	bool breakthrough = false;
 
-	if( trace.m_pEnt && FClassnameIs( trace.m_pEnt, "func_breakable" ) )
-	{
-		breakthrough = true;
-	}
-
-	if( trace.m_pEnt && FClassnameIs( trace.m_pEnt, "func_breakable_surf" ) )
+	if (trace.m_pEnt && ( FClassnameIs(trace.m_pEnt, "func_breakable") || FClassnameIs(trace.m_pEnt, "func_breakable_surf") ) )
 	{
 		breakthrough = true;
 	}

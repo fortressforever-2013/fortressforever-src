@@ -301,10 +301,7 @@ LINK_ENTITY_TO_CLASS(grenade_ff_base, CFFGrenadeBase);
 		// through it.
 		bool breakthrough = false;
 
-		if (trace.m_pEnt && FClassnameIs(trace.m_pEnt, "func_breakable"))
-			breakthrough = true;
-
-		if (trace.m_pEnt && FClassnameIs(trace.m_pEnt, "func_breakable_surf"))
+		if (trace.m_pEnt && ( FClassnameIs(trace.m_pEnt, "func_breakable") || FClassnameIs(trace.m_pEnt, "func_breakable_surf") ) )
 			breakthrough = true;
 
 		if (breakthrough)
