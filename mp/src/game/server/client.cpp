@@ -46,6 +46,11 @@
 #endif
 
 #include "ff_player.h"
+
+#include "ff_buildableobject.h"
+#include "ff_buildable_sentrygun.h"
+#include "ff_buildable_detpack.h"
+#include "ff_buildable_dispenser.h"
 #include "ff_scriptman.h"
 #include "ff_luacontext.h"
 

@@ -9,7 +9,6 @@
 #include "../EventLog.h"
 #include "KeyValues.h"
 #include "team.h"
-#include "ff_buildableobjects_shared.h"
 #include "ff_utils.h" // for class_intToString
 
 class CFFEventLog : public CEventLog

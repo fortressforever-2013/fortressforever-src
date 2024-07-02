@@ -11,7 +11,6 @@
 #include "ff_playerclass_parse.h"
 #include "ff_grenade_parse.h" //for parseing ff gren txts
 #include "c_basetempentity.h"
-#include "ff_buildableobjects_shared.h"
 #include "ff_utils.h"
 #include "c_ff_team.h"
 #include "engine/IEngineSound.h"

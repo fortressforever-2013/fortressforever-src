@@ -6,7 +6,6 @@
 
 #ifdef GAME_DLL
 	#include "smoke_trail.h"
-	#include "ff_buildableobjects_shared.h"
 	#include "soundent.h"
 	#include "effect_dispatch_data.h"
 	#include "te_effect_dispatch.h"

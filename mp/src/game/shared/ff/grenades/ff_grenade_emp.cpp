@@ -19,7 +19,6 @@
 #include "IEffects.h"
 
 #ifdef GAME_DLL
-	#include "ff_buildableobjects_shared.h"
 	#include "ff_projectile_pipebomb.h"
 	#include "baseentity.h"
 	#include "beam_flags.h"

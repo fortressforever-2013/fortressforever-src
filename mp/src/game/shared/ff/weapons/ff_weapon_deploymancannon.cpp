@@ -28,7 +28,7 @@
 	#include "ff_player.h"
 #endif
 
-#include "ff_buildableobjects_shared.h"
+#include "ff_buildableinfo.h"
 
 //=============================================================================
 // CFFWeaponDeployManCannon

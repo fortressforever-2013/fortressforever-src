@@ -5,6 +5,13 @@
 #include "omnibot_eventhandler.h"
 #include "ff_utils.h"
 
+
+#include "ff_buildableobject.h"
+#include "ff_buildable_sentrygun.h"
+#include "ff_buildable_dispenser.h"
+#include "ff_buildable_mancannon.h"
+#include "ff_buildable_detpack.h"
+
 #include <filesystem.h>
 
 KeyValues *g_pGameEvents = NULL;

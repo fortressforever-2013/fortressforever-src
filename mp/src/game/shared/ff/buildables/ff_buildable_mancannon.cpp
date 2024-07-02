@@ -1,7 +1,7 @@
 // =============== Fortress Forever ==============
 // ======== A modification for Half-Life 2 =======
 //
-// @file ff_mancannon.h
+// @file ff_buildable_mancannon.cpp
 // @author Patrick O'Leary (Mulchman)
 // @date 12/6/2007
 // @brief Man cannon thing
@@ -10,15 +10,23 @@
 // ---------
 // 12/6/2007, Mulchman: 
 //		First created
-
+//		Added man cannon stuff
 #include "cbase.h"
-#include "ff_buildableobjects_shared.h"
+#include "ff_buildableobject.h"
+#include "ff_buildable_mancannon.h"
 #include "const.h"
 #include "ff_gamerules.h"
 #include "ff_utils.h"
 #include "IEffects.h"
 
 #include "tier0/vprof.h"
+
+#ifdef CLIENT_DLL
+	#include "c_playerresource.h"
+
+	// for DrawSprite
+	#include "beamdraw.h"
+#endif
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -28,18 +36,26 @@
 //	class CFFManCannon
 //
 //=============================================================================
-LINK_ENTITY_TO_CLASS( FF_ManCannon, CFFManCannon );
-PRECACHE_REGISTER( FF_ManCannon );
+IMPLEMENT_NETWORKCLASS_ALIASED( FFManCannon, DT_FFManCannon )
 
-IMPLEMENT_SERVERCLASS_ST( CFFManCannon, DT_FFManCannon )
+BEGIN_NETWORK_TABLE( CFFManCannon, DT_FFManCannon )
+#ifdef CLIENT_DLL
+	RecvPropFloat( RECVINFO( m_flLastDamage ) ),
+#elif GAME_DLL
 	SendPropFloat( SENDINFO( m_flLastDamage ) ),
-END_SEND_TABLE()
+#endif
+END_NETWORK_TABLE()
 
 // Start of our data description for the class
 BEGIN_DATADESC( CFFManCannon )
+#ifdef GAME_DLL
 	DEFINE_ENTITYFUNC( OnObjectTouch ),
 	DEFINE_THINKFUNC( OnJumpPadThink ),
+#endif
 END_DATADESC()
+
+LINK_ENTITY_TO_CLASS( FF_ManCannon, CFFManCannon );
+PRECACHE_REGISTER( FF_ManCannon );
 
 extern const char *g_pszFFManCannonModels[];
 extern const char *g_pszFFManCannonGibModels[];
@@ -57,8 +73,126 @@ ConVar ffdev_mancannon_push_forward( "ffdev_mancannon_push_forward", "768", FCVA
 #define MANCANNON_HEALTH_REGEN 20 //ffdev_mancannon_health_regen.GetFloat()
 //ConVar ffdev_mancannon_healticklength( "ffdev_mancannon_healticklength", "1", FCVAR_FF_FFDEV_REPLICATED );
 #define MANCANNON_HEALTICKLENGTH 1 //ffdev_mancannon_healticklength.GetFloat()
-//extern ConVar ffdev_mancannon_combatcooldown;
-#define MANCANNON_COMBATCOOLDOWN 3.0f
+
+//-----------------------------------------------------------------------------
+// Purpose: Constructor
+//-----------------------------------------------------------------------------
+CFFManCannon::CFFManCannon( void )
+{
+#ifdef GAME_DLL
+	// Overwrite the base class stubs
+	m_ppszModels = g_pszFFManCannonModels;
+	m_ppszGibModels = g_pszFFManCannonGibModels;
+	m_ppszSounds = g_pszFFManCannonSounds;
+
+	m_bUsePhysics = true;
+	m_flLastClientUpdate = 0;
+	m_iLastState = 0;
+#endif
+
+	// Health
+	m_iMaxHealth = m_iHealth = 100;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Destructor
+//-----------------------------------------------------------------------------
+CFFManCannon::~CFFManCannon( void )
+{
+}
+
+#ifdef CLIENT_DLL
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CFFManCannon::OnDataChanged( DataUpdateType_t updateType )
+{
+	// NOTE: We MUST call the base classes' implementation of this function
+	BaseClass::OnDataChanged( updateType );
+
+	if( updateType == DATA_UPDATE_CREATED )
+	{
+		SetNextClientThink( CLIENT_THINK_ALWAYS );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Creates a client side entity using the man cannon model
+//-----------------------------------------------------------------------------
+CFFManCannon *CFFManCannon::CreateClientSideManCannon( const Vector& vecOrigin, const QAngle& vecAngles )
+{
+	CFFManCannon *pManCannon = new CFFManCannon;
+
+	if( !pManCannon )
+		return NULL;
+
+	if( !pManCannon->InitializeAsClientEntity( FF_MANCANNON_MODEL, RENDER_GROUP_TRANSLUCENT_ENTITY ) )
+	{
+		pManCannon->Release();
+		return NULL;
+	}
+
+	pManCannon->SetAbsOrigin( vecOrigin );
+	pManCannon->SetLocalAngles( vecAngles );
+	pManCannon->SetCollisionGroup( COLLISION_GROUP_DEBRIS );
+	pManCannon->SetRenderMode( kRenderTransAlpha );
+	pManCannon->SetRenderColorA( ( byte )110 );
+	
+	if( FFDEV_PULSEBUILDABLE )
+		pManCannon->m_nRenderFX = g_BuildableRenderFx;
+
+	// Since this is client side only, give it an owner just in case
+	// someone accesses the m_hOwner.Get() and wants to return something
+	// that isn't NULL!
+	pManCannon->m_hOwner = (C_BaseEntity *)C_BasePlayer::GetLocalPlayer();
+	//Team Coloring -GreenMushy
+	// slightly modified by Dexter to use the member just set.. :)	
+	pManCannon->m_nSkin = ( pManCannon->m_hOwner->GetTeamNumber() - 1 );
+	pManCannon->SetClientSideOnly( true );
+	pManCannon->SetNextClientThink( CLIENT_THINK_ALWAYS );
+
+	return pManCannon;
+}
+
+//-------------------------------------------------------------------------
+// Purpose: Sentryguns will sometimes appear as the wrong model when
+//			the local player is hallucinating
+//-------------------------------------------------------------------------
+int CFFManCannon::DrawModel(int flags)
+{
+	int nRet = BaseClass::DrawModel(flags);
+	
+	if( gpGlobals->curtime < m_flLastDamage + MANCANNON_COMBATCOOLDOWN )
+	{
+		// Thanks mirv!
+		IMaterial *pMaterial = materials->FindMaterial( "sprites/ff_sprite_combat", TEXTURE_GROUP_CLIENT_EFFECTS );
+		if( pMaterial )
+		{
+			CMatRenderContextPtr pMatRenderContext(g_pMaterialSystem);
+			pMatRenderContext->Bind( pMaterial );
+
+			// The color is based on the owner's team
+			int iAlpha = 255;
+			Color clr = Color( 255, 255, 255, iAlpha );
+
+			if( g_PR )
+			{
+				int teamnumber = GetTeamNumber();
+				float flCombatTime = clamp( gpGlobals->curtime - m_flLastDamage, 0, MANCANNON_COMBATCOOLDOWN );
+				iAlpha = (255 * ( 1.0f - (flCombatTime / MANCANNON_COMBATCOOLDOWN) ) );
+				clr = g_PR->GetTeamColor( teamnumber );
+			}
+
+			color32 c = { clr.r(), clr.g(), clr.b(), iAlpha };
+			DrawSprite( Vector( GetAbsOrigin().x, GetAbsOrigin().y, GetAbsOrigin().z + 48.0f ), 32.0f, 32.0f, c );
+		}
+	}
+
+	return nRet;
+}
+
+#elif GAME_DLL
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -314,3 +448,5 @@ void CFFManCannon::DoExplosionDamage( void )
 		UTIL_ScreenShake( GetAbsOrigin(), flDamage * 0.0125f, 150.0f, m_flExplosionDuration, 620.0f, SHAKE_START );
 	//}
 }
+
+#endif // CLIENT_DLL : GAME_DLL

@@ -1,7 +1,7 @@
 // =============== Fortress Forever ==============
 // ======== A modification for Half-Life 2 =======
 //
-// @file ff_dispenser.cpp
+// @file ff_buildable_detpack.cpp
 // @author Patrick O'Leary (Mulchman)
 // @date 12/28/2005
 // @brief Dispenser class
@@ -41,17 +41,27 @@
 //
 //	05/10/2006,	Mulchman:
 //		Matched values from TFC (thanks Dospac)
+//		Add radio tags to dispenser
 
 #include "cbase.h"
-#include "ff_buildableobjects_shared.h"
+#include "ff_buildableobject.h"
+#include "ff_buildable_dispenser.h"
 #include "const.h"
 #include "ff_weapon_base.h"
 #include "ff_gamerules.h"
 #include "ff_utils.h"
-#include "ff_item_backpack.h"
-#include "te_effect_dispatch.h"
 
-#include "omnibot_interface.h"
+#ifdef CLIENT_DLL
+	#include "c_gib.h"
+	
+#include "c_te_effect_dispatch.h"
+#elif GAME_DLL
+	#include "ff_buildableflickerer.h"
+	#include "ff_item_backpack.h"
+	#include "omnibot_interface.h"
+
+	#include "te_effect_dispatch.h"
+#endif
 
 #include "tier0/vprof.h"
 
@@ -63,23 +73,36 @@
 //	class CFFDispenser
 //
 //=============================================================================
-LINK_ENTITY_TO_CLASS( FF_Dispenser, CFFDispenser );
-PRECACHE_REGISTER( FF_Dispenser );
+IMPLEMENT_NETWORKCLASS_ALIASED( FFDispenser, DT_FFDispenser )
 
-IMPLEMENT_SERVERCLASS_ST( CFFDispenser, DT_FFDispenser )
+BEGIN_NETWORK_TABLE( CFFDispenser, DT_FFDispenser )
+#ifdef CLIENT_DLL
+	RecvPropInt( RECVINFO( m_iAmmoPercent ) ),
+	RecvPropInt( RECVINFO( m_iCells ) ),
+	RecvPropInt( RECVINFO( m_iShells ) ),
+	RecvPropInt( RECVINFO( m_iNails ) ),
+	RecvPropInt( RECVINFO( m_iRockets ) ),
+	RecvPropInt( RECVINFO( m_iArmor ) ),
+#elif GAME_DLL
 	SendPropInt( SENDINFO( m_iAmmoPercent ), 8, SPROP_UNSIGNED ), 
 	SendPropInt( SENDINFO( m_iCells ), 9, SPROP_UNSIGNED ), // max is 400 cells
 	SendPropInt( SENDINFO( m_iShells ), 9, SPROP_UNSIGNED ), // max is 400 shells
 	SendPropInt( SENDINFO( m_iNails ), 9, SPROP_UNSIGNED ), // max is 500 nails
 	SendPropInt( SENDINFO( m_iRockets ), 8, SPROP_UNSIGNED ), // max is 250 rockets
 	SendPropInt( SENDINFO( m_iArmor ), 9, SPROP_UNSIGNED ), // max is 500 armor
-END_SEND_TABLE()
+#endif
+END_NETWORK_TABLE()
 
 // Start of our data description for the class
 BEGIN_DATADESC( CFFDispenser )
+#ifdef GAME_DLL
 	DEFINE_ENTITYFUNC( OnObjectTouch ),
 	DEFINE_THINKFUNC( OnObjectThink ),
+#endif
 END_DATADESC( )
+
+LINK_ENTITY_TO_CLASS( FF_Dispenser, CFFDispenser );
+PRECACHE_REGISTER( FF_Dispenser );
 
 extern const char *g_pszFFDispenserModels[];
 extern const char *g_pszFFDispenserGibModels[];
@@ -87,22 +110,135 @@ extern const char *g_pszFFDispenserSounds[];
 
 extern const char *g_pszFFGenGibModels[];
 
-inline void DispenseHelper( CFFPlayer *pPlayer, int& iAmmo, int iGiveAmmo, const char *pszAmmoType )
-{
-	// Amount to give must be less than or equal to the amount we have,
-	// and the amount we want to give
-	int iToGive = min(iGiveAmmo, iAmmo);
-
-	// If there's any to give then, give it
-	if( iToGive )
+#ifdef GAME_DLL
+	inline void DispenseHelper( CFFPlayer *pPlayer, int& iAmmo, int iGiveAmmo, const char *pszAmmoType )
 	{
-		int iGave = pPlayer->GiveAmmo( iToGive, pszAmmoType );
+		// Amount to give must be less than or equal to the amount we have,
+		// and the amount we want to give
+		int iToGive = min(iGiveAmmo, iAmmo);
 
-		// Decrement ammo store by the amount
-		// we actually gave
-		iAmmo -= iGave;
+		// If there's any to give then, give it
+		if( iToGive )
+		{
+			int iGave = pPlayer->GiveAmmo( iToGive, pszAmmoType );
+
+			// Decrement ammo store by the amount
+			// we actually gave
+			iAmmo -= iGave;
+		}
+	}
+#endif
+
+//-----------------------------------------------------------------------------
+// Purpose: Constructor
+//-----------------------------------------------------------------------------
+CFFDispenser::CFFDispenser( void )
+{
+#ifdef GAME_DLL
+	// Overwrite the base class stubs
+	m_ppszModels = g_pszFFDispenserModels;
+	m_ppszGibModels = g_pszFFDispenserGibModels;
+	m_ppszSounds = g_pszFFDispenserSounds;
+
+	// Time in seconds between generating shiz
+	m_flThinkTime = 3.0f;
+
+	// Initialize
+	m_pLastTouch = NULL;
+	m_flLastTouch = 0.0f;
+
+	// Store a value from the base class
+	m_flOrigExplosionMagnitude = m_flExplosionMagnitude;
+
+	m_flLastClientUpdate = 0;
+	m_iLastState = 0;
+#endif
+
+	// Initial values
+	m_iCells = 30;
+	m_iNails = 30;
+	m_iShells = 30;
+	m_iRockets = 15;
+	m_iArmor = 30;
+
+	// Max values
+	m_iMaxCells		= 100;
+	m_iMaxNails		= 100;
+	m_iMaxShells	= 100;
+	m_iMaxRockets	= 50;
+	m_iMaxArmor		= 100;
+
+	// Give values - values to give a player when they touch us
+	m_iGiveCells	= 30; // Give engies 75, though
+	m_iGiveNails	= 30;
+	m_iGiveShells	= 30;
+	m_iGiveRockets	= 15;
+	m_iGiveArmor	= 30;
+
+	// Health
+	m_iMaxHealth = m_iHealth = 75;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Destructor
+//-----------------------------------------------------------------------------
+CFFDispenser::~CFFDispenser( void )
+{
+}
+
+#ifdef CLIENT_DLL
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CFFDispenser::OnDataChanged( DataUpdateType_t updateType )
+{
+	// NOTE: We MUST call the base classes' implementation of this function
+	BaseClass::OnDataChanged( updateType );
+
+	if( updateType == DATA_UPDATE_CREATED )
+	{
+		SetNextClientThink( CLIENT_THINK_ALWAYS );
 	}
 }
+
+//-----------------------------------------------------------------------------
+// Purpose: Creates a client side entity using the dispenser model
+//-----------------------------------------------------------------------------
+CFFDispenser *CFFDispenser::CreateClientSideDispenser( const Vector& vecOrigin, const QAngle& vecAngles )
+{
+	CFFDispenser *pDispenser = new CFFDispenser;
+
+	if( !pDispenser )
+		return NULL;
+
+	if( !pDispenser->InitializeAsClientEntity( FF_DISPENSER_MODEL, RENDER_GROUP_TRANSLUCENT_ENTITY ) )
+	{
+		pDispenser->Release( );
+		return NULL;
+	}
+
+	pDispenser->SetAbsOrigin( vecOrigin );
+	pDispenser->SetLocalAngles( vecAngles );
+	pDispenser->SetCollisionGroup( COLLISION_GROUP_DEBRIS );
+	pDispenser->SetRenderMode( kRenderTransAlpha );
+	pDispenser->SetRenderColorA( ( byte )110 );
+	
+	if(FFDEV_PULSEBUILDABLE)
+		pDispenser->m_nRenderFX = g_BuildableRenderFx;
+
+	// Since this is client side only, give it an owner just in case
+	// someone accesses the m_hOwner.Get() and wants to return something
+	// that isn't NULL!
+	pDispenser->m_hOwner = ( C_BaseEntity * )C_BasePlayer::GetLocalPlayer();
+	pDispenser->m_nSkin = clamp(CBasePlayer::GetLocalPlayer()->GetTeamNumber() + 1 - TEAM_BLUE, 0, 4); // dispenser skin 0 is neutral
+	pDispenser->SetClientSideOnly( true );
+	pDispenser->SetNextClientThink( CLIENT_THINK_ALWAYS );
+
+	return pDispenser;
+}
+
+#elif GAME_DLL
 
 /**
 @fn void Spawn( )
@@ -693,3 +829,29 @@ void CFFDispenser::Dismantle( CFFPlayer *pPlayer)
 
 	RemoveQuietly();
 }
+#endif // CLIENT_DLL : GAME_DLL
+
+#ifdef CLIENT_DLL
+	void DispenserGib_Callback(const CEffectData &data)
+	{
+		Vector vecPosition = data.m_vOrigin;
+		Vector vecOffset;
+		int nSkin = data.m_nMaterial;
+
+		// Now spawn a number of gibs
+		int iGib = 0;
+		while (g_pszFFDispenserGibModels[iGib])
+		{
+			C_Gib *pGib = C_Gib::CreateClientsideGib(g_pszFFDispenserGibModels[iGib], vecPosition, Vector(random->RandomFloat(-150, 150), random->RandomFloat(-150, 150), random->RandomFloat(100, 400)), RandomAngularImpulse( -60, 60 ), 10.0f);
+	
+			if (pGib)
+			{
+				pGib->m_nSkin = nSkin;
+				pGib->LeaveBloodDecal(false);
+			}
+			++iGib;
+		}
+	}
+
+	DECLARE_CLIENT_EFFECT("DispenserGib", DispenserGib_Callback);
+#endif // CLIENT_DLL

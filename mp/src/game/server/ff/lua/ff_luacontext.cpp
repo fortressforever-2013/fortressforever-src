@@ -8,7 +8,6 @@
 #include "ff_scriptman.h"
 #include "ff_entity_system.h"
 
-#include "ff_buildableobjects_shared.h"
 #include "ff_team.h"
 #include "ff_grenade_base.h"
 #include "ff_player.h"

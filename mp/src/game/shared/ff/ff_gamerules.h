@@ -23,9 +23,14 @@
 	#include "c_baseplayer.h"
 #else
 	#include "player.h"
-	#include "ff_buildableobjects_shared.h"
 	#include "ff_mapfilter.h"
 #endif
+
+#include "ff_buildableobject.h"
+#include "ff_buildable_sentrygun.h"
+#include "ff_buildable_detpack.h"
+#include "ff_buildable_mancannon.h"
+#include "ff_buildable_dispenser.h"
 
 
 #ifdef CLIENT_DLL

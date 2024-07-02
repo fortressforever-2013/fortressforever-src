@@ -23,7 +23,6 @@
 #include "ff_fx_infection.h"
 #include "ff_fx_immunity.h"
 #include "ff_fx_jetpack.h"
-#include "ff_buildableobjects_shared.h"
 #include "ff_radiotagdata.h"
 #include "model_types.h"
 #include "IEffects.h"

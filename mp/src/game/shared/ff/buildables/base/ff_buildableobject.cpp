@@ -33,137 +33,96 @@
 //		Messing w/ the explode function and dealing better damage
 
 #include "cbase.h"
-#include "ff_buildableobjects_shared.h"
-#include "explode.h"
-#include "gib.h"
-#include "ff_player.h"
-#include "EntityFlame.h"
-#include "beam_flags.h"
+#include "ff_buildableobject.h"
+#include "ff_buildableinfo.h"
 #include "ff_gamerules.h"
-#include "world.h"
-#include "ff_luacontext.h"
-#include "ff_scriptman.h"
-#include "ff_entity_system.h"
-
-#ifdef _DEBUG
-#include "Color.h"
-#endif
-
 #include "ff_utils.h"
 
-#include "omnibot_interface.h"
+#include "ff_buildable_mancannon.h"
+
+#include "tier0/vprof.h"
+
+#ifdef CLIENT_DLL
+	#include "c_playerresource.h"
+	#include "c_ff_team.h"
+	#include "c_ff_player.h"
+
+	// for DrawSprite
+	#include "beamdraw.h"
+#elif GAME_DLL
+	#include "gib.h"
+	#include "EntityFlame.h"
+
+	#include "ff_team.h"
+	#include "ff_player.h"
+	#include "ff_luacontext.h"
+	#include "ff_scriptman.h"
+	#include "ff_entity_system.h"
+
+	#include "omnibot_interface.h"
+#endif
+
+#ifdef _DEBUG
+	#include "Color.h"
+#endif
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-extern short	g_sModelIndexFireball;
+IMPLEMENT_NETWORKCLASS_ALIASED( FFBuildableObject, DT_FFBuildableObject )
 
-//=============================================================================
-//
-//	class CFFBuildableFlickerer
-//
-//=============================================================================
-LINK_ENTITY_TO_CLASS( ff_buildable_flickerer, CFFBuildableFlickerer );
-PRECACHE_REGISTER( ff_buildable_flickerer );
-
-BEGIN_DATADESC( CFFBuildableFlickerer )
-	DEFINE_THINKFUNC( OnObjectThink ),
-END_DATADESC()
-
-//static ConVar flicker_time( "ffdev_flicker_time", "0.1", FCVAR_FF_FFDEV );
-#define FLICKER_TIME 0.1f
-
-//-----------------------------------------------------------------------------
-// Purpose: Spawn a flickerer
-//-----------------------------------------------------------------------------
-void CFFBuildableFlickerer::Spawn( void )
-{
-	VPROF_BUDGET( "CFFBuildableFlickerer::Spawn", VPROF_BUDGETGROUP_FF_BUILDABLE );
-
-	m_flFlicker = gpGlobals->curtime;
-
-	SetThink( &CFFBuildableFlickerer::OnObjectThink );
-	SetNextThink( gpGlobals->curtime + 0.1f );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: See if it's time to un-flicker
-//-----------------------------------------------------------------------------
-void CFFBuildableFlickerer::OnObjectThink( void )
-{
-	VPROF_BUDGET( "CFFBuildableFlickerer::OnObjectThink", VPROF_BUDGETGROUP_FF_BUILDABLE );
-
-	// If a certain time period has gone by
-	// since we last flickered we need to unflicker
-
-	if( m_pBuildable )
-	{
-		// See if it's time to un-flicker
-		if( ( ( m_flFlicker + FLICKER_TIME ) < gpGlobals->curtime ) /*&& ( m_pBuildable->GetRenderMode() != kRenderNormal )*/ )
-		{
-			//m_pBuildable->SetRenderMode( kRenderNormal );
-			m_pBuildable->SetBodygroup( 1, 0 );
-		}
-
-		// Think again soon!
-		SetThink( &CFFBuildableFlickerer::OnObjectThink );
-		SetNextThink( gpGlobals->curtime + 0.1f );
-	}
-	else
-	{
-		UTIL_Remove( this );
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Flicker a buildable to indicate it's taking damage
-//-----------------------------------------------------------------------------
-void CFFBuildableFlickerer::Flicker( void )
-{
-	VPROF_BUDGET( "CFFBuildableFlickerer::Flicker", VPROF_BUDGETGROUP_FF_BUILDABLE );
-
-	// When flicker is called the buildable is taking damage
-
-	if( m_pBuildable )
-	{
-		// Put us in a flickered "state"
-		//if( m_pBuildable->GetRenderMode() == kRenderNormal )
-		//{
-			//m_pBuildable->SetRenderMode( kRenderTransAlpha );
-			//m_pBuildable->SetRenderColorA( ( byte )110 );
-			m_pBuildable->SetBodygroup( 1, 1 );
-		//}
-
-		// Note the time we flickered
-		m_flFlicker = gpGlobals->curtime;
-	}
-	else
-		UTIL_Remove( this );
-}
-
-//=============================================================================
-//
-//	class CFFBuildableObject
-//	
-//=============================================================================
-
-LINK_ENTITY_TO_CLASS( FF_BuildableObject_entity, CFFBuildableObject );
-PRECACHE_REGISTER( FF_BuildableObject_entity );
-
-IMPLEMENT_SERVERCLASS_ST( CFFBuildableObject, DT_FFBuildableObject )
+BEGIN_NETWORK_TABLE( CFFBuildableObject, DT_FFBuildableObject )
+#ifdef CLIENT_DLL
+	RecvPropEHandle( RECVINFO( m_hOwner ) ),
+	RecvPropInt( RECVINFO( m_iHealth ) ),
+	RecvPropInt( RECVINFO( m_iMaxHealth ) ),
+	RecvPropBool( RECVINFO( m_bBuilt ) ),
+	RecvPropFloat( RECVINFO( m_flSabotageTime ) ),
+	RecvPropInt( RECVINFO( m_iSaboteurTeamNumber ) ),
+#elif GAME_DLL
 	SendPropEHandle( SENDINFO( m_hOwner ) ),
 	SendPropInt( SENDINFO( m_iHealth ), 10 ),	// AfterShock: this can probably be limited to ~9 bits? max 180ish health on a SG? Do we ever use hp <0 for checking death?
 	SendPropInt( SENDINFO( m_iMaxHealth ), 10 ), // The client should work this out using Classify() and getLevel() 
 	SendPropBool( SENDINFO( m_bBuilt ) ), // can we encode this in the health? perhaps when health is 0?
 	SendPropFloat( SENDINFO( m_flSabotageTime ) ), // Do we need to send these for jumppads + detpacks? maybe make new datatables?
 	SendPropInt( SENDINFO( m_iSaboteurTeamNumber ) ),
-END_SEND_TABLE( )
+#endif
+END_NETWORK_TABLE()
 
 // Start of our data description for the class
 BEGIN_DATADESC( CFFBuildableObject )
+#ifdef GAME_DLL
 	DEFINE_THINKFUNC(DetonateThink),
 	//DEFINE_THINKFUNC( OnObjectThink ),
+#endif
 END_DATADESC( )
+
+LINK_ENTITY_TO_CLASS( FF_BuildableObject_entity, CFFBuildableObject );
+PRECACHE_REGISTER( FF_BuildableObject_entity );
+
+#ifdef CLIENT_DLL
+
+	// Define all the sprites to precache
+	CLIENTEFFECT_REGISTER_BEGIN( PrecacheBuildErrorNoRoom )
+	CLIENTEFFECT_MATERIAL( FF_BUILD_ERROR_NOROOM )
+	CLIENTEFFECT_REGISTER_END()
+
+	CLIENTEFFECT_REGISTER_BEGIN( PrecacheBuildErrorTooSteep )
+	CLIENTEFFECT_MATERIAL( FF_BUILD_ERROR_TOOSTEEP )
+	CLIENTEFFECT_REGISTER_END()
+
+	CLIENTEFFECT_REGISTER_BEGIN( PrecacheBuildErrorTooFar )
+	CLIENTEFFECT_MATERIAL( FF_BUILD_ERROR_TOOFAR )
+	CLIENTEFFECT_REGISTER_END()
+
+	CLIENTEFFECT_REGISTER_BEGIN( PrecacheBuildErrorOffGround )
+	CLIENTEFFECT_MATERIAL( FF_BUILD_ERROR_OFFGROUND )
+	CLIENTEFFECT_REGISTER_END()
+
+	CLIENTEFFECT_REGISTER_BEGIN( PrecacheBuildErrorMoveable )
+	CLIENTEFFECT_MATERIAL( FF_BUILD_ERROR_MOVEABLE )
+	CLIENTEFFECT_REGISTER_END()
+#endif
 
 const char *g_pszFFModels[ ] =
 {
@@ -194,6 +153,266 @@ const char *g_pszFFGenGibModels[ ] =
 	FF_BUILDABLE_GENERIC_GIB_MODEL_05,
 	NULL
 };
+
+extern short	g_sModelIndexFireball;
+
+//-----------------------------------------------------------------------------
+// Purpose: Get health as a percentage
+//-----------------------------------------------------------------------------
+int CFFBuildableObject::GetHealthPercent( void ) const
+{
+	float flPercent = ( ( float )GetHealth() / ( float )GetMaxHealth() ) * 100.0f;
+
+	// Don't display 0% it looks stupid
+	if (flPercent < 1.0f)
+		return 1;
+	else
+		return ( int )flPercent;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Team accessor [mirv]
+//-----------------------------------------------------------------------------
+int CFFBuildableObject::GetTeamNumber()
+{
+	CFFPlayer *pOwner = GetOwnerPlayer();
+
+	if (!pOwner)
+		return TEAM_UNASSIGNED;
+
+	return pOwner->GetTeamNumber();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Get a buildables owner
+//-----------------------------------------------------------------------------
+CFFPlayer *CFFBuildableObject::GetOwnerPlayer( void )
+{
+	if( m_hOwner.Get() )
+		return ToFFPlayer( m_hOwner.Get() );
+
+	return NULL;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Get a buildables team
+//-----------------------------------------------------------------------------
+CFFTeam *CFFBuildableObject::GetOwnerTeam( void )
+{
+	CFFPlayer *pOwner = GetOwnerPlayer();
+	if( pOwner )
+	{
+#ifdef _DEBUG
+		Assert( dynamic_cast< CFFTeam * >( pOwner->GetTeam() ) != 0 );
+#endif
+		return static_cast< CFFTeam * >( pOwner->GetTeam() );
+	}
+	return NULL;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Get a buildables team id
+//-----------------------------------------------------------------------------
+int CFFBuildableObject::GetOwnerTeamId( void )
+{
+	CFFPlayer *pOwner = GetOwnerPlayer();
+	if( pOwner )
+		return pOwner->GetTeamNumber();
+
+	return TEAM_UNASSIGNED;
+}
+
+#ifdef CLIENT_DLL
+
+//-----------------------------------------------------------------------------
+// Purpose: Constructor
+//-----------------------------------------------------------------------------
+C_FFBuildableObject::C_FFBuildableObject( void )
+{
+	// Initialize
+	m_bClientSideOnly = false;
+	m_flSabotageTime = 0.0f;
+	m_iSaboteurTeamNumber = TEAM_UNASSIGNED;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Destructor
+//-----------------------------------------------------------------------------
+C_FFBuildableObject::~C_FFBuildableObject( void )
+{
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void C_FFBuildableObject::OnDataChanged( DataUpdateType_t updateType )
+{
+	// NOTE: We MUST call the base classes' implementation of this function
+	BaseClass::OnDataChanged( updateType );
+
+	if( updateType == DATA_UPDATE_CREATED )
+	{
+		SetNextClientThink( CLIENT_THINK_ALWAYS );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: To smooth the build helpers
+//-----------------------------------------------------------------------------
+void C_FFBuildableObject::ClientThink( void )
+{
+	// This is to "smooth" the build helper models
+	if( m_bClientSideOnly )
+	{
+		C_FFPlayer *pPlayer = ToFFPlayer( m_hOwner.Get() );
+		if( !pPlayer )
+			return;
+
+		float flBuildDist = 0.0f;
+
+		switch( Classify() )
+		{
+			case CLASS_DISPENSER: flBuildDist = FF_BUILD_DISP_BUILD_DIST; break;
+			case CLASS_SENTRYGUN: flBuildDist = FF_BUILD_SG_BUILD_DIST; break;
+			case CLASS_DETPACK: flBuildDist = FF_BUILD_DET_BUILD_DIST; break;
+			case CLASS_MANCANNON: flBuildDist = FF_BUILD_MC_BUILD_DIST; break;
+			default: return; break;
+		}
+
+		Vector vecForward;
+		pPlayer->EyeVectors( &vecForward );
+		vecForward.z = 0.0f;
+		VectorNormalize( vecForward );
+
+		// Need to save off the z value before setting new origin
+		Vector vecOrigin = GetAbsOrigin();
+
+		// Compute a new origin in front of the player
+		Vector vecNewOrigin = pPlayer->GetAbsOrigin() + ( vecForward * ( flBuildDist + 16.0f ) );
+		vecNewOrigin.z = vecOrigin.z;
+
+		SetAbsOrigin( vecNewOrigin );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Two pass so that the player icons can be drawn
+//-----------------------------------------------------------------------------
+RenderGroup_t C_FFBuildableObject::GetRenderGroup()
+{
+	if ( m_flSabotageTime > 0.0f )
+		return RENDER_GROUP_TWOPASS;
+
+	return BaseClass::GetRenderGroup();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Using this to draw any "can't build" type glyphs
+//-----------------------------------------------------------------------------
+int C_FFBuildableObject::DrawModel( int flags )
+{
+	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+	CMatRenderContextPtr pMatRenderContext(g_pMaterialSystem);
+
+	// render a spy icon during the transparency pass
+	if ( flags & STUDIO_TRANSPARENCY && pPlayer && !pPlayer->IsObserver() && m_flSabotageTime > 0.0f )
+	{
+		if( FFGameRules()->IsTeam1AlliedToTeam2( pPlayer->GetTeamNumber(), m_iSaboteurTeamNumber ) == GR_TEAMMATE )
+		{
+			// Thanks mirv!
+			IMaterial *pMaterial = materials->FindMaterial( "sprites/ff_sprite_spy", TEXTURE_GROUP_CLIENT_EFFECTS );
+			if( pMaterial )
+			{
+				pMatRenderContext->Bind( pMaterial );
+
+				// The color is based on the saboteur's team
+				int iAlpha = 255;
+				Color clr = Color( 255, 255, 255, iAlpha );
+
+				if( g_PR )
+				{
+					float flSabotageTime = clamp( m_flSabotageTime - gpGlobals->curtime, 0, FF_BUILD_SABOTAGE_TIMEOUT );
+					iAlpha = 64 + (191 * (flSabotageTime / FF_BUILD_SABOTAGE_TIMEOUT) );
+					clr = g_PR->GetTeamColor( m_iSaboteurTeamNumber );
+				}
+
+				color32 c = { clr.r(), clr.g(), clr.b(), iAlpha };
+				DrawSprite( Vector( GetAbsOrigin().x, GetAbsOrigin().y, GetAbsOrigin().z + 64.0f ), 15.0f, 15.0f, c );
+			}
+		}
+	}
+
+	if( m_bClientSideOnly )
+	{
+		// Draw our glyphs
+
+		// See if there's even an error
+		if( m_hBuildError != BUILD_ALLOWED )
+		{
+			float flOffset = 0.0f;
+			
+			// Get an offset for drawing (relative to GetAbsOrigin)
+			const int iEntityClass = Classify();
+			switch( iEntityClass )
+			{
+				case CLASS_DISPENSER: flOffset = 32.0f; break;
+				case CLASS_SENTRYGUN: flOffset = 32.0f; break;
+				case CLASS_DETPACK: flOffset = 0.0f; break;
+				case CLASS_MANCANNON: flOffset = 0.0f; break;
+				default: return BaseClass::DrawModel( flags ); break;
+			}
+
+			// Find out which error we're showing
+			const char *pszMaterial = NULL;
+			switch( m_hBuildError )
+			{
+				case BUILD_NOROOM: pszMaterial = FF_BUILD_ERROR_NOROOM; break;
+				case BUILD_TOOSTEEP: pszMaterial = FF_BUILD_ERROR_TOOSTEEP; break;
+				case BUILD_TOOFAR: pszMaterial = FF_BUILD_ERROR_TOOFAR; break;
+				case BUILD_PLAYEROFFGROUND: pszMaterial = FF_BUILD_ERROR_OFFGROUND; break;
+				case BUILD_MOVEABLE: pszMaterial = FF_BUILD_ERROR_MOVEABLE; break;
+				case BUILD_NEEDAMMO: pszMaterial = FF_BUILD_ERROR_NEEDAMMO; break;
+				case BUILD_ALREADYBUILT:
+				{
+					switch ( iEntityClass )
+					{
+					case CLASS_DISPENSER: pszMaterial = FF_BUILD_ERROR_ALREADYBUILTDISP; break;
+					case CLASS_SENTRYGUN: pszMaterial = FF_BUILD_ERROR_ALREADYBUILTSG; break;
+					case CLASS_MANCANNON: pszMaterial = FF_BUILD_ERROR_ALREADYBUILTMANCANNON; break;
+					}
+
+					break;
+				}
+			}
+
+			// If a valid material...
+			if( pszMaterial )
+			{
+				// Draw!
+				IMaterial *pMaterial = materials->FindMaterial( pszMaterial, TEXTURE_GROUP_OTHER );
+				if( pMaterial )
+				{
+					pMatRenderContext->Bind( pMaterial );
+					color32 c = { 255, 255, 255, 255 };
+					DrawSprite( Vector( GetAbsOrigin().x, GetAbsOrigin().y, EyePosition().z + flOffset ), 15.0f, 15.0f, c );
+				}
+			}
+
+			// This just looks bad, even if it is a cvar. 
+			// We're already drawing the sprite noculled.
+			// UNDONE:
+			// Finally, there was a build error, so don't actually draw the real model!
+			//if(!ffdev_buildabledrawonerror.GetBool())
+			return 0;
+		}
+	}
+		
+	
+	return BaseClass::DrawModel( flags );
+}
+
+#elif GAME_DLL
+
 
 /**
 @fn CFFBuildableObject
@@ -1025,3 +1244,139 @@ void CFFBuildableObject::SetLocation(const char *_loc)
 	Q_strncpy(m_BuildableLocation, _loc?_loc:"", sizeof(m_BuildableLocation));
 }
 
+#endif // CLIENT_DLL : GAME_DLL
+
+// Utils
+//-----------------------------------------------------------------------------
+// Purpose: Is the entity a buildable?
+//-----------------------------------------------------------------------------
+bool FF_IsBuildableObject( CBaseEntity *pEntity )
+{
+	if( !pEntity )
+		return false;
+
+	return( ( pEntity->Classify() == CLASS_DISPENSER ) ||
+		( pEntity->Classify() == CLASS_SENTRYGUN ) ||
+		( pEntity->Classify() == CLASS_DETPACK ) ||
+		( pEntity->Classify() == CLASS_MANCANNON ) );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Is the entity a dispenser?
+//-----------------------------------------------------------------------------
+bool FF_IsDispenser( CBaseEntity *pEntity )
+{
+	if( !pEntity )
+		return false;
+
+	return pEntity->Classify() == CLASS_DISPENSER;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Is the entity a sentrygun?
+//-----------------------------------------------------------------------------
+bool FF_IsSentrygun( CBaseEntity *pEntity )
+{
+	if( !pEntity )
+		return false;
+
+	return pEntity->Classify() == CLASS_SENTRYGUN;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Is the entity a detpack?
+//-----------------------------------------------------------------------------
+bool FF_IsDetpack( CBaseEntity *pEntity )
+{
+	if( !pEntity )
+		return false;
+
+	return pEntity->Classify() == CLASS_DETPACK;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Is the entity a man cannon?
+//-----------------------------------------------------------------------------
+bool FF_IsManCannon( CBaseEntity *pEntity )
+{
+	if( !pEntity )
+		return false;
+
+	return pEntity->Classify() == CLASS_MANCANNON;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Try and convert entity to a buildable
+//-----------------------------------------------------------------------------
+CFFBuildableObject *FF_ToBuildableObject( CBaseEntity *pEntity )
+
+{
+	if( !pEntity || !FF_IsBuildableObject( pEntity ) )
+		return NULL;
+
+#ifdef _DEBUG
+	Assert( dynamic_cast< CFFBuildableObject * >( pEntity ) != 0 );
+#endif
+
+	return static_cast< CFFBuildableObject * >( pEntity );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Try and convert entity to a dispenser
+//-----------------------------------------------------------------------------
+CFFDispenser *FF_ToDispenser( CBaseEntity *pEntity )
+{
+	if( !pEntity || !FF_IsDispenser( pEntity ) )
+		return NULL;
+
+#ifdef _DEBUG
+	Assert( dynamic_cast< CFFDispenser * >( pEntity ) != 0 );
+#endif
+
+	return static_cast< CFFDispenser * >( pEntity );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Try and convert entity to a sentrygun
+//-----------------------------------------------------------------------------
+CFFSentryGun *FF_ToSentrygun( CBaseEntity *pEntity )
+{
+	if( !pEntity || !FF_IsSentrygun( pEntity ) )
+		return NULL;
+
+#ifdef _DEBUG
+	Assert( dynamic_cast< CFFSentryGun * >( pEntity ) != 0);
+#endif
+
+	return static_cast< CFFSentryGun * >( pEntity );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Try and convert entity to a detpack
+//-----------------------------------------------------------------------------
+CFFDetpack *FF_ToDetpack( CBaseEntity *pEntity )
+{
+	if( !pEntity || !FF_IsDetpack( pEntity ) )
+		return NULL;
+
+#ifdef _DEBUG
+	Assert( dynamic_cast< CFFDetpack * >( pEntity ) != 0 );
+#endif
+
+	return static_cast< CFFDetpack * >( pEntity );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Try and convert entity to a man cannon
+//-----------------------------------------------------------------------------
+CFFManCannon *FF_ToManCannon( CBaseEntity *pEntity )
+{
+	if( !pEntity || !FF_IsManCannon( pEntity ) )
+		return NULL;
+
+#ifdef _DEBUG
+	Assert( dynamic_cast< CFFManCannon * >( pEntity ) != 0);
+#endif
+
+	return static_cast< CFFManCannon * >( pEntity );
+}

@@ -26,7 +26,7 @@
 #include "iclientrenderable.h"
 #include "ff_shareddefs.h"
 
-#include "ff_buildableobjects_shared.h"
+#include "ff_buildabledefs.h"
 #include "c_ff_team.h"
 
 // memdbgon must be the last include file in a .cpp file!!!

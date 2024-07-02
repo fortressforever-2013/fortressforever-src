@@ -1,7 +1,7 @@
 // =============== Fortress Forever ==============
 // ======== A modification for Half-Life 2 =======
 //
-// @file ff_detpack.cpp
+// @file ff_buildable_detpack.cpp
 // @author Patrick O'Leary (Mulchman)
 // @date 12/28/2005
 // @brief Detpack class
@@ -21,33 +21,45 @@
 //		explode time
 
 #include "cbase.h"
-#include "ff_buildableobjects_shared.h"
-#include "ff_scriptman.h"
-#include "ff_luacontext.h"
+
+#include "ff_buildableobject.h"
+#include "ff_buildable_sentrygun.h"
+#include "ff_buildable_detpack.h"
+#include "ff_buildable_mancannon.h"
+#include "ff_buildable_dispenser.h"
 #include "beam_flags.h"
 #include "ff_gamerules.h"
+#include "ff_utils.h"
 
 #ifdef _DEBUG
-#include "Color.h"
+	#include "Color.h"
 #endif
-#include "ff_utils.h"
+
+#ifdef GAME_DLL
+	#include "ff_scriptman.h"
+	#include "ff_luacontext.h"
+#endif
 
 #include "tier0/vprof.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-LINK_ENTITY_TO_CLASS( FF_Detpack, CFFDetpack );
-PRECACHE_REGISTER( FF_Detpack );
+IMPLEMENT_NETWORKCLASS_ALIASED( FFDetpack, DT_FFDetpack )
 
-IMPLEMENT_SERVERCLASS_ST( CFFDetpack, DT_FFDetpack )
-END_SEND_TABLE( )
+BEGIN_NETWORK_TABLE( CFFDetpack, DT_FFDetpack )
+END_NETWORK_TABLE()
 
 // Start of our data description for the class
 BEGIN_DATADESC( CFFDetpack )
+#ifdef GAME_DLL
 	DEFINE_ENTITYFUNC( OnObjectTouch ),
 	DEFINE_THINKFUNC( OnObjectThink ),
+#endif
 END_DATADESC( )
+
+LINK_ENTITY_TO_CLASS( FF_Detpack, CFFDetpack );
+PRECACHE_REGISTER( FF_Detpack );
 
 //static ConVar detpack_radius( "ffdev_detpack_radius", "700" );
 //static ConVar detpack_falloff( "ffdev_detpack_falloff", "1" );
@@ -66,6 +78,7 @@ extern const char *g_pszFFGenGibModels[];
 */
 CFFDetpack::CFFDetpack( void )
 {
+#ifdef GAME_DLL
 	// Overwrite the base class stubs
 	m_ppszModels = g_pszFFDetpackModels;
 	m_ppszGibModels = g_pszFFDetpackGibModels;
@@ -95,6 +108,7 @@ CFFDetpack::CFFDetpack( void )
 	// Default
 	m_iFuseTime = 5;
 	m_bFiveSeconds = false;
+#endif
 }
 
 /**
@@ -105,6 +119,62 @@ CFFDetpack::CFFDetpack( void )
 CFFDetpack::~CFFDetpack( void )
 {
 }
+
+#ifdef CLIENT_DLL
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CFFDetpack::OnDataChanged( DataUpdateType_t updateType )
+{
+	// NOTE: We MUST call the base classes' implementation of this function
+	BaseClass::OnDataChanged( updateType );
+
+	if( updateType == DATA_UPDATE_CREATED )
+	{
+		SetNextClientThink( CLIENT_THINK_ALWAYS );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Creates a client side entity using the detpack model
+//-----------------------------------------------------------------------------
+CFFDetpack *CFFDetpack::CreateClientSideDetpack( const Vector& vecOrigin, const QAngle& vecAngles )
+{
+	CFFDetpack *pDetpack = new CFFDetpack;
+
+	if( !pDetpack )
+		return NULL;
+
+	if( !pDetpack->InitializeAsClientEntity( FF_DETPACK_MODEL, RENDER_GROUP_TRANSLUCENT_ENTITY ) )
+	{
+		pDetpack->Release( );
+		return NULL;
+	}
+
+	pDetpack->SetAbsOrigin( vecOrigin );
+	pDetpack->SetLocalAngles( vecAngles );
+	pDetpack->SetCollisionGroup( COLLISION_GROUP_DEBRIS );
+	pDetpack->SetRenderMode( kRenderTransAlpha );
+	pDetpack->SetRenderColorA( ( byte )110 );
+
+	if(FFDEV_PULSEBUILDABLE)
+		pDetpack->m_nRenderFX = g_BuildableRenderFx;
+
+	//kRenderTransAlphaAdd
+	//kRender
+
+	// Since this is client side only, give it an owner just in case
+	// someone accesses the m_hOwner.Get() and wants to return something
+	// that isn't NULL!
+	pDetpack->m_hOwner = ( C_BaseEntity * )C_BasePlayer::GetLocalPlayer();
+	pDetpack->SetClientSideOnly( true );
+	pDetpack->SetNextClientThink( CLIENT_THINK_ALWAYS );
+
+	return pDetpack;
+}
+
+#elif GAME_DLL
 
 /**
 @fn void Spawn( )
@@ -557,3 +627,5 @@ void CFFDetpack::DoExplosionDamage( void )
 		}
 	}
 }
+
+#endif // CLIENT_DLL : GAME_DLL

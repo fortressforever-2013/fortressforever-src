@@ -20,6 +20,7 @@
 #include "ff_playeranimstate.h"
 #include "ff_weapon_parse.h"
 #include "SoundEmitterSystem/isoundemittersystembase.h"
+#include "ff_buildabledefs.h"
 
 #ifdef CLIENT_DLL 
 	#define CFFWeaponBase C_FFWeaponBase

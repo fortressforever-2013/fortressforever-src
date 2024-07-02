@@ -29,7 +29,6 @@ using namespace vgui;
 //#include "debugoverlay_shared.h"
 
 //#include "c_ff_player.h"
-#include "ff_buildableobjects_shared.h"
 #include <igameresources.h>
 #include "c_ff_team.h"
 #include "ff_gamerules.h"

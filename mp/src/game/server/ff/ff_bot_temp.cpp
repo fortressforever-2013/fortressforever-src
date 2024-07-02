@@ -69,7 +69,9 @@
 
 // TODO: REMOVE ME REMOVE ME
 //#include "ff_detpack.h"
-#include "ff_buildableobjects_shared.h"
+
+#include "ff_buildableobject.h"
+#include "ff_buildable_sentrygun.h"
 
 CON_COMMAND_F(ffdev_tranqme, "tranqs you", FCVAR_CHEAT)
 {

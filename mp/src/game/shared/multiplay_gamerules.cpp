@@ -44,7 +44,11 @@
 	#include "ff_player.h"
 
 	// BEG: Added by Mulchman for Buildable Objects
-	#include "ff_buildableobjects_shared.h"
+	#include "ff_buildableobject.h"
+	#include "ff_buildable_sentrygun.h"
+	#include "ff_buildable_dispenser.h"
+	#include "ff_buildable_detpack.h"
+	#include "ff_buildable_mancannon.h"
 	// END: Added by Mulchman for Buildable Objects
 
 	#include "omnibot_interface.h"

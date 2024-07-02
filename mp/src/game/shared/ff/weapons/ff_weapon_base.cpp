@@ -16,7 +16,6 @@
 #include "takedamageinfo.h"
 #include "ff_weapon_base.h"
 #include "ammodef.h"
-#include "ff_buildableobjects_shared.h"
 #include "ff_utils.h"
 
 #ifdef CLIENT_DLL 

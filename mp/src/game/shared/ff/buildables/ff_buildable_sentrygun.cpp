@@ -1,13 +1,63 @@
+// =============== Fortress Forever ==============
+// ======== A modification for Half-Life 2 =======
+//
+// @file ff_buildable_sentrygun.cpp
+// @author Patrick O'Leary (Mulchman)
+// @date 12/28/2005
+// @brief SentryGun class
+//
+// REVISIONS
+// ---------
+//	12/28/2005, Mulchman: 
+//		First created
+//
+//	05/09/2005, Mulchman:
+//		Tons of little updates here and there
+//
+//	05/17/2005, Mulchman:
+//		Starting to make it animated and such
+//
+//	06/01/2005, Mulchman:
+//		Noticed I had dates wrong... *cough* and
+//		still working on making the SG animated
+//		and such.
+//
+//	06/08/2005, Mulchman:
+//		Decided the SG needs to inherit from the
+//		AI base class and not the buildable class.
+//		Some easy stuff will give it the same base
+//		buildable attributes while inheriting all
+//		of the AI stuff that it so desperately needs!
+//
+//	03/17/2006, Mulchman:
+//		Removing aim sphere
+// 
+//	05/10/2006, Mulchman:
+//		Cleaned this up A LOT. SG still doesn't factor in radiotagged targets, though.
+
+
 #include "cbase.h"
+#include "ff_buildableobject.h"
+#include "ff_buildable_sentrygun.h"
+#include "ff_buildable_detpack.h"
+#include "ff_buildable_mancannon.h"
+#include "ff_buildable_dispenser.h"
 #include "ammodef.h"
-#include "ff_sentrygun.h"
-#include "te_effect_dispatch.h" 
 #include "ff_projectile_rocket.h"
 #include "ff_utils.h"
 #include "ff_gamerules.h"
 #include "IEffects.h"
 
-#include "omnibot_interface.h"
+#ifdef CLIENT_DLL
+	#include "c_gib.h"
+	#include "c_te_effect_dispatch.h"
+#elif GAME_DLL
+	#include "ff_buildableflickerer.h"
+
+	#include "omnibot_interface.h"
+	#include "te_effect_dispatch.h" 
+	#include "smoke_trail.h"
+#endif
 
 #include "tier0/vprof.h"
 
@@ -149,7 +199,18 @@
 #define SG_ACCELFRICTIONMULT 2.0f //sg_accel_fricmult.GetFloat() // 2.0f
 // caes
 
-IMPLEMENT_SERVERCLASS_ST(CFFSentryGun, DT_FFSentryGun) 
+IMPLEMENT_NETWORKCLASS_ALIASED( FFSentryGun, DT_FFSentryGun )
+
+BEGIN_NETWORK_TABLE( CFFSentryGun, DT_FFSentryGun )
+#ifdef CLIENT_DLL
+RecvPropInt( RECVINFO( m_iAmmoPercent ) ),
+	//RecvPropFloat( RECVINFO( m_flRange ) ),
+	RecvPropInt( RECVINFO( m_iLevel ) ),
+	RecvPropInt( RECVINFO( m_iShells ) ),
+	RecvPropInt( RECVINFO( m_iRockets ) ),
+	RecvPropInt( RECVINFO( m_iMaxShells ) ),
+	RecvPropInt( RECVINFO( m_iMaxRockets ) ),
+#elif GAME_DLL
 	SendPropInt( SENDINFO( m_iAmmoPercent), 8, SPROP_UNSIGNED ), 
 	//SendPropFloat( SENDINFO( m_flRange ) ), //AfterShock: surely the client knows it's range?
 	SendPropInt( SENDINFO( m_iLevel ), 2, SPROP_UNSIGNED ), //AfterShock: max level 3
@@ -157,16 +218,19 @@ IMPLEMENT_SERVERCLASS_ST(CFFSentryGun, DT_FFSentryGun)
 	SendPropInt( SENDINFO( m_iRockets ), 5, SPROP_UNSIGNED ), //AfterShock: max 20 rockets for level 3
 	SendPropInt( SENDINFO( m_iMaxShells ) ), //AfterShock: this should be inferred from level
 	SendPropInt( SENDINFO( m_iMaxRockets ) ), //AfterShock: this should be inferred from level
-END_SEND_TABLE() 
+#endif
+END_NETWORK_TABLE()
+
+// Datatable
+BEGIN_DATADESC( CFFSentryGun )
+#ifdef GAME_DLL
+	DEFINE_THINKFUNC( OnActiveThink ), 
+	DEFINE_THINKFUNC( OnSearchThink ), 
+#endif
+END_DATADESC() 
 
 LINK_ENTITY_TO_CLASS( FF_SentryGun, CFFSentryGun );
 PRECACHE_REGISTER( FF_SentryGun );
-
-// Datatable
-BEGIN_DATADESC(CFFSentryGun) 
-	DEFINE_THINKFUNC( OnActiveThink ), 
-	DEFINE_THINKFUNC( OnSearchThink ), 
-END_DATADESC() 
 
 extern const char *g_pszFFSentryGunModels[];
 extern const char *g_pszFFSentryGunGibModelsL1[];
@@ -182,6 +246,9 @@ extern const char *g_pszFFGenGibModels[];
 //-----------------------------------------------------------------------------
 CFFSentryGun::CFFSentryGun() 
 {
+#ifdef CLIENT_DLL
+	m_iLocalHallucinationIndex = -1;
+#elif GAME_DLL
 	m_ppszModels = g_pszFFSentryGunModels;
 	m_ppszGibModels = g_pszFFSentryGunGibModels;
 	m_ppszSounds = g_pszFFSentryGunSounds;
@@ -219,14 +286,131 @@ CFFSentryGun::CFFSentryGun()
 	m_flNextSparkTime = 0;
 	m_flLastClientUpdate = 0;
 	m_iLastState = 0;
+#endif
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Destructor
+//-----------------------------------------------------------------------------
+CFFSentryGun::~CFFSentryGun( void ) 
+{
+}
+
+#ifdef CLIENT_DLL
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CFFSentryGun::OnDataChanged( DataUpdateType_t updateType )
+{
+	// NOTE: We MUST call the base classes' implementation of this function
+	BaseClass::OnDataChanged( updateType );
+
+	if( updateType == DATA_UPDATE_CREATED )
+	{
+		SetNextClientThink( CLIENT_THINK_ALWAYS );
+	}
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-CFFSentryGun::~CFFSentryGun( void ) 
+bool CFFSentryGun::Upgrade()
 {
+	if( ( m_iLevel < 3 ) && m_bBuilt )
+		return true;
+
+	return false;
 }
+
+//-----------------------------------------------------------------------------
+// Purpose: Creates a client side entity using the sentrygun model
+//-----------------------------------------------------------------------------
+CFFSentryGun *CFFSentryGun::CreateClientSideSentryGun( const Vector& vecOrigin, const QAngle& vecAngles )
+{
+	CFFSentryGun *pSentryGun = new CFFSentryGun;
+
+	if( !pSentryGun )
+		return NULL;
+
+	if( !pSentryGun->InitializeAsClientEntity( FF_SENTRYGUN_MODEL, RENDER_GROUP_TRANSLUCENT_ENTITY ) )
+	{
+		pSentryGun->Release( );
+		return NULL;
+	}
+
+	pSentryGun->SetAbsOrigin( vecOrigin );
+	pSentryGun->SetLocalAngles( vecAngles );
+	pSentryGun->SetCollisionGroup( COLLISION_GROUP_DEBRIS );
+	pSentryGun->SetRenderMode( kRenderTransAlpha );
+	pSentryGun->SetRenderColorA( ( byte )110 );
+	
+	if(FFDEV_PULSEBUILDABLE)
+		pSentryGun->m_nRenderFX = g_BuildableRenderFx;
+	
+	// Since this is client side only, give it an owner just in case
+	// someone accesses the m_hOwner.Get() and wants to return something
+	// that isn't NULL!
+	pSentryGun->m_hOwner = ( C_BaseEntity * )C_BasePlayer::GetLocalPlayer();
+
+	// Mirv: Show up as the correct skin
+	pSentryGun->m_nSkin = clamp(CBasePlayer::GetLocalPlayer()->GetTeamNumber() - TEAM_BLUE, 0, 3);
+	pSentryGun->SetClientSideOnly( true );
+	pSentryGun->SetNextClientThink( CLIENT_THINK_ALWAYS );
+
+	return pSentryGun;
+}
+
+//-------------------------------------------------------------------------
+// Purpose: Sentryguns will sometimes appear as the wrong model when
+//			the local player is hallucinating
+//-------------------------------------------------------------------------
+int CFFSentryGun::DrawModel(int flags)
+{
+	int nRet = BaseClass::DrawModel(flags);
+
+	if (m_iLevel <= 0)
+		return nRet;
+
+	C_FFPlayer *pLocalPlayer = ToFFPlayer(CBasePlayer::GetLocalPlayer());
+
+	// No hallucinations here. But check first if we have to reset
+	if (!pLocalPlayer || !pLocalPlayer->m_iHallucinationIndex)
+	{
+		if (m_iLocalHallucinationIndex >= 0)
+		{
+			switch (m_iLevel)
+			{
+			case 1: SetModel(FF_SENTRYGUN_MODEL); break;
+			case 2: SetModel(FF_SENTRYGUN_MODEL_LVL2); break;
+			case 3: SetModel(FF_SENTRYGUN_MODEL_LVL3); break;
+			}
+
+			m_iLocalHallucinationIndex = -1;
+		}
+
+		return nRet;
+	}
+
+	int nNewLevel = entindex() + pLocalPlayer->m_iHallucinationIndex;
+
+	nNewLevel = nNewLevel % 3; // ouch
+
+	if (m_iLocalHallucinationIndex == nNewLevel)
+		return nRet;
+
+	switch (nNewLevel)
+	{
+	case 0: SetModel(FF_SENTRYGUN_MODEL); break;
+	case 1: SetModel(FF_SENTRYGUN_MODEL_LVL2); break;
+	case 2: SetModel(FF_SENTRYGUN_MODEL_LVL3); break;
+	}
+
+	m_iLocalHallucinationIndex = nNewLevel;
+
+	return nRet;
+}
+#elif GAME_DLL
 
 void CFFSentryGun::UpdateOnRemove( void ) 
 {
@@ -1983,3 +2167,62 @@ void CFFSentryGun::PhysicsSimulate()
 		m_iLastState = iState;
 	}
 }
+
+#endif // CLIENT_DLL : GAME_DLL
+
+#ifdef CLIENT_DLL
+	void SentryGunGib_Callback(const CEffectData &data)
+	{
+		Vector vecPosition = data.m_vOrigin;
+		Vector vecOffset;
+		int nSkin = data.m_nMaterial;
+
+		// Now spawn a number of gibs
+		int iGib = 0;
+		if (data.m_nDamageType == 1) //HACK: Using m_nDamageType as SG level
+		{
+			while (g_pszFFSentryGunGibModelsL1[iGib])
+			{
+				C_Gib *pGib = C_Gib::CreateClientsideGib(g_pszFFSentryGunGibModelsL1[iGib], vecPosition, Vector(random->RandomFloat(-150, 150), random->RandomFloat(-150, 150), random->RandomFloat(100, 400)), RandomAngularImpulse( -90, 90 ), 4.0f);
+		
+				if (pGib)
+				{
+					pGib->m_nSkin = nSkin;
+					pGib->LeaveBloodDecal(false);
+				}
+				++iGib;
+			}
+		}
+		else if (data.m_nDamageType == 2) //HACK: Using m_nDamageType as SG level
+		{
+			while (g_pszFFSentryGunGibModelsL2[iGib])
+			{
+				C_Gib *pGib = C_Gib::CreateClientsideGib(g_pszFFSentryGunGibModelsL2[iGib], vecPosition, Vector(random->RandomFloat(-150, 150), random->RandomFloat(-150, 150), random->RandomFloat(100, 500)), RandomAngularImpulse( -90, 90 ), 4.0f);
+		
+				if (pGib)
+				{
+					pGib->m_nSkin = nSkin;
+					pGib->LeaveBloodDecal(false);
+				}
+				++iGib;
+			}
+		}
+		else if (data.m_nDamageType == 3) //HACK: Using m_nDamageType as SG level
+		{
+			while (g_pszFFSentryGunGibModelsL3[iGib])
+			{
+				C_Gib *pGib = C_Gib::CreateClientsideGib(g_pszFFSentryGunGibModelsL3[iGib], vecPosition, Vector(random->RandomFloat(-150, 150), random->RandomFloat(-150, 150), random->RandomFloat(100, 600)), RandomAngularImpulse( -90, 90 ), 4.0f);
+		
+				if (pGib)
+				{
+					pGib->m_nSkin = nSkin;
+					pGib->LeaveBloodDecal(false);
+				}
+				++iGib;
+			}
+		}
+	}
+
+	DECLARE_CLIENT_EFFECT("SentryGunGib", SentryGunGib_Callback);
+
+#endif

@@ -14,7 +14,7 @@
 #include "ff_projectile_base.h"
 
 #ifdef CLIENT_DLL
-	#define C_FFTeam CFFTeam
+	#define CFFTeam C_FFTeam
 	#include "c_ff_team.h"
 	#include "c_ff_player.h"
 
@@ -23,7 +23,6 @@
 	#include "ff_team.h"
 	#include "ff_player.h"
 	#include "ff_playercommand.h"
-	#include "ff_sentrygun.h"
 	#include "ff_info_script.h"
 	#include "ff_entity_system.h"
 	#include "ff_scriptman.h"
@@ -31,7 +30,6 @@
 	#include "ff_scheduleman.h"
 	#include "ff_timerman.h"
 	#include "ff_utils.h"
-	#include "ff_buildableobjects_shared.h"
 	#include "ff_menuman.h"
 #endif
 

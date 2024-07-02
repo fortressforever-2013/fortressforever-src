@@ -27,6 +27,12 @@
 	#include "c_te_effect_dispatch.h"
 #endif
 
+#include "ff_buildableobject.h"
+#include "ff_buildable_sentrygun.h"
+#include "ff_buildable_detpack.h"
+#include "ff_buildable_mancannon.h"
+#include "ff_buildable_dispenser.h"
+
 #define GRENADE_BEAM_SPRITE			"sprites/plasma.spr"
 #define NAILGRENADE_MODEL			"models/grenades/nailgren/nailgren.mdl"
 

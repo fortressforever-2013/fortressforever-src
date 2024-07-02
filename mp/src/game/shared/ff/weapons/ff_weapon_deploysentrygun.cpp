@@ -40,7 +40,10 @@
 	#include "ff_player.h"
 #endif
 
-#include "ff_buildableobjects_shared.h"
+#include "ff_buildableobject.h"
+#include "ff_buildable_sentrygun.h"
+
+#include "ff_buildableinfo.h"
 
 //=============================================================================
 // CFFWeaponDeploySentryGun

@@ -23,7 +23,7 @@
 #include "ff_info_script.h"
 #include "ff_utils.h"
 #include "ff_grenade_base.h"
-#include "ff_buildableobjects_shared.h"
+#include "ff_buildableinfo.h"
 #include "ff_item_backpack.h"
 
 #include "ff_team.h"			// team info

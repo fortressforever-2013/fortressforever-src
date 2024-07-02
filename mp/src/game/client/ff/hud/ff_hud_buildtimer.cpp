@@ -6,7 +6,6 @@
 #include "c_ff_player.h"
 
 #include "ff_hud_buildtimer.h"
-#include "ff_buildableobjects_shared.h"
 
 #include <vgui/IVGui.h>
 #include <vgui/ISurface.h>
