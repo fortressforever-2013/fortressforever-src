@@ -28,8 +28,7 @@ using namespace vgui;
 #include <vgui/IVGui.h>
 
 #include "c_ff_timers.h"
-#include "c_ff_buildableobjects.h"
-#include "ff_buildableobjects_shared.h"
+#include "ff_buildabledefs.h"
 
 //=============================================================================
 //

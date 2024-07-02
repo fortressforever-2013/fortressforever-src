@@ -17,12 +17,14 @@
 #include "cbase.h"
 #include "ff_weapon_basemelee.h"
 
+#include "ff_buildableobject.h"
+#include "ff_buildable_sentrygun.h"
+#include "ff_buildable_dispenser.h"
 
 #ifdef CLIENT_DLL
 	#define CFFWeaponSpanner C_FFWeaponSpanner
 	#include "ff_utils.h"
 #else
-	#include "ff_buildableobjects_shared.h"
 	#include "omnibot_interface.h"
 #endif
 

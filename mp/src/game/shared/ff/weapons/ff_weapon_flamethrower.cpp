@@ -15,6 +15,10 @@
 #include "ff_weapon_base.h"
 #include "ff_fx_shared.h"
 #include "in_buttons.h"
+#include "ff_buildableobject.h"
+#include "ff_buildable_sentrygun.h"
+#include "ff_buildable_dispenser.h"
+#include "ff_buildable_mancannon.h"
 
 #ifdef CLIENT_DLL 
 	#define CFFWeaponFlamethrower C_FFWeaponFlamethrower

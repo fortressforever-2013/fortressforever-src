@@ -7,7 +7,10 @@
 // includes
 #include "cbase.h"
 #include "ff_lualib.h"
-#include "ff_buildableobjects_shared.h"
+#include "ff_buildableobject.h"
+#include "ff_buildable_sentrygun.h"
+#include "ff_buildable_dispenser.h"
+#include "ff_buildable_detpack.h"
 
 // Lua includes
 extern "C"

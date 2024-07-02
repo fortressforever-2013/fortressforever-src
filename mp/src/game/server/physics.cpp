@@ -55,7 +55,7 @@ void PortalPhysFrame( float deltaTime ); //small wrapper for PhysFrame that simu
 
 void PrecachePhysicsSounds( void );
 
-#include "ff_buildableobjects_shared.h"
+#include "ff_buildableobject.h"
 #include "ff_triggerclip.h"
 
 // memdbgon must be the last include file in a .cpp file!!!

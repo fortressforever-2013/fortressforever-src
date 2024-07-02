@@ -38,6 +38,7 @@
 #include <networkstringtabledefs.h>
 #include "ff_button.h"
 #include "ff_utils.h"
+#include "c_ff_team.h"
 #include "ienginevgui.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -139,7 +140,7 @@ public:
 	void UpdateTeamIcon(int iTeamID)
 	{
 		const char* pszInsignias[] = { "hud_team_blue", "hud_team_red", "hud_team_yellow", "hud_team_green" };
-		CFFTeam* pFFTeam = GetGlobalFFTeam(iTeamID);
+		C_FFTeam* pFFTeam = GetGlobalFFTeam(iTeamID);
 
 		m_pTeamInsignia->SetShouldScaleImage(true);
 

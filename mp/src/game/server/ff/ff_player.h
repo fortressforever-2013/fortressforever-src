@@ -22,7 +22,6 @@
 #include "utlvector.h"
 #include "ff_weapon_base.h"
 #include "ff_grenade_base.h"
-#include "ff_buildableobjects_shared.h"
 #include "ff_modelglyph.h"
 #include "in_buttons.h"
 #include "ff_radiotagdata.h"

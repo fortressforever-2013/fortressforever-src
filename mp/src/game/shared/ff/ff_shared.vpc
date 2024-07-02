@@ -11,6 +11,28 @@ $Project
 	
 	$Folder "FF Shared Source Files"
 	{
+		$Folder "Buildables"
+		{
+			$Folder "Base"
+			{
+				$File "$SRCDIR\game\shared\ff\buildables\base\ff_buildabledefs.h"
+				$File "$SRCDIR\game\shared\ff\buildables\base\ff_buildabledefs.cpp"
+				$File "$SRCDIR\game\shared\ff\buildables\base\ff_buildableinfo.cpp"
+				$File "$SRCDIR\game\shared\ff\buildables\base\ff_buildableinfo.h"
+				$File "$SRCDIR\game\shared\ff\buildables\base\ff_buildableobject.cpp"
+				$File "$SRCDIR\game\shared\ff\buildables\base\ff_buildableobject.h"
+			}
+			
+			$File "$SRCDIR\game\shared\ff\buildables\ff_buildable_detpack.cpp"
+			$File "$SRCDIR\game\shared\ff\buildables\ff_buildable_detpack.h"
+			$File "$SRCDIR\game\shared\ff\buildables\ff_buildable_dispenser.cpp"
+			$File "$SRCDIR\game\shared\ff\buildables\ff_buildable_dispenser.h"
+			$File "$SRCDIR\game\shared\ff\buildables\ff_buildable_mancannon.cpp"
+			$File "$SRCDIR\game\shared\ff\buildables\ff_buildable_mancannon.h"
+			$File "$SRCDIR\game\shared\ff\buildables\ff_buildable_sentrygun.cpp"
+			$File "$SRCDIR\game\shared\ff\buildables\ff_buildable_sentrygun.h"
+		}
+		
 		$Folder "Grenades"
 		{
 			$File "$SRCDIR\game\shared\ff\grenades\ff_grenade_base.cpp"
@@ -89,8 +111,6 @@ $Project
 			$File "$SRCDIR\game\shared\ff\weapons\ff_weapon_umbrella.cpp"
 		}
 		
-	$File "$SRCDIR\game\shared\ff\ff_buildableobjects_shared.cpp"
-	$File "$SRCDIR\game\shared\ff\ff_buildableobjects_shared.h"
 	$File "$SRCDIR\game\shared\ff\ff_esp_shared.h"
 	$File "$SRCDIR\game\shared\ff\ff_fx_shared.cpp"
 	$File "$SRCDIR\game\shared\ff\ff_fx_shared.h"

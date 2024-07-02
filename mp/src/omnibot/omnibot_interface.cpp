@@ -17,6 +17,11 @@
 #include "ff_luacontext.h"
 #include "ff_utils.h"
 #include "ff_gamerules.h"
+
+#include "ff_team.h"
+
+#include "tier0/vprof.h"
+
 #include "func_ladder.h"
 #include "../public/engine/iserverplugin.h"
 extern ConVar mp_prematch;

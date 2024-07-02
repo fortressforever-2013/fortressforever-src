@@ -24,7 +24,7 @@
 	//#define CFFBuildableObject C_FFBuildableObject
 #endif
 
-#include "ff_buildableobjects_shared.h"
+#include "ff_buildableobject.h"
 // END: Added by Mulch 11/07/2005
 
 #ifdef PORTAL

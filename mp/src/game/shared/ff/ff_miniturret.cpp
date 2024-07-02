@@ -24,7 +24,6 @@
 #else	
 	#include "ammodef.h"
 	#include "ff_gamerules.h"
-	#include "ff_buildableobjects_shared.h"
 	#include "te_effect_dispatch.h"
 	#include "ff_scriptman.h"
 	#include "ff_luacontext.h"

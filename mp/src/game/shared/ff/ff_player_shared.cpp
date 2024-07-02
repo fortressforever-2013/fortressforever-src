@@ -12,7 +12,11 @@
 #include "shot_manipulator.h"
 #include "ff_shareddefs.h"
 #include "ff_utils.h"
-#include "ff_buildableobjects_shared.h"
+#include "ff_buildableobject.h"
+#include "ff_buildable_sentrygun.h"
+#include "ff_buildable_detpack.h"
+#include "ff_buildable_mancannon.h"
+#include "ff_buildable_dispenser.h"
 #include "ff_weapon_sniperrifle.h"
 #include "ff_weapon_assaultcannon.h"
 

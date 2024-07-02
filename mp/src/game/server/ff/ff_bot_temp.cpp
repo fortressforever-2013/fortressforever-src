@@ -62,13 +62,16 @@
 #include "movehelper_server.h"
 #include "gameinterface.h"
 #include "ff_utils.h"
+#include "ff_team.h"
 #include "te_effect_dispatch.h"
 #include "bitbuf.h"
 #include "filesystem.h"
 
 // TODO: REMOVE ME REMOVE ME
 //#include "ff_detpack.h"
-#include "ff_buildableobjects_shared.h"
+
+#include "ff_buildableobject.h"
+#include "ff_buildable_sentrygun.h"
 
 CON_COMMAND_F(ffdev_tranqme, "tranqs you", FCVAR_CHEAT)
 {

@@ -4,7 +4,6 @@
 
 #ifdef GAME_DLL
 	#include "ff_player.h"
-	#include "ff_buildableobjects_shared.h"
 	#include "baseentity.h"
 	#include "ff_entity_system.h"
 	#include "te_effect_dispatch.h"

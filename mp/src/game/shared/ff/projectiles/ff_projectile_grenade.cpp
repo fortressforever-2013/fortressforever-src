@@ -13,7 +13,7 @@
 
 #include "cbase.h"
 #include "ff_projectile_grenade.h"
-#include "ff_buildableobjects_shared.h"
+#include "ff_buildableobject.h"
 #include "ff_shareddefs.h"
 #include "ff_utils.h"
 

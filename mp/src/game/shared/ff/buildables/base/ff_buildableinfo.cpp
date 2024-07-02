@@ -1,209 +1,90 @@
 // =============== Fortress Forever ==============
 // ======== A modification for Half-Life 2 =======
 //
-// @file ff_buildableobjects_shared.cpp
-// @author Patrick O'Leary(Mulchman) 
-// @date 06/08/2005
-// @brief Shared code for buildable objects
+// @file ff_buildableinfo.h
+// @author Patrick O'Leary (Mulchman)
+// @date ?/?/2005
+// @brief BuildableInfo class
 //
-// REVISIONS
-// ---------
-// 06/08/2005, Mulchman: 
-//		This file First created
-// 22/01/2006, Mirv:
-//		Rewritten a lot of this, an instance of this object will now hold all the information
-//		needed to put a buildable on the ground(including pre-working out the orientation 
-//		and whether or not the orientation is okay, since that is now part of this class) 
-//		 (Previously calculating the orientation was left until last and not part of the
-//		buildable spot validation).
-//		Also now the SG orients away from walls.
-//
-// 9/16/2006, Mulchman:
-//		Re-jigged the building process, hopefully it's a little better now
-//
-//	12/6/2007, Mulchman:
-//		Added man cannon stuff
+// ===============================================
 
 #include "cbase.h"
-#include "ff_buildableobjects_shared.h"
+#include "ff_buildableinfo.h"
 
-#ifdef GAME_DLL
-	#include "omnibot_interface.h"	
-#else
-	#include "c_gib.h"
-	#include "clienteffectprecachesystem.h"
-	#include "c_te_effect_dispatch.h"
+#ifdef CLIENT_DLL
+	#include "c_ff_player.h"
+#elif GAME_DLL
+	#include "ff_player.h"
+	#include "omnibot_interface.h"
 #endif
 
-// memdbgon must be the last include file in a .cpp file!!!
-#include "tier0/memdbgon.h"
-
-#define FF_BUILD_DEBUG_VISUALIZATIONS
-
-// Array of char *'s to dispenser models
-const char *g_pszFFDispenserModels[ ] =
+//-----------------------------------------------------------------------------
+// Purpose: Returns a proper angle orientation for the buidlable depending
+//			on the approximate ground normal
+//-----------------------------------------------------------------------------
+QAngle OrientToVectors(const Vector &vecGroundNormal, const Vector &vecPlayerForward) 
 {
-	FF_DISPENSER_MODEL,
-	NULL
-};
+	// Get correct forward & right vector
+	Vector vecUp = vecGroundNormal;
+	Vector vecRight = CrossProduct(vecUp, -vecPlayerForward);
+	Vector vecForward = CrossProduct(vecUp, vecRight);
 
-// Array of char *'s to gib models
-const char *g_pszFFDispenserGibModels[ ] =
+	// Normalise(jic) 
+	VectorNormalize(vecForward);
+	VectorNormalize(vecRight);
+	VectorNormalize(vecUp);
+
+	// Quaternions are the handiest things
+	Quaternion q;
+	BasisToQuaternion(vecForward, vecRight, vecUp, q);
+
+	// Now for the angles
+	QAngle angNew;
+	QuaternionAngles(q, angNew);
+
+	return angNew;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Vectors must be	0 1
+//							2 3
+//-----------------------------------------------------------------------------
+void ComputeRectangularPlane(const Vector &v0, const Vector &v1, const Vector &v2, const Vector &v3, Vector &vOut) 
 {
-	FF_DISPENSER_GIB01_MODEL,
-	FF_DISPENSER_GIB02_MODEL,
-	FF_DISPENSER_GIB03_MODEL,
-	FF_DISPENSER_GIB04_MODEL,
-	FF_DISPENSER_GIB05_MODEL,
-	FF_DISPENSER_GIB06_MODEL,
-	NULL
-};
+	Vector vecOne = v0 - v3;
+	Vector vecTwo = v2 - v1;
 
-// Array of char *'s to sounds
-const char *g_pszFFDispenserSounds[ ] =
+	VectorNormalize(vecOne);
+	VectorNormalize(vecTwo);
+
+	vOut = CrossProduct(vecOne, vecTwo);
+
+	VectorNormalize(vOut);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+Vector GetMiddle(const Vector *v1, const Vector *v2, const Vector *v3 = NULL, const Vector *v4 = NULL) 
 {
-	FF_DISPENSER_BUILD_SOUND,
-	FF_DISPENSER_EXPLODE_SOUND,
-	FF_DISPENSER_UNBUILD_SOUND,
-	FF_DISPENSER_OMNOMNOM_SOUND,
-	NULL
-};
+	float c = 2.0f;
+	Vector vecMiddle = *v1 + *v2;
 
-// Array of char *'s to sentrygun models
-const char *g_pszFFSentryGunModels[] =
-{
-	FF_SENTRYGUN_MODEL, 
-	FF_SENTRYGUN_MODEL_LVL2, 
-	FF_SENTRYGUN_MODEL_LVL3, 
-	NULL
-};
+	if (v3) 
+	{
+		vecMiddle += *v3;
+		c++;
+	}
+	if (v4) 
+	{
+		vecMiddle += *v4;
+		c++;
+	}
 
-// Array of char *'s to gib models
-const char *g_pszFFSentryGunGibModelsL1[] =
-{
-	FF_SENTRYGUN_GIB1A_MODEL,
-	FF_SENTRYGUN_GIB1B_MODEL,
-	FF_SENTRYGUN_GIB1C_MODEL,
-	FF_SENTRYGUN_GIB1D_MODEL,
-	FF_SENTRYGUN_GIBTRIPOD_MODEL,
-	NULL
-};
+	vecMiddle /= c;
 
-const char *g_pszFFSentryGunGibModelsL2[] =
-{
-	FF_SENTRYGUN_GIB2A_MODEL,
-	FF_SENTRYGUN_GIB2B_MODEL,
-	FF_SENTRYGUN_GIB2C_MODEL,
-	FF_SENTRYGUN_GIB2D_MODEL,
-	FF_SENTRYGUN_GIBTRIPOD_MODEL,
-	NULL
-};
-
-const char *g_pszFFSentryGunGibModelsL3[] =
-{
-	FF_SENTRYGUN_GIB3A_MODEL,
-	FF_SENTRYGUN_GIB3B_MODEL,
-	FF_SENTRYGUN_GIB3C_MODEL,
-	FF_SENTRYGUN_GIB3D_MODEL,
-	FF_SENTRYGUN_GIB3D_MODEL,
-	FF_SENTRYGUN_GIB3E_MODEL,
-	FF_SENTRYGUN_GIBTRIPOD_MODEL,
-	NULL
-};
-
-// Array of char *'s to ALL sg gib models to precache
-const char *g_pszFFSentryGunGibModels[] =
-{
-	FF_SENTRYGUN_GIB1A_MODEL,
-	FF_SENTRYGUN_GIB1B_MODEL,
-	FF_SENTRYGUN_GIB1C_MODEL,
-	FF_SENTRYGUN_GIB1D_MODEL,
-	FF_SENTRYGUN_GIB2A_MODEL,
-	FF_SENTRYGUN_GIB2B_MODEL,
-	FF_SENTRYGUN_GIB2C_MODEL,
-	FF_SENTRYGUN_GIB2D_MODEL,
-	FF_SENTRYGUN_GIB3A_MODEL,
-	FF_SENTRYGUN_GIB3B_MODEL,
-	FF_SENTRYGUN_GIB3C_MODEL,
-	FF_SENTRYGUN_GIB3D_MODEL,
-	FF_SENTRYGUN_GIB3D_MODEL,
-	FF_SENTRYGUN_GIB3E_MODEL,
-	FF_SENTRYGUN_GIBTRIPOD_MODEL,
-	NULL
-};
-
-// Array of char *'s to sounds
-const char *g_pszFFSentryGunSounds[] =
-{
-	FF_SENTRYGUN_BUILD_SOUND, 
-	FF_SENTRYGUN_EXPLODE_SOUND, 
-	"Sentry.Fire", 
-	"Sentry.Spot", 
-	"Sentry.Scan", 
-	"Sentry.Two", 
-	"Sentry.Three", 
-	"Sentry.Aim",
-	FF_SENTRYGUN_UNBUILD_SOUND,
-	"Spanner.HitSG",
-	"Sentry.RocketFire",
-	"Sentry.SabotageActivate",
-	//"Sentry.SabotageFinish",
-	"Sentry.CloakDetection",
-	"Sentry.CloakSonar",
-	"DoSpark",
-	NULL
-};
-
-// Array of char *'s to dispenser models
-const char *g_pszFFDetpackModels[ ] =
-{
-	FF_DETPACK_MODEL,
-	NULL
-};
-
-// Array of char *'s to gib models
-const char *g_pszFFDetpackGibModels[ ] =
-{
-	NULL
-};
-
-// Array of char *'s to sounds
-const char *g_pszFFDetpackSounds[ ] =
-{
-	FF_DETPACK_BUILD_SOUND,
-	FF_DETPACK_EXPLODE_SOUND,
-	"Detpack.FiveSeconds",
-	"Detpack.Defuse",
-	NULL
-};
-
-// Array of char *'s to dispenser models
-const char *g_pszFFManCannonModels[] =
-{
-	FF_MANCANNON_MODEL,
-	NULL
-};
-
-// Array of char *'s to gib models
-const char *g_pszFFManCannonGibModels[] =
-{
-	NULL
-};
-
-// Array of char *'s to sounds
-const char *g_pszFFManCannonSounds[] =
-{
-	FF_MANCANNON_BUILD_SOUND,
-	FF_MANCANNON_EXPLODE_SOUND,
-	//"JumpPad.WarmUp",
-	//"JumpPad.PowerDown",
-	"JumpPad.Fire",
-	"JumpPad.Heal",//For the healing sound on jumppads -GreenMushy
-	NULL
-};
-
-//ConVar ffdev_mancannon_combatcooldown( "ffdev_mancannon_combatcooldown", "3", FCVAR_FF_FFDEV_REPLICATED );
-#define MANCANNON_COMBATCOOLDOWN 3.0f
+	return vecMiddle;
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Constructor - initializes a bunch of stuff and figures out if
@@ -494,74 +375,6 @@ void CFFBuildableInfo::GetBuildError( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Returns a proper angle orientation for the buidlable depending
-//			on the approximate ground normal
-//-----------------------------------------------------------------------------
-QAngle OrientToVectors(const Vector &vecGroundNormal, const Vector &vecPlayerForward) 
-{
-	// Get correct forward & right vector
-	Vector vecUp = vecGroundNormal;
-	Vector vecRight = CrossProduct(vecUp, -vecPlayerForward);
-	Vector vecForward = CrossProduct(vecUp, vecRight);
-
-	// Normalise(jic) 
-	VectorNormalize(vecForward);
-	VectorNormalize(vecRight);
-	VectorNormalize(vecUp);
-
-	// Quaternions are the handiest things
-	Quaternion q;
-	BasisToQuaternion(vecForward, vecRight, vecUp, q);
-
-	// Now for the angles
-	QAngle angNew;
-	QuaternionAngles(q, angNew);
-
-	return angNew;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Vectors must be	0 1
-//							2 3
-//-----------------------------------------------------------------------------
-void ComputeRectangularPlane(const Vector &v0, const Vector &v1, const Vector &v2, const Vector &v3, Vector &vOut) 
-{
-	Vector vecOne = v0 - v3;
-	Vector vecTwo = v2 - v1;
-
-	VectorNormalize(vecOne);
-	VectorNormalize(vecTwo);
-
-	vOut = CrossProduct(vecOne, vecTwo);
-
-	VectorNormalize(vOut);
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-Vector GetMiddle(const Vector *v1, const Vector *v2, const Vector *v3 = NULL, const Vector *v4 = NULL) 
-{
-	float c = 2.0f;
-	Vector vecMiddle = *v1 + *v2;
-
-	if (v3) 
-	{
-		vecMiddle += *v3;
-		c++;
-	}
-	if (v4) 
-	{
-		vecMiddle += *v4;
-		c++;
-	}
-
-	vecMiddle /= c;
-
-	return vecMiddle;
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: Sees if a buildable can be placed on the ground
 //-----------------------------------------------------------------------------
 BuildInfoResult_t CFFBuildableInfo::CanOrientToGround( void ) 
@@ -713,234 +526,3 @@ BuildInfoResult_t CFFBuildableInfo::CanOrientToGround( void )
 
 	return BUILD_ALLOWED;
 }
-
-//-----------------------------------------------------------------------------
-// Purpose: Get health as a percentage
-//-----------------------------------------------------------------------------
-int CFFBuildableObject::GetHealthPercent( void ) const
-{
-	float flPercent = ( ( float )GetHealth() / ( float )GetMaxHealth() ) * 100.0f;
-
-	// Don't display 0% it looks stupid
-	if (flPercent < 1.0f)
-		return 1;
-	else
-		return ( int )flPercent;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Team accessor [mirv]
-//-----------------------------------------------------------------------------
-int CFFBuildableObject::GetTeamNumber()
-{
-	CFFPlayer *pOwner = GetOwnerPlayer();
-
-	if (!pOwner)
-		return TEAM_UNASSIGNED;
-
-	return pOwner->GetTeamNumber();
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Get a buildables owner
-//-----------------------------------------------------------------------------
-CFFPlayer *CFFBuildableObject::GetOwnerPlayer( void )
-{
-	if( m_hOwner.Get() )
-		return ToFFPlayer( m_hOwner.Get() );
-
-	return NULL;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Get a buildables team
-//-----------------------------------------------------------------------------
-CFFTeam *CFFBuildableObject::GetOwnerTeam( void )
-{
-	CFFPlayer *pOwner = GetOwnerPlayer();
-	if( pOwner )
-	{
-#ifdef _DEBUG
-		Assert( dynamic_cast< CFFTeam * >( pOwner->GetTeam() ) != 0 );
-#endif
-		return static_cast< CFFTeam * >( pOwner->GetTeam() );
-	}
-	return NULL;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Get a buildables team id
-//-----------------------------------------------------------------------------
-int CFFBuildableObject::GetOwnerTeamId( void )
-{
-	CFFPlayer *pOwner = GetOwnerPlayer();
-	if( pOwner )
-		return pOwner->GetTeamNumber();
-
-	return TEAM_UNASSIGNED;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Constructor
-//-----------------------------------------------------------------------------
-CFFDispenser::CFFDispenser( void )
-{
-#ifdef GAME_DLL
-	// Overwrite the base class stubs
-	m_ppszModels = g_pszFFDispenserModels;
-	m_ppszGibModels = g_pszFFDispenserGibModels;
-	m_ppszSounds = g_pszFFDispenserSounds;
-
-	// Time in seconds between generating shiz
-	m_flThinkTime = 3.0f;
-
-	// Initialize
-	m_pLastTouch = NULL;
-	m_flLastTouch = 0.0f;
-
-	// Store a value from the base class
-	m_flOrigExplosionMagnitude = m_flExplosionMagnitude;
-
-	m_flLastClientUpdate = 0;
-	m_iLastState = 0;
-#endif
-
-	// Initial values
-	m_iCells = 30;
-	m_iNails = 30;
-	m_iShells = 30;
-	m_iRockets = 15;
-	m_iArmor = 30;
-
-	// Max values
-	m_iMaxCells		= 100;
-	m_iMaxNails		= 100;
-	m_iMaxShells	= 100;
-	m_iMaxRockets	= 50;
-	m_iMaxArmor		= 100;
-
-	// Give values - values to give a player when they touch us
-	m_iGiveCells	= 30; // Give engies 75, though
-	m_iGiveNails	= 30;
-	m_iGiveShells	= 30;
-	m_iGiveRockets	= 15;
-	m_iGiveArmor	= 30;
-
-	// Health
-	m_iMaxHealth = m_iHealth = 75;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Destructor
-//-----------------------------------------------------------------------------
-CFFDispenser::~CFFDispenser( void )
-{
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Constructor
-//-----------------------------------------------------------------------------
-CFFManCannon::CFFManCannon( void )
-{
-#ifdef GAME_DLL
-	// Overwrite the base class stubs
-	m_ppszModels = g_pszFFManCannonModels;
-	m_ppszGibModels = g_pszFFManCannonGibModels;
-	m_ppszSounds = g_pszFFManCannonSounds;
-
-	m_bUsePhysics = true;
-	m_flLastClientUpdate = 0;
-	m_iLastState = 0;
-#endif
-
-	// Health
-	m_iMaxHealth = m_iHealth = 100;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Destructor
-//-----------------------------------------------------------------------------
-CFFManCannon::~CFFManCannon( void )
-{
-}
-
-#ifdef CLIENT_DLL
-
-void DispenserGib_Callback(const CEffectData &data)
-{
-	Vector vecPosition = data.m_vOrigin;
-	Vector vecOffset;
-	int nSkin = data.m_nMaterial;
-
-	// Now spawn a number of gibs
-	int iGib = 0;
-	while (g_pszFFDispenserGibModels[iGib])
-	{
-		C_Gib *pGib = C_Gib::CreateClientsideGib(g_pszFFDispenserGibModels[iGib], vecPosition, Vector(random->RandomFloat(-150, 150), random->RandomFloat(-150, 150), random->RandomFloat(100, 400)), RandomAngularImpulse( -60, 60 ), 10.0f);
-	
-		if (pGib)
-		{
-			pGib->m_nSkin = nSkin;
-			pGib->LeaveBloodDecal(false);
-		}
-		++iGib;
-	}
-}
-
-DECLARE_CLIENT_EFFECT("DispenserGib", DispenserGib_Callback);
-
-void SentryGunGib_Callback(const CEffectData &data)
-{
-	Vector vecPosition = data.m_vOrigin;
-	Vector vecOffset;
-	int nSkin = data.m_nMaterial;
-
-	// Now spawn a number of gibs
-	int iGib = 0;
-	if (data.m_nDamageType == 1) //HACK: Using m_nDamageType as SG level
-	{
-		while (g_pszFFSentryGunGibModelsL1[iGib])
-		{
-			C_Gib *pGib = C_Gib::CreateClientsideGib(g_pszFFSentryGunGibModelsL1[iGib], vecPosition, Vector(random->RandomFloat(-150, 150), random->RandomFloat(-150, 150), random->RandomFloat(100, 400)), RandomAngularImpulse( -90, 90 ), 4.0f);
-		
-			if (pGib)
-			{
-				pGib->m_nSkin = nSkin;
-				pGib->LeaveBloodDecal(false);
-			}
-			++iGib;
-		}
-	}
-	else if (data.m_nDamageType == 2) //HACK: Using m_nDamageType as SG level
-	{
-		while (g_pszFFSentryGunGibModelsL2[iGib])
-		{
-			C_Gib *pGib = C_Gib::CreateClientsideGib(g_pszFFSentryGunGibModelsL2[iGib], vecPosition, Vector(random->RandomFloat(-150, 150), random->RandomFloat(-150, 150), random->RandomFloat(100, 500)), RandomAngularImpulse( -90, 90 ), 4.0f);
-		
-			if (pGib)
-			{
-				pGib->m_nSkin = nSkin;
-				pGib->LeaveBloodDecal(false);
-			}
-			++iGib;
-		}
-	}
-	else if (data.m_nDamageType == 3) //HACK: Using m_nDamageType as SG level
-	{
-		while (g_pszFFSentryGunGibModelsL3[iGib])
-		{
-			C_Gib *pGib = C_Gib::CreateClientsideGib(g_pszFFSentryGunGibModelsL3[iGib], vecPosition, Vector(random->RandomFloat(-150, 150), random->RandomFloat(-150, 150), random->RandomFloat(100, 600)), RandomAngularImpulse( -90, 90 ), 4.0f);
-		
-			if (pGib)
-			{
-				pGib->m_nSkin = nSkin;
-				pGib->LeaveBloodDecal(false);
-			}
-			++iGib;
-		}
-	}
-}
-
-DECLARE_CLIENT_EFFECT("SentryGunGib", SentryGunGib_Callback);
-
-#endif
