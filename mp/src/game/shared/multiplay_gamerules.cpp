@@ -16,6 +16,7 @@
 #include "utlbuffer.h"
 
 #include "ff_projectile_base.h"
+#include "ff_weapon_base.h"
 
 #ifdef CLIENT_DLL
 
@@ -39,6 +40,8 @@
 	#include "team.h"
 	#include "usermessages.h"
 	#include "tier0/icommandline.h"
+
+	#include "ff_player.h"
 
 	// BEG: Added by Mulchman for Buildable Objects
 	#include "ff_buildableobjects_shared.h"

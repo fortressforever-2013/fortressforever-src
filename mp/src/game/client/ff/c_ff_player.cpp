@@ -13,6 +13,7 @@
 #include "c_basetempentity.h"
 #include "ff_buildableobjects_shared.h"
 #include "ff_utils.h"
+#include "c_ff_team.h"
 #include "engine/IEngineSound.h"
 #include "in_buttons.h"
 #include "filesystem.h"

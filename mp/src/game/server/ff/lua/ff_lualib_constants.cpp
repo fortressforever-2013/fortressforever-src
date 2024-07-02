@@ -12,6 +12,8 @@
 #include "ff_info_script.h"
 #include "ff_triggerclip.h"
 
+#include "ff_weapon_base.h"
+
 #include "ammodef.h"
 
 // Lua includes

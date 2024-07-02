@@ -10,6 +10,7 @@
 #include "ff_info_script.h"
 #include "triggers.h"
 #include "stringregistry.h"
+#include "tier0/vprof.h"
 
 // engine
 #include "filesystem.h"

@@ -62,6 +62,7 @@
 #include "movehelper_server.h"
 #include "gameinterface.h"
 #include "ff_utils.h"
+#include "ff_team.h"
 #include "te_effect_dispatch.h"
 #include "bitbuf.h"
 #include "filesystem.h"

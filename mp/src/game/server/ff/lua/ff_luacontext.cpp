@@ -21,6 +21,8 @@
 
 #include "ff_item_backpack.h"
 
+#include "tier0/vprof.h"
+
 // Lua includes
 extern "C"
 {

@@ -13,6 +13,7 @@
 #include "ff_triggerclip.h"
 #include "ff_player.h"
 #include "ff_utils.h"
+#include "ff_team.h"
 
 #include "beam_shared.h"
 #include "buttons.h"
