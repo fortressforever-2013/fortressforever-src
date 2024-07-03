@@ -41,6 +41,9 @@ extern "C"
 #include "ff_timerman.h"
 #include "ff_menuman.h"
 
+#include "ff_luacontext.h"
+#include "ff_scriptman.h"
+
 #include "omnibot_interface.h"
 
 #include "LuaBridge/LuaBridge.h"
@@ -1435,7 +1438,21 @@ namespace FFLib
 			//pEvent->SetString( "eventname", name );
 			pEvent->SetString( "eventtext", text );
 
-			gameeventmanager->FireEvent( pEvent );
+			// pass on to lua to do "stuff"
+			bool bAllowedLUA = true;
+			
+			CFFLuaSC hContext( 0 );
+			hContext.Push( pEvent );
+			
+			if ( _scriptman.RunPredicates_LUA( NULL, &hContext, "ondeathnotice" ) )
+			{
+				bAllowedLUA = hContext.GetBool();
+			}
+			
+			if ( bAllowedLUA )
+			{
+				gameeventmanager->FireEvent( pEvent );
+			}
 		}
 	}
 

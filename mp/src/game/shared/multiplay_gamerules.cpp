@@ -51,6 +51,9 @@
 	#include "ff_buildable_mancannon.h"
 	// END: Added by Mulchman for Buildable Objects
 
+	#include "ff_luacontext.h"
+	#include "ff_scriptman.h"
+
 	#include "omnibot_interface.h"
 
 #ifdef NEXT_BOT
@@ -1074,7 +1077,21 @@ ConVarRef suitcharger( "sk_suitcharger" );
 #ifdef HL1MP_DLL
 			event->SetString("weapon", killer_weapon_name );
 #endif			
-			gameeventmanager->FireEvent( event );
+			// pass on to lua to do "stuff"
+			bool bAllowedLUA = true;
+			
+			CFFLuaSC hContext( 0 );
+			hContext.Push( event );
+
+			if ( _scriptman.RunPredicates_LUA( NULL, &hContext, "ondeathnotice" ) )
+			{
+				bAllowedLUA = hContext.GetBool();
+			}
+			
+			if ( bAllowedLUA )
+			{
+				gameeventmanager->FireEvent(event);
+			}
 		}
 		Omnibot::Notify_Death(pVictim, pKiller, killer_weapon_name);
 	}

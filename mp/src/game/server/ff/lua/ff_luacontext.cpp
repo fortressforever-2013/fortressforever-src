@@ -136,6 +136,9 @@ void CFFLuaSC::Push(QAngle angle) { m_params.AddToTail(SETOBJECT(angle)); }
 void CFFLuaSC::Push(const CTakeDamageInfo* pInfo) { m_params.AddToTail(SETOBJECT(pInfo)); }
 void CFFLuaSC::Push(CFFItemBackpack* pEntity) { m_params.AddToTail(SETOBJECT(pEntity)); }
 
+// deathnotice events for lua
+void CFFLuaSC::Push(IGameEvent* pEvent) { m_params.AddToTail(SETOBJECT(pEvent)); }
+
 //---------------------------------------------------------------------------
 void CFFLuaSC::PushRef(luabridge::LuaRef& luaObject) { m_params.AddToTail(SETOBJECTREF(luaObject)); }
 void CFFLuaSC::PushRef(Vector &vector) { m_params.AddToTail(SETOBJECTREF(vector)); }

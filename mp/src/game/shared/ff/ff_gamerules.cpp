@@ -1793,7 +1793,21 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 			else
 				pEvent->SetString( "attackerpos", "");
 
-			gameeventmanager->FireEvent( pEvent );
+			// pass on to lua to do "stuff"
+			bool bAllowedLUA = true;
+			
+			CFFLuaSC hContext( 0 );
+			hContext.Push( pEvent );
+			
+			if ( _scriptman.RunPredicates_LUA( NULL, &hContext, "ondeathnotice" ) )
+			{
+				bAllowedLUA = hContext.GetBool();
+			}
+			
+			if ( bAllowedLUA )
+			{
+				gameeventmanager->FireEvent( pEvent );
+			}
 		}
 	}
 

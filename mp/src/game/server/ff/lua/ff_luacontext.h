@@ -31,6 +31,9 @@ class CBeam;
 class CTakeDamageInfo;
 class CFFItemBackpack;
 
+// deathnotice events for lua
+class IGameEvent;
+
 namespace luabridge {
 	class LuaRef;
 };
@@ -71,6 +74,9 @@ public:
 	void Push(QAngle angle);
 	void Push(const CTakeDamageInfo* pInfo);
 	void Push(CFFItemBackpack* pEntity);
+
+	// deathnotice events for lua
+	void Push(IGameEvent* pEvent);
 
 	// pushes a parameter by reference in preparation for a function call
 	void PushRef(CTakeDamageInfo& info);
