@@ -88,6 +88,11 @@ class IHasAttributes;
 
 typedef CUtlVector< CBaseEntity* > EntityList_t;
 
+namespace luabridge
+{
+	class LuaRef;
+};
+
 #if defined( HL2_DLL )
 
 // For CLASSIFY
@@ -227,6 +232,8 @@ enum Class_T
 	CLASS_BACKPACK,
 	CLASS_INFOSCRIPT,
 	CLASS_TRIGGER, // see https://github.com/fortressforever-2013/fortressforever-src/issues/34
+	CLASS_TRIGGER_HURT,
+	CLASS_TRIGGER_MULTIPLE,
 	CLASS_TRIGGERSCRIPT,
 	CLASS_TRIGGER_CLIP,
 	CLASS_TEAMSPAWN,
@@ -382,7 +389,11 @@ class CBaseEntity : public IServerEntity
 public:
 	DECLARE_CLASS_NOBASE( CBaseEntity );	
 
-	CUtlVector< int > m_hActiveScripts;
+	// active triggers
+	CUtlVector< int > m_hActiveScripts;		// only triggerscripts
+	CUtlVector< int > m_hActiveTriggers;	// all triggers
+
+	luabridge::LuaRef GetTouchingTriggers( void );
 
 	//----------------------------------------
 	// Class vars and functions

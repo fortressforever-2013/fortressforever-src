@@ -207,6 +207,21 @@ namespace FFLib
 		return IsOfClass( pEntity, CLASS_INFOSCRIPT );
 	}
 
+	bool IsBaseTrigger( CBaseEntity* pEntity )
+	{
+		return IsOfClass( pEntity, CLASS_TRIGGER );
+	}
+
+	bool IsTriggerMultiple( CBaseEntity* pEntity )
+	{
+		return IsOfClass( pEntity, CLASS_TRIGGER_MULTIPLE );
+	}
+
+	bool IsTriggerHurt( CBaseEntity* pEntity )
+	{
+		return IsOfClass( pEntity, CLASS_TRIGGER_HURT );
+	}
+
 	// is entity a trigger ff script
 	bool IsTriggerScript(CBaseEntity* pEntity)
 	{

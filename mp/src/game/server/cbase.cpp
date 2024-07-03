@@ -285,7 +285,13 @@ void CBaseEntityOutput::FireOutput(variant_t Value, CBaseEntity *pActivator, CBa
 			//
 			// Post the event with the default parameter.
 			//
-			if ( pCaller && ( pCaller->Classify() == CLASS_TRIGGER || pCaller->Classify() == CLASS_TRIGGERSCRIPT || pCaller->Classify() == CLASS_TRIGGER_CLIP )
+			if ( pCaller &&
+				( pCaller->Classify() == CLASS_TRIGGER ||
+				  pCaller->Classify() == CLASS_TRIGGER_HURT ||
+				  pCaller->Classify() == CLASS_TRIGGER_MULTIPLE ||
+				  pCaller->Classify() == CLASS_TRIGGERSCRIPT ||
+				  pCaller->Classify() == CLASS_TRIGGER_CLIP
+				)
 				&& pCaller->GetName() == STRING( ev->m_iTarget ) )
 			{
 				g_EventQueue.AddEvent( pCaller, STRING(ev->m_iTargetInput), Value, ev->m_flDelay + fDelay, pActivator, pCaller, ev->m_iIDStamp );
@@ -301,7 +307,13 @@ void CBaseEntityOutput::FireOutput(variant_t Value, CBaseEntity *pActivator, CBa
 			variant_t ValueOverride;
 			ValueOverride.SetString( ev->m_iParameter );
 
-			if ( pCaller && ( pCaller->Classify() == CLASS_TRIGGER || pCaller->Classify() == CLASS_TRIGGERSCRIPT || pCaller->Classify() == CLASS_TRIGGER_CLIP )
+			if ( pCaller &&
+				( pCaller->Classify() == CLASS_TRIGGER ||
+				  pCaller->Classify() == CLASS_TRIGGER_HURT ||
+				  pCaller->Classify() == CLASS_TRIGGER_MULTIPLE ||
+				  pCaller->Classify() == CLASS_TRIGGERSCRIPT ||
+				  pCaller->Classify() == CLASS_TRIGGER_CLIP
+				)
 				&& pCaller->GetName() == STRING( ev->m_iTarget ) )
 			{
 				g_EventQueue.AddEvent( pCaller, STRING(ev->m_iTargetInput), ValueOverride, ev->m_flDelay, pActivator, pCaller, ev->m_iIDStamp );

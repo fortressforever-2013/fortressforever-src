@@ -64,9 +64,20 @@
 #include "utlhashtable.h"
 
 #include "SpriteTrail.h"
+#include "triggers.h"
 
 #include "ff_luacontext.h" // FF
 #include "ff_scriptman.h" // FF
+
+// Lua includes
+extern "C"
+{
+	#include "lua.h"
+	#include "lualib.h"
+	#include "lauxlib.h"
+}
+
+#include "LuaBridge/LuaBridge.h"
 
 #if defined( TF_DLL )
 #include "tf_gamerules.h"
@@ -7639,3 +7650,19 @@ void CBaseEntity::StopTrail()
 }
 
 static ConCommand ent_orient("ent_orient", CC_Ent_Orient, "Orient the specified entity to match the player's angles. By default, only orients target entity's YAW. Use the 'allangles' option to orient on all axis.\n\tFormat: ent_orient <entity name> <optional: allangles>", FCVAR_CHEAT);
+
+luabridge::LuaRef CBaseEntity::GetTouchingTriggers( void )
+{
+	luabridge::LuaRef retObj = luabridge::newTable( _scriptman.GetLuaState() );
+
+	for (int i = 0; i != m_hActiveTriggers.Count(); i++)
+	{
+		CBaseTrigger* trigger = static_cast<CBaseTrigger*>(UTIL_EntityByIndex(m_hActiveTriggers[i]));
+		if (trigger)
+		{
+			retObj[i + 1] = luabridge::LuaRef(_scriptman.GetLuaState(), trigger);
+		}
+	}
+
+	return retObj;
+}

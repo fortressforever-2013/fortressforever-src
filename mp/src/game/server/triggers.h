@@ -123,6 +123,8 @@ public:
 	void MultiWaitOver( void );
 	void ActivateMultiTrigger(CBaseEntity *pActivator);
 
+	virtual Class_T Classify( void ) { return CLASS_TRIGGER_MULTIPLE; }
+
 	DECLARE_DATADESC();
 
 	// Outputs
@@ -206,6 +208,8 @@ public:
 	void EndTouch( CBaseEntity *pOther );
 	bool HurtEntity( CBaseEntity *pOther, float damage );
 	int HurtAllTouchers( float dt );
+
+	virtual Class_T Classify(void) { return CLASS_TRIGGER_HURT; }
 
 	DECLARE_DATADESC();
 

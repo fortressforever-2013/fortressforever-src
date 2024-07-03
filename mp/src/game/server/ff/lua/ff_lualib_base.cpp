@@ -117,6 +117,8 @@ void CFFLuaLib::InitBase(lua_State* L)
 
 			.addFunction("GetFriction",			&CBaseEntity::GetFriction)
 			.addFunction("SetFriction",			&CBaseEntity::SetFriction)
+
+			.addFunction("GetTouchingTriggers", &CBaseEntity::GetTouchingTriggers)
 		.endClass()
 
 		// CFFProjectileBase
@@ -176,8 +178,20 @@ void CFFLuaLib::InitBase(lua_State* L)
 			.addFunction("SetAngularVelocity",	&CFFInfoScript::SetLocalAngularVelocity)
 		.endClass()
 
+		// CBaseTrigger
+		.deriveClass<CBaseTrigger, CBaseEntity>("BaseTrigger")
+		.endClass()
+
+		// CTriggerHurt
+		.deriveClass<CTriggerHurt, CBaseTrigger>("TriggerHurt")
+		.endClass()
+
+		// CTriggerMultiple
+		.deriveClass<CTriggerMultiple, CBaseTrigger>("TriggerMultiple")
+		.endClass()
+
 		// CFuncFFScript - trigger_ff_script
-		.beginClass<CFuncFFScript>("TriggerScript")
+		.deriveClass<CFuncFFScript, CTriggerMultiple>("TriggerScript")
 			.addFunction("IsActive", &CFuncFFScript::IsActive)
 			.addFunction("IsInactive", &CFuncFFScript::IsInactive)
 			.addFunction("IsRemoved", &CFuncFFScript::IsRemoved)

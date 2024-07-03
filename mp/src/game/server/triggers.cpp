@@ -597,6 +597,22 @@ void CBaseTrigger::StartTouch(CBaseEntity *pOther)
 		CFFLuaSC hTouch(1, pOther);
 		_scriptman.RunPredicates_LUA(this, &hTouch, "ontouch");
 
+		// Add this trigger to m_hActiveTriggers
+		int iEntIndex = entindex();
+		if (iEntIndex)
+		{
+			// Don't want dups
+			bool bFound = false;
+			for (int i = 0; (i < pOther->m_hActiveTriggers.Count()) && !bFound; i++)
+				if (pOther->m_hActiveTriggers[i] == iEntIndex)
+					bFound = true;
+
+			if (!bFound)
+			{
+				pOther->m_hActiveTriggers.AddToTail(iEntIndex);
+			}
+		}
+
 		// Got a trigger_ff_script - do special stuff
 		if (Classify() == CLASS_TRIGGERSCRIPT)
 		{
@@ -651,6 +667,10 @@ void CBaseTrigger::EndTouch(CBaseEntity *pOther)
 		int iEntIndex = entindex();
 		if (iEntIndex)
 		{
+			for (int i = 0; i < pOther->m_hActiveTriggers.Count(); i++)
+				if (pOther->m_hActiveTriggers[i] == iEntIndex)
+					pOther->m_hActiveTriggers.Remove(i);
+
 			for (int i = 0; i < pOther->m_hActiveScripts.Count(); i++)
 				if (pOther->m_hActiveScripts[i] == iEntIndex)
 					pOther->m_hActiveScripts.Remove(i);
