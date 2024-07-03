@@ -42,7 +42,7 @@ bool CheckKeyName(const char* keyName)
 {
 	// we limit on how many keys lua can access/write
 	// so lua cannot access the internal keys
-	if (Q_strcmp(keyName, "userid")			&& // (int) player_death, sentrygun_killed, dispenser_killed, mancannon_killed
+	if (Q_strcmp(keyName, "userid")			&& // (int) player_death, sentrygun_killed, dispenser_killed, mancannon_killed, objective_event
 		Q_strcmp(keyName, "attacker")		&& // (int) player_death, sentrygun_killed, dispenser_killed, mancannon_killed
 		Q_strcmp(keyName, "weapon")			&& // (string classname) player_death, sentrygun_killed, dispenser_killed, mancannon_killed
 		Q_strcmp(keyName, "damagetype")		&& // (int) player_death
@@ -50,7 +50,8 @@ bool CheckKeyName(const char* keyName)
 		Q_strcmp(keyName, "killassister")	&& // (int) player_death
 		Q_strcmp(keyName, "killersglevel")	&& // (int) player_death, sentrygun_killed, dispenser_killed, mancannon_killed
 		Q_strcmp(keyName, "killedsglevel")	&& // (int) player_death, sentrygun_killed
-		Q_strcmp(keyName, "attackerpos")	   // (string vector) sentrygun_killed
+		Q_strcmp(keyName, "attackerpos")	&& // (string vector) sentrygun_killed
+		Q_strcmp(keyName, "eventtext")		   // (string) objective_event
 		)
 	{
 		return false;
