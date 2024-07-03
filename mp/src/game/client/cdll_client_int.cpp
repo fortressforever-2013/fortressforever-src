@@ -121,7 +121,6 @@
 #include "../engine/audio/public/sound.h"
 #include "tf_shared_content_manager.h"
 #endif
-#include "clientsteamcontext.h"
 #include "renamed_recvtable_compat.h"
 #include "mouthinfo.h"
 #include "sourcevr/isourcevirtualreality.h"
@@ -769,10 +768,6 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 	ConnectTier2Libraries( &appSystemFactory, 1 );
 	ConnectTier3Libraries( &appSystemFactory, 1 );
 
-#ifndef NO_STEAM
-	ClientSteamContext().Activate();
-#endif
-
 	// We aren't happy unless we get all of our interfaces.
 	// please don't collapse this into one monolithic boolean expression (impossible to debug)
 	if ( (engine = (IVEngineClient *)appSystemFactory( VENGINE_CLIENT_INTERFACE_VERSION, NULL )) == NULL )
@@ -1056,10 +1051,10 @@ void CHLClient::PostInit()
 	g_ClientVirtualReality.StartupComplete();
 
 #ifdef HL1MP_CLIENT_DLL
-	if ( s_cl_load_hl1_content.GetBool() && steamapicontext && steamapicontext->SteamApps() )
+	if ( s_cl_load_hl1_content.GetBool() && steamapicontext && SteamApps() )
 	{
 		char szPath[ MAX_PATH*2 ];
-		int ccFolder= steamapicontext->SteamApps()->GetAppInstallDir( 280, szPath, sizeof(szPath) );
+		int ccFolder= SteamApps()->GetAppInstallDir( 280, szPath, sizeof(szPath) );
 		if ( ccFolder > 0 )
 		{
 			V_AppendSlash( szPath, sizeof(szPath) );
@@ -1117,10 +1112,6 @@ void CHLClient::Shutdown( void )
 	ParticleMgr()->Term();
 	
 	ClearKeyValuesCache();
-
-#ifndef NO_STEAM
-	ClientSteamContext().Shutdown();
-#endif
 
 #ifdef WORKSHOP_IMPORT_ENABLED
 	ShutdownDataModel();
@@ -2575,13 +2566,13 @@ bool CHLClient::IsConnectedUserInfoChangeAllowed( IConVar *pCvar )
 CSteamID GetSteamIDForPlayerIndex( int iPlayerIndex )
 {
 	player_info_t pi;
-	if ( steamapicontext && steamapicontext->SteamUtils() )
+	if ( SteamUtils() )
 	{
 		if ( engine->GetPlayerInfo( iPlayerIndex, &pi ) )
 		{
 			if ( pi.friendsID )
 			{
-				return CSteamID( pi.friendsID, 1, steamapicontext->SteamUtils()->GetConnectedUniverse(), k_EAccountTypeIndividual );
+				return CSteamID( pi.friendsID, 1, SteamUtils()->GetConnectedUniverse(), k_EAccountTypeIndividual );
 			}
 		}
 	}

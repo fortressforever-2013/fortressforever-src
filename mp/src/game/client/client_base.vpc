@@ -305,8 +305,8 @@ $Project
 		$File	"clientshadowmgr.cpp"
 		$File	"clientsideeffects.cpp"
 		$File	"clientsideeffects_test.cpp"
-		$File	"clientsteamcontext.cpp"
-		$File	"clientsteamcontext.h"
+		//$File	"clientsteamcontext.cpp"		// removed in latest steam API (v1.60)
+		//$File	"clientsteamcontext.h"			// removed in latest steam API (v1.60)
 		$File	"colorcorrectionmgr.cpp"
 		$File	"commentary_modelviewer.cpp"
 		$File	"commentary_modelviewer.h"
