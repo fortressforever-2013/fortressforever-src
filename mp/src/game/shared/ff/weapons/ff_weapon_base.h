@@ -35,7 +35,7 @@ class CFFPlayer;
 #define AMMO_SHELLS				"AMMO_SHELLS"	// shotguns
 #define AMMO_NAILS				"AMMO_NAILS"	// nailguns
 #define AMMO_ROCKETS			"AMMO_ROCKETS"	// rpg
-#define AMMO_CELLS				"AMMO_CELLS"	// for building dispenser, sentry gun
+#define AMMO_CELLS				"AMMO_CELLS"	// for building dispenser, sentry gun, and teleporters
 #define AMMO_DETPACK			"AMMO_DETPACK"	// for "building" detpacks
 #define AMMO_MANCANNON			"AMMO_MANCANNON"	// for "building" man cannons
 #define AMMO_GREN1				"AMMO_GREN1"	// gren1
@@ -60,6 +60,8 @@ class CFFPlayer;
 			case FF_BUILD_SENTRYGUN: pFFPlayer->Command_BuildSentryGun(); break; \
 			case FF_BUILD_DETPACK: engine->ClientCommand( pFFPlayer->edict(), "detpack 5" ); break; \
 			case FF_BUILD_MANCANNON: pFFPlayer->Command_BuildManCannon(); break; \
+			case FF_BUILD_TELEPORTER_ENTRANCE: pFFPlayer->Command_BuildTeleporter(); break; \
+			case FF_BUILD_TELEPORTER_EXIT: pFFPlayer->Command_BuildTeleporter(); break; \
 		} \
 		return; \
 	} \
@@ -167,6 +169,7 @@ typedef enum
 	FF_WEAPON_DEPLOYSENTRYGUN, 
 	FF_WEAPON_DEPLOYDETPACK,
 	FF_WEAPON_DEPLOYMANCANNON,
+	FF_WEAPON_DEPLOYTELEPORTER,
 
 	// Don't put any more weapons down here! 
 	// Put the rest above the DEPLOY weapons please.

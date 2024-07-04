@@ -48,6 +48,8 @@ void CHudBuildTimer::VidInit()
 	m_pSentrygunIconTexture = gHUD.GetIcon("build_sentrygun");
 	m_pDetpackIconTexture = gHUD.GetIcon("build_detpack");
 	m_pMancannonIconTexture = gHUD.GetIcon("build_jumppad");
+	m_pTeleporterEntranceIconTexture = gHUD.GetIcon("build_jumppad");
+	m_pTeleporterExitIconTexture = gHUD.GetIcon("build_jumppad");
 	
 	Reset();
 }
@@ -86,6 +88,12 @@ void CHudBuildTimer::SetBuildTimer(int iBuildType, float flDuration)
 			break;
 		case FF_BUILD_MANCANNON:
 			m_pIconTexture = m_pMancannonIconTexture;
+			break;
+		case FF_BUILD_TELEPORTER_ENTRANCE:
+			m_pIconTexture = m_pTeleporterEntranceIconTexture;
+			break;
+		case FF_BUILD_TELEPORTER_EXIT:
+			m_pIconTexture = m_pTeleporterExitIconTexture;
 			break;
 		}
 	}

@@ -63,6 +63,8 @@
 // 10 - civilian
 // 11 - dispenser
 // 12 - sentrygun
+// 13 - mancannon
+// 14 - teleporter
 int Class_StringToInt( const char *szClassName )
 {
 	// Doing case insensitive compares and also
@@ -95,6 +97,8 @@ int Class_StringToInt( const char *szClassName )
 		return 12;
 	else if( Q_stricmp( szClassName, "mancannon" ) == 0 )
 		return 13;
+	else if( Q_stricmp( szClassName, "teleporter" ) == 0 )
+		return 14;
 	else
 		DevWarning( "Class_StringToInt :: No match!\n" );
 
@@ -124,6 +128,7 @@ const char *Class_IntToString( int iClassIndex )
 		case 11: return "dispenser"; break;
 		case 12: return "sentrygun"; break;
 		case 13: return "mancannon"; break;
+		case 14: return "teleporter"; break;
 		default: DevWarning( "Class_IntToString :: No match!\n" ); break;
 	}
 
@@ -149,6 +154,7 @@ const char *Class_IntToResourceString( int iClassIndex )
 		case 11: return "#FF_PLAYER_DISPENSER"; break;
 		case 12: return "#FF_PLAYER_SENTRYGUN"; break;
 		case 13: return "#FF_PLAYER_MANCANNON"; break;
+		case 14: return "#FF_PLAYER_TELEPORTER"; break;
 	}
 
 	return "#FF_PLAYER_INVALID";
@@ -177,6 +183,7 @@ const char *Class_IntToPrintString( int iClassIndex )
 		case 11: return "Dispenser"; break;
 		case 12: return "SentryGun"; break;
 		case 13: return "ManCannon"; break;
+		case 14: return "Teleporter"; break;
 		default: DevWarning( "Class_IntToPrintString :: No match!\n" ); break;
 	}
 

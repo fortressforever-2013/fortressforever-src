@@ -23,6 +23,8 @@ private:
 	CHudTexture *m_pSentrygunIconTexture;
 	CHudTexture *m_pDetpackIconTexture;
 	CHudTexture *m_pMancannonIconTexture;
+	CHudTexture *m_pTeleporterEntranceIconTexture;
+	CHudTexture *m_pTeleporterExitIconTexture;
 	
 	CPanelAnimationVarAliasType(float, bar_xpos, "bar_xpos", "0", "proportional_float");
 	CPanelAnimationVarAliasType(float, bar_ypos, "bar_ypos", "0", "proportional_float");

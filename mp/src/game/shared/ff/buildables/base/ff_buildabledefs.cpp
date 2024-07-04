@@ -172,3 +172,27 @@ const char *g_pszFFManCannonSounds[] =
 	"JumpPad.Heal",//For the healing sound on jumppads -GreenMushy
 	NULL
 };
+
+// Array of char *'s to dispenser models
+const char *g_pszFFTeleporterModels[] =
+{
+	FF_TELEPORTER_MODEL,
+	NULL
+};
+
+// Array of char *'s to gib models
+const char *g_pszFFTeleporterGibModels[] =
+{
+	NULL
+};
+
+// Array of char *'s to sounds
+const char *g_pszFFTeleporterSounds[] =
+{
+	FF_TELEPORTER_BUILD_SOUND,
+	FF_TELEPORTER_EXPLODE_SOUND,
+	"Teleporter.Ready",
+	"Teleporter.TeleportIn",
+	"Teleporter.TeleportOut",
+	NULL
+};

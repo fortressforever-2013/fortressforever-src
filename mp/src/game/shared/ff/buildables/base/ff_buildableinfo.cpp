@@ -111,6 +111,8 @@ CFFBuildableInfo::CFFBuildableInfo( CFFPlayer *pPlayer, int iBuildObject )
 		case FF_BUILD_SENTRYGUN: flBuildDist = FF_BUILD_SG_BUILD_DIST; flOffset = -22.0f; break;
 		case FF_BUILD_DETPACK: flBuildDist = FF_BUILD_DET_BUILD_DIST; break;
 		case FF_BUILD_MANCANNON: flBuildDist = FF_BUILD_MC_BUILD_DIST; break;
+		case FF_BUILD_TELEPORTER_ENTRANCE: flBuildDist = FF_BUILD_MC_BUILD_DIST; break;
+		case FF_BUILD_TELEPORTER_EXIT: flBuildDist = FF_BUILD_MC_BUILD_DIST; break;
 	}
 
 	// Player building the object
@@ -152,6 +154,22 @@ CFFBuildableInfo::CFFBuildableInfo( CFFPlayer *pPlayer, int iBuildObject )
 
 	switch( iBuildObject )
 	{
+	case FF_BUILD_TELEPORTER_ENTRANCE:
+		if (pPlayer->GetTeleporterEntrance())
+			m_BuildResult = BUILD_ALREADYBUILT;
+		else if (pPlayer->GetAmmoCount(AMMO_CELLS) < FF_BUILDCOST_TELEPORTER_ENTRANCE)
+			m_BuildResult = BUILD_NEEDAMMO;
+		else
+			break;
+		return;
+	case FF_BUILD_TELEPORTER_EXIT:
+		if (pPlayer->GetTeleporterExit())
+			m_BuildResult = BUILD_ALREADYBUILT;
+		else if (pPlayer->GetAmmoCount(AMMO_CELLS) < FF_BUILDCOST_TELEPORTER_EXIT)
+			m_BuildResult = BUILD_NEEDAMMO;
+		else
+			break;
+		return;
 	case FF_BUILD_DISPENSER:
 		if(pPlayer->GetDispenser())
 			m_BuildResult = BUILD_ALREADYBUILT;
@@ -215,7 +233,7 @@ CFFBuildableInfo::CFFBuildableInfo( CFFPlayer *pPlayer, int iBuildObject )
 		return;
 
 	// If we're dealing w/ a detpack then we're finished here
-	if( (m_iBuildObject == FF_BUILD_DETPACK) || (m_iBuildObject == FF_BUILD_MANCANNON) )
+	if( (m_iBuildObject == FF_BUILD_DETPACK) || (m_iBuildObject == FF_BUILD_MANCANNON) || (m_iBuildObject == FF_BUILD_TELEPORTER_ENTRANCE) || (m_iBuildObject == FF_BUILD_TELEPORTER_EXIT ) )
 	{
 		m_BuildResult = BUILD_ALLOWED;
 		return;
@@ -240,6 +258,8 @@ bool CFFBuildableInfo::IsGeometryInTheWay( void )
 		case FF_BUILD_SENTRYGUN: vecMins = FF_SENTRYGUN_MINS; vecMaxs = FF_SENTRYGUN_MAXS; break;
 		case FF_BUILD_DETPACK:   vecMins = FF_DETPACK_MINS;   vecMaxs = FF_DETPACK_MAXS;   break;
 		case FF_BUILD_MANCANNON: vecMins = FF_MANCANNON_MINS; vecMaxs = FF_MANCANNON_MAXS; break;
+		case FF_BUILD_TELEPORTER_ENTRANCE: vecMins = FF_MANCANNON_MINS; vecMaxs = FF_MANCANNON_MAXS; break;
+		case FF_BUILD_TELEPORTER_EXIT: vecMins = FF_TELEPORTER_MINS; vecMaxs = FF_TELEPORTER_MAXS; break;
 	}
 
 	// We're going to do this test 3 times... building on an incline always kills us

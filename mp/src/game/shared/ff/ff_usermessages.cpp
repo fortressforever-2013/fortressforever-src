@@ -70,6 +70,10 @@ void RegisterUserMessages()
 	usermessages->Register( "Dispenser_TouchEnemy", -1 );
 	// When our dispenser blows up (sent to owner of dispenser)
 	usermessages->Register( "Dispenser_Destroyed", -1 );
+	// When our teleporter entrance blows up (sent to owner of teleporter)
+	usermessages->Register( "Teleporter_Entrance_Destroyed", -1 );
+	// When our teleporter exit blows up (sent to owner of teleporter)
+	usermessages->Register( "Teleporter_Exit_Destroyed", -1 );
 	// When our sentrygun blows up (sent to owner of sg)
 	usermessages->Register( "SentryGun_Destroyed", -1 );
 
@@ -83,6 +87,7 @@ void RegisterUserMessages()
 	usermessages->Register("DispenserMsg", -1);
 	usermessages->Register("SentryMsg", -1);
 	usermessages->Register("ManCannonMsg", -1);
+	usermessages->Register("TeleporterMsg", -1);
 	usermessages->Register("DetpackMsg", -1);
 	usermessages->Register("PipeMsg", -1);
 

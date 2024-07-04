@@ -276,6 +276,7 @@ void C_FFBuildableObject::ClientThink( void )
 			case CLASS_SENTRYGUN: flBuildDist = FF_BUILD_SG_BUILD_DIST; break;
 			case CLASS_DETPACK: flBuildDist = FF_BUILD_DET_BUILD_DIST; break;
 			case CLASS_MANCANNON: flBuildDist = FF_BUILD_MC_BUILD_DIST; break;
+			case CLASS_TELEPORTER: flBuildDist = FF_BUILD_MC_BUILD_DIST; break;
 			default: return; break;
 		}
 
@@ -359,6 +360,7 @@ int C_FFBuildableObject::DrawModel( int flags )
 				case CLASS_SENTRYGUN: flOffset = 32.0f; break;
 				case CLASS_DETPACK: flOffset = 0.0f; break;
 				case CLASS_MANCANNON: flOffset = 0.0f; break;
+				case CLASS_TELEPORTER: flOffset = 0.0f; break;
 				default: return BaseClass::DrawModel( flags ); break;
 			}
 
@@ -379,6 +381,12 @@ int C_FFBuildableObject::DrawModel( int flags )
 					case CLASS_DISPENSER: pszMaterial = FF_BUILD_ERROR_ALREADYBUILTDISP; break;
 					case CLASS_SENTRYGUN: pszMaterial = FF_BUILD_ERROR_ALREADYBUILTSG; break;
 					case CLASS_MANCANNON: pszMaterial = FF_BUILD_ERROR_ALREADYBUILTMANCANNON; break;
+					case CLASS_TELEPORTER: 
+						{
+							if(pPlayer && ( pPlayer->GetTeleporterEntrance() && pPlayer->GetTeleporterExit() ) )
+								pszMaterial = FF_BUILD_ERROR_ALREADYBUILTTELEPORTER;
+							break;
+						}
 					}
 
 					break;
@@ -886,6 +894,10 @@ void CFFBuildableObject::OnObjectThink( void )
 
 				case CLASS_SENTRYGUN:
 					ClientPrint( pOwner , HUD_PRINTCENTER, "#FF_SENTRYGUN_MALFUNCTIONED" );
+				break;
+
+				case CLASS_TELEPORTER:
+					ClientPrint( pOwner , HUD_PRINTCENTER, "#FF_TELEPORTER_MALFUNCTIONED" );
 				break;
 			}
 		}

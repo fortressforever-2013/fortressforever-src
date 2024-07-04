@@ -17,6 +17,7 @@
 #include "ff_buildable_detpack.h"
 #include "ff_buildable_mancannon.h"
 #include "ff_buildable_dispenser.h"
+#include "ff_buildable_teleporter.h"
 #include "ff_weapon_sniperrifle.h"
 #include "ff_weapon_assaultcannon.h"
 
@@ -885,6 +886,22 @@ CFFManCannon *CFFPlayer::GetManCannon( void ) const
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: Get man cannon
+//-----------------------------------------------------------------------------
+CFFTeleporter *CFFPlayer::GetTeleporterEntrance( void ) const
+{
+	return static_cast<CFFTeleporter *>( m_hTeleporterEntrance.Get() );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Get man cannon
+//-----------------------------------------------------------------------------
+CFFTeleporter *CFFPlayer::GetTeleporterExit( void ) const
+{
+	return static_cast<CFFTeleporter *>( m_hTeleporterExit.Get() );
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
 CFFBuildableObject *CFFPlayer::GetBuildable( int iBuildable ) const
@@ -897,6 +914,8 @@ CFFBuildableObject *CFFPlayer::GetBuildable( int iBuildable ) const
 		case FF_BUILD_SENTRYGUN: pEntity = GetSentryGun(); break;
 		case FF_BUILD_DETPACK: pEntity = GetDetpack(); break;
 		case FF_BUILD_MANCANNON: pEntity = GetManCannon(); break;
+		case FF_BUILD_TELEPORTER_ENTRANCE: pEntity = GetTeleporterEntrance(); break;
+		case FF_BUILD_TELEPORTER_EXIT: pEntity = GetTeleporterExit(); break;
 		default: return NULL; break;
 	}
 

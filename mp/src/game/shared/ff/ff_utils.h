@@ -236,8 +236,11 @@ enum HintType
 	ENGY_NOUPGRADE,		// Event: Hitting you or an allies gun with the wrench that is full health, and is upgradable while player has < 130 cells.
 	ENGY_BUILDDISP,		// Event: Building a dispenser
 	ENGY_BUILTDISP,		// Event: Dispenser finished building
+	ENGY_BUILDTELE,		// Event: Building a teleporter
+	ENGY_BUILTTELE,		// Event: Teleporter finished building
 	ENGY_SGDAMAGED,		// Event: Sentry gun damaged 
 	ENGY_DISPDAMAGED,	// Event: Dispenser damaged
+	ENGY_TELEDAMAGED,	// Event: Teleporter damaged
 	ENGY_DISPENEMY,		// Event: Enemy touches dispenser
 	ENGY_TEAMSG,		// Event: Teammate engineer building gun w/in 1000 radius 
 	ENGY_GOSMACK,		// Event: Allied player within 1000 units calls for engineer/armor for the first time.

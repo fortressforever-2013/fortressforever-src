@@ -21,6 +21,7 @@
 #define FF_BUILD_ERROR_ALREADYBUILTSG			"sprites/ff_build_alreadybuiltsg"
 #define FF_BUILD_ERROR_ALREADYBUILTDISP			"sprites/ff_build_alreadybuiltdisp"
 #define FF_BUILD_ERROR_ALREADYBUILTMANCANNON	"sprites/ff_build_alreadybuiltmancannon"
+#define FF_BUILD_ERROR_ALREADYBUILTTELEPORTER	FF_BUILD_ERROR_ALREADYBUILTMANCANNON
 
 enum BuildInfoResult_t
 {
@@ -46,6 +47,25 @@ enum JumpPadState_t
 {
 	JUMPPAD_INCOMBAT = 0,
 	JUMPPAD_IDLE
+};
+
+// Teleporters!
+enum TeleporterState_t
+{
+	TELEPORTER_INCOMPLETE,	// entrance built, exit isn't (and vice versa)
+	TELEPORTER_COMPLETE		// both entrance and exit built
+};
+
+enum TeleporterType_t
+{
+	TELEPORTER_ENTRANCE,
+	TELEPORTER_EXIT
+};
+
+enum TeleporterTeleportState_t
+{
+	TELEPORTER_READY,		// ready to teleport
+	TELEPORTER_INCOOLDOWN	// someone just teleported, recharging
 };
 
 // For ghost buildables.
@@ -96,6 +116,10 @@ const RenderFx_t g_BuildableRenderFx = kRenderFxPulseSlowWide;
 #define FF_MANCANNON_BUILD_SOUND			"JumpPad.Build"
 #define FF_MANCANNON_EXPLODE_SOUND			"JumpPad.Explode"
 
+#define FF_TELEPORTER_MODEL					FF_MANCANNON_MODEL			// placeholder
+#define FF_TELEPORTER_BUILD_SOUND			FF_MANCANNON_BUILD_SOUND	// placeholder
+#define FF_TELEPORTER_EXPLODE_SOUND			FF_MANCANNON_EXPLODE_SOUND	// placeholder
+
 //#define FF_SENTRYGUN_AIMSPHERE_MODEL		"models/buildable/sg/sentrygun_aimsphere.mdl"
 
 #define FF_BUILDABLE_GENERIC_GIB_MODEL_01	"models/gibs/random/randGib1.mdl"
@@ -112,6 +136,10 @@ const RenderFx_t g_BuildableRenderFx = kRenderFxPulseSlowWide;
 #define FF_BUILD_SENTRYGUN	2
 #define FF_BUILD_DETPACK	3
 #define FF_BUILD_MANCANNON	4
+
+// special case
+#define FF_BUILD_TELEPORTER_ENTRANCE 5
+#define FF_BUILD_TELEPORTER_EXIT 6
 
 // The *_BUILD_DIST means how far in front of the player
 // the object is built
@@ -144,6 +172,9 @@ const RenderFx_t g_BuildableRenderFx = kRenderFxPulseSlowWide;
 #define FF_MANCANNON_MINS	Vector( -54, -54, 0 )
 #define FF_MANCANNON_MAXS	Vector( 54, 54, 48 )
 
+#define FF_TELEPORTER_MINS	FF_MANCANNON_MINS
+#define FF_TELEPORTER_MAXS	FF_MANCANNON_MAXS
+
 #define FF_SOUND_BUILD		0	// Don't change these two values
 #define FF_SOUND_EXPLODE	1
 
@@ -154,6 +185,9 @@ const RenderFx_t g_BuildableRenderFx = kRenderFxPulseSlowWide;
 #define FF_BUILDCOST_UPGRADE_SENTRYGUN 130
 #define FF_REPAIRAMOUNTPERCELL_SENTRYGUN 3.5f
 #define FF_REPAIRAMOUNTPERCELL_DISPENSER 5.0f
+
+#define FF_BUILDCOST_TELEPORTER_ENTRANCE 125
+#define FF_BUILDCOST_TELEPORTER_EXIT 125
 
 #define FF_BUILD_DEBUG_VISUALIZATIONS
 

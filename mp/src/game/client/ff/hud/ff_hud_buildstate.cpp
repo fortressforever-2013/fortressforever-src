@@ -12,6 +12,8 @@
 
 #include "cbase.h"
 #include "ff_hud_buildstate.h"
+#include "ff_buildableobject.h"
+#include "ff_buildable_teleporter.h"
 
 CHudBuildState::CHudBuildState(const char *pElementName) : CHudElement(pElementName), BaseClass(NULL, "HudBuildState") 
 {
@@ -47,6 +49,14 @@ void CHudBuildState::VidInit()
 	m_pHudManCannon = new CHudTexture();
 	m_pHudManCannon->textureId = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile(m_pHudManCannon->textureId, "vgui/hud_buildable_jumppad", true, false);
+
+	m_pHudTeleporterEntrance = new CHudTexture();
+	m_pHudTeleporterEntrance->textureId = surface()->CreateNewTextureID();
+	surface()->DrawSetTextureFile(m_pHudTeleporterEntrance->textureId, "vgui/hud_buildable_jumppad", true, false);
+
+	m_pHudTeleporterExit = new CHudTexture();
+	m_pHudTeleporterExit->textureId = surface()->CreateNewTextureID();
+	surface()->DrawSetTextureFile(m_pHudTeleporterExit->textureId, "vgui/hud_buildable_jumppad", true, false);
 	
 	m_pHudDetpack = new CHudTexture();
 	m_pHudDetpack->textureId = surface()->CreateNewTextureID();
@@ -95,6 +105,7 @@ void CHudBuildState::Init()
 	HOOK_HUD_MESSAGE(CHudBuildState, ManCannonMsg);
 	HOOK_HUD_MESSAGE(CHudBuildState, DetpackMsg);
 	HOOK_HUD_MESSAGE(CHudBuildState, PipeMsg);
+	HOOK_HUD_MESSAGE(CHudBuildState, TeleporterMsg);
 }
 
 void CHudBuildState::OnTick() 
@@ -108,13 +119,18 @@ void CHudBuildState::OnTick()
 	if (!pPlayer) 
 		return;
 
-	m_bDrawDispenser = m_bDrawSentry = m_bDrawManCannon = m_bDrawDetpack = m_bDrawPipes = m_bDrawMedpacks = m_bDrawCloak = false;
+	m_bDrawDispenser = m_bDrawSentry = m_bDrawManCannon = m_bDrawDetpack = m_bDrawPipes = m_bDrawMedpacks = m_bDrawCloak = m_bDrawTeleporterEntrance = m_bDrawTeleporterExit = false;
 	m_iSentryLevel = 0;
 
 	C_FFDispenser *pDispenser = pPlayer->GetDispenser();
 	C_FFSentryGun *pSentryGun = pPlayer->GetSentryGun();
 	C_FFManCannon *pManCannon = pPlayer->GetManCannon();
 	C_FFDetpack	*pDetpack = pPlayer->GetDetpack();
+	C_FFTeleporter *pTeleporterEntrance = pPlayer->GetTeleporterEntrance();
+	C_FFTeleporter *pTeleporterExit = pPlayer->GetTeleporterExit();
+
+	m_bDrawTeleporterEntrance = pTeleporterEntrance && pTeleporterEntrance->IsBuilt();
+	m_bDrawTeleporterExit = pTeleporterExit && pTeleporterExit->IsBuilt();
 
 	m_bDrawDispenser = pDispenser && pDispenser->IsBuilt();
 
@@ -223,6 +239,11 @@ void CHudBuildState::MsgFunc_PipeMsg(bf_read &msg)
 	}
 }
 
+void CHudBuildState::MsgFunc_TeleporterMsg(bf_read &msg)
+{
+	DevWarning("got a teleporter message, what do i do with this\n");
+}
+
 void CHudBuildState::Paint() 
 {
 	if (!m_bDrawDispenser && !m_bDrawSentry && !m_bDrawManCannon && !m_bDrawDetpack && !m_bDrawPipes && !m_bDrawMedpacks && !m_bDrawCloak ) 
@@ -275,6 +296,18 @@ void CHudBuildState::Paint()
 	if (m_bDrawMedpacks) 
 	{
 		surface()->DrawSetTexture(m_pHudMedpacks->textureId);
+		surface()->DrawTexturedRect(icon2_xpos, icon2_ypos, icon2_xpos + icon2_width, icon2_ypos + icon2_height);
+	}
+
+	if (m_bDrawTeleporterEntrance) 
+	{
+		surface()->DrawSetTexture(m_pHudTeleporterEntrance ->textureId);
+		surface()->DrawTexturedRect(icon2_xpos, icon2_ypos, icon2_xpos + icon2_width, icon2_ypos + icon2_height);
+	}
+
+	if (m_bDrawTeleporterExit)
+	{
+		surface()->DrawSetTexture(m_pHudTeleporterExit->textureId);
 		surface()->DrawTexturedRect(icon2_xpos, icon2_ypos, icon2_xpos + icon2_width, icon2_ypos + icon2_height);
 	}
 
@@ -365,6 +398,26 @@ void CHudBuildState::Paint()
 		_snwprintf(m_wszCloak, 127, L"Time Left: %.2f seconds", m_flCloakTimeLeft);
 
 		for (wchar_t* wch = m_wszCloak; *wch != 0; wch++)
+			surface()->DrawUnicodeChar(*wch);
+	}
+
+	if (m_bDrawTeleporterEntrance)
+	{
+		surface()->DrawSetTextPos(text1_xpos, text1_ypos);
+
+		_snwprintf(m_wszTeleporterEntrance, 127, L"this is a placeholder message");
+
+		for (wchar_t* wch = m_wszTeleporterEntrance; *wch != 0; wch++)
+			surface()->DrawUnicodeChar(*wch);
+	}
+
+	if (m_bDrawTeleporterExit)
+	{
+		surface()->DrawSetTextPos(text1_xpos, text1_ypos);
+
+		_snwprintf(m_wszTeleporterExit, 127, L"this is a placeholder message");
+
+		for (wchar_t* wch = m_wszTeleporterExit; *wch != 0; wch++)
 			surface()->DrawUnicodeChar(*wch);
 	}
 }

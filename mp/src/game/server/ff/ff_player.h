@@ -31,6 +31,7 @@ class CFFDetpack;
 class CFFDispenser;
 class CFFSentryGun;
 class CFFManCannon;
+class CFFTeleporter;
 class CFFBuildableInfo;
 
 class CFFGrenadeBase;
@@ -345,6 +346,7 @@ public:
 	void Command_BuildSentryGun(const CCommand& args = CCommand());
 	void Command_BuildDetpack(const CCommand& args = CCommand());
 	void Command_BuildManCannon(const CCommand& args = CCommand());
+	void Command_BuildTeleporter(const CCommand& args = CCommand());
 	void Command_DispenserText(const CCommand& args = CCommand());	// to set custom dispenser text messages on the server
 	void Command_PrimeOne(const CCommand& args = CCommand()); // prime primary grenade
 	void Command_PrimeTwo(const CCommand& args = CCommand()); // prime secondary grenade
@@ -370,6 +372,8 @@ protected:
 	CNetworkHandle( CFFSentryGun, m_hSentryGun );
 	CNetworkHandle( CFFDetpack, m_hDetpack );
 	CNetworkHandle( CFFManCannon, m_hManCannon );
+	CNetworkHandle( CFFTeleporter, m_hTeleporterEntrance );
+	CNetworkHandle( CFFTeleporter, m_hTeleporterExit );
 	
 	// Used for seeing if a player is currently
 	// trying to build a detpack, dispenser, or sentry gun
@@ -402,6 +406,8 @@ public:
 	CFFDispenser *GetDispenser( void ) const;
 	CFFSentryGun *GetSentryGun( void ) const;
 	CFFManCannon *GetManCannon( void ) const;
+	CFFTeleporter *GetTeleporterEntrance( void ) const;
+	CFFTeleporter *GetTeleporterExit( void ) const;
 	CFFBuildableObject *GetBuildable( int iBuildable ) const;
 	CFFWeaponBase* GetLastFFWeapon(){ return m_pLastWeapon; }
 	void SetLastFFWeapon( CFFWeaponBase* _pLastWeapon ){ m_pLastWeapon = _pLastWeapon; }

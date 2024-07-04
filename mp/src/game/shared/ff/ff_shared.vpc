@@ -31,6 +31,8 @@ $Project
 			$File "$SRCDIR\game\shared\ff\buildables\ff_buildable_mancannon.h"
 			$File "$SRCDIR\game\shared\ff\buildables\ff_buildable_sentrygun.cpp"
 			$File "$SRCDIR\game\shared\ff\buildables\ff_buildable_sentrygun.h"
+			$File "$SRCDIR\game\shared\ff\buildables\ff_buildable_teleporter.cpp"
+			$File "$SRCDIR\game\shared\ff\buildables\ff_buildable_teleporter.h"
 		}
 		
 		$Folder "Grenades"
@@ -88,6 +90,7 @@ $Project
 			$File "$SRCDIR\game\shared\ff\weapons\ff_weapon_deploydispenser.cpp"
 			$File "$SRCDIR\game\shared\ff\weapons\ff_weapon_deploymancannon.cpp"
 			$File "$SRCDIR\game\shared\ff\weapons\ff_weapon_deploysentrygun.cpp"
+			$File "$SRCDIR\game\shared\ff\weapons\ff_weapon_deployteleporter.cpp"
 			$File "$SRCDIR\game\shared\ff\weapons\ff_weapon_flamethrower.cpp"
 			$File "$SRCDIR\game\shared\ff\weapons\ff_weapon_grenadelauncher.cpp"
 			$File "$SRCDIR\game\shared\ff\weapons\ff_weapon_ic.cpp"

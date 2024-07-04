@@ -32,6 +32,9 @@
 #include "ff_grenade_emp.h"
 #include "ff_lualib_constants.h"
 
+#include "ff_buildableobject.h"
+#include "ff_buildable_teleporter.h"
+
 #include "client.h"
 #include "gib.h"
 #include "omnibot_interface.h"
@@ -379,6 +382,8 @@ BEGIN_SEND_TABLE_NOBASE( CFFPlayer, DT_FFLocalPlayerExclusive )
 	SendPropEHandle( SENDINFO( m_hSentryGun ) ),
 	SendPropEHandle( SENDINFO( m_hDetpack ) ),
 	SendPropEHandle( SENDINFO( m_hManCannon ) ),
+	SendPropEHandle( SENDINFO( m_hTeleporterEntrance ) ),
+	SendPropEHandle( SENDINFO( m_hTeleporterExit ) ),
 	SendPropBool( SENDINFO( m_bStaticBuilding ) ),
 	SendPropBool( SENDINFO( m_bBuilding ) ),
 	SendPropInt( SENDINFO( m_iCurBuild ), 3, SPROP_UNSIGNED ),
@@ -535,6 +540,8 @@ CFFPlayer::CFFPlayer()
 	m_hSentryGun = NULL;
 	m_hDetpack = NULL;
 	m_hManCannon = NULL;
+	m_hTeleporterEntrance = NULL;
+	m_hTeleporterExit = NULL;
 	m_flBuildTime = 0.0f;
 
 	m_bRadioTagged = false;
@@ -3275,6 +3282,31 @@ void CFFPlayer::Command_BuildManCannon(const CCommand& args)
 	PreBuildGenericThink();
 }
 
+void CFFPlayer::Command_BuildTeleporter(const CCommand& args)
+{
+	// user wants a specific type of teleporter
+	if ( args.ArgC() > 1 )
+	{
+		if ( !Q_strcmp( args[ 1 ], "entrance" ) )
+			m_iWantBuild = FF_BUILD_TELEPORTER_ENTRANCE;
+		else if ( !Q_strcmp( args[ 1 ], "exit" ) )
+			m_iWantBuild = FF_BUILD_TELEPORTER_EXIT;
+	}
+	else { // user didn't specify anything, automatic detection (entrance first exit second)
+		if ( !GetTeleporterEntrance() )
+			m_iWantBuild = FF_BUILD_TELEPORTER_ENTRANCE;
+		else if ( !GetTeleporterExit() )
+			m_iWantBuild = FF_BUILD_TELEPORTER_EXIT;
+		else
+			m_iWantBuild = FF_BUILD_NONE;
+	}
+
+	if( m_iWantBuild == FF_BUILD_NONE )
+		return;
+
+	PreBuildGenericThink();
+}
+
 //ConVar sg_buildtime("ffdev_sg_buildtime", "7.0", FCVAR_REPLICATED | FCVAR_CHEAT, "Sentry Gun build time");
 #define SG_BUILDTIME 3.0f //sg_buildtime.GetFloat()  //
 
@@ -3306,10 +3338,13 @@ void CFFPlayer::PreBuildGenericThink( void )
 		*/
 
 		// See if the user has already built this item
-		if( ( (m_iWantBuild == FF_BUILD_DISPENSER) && GetDispenser()) ||
-			( (m_iWantBuild == FF_BUILD_SENTRYGUN) && GetSentryGun()) ||
-			( (m_iWantBuild == FF_BUILD_DETPACK) && GetDetpack()) ||
-			( (m_iWantBuild == FF_BUILD_MANCANNON) && GetManCannon()) )
+		if( ( (m_iWantBuild == FF_BUILD_DISPENSER) && GetDispenser())						||
+			( (m_iWantBuild == FF_BUILD_SENTRYGUN) && GetSentryGun())						||
+			( (m_iWantBuild == FF_BUILD_DETPACK) && GetDetpack())							||
+			( (m_iWantBuild == FF_BUILD_MANCANNON) && GetManCannon())						||
+			( (m_iWantBuild == FF_BUILD_TELEPORTER_ENTRANCE) && GetTeleporterEntrance())	||
+			( (m_iWantBuild == FF_BUILD_TELEPORTER_EXIT) && GetTeleporterExit())
+		)
 		{
 			if (!m_bRequireRePressBuildable)
 			{
@@ -3321,6 +3356,8 @@ void CFFPlayer::PreBuildGenericThink( void )
 				case FF_BUILD_DISPENSER: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_DISPENSER_ALREADYBUILT"); break;
 				case FF_BUILD_SENTRYGUN: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_SENTRYGUN_ALREADYBUILT"); break;
 				case FF_BUILD_DETPACK: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_DETPACK_ALREADYSET"); break;
+				case FF_BUILD_TELEPORTER_ENTRANCE: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_TELEPORTER_ENTRANCE_ALREADYBUILT"); break;
+				case FF_BUILD_TELEPORTER_EXIT: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_TELEPORTER_EXIT_ALREADYBUILT"); break;
 				case FF_BUILD_MANCANNON:
 					// If the Scout right-clicks after has built a jump pad, he'll get the warning, and a message
 					// that he can click again to det it; this gives him 2 seconds to do so
@@ -3369,10 +3406,12 @@ void CFFPlayer::PreBuildGenericThink( void )
 		}
 
 		// See if the user has appropriate ammo
-		if( ( (m_iWantBuild == FF_BUILD_DISPENSER) && (GetAmmoCount( AMMO_CELLS ) < FF_BUILDCOST_DISPENSER) ) ||
-			( (m_iWantBuild == FF_BUILD_SENTRYGUN) && (GetAmmoCount( AMMO_CELLS ) < FF_BUILDCOST_SENTRYGUN) ) ||
-			( (m_iWantBuild == FF_BUILD_DETPACK) && (GetAmmoCount( AMMO_DETPACK ) < 1 )) ||
-			( (m_iWantBuild == FF_BUILD_MANCANNON) && (GetAmmoCount( AMMO_MANCANNON ) < 1 )) )
+		if( ( ( m_iWantBuild == FF_BUILD_DISPENSER) && (GetAmmoCount( AMMO_CELLS ) < FF_BUILDCOST_DISPENSER) )						||
+			( ( m_iWantBuild == FF_BUILD_SENTRYGUN) && (GetAmmoCount( AMMO_CELLS ) < FF_BUILDCOST_SENTRYGUN) )						||
+			( ( m_iWantBuild == FF_BUILD_TELEPORTER_ENTRANCE) && (GetAmmoCount( AMMO_CELLS ) < FF_BUILDCOST_TELEPORTER_ENTRANCE) )	||
+			( ( m_iWantBuild == FF_BUILD_TELEPORTER_EXIT) && (GetAmmoCount( AMMO_CELLS ) < FF_BUILDCOST_TELEPORTER_EXIT) )			||
+			( ( m_iWantBuild == FF_BUILD_DETPACK) && (GetAmmoCount( AMMO_DETPACK ) < 1 ))											||
+			( ( m_iWantBuild == FF_BUILD_MANCANNON) && (GetAmmoCount( AMMO_MANCANNON ) < 1 )) )
 		{
 			Omnibot::Notify_Build_NotEnoughAmmo(this, m_iWantBuild);
 
@@ -3382,6 +3421,8 @@ void CFFPlayer::PreBuildGenericThink( void )
 				case FF_BUILD_SENTRYGUN: ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_SENTRYGUN_NOTENOUGHAMMO" ); break;
 				case FF_BUILD_DETPACK: ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_DETPACK_NOTENOUGHAMMO" ); break;
 				case FF_BUILD_MANCANNON: ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_MANCANNON_NOTENOUGHAMMO" ); break;
+				case FF_BUILD_TELEPORTER_ENTRANCE: ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_TELEPORTER_ENTRANCE_NOTENOUGHAMMO" ); break;
+				case FF_BUILD_TELEPORTER_EXIT: ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_TELEPORTER_EXIT_NOTENOUGHAMMO" ); break;
 			}
 			
 			// Re-initialize
@@ -3539,6 +3580,58 @@ void CFFPlayer::PreBuildGenericThink( void )
 					// TODO: Omnibot::Notify_ManCannonBuilding( this, pManCannon );
 				}
 				break;
+
+				case FF_BUILD_TELEPORTER_ENTRANCE:
+				{
+					CFFTeleporter *pTeleporter = CFFTeleporter::Create(hBuildInfo.GetBuildOrigin(), hBuildInfo.GetBuildAngles(), this);
+
+					pTeleporter->SetType(TELEPORTER_ENTRANCE);
+
+					pTeleporter->SetLocation( g_pGameRules->GetChatLocation( true, this ) );
+					pTeleporter->SetGroundOrigin( hBuildInfo.GetBuildOrigin() );
+					pTeleporter->SetGroundAngles( hBuildInfo.GetBuildAngles() );
+
+					m_hTeleporterEntrance = pTeleporter;
+					m_flBuildTime = gpGlobals->curtime + 3.5f; // 3.5 seconds to build?
+
+					CFFTeleporter *pTeleporterExit = GetTeleporterExit();
+
+					if (pTeleporterExit)
+						pTeleporter->SetExit(pTeleporterExit);
+
+					// Bug #0001558: exploit to get instant lvl2 SG
+					// Moved code to remove cells from CFFSentryGun::GoLive() to here -> Defrag
+					RemoveAmmo(FF_BUILDCOST_TELEPORTER_ENTRANCE, AMMO_CELLS);
+
+					// TODO: Omnibot::Notify_ManCannonBuilding( this, pTeleporter );
+				}
+				break;
+
+				case FF_BUILD_TELEPORTER_EXIT:
+				{
+					CFFTeleporter *pTeleporter = CFFTeleporter::Create( hBuildInfo.GetBuildOrigin(), hBuildInfo.GetBuildAngles(), this );
+
+					pTeleporter->SetType( TELEPORTER_EXIT );
+
+					pTeleporter->SetLocation( g_pGameRules->GetChatLocation( true, this ) );
+					pTeleporter->SetGroundOrigin( hBuildInfo.GetBuildOrigin() );
+					pTeleporter->SetGroundAngles( hBuildInfo.GetBuildAngles() );
+
+					m_hTeleporterExit = pTeleporter;
+					m_flBuildTime = gpGlobals->curtime + 3.5f; // 3.5 seconds to build?
+
+					CFFTeleporter *pTeleporterEntrance = GetTeleporterEntrance();
+
+					if (pTeleporterEntrance)
+						pTeleporter->SetEntrance(pTeleporterEntrance);
+
+					// Bug #0001558: exploit to get instant lvl2 SG
+					// Moved code to remove cells from CFFSentryGun::GoLive() to here -> Defrag
+					RemoveAmmo(FF_BUILDCOST_TELEPORTER_EXIT, AMMO_CELLS);
+
+					// TODO: Omnibot::Notify_ManCannonBuilding( this, pTeleporter );
+				}
+				break;
 			}
 			
 			if ( m_bStaticBuilding == true )
@@ -3592,6 +3685,12 @@ void CFFPlayer::PreBuildGenericThink( void )
 						break;
 					case FF_BUILD_SENTRYGUN:
 						GiveAmmo(FF_BUILDCOST_SENTRYGUN, AMMO_CELLS, true);
+						break;
+					case FF_BUILD_TELEPORTER_ENTRANCE:
+						GiveAmmo(FF_BUILDCOST_TELEPORTER_ENTRANCE, AMMO_CELLS, true);
+						break;
+					case FF_BUILD_TELEPORTER_EXIT:
+						GiveAmmo(FF_BUILDCOST_TELEPORTER_EXIT, AMMO_CELLS, true);
 						break;
 					default:
 						break;
@@ -3712,6 +3811,48 @@ void CFFPlayer::PostBuildGenericThink( void )
 						pEvent->SetInt( "userid", GetUserID() );
 						gameeventmanager->FireEvent( pEvent, true );
 					}
+				}
+			}
+			break;
+
+			case FF_BUILD_TELEPORTER_ENTRANCE:
+			{
+				CFFTeleporter* pTeleporter = GetTeleporterEntrance();
+				if (pTeleporter)
+				{
+					pTeleporter->GoLive();
+
+					switchToWeapon = FF_WEAPON_SPANNER;
+					IGameEvent* pEvent = gameeventmanager->CreateEvent("build_teleporter_entrance");
+					if (pEvent)
+					{
+						pEvent->SetInt("userid", GetUserID());
+						gameeventmanager->FireEvent(pEvent, true);
+					}
+
+					FF_SendHint(this, ENGY_BUILTSG, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_BUILTSG");
+
+				}
+			}
+			break;
+
+			case FF_BUILD_TELEPORTER_EXIT:
+			{
+				CFFTeleporter* pTeleporter = GetTeleporterExit();
+				if (pTeleporter)
+				{
+					pTeleporter->GoLive();
+
+					switchToWeapon = FF_WEAPON_SPANNER;
+					IGameEvent* pEvent = gameeventmanager->CreateEvent("build_teleporter_exit");
+					if (pEvent)
+					{
+						pEvent->SetInt("userid", GetUserID());
+						gameeventmanager->FireEvent(pEvent, true);
+					}
+
+					FF_SendHint(this, ENGY_BUILTSG, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_BUILTSG");
+
 				}
 			}
 			break;

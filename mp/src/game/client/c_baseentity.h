@@ -81,6 +81,7 @@ enum Class_T
 	CLASS_SENTRYGUN,
 	CLASS_DETPACK,
 	CLASS_MANCANNON,
+	CLASS_TELEPORTER,
 	CLASS_GREN,			// Normal gren
 	CLASS_GREN_EMP,		// Emp greande
 	CLASS_GREN_NAIL,	// Nail grenade

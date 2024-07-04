@@ -73,6 +73,8 @@ private:
 	CHudTexture *m_pHudDetpack;
 	CHudTexture *m_pHudPipes;
 	CHudTexture *m_pHudMedpacks;
+	CHudTexture *m_pHudTeleporterEntrance;
+	CHudTexture *m_pHudTeleporterExit;
 
 	// Lines of information
 	wchar_t m_wszDispenser[128];
@@ -82,6 +84,8 @@ private:
 	wchar_t m_wszPipes[128];
 	wchar_t m_wszMedpacks[128];
 	wchar_t m_wszCloak[128];
+	wchar_t m_wszTeleporterEntrance[128];
+	wchar_t m_wszTeleporterExit[128];
 
 	bool m_bDrawDispenser;
 	bool m_bDrawSentry;
@@ -90,6 +94,8 @@ private:
 	bool m_bDrawPipes;
 	bool m_bDrawMedpacks;
 	bool m_bDrawCloak;
+	bool m_bDrawTeleporterEntrance;
+	bool m_bDrawTeleporterExit;
 
 	int m_iHealthPerc, m_iAmmoPerc;
 	bool m_fNoRockets;
@@ -106,6 +112,7 @@ private:
 	void MsgFunc_ManCannonMsg(bf_read &msg);
 	void MsgFunc_DetpackMsg(bf_read &msg);
 	void MsgFunc_PipeMsg(bf_read &msg);
+	void MsgFunc_TeleporterMsg(bf_read &msg);
 
 public:
 	CHudBuildState(const char *pElementName);
@@ -125,3 +132,4 @@ DECLARE_HUD_MESSAGE(CHudBuildState, SentryMsg);
 DECLARE_HUD_MESSAGE(CHudBuildState, ManCannonMsg);
 DECLARE_HUD_MESSAGE(CHudBuildState, DetpackMsg);
 DECLARE_HUD_MESSAGE(CHudBuildState, PipeMsg);
+DECLARE_HUD_MESSAGE(CHudBuildState, TeleporterMsg);
