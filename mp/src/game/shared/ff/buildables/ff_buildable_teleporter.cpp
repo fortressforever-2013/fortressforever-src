@@ -43,6 +43,13 @@
 IMPLEMENT_NETWORKCLASS_ALIASED( FFTeleporter, DT_FFTeleporter )
 
 BEGIN_NETWORK_TABLE( CFFTeleporter, DT_FFTeleporter )
+#ifdef CLIENT_DLL
+	RecvPropFloat( RECVINFO( m_flLastTeleport ) ),
+	RecvPropFloat( RECVINFO( m_flNextTeleport ) ),
+#elif GAME_DLL
+	SendPropFloat( SENDINFO( m_flLastTeleport ) ),
+	SendPropFloat( SENDINFO( m_flNextTeleport ) ),
+#endif
 END_NETWORK_TABLE()
 
 // Start of our data description for the class
@@ -207,9 +214,9 @@ void CFFTeleporter::Spawn( void )
 		m_nSkin = ( pOwner->GetTeamNumber() - 1 ); 
 
 	m_bTakesDamage = true; // Making the teleporter take damage -GreenMushy
-	m_iState = TELEPORTER_INCOMPLETE;
-	m_iType = TELEPORTER_ENTRANCE;
-	m_iTeleportState = TELEPORTER_READY;
+	SetState( TELEPORTER_INCOMPLETE );
+	SetType( TELEPORTER_ENTRANCE ); // we set this while building, but still providing a default value just in case
+	SetTeleportState( TELEPORTER_READY );
 
 	// Set the current and max health to the same values -Green Mushy
 	m_iMaxHealth = TELEPORTER_HEALTH;
@@ -253,39 +260,39 @@ void CFFTeleporter::GoLive( void )
 void CFFTeleporter::OnTeleporterThink( void )
 {
 	// teleporter buildstate
-	if ( m_iState != TELEPORTER_INCOMPLETE && ( ( m_iType == TELEPORTER_ENTRANCE && !m_hExit ) || ( m_iType == TELEPORTER_EXIT && !m_hEntrance ) ) )
+	if ( IsComplete() && ( ( IsEntrance() && !GetExit() ) || ( IsExit() && !GetEntrance() ) ) )
 	{
-		m_iState = TELEPORTER_INCOMPLETE;
+		SetState( TELEPORTER_INCOMPLETE );
 		return;
 	}
-	else if ( m_iState != TELEPORTER_COMPLETE && ( ( m_iType == TELEPORTER_ENTRANCE && m_hExit ) || ( m_iType == TELEPORTER_EXIT && m_hEntrance ) ) )
+	else if ( !IsComplete() && ( ( IsEntrance() && GetExit() ) || ( IsExit() && GetEntrance() ) ) )
 	{
-		m_iState = TELEPORTER_COMPLETE;
+		SetState( TELEPORTER_COMPLETE );
 	}
 
 	// teleporter teleport state
-	if ( m_iTeleportState != TELEPORTER_READY && ( gpGlobals->curtime > m_flNextTeleport ) )
+	if ( IsInCooldown() && ( gpGlobals->curtime > m_flNextTeleport ) )
 	{
-		m_iTeleportState = TELEPORTER_READY;
+		SetTeleportState( TELEPORTER_READY );
 		EmitSound("Teleporter.Ready");
 	}
-	else if ( m_iTeleportState != TELEPORTER_INCOOLDOWN && ( gpGlobals->curtime < m_flNextTeleport ) )
+	else if ( !IsInCooldown() && ( gpGlobals->curtime < m_flNextTeleport ) )
 	{
-		m_iTeleportState = TELEPORTER_INCOOLDOWN;
+		SetTeleportState( TELEPORTER_INCOOLDOWN );
 	}
 
-	if (m_iType == TELEPORTER_ENTRANCE && m_hExit)
+	if ( IsEntrance() && GetExit() )
 	{
-		if (!m_hExit->m_hEntrance)
-			m_hExit->m_hEntrance = this;
+		if ( !GetExit()->GetEntrance() )
+			GetExit()->SetEntrance( this );
 	}
-	else if (m_iType == TELEPORTER_EXIT && m_hEntrance)
+	else if ( IsExit() && GetEntrance() )
 	{
-		if (!m_hEntrance->m_hExit)
-			m_hEntrance->m_hExit = this;
+		if ( !GetEntrance()->GetExit() )
+			GetEntrance()->SetExit(this);
 	}
 
-	SetNextThink(gpGlobals->curtime + m_flThinkTime);
+	SetNextThink( gpGlobals->curtime + m_flThinkTime );
 }
 
 //-----------------------------------------------------------------------------
@@ -314,7 +321,7 @@ void CFFTeleporter::OnObjectTouch( CBaseEntity *pOther )
 	if( g_pGameRules->PlayerRelationship( GetOwnerPlayer(), pPlayer ) == GR_NOTTEAMMATE ) // Team orients it -GreenMushy
 		return;
 
-	// a player is in queue already, respectfully fuck off
+	// a player is in queue already
 	if( m_hTouchingPlayer && m_hTouchingPlayer->entindex() != pPlayer->entindex() )
 		return;
 
@@ -322,14 +329,14 @@ void CFFTeleporter::OnObjectTouch( CBaseEntity *pOther )
 
 	// we don't teleport _from_ an exit, but we still store
 	// the touching player so we can telefrag them :D
-	if (m_iType == TELEPORTER_EXIT)
+	if ( IsExit() )
 		return;
 
-	if (m_iState != TELEPORTER_COMPLETE || m_iTeleportState != TELEPORTER_READY)
+	if ( !IsComplete() )
 		return;
 	
 	// can only use it once per 10 seconds
-	if (m_iTeleportState == TELEPORTER_INCOOLDOWN)
+	if ( IsInCooldown() )
 	{
 		DevMsg("Teleporter ready in %f\n", (m_flNextTeleport - gpGlobals->curtime));
 		return;
@@ -342,7 +349,7 @@ void CFFTeleporter::OnObjectTouch( CBaseEntity *pOther )
 		return;
 
 	Vector pDest = m_hExit->GetAbsOrigin();
-	pDest.z += 20;
+	pDest.z += 50;
 
 	QAngle pDestAngles = m_hTouchingPlayer->GetAbsAngles();
 
@@ -351,14 +358,14 @@ void CFFTeleporter::OnObjectTouch( CBaseEntity *pOther )
 
 	EmitSound("Teleporter.TeleportIn");
 
-	pPlayer->m_flMancannonTime = gpGlobals->curtime;
+	//pPlayer->m_flMancannonTime = gpGlobals->curtime;
 
 	m_flLastTeleport = gpGlobals->curtime;
 	m_flNextTeleport = m_flLastTeleport + TELEPORTER_COOLDOWN;
 
-	m_iTeleportState = TELEPORTER_INCOOLDOWN;
+	SetTeleportState( TELEPORTER_INCOOLDOWN );
 
-	DevMsg( "[Teleporter] You have been teleported, teleport time is %f and next teleport time is %f\n", m_flLastTeleport, m_flNextTeleport );
+	DevMsg( "[Teleporter] You have been teleported, teleport time is %f and next teleport time is %f\n", m_flLastTeleport.Get(), m_flNextTeleport.Get());
 }
 
 //-----------------------------------------------------------------------------
@@ -424,7 +431,7 @@ void CFFTeleporter::Detonate( void )
 	VPROF_BUDGET( "CFFTeleporter::Detonate", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
 	// Fire an event.
-	IGameEvent *pEvent = gameeventmanager->CreateEvent( "mancannon_detonated" );
+	IGameEvent *pEvent = gameeventmanager->CreateEvent( "teleporter_detonated" );
 	if( pEvent )
 	{
 		CFFPlayer *pOwner = GetOwnerPlayer();
@@ -434,6 +441,11 @@ void CFFTeleporter::Detonate( void )
 			gameeventmanager->FireEvent( pEvent, true );
 		}		
 	}
+
+	if ( IsEntrance() )
+		SetExit( NULL );
+	else if ( IsExit() )
+		SetEntrance( NULL );
 
 	CFFBuildableObject::Detonate();
 }
@@ -458,7 +470,7 @@ void CFFTeleporter::DoExplosionDamage( void )
 
 void CFFTeleporter::SetEntrance( CFFTeleporter* pTeleporter )
 {
-	if (m_iType == TELEPORTER_ENTRANCE)
+	if (IsEntrance())
 		return;
 
 	m_hEntrance = pTeleporter;
@@ -466,10 +478,26 @@ void CFFTeleporter::SetEntrance( CFFTeleporter* pTeleporter )
 
 void CFFTeleporter::SetExit( CFFTeleporter* pTeleporter )
 {
-	if (m_iType == TELEPORTER_EXIT)
+	if (IsExit())
 		return;
 
 	m_hExit = pTeleporter;
+}
+
+CFFTeleporter* CFFTeleporter::GetEntrance( void )
+{
+	if (IsEntrance())
+		return NULL;
+
+	return m_hEntrance;
+}
+
+CFFTeleporter* CFFTeleporter::GetExit( void )
+{
+	if (IsExit())
+		return NULL;
+
+	return m_hExit;
 }
 
 #endif // CLIENT_DLL : GAME_DLL

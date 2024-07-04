@@ -49,6 +49,9 @@ public:
 
 	TeleporterTeleportState_t m_iTeleportState;
 
+	CNetworkVar(float, m_flLastTeleport);
+	CNetworkVar(float, m_flNextTeleport);
+
 #ifdef CLIENT_DLL
 	virtual void OnDataChanged( DataUpdateType_t updateType );
 	virtual int DrawModel(int flags);
@@ -69,15 +72,27 @@ public:
 	float			m_flLastClientUpdate;
 	int				m_iLastState;
 
-	float			m_flLastTeleport;
-	float			m_flNextTeleport;
+	CFFPlayer* m_hTouchingPlayer;
+	
+	TeleporterState_t GetState( void ) { return m_iState; }
+	void			SetState( TeleporterState_t iState ) { m_iState = iState; }
 
-	CFFPlayer*		m_hTouchingPlayer;
+	TeleporterType_t GetType( void ) { return m_iType; }
+	void			SetType( TeleporterType_t iType ) { m_iType = iType; }
 
-	void SetType( TeleporterType_t type ) { m_iType = type; }
+	TeleporterTeleportState_t GetTeleportState( void ) { return m_iTeleportState; }
+	void			SetTeleportState( TeleporterTeleportState_t iState ) { m_iTeleportState = iState; }
 
-	void SetEntrance( CFFTeleporter* pTeleporter );
-	void SetExit( CFFTeleporter* pTeleporter );
+	bool			IsComplete( void ) { return GetState() == TELEPORTER_COMPLETE; }
+	bool			IsInCooldown( void ) { return GetTeleportState() == TELEPORTER_INCOOLDOWN; }
+
+	bool			IsEntrance( void ) { return GetType() == TELEPORTER_ENTRANCE; }
+	bool			IsExit( void ) { return GetType() == TELEPORTER_EXIT; }
+
+	CFFTeleporter*	GetEntrance( void );
+	CFFTeleporter*	GetExit( void );
+	void			SetEntrance( CFFTeleporter* pTeleporter );
+	void			SetExit( CFFTeleporter* pTeleporter );
 
 	CFFTeleporter*	m_hEntrance;
 	CFFTeleporter*	m_hExit;
