@@ -57,12 +57,31 @@ private:
 	CPanelAnimationVarAliasType(float, icon2_width, "icon2_width", "1", "proportional_float");
 	CPanelAnimationVarAliasType(float, icon2_height, "icon2_height", "1", "proportional_float");
 
+
+	// teleporters
+	CPanelAnimationVarAliasType(float, text3_xpos, "text3_xpos", "8", "proportional_float");
+	CPanelAnimationVarAliasType(float, text3_ypos, "text3_ypos", "20", "proportional_float");
+	CPanelAnimationVarAliasType(float, text4_xpos, "text4_xpos", "8", "proportional_float");
+	CPanelAnimationVarAliasType(float, text4_ypos, "text4_ypos", "20", "proportional_float");
+
+	CPanelAnimationVarAliasType(float, icon3_xpos, "icon3_xpos", "0", "proportional_float");
+	CPanelAnimationVarAliasType(float, icon3_ypos, "icon3_ypos", "0", "proportional_float");
+	CPanelAnimationVarAliasType(float, icon3_width, "icon3_width", "1", "proportional_float");
+	CPanelAnimationVarAliasType(float, icon3_height, "icon3_height", "1", "proportional_float");
+	CPanelAnimationVarAliasType(float, icon4_xpos, "icon4_xpos", "0", "proportional_float");
+	CPanelAnimationVarAliasType(float, icon4_ypos, "icon4_ypos", "0", "proportional_float");
+	CPanelAnimationVarAliasType(float, icon4_width, "icon4_width", "1", "proportional_float");
+	CPanelAnimationVarAliasType(float, icon4_height, "icon4_height", "1", "proportional_float");
+
 	CHudTexture	*m_pHudElementTexture;
 
 	// Results of localising strings
 	wchar_t m_wszHealth[32];
 	wchar_t m_wszAmmo[32];
 	wchar_t m_wszNoRockets[32];
+
+	// teleporter recharge
+	wchar_t m_wszRecharge[32];
 
 	// Icons
 	CHudTexture *m_pHudSentryLevel1;

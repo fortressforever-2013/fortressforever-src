@@ -18,6 +18,8 @@
 	#include "omnibot_interface.h"
 #endif
 
+ConVar ffdev_tel( "ffdev_tel", "20", FCVAR_FF_FFDEV_REPLICATED );
+
 //-----------------------------------------------------------------------------
 // Purpose: Returns a proper angle orientation for the buidlable depending
 //			on the approximate ground normal
@@ -111,8 +113,8 @@ CFFBuildableInfo::CFFBuildableInfo( CFFPlayer *pPlayer, int iBuildObject )
 		case FF_BUILD_SENTRYGUN: flBuildDist = FF_BUILD_SG_BUILD_DIST; flOffset = -22.0f; break;
 		case FF_BUILD_DETPACK: flBuildDist = FF_BUILD_DET_BUILD_DIST; break;
 		case FF_BUILD_MANCANNON: flBuildDist = FF_BUILD_MC_BUILD_DIST; break;
-		case FF_BUILD_TELEPORTER_ENTRANCE: flBuildDist = FF_BUILD_MC_BUILD_DIST; flOffset = -30.0f; break;
-		case FF_BUILD_TELEPORTER_EXIT: flBuildDist = FF_BUILD_MC_BUILD_DIST; flOffset = -30.0f; break;
+		case FF_BUILD_TELEPORTER_ENTRANCE: flBuildDist = FF_BUILD_MC_BUILD_DIST; flOffset = -22.0f; break;
+		case FF_BUILD_TELEPORTER_EXIT: flBuildDist = FF_BUILD_MC_BUILD_DIST; flOffset = -22.0f; break;
 	}
 
 	// Player building the object
@@ -233,7 +235,7 @@ CFFBuildableInfo::CFFBuildableInfo( CFFPlayer *pPlayer, int iBuildObject )
 		return;
 
 	// If we're dealing w/ a detpack then we're finished here
-	if( (m_iBuildObject == FF_BUILD_DETPACK) || (m_iBuildObject == FF_BUILD_MANCANNON) || (m_iBuildObject == FF_BUILD_TELEPORTER_ENTRANCE) || (m_iBuildObject == FF_BUILD_TELEPORTER_EXIT ) )
+	if( (m_iBuildObject == FF_BUILD_DETPACK) || (m_iBuildObject == FF_BUILD_MANCANNON) )
 	{
 		m_BuildResult = BUILD_ALLOWED;
 		return;
@@ -525,6 +527,64 @@ BuildInfoResult_t CFFBuildableInfo::CanOrientToGround( void )
 			float flIntercept;
 			ComputeTrianglePlane( tr[0].endpos, tr[1].endpos, tr[2].endpos, vecNormal, flIntercept );
 			vecGround = GetMiddle( &tr[0].endpos, &tr[1].endpos, &tr[2].endpos );
+		}
+		break;
+
+		case FF_BUILD_TELEPORTER_ENTRANCE:
+		case FF_BUILD_TELEPORTER_EXIT:
+		{
+
+			flTestDist = ffdev_tel.GetFloat();
+
+			Vector vecRightAdjWidth = m_vecPlayerRight * FF_BUILD_TELEPORTER_HALF_WIDTH;
+			Vector vecForwardAdjWidth = m_vecPlayerForward * FF_BUILD_TELEPORTER_HALF_WIDTH;
+
+			// These are object aligned positions - to orient us to the ground correctly
+			Vector vecCorners[4];
+			vecCorners[0] = m_vecBuildAirOrigin + (vecRightAdjWidth)+(vecForwardAdjWidth)+Vector(0, 0, 2.0f); // Front right corner
+			vecCorners[1] = m_vecBuildAirOrigin + (vecRightAdjWidth)-(vecForwardAdjWidth)+Vector(0, 0, 2.0f); // Back right corner
+			vecCorners[2] = m_vecBuildAirOrigin - (vecRightAdjWidth)+(vecForwardAdjWidth)+Vector(0, 0, 2.0f); // Front left corner
+			vecCorners[3] = m_vecBuildAirOrigin - (vecRightAdjWidth)-(vecForwardAdjWidth)+Vector(0, 0, 2.0f); // Back left corner
+
+#ifdef FF_BUILD_DEBUG_VISUALIZATIONS
+#ifdef GAME_DLL
+#ifdef _DEBUG
+			// Some visualizations
+			if (!engine->IsDedicatedServer())
+			{
+				for (int j = 0; j < 4; j++)
+				{
+					// Draw object aligned corners in blue
+					NDebugOverlay::Line(vecCorners[j], vecCorners[j] - Vector(0, 0, flTestDist), 0, 0, 255, false, 10.0f);
+				}
+			}
+#endif // _DEBUG
+#endif // GAME_DLL
+#endif // FF_BUILD_DEBUG_VISUALIZATIONS
+
+			// For feet traces to come
+			trace_t tr[4];
+
+			// Loop through and do traces from each corner of the dispenser to the ground
+			// The mask is normal PLAYER_SOLID minus PLAYER_CLIP as we don't want to build on those(Bug #0000185: Buildable objects can be built on clips.) 
+			// HACK Changed to COLLISION_GROUP_PROJECTILE so it doesn't clip healthpacks (Bug #0000242: SG/Disp when building clips on health pack.)
+			for (int i = 0; i < 4; i++)
+			{
+				UTIL_TraceLine(vecCorners[i], vecCorners[i] - Vector(0, 0, flTestDist), CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_WINDOW | CONTENTS_MONSTER | CONTENTS_GRATE, m_pPlayer, COLLISION_GROUP_BUILDABLE_BUILDING, &tr[i]);
+
+				// Bug #0000246: Dispenser and sg overlap if built on each other
+				if (!tr[i].DidHit())
+					return BUILD_TOOFAR;
+				else if (tr[i].startsolid)
+					return BUILD_NOROOM;
+				// squeek: allow dispensers to be built on other buildables
+				//else if( ( tr[i].m_pEnt->Classify() == CLASS_SENTRYGUN ) || ( tr[i].m_pEnt->Classify() == CLASS_DISPENSER ) )
+				//	return BUILD_NOROOM;
+			}
+
+			// Make an X shaped vector from our 4 corner position traces and do the cross product
+			ComputeRectangularPlane(tr[0].endpos, tr[1].endpos, tr[2].endpos, tr[3].endpos, vecNormal);
+			vecGround = GetMiddle(&tr[0].endpos, &tr[1].endpos, &tr[2].endpos, &tr[3].endpos);
 		}
 		break;
 

@@ -52,11 +52,18 @@ BEGIN_NETWORK_TABLE( CFFTeleporter, DT_FFTeleporter )
 #endif
 END_NETWORK_TABLE()
 
+#ifdef CLIENT_DLL
+BEGIN_PREDICTION_DATA( CFFTeleporter )
+	DEFINE_PRED_FIELD( m_flLastTeleport, FIELD_TIME, FTYPEDESC_INSENDTABLE ),
+	DEFINE_PRED_FIELD( m_flNextTeleport, FIELD_TIME, FTYPEDESC_INSENDTABLE ),
+END_PREDICTION_DATA()
+#endif
+
 // Start of our data description for the class
 BEGIN_DATADESC( CFFTeleporter )
 #ifdef GAME_DLL
+	DEFINE_THINKFUNC( OnThink ),
 	DEFINE_ENTITYFUNC( OnObjectTouch ),
-	DEFINE_THINKFUNC( OnTeleporterThink ),
 #endif
 END_DATADESC()
 
@@ -88,14 +95,14 @@ CFFTeleporter::CFFTeleporter( void )
 	m_ppszSounds = g_pszFFTeleporterSounds;
 
 	m_flLastClientUpdate = 0;
-	m_iLastState = 0;
+	m_iLastHealth = 0;
 
 	m_flLastTeleport = 0;
 	m_flNextTeleport = 0;
 #endif
 
 	// Health
-	m_iMaxHealth = m_iHealth = 100;
+	m_iMaxHealth = m_iHealth = TELEPORTER_HEALTH;
 }
 
 //-----------------------------------------------------------------------------
@@ -103,6 +110,11 @@ CFFTeleporter::CFFTeleporter( void )
 //-----------------------------------------------------------------------------
 CFFTeleporter::~CFFTeleporter( void )
 {
+#ifdef GAME_DLL
+	// unlink entrances and exits properly
+	if ( GetOther() )
+		GetOther()->SetOther( NULL );
+#endif
 }
 
 #ifdef CLIENT_DLL
@@ -159,43 +171,6 @@ CFFTeleporter *CFFTeleporter::CreateClientSideTeleporter( const Vector& vecOrigi
 	return pTeleporter;
 }
 
-//-------------------------------------------------------------------------
-// Purpose: Sentryguns will sometimes appear as the wrong model when
-//			the local player is hallucinating
-//-------------------------------------------------------------------------
-int CFFTeleporter::DrawModel(int flags)
-{
-	int nRet = BaseClass::DrawModel(flags);
-	
-	if( gpGlobals->curtime < m_flLastDamage + MANCANNON_COMBATCOOLDOWN )
-	{
-		// Thanks mirv!
-		IMaterial *pMaterial = materials->FindMaterial( "sprites/ff_sprite_combat", TEXTURE_GROUP_CLIENT_EFFECTS );
-		if( pMaterial )
-		{
-			CMatRenderContextPtr pMatRenderContext(g_pMaterialSystem);
-			pMatRenderContext->Bind( pMaterial );
-
-			// The color is based on the owner's team
-			int iAlpha = 255;
-			Color clr = Color( 255, 255, 255, iAlpha );
-
-			if( g_PR )
-			{
-				int teamnumber = GetTeamNumber();
-				float flCombatTime = clamp( gpGlobals->curtime - m_flLastDamage, 0, MANCANNON_COMBATCOOLDOWN );
-				iAlpha = (255 * ( 1.0f - (flCombatTime / MANCANNON_COMBATCOOLDOWN) ) );
-				clr = g_PR->GetTeamColor( teamnumber );
-			}
-
-			color32 c = { clr.r(), clr.g(), clr.b(), iAlpha };
-			DrawSprite( Vector( GetAbsOrigin().x, GetAbsOrigin().y, GetAbsOrigin().z + 48.0f ), 32.0f, 32.0f, c );
-		}
-	}
-
-	return nRet;
-}
-
 #elif GAME_DLL
 
 //-----------------------------------------------------------------------------
@@ -208,19 +183,19 @@ void CFFTeleporter::Spawn( void )
 	Precache();
 	CFFBuildableObject::Spawn();
 
-	//Sets the team color -GreenMushy
-	CFFPlayer *pOwner = ToFFPlayer( m_hOwner.Get() ); //static_cast< CFFPlayer * >( m_hOwner.Get() );
+	// Sets the team color -GreenMushy
+	CFFPlayer *pOwner = ToFFPlayer( m_hOwner.Get() );
 	if( pOwner ) 
 		m_nSkin = ( pOwner->GetTeamNumber() - 1 ); 
 
 	m_bTakesDamage = true; // Making the teleporter take damage -GreenMushy
+
 	SetState( TELEPORTER_INCOMPLETE );
 	SetType( TELEPORTER_ENTRANCE ); // we set this while building, but still providing a default value just in case
-	SetTeleportState( TELEPORTER_READY );
+	SetTeleportState( TELEPORTER_INCOOLDOWN ); // HACK: allow playing teleporter ready sound when exit is built, see CFFTeleporter::OnThink
 
 	// Set the current and max health to the same values -Green Mushy
-	m_iMaxHealth = TELEPORTER_HEALTH;
-	m_iHealth = m_iMaxHealth;
+	m_iHealth = m_iMaxHealth = TELEPORTER_HEALTH;
 }
 
 //-----------------------------------------------------------------------------
@@ -237,7 +212,7 @@ void CFFTeleporter::GoLive( void )
 	SetTouch( &CFFTeleporter::OnObjectTouch );
 
 	m_flThinkTime = 0.1f;
-	SetThink( &CFFTeleporter::OnTeleporterThink );
+	SetThink( &CFFTeleporter::OnThink );
 	SetNextThink( gpGlobals->curtime + m_flThinkTime );
 
 	// Create our flickerer
@@ -257,39 +232,54 @@ void CFFTeleporter::GoLive( void )
 //-----------------------------------------------------------------------------
 // Purpose: Generic think function
 //-----------------------------------------------------------------------------
-void CFFTeleporter::OnTeleporterThink( void )
+void CFFTeleporter::OnThink( void )
 {
-	// teleporter buildstate
-	if ( IsComplete() && ( ( IsEntrance() && !GetExit() ) || ( IsExit() && !GetEntrance() ) ) )
+	if ( IsEntrance() )
 	{
-		SetState( TELEPORTER_INCOMPLETE );
-		return;
+		if ( m_hTouchingPlayer )
+			DevWarning("[Teleporter 1] Has player\n");
+		else
+			DevWarning("[Teleporter 1] No player\n");
 	}
-	else if ( !IsComplete() && ( ( IsEntrance() && GetExit() ) || ( IsExit() && GetEntrance() ) ) )
+	else
+	{
+		if ( m_hTouchingPlayer )
+			DevWarning("[Teleporter 2] Has player\n");
+		else
+			DevWarning("[Teleporter 2] No player\n");
+	}
+	// teleporter buildstate
+	if ( !IsComplete() && GetOther() )
 	{
 		SetState( TELEPORTER_COMPLETE );
 	}
-
-	// teleporter teleport state
-	if ( IsInCooldown() && ( gpGlobals->curtime > m_flNextTeleport ) )
+	else if ( IsComplete() && !GetOther() )
 	{
-		SetTeleportState( TELEPORTER_READY );
-		EmitSound("Teleporter.Ready");
-	}
-	else if ( !IsInCooldown() && ( gpGlobals->curtime < m_flNextTeleport ) )
-	{
-		SetTeleportState( TELEPORTER_INCOOLDOWN );
+		SetState( TELEPORTER_INCOMPLETE );
+		SetTeleportState( TELEPORTER_INCOOLDOWN ); // will allow playing sound when it's complete again
 	}
 
-	if ( IsEntrance() && GetExit() )
+	if( IsComplete() )
 	{
-		if ( !GetExit()->GetEntrance() )
-			GetExit()->SetEntrance( this );
+		// teleporter teleport state
+		if ( IsInCooldown() && ( gpGlobals->curtime > m_flNextTeleport ) )
+		{
+			SetTeleportState( TELEPORTER_READY );
+
+			if( IsEntrance() )
+				EmitSound("Teleporter.Ready");
+		}
+		else if ( !IsInCooldown() && ( gpGlobals->curtime < m_flNextTeleport ) )
+		{
+			SetTeleportState( TELEPORTER_INCOOLDOWN );
+		}
 	}
-	else if ( IsExit() && GetEntrance() )
+
+	// link entrances and exits properly
+	if ( GetOther() )
 	{
-		if ( !GetEntrance()->GetExit() )
-			GetEntrance()->SetExit(this);
+		if ( !GetOther()->GetOther() )
+			GetOther()->SetOther( this );
 	}
 
 	SetNextThink( gpGlobals->curtime + m_flThinkTime );
@@ -318,11 +308,8 @@ void CFFTeleporter::OnObjectTouch( CBaseEntity *pOther )
 	if( !pPlayer )
 		return;
 
-	if( g_pGameRules->PlayerRelationship( GetOwnerPlayer(), pPlayer ) == GR_NOTTEAMMATE ) // Team orients it -GreenMushy
-		return;
-
 	// a player is in queue already
-	if( m_hTouchingPlayer && m_hTouchingPlayer->entindex() != pPlayer->entindex() )
+	if( m_hTouchingPlayer && pPlayer->entindex() != m_hTouchingPlayer->entindex())
 		return;
 
 	m_hTouchingPlayer = pPlayer;
@@ -330,6 +317,10 @@ void CFFTeleporter::OnObjectTouch( CBaseEntity *pOther )
 	// we don't teleport _from_ an exit, but we still store
 	// the touching player so we can telefrag them :D
 	if ( IsExit() )
+		return;
+
+	// only teammates can use the entrance (should disguised spies also be able to use it?)
+	if( g_pGameRules->PlayerRelationship( GetOwnerPlayer(), pPlayer ) == GR_NOTTEAMMATE ) // Team orients it -GreenMushy
 		return;
 
 	if ( !IsComplete() )
@@ -348,15 +339,19 @@ void CFFTeleporter::OnObjectTouch( CBaseEntity *pOther )
 	if ( playerVel.x != 0 || playerVel.y != 0 )
 		return;
 
-	Vector pDest = m_hExit->GetAbsOrigin();
+	Vector pDest = GetOther()->GetAbsOrigin();
 	pDest.z += 50;
 
 	QAngle pDestAngles = m_hTouchingPlayer->GetAbsAngles();
 
 	// TODO: actually teleport the player
 	pPlayer->Teleport(&pDest, &pDestAngles, &playerVel);
+	OnTeleport(pPlayer);
 
-	EmitSound("Teleporter.TeleportIn");
+	// Emit sound at the entrance and clear the touching player
+	// (this part can be moved to OnTeleport() but i prefer having it here)
+	EmitSound( "Teleporter.TeleportIn" );
+	m_hTouchingPlayer = NULL;
 
 	//pPlayer->m_flMancannonTime = gpGlobals->curtime;
 
@@ -376,7 +371,6 @@ CFFTeleporter *CFFTeleporter::Create( const Vector& vecOrigin, const QAngle& vec
 	CFFTeleporter *pObject = (CFFTeleporter *)CBaseEntity::Create( "FF_Teleporter", vecOrigin, vecAngles, NULL );
 
 	pObject->m_hOwner.GetForModify() = pentOwner;
-	//pObject->VPhysicsInitNormal( SOLID_VPHYSICS, pObject->GetSolidFlags(), true );
 	pObject->Spawn();
 
 	return pObject;
@@ -399,27 +393,28 @@ void CFFTeleporter::PhysicsSimulate()
 		if (!pPlayer)
 			return;
 
-		int iHealth = (int) (100.0f * GetHealth() / TELEPORTER_HEALTH);
-		//int iArmor = (int) ( 100.0f * m_iSGArmor / m_iMaxSGArmor); // no more armor, just reduce max health - shok
-		//int iAmmo = (int) (100.0f * (float) m_iShells / m_iMaxShells);
+		int iHealth = ( GetHealth() / TELEPORTER_HEALTH ) * 100;
+		int iRecharge = ( IsEntrance() && GetOther() )
+			? clamp( (int) ( 100 - ( ( m_flNextTeleport - gpGlobals->curtime - 0.2f ) / TELEPORTER_COOLDOWN ) * 100.0f ), 0, 100 )
+			: 0;
 
-		// Last bit of ammo signifies whether the SG needs rockets
-		//if (m_iMaxRockets && !m_iRockets) 
-		//	m_iAmmoPercent += 128;
-
-		// If things haven't changed then do nothing more
-		int iState = iHealth;
-		if (m_iLastState == iState)
+		// send updates to client only if our health changed, or is in cooldown
+		if ( m_iLastHealth == iHealth && !IsInCooldown() )
 			return;
+
+		if ( !IsComplete() )
+			iRecharge = 0;
 
 		CSingleUserRecipientFilter user(pPlayer);
 		user.MakeReliable();
 
 		UserMessageBegin(user, "TeleporterMsg");
-			WRITE_BYTE(iHealth);
+		WRITE_BYTE(iHealth);
+		WRITE_BYTE(iRecharge);
+		WRITE_BYTE(GetType());
 		MessageEnd();
 
-		m_iLastState = iState;
+		m_iLastHealth = iHealth;
 	}
 }
 
@@ -442,10 +437,8 @@ void CFFTeleporter::Detonate( void )
 		}		
 	}
 
-	if ( IsEntrance() )
-		SetExit( NULL );
-	else if ( IsExit() )
-		SetEntrance( NULL );
+	if ( GetOther() )
+		GetOther()->SetOther( NULL );
 
 	CFFBuildableObject::Detonate();
 }
@@ -468,36 +461,58 @@ void CFFTeleporter::DoExplosionDamage( void )
 	//}
 }
 
-void CFFTeleporter::SetEntrance( CFFTeleporter* pTeleporter )
+// this will ONLY be called from the entrance
+void CFFTeleporter::OnTeleport( CBaseEntity* pEntity )
 {
-	if (IsEntrance())
+	CFFPlayer* pPlayer = ToFFPlayer( pEntity );
+	CFFTeleporter* pExit = GetOther();
+
+	// neither player nor the exit will be NULL here
+	// if any of them are NULL for some reason
+	// something REALLY BAD has happened
+	if ( !pPlayer || !pExit )
+	{
+		ASSERT( false );
 		return;
+	}
 
-	m_hEntrance = pTeleporter;
+	// Emit sound at the exit
+	pExit->EmitSound( "Teleporter.TeleportOut" );
+
+	// Is a player touching the exit?
+	if ( pExit->m_hTouchingPlayer && pExit->m_hTouchingPlayer->entindex() != pPlayer->entindex() )
+	{
+		// make sure it's not one of our teammates, TakeDamage() does handle
+		// teammates just fine based on 'mp_friendlyfire' CVAR
+		// but it would fire a false 'player_ondamage' event to LUA
+		if ( g_pGameRules->PlayerRelationship( pExit->m_hTouchingPlayer, pPlayer ) == GR_NOTTEAMMATE )
+		{
+			CTakeDamageInfo info( this, pPlayer, 999, DMG_CRUSH | DMG_ALWAYSGIB );
+			//info.SetDamageCustom( DAMAGETYPE_TELEFRAG );
+
+			// Telefrag!
+			pExit->m_hTouchingPlayer->TakeDamage(info);
+
+			// it is possible that the player wouldn't die even after calling TakeDamage()
+			if ( !pExit->m_hTouchingPlayer->IsAlive() )
+				pExit->m_hTouchingPlayer = NULL;
+		}
+	}
 }
 
-void CFFTeleporter::SetExit( CFFTeleporter* pTeleporter )
+CFFTeleporter* CFFTeleporter::GetOther( void )
 {
-	if (IsExit())
-		return;
-
-	m_hExit = pTeleporter;
+	if ( IsEntrance() )
+		return m_hExit;
+	else
+		return m_hEntrance;
 }
 
-CFFTeleporter* CFFTeleporter::GetEntrance( void )
+void CFFTeleporter::SetOther( CFFTeleporter* pOther )
 {
-	if (IsEntrance())
-		return NULL;
-
-	return m_hEntrance;
+	if ( IsEntrance() )
+		m_hExit = pOther;
+	else
+		m_hEntrance = pOther;
 }
-
-CFFTeleporter* CFFTeleporter::GetExit( void )
-{
-	if (IsExit())
-		return NULL;
-
-	return m_hExit;
-}
-
 #endif // CLIENT_DLL : GAME_DLL

@@ -50,10 +50,12 @@ void CHudBuildState::VidInit()
 	m_pHudManCannon->textureId = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile(m_pHudManCannon->textureId, "vgui/hud_buildable_jumppad", true, false);
 
+	// PLACEHOLDER
 	m_pHudTeleporterEntrance = new CHudTexture();
 	m_pHudTeleporterEntrance->textureId = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile(m_pHudTeleporterEntrance->textureId, "vgui/hud_buildable_jumppad", true, false);
 
+	// PLACEHOLDER
 	m_pHudTeleporterExit = new CHudTexture();
 	m_pHudTeleporterExit->textureId = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile(m_pHudTeleporterExit->textureId, "vgui/hud_buildable_jumppad", true, false);
@@ -78,6 +80,14 @@ void CHudBuildState::VidInit()
 
 	wcsncpy(m_wszHealth, tempString, sizeof(m_wszHealth) / sizeof(wchar_t));
 	m_wszHealth[ (sizeof(m_wszHealth) / sizeof(wchar_t)) - 1] = 0;
+
+	tempString = g_pVGuiLocalize->Find("#FF_HUD_RECHARGE");
+
+	if (!tempString)
+		tempString = L"RECHARGE";
+
+	wcsncpy(m_wszRecharge, tempString, sizeof(m_wszRecharge) / sizeof(wchar_t));
+	m_wszRecharge[ (sizeof(m_wszRecharge) / sizeof(wchar_t)) - 1] = 0;
 
 	tempString = g_pVGuiLocalize->Find("#FF_HUD_AMMO");
 
@@ -129,9 +139,6 @@ void CHudBuildState::OnTick()
 	C_FFTeleporter *pTeleporterEntrance = pPlayer->GetTeleporterEntrance();
 	C_FFTeleporter *pTeleporterExit = pPlayer->GetTeleporterExit();
 
-	m_bDrawTeleporterEntrance = pTeleporterEntrance && pTeleporterEntrance->IsBuilt();
-	m_bDrawTeleporterExit = pTeleporterExit && pTeleporterExit->IsBuilt();
-
 	m_bDrawDispenser = pDispenser && pDispenser->IsBuilt();
 
 	m_bDrawSentry = pSentryGun && pSentryGun->m_iLevel > 0;
@@ -153,10 +160,6 @@ void CHudBuildState::OnTick()
 		m_flMedpackRegenPercent = modf((double)(pPlayer->GetAmmoCount(AMMO_CELLS) / 10.0f), &numMedpacks);
 		m_iNumMedpacks = (int)numMedpacks;
 	}
-	else
-	{
-		m_bDrawMedpacks = false;
-	}
 
 	if (pPlayer && pPlayer->GetClassSlot() == CLASS_SPY && !pPlayer->IsCloaked())
 	{
@@ -172,10 +175,9 @@ void CHudBuildState::OnTick()
 			m_flCloakTimeLeft = 0.0f;
 		}
 	}
-	else
-	{
-		m_bDrawCloak = false;
-	}
+
+	m_bDrawTeleporterEntrance = pTeleporterEntrance && pTeleporterEntrance->IsBuilt();
+	m_bDrawTeleporterExit = pTeleporterExit && pTeleporterExit->IsBuilt();
 }
 
 void CHudBuildState::MsgFunc_DispenserMsg(bf_read &msg)
@@ -241,12 +243,23 @@ void CHudBuildState::MsgFunc_PipeMsg(bf_read &msg)
 
 void CHudBuildState::MsgFunc_TeleporterMsg(bf_read &msg)
 {
-	DevWarning("got a teleporter message, what do i do with this\n");
+	int iHealth = msg.ReadByte();
+	int iRecharge = msg.ReadByte();
+	int iType = msg.ReadByte();
+
+	if ( iType == TELEPORTER_ENTRANCE )
+	{
+		_snwprintf(m_wszTeleporterEntrance, 127, L"%ls: %i%% %ls: %i%%", m_wszHealth, iHealth, m_wszRecharge, iRecharge);
+	}
+	else
+	{
+		_snwprintf(m_wszTeleporterExit, 127, L"%ls: %i%%", m_wszHealth, iHealth);
+	}
 }
 
 void CHudBuildState::Paint() 
 {
-	if (!m_bDrawDispenser && !m_bDrawSentry && !m_bDrawManCannon && !m_bDrawDetpack && !m_bDrawPipes && !m_bDrawMedpacks && !m_bDrawCloak ) 
+	if ( !m_bDrawDispenser && !m_bDrawSentry && !m_bDrawManCannon && !m_bDrawDetpack && !m_bDrawPipes && !m_bDrawMedpacks && !m_bDrawCloak && !m_bDrawTeleporterEntrance && !m_bDrawTeleporterExit ) 
 		return;
 
 	// Draw icons
@@ -301,14 +314,14 @@ void CHudBuildState::Paint()
 
 	if (m_bDrawTeleporterEntrance) 
 	{
-		surface()->DrawSetTexture(m_pHudTeleporterEntrance ->textureId);
-		surface()->DrawTexturedRect(icon2_xpos, icon2_ypos, icon2_xpos + icon2_width, icon2_ypos + icon2_height);
+		surface()->DrawSetTexture(m_pHudTeleporterEntrance->textureId);
+		surface()->DrawTexturedRect(icon3_xpos, icon3_ypos, icon3_xpos + icon3_width, icon3_ypos + icon3_height);
 	}
 
 	if (m_bDrawTeleporterExit)
 	{
 		surface()->DrawSetTexture(m_pHudTeleporterExit->textureId);
-		surface()->DrawTexturedRect(icon2_xpos, icon2_ypos, icon2_xpos + icon2_width, icon2_ypos + icon2_height);
+		surface()->DrawTexturedRect(icon4_xpos, icon4_ypos, icon4_xpos + icon4_width, icon4_ypos + icon4_height);
 	}
 
 	// Draw text
@@ -403,9 +416,7 @@ void CHudBuildState::Paint()
 
 	if (m_bDrawTeleporterEntrance)
 	{
-		surface()->DrawSetTextPos(text1_xpos, text1_ypos);
-
-		_snwprintf(m_wszTeleporterEntrance, 127, L"this is a placeholder message");
+		surface()->DrawSetTextPos(text3_xpos, text3_ypos);
 
 		for (wchar_t* wch = m_wszTeleporterEntrance; *wch != 0; wch++)
 			surface()->DrawUnicodeChar(*wch);
@@ -413,9 +424,7 @@ void CHudBuildState::Paint()
 
 	if (m_bDrawTeleporterExit)
 	{
-		surface()->DrawSetTextPos(text1_xpos, text1_ypos);
-
-		_snwprintf(m_wszTeleporterExit, 127, L"this is a placeholder message");
+		surface()->DrawSetTextPos(text4_xpos, text4_ypos);
 
 		for (wchar_t* wch = m_wszTeleporterExit; *wch != 0; wch++)
 			surface()->DrawUnicodeChar(*wch);

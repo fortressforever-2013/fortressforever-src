@@ -172,6 +172,9 @@ const RenderFx_t g_BuildableRenderFx = kRenderFxPulseSlowWide;
 #define FF_MANCANNON_MINS	Vector( -54, -54, 0 )
 #define FF_MANCANNON_MAXS	Vector( 54, 54, 48 )
 
+// Using this value based off of the mins/maxs
+#define FF_BUILD_TELEPORTER_HALF_WIDTH	54.0f
+
 #define FF_TELEPORTER_MINS	FF_MANCANNON_MINS
 #define FF_TELEPORTER_MAXS	FF_MANCANNON_MAXS
 

@@ -34,8 +34,9 @@ class CFFTeleporter : public CFFBuildableObject
 {
 public:
 	DECLARE_CLASS( CFFTeleporter, CFFBuildableObject )
-	DECLARE_NETWORKCLASS()
-	DECLARE_DATADESC()
+	DECLARE_NETWORKCLASS();
+	DECLARE_DATADESC();
+	DECLARE_PREDICTABLE();
 
 	// --> shared
 	CFFTeleporter( void );
@@ -44,35 +45,34 @@ public:
 	virtual Class_T Classify( void ) { return CLASS_TELEPORTER; }
 	// <-- shared
 
-	TeleporterState_t m_iState;
-	TeleporterType_t m_iType;
-
-	TeleporterTeleportState_t m_iTeleportState;
-
 	CNetworkVar(float, m_flLastTeleport);
 	CNetworkVar(float, m_flNextTeleport);
 
 #ifdef CLIENT_DLL
 	virtual void OnDataChanged( DataUpdateType_t updateType );
-	virtual int DrawModel(int flags);
 
 	// Creates a client side ONLY teleporter - used for the build slot
-	static CFFTeleporter *CreateClientSideTeleporter( const Vector& vecOrigin, const QAngle& vecAngles );	
-
-	float m_flLastDamage;
+	static CFFTeleporter *CreateClientSideTeleporter( const Vector& vecOrigin, const QAngle& vecAngles );
 #else
-	virtual void Spawn( void );
-	virtual void GoLive( void );
+	virtual void	Spawn( void );
+	virtual void	GoLive( void );
+	virtual void	Detonate( void );
+	virtual void	DoExplosionDamage( void );
 
-	void OnObjectTouch( CBaseEntity *pOther );
-	void OnTeleporterThink( void );
-	
 	// These are for updating the user
 	virtual void	PhysicsSimulate();
 	float			m_flLastClientUpdate;
-	int				m_iLastState;
+	int				m_iLastHealth;
 
-	CFFPlayer* m_hTouchingPlayer;
+	void			OnObjectTouch( CBaseEntity *pOther );
+	void			OnThink( void );
+	void			OnTeleport( CBaseEntity* pEntity ); // to do stuff after teleporting
+
+	static CFFTeleporter *Create( const Vector& vecOrigin, const QAngle& vecAngles, CBaseEntity *pentOwner = NULL );
+
+	TeleporterState_t m_iState;
+	TeleporterType_t m_iType;
+	TeleporterTeleportState_t m_iTeleportState;
 	
 	TeleporterState_t GetState( void ) { return m_iState; }
 	void			SetState( TeleporterState_t iState ) { m_iState = iState; }
@@ -89,18 +89,14 @@ public:
 	bool			IsEntrance( void ) { return GetType() == TELEPORTER_ENTRANCE; }
 	bool			IsExit( void ) { return GetType() == TELEPORTER_EXIT; }
 
-	CFFTeleporter*	GetEntrance( void );
-	CFFTeleporter*	GetExit( void );
-	void			SetEntrance( CFFTeleporter* pTeleporter );
-	void			SetExit( CFFTeleporter* pTeleporter );
+	CFFTeleporter* m_hEntrance;
+	CFFTeleporter* m_hExit;
 
-	CFFTeleporter*	m_hEntrance;
-	CFFTeleporter*	m_hExit;
+	// entrance will point to exit, exit will point to entrance
+	CFFTeleporter*	GetOther( void );
+	void			SetOther( CFFTeleporter* pOther );
 
-	virtual void Detonate( void );
-	virtual void DoExplosionDamage( void );
-
-	static CFFTeleporter *Create( const Vector& vecOrigin, const QAngle& vecAngles, CBaseEntity *pentOwner = NULL );
+	CBaseEntity* m_hTouchingPlayer;
 #endif
 };
 

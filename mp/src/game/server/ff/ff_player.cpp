@@ -3597,7 +3597,7 @@ void CFFPlayer::PreBuildGenericThink( void )
 					CFFTeleporter *pTeleporterExit = GetTeleporterExit();
 
 					if (pTeleporterExit)
-						pTeleporter->SetExit(pTeleporterExit);
+						pTeleporter->SetOther(pTeleporterExit);
 
 					// Bug #0001558: exploit to get instant lvl2 SG
 					// Moved code to remove cells from CFFSentryGun::GoLive() to here -> Defrag
@@ -3623,7 +3623,7 @@ void CFFPlayer::PreBuildGenericThink( void )
 					CFFTeleporter *pTeleporterEntrance = GetTeleporterEntrance();
 
 					if (pTeleporterEntrance)
-						pTeleporter->SetEntrance(pTeleporterEntrance);
+						pTeleporter->SetOther(pTeleporterEntrance);
 
 					// Bug #0001558: exploit to get instant lvl2 SG
 					// Moved code to remove cells from CFFSentryGun::GoLive() to here -> Defrag
