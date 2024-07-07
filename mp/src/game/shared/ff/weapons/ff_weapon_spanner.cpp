@@ -20,6 +20,7 @@
 #include "ff_buildableobject.h"
 #include "ff_buildable_sentrygun.h"
 #include "ff_buildable_dispenser.h"
+#include "ff_buildable_teleporter.h"
 
 #ifdef CLIENT_DLL
 	#define CFFWeaponSpanner C_FFWeaponSpanner
@@ -302,6 +303,48 @@ void CFFWeaponSpanner::Hit(trace_t &traceHit, Activity nHitActivity)
 					pSentryGun->AddAmmo(shells, rockets);
 					pPlayer->RemoveAmmo(shells, AMMO_SHELLS);
 					pPlayer->RemoveAmmo(rockets, AMMO_ROCKETS);
+#endif
+				}
+
+				// Get out now so we don't call the baseclass and do damage
+				return;
+			}
+		}
+		else if (pHitEntity->Classify() == CLASS_TELEPORTER)
+		{
+			CFFTeleporter *pTeleporter = (CFFTeleporter*) pHitEntity;
+
+			WeaponSound( SPECIAL2 );
+
+			// Is the teleporter mine(is pPlayer the owner?) 
+			bool bMine = ( pPlayer == ToFFPlayer( pTeleporter->m_hOwner.Get() ) );
+
+			// Is the teleporter a teammates or an allies? (changes depending on friendlyfire value) 
+			bool bFriendly = ( g_pGameRules->PlayerRelationship( pPlayer, ToFFPlayer( pTeleporter->m_hOwner.Get() ) ) == GR_TEAMMATE );
+
+			// If the teleporter is mine, a team mates, or an allies, don't hurt it, ever
+			if( bMine || bFriendly ) 
+			{
+				// DrEvil: Added IsBuilt check to fix upgrading when build in progress
+				if(!pTeleporter->IsBuilt())
+					return;
+
+				// If it's damaged, restore it's health
+				if( pTeleporter->NeedsHealth() ) 
+				{
+					// We get 3 health for each cell
+					int iHealthGiven = min( pTeleporter->NeedsHealth(), FF_REPAIRAMOUNTPERCELL_TELEPORTER * pPlayer->GetAmmoCount( AMMO_CELLS ) );
+
+					// If we give health, play a special sound. Pun intended.
+					if( iHealthGiven > 0 )
+						WeaponSoundLocal( SPECIAL3 );
+					
+#ifdef GAME_DLL
+					pTeleporter->SetHealth( pTeleporter->GetHealth() + iHealthGiven );
+					// AfterShock - scoring system: Added this for if we later want to give points for repairing friendly teleporters
+					if ( bFriendly && !bMine )
+						pPlayer->AddFortPoints(iHealthGiven*0.1, "#FF_FORTPOINTS_REPAIRTEAMTELEPORTER");
+					pPlayer->RemoveAmmo( iHealthGiven / FF_REPAIRAMOUNTPERCELL_TELEPORTER, AMMO_CELLS );
 #endif
 				}
 

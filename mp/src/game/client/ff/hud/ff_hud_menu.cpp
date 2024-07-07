@@ -68,21 +68,37 @@ extern menu_t ClassDMenu;
 extern menu_t FriendlyDMenu;
 extern menu_t EnemyDMenu;
 
+extern menu_t EngineerTeleportersMenu;
+
 // We buffer our commands onto here sequentially.
 char szCmdBuffer[MAX_CMD_LEN];
-
-CON_COMMAND(qsentry, "qsentry")
-{
-	C_FFPlayer *pPlayer = ToFFPlayer(CBasePlayer::GetLocalPlayer());
-	if (pPlayer)
-		pPlayer->SwapToWeaponSlot(5);
-}
 
 CON_COMMAND(qdispenser, "qdispenser")
 {
 	C_FFPlayer *pPlayer = ToFFPlayer(CBasePlayer::GetLocalPlayer());
 	if (pPlayer)
 		pPlayer->SwapToWeaponSlot(4);
+}
+
+CON_COMMAND(qsentry, "qsentry")
+{
+	C_FFPlayer* pPlayer = ToFFPlayer(CBasePlayer::GetLocalPlayer());
+	if (pPlayer)
+		pPlayer->SwapToWeaponSlot(5);
+}
+
+CON_COMMAND(qtpentrance, "qtpentrance")
+{
+	C_FFPlayer *pPlayer = ToFFPlayer(CBasePlayer::GetLocalPlayer());
+	if (pPlayer)
+		pPlayer->SwapToWeaponSlot(6);
+}
+
+CON_COMMAND(qtpexit, "qtpexit")
+{
+	C_FFPlayer *pPlayer = ToFFPlayer(CBasePlayer::GetLocalPlayer());
+	if (pPlayer)
+		pPlayer->SwapToWeaponSlot(6);
 }
 
 int CheckDisguiseClass( int iClass )
@@ -297,6 +313,128 @@ ADD_MENU_OPTION(aimsentry, "#FF_CM_AIMSENTRY", 'O', "aimsentry")
 	return MENU_SHOW;
 }
 
+// Teleporters stuff
+
+ADD_MENU_BRANCH(teleporters, "#FF_CM_TELEPORTERS", 'O', "", &EngineerTeleportersMenu)
+{
+	C_FFPlayer *ff = C_FFPlayer::GetLocalFFPlayer();
+
+	// Yeah, this is highly unlikely to happen, but just checking anyway
+	if( !ff )
+		return MENU_DIM;
+
+	return MENU_SHOW;
+}
+
+ADD_MENU_OPTION(buildtpentrance, "#FF_CM_BUILD_TPEN", 'O', "qtpentrance")
+{
+	C_FFPlayer* ff = C_FFPlayer::GetLocalFFPlayer();
+
+	// Yeah, this is highly unlikely to happen, but just checking anyway
+	if (!ff)
+		return MENU_DIM;
+
+	// Bug #0000333: Buildable Behavior (non build slot) while building
+	if( ff->IsBuilding() && ( ff->GetCurrentBuild() == FF_BUILD_TELEPORTER_ENTRANCE ) )
+		return MENU_DIM;
+
+	if ( ff->GetTeleporterEntrance() )
+		return MENU_DIM;
+
+	return MENU_SHOW;
+}
+
+ADD_MENU_OPTION(dettpentrance, "#FF_CM_DETONATE_TPEN", 'O', "dettpentrance")
+{
+	C_FFPlayer* ff = C_FFPlayer::GetLocalFFPlayer();
+
+	// Yeah, this is highly unlikely to happen, but just checking anyway
+	if (!ff)
+		return MENU_DIM;
+
+	// Bug #0000333: Buildable Behavior (non build slot) while building
+	if( ff->IsBuilding() && ( ff->GetCurrentBuild() == FF_BUILD_TELEPORTER_ENTRANCE ) )
+		return MENU_DIM;
+
+	if ( !ff->GetTeleporterEntrance() )
+		return MENU_DIM;
+
+	return MENU_SHOW;
+}
+
+ADD_MENU_OPTION(dismantletpentrance, "#FF_CM_DISMANTLE_TPEN", 'O', "dismantletpentrance")
+{
+	C_FFPlayer* ff = C_FFPlayer::GetLocalFFPlayer();
+
+	// Yeah, this is highly unlikely to happen, but just checking anyway
+	if (!ff)
+		return MENU_DIM;
+
+	// Bug #0000333: Buildable Behavior (non build slot) while building
+	if( ff->IsBuilding() && ( ff->GetCurrentBuild() == FF_BUILD_TELEPORTER_ENTRANCE ) )
+		return MENU_DIM;
+
+	if ( !ff->GetTeleporterEntrance() )
+		return MENU_DIM;
+
+	return MENU_SHOW;
+}
+
+ADD_MENU_OPTION(buildtpexit, "#FF_CM_BUILD_TPEX", 'O', "qtpexit")
+{
+	C_FFPlayer* ff = C_FFPlayer::GetLocalFFPlayer();
+
+	// Yeah, this is highly unlikely to happen, but just checking anyway
+	if (!ff)
+		return MENU_DIM;
+
+	// Bug #0000333: Buildable Behavior (non build slot) while building
+	if( ff->IsBuilding() && ( ff->GetCurrentBuild() == FF_BUILD_TELEPORTER_EXIT ) )
+		return MENU_DIM;
+
+	if ( ff->GetTeleporterExit() )
+		return MENU_DIM;
+
+	return MENU_SHOW;
+}
+
+ADD_MENU_OPTION(dettpexit, "#FF_CM_DETONATE_TPEX", 'O', "dettpexit")
+{
+	C_FFPlayer* ff = C_FFPlayer::GetLocalFFPlayer();
+
+	// Yeah, this is highly unlikely to happen, but just checking anyway
+	if (!ff)
+		return MENU_DIM;
+
+	// Bug #0000333: Buildable Behavior (non build slot) while building
+	if( ff->IsBuilding() && ( ff->GetCurrentBuild() == FF_BUILD_TELEPORTER_EXIT ) )
+		return MENU_DIM;
+
+	if ( !ff->GetTeleporterExit() )
+		return MENU_DIM;
+
+	return MENU_SHOW;
+}
+
+ADD_MENU_OPTION(dismantletpexit, "#FF_CM_DISMANTLE_TPEX", 'O', "dismantletpexit")
+{
+	C_FFPlayer* ff = C_FFPlayer::GetLocalFFPlayer();
+
+	// Yeah, this is highly unlikely to happen, but just checking anyway
+	if (!ff)
+		return MENU_DIM;
+
+	// Bug #0000333: Buildable Behavior (non build slot) while building
+	if( ff->IsBuilding() && ( ff->GetCurrentBuild() == FF_BUILD_TELEPORTER_EXIT) )
+		return MENU_DIM;
+
+	if ( !ff->GetTeleporterExit() )
+		return MENU_DIM;
+
+	return MENU_SHOW;
+}
+
+
 //-----------------------------------------------------------------------------
 // Disguise menu options
 //-----------------------------------------------------------------------------
@@ -443,7 +581,8 @@ ADD_MENU_OPTION(need_ammo, "#FF_CM_CALLAMMO", '^', "ammome") { return MENU_SHOW;
 //-----------------------------------------------------------------------------
 // Menu option lists
 //-----------------------------------------------------------------------------
-MenuOption EngineerOptionList[] = { aimsentry, builddispenser, detdispenser, dismantledispenser, dismantlesentry, detsentry, buildsentry };
+MenuOption EngineerOptionList[] = { aimsentry, builddispenser, detdispenser, dismantledispenser, dismantlesentry, detsentry, buildsentry, teleporters };
+MenuOption EngineerTeleportersOptionList[] = { buildtpentrance, dettpentrance, dismantletpentrance, buildtpexit, dettpexit, dismantletpexit, };
 MenuOption DemomanOptionList[] = { det5, det10, det20, det50 };
 MenuOption SpyOptionList[] = { lastdisguise, disguiseenemy, smartcloak, sentrysabotage, dispensersabotage, disguiseteam };
 MenuOption ClassDOptionList[] = { disguisescout, disguisesniper, disguisesoldier, disguisedemoman, disguisemedic, disguisehwguy, disguisepyro, disguisespy, disguiseengineer, disguisecivilian };
@@ -455,6 +594,7 @@ MenuOption CallOptionList[] = { need_armor, need_medic, need_ammo };
 // Menus themselves
 //-----------------------------------------------------------------------------
 menu_t EngineerMenu = { ARRAYSIZE(EngineerOptionList), EngineerOptionList, "aimsentry" };
+menu_t EngineerTeleportersMenu = { ARRAYSIZE(EngineerTeleportersOptionList), EngineerTeleportersOptionList, NULL };
 menu_t DemomanMenu = { ARRAYSIZE(DemomanOptionList), DemomanOptionList, "detpack 5" };
 menu_t SpyMenu = { ARRAYSIZE(SpyOptionList), SpyOptionList, "smartcloak" };
 menu_t ClassDMenu = { ARRAYSIZE(ClassDOptionList), ClassDOptionList, NULL };
@@ -462,7 +602,7 @@ menu_t FriendlyDMenu = { ARRAYSIZE(FriendlyDOptionList), FriendlyDOptionList, NU
 menu_t EnemyDMenu = { ARRAYSIZE(EnemyDOptionList), EnemyDOptionList, NULL };
 menu_t CallMenu = { ARRAYSIZE(CallOptionList), CallOptionList, "saveme" };
 
-menu_t Menus[] = { EngineerMenu, DemomanMenu, SpyMenu, ClassDMenu, FriendlyDMenu, EnemyDMenu, CallMenu };
+menu_t Menus[] = { EngineerMenu, EngineerTeleportersMenu, DemomanMenu, SpyMenu, ClassDMenu, FriendlyDMenu, EnemyDMenu, CallMenu };
 
 CHudContextMenu::~CHudContextMenu() 
 {

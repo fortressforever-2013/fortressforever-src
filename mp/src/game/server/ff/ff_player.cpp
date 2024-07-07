@@ -3297,12 +3297,13 @@ void CFFPlayer::Command_BuildTeleporter(const CCommand& args)
 			m_iWantBuild = FF_BUILD_TELEPORTER_ENTRANCE;
 		else if ( !GetTeleporterExit() )
 			m_iWantBuild = FF_BUILD_TELEPORTER_EXIT;
-		else
-			m_iWantBuild = FF_BUILD_NONE;
 	}
 
-	if( m_iWantBuild == FF_BUILD_NONE )
-		return;
+	// turns out PreBuildGenericThink() handles it already
+	// and uncommenting this also prevents cancelling of building teleporters
+	// BUGGY CODE!!!! who wrote this smh
+	//if( m_iWantBuild == FF_BUILD_NONE )
+	//	return;
 
 	PreBuildGenericThink();
 }
@@ -3356,8 +3357,8 @@ void CFFPlayer::PreBuildGenericThink( void )
 				case FF_BUILD_DISPENSER: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_DISPENSER_ALREADYBUILT"); break;
 				case FF_BUILD_SENTRYGUN: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_SENTRYGUN_ALREADYBUILT"); break;
 				case FF_BUILD_DETPACK: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_DETPACK_ALREADYSET"); break;
-				case FF_BUILD_TELEPORTER_ENTRANCE: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_TELEPORTER_ENTRANCE_ALREADYBUILT"); break;
-				case FF_BUILD_TELEPORTER_EXIT: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_TELEPORTER_EXIT_ALREADYBUILT"); break;
+				case FF_BUILD_TELEPORTER_ENTRANCE: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_TPEN_ALREADYBUILT"); break;
+				case FF_BUILD_TELEPORTER_EXIT: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_TPEX_ALREADYBUILT"); break;
 				case FF_BUILD_MANCANNON:
 					// If the Scout right-clicks after has built a jump pad, he'll get the warning, and a message
 					// that he can click again to det it; this gives him 2 seconds to do so
@@ -3421,8 +3422,8 @@ void CFFPlayer::PreBuildGenericThink( void )
 				case FF_BUILD_SENTRYGUN: ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_SENTRYGUN_NOTENOUGHAMMO" ); break;
 				case FF_BUILD_DETPACK: ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_DETPACK_NOTENOUGHAMMO" ); break;
 				case FF_BUILD_MANCANNON: ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_MANCANNON_NOTENOUGHAMMO" ); break;
-				case FF_BUILD_TELEPORTER_ENTRANCE: ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_TELEPORTER_ENTRANCE_NOTENOUGHAMMO" ); break;
-				case FF_BUILD_TELEPORTER_EXIT: ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_TELEPORTER_EXIT_NOTENOUGHAMMO" ); break;
+				case FF_BUILD_TELEPORTER_ENTRANCE: ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_TPEN_NOTENOUGHAMMO" ); break;
+				case FF_BUILD_TELEPORTER_EXIT: ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_TPEX_NOTENOUGHAMMO" ); break;
 			}
 			
 			// Re-initialize
@@ -3591,13 +3592,13 @@ void CFFPlayer::PreBuildGenericThink( void )
 					pTeleporter->SetGroundOrigin( hBuildInfo.GetBuildOrigin() );
 					pTeleporter->SetGroundAngles( hBuildInfo.GetBuildAngles() );
 
-					m_hTeleporterEntrance = pTeleporter;
-					m_flBuildTime = gpGlobals->curtime + 3.5f; // 3.5 seconds to build?
-
 					CFFTeleporter *pTeleporterExit = GetTeleporterExit();
 
 					if (pTeleporterExit)
 						pTeleporter->SetOther(pTeleporterExit);
+
+					m_hTeleporterEntrance = pTeleporter;
+					m_flBuildTime = gpGlobals->curtime + 3.5f; // 3.5 seconds to build?
 
 					// Bug #0001558: exploit to get instant lvl2 SG
 					// Moved code to remove cells from CFFSentryGun::GoLive() to here -> Defrag
@@ -3617,13 +3618,13 @@ void CFFPlayer::PreBuildGenericThink( void )
 					pTeleporter->SetGroundOrigin( hBuildInfo.GetBuildOrigin() );
 					pTeleporter->SetGroundAngles( hBuildInfo.GetBuildAngles() );
 
-					m_hTeleporterExit = pTeleporter;
-					m_flBuildTime = gpGlobals->curtime + 3.5f; // 3.5 seconds to build?
-
 					CFFTeleporter *pTeleporterEntrance = GetTeleporterEntrance();
 
 					if (pTeleporterEntrance)
 						pTeleporter->SetOther(pTeleporterEntrance);
+
+					m_hTeleporterExit = pTeleporter;
+					m_flBuildTime = gpGlobals->curtime + 3.5f; // 3.5 seconds to build?
 
 					// Bug #0001558: exploit to get instant lvl2 SG
 					// Moved code to remove cells from CFFSentryGun::GoLive() to here -> Defrag

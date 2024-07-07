@@ -98,13 +98,14 @@ CFFTeleporter::CFFTeleporter( void )
 
 	m_flLastClientUpdate = 0;
 	m_iLastHealth = 0;
+	m_iLastRecharge = 0;
 
 	m_flLastTeleport = 0;
 	m_flNextTeleport = 0;
 #endif
 
 	// Health
-	m_iMaxHealth = m_iHealth = TELEPORTER_HEALTH;
+ 	m_iMaxHealth = m_iHealth = TELEPORTER_HEALTH;
 }
 
 //-----------------------------------------------------------------------------
@@ -217,6 +218,32 @@ void CFFTeleporter::GoLive( void )
 	SetThink( &CFFTeleporter::OnThink );
 	SetNextThink( gpGlobals->curtime + m_flThinkTime );
 
+	// when the exit is built "after" the entrance, we need to update
+	// the entrance's information once for the client
+	if ( IsExit() )
+	{
+		CFFTeleporter* pEntrance = GetOther();
+
+		if ( !pEntrance )
+			return;
+
+		int iHealth = ( pEntrance->GetHealth() / TELEPORTER_HEALTH ) * 100;
+		int iRecharge = clamp( (int) ( 100 - ( ( m_flNextTeleport - gpGlobals->curtime - 0.2f ) / TELEPORTER_COOLDOWN ) * 100.0f ), 0, 100 );
+		CFFPlayer* pOwner = ToFFPlayer( m_hOwner.Get() );
+
+		if ( !pOwner )
+			return;
+
+		CSingleUserRecipientFilter user(pOwner);
+		user.MakeReliable();
+
+		UserMessageBegin(user, "TeleporterMsg");
+		WRITE_BYTE(iHealth);
+		WRITE_BYTE(iRecharge);
+		WRITE_BYTE(pEntrance->GetType());
+		MessageEnd();
+	}
+
 	// Create our flickerer
 	m_pFlickerer = ( CFFBuildableFlickerer * )CreateEntityByName( "ff_buildable_flickerer" );
 	if( !m_pFlickerer )
@@ -239,7 +266,7 @@ void CFFTeleporter::OnThink( void )
 	if ( ( gpGlobals->curtime - m_flPlayerLastTouch ) > /*ffdev_teleporter_cleartime.GetFloat()*/ 0.1f )
 		m_hTouchingPlayer = NULL;
 
-	if ( IsEntrance() )
+	/*if ( IsEntrance() )
 	{
 		if ( m_hTouchingPlayer )
 			DevWarning("[Teleporter 1] Has player\n");
@@ -252,7 +279,8 @@ void CFFTeleporter::OnThink( void )
 			DevWarning("[Teleporter 2] Has player\n");
 		else
 			DevWarning("[Teleporter 2] No player\n");
-	}
+	}*/
+
 	// teleporter buildstate
 	if ( !IsComplete() && GetOther() )
 	{
@@ -335,7 +363,7 @@ void CFFTeleporter::OnObjectTouch( CBaseEntity *pOther )
 	// can only use it once per 10 seconds
 	if ( IsInCooldown() )
 	{
-		DevMsg("Teleporter ready in %f\n", (m_flNextTeleport - gpGlobals->curtime));
+		//DevMsg("Teleporter ready in %f\n", (m_flNextTeleport - gpGlobals->curtime));
 		return;
 	}
 
@@ -361,12 +389,12 @@ void CFFTeleporter::OnObjectTouch( CBaseEntity *pOther )
 
 	//pPlayer->m_flMancannonTime = gpGlobals->curtime;
 
-	m_flLastTeleport = gpGlobals->curtime;
-	m_flNextTeleport = m_flLastTeleport + TELEPORTER_COOLDOWN;
+	GetOther()->m_flLastTeleport = m_flLastTeleport = gpGlobals->curtime;
+	GetOther()->m_flNextTeleport = m_flNextTeleport = m_flLastTeleport + TELEPORTER_COOLDOWN;
 
 	SetTeleportState( TELEPORTER_INCOOLDOWN );
 
-	DevMsg( "[Teleporter] You have been teleported, teleport time is %f and next teleport time is %f\n", m_flLastTeleport.Get(), m_flNextTeleport.Get());
+	//DevMsg( "[Teleporter] You have been teleported, teleport time is %f and next teleport time is %f\n", m_flLastTeleport.Get(), m_flNextTeleport.Get());
 }
 
 //-----------------------------------------------------------------------------
@@ -399,17 +427,14 @@ void CFFTeleporter::PhysicsSimulate()
 		if (!pPlayer)
 			return;
 
-		int iHealth = ( GetHealth() / TELEPORTER_HEALTH ) * 100;
-		int iRecharge = ( IsEntrance() && GetOther() )
+		int iHealth = (int) ( 100.0f * GetHealth() / GetMaxHealth() );
+		int iRecharge = ( IsEntrance() && IsComplete() )
 			? clamp( (int) ( 100 - ( ( m_flNextTeleport - gpGlobals->curtime - 0.2f ) / TELEPORTER_COOLDOWN ) * 100.0f ), 0, 100 )
 			: 0;
 
 		// send updates to client only if our health changed, or is in cooldown
-		if ( m_iLastHealth == iHealth && !IsInCooldown() )
+		if ( m_iLastHealth == iHealth && m_iLastRecharge == iRecharge )
 			return;
-
-		if ( !IsComplete() )
-			iRecharge = 0;
 
 		CSingleUserRecipientFilter user(pPlayer);
 		user.MakeReliable();
@@ -421,6 +446,7 @@ void CFFTeleporter::PhysicsSimulate()
 		MessageEnd();
 
 		m_iLastHealth = iHealth;
+		m_iLastRecharge = iRecharge;
 	}
 }
 

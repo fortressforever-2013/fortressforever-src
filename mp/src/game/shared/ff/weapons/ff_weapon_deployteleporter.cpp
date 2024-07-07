@@ -253,17 +253,15 @@ bool CFFWeaponDeployTeleporter::CanDeploy( void )
 
 bool CFFWeaponDeployTeleporter::CanBeSelected( void )
 {
-	/*CFFPlayer *pPlayer = GetPlayerOwner();
+	CFFPlayer *pPlayer = GetPlayerOwner();
 
 	if( !pPlayer )
 		return false;
 
-	if( pPlayer->GetTeleporter() )
+	if( pPlayer->GetTeleporterEntrance() && pPlayer->GetTeleporterExit() )
+	{
 		return false;
-	else if( pPlayer->IsBuilding() )
-		return false;
-	else if( pPlayer->GetAmmoCount( AMMO_CELLS ) < 100 )
-		return false;*/
+	}
 
 	return BaseClass::CanBeSelected();
 }

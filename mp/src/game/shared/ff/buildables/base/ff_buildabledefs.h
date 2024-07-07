@@ -189,6 +189,10 @@ const RenderFx_t g_BuildableRenderFx = kRenderFxPulseSlowWide;
 #define FF_REPAIRAMOUNTPERCELL_SENTRYGUN 3.5f
 #define FF_REPAIRAMOUNTPERCELL_DISPENSER 5.0f
 
+// with great power comes great responsibility
+// 2hp per cell
+#define FF_REPAIRAMOUNTPERCELL_TELEPORTER 2.0f
+
 #define FF_BUILDCOST_TELEPORTER_ENTRANCE 125
 #define FF_BUILDCOST_TELEPORTER_EXIT 125
 

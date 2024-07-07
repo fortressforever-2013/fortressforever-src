@@ -47,6 +47,8 @@ public:
 
 	CNetworkVar(float, m_flLastTeleport);
 	CNetworkVar(float, m_flNextTeleport);
+	
+	int NeedsHealth( void ) const { return GetMaxHealth() - GetHealth(); }
 
 #ifdef CLIENT_DLL
 	virtual void OnDataChanged( DataUpdateType_t updateType );
@@ -63,6 +65,7 @@ public:
 	virtual void	PhysicsSimulate();
 	float			m_flLastClientUpdate;
 	int				m_iLastHealth;
+	int				m_iLastRecharge;
 
 	void			OnObjectTouch( CBaseEntity *pOther );
 	void			OnThink( void );
@@ -96,7 +99,7 @@ public:
 	CFFTeleporter*	GetOther( void );
 	void			SetOther( CFFTeleporter* pOther );
 
-	CBaseEntity* m_hTouchingPlayer;
+	CHandle<CFFPlayer> m_hTouchingPlayer;
 	float		 m_flPlayerLastTouch;
 #endif
 };
