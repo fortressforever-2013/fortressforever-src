@@ -83,6 +83,8 @@ extern const char *g_pszFFGenGibModels[];
 //ConVar ffdev_teleporter_cooldown( "ffdev_teleporter_cooldown", "10", FCVAR_FF_FFDEV_REPLICATED );
 #define TELEPORTER_COOLDOWN 10.0f //ffdev_teleporter_cooldown.GetFloat()
 
+//ConVar ffdev_teleporter_cleartime("ffdev_teleporter_cleartime", "0.1", FCVAR_FF_FFDEV_REPLICATED);
+
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
@@ -234,6 +236,9 @@ void CFFTeleporter::GoLive( void )
 //-----------------------------------------------------------------------------
 void CFFTeleporter::OnThink( void )
 {
+	if ( ( gpGlobals->curtime - m_flPlayerLastTouch ) > /*ffdev_teleporter_cleartime.GetFloat()*/ 0.1f )
+		m_hTouchingPlayer = NULL;
+
 	if ( IsEntrance() )
 	{
 		if ( m_hTouchingPlayer )
@@ -313,6 +318,7 @@ void CFFTeleporter::OnObjectTouch( CBaseEntity *pOther )
 		return;
 
 	m_hTouchingPlayer = pPlayer;
+	m_flPlayerLastTouch = gpGlobals->curtime;
 
 	// we don't teleport _from_ an exit, but we still store
 	// the touching player so we can telefrag them :D

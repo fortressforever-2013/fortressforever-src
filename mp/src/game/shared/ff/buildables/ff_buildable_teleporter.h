@@ -97,6 +97,7 @@ public:
 	void			SetOther( CFFTeleporter* pOther );
 
 	CBaseEntity* m_hTouchingPlayer;
+	float		 m_flPlayerLastTouch;
 #endif
 };
 
