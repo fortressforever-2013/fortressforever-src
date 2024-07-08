@@ -35,7 +35,6 @@ class CFFTeleporter;
 class CFFBuildableInfo;
 
 class CFFGrenadeBase;
-
 #include "ff_mapguide.h"	// |-- Mirv: Map guides
 
 #define INVALID_OBJECTIVE_LOCATION -9515.2f
@@ -697,6 +696,8 @@ public:
 	int m_iChannel;
     float m_flMancannonTime;		// Last time the player was affected (pushed) by a jump pad
 	float m_flMancannonDetTime;		// Used to allow the Scout to det his jump pad
+
+	float m_flTeleportTime;			// Last time the player teleported, used for the post-teleport player glow
 
 	// BEG: Spy cloak stuff
 private:

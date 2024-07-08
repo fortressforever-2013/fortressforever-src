@@ -267,151 +267,260 @@ bool CFFWeaponDeployTeleporter::CanBeSelected( void )
 }
 
 #ifdef GAME_DLL
-	////=============================================================================
-	//// Commands
-	////=============================================================================
-	//CON_COMMAND(dismantledispenser, "Dismantle dispenser")
-	//{
-	//	CFFPlayer *pPlayer = ToFFPlayer(UTIL_GetCommandClient());
+	//=============================================================================
+	// Commands
+	//=============================================================================
+	CON_COMMAND(dismantletpen, "Dismantle teleporter entrance")
+	{
+		CFFPlayer *pPlayer = ToFFPlayer(UTIL_GetCommandClient());
 
-	//	if (!pPlayer)
-	//		return;
+		if (!pPlayer)
+			return;
 
-	//	if( ! pPlayer->IsAlive() )
-	//	{
-	//		ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEWHENDEAD" );
-	//		return;
-	//	}
+		if( ! pPlayer->IsAlive() )
+		{
+			ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEWHENDEAD" );
+			return;
+		}
 
-	//	// Bug #0000333: Buildable Behavior (non build slot) while building
-	//	if( pPlayer->IsBuilding() && ( pPlayer->GetCurrentBuild() == FF_BUILD_DISPENSER ) )
-	//	{
-	//		ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEMIDBUILD");			
-	//		return;
-	//	}
+		// Bug #0000333: Buildable Behavior (non build slot) while building
+		if( pPlayer->IsBuilding() && ( pPlayer->GetCurrentBuild() == FF_BUILD_TELEPORTER_ENTRANCE ) )
+		{
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEMIDBUILD");			
+			return;
+		}
 
-	//	CFFTeleporter *pTeleporter = pPlayer->GetTeleporter();
+		CFFTeleporter *pTeleporter = pPlayer->GetTeleporterEntrance();
 
-	//	// can't dismantle what doesn't exist
-	//	if (!pTeleporter)
-	//	{
-	//		ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_NODISPENSERTODISMANTLE");	
-	//		return;
-	//	}
+		// can't dismantle what doesn't exist
+		if (!pTeleporter)
+		{
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_NO_TPEN_TODISMANTLE");	
+			return;
+		}
 
-	//	//Bug fix: dismantling a ghost dispenser 
-	//	//if the dispenser is in transparent form, dont dismantle it -GreenMushy
-	//	if( pTeleporter->IsTransparent() )
-	//	{
-	//		ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEMIDBUILD");			
-	//		return;
-	//	}
+		//Bug fix: dismantling a ghost teleporter 
+		//if the teleporter is in transparent form, dont dismantle it -GreenMushy
+		if( pTeleporter->IsTransparent() )
+		{
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEMIDBUILD");			
+			return;
+		}
 
-	//	if (pTeleporter->IsSabotaged())
-	//	{
-	//		ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_BUILDINGUNRESPONSIVE");
-	//		return;
-	//	}
+		if (pTeleporter->CloseEnoughToDismantle(pPlayer))
+		{
+			pTeleporter->Dismantle(pPlayer);
+		}
+		else
+		{
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_TOOFARAWAY");
+		}
+	}
 
-	//	if (pTeleporter->CloseEnoughToDismantle(pPlayer))
-	//	{
- //           pTeleporter->Dismantle(pPlayer);
-	//	}
-	//	else
- //       {
- //           ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_TOOFARAWAY");
- //       }
-	//}
+	CON_COMMAND(dettpen, "Detonates teleporter entrance")
+	{
+		CFFPlayer *pPlayer = ToFFPlayer(UTIL_GetCommandClient());
 
-	//CON_COMMAND(detdispenser, "Detonates dispenser")
-	//{
-	//	CFFPlayer *pPlayer = ToFFPlayer(UTIL_GetCommandClient());
+		if (!pPlayer)
+			return;
 
-	//	if (!pPlayer)
-	//		return;
+		if( ! pPlayer->IsAlive() )
+		{
+			ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDETWHENDEAD" );
+			return;
+		}
 
-	//	if( ! pPlayer->IsAlive() )
-	//	{
-	//		ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDETWHENDEAD" );
-	//		return;
-	//	}
+		// Bug #0000333: Buildable Behavior (non build slot) while building
+		if( pPlayer->IsBuilding() && ( pPlayer->GetCurrentBuild() == FF_BUILD_TELEPORTER_ENTRANCE ) )
+		{
+			ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDETMIDBUILD" );
+			return;
+		}
 
-	//	// Bug #0000333: Buildable Behavior (non build slot) while building
-	//	if( pPlayer->IsBuilding() && ( pPlayer->GetCurrentBuild() == FF_BUILD_DISPENSER ) )
-	//	{
-	//		ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDETMIDBUILD" );
-	//		return;
-	//	}
+		CFFTeleporter *pTeleporter = pPlayer->GetTeleporterEntrance();
 
-	//	CFFTeleporter *pTeleporter = pPlayer->GetTeleporter();
+		// can't detonate what we don't have
+		if (!pTeleporter)
+		{
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_NO_TPEN_TODET");
+			return;
+		}
 
-	//	// can't detonate what we don't have
-	//	if (!pTeleporter)
-	//	{
-	//		ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_NODISPENSERTODET");
-	//		return;
-	//	}			
-	//	
-	//	if (pTeleporter->IsSabotaged())
-	//	{
-	//		ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_BUILDINGUNRESPONSIVE");
-	//		return;
-	//	}
+		pTeleporter->DetonateNextFrame();
+	}
 
-	//	pTeleporter->DetonateNextFrame();
-	//}
+	CON_COMMAND(detdismantletpen, "Dismantles or detonate teleporter entrance depending on distance")
+	{
+		CFFPlayer *pPlayer = ToFFPlayer(UTIL_GetCommandClient());
 
-	//CON_COMMAND(detdismantledispenser, "Dismantles or detonate dispenser depending on distance")
-	//{
-	//	CFFPlayer *pPlayer = ToFFPlayer(UTIL_GetCommandClient());
+		if (!pPlayer)
+			return;
 
-	//	if (!pPlayer)
-	//		return;
+		if( !pPlayer->IsAlive() )
+		{
+			ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEORDETWHENDEAD" );
+			return;
+		}
 
-	//	if( ! pPlayer->IsAlive() )
-	//	{
-	//		ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEORDETWHENDEAD" );
-	//		return;
-	//	}
+		// Bug #0000333: Buildable Behavior (non build slot) while building
+		if( pPlayer->IsBuilding() && ( pPlayer->GetCurrentBuild() == FF_BUILD_TELEPORTER_ENTRANCE ) )
+		{
+			ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEMIDBUILD" );
+			return;
+		}
 
-	//	// Bug #0000333: Buildable Behavior (non build slot) while building
-	//	if( pPlayer->IsBuilding() && ( pPlayer->GetCurrentBuild() == FF_BUILD_DISPENSER ) )
-	//	{
- //           ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEMIDBUILD" );
-	//		return;
-	//	}
+		CFFTeleporter *pTeleporter = pPlayer->GetTeleporterEntrance();
 
-	//	CFFTeleporter *pTeleporter = pPlayer->GetTeleporter();
+		// can't do owt to it 'cause it doesn't exist!
+		if (!pTeleporter)
+		{
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_NO_TPEN");
+			return;
+		}
 
-	//	// can't do owt to it 'cause it doesn't exist!
-	//	if (!pTeleporter)
-	//	{
- //           ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_NODISPENSER");
-	//		return;
-	//	}
+		//Bug fix: dismantling a ghost teleporter 
+		//if the teleporter is in transparent form, dont dismantle it -GreenMushy
+		if( pTeleporter->IsTransparent() )
+		{
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEMIDBUILD");			
+			return;
+		}
 
-	//	//Bug fix: dismantling a ghost dispenser 
-	//	//if the dispenser is in transparent form, dont dismantle it -GreenMushy
-	//	if( pTeleporter->IsTransparent() )
-	//	{
-	//		ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEMIDBUILD");			
-	//		return;
-	//	}
+		//The previous IsBuilt function didnt seem to work so i removed it -GreenMushy
+		if (pTeleporter->CloseEnoughToDismantle(pPlayer))
+		{
+			pTeleporter->Dismantle(pPlayer);
+		}
+		else
+		{
+			pTeleporter->DetonateNextFrame();
+		}
+	}
 
-	//	if (pTeleporter->IsSabotaged())
-	//	{
-	//		ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_BUILDINGUNRESPONSIVE");
-	//		return;
-	//	}
+	CON_COMMAND(dismantletpex, "Dismantle teleporter exit")
+	{
+		CFFPlayer *pPlayer = ToFFPlayer(UTIL_GetCommandClient());
 
-	//	//The previous IsBuilt function didnt seem to work so i removed it -GreenMushy
-	//	if (pTeleporter->CloseEnoughToDismantle(pPlayer))
-	//	{
- //           pTeleporter->Dismantle(pPlayer);
-	//	}
-	//	else
- //       {
-	//		pTeleporter->DetonateNextFrame();
- //       }
-	//}
+		if (!pPlayer)
+			return;
+
+		if( ! pPlayer->IsAlive() )
+		{
+			ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEWHENDEAD" );
+			return;
+		}
+
+		// Bug #0000333: Buildable Behavior (non build slot) while building
+		if( pPlayer->IsBuilding() && ( pPlayer->GetCurrentBuild() == FF_BUILD_TELEPORTER_EXIT ) )
+		{
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEMIDBUILD");			
+			return;
+		}
+
+		CFFTeleporter *pTeleporter = pPlayer->GetTeleporterExit();
+
+		// can't dismantle what doesn't exist
+		if (!pTeleporter)
+		{
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_NO_TPEX_TODISMANTLE");	
+			return;
+		}
+
+		//Bug fix: dismantling a ghost teleporter 
+		//if the teleporter is in transparent form, dont dismantle it -GreenMushy
+		if( pTeleporter->IsTransparent() )
+		{
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEMIDBUILD");			
+			return;
+		}
+
+		if (pTeleporter->CloseEnoughToDismantle(pPlayer))
+		{
+			pTeleporter->Dismantle(pPlayer);
+		}
+		else
+		{
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_TOOFARAWAY");
+		}
+	}
+
+	CON_COMMAND(dettpex, "Detonates teleporter exit")
+	{
+		CFFPlayer *pPlayer = ToFFPlayer(UTIL_GetCommandClient());
+
+		if (!pPlayer)
+			return;
+
+		if( ! pPlayer->IsAlive() )
+		{
+			ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDETWHENDEAD" );
+			return;
+		}
+
+		// Bug #0000333: Buildable Behavior (non build slot) while building
+		if( pPlayer->IsBuilding() && ( pPlayer->GetCurrentBuild() == FF_BUILD_TELEPORTER_EXIT ) )
+		{
+			ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDETMIDBUILD" );
+			return;
+		}
+
+		CFFTeleporter *pTeleporter = pPlayer->GetTeleporterExit();
+
+		// can't detonate what we don't have
+		if (!pTeleporter)
+		{
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_NO_TPEX_TODET");
+			return;
+		}
+
+		pTeleporter->DetonateNextFrame();
+	}
+
+	CON_COMMAND(detdismantletpex, "Dismantles or detonate teleporter exit depending on distance")
+	{
+		CFFPlayer *pPlayer = ToFFPlayer(UTIL_GetCommandClient());
+
+		if (!pPlayer)
+			return;
+
+		if( !pPlayer->IsAlive() )
+		{
+			ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEORDETWHENDEAD" );
+			return;
+		}
+
+		// Bug #0000333: Buildable Behavior (non build slot) while building
+		if( pPlayer->IsBuilding() && ( pPlayer->GetCurrentBuild() == FF_BUILD_TELEPORTER_EXIT ) )
+		{
+			ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEMIDBUILD" );
+			return;
+		}
+
+		CFFTeleporter *pTeleporter = pPlayer->GetTeleporterExit();
+
+		// can't do owt to it 'cause it doesn't exist!
+		if (!pTeleporter)
+		{
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_NO_TPEX");
+			return;
+		}
+
+		//Bug fix: dismantling a ghost teleporter 
+		//if the teleporter is in transparent form, dont dismantle it -GreenMushy
+		if( pTeleporter->IsTransparent() )
+		{
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDISMANTLEMIDBUILD");			
+			return;
+		}
+
+		//The previous IsBuilt function didnt seem to work so i removed it -GreenMushy
+		if (pTeleporter->CloseEnoughToDismantle(pPlayer))
+		{
+			pTeleporter->Dismantle(pPlayer);
+		}
+		else
+		{
+			pTeleporter->DetonateNextFrame();
+		}
+	}
 #endif

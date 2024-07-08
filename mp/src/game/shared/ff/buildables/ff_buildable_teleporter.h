@@ -50,6 +50,9 @@ public:
 	
 	int NeedsHealth( void ) const { return GetMaxHealth() - GetHealth(); }
 
+	TeleporterType_t m_iType;
+	TeleporterType_t GetType( void ) { return m_iType; }
+
 #ifdef CLIENT_DLL
 	virtual void OnDataChanged( DataUpdateType_t updateType );
 
@@ -71,16 +74,18 @@ public:
 	void			OnThink( void );
 	void			OnTeleport( CBaseEntity* pEntity ); // to do stuff after teleporting
 
+	bool			CloseEnoughToDismantle( CFFPlayer* pPlayer );
+	void			Dismantle( CFFPlayer* pPlayer );
+
 	static CFFTeleporter *Create( const Vector& vecOrigin, const QAngle& vecAngles, CBaseEntity *pentOwner = NULL );
 
 	TeleporterState_t m_iState;
-	TeleporterType_t m_iType;
 	TeleporterTeleportState_t m_iTeleportState;
 	
 	TeleporterState_t GetState( void ) { return m_iState; }
 	void			SetState( TeleporterState_t iState ) { m_iState = iState; }
 
-	TeleporterType_t GetType( void ) { return m_iType; }
+	//TeleporterType_t GetType( void ) { return m_iType; } // now shared
 	void			SetType( TeleporterType_t iType ) { m_iType = iType; }
 
 	TeleporterTeleportState_t GetTeleportState( void ) { return m_iTeleportState; }
@@ -100,7 +105,9 @@ public:
 	void			SetOther( CFFTeleporter* pOther );
 
 	CHandle<CFFPlayer> m_hTouchingPlayer;
-	float		 m_flPlayerLastTouch;
+	CHandle<CFFPlayer> m_hLastTeleportedPlayer;
+	float		m_flLastTeleportTime; // same as m_flLastTeleport but we set this to 0 after 0.5 seconds
+	float		m_flPlayerLastTouch;
 #endif
 };
 

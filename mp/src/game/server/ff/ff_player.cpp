@@ -58,6 +58,9 @@ extern "C"
 extern int gEvilImpulse101;
 #define FF_PLAYER_MODEL "models/player/demoman/demoman.mdl"
 
+// must match the value from ff_buildable_teleporter.cpp!!!
+#define TELEPORTER_GLOW_DURATION 11.0f
+
 // Oh no a gobal.
 int g_iLimbs[CLASS_CIVILIAN + 1][5] = { { 0 } };
 
@@ -819,6 +822,20 @@ void CFFPlayer::PreThink(void)
 		m_iActiveSabotages &= ~2;
 	if (m_iSabotagedDispensers == 0)
 		m_iActiveSabotages &= ~1;
+
+	// teleporter glow
+	if (m_flTeleportTime != 0)
+	{
+		if (m_flTeleportTime + TELEPORTER_GLOW_DURATION > gpGlobals->curtime)
+		{
+			//TODO: add glow
+		}
+		else
+		{
+			//TODO: remove glow
+			m_flTeleportTime = 0;
+		}
+	}
 
 	BaseClass::PreThink();
 }
@@ -1637,6 +1654,7 @@ void CFFPlayer::SetupClassVariables()
 
 	m_flMancannonTime = 0.0f;
 	m_flMancannonDetTime = 0.0f;
+	m_flTeleportTime = 0.0f;
 	// Reset Spy stuff
 	m_iCloaked = 0;
 	m_flCloakTime = 0.0f;
@@ -2965,6 +2983,12 @@ void CFFPlayer::RemoveBuildables( void )
 
 	if( GetManCannon() )
 		GetManCannon()->Cancel();
+
+	if( GetTeleporterEntrance() )
+		GetTeleporterEntrance()->Cancel();
+
+	if( GetTeleporterExit() )
+		GetTeleporterExit()->Cancel();
 }
 
 //-----------------------------------------------------------------------------

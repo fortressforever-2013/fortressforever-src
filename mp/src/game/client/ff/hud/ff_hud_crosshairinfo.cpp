@@ -35,12 +35,18 @@ using namespace vgui;
 #include "ff_utils.h"
 #include "ff_shareddefs.h"
 
+#include "ff_buildableobject.h"
+#include "ff_buildable_teleporter.h"
+
 static ConVar hud_centerid( "hud_centerid", "0", FCVAR_ARCHIVE );
 #define CROSSHAIRTYPE_NORMAL 0
 #define CROSSHAIRTYPE_DISPENSER 1
 #define CROSSHAIRTYPE_SENTRYGUN 2
 #define CROSSHAIRTYPE_DETPACK 3
 #define CROSSHAIRTYPE_MANCANNON 4
+
+#define CROSSHAIRTYPE_TPEN 5
+#define CROSSHAIRTYPE_TPEX 6
 
 //=============================================================================
 //
@@ -217,6 +223,19 @@ void CHudCrosshairInfo::OnTick( void )
 					pHitPlayer = ToFFPlayer( pManCannon->m_hOwner.Get() );
 				}
 			}
+			// If we hit a teleporter
+			else if( tr.m_pEnt->Classify() == CLASS_TELEPORTER )
+			{
+				C_FFTeleporter *pTeleporter = (C_FFTeleporter*)tr.m_pEnt;
+				if( !pTeleporter->IsBuilt() )
+					return;
+
+				if( pTeleporter->IsAlive() )
+				{
+					bBuildable = true;
+					pHitPlayer = ToFFPlayer( pTeleporter->m_hOwner.Get() );
+				}
+			}
 
 			// If the players/objects aren't "alive" pHitPlayer will still be NULL
 			// and we'll bail here...
@@ -259,6 +278,9 @@ void CHudCrosshairInfo::OnTick( void )
 						break;
 					case CLASS_MANCANNON:
 						Q_strcpy( szClass, "#FF_PLAYER_MANCANNON" );
+						break;
+					case CLASS_TELEPORTER:
+						Q_strcpy( szClass, "#FF_PLAYER_TELEPORTER" );
 						break;
 					}
 				}
@@ -314,6 +336,22 @@ void CHudCrosshairInfo::OnTick( void )
 						else if( pBuildable->Classify() == CLASS_MANCANNON )
 						{
 							CROSSHAIRTYPE = CROSSHAIRTYPE_MANCANNON;
+							iArmor = -1;
+						}
+						else if( pBuildable->Classify() == CLASS_TELEPORTER )
+						{
+							CFFPlayer* pOwner = ToFFPlayer( pBuildable->m_hOwner.Get() );
+
+							if ( !pOwner )
+								return;
+
+							CFFTeleporter* pTeleporterEntrance = pOwner->GetTeleporterEntrance();
+
+							if ( pTeleporterEntrance && pTeleporterEntrance->entindex() == pBuildable->entindex() )
+								CROSSHAIRTYPE = CROSSHAIRTYPE_TPEN;
+							else
+								CROSSHAIRTYPE = CROSSHAIRTYPE_TPEX;
+
 							iArmor = -1;
 						}
 						else
@@ -558,6 +596,34 @@ void CHudCrosshairInfo::OnTick( void )
 
 					if (bOwnBuildable)
 						_snwprintf( m_pText, 255, L"Your Jump Pad - Health: %ls", wszHealth );
+					else
+						_snwprintf( m_pText, 255, L"(%ls) %ls - H: %ls", wszClass, wszName, wszHealth );
+				}
+				//Teleporter entrance displayed here -GreenMushy
+				else if( CROSSHAIRTYPE == CROSSHAIRTYPE_TPEN )
+				{
+					char szHealth[ 5 ];
+					Q_snprintf( szHealth, 5, "%i%%", iHealth );
+					
+					wchar_t wszHealth[ 10 ];
+					g_pVGuiLocalize->ConvertANSIToUnicode( szHealth, wszHealth, sizeof( wszHealth ) );
+
+					if (bOwnBuildable)
+						_snwprintf( m_pText, 255, L"Your Teleporter Entrance - Health: %ls", wszHealth );
+					else
+						_snwprintf( m_pText, 255, L"(%ls) %ls - H: %ls", wszClass, wszName, wszHealth );
+				}
+				//Teleporter exit displayed here -GreenMushy
+				else if( CROSSHAIRTYPE == CROSSHAIRTYPE_TPEX )
+				{
+					char szHealth[ 5 ];
+					Q_snprintf( szHealth, 5, "%i%%", iHealth );
+					
+					wchar_t wszHealth[ 10 ];
+					g_pVGuiLocalize->ConvertANSIToUnicode( szHealth, wszHealth, sizeof( wszHealth ) );
+
+					if (bOwnBuildable)
+						_snwprintf( m_pText, 255, L"Your Teleporter Exit - Health: %ls", wszHealth );
 					else
 						_snwprintf( m_pText, 255, L"(%ls) %ls - H: %ls", wszClass, wszName, wszHealth );
 				}

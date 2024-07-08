@@ -87,14 +87,7 @@ CON_COMMAND(qsentry, "qsentry")
 		pPlayer->SwapToWeaponSlot(5);
 }
 
-CON_COMMAND(qtpentrance, "qtpentrance")
-{
-	C_FFPlayer *pPlayer = ToFFPlayer(CBasePlayer::GetLocalPlayer());
-	if (pPlayer)
-		pPlayer->SwapToWeaponSlot(6);
-}
-
-CON_COMMAND(qtpexit, "qtpexit")
+CON_COMMAND(qteleporter, "qteleporter")
 {
 	C_FFPlayer *pPlayer = ToFFPlayer(CBasePlayer::GetLocalPlayer());
 	if (pPlayer)
@@ -326,7 +319,7 @@ ADD_MENU_BRANCH(teleporters, "#FF_CM_TELEPORTERS", 'O', "", &EngineerTeleporters
 	return MENU_SHOW;
 }
 
-ADD_MENU_OPTION(buildtpentrance, "#FF_CM_BUILD_TPEN", 'O', "qtpentrance")
+ADD_MENU_OPTION(buildteleporter, "#FF_CM_BUILD_TELEPORTER", 'O', "qteleporter")
 {
 	C_FFPlayer* ff = C_FFPlayer::GetLocalFFPlayer();
 
@@ -344,7 +337,7 @@ ADD_MENU_OPTION(buildtpentrance, "#FF_CM_BUILD_TPEN", 'O', "qtpentrance")
 	return MENU_SHOW;
 }
 
-ADD_MENU_OPTION(dettpentrance, "#FF_CM_DETONATE_TPEN", 'O', "dettpentrance")
+ADD_MENU_OPTION(dettpen, "#FF_CM_DETONATE_TPEN", 'O', "dettpen")
 {
 	C_FFPlayer* ff = C_FFPlayer::GetLocalFFPlayer();
 
@@ -362,7 +355,7 @@ ADD_MENU_OPTION(dettpentrance, "#FF_CM_DETONATE_TPEN", 'O', "dettpentrance")
 	return MENU_SHOW;
 }
 
-ADD_MENU_OPTION(dismantletpentrance, "#FF_CM_DISMANTLE_TPEN", 'O', "dismantletpentrance")
+ADD_MENU_OPTION(dismantletpen, "#FF_CM_DISMANTLE_TPEN", 'O', "dismantletpen")
 {
 	C_FFPlayer* ff = C_FFPlayer::GetLocalFFPlayer();
 
@@ -380,25 +373,7 @@ ADD_MENU_OPTION(dismantletpentrance, "#FF_CM_DISMANTLE_TPEN", 'O', "dismantletpe
 	return MENU_SHOW;
 }
 
-ADD_MENU_OPTION(buildtpexit, "#FF_CM_BUILD_TPEX", 'O', "qtpexit")
-{
-	C_FFPlayer* ff = C_FFPlayer::GetLocalFFPlayer();
-
-	// Yeah, this is highly unlikely to happen, but just checking anyway
-	if (!ff)
-		return MENU_DIM;
-
-	// Bug #0000333: Buildable Behavior (non build slot) while building
-	if( ff->IsBuilding() && ( ff->GetCurrentBuild() == FF_BUILD_TELEPORTER_EXIT ) )
-		return MENU_DIM;
-
-	if ( ff->GetTeleporterExit() )
-		return MENU_DIM;
-
-	return MENU_SHOW;
-}
-
-ADD_MENU_OPTION(dettpexit, "#FF_CM_DETONATE_TPEX", 'O', "dettpexit")
+ADD_MENU_OPTION(dettpex, "#FF_CM_DETONATE_TPEX", 'O', "dettpex")
 {
 	C_FFPlayer* ff = C_FFPlayer::GetLocalFFPlayer();
 
@@ -416,7 +391,7 @@ ADD_MENU_OPTION(dettpexit, "#FF_CM_DETONATE_TPEX", 'O', "dettpexit")
 	return MENU_SHOW;
 }
 
-ADD_MENU_OPTION(dismantletpexit, "#FF_CM_DISMANTLE_TPEX", 'O', "dismantletpexit")
+ADD_MENU_OPTION(dismantletpex, "#FF_CM_DISMANTLE_TPEX", 'O', "dismantletpex")
 {
 	C_FFPlayer* ff = C_FFPlayer::GetLocalFFPlayer();
 
@@ -582,7 +557,7 @@ ADD_MENU_OPTION(need_ammo, "#FF_CM_CALLAMMO", '^', "ammome") { return MENU_SHOW;
 // Menu option lists
 //-----------------------------------------------------------------------------
 MenuOption EngineerOptionList[] = { aimsentry, builddispenser, detdispenser, dismantledispenser, dismantlesentry, detsentry, buildsentry, teleporters };
-MenuOption EngineerTeleportersOptionList[] = { buildtpentrance, dettpentrance, dismantletpentrance, buildtpexit, dettpexit, dismantletpexit, };
+MenuOption EngineerTeleportersOptionList[] = { buildteleporter, dettpen, dismantletpen, dettpex, dismantletpex, };
 MenuOption DemomanOptionList[] = { det5, det10, det20, det50 };
 MenuOption SpyOptionList[] = { lastdisguise, disguiseenemy, smartcloak, sentrysabotage, dispensersabotage, disguiseteam };
 MenuOption ClassDOptionList[] = { disguisescout, disguisesniper, disguisesoldier, disguisedemoman, disguisemedic, disguisehwguy, disguisepyro, disguisespy, disguiseengineer, disguisecivilian };

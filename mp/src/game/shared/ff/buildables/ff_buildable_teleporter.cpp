@@ -84,6 +84,9 @@ extern const char *g_pszFFGenGibModels[];
 #define TELEPORTER_COOLDOWN 10.0f //ffdev_teleporter_cooldown.GetFloat()
 
 //ConVar ffdev_teleporter_cleartime("ffdev_teleporter_cleartime", "0.1", FCVAR_FF_FFDEV_REPLICATED);
+//ConVar ffdev_teleporter_screenfadetime("ffdev_teleporter_screenfadetime", "0.5", FCVAR_FF_FFDEV_REPLICATED);
+
+color32 telescreenfadecolor = { 255, 255, 255, 255 };
 
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
@@ -102,6 +105,8 @@ CFFTeleporter::CFFTeleporter( void )
 
 	m_flLastTeleport = 0;
 	m_flNextTeleport = 0;
+
+	m_flLastTeleportTime = 0;
 #endif
 
 	// Health
@@ -266,6 +271,12 @@ void CFFTeleporter::OnThink( void )
 	if ( ( gpGlobals->curtime - m_flPlayerLastTouch ) > /*ffdev_teleporter_cleartime.GetFloat()*/ 0.1f )
 		m_hTouchingPlayer = NULL;
 
+	if (m_hLastTeleportedPlayer && gpGlobals->curtime - m_flLastTeleportTime > /*ffdev_teleporter_screenfadetime.GetFloat()*/ 0.5f)
+	{
+		UTIL_ScreenFade( m_hLastTeleportedPlayer, telescreenfadecolor, /*ffdev_teleporter_screenfadetime.GetFloat()*/ 0.5f, NULL, FFADE_OUT );
+		m_flLastTeleportTime = 0;
+	}
+
 	/*if ( IsEntrance() )
 	{
 		if ( m_hTouchingPlayer )
@@ -382,12 +393,18 @@ void CFFTeleporter::OnObjectTouch( CBaseEntity *pOther )
 	pPlayer->Teleport(&pDest, &pDestAngles, &playerVel);
 	OnTeleport(pPlayer);
 
+	// white color fade in
+	// fades out from CFFTeleporter::OnThink
+	UTIL_ScreenFade( pPlayer, telescreenfadecolor, /*ffdev_teleporter_screenfadetime.GetFloat()*/ 0.5f, NULL, FFADE_IN );
+
+	m_flLastTeleportTime = gpGlobals->curtime;
+
 	// Emit sound at the entrance and clear the touching player
 	// (this part can be moved to OnTeleport() but i prefer having it here)
 	EmitSound( "Teleporter.TeleportIn" );
 	m_hTouchingPlayer = NULL;
 
-	//pPlayer->m_flMancannonTime = gpGlobals->curtime;
+	pPlayer->m_flTeleportTime = gpGlobals->curtime;
 
 	GetOther()->m_flLastTeleport = m_flLastTeleport = gpGlobals->curtime;
 	GetOther()->m_flNextTeleport = m_flNextTeleport = m_flLastTeleport + TELEPORTER_COOLDOWN;
@@ -546,5 +563,33 @@ void CFFTeleporter::SetOther( CFFTeleporter* pOther )
 		m_hExit = pOther;
 	else
 		m_hEntrance = pOther;
+}
+    
+bool CFFTeleporter::CloseEnoughToDismantle( CFFPlayer *pPlayer )
+{
+    return (pPlayer->GetAbsOrigin() - GetAbsOrigin()).LengthSqr() < 6400.0f;
+}
+
+void CFFTeleporter::Dismantle( CFFPlayer *pPlayer )
+{
+	// Bug #0000333: Buildable Behavior (non build slot) while building
+	if ( GetType() == TELEPORTER_ENTRANCE )
+		pPlayer->GiveAmmo( ( FF_BUILDCOST_TELEPORTER_ENTRANCE / 2 ), AMMO_CELLS, true );
+	else
+		pPlayer->GiveAmmo( ( FF_BUILDCOST_TELEPORTER_EXIT / 2 ), AMMO_CELLS, true );
+
+	// Bug #0000426: Buildables Dismantle Sounds Missing
+	CPASAttenuationFilter sndFilter( this );
+	EmitSound( sndFilter, entindex(), "Dispenser.unbuild" );
+
+	// Fire an event.
+	IGameEvent *pEvent = gameeventmanager->CreateEvent("teleporter_dismantled");		
+	if(pEvent)
+	{
+		pEvent->SetInt("userid", pPlayer->GetUserID());
+		gameeventmanager->FireEvent(pEvent, true);
+	}
+
+	RemoveQuietly();
 }
 #endif // CLIENT_DLL : GAME_DLL
