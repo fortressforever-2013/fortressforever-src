@@ -12,6 +12,7 @@
 #include "filesystem.h"
 #include "ff_weapon_base.h"
 #include "ff_projectile_base.h"
+#include "ff_buildable_teleporter.h"
 
 #ifdef CLIENT_DLL
 	#define CFFTeam C_FFTeam
@@ -1562,6 +1563,10 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 		int iKillerID = 0;
 		int iKilledSGLevel = 0;
 		int iKillerSGLevel = 0;
+		
+		// teleporters
+		bool bIsEntrance = false;
+		bool bIsExit = false;
 
 		// Find the killer & the scorer
 		CBaseEntity *pInflictor = info.GetInflictor();
@@ -1599,18 +1604,25 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 
 		// pVictim is the buildables owner
 		CFFPlayer *pVictim = NULL, *pOwner = NULL;
-		if( pObject->Classify() == CLASS_SENTRYGUN || pObject->Classify() == CLASS_DISPENSER || pObject->Classify() == CLASS_MANCANNON )
+		switch (pObject->Classify())
 		{
-			pOwner = ToFFPlayer( ( pObject )->m_hOwner.Get() );
-			if ( !pObject->IsMaliciouslySabotaged() )
-				pVictim = pOwner;
-			else
+			case CLASS_SENTRYGUN:
+			case CLASS_DISPENSER:
+			case CLASS_MANCANNON:
+			case CLASS_TELEPORTER:
 			{
-				pVictim = ToFFPlayer( ( pObject )->m_hSaboteur.Get() );
-				// try not to teamkill your other sabotaged buildables
-				if ( g_pGameRules->PlayerRelationship( pVictim, pKiller ) == GR_TEAMMATE )
+				pOwner = ToFFPlayer( ( pObject )->m_hOwner.Get() );
+				if ( !pObject->IsMaliciouslySabotaged() )
 					pVictim = pOwner;
+				else
+				{
+					pVictim = ToFFPlayer( ( pObject )->m_hSaboteur.Get() );
+					// try not to teamkill your other sabotaged buildables
+					if ( g_pGameRules->PlayerRelationship( pVictim, pKiller ) == GR_TEAMMATE )
+						pVictim = pOwner;
+				}
 			}
+			break;
 		}
 
 		// Custom kill type?
@@ -1736,6 +1748,8 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 				// AfterShock - Scoring System: 50 points for dispenser
 				if( pObject->Classify() == CLASS_DISPENSER )
 					pScorer->AddFortPoints( 50, "#FF_FORTPOINTS_KILLDISPENSER" );
+				else if( pObject->Classify() == CLASS_TELEPORTER )
+					pScorer->AddFortPoints( 150, "FF_FORTPOINTS_KILLTELEPORTER" );
 				else if( pObject->Classify() == CLASS_SENTRYGUN )
 				{
 					pScorer->IncrementFragCount( 1 ); // 1 frag for SG kill
@@ -1763,6 +1777,14 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 
 			iKilledSGLevel = pSentryGun->GetLevel();
 		}
+		
+		if( pObject->Classify() == CLASS_TELEPORTER )
+		{
+			CFFTeleporter* pTeleporter = FF_ToTeleporter( pObject );
+			
+			bIsEntrance = pTeleporter->GetType() == TELEPORTER_ENTRANCE;
+			bIsExit = pTeleporter->GetType() == TELEPORTER_EXIT;
+		}
 
 		//UTIL_LogPrintf( " userid (buildable's owner): %i\n", pVictim->GetUserID() );
 		//UTIL_LogPrintf( " attacker: %i\n", iKillerID );
@@ -1775,6 +1797,10 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 			pEvent = gameeventmanager->CreateEvent( "dispenser_killed" );
 		else if( pObject->Classify() == CLASS_MANCANNON )
 			pEvent = gameeventmanager->CreateEvent( "mancannon_killed" );
+		else if( pObject->Classify() == CLASS_TELEPORTER && bIsEntrance )
+			pEvent = gameeventmanager->CreateEvent( "tpen_killed" );
+		else if( pObject->Classify() == CLASS_TELEPORTER && bIsExit )
+			pEvent = gameeventmanager->CreateEvent( "tpex_killed" );
 		if( pEvent )
 		{
 			pEvent->SetInt( "userid", pVictim->GetUserID() );

@@ -51,6 +51,7 @@
 #include "ff_buildable_sentrygun.h"
 #include "ff_buildable_detpack.h"
 #include "ff_buildable_dispenser.h"
+#include "ff_buildable_teleporter.h"
 #include "ff_scriptman.h"
 #include "ff_luacontext.h"
 
@@ -85,7 +86,12 @@ inline int FF_ParsePercentCommand(edict_t* pEdict, const char* cCommand, char* p
 	// %dh - dispenser health
 	// %da - dispenser ammo
 	// %dl - dispenser location
+
 	// %df - detpack fuse time
+
+	// %tpenh - teleporter entrance health
+	// %tpexh - teleporter exit health
+	// %tpr - teleporter recharge percentage
 
 	CFFPlayer* pPlayer = ToFFPlayer(((CBasePlayer*)CBaseEntity::Instance(pEdict)));
 	if (!pPlayer)
@@ -159,6 +165,10 @@ inline int FF_ParsePercentCommand(edict_t* pEdict, const char* cCommand, char* p
 				else
 					Q_snprintf(pszText, iDestLen, "0");
 			}
+			else
+			{
+				Q_snprintf(pszText, iDestLen, "-");
+			}
 			return 2;
 		}
 		case 'a':
@@ -172,6 +182,10 @@ inline int FF_ParsePercentCommand(edict_t* pEdict, const char* cCommand, char* p
 				else
 					Q_snprintf(pszText, iDestLen, "0");
 			}
+			else
+			{
+				Q_snprintf(pszText, iDestLen, "-");
+			}
 			return 2;
 		}
 		case 'l':
@@ -181,6 +195,10 @@ inline int FF_ParsePercentCommand(edict_t* pEdict, const char* cCommand, char* p
 			if (pDispenser)
 			{
 				Q_snprintf(pszText, iDestLen, "%s", pDispenser->GetLocation());
+			}
+			else
+			{
+				Q_snprintf(pszText, iDestLen, "-");
 			}
 			return 2;
 		}
@@ -258,6 +276,10 @@ inline int FF_ParsePercentCommand(edict_t* pEdict, const char* cCommand, char* p
 				else
 					Q_snprintf(pszText, iDestLen, "0");
 			}
+			else
+			{
+				Q_snprintf(pszText, iDestLen, "-");
+			}
 			return 2;
 		}
 		case 'a':
@@ -270,6 +292,10 @@ inline int FF_ParsePercentCommand(edict_t* pEdict, const char* cCommand, char* p
 					Q_snprintf(pszText, iDestLen, "%d", (int)pSentry->m_iAmmoPercent);
 				else
 					Q_snprintf(pszText, iDestLen, "0");
+			}
+			else
+			{
+				Q_snprintf(pszText, iDestLen, "-");
 			}
 			return 2;
 		}
@@ -284,6 +310,10 @@ inline int FF_ParsePercentCommand(edict_t* pEdict, const char* cCommand, char* p
 				else
 					Q_snprintf(pszText, iDestLen, "1");
 			}
+			else
+			{
+				Q_snprintf(pszText, iDestLen, "-");
+			}
 			return 2;
 		}
 		case 'l':
@@ -293,6 +323,10 @@ inline int FF_ParsePercentCommand(edict_t* pEdict, const char* cCommand, char* p
 			if (pSentry)
 			{
 				Q_snprintf(pszText, iDestLen, "%s", pSentry->GetLocation());
+			}
+			else
+			{
+				Q_snprintf(pszText, iDestLen, "-");
 			}
 			return 2;
 		}
@@ -350,10 +384,99 @@ inline int FF_ParsePercentCommand(edict_t* pEdict, const char* cCommand, char* p
 			{
 				Q_snprintf(pszText, iDestLen, "%s", pDetpack->GetLocation());
 			}
+			else
+			{
+				Q_snprintf(pszText, iDestLen, "-");
+			}
 			return 2;
 		}
 		}
 		break;
+	}
+	break;
+
+	// ughh...
+	case 't':
+	case 'T':
+	{
+		switch (cCommand[1])
+		{
+		case 'p':
+		case 'P':
+		{
+			switch (cCommand[2])
+			{
+			case 'e':
+			case 'E':
+			{
+				switch (cCommand[4])
+				{
+				case 'h':
+				case 'H':
+				{
+					switch (cCommand[3])
+					{
+						// teleporter entrance
+					case 'n':
+					case 'N':
+					{
+						CFFTeleporter* pTeleporter = pPlayer->GetTeleporterEntrance();
+
+						if (pTeleporter)
+						{
+							Q_snprintf(pszText, iDestLen, "%i", pTeleporter->GetHealthPercent());
+						}
+						else
+						{
+							Q_snprintf(pszText, iDestLen, "-");
+						}
+						return 5;
+					}
+					break;
+
+					case 'x':
+					case 'X':
+					{
+						CFFTeleporter* pTeleporter = pPlayer->GetTeleporterExit();
+
+						if (pTeleporter)
+						{
+							Q_snprintf(pszText, iDestLen, "%i", pTeleporter->GetHealthPercent());
+						}
+						else
+						{
+							Q_snprintf(pszText, iDestLen, "-");
+						}
+						return 5;
+					}
+					break;
+					}
+				}
+				}
+			}
+			break;
+
+			case 'r':
+			case 'R':
+			{
+				CFFTeleporter* pTeleporterEntrance = pPlayer->GetTeleporterEntrance();
+				CFFTeleporter* pTeleporterExit = pPlayer->GetTeleporterExit();
+
+				if (pTeleporterEntrance && pTeleporterExit)
+				{
+					Q_snprintf(pszText, iDestLen, "%i", pTeleporterEntrance->GetRechargePercent());
+				}
+				else
+				{
+					Q_snprintf(pszText, iDestLen, "-");
+				}
+
+				return 3;
+			}
+			}
+		}
+		}
+
 	}
 	}
 

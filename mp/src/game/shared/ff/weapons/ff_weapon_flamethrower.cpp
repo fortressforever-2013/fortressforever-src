@@ -19,6 +19,7 @@
 #include "ff_buildable_sentrygun.h"
 #include "ff_buildable_dispenser.h"
 #include "ff_buildable_mancannon.h"
+#include "ff_buildable_teleporter.h"
 
 #ifdef CLIENT_DLL 
 	#define CFFWeaponFlamethrower C_FFWeaponFlamethrower
@@ -254,7 +255,7 @@ void CFFWeaponFlamethrower::Fire()
 		
 		// only interested in players, dispensers & sentry guns
 		// adding so flamethrower hits the jumppad too -GreenMushy
-		if ( pTarget->IsPlayer() || pTarget->Classify() == CLASS_DISPENSER || pTarget->Classify() == CLASS_SENTRYGUN || pTarget->Classify() == CLASS_MANCANNON )
+		if ( pTarget->IsPlayer() || pTarget->Classify() == CLASS_DISPENSER || pTarget->Classify() == CLASS_SENTRYGUN || pTarget->Classify() == CLASS_MANCANNON || pTarget->Classify() == CLASS_TELEPORTER )
 		{
 			// If pTarget can take damage from the flame thrower shooter...
 			if ( g_pGameRules->FCanTakeDamage( pTarget, pPlayer ))
@@ -288,6 +289,13 @@ void CFFWeaponFlamethrower::Fire()
 					CFFManCannon *pManCannon = FF_ToManCannon( pTarget );
 					if( pManCannon && ( pManCannon->GetWaterLevel() <= WL_Waist ) )
 						pManCannon->TakeDamage( CTakeDamageInfo( this, pPlayer, 18.0f, DMG_BURN ) );
+				}
+				//Do flame damage to jumppad here - GreenMushy
+				else if( FF_IsTeleporter( pTarget ) )
+				{
+					CFFTeleporter *pTeleporter = FF_ToTeleporter( pTarget );
+					if( pTeleporter && ( pTeleporter->GetWaterLevel() <= WL_Waist ) )
+						pTeleporter->TakeDamage( CTakeDamageInfo( this, pPlayer, 18.0f, DMG_BURN ) );
 				}
 			}
 		}		

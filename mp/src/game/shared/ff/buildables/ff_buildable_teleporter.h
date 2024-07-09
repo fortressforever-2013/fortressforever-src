@@ -44,15 +44,26 @@ public:
 
 	virtual Class_T Classify( void ) { return CLASS_TELEPORTER; }
 	// <-- shared
+	
+	int NeedsHealth( void ) const { return GetMaxHealth() - GetHealth(); }
+	int GetRechargePercent( void );
+
+	TeleporterType_t GetType( void ) { return m_iType; }
+
+	TeleporterTeleportState_t GetTeleportState( void ) { return m_iTeleportState; }
+
+private:
 
 	CNetworkVar(float, m_flLastTeleport);
 	CNetworkVar(float, m_flNextTeleport);
-	
-	int NeedsHealth( void ) const { return GetMaxHealth() - GetHealth(); }
 
-	TeleporterType_t m_iType;
-	TeleporterType_t GetType( void ) { return m_iType; }
+	CNetworkVar(float, m_flCooldown); // calculated cooldown based off of the teleporters' healths
 
+	CNetworkVar(TeleporterType_t, m_iType);
+
+	CNetworkVar(TeleporterTeleportState_t, m_iTeleportState);
+
+public:
 #ifdef CLIENT_DLL
 	virtual void OnDataChanged( DataUpdateType_t updateType );
 
@@ -63,6 +74,8 @@ public:
 	virtual void	GoLive( void );
 	virtual void	Detonate( void );
 	virtual void	DoExplosionDamage( void );
+	
+	virtual void	Event_Killed( const CTakeDamageInfo &info );
 
 	// These are for updating the user
 	virtual void	PhysicsSimulate();
@@ -80,7 +93,6 @@ public:
 	static CFFTeleporter *Create( const Vector& vecOrigin, const QAngle& vecAngles, CBaseEntity *pentOwner = NULL );
 
 	TeleporterState_t m_iState;
-	TeleporterTeleportState_t m_iTeleportState;
 	
 	TeleporterState_t GetState( void ) { return m_iState; }
 	void			SetState( TeleporterState_t iState ) { m_iState = iState; }
@@ -88,7 +100,7 @@ public:
 	//TeleporterType_t GetType( void ) { return m_iType; } // now shared
 	void			SetType( TeleporterType_t iType ) { m_iType = iType; }
 
-	TeleporterTeleportState_t GetTeleportState( void ) { return m_iTeleportState; }
+	//TeleporterTeleportState_t GetTeleportState( void ) { return m_iTeleportState; } // now shared
 	void			SetTeleportState( TeleporterTeleportState_t iState ) { m_iTeleportState = iState; }
 
 	bool			IsComplete( void ) { return GetState() == TELEPORTER_COMPLETE; }
@@ -103,10 +115,12 @@ public:
 	// entrance will point to exit, exit will point to entrance
 	CFFTeleporter*	GetOther( void );
 	void			SetOther( CFFTeleporter* pOther );
+	
+	void			SyncVariables( CFFTeleporter* pOtherTeleporter );
 
 	CHandle<CFFPlayer> m_hTouchingPlayer;
 	CHandle<CFFPlayer> m_hLastTeleportedPlayer;
-	float		m_flLastTeleportTime; // same as m_flLastTeleport but we set this to 0 after 0.5 seconds
+	float		m_flFadeInTime; // same as m_flLastTeleport but we set this to 0 after 0.5 seconds
 	float		m_flPlayerLastTouch;
 #endif
 };

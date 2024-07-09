@@ -236,8 +236,9 @@ enum HintType
 	ENGY_NOUPGRADE,		// Event: Hitting you or an allies gun with the wrench that is full health, and is upgradable while player has < 130 cells.
 	ENGY_BUILDDISP,		// Event: Building a dispenser
 	ENGY_BUILTDISP,		// Event: Dispenser finished building
-	ENGY_BUILDTELE,		// Event: Building a teleporter
-	ENGY_BUILTTELE,		// Event: Teleporter finished building
+	ENGY_BUILDTPEN,		// Event: Building a teleporter entrance
+	ENGY_BUILDTPEX,		// Event: Building a teleporter exit
+	ENGY_BUILTTELE,		// Event: Both the teleporter entrance and exit are built
 	ENGY_SGDAMAGED,		// Event: Sentry gun damaged 
 	ENGY_DISPDAMAGED,	// Event: Dispenser damaged
 	ENGY_TELEDAMAGED,	// Event: Teleporter damaged

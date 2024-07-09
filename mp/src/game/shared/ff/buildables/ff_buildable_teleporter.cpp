@@ -46,9 +46,17 @@ BEGIN_NETWORK_TABLE( CFFTeleporter, DT_FFTeleporter )
 #ifdef CLIENT_DLL
 	RecvPropFloat( RECVINFO( m_flLastTeleport ) ),
 	RecvPropFloat( RECVINFO( m_flNextTeleport ) ),
+	RecvPropFloat( RECVINFO( m_flCooldown ) ),
+
+	RecvPropInt( RECVINFO( m_iType ) ),
+	RecvPropInt( RECVINFO( m_iTeleportState ) ),
 #elif GAME_DLL
 	SendPropFloat( SENDINFO( m_flLastTeleport ) ),
 	SendPropFloat( SENDINFO( m_flNextTeleport ) ),
+	SendPropFloat( SENDINFO( m_flCooldown ) ),
+
+	SendPropInt( SENDINFO( m_iType ) ),
+	SendPropInt( SENDINFO( m_iTeleportState ) ),
 #endif
 END_NETWORK_TABLE()
 
@@ -56,6 +64,8 @@ END_NETWORK_TABLE()
 BEGIN_PREDICTION_DATA( CFFTeleporter )
 	DEFINE_PRED_FIELD( m_flLastTeleport, FIELD_TIME, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_flNextTeleport, FIELD_TIME, FTYPEDESC_INSENDTABLE ),
+
+	DEFINE_PRED_FIELD( m_flCooldown, FIELD_FLOAT, FTYPEDESC_INSENDTABLE ),
 END_PREDICTION_DATA()
 #endif
 
@@ -82,6 +92,8 @@ extern const char *g_pszFFGenGibModels[];
 #define TELEPORTER_GLOW_DURATION 11.0f //ffdev_teleporter_glowduration.GetFloat()
 //ConVar ffdev_teleporter_cooldown( "ffdev_teleporter_cooldown", "10", FCVAR_FF_FFDEV_REPLICATED );
 #define TELEPORTER_COOLDOWN 10.0f //ffdev_teleporter_cooldown.GetFloat()
+//ConVar ffdev_teleporter_slowdown_multiplier( "ffdev_teleporter_slowdown_multiplier", "1", FCVAR_FF_FFDEV_REPLICATED );
+#define TELEPORTER_SLOWDOWN_MULTIPLIER 1.0f //ffdev_teleporter_slowdown_multiplier.GetFloat()
 
 //ConVar ffdev_teleporter_cleartime("ffdev_teleporter_cleartime", "0.1", FCVAR_FF_FFDEV_REPLICATED);
 //ConVar ffdev_teleporter_screenfadetime("ffdev_teleporter_screenfadetime", "0.5", FCVAR_FF_FFDEV_REPLICATED);
@@ -103,11 +115,12 @@ CFFTeleporter::CFFTeleporter( void )
 	m_iLastHealth = 0;
 	m_iLastRecharge = 0;
 
+	m_flFadeInTime = 0;
+#endif
+
 	m_flLastTeleport = 0;
 	m_flNextTeleport = 0;
-
-	m_flLastTeleportTime = 0;
-#endif
+	m_flCooldown = 0;
 
 	// Health
  	m_iMaxHealth = m_iHealth = TELEPORTER_HEALTH;
@@ -123,6 +136,13 @@ CFFTeleporter::~CFFTeleporter( void )
 	if ( GetOther() )
 		GetOther()->SetOther( NULL );
 #endif
+}
+
+int CFFTeleporter::GetRechargePercent( void )
+{
+	return ( GetTeleportState() == TELEPORTER_INCOOLDOWN )
+		? clamp( (int) ( 100 - ( ( m_flNextTeleport - gpGlobals->curtime - 0.2f ) / m_flCooldown ) * 100.0f ), 0, 100 )
+		: 100;
 }
 
 #ifdef CLIENT_DLL
@@ -233,7 +253,7 @@ void CFFTeleporter::GoLive( void )
 			return;
 
 		int iHealth = ( pEntrance->GetHealth() / TELEPORTER_HEALTH ) * 100;
-		int iRecharge = clamp( (int) ( 100 - ( ( m_flNextTeleport - gpGlobals->curtime - 0.2f ) / TELEPORTER_COOLDOWN ) * 100.0f ), 0, 100 );
+		int iRecharge = GetRechargePercent();
 		CFFPlayer* pOwner = ToFFPlayer( m_hOwner.Get() );
 
 		if ( !pOwner )
@@ -271,10 +291,10 @@ void CFFTeleporter::OnThink( void )
 	if ( ( gpGlobals->curtime - m_flPlayerLastTouch ) > /*ffdev_teleporter_cleartime.GetFloat()*/ 0.1f )
 		m_hTouchingPlayer = NULL;
 
-	if (m_hLastTeleportedPlayer && gpGlobals->curtime - m_flLastTeleportTime > /*ffdev_teleporter_screenfadetime.GetFloat()*/ 0.5f)
+	if (m_hLastTeleportedPlayer && gpGlobals->curtime - m_flFadeInTime > /*ffdev_teleporter_screenfadetime.GetFloat()*/ 0.5f)
 	{
 		UTIL_ScreenFade( m_hLastTeleportedPlayer, telescreenfadecolor, /*ffdev_teleporter_screenfadetime.GetFloat()*/ 0.5f, NULL, FFADE_OUT );
-		m_flLastTeleportTime = 0;
+		m_flFadeInTime = 0;
 	}
 
 	/*if ( IsEntrance() )
@@ -324,13 +344,24 @@ void CFFTeleporter::OnThink( void )
 	{
 		if ( !GetOther()->GetOther() )
 			GetOther()->SetOther( this );
+
+		// keep the exit's variables synced with its entrance's
+		if ( IsEntrance() )
+		{
+			// GetOther()->m_flCooldown = m_flCooldown;
+			// GetOther()->m_flLastTeleport = m_flLastTeleport;
+			// GetOther()->m_flNextTeleport = m_flNextTeleport;
+			
+			// telling the 'exit' to sync its variables from 'this' (entrance)
+			GetOther()->SyncVariables( this );
+		}
 	}
 
 	SetNextThink( gpGlobals->curtime + m_flThinkTime );
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Launch guy
+// Purpose: Teleport guy
 //-----------------------------------------------------------------------------
 void CFFTeleporter::OnObjectTouch( CBaseEntity *pOther )
 {
@@ -366,7 +397,13 @@ void CFFTeleporter::OnObjectTouch( CBaseEntity *pOther )
 
 	// only teammates can use the entrance (should disguised spies also be able to use it?)
 	if( g_pGameRules->PlayerRelationship( GetOwnerPlayer(), pPlayer ) == GR_NOTTEAMMATE ) // Team orients it -GreenMushy
+	{
+		// no we don't want an enemy blocking our entrance
+		if ( IsEntrance() )
+			m_hTouchingPlayer = NULL; // try to capture a different player
+
 		return;
+	}
 
 	if ( !IsComplete() )
 		return;
@@ -389,7 +426,6 @@ void CFFTeleporter::OnObjectTouch( CBaseEntity *pOther )
 
 	QAngle pDestAngles = m_hTouchingPlayer->GetAbsAngles();
 
-	// TODO: actually teleport the player
 	pPlayer->Teleport(&pDest, &pDestAngles, &playerVel);
 	OnTeleport(pPlayer);
 
@@ -397,7 +433,7 @@ void CFFTeleporter::OnObjectTouch( CBaseEntity *pOther )
 	// fades out from CFFTeleporter::OnThink
 	UTIL_ScreenFade( pPlayer, telescreenfadecolor, /*ffdev_teleporter_screenfadetime.GetFloat()*/ 0.5f, NULL, FFADE_IN );
 
-	m_flLastTeleportTime = gpGlobals->curtime;
+	m_flFadeInTime = gpGlobals->curtime;
 
 	// Emit sound at the entrance and clear the touching player
 	// (this part can be moved to OnTeleport() but i prefer having it here)
@@ -406,8 +442,10 @@ void CFFTeleporter::OnObjectTouch( CBaseEntity *pOther )
 
 	pPlayer->m_flTeleportTime = gpGlobals->curtime;
 
-	GetOther()->m_flLastTeleport = m_flLastTeleport = gpGlobals->curtime;
-	GetOther()->m_flNextTeleport = m_flNextTeleport = m_flLastTeleport + TELEPORTER_COOLDOWN;
+	m_flCooldown = TELEPORTER_COOLDOWN + ( ( TELEPORTER_COOLDOWN * TELEPORTER_SLOWDOWN_MULTIPLIER ) * ( 1.0f - ( ( GetHealth() + GetOther()->GetHealth() ) / ( TELEPORTER_HEALTH * 2.0f ) ) ) );
+
+	m_flLastTeleport = gpGlobals->curtime;
+	m_flNextTeleport = m_flLastTeleport + m_flCooldown;
 
 	SetTeleportState( TELEPORTER_INCOOLDOWN );
 
@@ -445,9 +483,7 @@ void CFFTeleporter::PhysicsSimulate()
 			return;
 
 		int iHealth = (int) ( 100.0f * GetHealth() / GetMaxHealth() );
-		int iRecharge = ( IsEntrance() && IsComplete() )
-			? clamp( (int) ( 100 - ( ( m_flNextTeleport - gpGlobals->curtime - 0.2f ) / TELEPORTER_COOLDOWN ) * 100.0f ), 0, 100 )
-			: 0;
+		int iRecharge = ( IsEntrance() && IsComplete() ) ? GetRechargePercent() : 0;
 
 		// send updates to client only if our health changed, or is in cooldown
 		if ( m_iLastHealth == iHealth && m_iLastRecharge == iRecharge )
@@ -542,7 +578,7 @@ void CFFTeleporter::OnTeleport( CBaseEntity* pEntity )
 			// Telefrag!
 			pExit->m_hTouchingPlayer->TakeDamage(info);
 
-			// it is possible that the player wouldn't die even after calling TakeDamage()
+			// it is possible that the player will not die even after calling TakeDamage()
 			if ( !pExit->m_hTouchingPlayer->IsAlive() )
 				pExit->m_hTouchingPlayer = NULL;
 		}
@@ -591,5 +627,28 @@ void CFFTeleporter::Dismantle( CFFPlayer *pPlayer )
 	}
 
 	RemoveQuietly();
+}
+
+void CFFTeleporter::Event_Killed( const CTakeDamageInfo &info )
+{
+	VPROF_BUDGET( "CFFTeleporter::Event_Killed", VPROF_BUDGETGROUP_FF_BUILDABLE );
+
+	if( m_hOwner.Get() )
+	{
+		if ( IsEntrance() )
+			ClientPrint( ToFFPlayer( m_hOwner.Get() ), HUD_PRINTCENTER, "#FF_TPEN_DESTROYED" );
+		else
+			ClientPrint( ToFFPlayer( m_hOwner.Get() ), HUD_PRINTCENTER, "#FF_TPEX_DESTROYED" );
+	}
+
+	BaseClass::Event_Killed( info );
+}
+
+// "entity FF_Teleporter reported ENTITY_CHANGE_NONE but 'x' changed" SHUT UP
+void CFFTeleporter::SyncVariables( CFFTeleporter* pOtherTeleporter )
+{
+	m_flCooldown = pOtherTeleporter->m_flCooldown;
+	m_flLastTeleport = pOtherTeleporter->m_flLastTeleport;
+	m_flNextTeleport = pOtherTeleporter->m_flNextTeleport;
 }
 #endif // CLIENT_DLL : GAME_DLL

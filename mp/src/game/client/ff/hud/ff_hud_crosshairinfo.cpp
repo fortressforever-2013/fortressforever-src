@@ -280,7 +280,18 @@ void CHudCrosshairInfo::OnTick( void )
 						Q_strcpy( szClass, "#FF_PLAYER_MANCANNON" );
 						break;
 					case CLASS_TELEPORTER:
-						Q_strcpy( szClass, "#FF_PLAYER_TELEPORTER" );
+					{
+						CFFTeleporter* pTeleporter = static_cast<CFFTeleporter*>(tr.m_pEnt);
+
+						if (pTeleporter->GetType() == TELEPORTER_ENTRANCE)
+						{
+							Q_strcpy(szClass, "#FF_PLAYER_TPEN");
+						}
+						else
+						{
+							Q_strcpy(szClass, "#FF_PLAYER_TPEX");
+						}
+					}
 						break;
 					}
 				}
@@ -291,7 +302,7 @@ void CHudCrosshairInfo::OnTick( void )
 				}
 
 				// Default
-				int iHealth = -1, iArmor = -1, iCells = -1, iRockets = -1, iNails = -1, iShells = -1, iLevel = -1, iFuseTime = -1;
+				int iHealth = -1, iArmor = -1, iCells = -1, iRockets = -1, iNails = -1, iShells = -1, iLevel = -1, iFuseTime = -1, iRecharge = -1;
 				bool bOwnBuildable = false;
 				int CROSSHAIRTYPE = CROSSHAIRTYPE_NORMAL;
 				// Default
@@ -336,7 +347,6 @@ void CHudCrosshairInfo::OnTick( void )
 						else if( pBuildable->Classify() == CLASS_MANCANNON )
 						{
 							CROSSHAIRTYPE = CROSSHAIRTYPE_MANCANNON;
-							iArmor = -1;
 						}
 						else if( pBuildable->Classify() == CLASS_TELEPORTER )
 						{
@@ -346,17 +356,21 @@ void CHudCrosshairInfo::OnTick( void )
 								return;
 
 							CFFTeleporter* pTeleporterEntrance = pOwner->GetTeleporterEntrance();
+							CFFTeleporter* pTeleporterExit = pOwner->GetTeleporterExit();
 
 							if ( pTeleporterEntrance && pTeleporterEntrance->entindex() == pBuildable->entindex() )
+							{
 								CROSSHAIRTYPE = CROSSHAIRTYPE_TPEN;
+								iRecharge = pTeleporterEntrance->GetRechargePercent();
+							}
 							else
+							{
 								CROSSHAIRTYPE = CROSSHAIRTYPE_TPEX;
 
-							iArmor = -1;
-						}
-						else
-						{
-							iArmor = -1;
+								// 'this' was nullptr, what
+								if(pTeleporterExit)
+									iRecharge = pTeleporterExit->GetRechargePercent();
+							}
 						}
 					//}
 				}
@@ -602,28 +616,32 @@ void CHudCrosshairInfo::OnTick( void )
 				//Teleporter entrance displayed here -GreenMushy
 				else if( CROSSHAIRTYPE == CROSSHAIRTYPE_TPEN )
 				{
-					char szHealth[ 5 ];
+					char szHealth[ 5 ], szRecharge[ 5 ];
 					Q_snprintf( szHealth, 5, "%i%%", iHealth );
+					Q_snprintf( szRecharge, 5, "%i%%", iRecharge );
 					
-					wchar_t wszHealth[ 10 ];
+					wchar_t wszHealth[ 10 ], wszRecharge[ 10 ];
 					g_pVGuiLocalize->ConvertANSIToUnicode( szHealth, wszHealth, sizeof( wszHealth ) );
+					g_pVGuiLocalize->ConvertANSIToUnicode( szRecharge, wszRecharge, sizeof( wszRecharge ) );
 
 					if (bOwnBuildable)
-						_snwprintf( m_pText, 255, L"Your Teleporter Entrance - Health: %ls", wszHealth );
+						_snwprintf( m_pText, 255, L"Your Teleporter Entrance - Health: %ls Recharge: %ls", wszHealth, wszRecharge );
 					else
 						_snwprintf( m_pText, 255, L"(%ls) %ls - H: %ls", wszClass, wszName, wszHealth );
 				}
 				//Teleporter exit displayed here -GreenMushy
 				else if( CROSSHAIRTYPE == CROSSHAIRTYPE_TPEX )
 				{
-					char szHealth[ 5 ];
+					char szHealth[ 5 ], szRecharge[ 5 ];
 					Q_snprintf( szHealth, 5, "%i%%", iHealth );
+					Q_snprintf( szRecharge, 5, "%i%%", iRecharge );
 					
-					wchar_t wszHealth[ 10 ];
+					wchar_t wszHealth[ 10 ], wszRecharge[ 10 ];
 					g_pVGuiLocalize->ConvertANSIToUnicode( szHealth, wszHealth, sizeof( wszHealth ) );
+					g_pVGuiLocalize->ConvertANSIToUnicode( szRecharge, wszRecharge, sizeof( wszRecharge ) );
 
 					if (bOwnBuildable)
-						_snwprintf( m_pText, 255, L"Your Teleporter Exit - Health: %ls", wszHealth );
+						_snwprintf( m_pText, 255, L"Your Teleporter Exit - Health: %ls Recharge: %ls", wszHealth, wszRecharge );
 					else
 						_snwprintf( m_pText, 255, L"(%ls) %ls - H: %ls", wszClass, wszName, wszHealth );
 				}

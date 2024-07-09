@@ -1122,7 +1122,8 @@ void CBaseEntity::PhysicsImpact( CBaseEntity *other, trace_t &trace )
 	{
 		if ((trace.m_pEnt->Classify() == CLASS_DISPENSER) ||
 			(trace.m_pEnt->Classify() == CLASS_SENTRYGUN) ||
-			(trace.m_pEnt->Classify() == CLASS_DETPACK))
+			(trace.m_pEnt->Classify() == CLASS_DETPACK)  ||
+			(trace.m_pEnt->Classify() == CLASS_TELEPORTER))
 		{
 			// If there's no owner bail out
 			if (!(((CFFBuildableObject*)trace.m_pEnt)->CheckForOwner()))

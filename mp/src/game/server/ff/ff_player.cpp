@@ -3317,9 +3317,9 @@ void CFFPlayer::Command_BuildTeleporter(const CCommand& args)
 			m_iWantBuild = FF_BUILD_TELEPORTER_EXIT;
 	}
 	else { // user didn't specify anything, automatic detection (entrance first exit second)
-		if ( !GetTeleporterEntrance() )
+		if ( ( !GetTeleporterEntrance() && !GetTeleporterExit() ) || ( GetTeleporterExit() && GetTeleporterExit()->IsBuilt() && !GetTeleporterEntrance() ) )
 			m_iWantBuild = FF_BUILD_TELEPORTER_ENTRANCE;
-		else if ( !GetTeleporterExit() )
+		else if ( GetTeleporterEntrance() && GetTeleporterEntrance()->IsBuilt() && !GetTeleporterExit() )
 			m_iWantBuild = FF_BUILD_TELEPORTER_EXIT;
 	}
 
@@ -3608,6 +3608,10 @@ void CFFPlayer::PreBuildGenericThink( void )
 
 				case FF_BUILD_TELEPORTER_ENTRANCE:
 				{
+					// Jiggles: Start hint code	
+					// Event: Player starts building teleporter entrance
+					FF_SendHint(this, ENGY_BUILDTPEN, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_BUILDTPEN");
+
 					CFFTeleporter *pTeleporter = CFFTeleporter::Create(hBuildInfo.GetBuildOrigin(), hBuildInfo.GetBuildAngles(), this);
 
 					pTeleporter->SetType(TELEPORTER_ENTRANCE);
@@ -3627,13 +3631,15 @@ void CFFPlayer::PreBuildGenericThink( void )
 					// Bug #0001558: exploit to get instant lvl2 SG
 					// Moved code to remove cells from CFFSentryGun::GoLive() to here -> Defrag
 					RemoveAmmo(FF_BUILDCOST_TELEPORTER_ENTRANCE, AMMO_CELLS);
-
-					// TODO: Omnibot::Notify_ManCannonBuilding( this, pTeleporter );
 				}
 				break;
 
 				case FF_BUILD_TELEPORTER_EXIT:
 				{
+					// Jiggles: Start hint code	
+					// Event: Player starts building teleporter exit
+					FF_SendHint(this, ENGY_BUILDTPEX, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_BUILDTPEX");
+
 					CFFTeleporter *pTeleporter = CFFTeleporter::Create( hBuildInfo.GetBuildOrigin(), hBuildInfo.GetBuildAngles(), this );
 
 					pTeleporter->SetType( TELEPORTER_EXIT );
@@ -3653,8 +3659,6 @@ void CFFPlayer::PreBuildGenericThink( void )
 					// Bug #0001558: exploit to get instant lvl2 SG
 					// Moved code to remove cells from CFFSentryGun::GoLive() to here -> Defrag
 					RemoveAmmo(FF_BUILDCOST_TELEPORTER_EXIT, AMMO_CELLS);
-
-					// TODO: Omnibot::Notify_ManCannonBuilding( this, pTeleporter );
 				}
 				break;
 			}
@@ -3855,7 +3859,8 @@ void CFFPlayer::PostBuildGenericThink( void )
 						gameeventmanager->FireEvent(pEvent, true);
 					}
 
-					FF_SendHint(this, ENGY_BUILTSG, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_BUILTSG");
+					if( GetTeleporterEntrance() && GetTeleporterExit() )
+						FF_SendHint(this, ENGY_BUILTTELE, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_BUILTTELE");
 
 				}
 			}
@@ -3875,8 +3880,9 @@ void CFFPlayer::PostBuildGenericThink( void )
 						pEvent->SetInt("userid", GetUserID());
 						gameeventmanager->FireEvent(pEvent, true);
 					}
-
-					FF_SendHint(this, ENGY_BUILTSG, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_BUILTSG");
+					
+					if( GetTeleporterEntrance() && GetTeleporterExit() )
+						FF_SendHint(this, ENGY_BUILTTELE, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_BUILTTELE");
 
 				}
 			}

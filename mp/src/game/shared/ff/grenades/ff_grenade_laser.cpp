@@ -344,7 +344,7 @@ float CFFGrenadeLaser::getLengthPercent()
 				continue;
 
 			// only interested in players, dispensers & sentry guns
-			if ( !(pEntity->IsPlayer() || pEntity->Classify() == CLASS_DISPENSER || pEntity->Classify() == CLASS_SENTRYGUN || pEntity->Classify() == CLASS_MANCANNON) )
+			if ( !(pEntity->IsPlayer() || pEntity->Classify() == CLASS_DISPENSER || pEntity->Classify() == CLASS_SENTRYGUN || pEntity->Classify() == CLASS_MANCANNON || pEntity->Classify() == CLASS_TELEPORTER) )
 				continue;
 
 			// If pTarget can take damage from nails...

@@ -44,6 +44,7 @@
 	#define CFFDispenser C_FFDispenser
 	#define CFFManCannon C_FFManCannon
 	#define CFFDetpack C_FFDetpack
+	#define CFFTeleporter C_FFTeleporter
 
 	#include "c_baseanimating.h"
 #elif GAME_DLL
@@ -57,6 +58,7 @@ class CFFSentryGun;
 class CFFDispenser;
 class CFFDetpack;
 class CFFManCannon;
+class CFFTeleporter;
 
 #include "ff_buildabledefs.h"
 
@@ -280,11 +282,13 @@ bool FF_IsDispenser( CBaseEntity *pEntity );
 bool FF_IsSentrygun( CBaseEntity *pEntity );
 bool FF_IsDetpack( CBaseEntity *pEntity );
 bool FF_IsManCannon( CBaseEntity *pEntity );
+bool FF_IsTeleporter( CBaseEntity *pEntity );
 
 CFFBuildableObject *FF_ToBuildableObject( CBaseEntity *pEntity );
 CFFDispenser *FF_ToDispenser( CBaseEntity *pEntity );
 CFFSentryGun *FF_ToSentrygun( CBaseEntity *pEntity );
 CFFDetpack *FF_ToDetpack( CBaseEntity *pEntity );
 CFFManCannon* FF_ToManCannon( CBaseEntity* pEntity );
+CFFTeleporter* FF_ToTeleporter( CBaseEntity* pEntity );
 
 #endif // FF_BUILDABLEOBJECT_H

@@ -39,6 +39,7 @@
 #include "ff_utils.h"
 
 #include "ff_buildable_mancannon.h"
+#include "ff_buildable_teleporter.h"
 
 #include "tier0/vprof.h"
 
@@ -1214,6 +1215,10 @@ int CFFBuildableObject::OnTakeDamage( const CTakeDamageInfo &info )
 				FF_SendHint( pOwner, ENGY_SGDAMAGED, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_SGDAMAGED" ); 
 				m_flOnTakeDamageHintTime = gpGlobals->curtime + 10.0f;
 				break;
+			case CLASS_TELEPORTER: 
+				FF_SendHint( pOwner, ENGY_TELEDAMAGED, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_TELEDAMAGED" ); 
+				m_flOnTakeDamageHintTime = gpGlobals->curtime + 10.0f;
+				break;
 		}
 	}
 	// End hint code
@@ -1232,7 +1237,7 @@ int CFFBuildableObject::OnTakeDamage( const CTakeDamageInfo &info )
 	int res = CBaseEntity::OnTakeDamage( adjustedDamage );
 
 	// Send hit indicator to attacker
-	if ( Classify() == CLASS_SENTRYGUN ||  Classify() == CLASS_DISPENSER || Classify() == CLASS_MANCANNON )
+	if ( Classify() == CLASS_SENTRYGUN ||  Classify() == CLASS_DISPENSER || Classify() == CLASS_MANCANNON || Classify() == CLASS_TELEPORTER )
 	{
 		CFFPlayer *pAttacker = ToFFPlayer( adjustedDamage.GetAttacker() );
 		if( pAttacker )
@@ -1270,7 +1275,8 @@ bool FF_IsBuildableObject( CBaseEntity *pEntity )
 	return( ( pEntity->Classify() == CLASS_DISPENSER ) ||
 		( pEntity->Classify() == CLASS_SENTRYGUN ) ||
 		( pEntity->Classify() == CLASS_DETPACK ) ||
-		( pEntity->Classify() == CLASS_MANCANNON ) );
+		( pEntity->Classify() == CLASS_MANCANNON ) ||
+		( pEntity->Classify() == CLASS_TELEPORTER ) );
 }
 
 //-----------------------------------------------------------------------------
@@ -1315,6 +1321,17 @@ bool FF_IsManCannon( CBaseEntity *pEntity )
 		return false;
 
 	return pEntity->Classify() == CLASS_MANCANNON;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Is the entity a teleporter?
+//-----------------------------------------------------------------------------
+bool FF_IsTeleporter( CBaseEntity *pEntity )
+{
+	if( !pEntity )
+		return false;
+
+	return pEntity->Classify() == CLASS_TELEPORTER;
 }
 
 //-----------------------------------------------------------------------------
@@ -1391,4 +1408,19 @@ CFFManCannon *FF_ToManCannon( CBaseEntity *pEntity )
 #endif
 
 	return static_cast< CFFManCannon * >( pEntity );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Try and convert entity to a teleporter
+//-----------------------------------------------------------------------------
+CFFTeleporter *FF_ToTeleporter( CBaseEntity *pEntity )
+{
+	if( !pEntity || !FF_IsTeleporter( pEntity ) )
+		return NULL;
+
+#ifdef _DEBUG
+	Assert( dynamic_cast< CFFTeleporter * >( pEntity ) != 0);
+#endif
+
+	return static_cast< CFFTeleporter * >( pEntity );
 }

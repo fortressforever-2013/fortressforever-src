@@ -142,7 +142,7 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_gl);
 
 		// Bug #0000512: Blue pipes don't explode on impact on buildables
 		// Explode on contact w/ buildables if pipe bomb
-		if( trace.m_pEnt && ( ( trace.m_pEnt->Classify() == CLASS_SENTRYGUN ) || ( trace.m_pEnt->Classify() == CLASS_DISPENSER ) || ( trace.m_pEnt->Classify() == CLASS_MANCANNON ) ) )
+		if( trace.m_pEnt && ( ( trace.m_pEnt->Classify() == CLASS_SENTRYGUN ) || ( trace.m_pEnt->Classify() == CLASS_DISPENSER ) || ( trace.m_pEnt->Classify() == CLASS_MANCANNON ) || ( trace.m_pEnt->Classify() == CLASS_TELEPORTER ) ) )
 		{
 			if( m_bIsLive )
 			{

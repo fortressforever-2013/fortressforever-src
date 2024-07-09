@@ -19,6 +19,7 @@
 #endif
 
 ConVar ffdev_tel( "ffdev_tel", "20", FCVAR_FF_FFDEV_REPLICATED );
+ConVar ffdev_tel_offset( "ffdev_tel_offset", "-22", FCVAR_FF_FFDEV_REPLICATED );
 
 //-----------------------------------------------------------------------------
 // Purpose: Returns a proper angle orientation for the buidlable depending
@@ -113,8 +114,8 @@ CFFBuildableInfo::CFFBuildableInfo( CFFPlayer *pPlayer, int iBuildObject )
 		case FF_BUILD_SENTRYGUN: flBuildDist = FF_BUILD_SG_BUILD_DIST; flOffset = -22.0f; break;
 		case FF_BUILD_DETPACK: flBuildDist = FF_BUILD_DET_BUILD_DIST; break;
 		case FF_BUILD_MANCANNON: flBuildDist = FF_BUILD_MC_BUILD_DIST; break;
-		case FF_BUILD_TELEPORTER_ENTRANCE: flBuildDist = FF_BUILD_MC_BUILD_DIST; flOffset = -22.0f; break;
-		case FF_BUILD_TELEPORTER_EXIT: flBuildDist = FF_BUILD_MC_BUILD_DIST; flOffset = -22.0f; break;
+		case FF_BUILD_TELEPORTER_ENTRANCE: flBuildDist = FF_BUILD_MC_BUILD_DIST; flOffset = ffdev_tel_offset.GetFloat(); break;
+		case FF_BUILD_TELEPORTER_EXIT: flBuildDist = FF_BUILD_MC_BUILD_DIST; flOffset = ffdev_tel_offset.GetFloat(); break;
 	}
 
 	// Player building the object

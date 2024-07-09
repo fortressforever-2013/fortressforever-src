@@ -137,6 +137,9 @@ void CHudDeathNotice::Init( void )
 	gameeventmanager->AddListener( this, "sentrygun_killed", false );
 	gameeventmanager->AddListener( this, "mancannon_killed", false );
 	gameeventmanager->AddListener( this, "objective_event", false );
+
+	gameeventmanager->AddListener( this, "tpen_killed", false );
+	gameeventmanager->AddListener( this, "tpex_killed", false );
 }
 
 //-----------------------------------------------------------------------------
@@ -698,6 +701,16 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 		else if( !Q_strcmp( event->GetName(), "mancannon_killed" ) )
 		{
 			deathMsg.iconBuildable = gHUD.GetIcon( "death_weapon_deploymancannon");
+			bBuildableKilled = true;
+		}
+		else if( !Q_strcmp( event->GetName(), "tpen_killed" ) )
+		{
+			deathMsg.iconBuildable = gHUD.GetIcon( "death_weapon_deploymancannon"); // placeholder
+			bBuildableKilled = true;
+		}
+		else if( !Q_strcmp( event->GetName(), "tpex_killed" ) )
+		{
+			deathMsg.iconBuildable = gHUD.GetIcon( "death_weapon_deploymancannon"); // placeholder
 			bBuildableKilled = true;
 		}
 		else

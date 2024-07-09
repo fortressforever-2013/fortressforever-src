@@ -58,6 +58,8 @@ public:
 	void MsgFunc_Dispenser_TouchEnemy( bf_read &msg );
 	void MsgFunc_Dispenser_Destroyed( bf_read &msg );
 	void MsgFunc_SentryGun_Destroyed( bf_read &msg );
+	void MsgFunc_Teleporter_Entrance_Destroyed( bf_read &msg );
+	void MsgFunc_Teleporter_Exit_Destroyed( bf_read &msg );
 	void OnTick( void );
 	void Paint( void );
 
@@ -75,6 +77,8 @@ DECLARE_HUD_MESSAGE( CHudBuildableMessages, Dispenser_EnemiesUsing );
 DECLARE_HUD_MESSAGE( CHudBuildableMessages, Dispenser_TouchEnemy );
 DECLARE_HUD_MESSAGE( CHudBuildableMessages, Dispenser_Destroyed );
 DECLARE_HUD_MESSAGE( CHudBuildableMessages, SentryGun_Destroyed );
+DECLARE_HUD_MESSAGE( CHudBuildableMessages, Teleporter_Entrance_Destroyed );
+DECLARE_HUD_MESSAGE( CHudBuildableMessages, Teleporter_Exit_Destroyed );
 
 void CHudBuildableMessages::Init( void )
 {
@@ -82,6 +86,8 @@ void CHudBuildableMessages::Init( void )
 	HOOK_HUD_MESSAGE( CHudBuildableMessages, Dispenser_TouchEnemy );
 	HOOK_HUD_MESSAGE( CHudBuildableMessages, Dispenser_Destroyed );
 	HOOK_HUD_MESSAGE( CHudBuildableMessages, SentryGun_Destroyed );
+	HOOK_HUD_MESSAGE( CHudBuildableMessages, Teleporter_Entrance_Destroyed );
+	HOOK_HUD_MESSAGE( CHudBuildableMessages, Teleporter_Exit_Destroyed );
 
 	// 4 seconds to show the messages enough time?
 	m_flDuration = 4.0f;
@@ -170,6 +176,44 @@ void CHudBuildableMessages::MsgFunc_SentryGun_Destroyed( bf_read &msg )
 			wcscpy( m_pText, pszTemp );
 		else
 			g_pVGuiLocalize->ConvertANSIToUnicode( "Your sentrygun has been destroyed!", m_pText, sizeof( m_pText ) );
+		
+		CalculateWidthHeight();
+	}
+}
+
+void CHudBuildableMessages::MsgFunc_Teleporter_Entrance_Destroyed( bf_read &msg )
+{
+	// Tell the player his sentrygun died
+	int iRead = msg.ReadShort();
+
+	if( iRead )
+	{
+		m_flStartTime = gpGlobals->curtime;
+
+		wchar_t *pszTemp = g_pVGuiLocalize->Find( "#FF_TPEN_DESTROYED" );
+		if( pszTemp )
+			wcscpy( m_pText, pszTemp );
+		else
+			g_pVGuiLocalize->ConvertANSIToUnicode( "Your teleporter entrance has been destroyed!", m_pText, sizeof( m_pText ) );
+		
+		CalculateWidthHeight();
+	}
+}
+
+void CHudBuildableMessages::MsgFunc_Teleporter_Exit_Destroyed( bf_read &msg )
+{
+	// Tell the player his sentrygun died
+	int iRead = msg.ReadShort();
+
+	if( iRead )
+	{
+		m_flStartTime = gpGlobals->curtime;
+
+		wchar_t *pszTemp = g_pVGuiLocalize->Find( "#FF_TPEX_DESTROYED" );
+		if( pszTemp )
+			wcscpy( m_pText, pszTemp );
+		else
+			g_pVGuiLocalize->ConvertANSIToUnicode( "Your teleporter exit has been destroyed!", m_pText, sizeof( m_pText ) );
 		
 		CalculateWidthHeight();
 	}
