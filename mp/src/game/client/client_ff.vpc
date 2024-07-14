@@ -11,6 +11,8 @@ $Macro GAMENAME 	"FortressForever2013" [$SOURCESDK] // TEMP!!
 $Include "$SRCDIR\game\client\client_base.vpc"
 $Include "$SRCDIR\game\shared\ff\ff_shared.vpc"
 
+$Include "$SRCDIR\coplay\src\coplay.vpc"
+
 $Macro THIRDPARTY	"$SRCDIR\thirdparty"
 
 $Configuration
