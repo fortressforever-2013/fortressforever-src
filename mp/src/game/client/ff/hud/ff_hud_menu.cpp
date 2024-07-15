@@ -328,10 +328,10 @@ ADD_MENU_OPTION(buildteleporter, "#FF_CM_BUILD_TELEPORTER", 'O', "qteleporter")
 		return MENU_DIM;
 
 	// Bug #0000333: Buildable Behavior (non build slot) while building
-	if( ff->IsBuilding() && ( ff->GetCurrentBuild() == FF_BUILD_TELEPORTER_ENTRANCE ) )
+	if( ff->IsBuilding() && ( ff->GetCurrentBuild() == FF_BUILD_TELEPORTER_ENTRANCE || ff->GetCurrentBuild() == FF_BUILD_TELEPORTER_EXIT ) )
 		return MENU_DIM;
 
-	if ( ff->GetTeleporterEntrance() )
+	if ( ff->GetTeleporterEntrance() && ff->GetTeleporterExit() )
 		return MENU_DIM;
 
 	return MENU_SHOW;
