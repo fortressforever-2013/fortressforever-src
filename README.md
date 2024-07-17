@@ -16,7 +16,7 @@ Fortress Forever is based upon Source SDK 2006, the original repository of the g
   * MSVC v143 - VS 2022 C++ x64/x86 build tools
   * C++ MFC Library for latest v143 build tools (x86 and x64)
   * Windows 11 SDK (10.0.22000.0)
-
+<br><br>
   1. Clone this repository and run `.\creategameprojects.bat` or `.\createallprojects.bat` located in `mp\src`
       * This will generate the project files and solution files that are needed in order to compile the game.
   2. Open the generated `Game_FF.sln` or `Everything_FF.sln` using Visual Studio 2022.
