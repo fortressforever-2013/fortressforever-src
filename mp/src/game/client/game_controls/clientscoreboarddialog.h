@@ -11,7 +11,7 @@
 #pragma once
 #endif
 
-#include <vgui_controls/EditablePanel.h>
+#include <vgui_controls/Frame.h>
 #include <game/client/iviewport.h>
 #include "GameEventListener.h"
 
@@ -75,10 +75,10 @@ struct ScoreboardSection_s
 //-----------------------------------------------------------------------------
 // Purpose: Game ScoreBoard
 //-----------------------------------------------------------------------------
-class CClientScoreBoardDialog : public vgui::EditablePanel, public IViewPortPanel, public CGameEventListener
+class CClientScoreBoardDialog : public vgui::Frame, public IViewPortPanel, public CGameEventListener
 {
 private:
-	DECLARE_CLASS_SIMPLE( CClientScoreBoardDialog, vgui::EditablePanel );
+	DECLARE_CLASS_SIMPLE( CClientScoreBoardDialog, vgui::Frame);
 
 protected:
 // column widths at 640
@@ -131,6 +131,8 @@ public:
 	virtual void OnCommand( const char *command ); // |-- Mirv: Catch channel changing
 
 	virtual void UpdatePlayerAvatar( int playerIndex, KeyValues *kv );
+
+	int KeyInput(int down, int keynum, const char* pszCurrentBinding);
 			
 protected:
 	MESSAGE_FUNC_INT( OnPollHideCode, "PollHideCode", code );

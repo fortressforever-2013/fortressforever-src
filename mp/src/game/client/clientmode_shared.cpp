@@ -72,6 +72,7 @@ extern ConVar replay_rendersetting_renderglow;
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 #include <ff_hud_menu.h>
+#include "clientscoreboarddialog.h"
 
 #define ACHIEVEMENT_ANNOUNCEMENT_MIN_TIME 10
 
@@ -821,6 +822,7 @@ int ClientModeShared::HandleSpectatorKeyInput( int down, ButtonCode_t keynum, co
 }
 
 extern CHudContextMenu* g_pHudContextMenu;
+extern CClientScoreBoardDialog* g_pScoreboard;
 
 //-----------------------------------------------------------------------------
 // Purpose: See if hud elements want key input. Return 0 if the key is swallowed
@@ -838,6 +840,14 @@ int ClientModeShared::HudElementKeyInput( int down, ButtonCode_t keynum, const c
 	if ( m_pWeaponSelection )
 	{
 		if ( !m_pWeaponSelection->KeyInput( down, keynum, pszCurrentBinding ) )
+		{
+			return 0;
+		}
+	}
+
+	if ( g_pScoreboard )
+	{
+		if ( !g_pScoreboard->KeyInput(down, keynum, pszCurrentBinding) )
 		{
 			return 0;
 		}

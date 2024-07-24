@@ -50,7 +50,7 @@ bool AvatarIndexLessFunc( const int &lhs, const int &rhs )
 
 extern bool g_fBlockedStatus[256];	// |-- Mirv: The blocked status of people's text
 
-static CClientScoreBoardDialog *g_pScoreboard = NULL;
+CClientScoreBoardDialog *g_pScoreboard = NULL;
 
 //ConVar row_alpha("ffdev_row_alpha", "0.55", FCVAR_REPLICATED);
 //ConVar header_alpha("ffdev_header_alpha", "0.6", FCVAR_REPLICATED);
@@ -129,7 +129,7 @@ const char *szClassName[] = {	"",
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CClientScoreBoardDialog::CClientScoreBoardDialog(IViewPort *pViewPort) : EditablePanel( NULL, PANEL_SCOREBOARD )
+CClientScoreBoardDialog::CClientScoreBoardDialog(IViewPort *pViewPort) : Frame( NULL, PANEL_SCOREBOARD )
 {
 	m_iPlayerIndexSymbol = KeyValuesSystem()->GetSymbolForString("playerIndex");
 	m_nCloseKey = BUTTON_CODE_INVALID;
@@ -1173,4 +1173,13 @@ void CClientScoreBoardDialog::PaintBackground()
 	surface()->DrawFilledRect(0, iYPos, GetWide(), iYPos + 1);
 
 	//BaseClass::PaintBackground();
+}
+
+
+int CClientScoreBoardDialog::KeyInput(int down, int keynum, const char* pszCurrentBinding)
+{
+	if (keynum == MOUSE_LEFT && ActivateScoreboard())
+		return 0;
+
+	return 1;
 }

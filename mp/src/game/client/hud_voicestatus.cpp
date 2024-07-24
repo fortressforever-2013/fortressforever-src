@@ -16,6 +16,8 @@
 #include "voice_common.h"
 #include "vgui_avatarimage.h"
 
+#include "ff_hud_chat.h" // GetCustomClientColor()
+
 using namespace vgui;
 
 ConVar* sv_alltalk = NULL;
@@ -364,7 +366,7 @@ void CHudVoiceStatus::Paint()
 		float oldAlphaMultiplier = surface()->DrawGetAlphaMultiplier();
 		surface()->DrawSetAlphaMultiplier(oldAlphaMultiplier * m_SpeakingList[i].fAlpha);
 
-		Color c = g_PR->GetTeamColor(g_PR ? g_PR->GetTeam(playerId) : TEAM_UNASSIGNED);
+		Color c = GetCustomClientColor(playerId);
 
 		c[3] = 128;
 
