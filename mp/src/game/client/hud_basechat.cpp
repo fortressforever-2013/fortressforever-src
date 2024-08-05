@@ -54,6 +54,7 @@ Color g_ColorDarkGreen( 64, 255, 64, 255 );
 Color g_ColorYellow( 255, 178, 0, 255 );
 Color g_ColorGrey( 204, 204, 204, 255 );
 
+extern Color GetDefaultChatColor( void );
 
 // removes all color markup characters, so Msg can deal with the string properly
 // returns a pointer to str
@@ -1398,13 +1399,13 @@ Color CBaseHudChat::GetTextColorForClient( TextColor colorNum, int clientIndex )
 			}
 			else
 			{
-				c = GetDefaultTextColor();
+				c = GetDefaultChatColor();
 			}
 		}
 		break;
 
 	default:
-		c = GetDefaultTextColor();
+		c = GetDefaultChatColor();
 	}
 
 	return Color( c[0], c[1], c[2], 255 );
@@ -1521,15 +1522,27 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 				break;
 			case '^':
 			{
-				range.start = nBytesIn + 2;
+				if ( *(txt + 1) >= '0' && *(txt + 1) <= '9' )
+					range.start = nBytesIn + 2;
+				else
+					range.start = nBytesIn + 1;
+
 				range.end = lineLen;
 				++txt;
 
 				if (range.end > range.start)
 				{
 					Color col;
-					switch (txt[0])
+
+					ConVarRef cl_chat_colorize("cl_chat_colorize");
+					
+					if ( cl_chat_colorize.IsValid() && !cl_chat_colorize.GetBool() )
+						col = GetDefaultChatColor();
+
+					if (col == Color())
 					{
+						switch ( txt[0] )
+						{
 						case '0': // orange
 							col = Color( 226, 118, 10, 255 ); break;
 						case '1': // blue
@@ -1550,6 +1563,10 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 							col = Color(139, 45, 139, 255); break;
 						case '9': // cyan
 							col = Color(0, 255, 255, 255); break;
+
+						default:
+							col = GetDefaultChatColor();
+						}
 					}
 
 					if (col != Color())
