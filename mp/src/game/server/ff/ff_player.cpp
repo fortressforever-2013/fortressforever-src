@@ -479,6 +479,7 @@ IMPLEMENT_SERVERCLASS_ST( CFFPlayer, DT_FFPlayer )
 	SendPropInt( SENDINFO( m_iCloaked ), 1, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_iActiveSabotages ), 2, SPROP_UNSIGNED ),
 	SendPropBool( SENDINFO( m_bJetpacking ) ),
+	SendPropBool( SENDINFO( m_bCanUseJetpack ) ),
 	SendPropBool(SENDINFO(m_bCanDoubleJump)),
 	SendPropTime(SENDINFO(m_flNextJumpTimeForDouble)),
 	SendPropTime(SENDINFO(m_flLastSpawnTime)),
@@ -554,6 +555,7 @@ CFFPlayer::CFFPlayer()
 	m_bSGDamageHint = true;	 // For triggering the "Spy takes damage from SG while cloaked" hint only once
 
 	m_bDisguisable = true;
+	m_bCanUseJetpack = true;
 
 	m_flNextJumpTimeForDouble = 0;
 
@@ -8124,4 +8126,14 @@ void CFFPlayer::SetJetpackFuelPercent(float newPct)
 {
 	float pctClamped = max(0.0f, min(newPct, 100.0f));
 	m_iJetpackFuel = (int)(200.0f * (pctClamped / 100.0f));
+}
+
+void CFFPlayer::SetJetpackState( bool bCanUseJetpack )
+{
+	m_bCanUseJetpack = bCanUseJetpack;
+}
+
+bool CFFPlayer::GetJetpackState( void )
+{
+	return m_bCanUseJetpack;
 }

@@ -727,6 +727,9 @@ public:
 	void SetJetpackFuelPercent( float );
 	float GetJetpackFuelPercent( void );
 
+	void SetJetpackState( bool bCanUseJetpack );
+	bool GetJetpackState( void );
+
 	void SharedPreThink( void );
 
 public:	
@@ -780,6 +783,7 @@ public:
 
 	CNetworkVar( float, m_flNextClassSpecificSkill );
 	CNetworkVar( int, m_iJetpackFuel );
+	CNetworkVar( bool, m_bCanUseJetpack );
 	float m_flJetpackNextFuelRechargeTime;
 
 	CNetworkVar( float, m_flConcTime );

@@ -437,7 +437,7 @@ void CHudCrosshair::Paint(void)
 	// <-- Mirv
 
 	// Draw pyro fuel
-	if (cl_pyro_fuelbar.GetBool() && pActivePlayer->GetClassSlot() == CLASS_PYRO)
+	if (cl_pyro_fuelbar.GetBool() && pActivePlayer->GetClassSlot() == CLASS_PYRO && pActivePlayer->m_bCanUseJetpack)
 	{
 		float fuelPercent = pActivePlayer->m_iJetpackFuel / 200.0f;
 

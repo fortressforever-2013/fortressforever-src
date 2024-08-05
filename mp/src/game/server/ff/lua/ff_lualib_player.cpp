@@ -200,6 +200,9 @@ void CFFLuaLib::InitPlayer(lua_State* L)
 
 			.addFunction("GetJetpackFuelPercent", &CFFPlayer::GetJetpackFuelPercent)
 			.addFunction("SetJetpackFuelPercent", &CFFPlayer::SetJetpackFuelPercent)
+
+			.addFunction("GetJetpackState",		&CFFPlayer::GetJetpackState)
+			.addFunction("SetJetpackState",		&CFFPlayer::SetJetpackState)
 		.endClass()
 
 		.beginNamespace("Player")

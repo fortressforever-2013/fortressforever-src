@@ -77,7 +77,7 @@ void CHudJetpackFuelBar::Paint( void )
 	if( !pPlayer )
 		return;
 
-	if( pPlayer->GetClassSlot() != CLASS_PYRO || FF_IsPlayerSpec( pPlayer ) || !FF_HasPlayerPickedClass( pPlayer ) )
+	if( pPlayer->GetClassSlot() != CLASS_PYRO || FF_IsPlayerSpec( pPlayer ) || !FF_HasPlayerPickedClass( pPlayer ) || !pPlayer->m_bCanUseJetpack )
 		return;
 
 	BaseClass::PaintBackground();
