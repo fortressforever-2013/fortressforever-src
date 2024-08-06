@@ -29,6 +29,9 @@
 //#include "ff_luaobject_wrapper.h"
 #include "ff_luacontext.h"
 
+#include "ff_projectile_pipebomb.h"
+#include "ff_player.h"
+
 #undef MINMAX_H
 #include "minmax.h"
 
@@ -1295,6 +1298,23 @@ void CBaseDoor::Blocked( CBaseEntity *pOther )
 		}
 		else
 		{
+			if ( pOther->Classify() == CLASS_PIPEBOMB )
+			{
+				CFFProjectilePipebomb* pEnt = static_cast<CFFProjectilePipebomb*>(pOther);
+				pEnt->DetonatePipe();
+
+				// tell the client to decrement the count for the hud
+				CFFPlayer *pPipeOwner = ToFFPlayer(pEnt->GetOwnerEntity());
+				CSingleUserRecipientFilter user(pPipeOwner);
+				user.MakeReliable();
+
+				UserMessageBegin(user, "PipeMsg");
+					WRITE_BYTE(2);
+				MessageEnd();
+
+				return;
+			}
+
 			pOther->TakeDamage( CTakeDamageInfo( this, this, m_flBlockDamage, DMG_CRUSH ) );
 		}
 	}
