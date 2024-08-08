@@ -668,6 +668,16 @@ void Host_Say( edict_t *pEdict, const CCommand &args, bool teamonly )
 	if ( (int)strlen(p) > j )
 		p[j] = 0;
 
+	// normalize quotes
+	char* temp = p;
+	while (*temp != '\0')
+	{
+		if (*temp == 26)
+			*temp = '"';
+
+		temp++;
+	}
+
 	Q_strncat( text, p, sizeof( text ), COPY_ALL_CHARACTERS );
 	Q_strncat( text, "\n", sizeof( text ), COPY_ALL_CHARACTERS );
 

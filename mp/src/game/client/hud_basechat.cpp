@@ -1748,6 +1748,15 @@ This is a very long string that I am going to attempt to paste into the cs hud c
 			GameRules()->ModifySentChat( ansi, ARRAYSIZE(ansi) );
 		}
 
+		char* txt = ansi;
+		while ( *txt != '\0' )
+		{
+			if (*txt == '"')
+				*txt = 26;
+
+			txt++;
+		}
+
 		char szbuf[144];	// more than 128
 		Q_snprintf( szbuf, sizeof(szbuf), "%s \"%s\"", m_nMessageMode == MM_SAY ? "say" : "say_team", ansi );
 
