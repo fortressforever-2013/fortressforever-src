@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: Draws CSPort's death notices
 //
@@ -254,10 +254,17 @@ void CHudDeathNotice::Paint()
 			x -= 28;
 			// <--
 			
+#ifdef WIN32
 			int x_start = x - 5;
-			int x_end = x + iconWide + 5 + victimStringWidth + 10;
 			int y_start = y - (iconTall / 4) - 3;
 			int y_end = y + iconTall/2 + 6;
+#else
+			int x_start = x - 14;
+			int y_start = y - (iconTall / 4) - 6;
+			int y_end = y + iconTall/2 + 12;
+#endif
+
+			int x_end = x + iconWide + 5 + victimStringWidth + 10;
 
 			if (hud_deathnotice_highlightself.GetBool() && selfInvolved)
 				DrawHighlightBackground(x_start, y_start, x_end, y_end);
@@ -403,10 +410,20 @@ void CHudDeathNotice::Paint()
 			
 			if (hud_deathnotice_highlightself.GetBool() && selfInvolved)
 			{
+#ifdef WIN32
 				int x_start = (m_DeathNotices[i].iSuicide) ? x - 5 : x - killerAndAssisterStringWidth - 5;
-				int x_end = x + 5 + iconWide + 5 + victimAndAssisterStringWidth + 5 + ((iconBuildableWide) ? iconBuildableWide + 5 : 0) + ((iconModifierWide) ? iconModifierWide + 5 : 0);
+				
 				int y_start = y - (iconTall / 4) - 3;
-				int y_end = y + iconTall/2 + 6;
+                                int y_end = y + iconTall/2 + 6;
+#else
+				int x_start = (m_DeathNotices[i].iSuicide) ? x - 14 : x - killerAndAssisterStringWidth - 14;
+				
+				int y_start = y - (iconTall / 4) - 6;
+				int y_end = y + iconTall/2 + 12;
+#endif
+
+                                int x_end = x + 5 + iconWide + 5 + victimAndAssisterStringWidth + 5 + ((iconBuildableWide) ? iconBuildableWide + 5 : 0) + ((iconModifierWide) ? iconModifierWide + 5 : 0);
+                                
 				DrawHighlightBackground(x_start, y_start, x_end, y_end);
 			}
 
