@@ -167,6 +167,9 @@ extern IFileSystem** pFilesystem;
 // Need this to remove the HUD context menus on spawn
 extern void HudContextForceClose();
 
+// this needs to match the value from ff_player.cpp!!
+#define GREN_THROW_DELAY 0.5f
+
 // #0000331: impulse 81 not working (weapon_cubemap)
 #include "../c_weapon__stubs.h"
 #include "ff_weapon_base.h"
@@ -417,9 +420,9 @@ bool CC_PrimeOne(const CCommand& args)
 		return false;
 
 	// Make sure we can't insta-prime on the client either
-	// This can be anything really so long as it's less than the real delay
-	// This should be okay up to about ~400ms for the moment
-	if (engine->Time() < pLocalPlayer->m_flPrimeTime + 0.4f)
+	// This should match the grenade throw delay with the server
+	// otherwise it results in ghost nades
+	if (engine->Time() < pLocalPlayer->m_flPrimeTime + GREN_THROW_DELAY)
 		return false;
 
 	// 0000818: Grenade timer not playing on second of double primes
@@ -508,9 +511,9 @@ bool CC_PrimeTwo(const CCommand& args)
 		return false;
 
 	// Make sure we can't insta-prime on the client either
-	// This can be anything really so long as it's less than the real delay
-	// This should be okay up to about ~400ms for the moment
-	if (engine->Time() < pLocalPlayer->m_flPrimeTime + 0.4f)
+	// This should match the grenade throw delay with the server
+	// otherwise it results in ghost nades
+	if (engine->Time() < pLocalPlayer->m_flPrimeTime + GREN_THROW_DELAY)
 		return false;
 
 	// 0000818: Grenade timer not playing on second of double primes
