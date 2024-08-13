@@ -27,6 +27,7 @@
 #include "in_buttons.h"
 #include "c_ff_player.h"
 #include "ff_utils.h"
+#include "ff_weapon_assaultcannon.h"
 
 #include "ScreenSpaceEffects.h"
 
@@ -336,15 +337,13 @@ void CMotionBlur::Shutdown()
 	m_BlurImage.Shutdown();
 }
 
-extern float GetAssaultCannonCharge();
-
 //-----------------------------------------------------------------------------
 // Purpose: Do the blurring effect based on player speed
 //-----------------------------------------------------------------------------
 void CMotionBlur::Render(int x, int y, int w, int h)
 {
 	// First of all lets work out how much to do this
-	C_BasePlayer *pPlayer = C_FFPlayer::GetLocalFFPlayerOrObserverTarget();
+	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayerOrObserverTarget();
 
 	// Must be valid, on a team and not no-clipping and alive
 	if (!cl_dynamicblur.GetBool() || !pPlayer || pPlayer->GetTeamNumber() < TEAM_BLUE || !pPlayer->IsAlive() || pPlayer->GetMoveType() == MOVETYPE_NOCLIP)
@@ -385,11 +384,20 @@ void CMotionBlur::Render(int x, int y, int w, int h)
 	// Take the largest blur from the two sources
 	if (cl_dynamicblur_ac.GetBool())
 	{
-		float flCharge = GetAssaultCannonCharge();
-		if (flCharge > 50.0f)
+		C_FFWeaponBase *pWeapon = pPlayer->GetActiveFFWeapon();
+
+		if ( pWeapon && pWeapon->GetWeaponID() == FF_WEAPON_ASSAULTCANNON )
 		{
-			float flACBlur = (flCharge - 50.0f) / 100.0f;
-			flBlur = max(flBlur, flACBlur);
+			CFFWeaponAssaultCannon* pAC = (CFFWeaponAssaultCannon*)pPlayer->GetActiveFFWeapon();
+
+			float flCharge = pAC->m_flChargeTime / FF_AC_MAXCHARGETIME;
+			flCharge = 100 * clamp(flCharge, 0.01f, 1.0f);
+
+			if (flCharge > 50.0f)
+			{
+				float flACBlur = (flCharge - 50.0f) / 100.0f;
+				flBlur = max(flBlur, flACBlur);
+			}
 		}
 	}
 

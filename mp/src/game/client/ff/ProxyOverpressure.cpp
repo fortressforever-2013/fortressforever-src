@@ -48,9 +48,6 @@ void CProxyOverpressureCharge::OnBind(void *pC_BaseEntity)
 
 	Assert(m_pResult);
 
-	// Use this awful global function for now
-	// TODO: Stop using this awful global function
-	//float flNextClassSpecificSkill = GetAssaultCannonCharge();
 	// gotta take into account the spinup before we start displaying heat.
 	float flNextClassSpecificSkill = ( OVERPRESSURE_COOLDOWN - (pPlayer->m_flNextClassSpecificSkill - gpGlobals->curtime) ) / ( OVERPRESSURE_COOLDOWN );
 	

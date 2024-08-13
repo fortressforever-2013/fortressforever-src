@@ -21,6 +21,9 @@
 #include "ff_weapon_base.h"
 #include "c_ff_player.h"
 #include "ff_utils.h"
+#include "ff_weapon_assaultcannon.h"
+#include "ff_weapon_sniperrifle.h"
+#include "ff_weapon_jumpgun.h"
 
 #ifdef SIXENSE
 #include "sixense/in_sixense.h"
@@ -467,8 +470,10 @@ void CHudCrosshair::Paint(void)
 	// Mulch: Draw charge bar!
 	if ((weaponID == FF_WEAPON_ASSAULTCANNON) && (cl_acchargebar.GetBool()))
 	{
-		extern float GetAssaultCannonCharge();
-		float flCharge = GetAssaultCannonCharge();
+		CFFWeaponAssaultCannon *pAC = (CFFWeaponAssaultCannon *) pWeapon;
+
+		float flCharge =  pAC->m_flChargeTime / FF_AC_MAXCHARGETIME;
+		flCharge = 100 * clamp(flCharge, 0.01f, 1.0f);
 
 		if (flCharge <= 0.0f)
 			return;
@@ -486,8 +491,13 @@ void CHudCrosshair::Paint(void)
 	}
 	else if (weaponID == FF_WEAPON_SNIPERRIFLE)
 	{
-		extern float GetSniperRifleCharge();
-		float flCharge = GetSniperRifleCharge();
+		CFFWeaponSniperRifle *pSniperRifle = (CFFWeaponSniperRifle *)pWeapon;
+
+		if ( !pSniperRifle->IsInFire() )
+			return;
+
+		float flCharge = clamp( gpGlobals->curtime - pSniperRifle->GetFireStartTime(), 1.0f, FF_SNIPER_MAXCHARGE );
+		flCharge = 100.0f * ( flCharge / FF_SNIPER_MAXCHARGE );
 
 		if (flCharge <= 1.0f)
 			return;
@@ -505,8 +515,10 @@ void CHudCrosshair::Paint(void)
 	}
 	else if (weaponID == FF_WEAPON_JUMPGUN)
 	{
-		extern float GetJumpgunCharge();
-		float flCharge = GetJumpgunCharge();
+		CFFWeaponJumpgun *pJump = (CFFWeaponJumpgun *) pWeapon;
+
+		float flCharge = pJump->GetClampedCharge() / JUMPGUN_CHARGEUPTIME;
+		flCharge = clamp(flCharge, 0.01f, 1.0f);
 
 		if (flCharge <= 0.0f)
 			return;

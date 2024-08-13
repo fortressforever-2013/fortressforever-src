@@ -855,31 +855,3 @@ void CFFWeaponAssaultCannon::UpdateBarrelRotation()
 		}
 	}
 }
-#ifdef CLIENT_DLL
-//-----------------------------------------------------------------------------
-// Purpose: This is a awful function to quickly get the AC charge. It will be
-//			replaced tomorrow.
-//-----------------------------------------------------------------------------
-float GetAssaultCannonCharge()
-{
-	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayerOrObserverTarget();
-
-	if (!pPlayer)
-		return 0.0f;
-
-	C_FFWeaponBase *pWeapon = pPlayer->GetActiveFFWeapon();
-
-	if (!pWeapon || pWeapon->GetWeaponID() != FF_WEAPON_ASSAULTCANNON)
-		return 0.0f;
-
-	CFFWeaponAssaultCannon *pAC = (CFFWeaponAssaultCannon *) pWeapon;
-
-	// gotta take into account the spinup before we start displaying heat.
-	float fCharge = ( pAC->m_flChargeTime ) / ( FF_AC_MAXCHARGETIME );
-	
-	fCharge = clamp( fCharge, 0.01f, 1.0f );
-
-	return 100 * fCharge;
-}
-
-#endif

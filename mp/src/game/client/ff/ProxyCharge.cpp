@@ -14,13 +14,11 @@
 #include "functionproxy.h"
 #include "c_ff_player.h"
 #include "ff_weapon_base.h"
+#include "ff_weapon_assaultcannon.h"
 #include "materialsystem/imaterialvar.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
-
-// Yuck
-extern float GetAssaultCannonCharge();
 
 //-----------------------------------------------------------------------------
 // Returns charge of current weapon
@@ -53,9 +51,10 @@ void CProxyCharge::OnBind(void *pC_BaseEntity)
 
 	Assert(m_pResult);
 
-	// Use this awful global function for now
-	// TODO: Stop using this awful global function
-	float flCharge = GetAssaultCannonCharge();
+	CFFWeaponAssaultCannon *pAC = (CFFWeaponAssaultCannon *) pWeapon;
+
+	float flCharge = pAC->m_flChargeTime / FF_AC_MAXCHARGETIME;
+	flCharge = 100 * clamp(flCharge, 0.01f, 1.0f);
 	
 	SetFloatResult(flCharge);
 }
