@@ -5,9 +5,9 @@
 # Fortress Forever 2013
 This is an actively developed port of the game [Fortress Forever](https://store.steampowered.com/app/253530/Fortress_Forever/) on Source SDK 2013 using [@Nbc66](https://github.com/Nbc66)'s [SDK 2013 Community Edition](https://github.com/Nbc66/source-sdk-2013-ce) repository.
 
-Fortress Forever is based upon Source SDK 2006, the original repository of the game could be found [here](https://github.com/fortressforever/fortressforever).
+Fortress Forever is based upon Source SDK 2006, the original repository of the game can be found [here](https://github.com/fortressforever/fortressforever).
 
-**Note:** This repository contains the **source code** of the game and **not the game files**, The repository containing the game files could be found [here](https://github.com/fortressforever-2013/FortressForever2013).
+**Note:** This repository contains the **source code** of the game and **not the game files**, The repository containing the game files are found [here](https://github.com/fortressforever-2013/fortressforever).
 
 # Build Instructions
 
