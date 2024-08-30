@@ -22,7 +22,7 @@ Fortress Forever is based upon Source SDK 2006, the original repository of the g
   2. Open the generated `Game_FF.sln` or `Everything_FF.sln` using Visual Studio 2022.
   3. Switch the current configuration from `Debug` to `Release`.
   4. Run `Build Solution`.
-      * The compiled binaries would automatically be copied to `mp\game\FortressForever2013`.
+      * The compiled binaries should automatically be copied to `mp\game\FortressForever2013`.
 
 - ## Linux
   **Note:** These instructions were only tested on Ubuntu 22.04 (Jammy Jellyfish), but should work for most Debian-based Linux distributions.
@@ -41,7 +41,6 @@ Fortress Forever is based upon Source SDK 2006, the original repository of the g
       * The compiled binaries would automatically be copied to `mp/game/FortressForever2013`.
 
 # External content
-
 - ### [Coplay](https://github.com/CoaXioN-Games/coplay)
 - ### [Discord-RPC](https://github.com/discord/discord-rpc)
 - ### [Lua (5.1.5)](https://www.lua.org/)

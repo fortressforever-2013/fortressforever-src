@@ -12,6 +12,7 @@
 //		This file First created
 //		Rewriting "ff_item_flag"
 //		CFF_InfoScript name will change once complete
+//		BREAKINBENNY: We could attach the flags to the carrier's "ffAtt_flag" $attachment on their model, if one exists.
 
 #include "cbase.h"
 #include "ff_info_script.h"
