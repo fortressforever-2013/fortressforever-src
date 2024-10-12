@@ -11,21 +11,20 @@ jobs:
   build:
     runs-on:
       ubuntu-latest
+    container:
+      image: registry.gitlab.steamos.cloud/steamrt/sniper/sdk
         
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Configure dependencies
-        shell: bash
-        run: sudo apt update && sudo apt install -y g++-9-multilib gcc-9-multilib
         
       - name: Create project
         run: cd mp/src;devtools/bin/vpc /ff +game /mksln Game_FF
 
       - name: Build project
         env:
-          CC: gcc-9
-          CXX: g++-9
+          CC: gcc-10
+          CXX: g++-10
         run: cd mp/src;make -f Game_FF.mak
 
       - name: Pack
