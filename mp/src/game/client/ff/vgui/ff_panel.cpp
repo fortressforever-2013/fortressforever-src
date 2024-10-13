@@ -123,6 +123,10 @@ namespace vgui
 		m_pHudBackground = NULL;
 		m_pHudForeground = NULL;
 
+		m_HudForegroundColour = Color(255, 255, 255, 255);
+		m_HudBackgroundColour = Color(255, 255, 255, 255);
+		m_TeamColorHudBackgroundColour = Color(255, 255, 255, 255);
+
 		ivgui()->AddTickSignal( GetVPanel(), 500 );
 		//HScheme scheme = vgui::scheme()->LoadSchemeFromFile( "resource/HudScheme.res", "HudScheme");
 		//SetScheme(scheme);
