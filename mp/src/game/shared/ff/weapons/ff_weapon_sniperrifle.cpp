@@ -766,29 +766,3 @@ float CFFWeaponSniperRifle::GetRecoilMultiplier()
 {
 	return clamp(gpGlobals->curtime - m_flFireStartTime, 1, FF_SNIPER_MAXCHARGE);
 }
-
-#ifdef CLIENT_DLL
-float GetSniperRifleCharge( void )
-#else
-float GetSniperRifleCharge( CFFPlayer *pPlayer )
-#endif
-{
-#ifdef CLIENT_DLL
-	CFFPlayer *pPlayer = CFFPlayer::GetLocalFFPlayer();
-#endif
-	if( !pPlayer )
-		return 0.0f;
-
-	CFFWeaponBase *pWeapon = pPlayer->GetActiveFFWeapon();
-	if( !pWeapon || (pWeapon->GetWeaponID() != FF_WEAPON_SNIPERRIFLE) )
-		return 0.0f;
-
-	CFFWeaponSniperRifle *pSniperRifle = (CFFWeaponSniperRifle *)pWeapon;
-	if( !pSniperRifle )
-		return 0.0f;
-
-	if( !pSniperRifle->IsInFire() )
-		return 0.0;
-
-	return 100.0f * ( clamp( gpGlobals->curtime - pSniperRifle->GetFireStartTime(), 1.0f, FF_SNIPER_MAXCHARGE ) / FF_SNIPER_MAXCHARGE );
-}

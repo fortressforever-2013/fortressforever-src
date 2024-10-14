@@ -92,6 +92,7 @@ $Project
 			$File "$SRCDIR\game\shared\ff\weapons\ff_weapon_grenadelauncher.cpp"
 			$File "$SRCDIR\game\shared\ff\weapons\ff_weapon_ic.cpp"
 			$File "$SRCDIR\game\shared\ff\weapons\ff_weapon_jumpgun.cpp"
+			$File "$SRCDIR\game\shared\ff\weapons\ff_weapon_jumpgun.h"
 			$File "$SRCDIR\game\shared\ff\weapons\ff_weapon_knife.cpp"
 			$File "$SRCDIR\game\shared\ff\weapons\ff_weapon_medkit.cpp"
 			$File "$SRCDIR\game\shared\ff\weapons\ff_weapon_nailgun.cpp"

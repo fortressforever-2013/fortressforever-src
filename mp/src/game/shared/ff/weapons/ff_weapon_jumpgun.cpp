@@ -1,12 +1,11 @@
 #include "cbase.h"
 #include "ff_weapon_base.h"
+#include "ff_weapon_jumpgun.h"
 #include "ff_fx_shared.h"
 #include "in_buttons.h"
 #include "beam_flags.h"
 
-#ifdef CLIENT_DLL 
-	#define CFFWeaponJumpgun C_FFWeaponJumpgun
-
+#ifdef CLIENT_DLL
 	#include "soundenvelope.h"
 	#include "c_ff_player.h"
 	#include "beamdraw.h"
@@ -19,9 +18,6 @@
 	#include "ff_entity_system.h"
 	#include "te_effect_dispatch.h"
 #endif
-
-//ConVar ffdev_jumpgun_chargeuptime("ffdev_jumpgun_chargeuptime", "6", FCVAR_REPLICATED | FCVAR_CHEAT);
-#define JUMPGUN_CHARGEUPTIME 6 //ffdev_jumpgun_chargeuptime.GetFloat()
 
 //ConVar ffdev_jumpgun_allowunchargedshot("ffdev_jumpgun_allowunchargedshot", "0", FCVAR_REPLICATED | FCVAR_CHEAT);
 #define JUMPGUN_ALLOWUNCHARGEDSHOT 0 //ffdev_jumpgun_allowunchargedshot.GetBool()
@@ -78,71 +74,6 @@
 
 //ConVar ffdev_jumpgun_fx_offset_z("ffdev_jumpgun_fx_offset_z", "-32", FCVAR_REPLICATED /* | FCVAR_CHEAT */);
 #define JUMPGUN_EFFECT_Z_OFFSET -32 //ffdev_jumpgun_fx_offset_z.GetFloat()
-
-#ifdef CLIENT_DLL
-
-#define JUMPGUN_CHARGETIMEBUFFERED_UPDATEINTERVAL 0.02f
-
-#endif
-
-//=============================================================================
-// CFFWeaponJumpgun
-//=============================================================================
-
-class CFFWeaponJumpgun : public CFFWeaponBase
-{
-public:
-	DECLARE_CLASS( CFFWeaponJumpgun, CFFWeaponBase );
-	DECLARE_NETWORKCLASS(); 
-	DECLARE_PREDICTABLE();
-	
-	CFFWeaponJumpgun( void );
-
-	virtual void	PrimaryAttack() {}
-
-	virtual bool	Deploy( void );
-	virtual bool	Holster( CBaseCombatWeapon *pSwitchingTo );
-	virtual void	Precache( void );
-	virtual void	Fire( void );
-	virtual void	ItemPostFrame( void );
-	virtual void	UpdateOnRemove( void );
-
-	virtual FFWeaponID GetWeaponID( void ) const { return FF_WEAPON_JUMPGUN; }
-
-	float	GetClampedCharge( void );
-
-	int m_nRevSound;
-	int m_iShockwaveTexture;
-
-#ifdef GAME_DLL
-
-	void JumpgunEmitSound( const char* szSoundName );
-
-	bool m_bPlayRevSound;
-	float m_flRevSoundNextUpdate;
-	EmitSound_t m_paramsRevSound;
-
-	float m_flStartTime;
-	float m_flLastUpdate;
-
-#else
-
-	virtual void	ViewModelDrawn( C_BaseViewModel *pBaseViewModel );
-
-private:
-	int	m_iAttachment1;
-	int m_iAttachment2;
-	float m_flTotalChargeTimeBuffered;
-	float m_flClampedChargeTimeBuffered;
-	float m_flChargeTimeBufferedNextUpdate;
-
-#endif	
-
-private:
-	CFFWeaponJumpgun( const CFFWeaponJumpgun & );
-	CNetworkVar( float, m_flTotalChargeTime );
-	CNetworkVar( float, m_flClampedChargeTime );
-};
 
 //=============================================================================
 // CFFWeaponJumpgun tables
@@ -545,29 +476,4 @@ void CFFWeaponJumpgun::ViewModelDrawn( C_BaseViewModel *pBaseViewModel )
 	
 	DrawHalo(pMat, vecMuzzle, 0.58f * effectScale, colour);
 }
-
-//----------------------------------------------------------------------------
-// Purpose: Get charge
-//----------------------------------------------------------------------------
-float GetJumpgunCharge()
-{
-	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayerOrObserverTarget();
-
-	if (!pPlayer)
-		return 0.0f;
-
-	C_FFWeaponBase *pWeapon = pPlayer->GetActiveFFWeapon();
-
-	if (!pWeapon || pWeapon->GetWeaponID() != FF_WEAPON_JUMPGUN)
-		return 0.0f;
-
-	CFFWeaponJumpgun *pJump = (CFFWeaponJumpgun *) pWeapon;
-
-	float fCharge = ( pJump->GetClampedCharge() ) / ( JUMPGUN_CHARGEUPTIME );
-	
-	fCharge = clamp( fCharge, 0.01f, 1.0f );
-
-	return fCharge;
-}
-
 #endif
