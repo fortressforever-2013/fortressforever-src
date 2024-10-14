@@ -471,7 +471,7 @@ void CTeamMenu::UpdateTeamButtons()
 
 		if (wszTeamName)
 		{
-			V_snwprintf( wszName, sizeof(wszName), L"%c. %ls", wchTeamNumber, wszTeamName );
+			V_snwprintf( wszName, ARRAYSIZE(wszName), L"%c. %ls", wchTeamNumber, wszTeamName );
 			wszTeamName = wszName;
 		}
 		else
@@ -487,7 +487,12 @@ void CTeamMenu::UpdateTeamButtons()
 		if ( !wszTeamName )
 		{
 			// no name, just use the number
-			V_snwprintf( wszTeamName, sizeof(wszTeamName), L"%c.", wchTeamNumber );
+			// what the FUCK are you DOING!!!!! - azzy
+			// wszTeamName is a wchar_t fucking pointer !!!
+			// V_snwprintf( wszTeamName, sizeof(wszTeamName), L"%c.", wchTeamNumber );
+			V_snwprintf( wszName, ARRAYSIZE(wszName), L"%c.", wchTeamNumber );
+			wszTeamName = wszName;
+
 			pTeamButton->SetText(wszTeamName);
 		}
 		else

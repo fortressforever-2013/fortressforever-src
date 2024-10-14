@@ -154,7 +154,7 @@ void CHudNumericDisplay::PaintNumbersRightAligned(HFont font, int xpos, int ypos
 	int iTempxpos = xpos + charWidth * maxchars; // allow for X characters of score
 
 	wchar_t unicode[6];
-	V_snwprintf(unicode, sizeof(unicode), L"%d", value);
+	V_snwprintf(unicode, ARRAYSIZE(unicode), L"%d", value);
 
 	surface()->DrawSetTextFont(font);
 

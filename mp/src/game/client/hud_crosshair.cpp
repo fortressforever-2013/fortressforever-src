@@ -420,7 +420,7 @@ void CHudCrosshair::Paint(void)
 	int charOffsetX = surface()->GetCharacterWidth(currentFont, outerChar) / 2;
 	int charOffsetY = surface()->GetFontTall(currentFont) / 2;
 
-	V_snwprintf(unicode, sizeof(unicode), L"%c", outerChar);
+	V_snwprintf(unicode, ARRAYSIZE(unicode), L"%c", outerChar);
 
 	surface()->DrawSetTextPos(x - charOffsetX, y - charOffsetY);
 	surface()->DrawUnicodeChar(unicode[0]);
@@ -433,7 +433,7 @@ void CHudCrosshair::Paint(void)
 	charOffsetX = surface()->GetCharacterWidth(currentFont, innerChar) / 2;
 	charOffsetY = surface()->GetFontTall(currentFont) / 2;
 
-	V_snwprintf(unicode, sizeof(unicode), L"%c", innerChar);
+	V_snwprintf(unicode, ARRAYSIZE(unicode), L"%c", innerChar);
 
 	surface()->DrawSetTextPos(x - charOffsetX, y - charOffsetY);
 	surface()->DrawUnicodeChar(unicode[0]);
