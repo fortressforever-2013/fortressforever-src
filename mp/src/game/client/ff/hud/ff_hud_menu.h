@@ -14,7 +14,7 @@
 
 
 #include "cbase.h"
-#include <string>
+#include "stdstring.h"
 
 #define MENU_SHOW	0
 #define MENU_DIM	1
