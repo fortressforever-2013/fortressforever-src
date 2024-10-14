@@ -1969,11 +1969,13 @@ void CBaseHudChat::ChatPrintf( int iPlayerIndex, int iFilter, const char *fmt, .
 			{
 				// Go ahead and play the correct "chat beep" sound.
 				// These strings will be the same length if the "(TEAM)" prefix is missing
+				std::string szMsg = pmsg;
+
 				CLocalPlayerFilter filter;
-				if (strlen(pmsg + 1) == wcslen(nameInString))
-					C_BaseEntity::EmitSound(filter, -1, "HudChat.Message");
-				else
+				if ( szMsg.find( "\x1(TEAM)" ) == 0 )
 					C_BaseEntity::EmitSound(filter, -1, "HudChat.TeamMessage");
+				else
+					C_BaseEntity::EmitSound(filter, -1, "HudChat.Message");
 
 				iNameStart = (nameInString - wbuf);
 				iNameLength = wcslen( wideName );
