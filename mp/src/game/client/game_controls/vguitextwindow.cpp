@@ -437,6 +437,7 @@ void CTextWindow::ShowPanel( bool bShow )
 		Activate();
 		SetMouseInputEnabled( true );
 		SetKeyBoardInputEnabled(true);
+		SetCloseButtonVisible(false);
 		SetEnabled(true);
 
 		MoveToFront();
