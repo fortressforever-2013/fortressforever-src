@@ -422,7 +422,7 @@ int	C_PlayerResource::GetClass(int iIndex)
 
 const Color &C_PlayerResource::GetTeamColor(int index )
 {
-	if ( index < 1 || index >= MAX_TEAMS )
+	if ( index < 0 || index >= MAX_TEAMS )
 	{
 		Assert( false );
 		static Color blah;
