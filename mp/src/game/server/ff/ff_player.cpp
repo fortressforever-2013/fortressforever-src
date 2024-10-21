@@ -5528,11 +5528,11 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 	// Display any effect associate with this damage type
 	DamageEffect(info.GetDamage(),bitsDamage);
 
-	// Emit a pain sound but not when we're falling, because that is already handled
-	if (IsAlive() && !(info.GetDamageType() & DMG_FALL))
-	{
+	// Emit a pain sound if we take normal damage or are drowning, because that is already handled
+	if (IsAlive() && !(info.GetDamageType() & (DMG_FALL | DMG_DROWN)))
 		EmitSound("Player.Pain");
-	}
+	if (IsAlive() && (info.GetDamageType() & DMG_DROWN))
+		EmitSound("Player.DrownContinue");
 	
 	// Send hit indicator to attacker
 	CFFPlayer *pAttacker = ToFFPlayer( info.GetAttacker() );
