@@ -25,7 +25,7 @@ extern bool CRC32_LessFunc(const CRC32_t& a, const CRC32_t& b);
 /////////////////////////////////////////////////////////////////////////////
 CFFLuaMenu::CFFLuaMenu(const char *szIdentifier )
 {
-	Q_strcpy(m_szIdentifier, szIdentifier);
+	V_snprintf( m_szIdentifier, sizeof( m_szIdentifier ), "%s", szIdentifier );
 	m_flDisplayTime = LUAMENU_DEFAULT_DISPLAYTIME;
 	m_szMenuTitle[0] = 0;
 	m_bMenuActive = false;
@@ -38,7 +38,7 @@ CFFLuaMenu::CFFLuaMenu(const char *szIdentifier )
 CFFLuaMenu::CFFLuaMenu( const char *szIdentifier, 
 					   float flDisplayTime )
 {
-	Q_strcpy(m_szIdentifier, szIdentifier);
+	V_snprintf( m_szIdentifier, sizeof( m_szIdentifier ), "%s", szIdentifier );
 	m_flDisplayTime = flDisplayTime;
 	m_szMenuTitle[0] = 0;
 	m_bMenuActive = false;
@@ -51,9 +51,9 @@ CFFLuaMenu::CFFLuaMenu( const char *szIdentifier,
 CFFLuaMenu::CFFLuaMenu( const char *szIdentifier, 
 					   const char *szMenuTitle )
 {
-	Q_strcpy(m_szIdentifier, szIdentifier);
+	V_snprintf( m_szIdentifier, sizeof( m_szIdentifier ), "%s", szIdentifier );
 	m_flDisplayTime = LUAMENU_DEFAULT_DISPLAYTIME;
-	Q_strcpy(m_szMenuTitle, szMenuTitle);
+	V_snprintf( m_szMenuTitle, sizeof( m_szMenuTitle ), "%s", szMenuTitle );
 	m_bMenuActive = false;
 	m_iNumPlayersSent = 0;
 	m_iNumPlayersActive = 0;
@@ -65,9 +65,9 @@ CFFLuaMenu::CFFLuaMenu( const char *szIdentifier,
 					   const char *szMenuTitle,
 					   float flDisplayTime )
 {
-	Q_strcpy(m_szIdentifier, szIdentifier);
+	V_snprintf( m_szIdentifier, sizeof( m_szIdentifier ), "%s", szIdentifier );
 	m_flDisplayTime = flDisplayTime;
-	Q_strcpy(m_szMenuTitle, szMenuTitle);
+	V_snprintf( m_szMenuTitle, sizeof( m_szMenuTitle ), "%s", szMenuTitle );
 	m_bMenuActive = false;
 	m_iNumPlayersSent = 0;
 	m_iNumPlayersActive = 0;
@@ -212,7 +212,7 @@ void CFFLuaMenu::AddMenuOption( int iSlot, const char *szOptionText )
 	if (iSlot > 9 || iSlot < 0)
 		return;
 
-	Q_strcpy( m_MenuOptions[iSlot].szText, szOptionText );
+	V_snprintf( m_MenuOptions[iSlot].szText, sizeof( m_MenuOptions[iSlot].szText ), "%s", szOptionText );
 }
 
 /////////////////////////////////////////////////////////////////////////////
