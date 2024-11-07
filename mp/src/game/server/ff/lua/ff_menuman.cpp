@@ -164,6 +164,7 @@ void CFFLuaMenu::Display(IRecipientFilter &filter)
 			WRITE_CHAR(m_flDisplayTime);
 			WRITE_BYTE(bMoreToCome ? 0xFF : 0x00);
 			WRITE_STRING(szMenuString);
+			WRITE_BOOL(true);
 		MessageEnd();
 
 		if (len > 240)
@@ -322,7 +323,7 @@ void CFFLuaMenuManager::AddLuaMenu(const char* szMenuName,
 /////////////////////////////////////////////////////////////////////////////
 void CFFLuaMenuManager::Init()
 {
-	Shutdown();
+	Reset();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -415,7 +416,7 @@ void CFFLuaMenuManager::PlayerMenuExpired(const char *szMenuName)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-void CFFLuaMenuManager::Shutdown()
+void CFFLuaMenuManager::Reset()
 {
 	m_menus.RemoveAll();
 }

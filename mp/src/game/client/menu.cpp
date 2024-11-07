@@ -74,6 +74,7 @@ void CHudMenu::Init( void )
 
 	m_bMenuTakesInput = false;
 	m_bMenuDisplayed = false;
+	m_bIsFromMenuMan = false;
 	m_bitsValidSlots = 0;
 	m_Processed.RemoveAll();
 	m_nMaxPixels = 0;
@@ -111,6 +112,9 @@ void CHudMenu::VidInit( void )
 //-----------------------------------------------------------------------------
 void CHudMenu::OnThink()
 {
+	if ( m_bIsFromMenuMan )
+		return;
+
 	float flSelectionTimeout = MENU_SELECTION_TIMEOUT;
 
 	// If we've been open for a while without input, hide
@@ -470,6 +474,7 @@ void CHudMenu::MsgFunc_ShowMenu( bf_read &msg)
 	m_bitsValidSlots = (short)msg.ReadWord();
 	int DisplayTime = msg.ReadChar();
 	int NeedMore = msg.ReadByte();
+	bool bIsFromMenuMan = false;
 
 	if ( DisplayTime > 0 )
 	{
@@ -487,6 +492,8 @@ void CHudMenu::MsgFunc_ShowMenu( bf_read &msg)
 	{
 		char szString[2048];
 		msg.ReadString( szString, sizeof(szString) );
+
+		bIsFromMenuMan = msg.ReadByte();
 
 		if ( !m_fWaitingForMore ) // this is the start of a new menu
 		{
@@ -517,10 +524,15 @@ void CHudMenu::MsgFunc_ShowMenu( bf_read &msg)
 	}
 	else
 	{
+		char szString[2048];
+		msg.ReadString( szString, sizeof(szString) );
+
+		bIsFromMenuMan = msg.ReadByte();
 		HideMenu();
 	}
 
 	m_fWaitingForMore = NeedMore;
+	m_bIsFromMenuMan = bIsFromMenuMan;
 }
 
 //-----------------------------------------------------------------------------
