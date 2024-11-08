@@ -9,6 +9,8 @@
 #include "ff_scriptman.h"
 #include "ff_luacontext.h"
 
+#include <string>
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -119,11 +121,12 @@ void CFFLuaMenu::Display(IRecipientFilter &filter)
 {
 	unsigned short optionBits = 0;
 
-	char *szMenuString = new char[512];
+        std::string szMenuString = "";
 
 	if (*m_szMenuTitle)
 	{
-		Q_snprintf(szMenuString, MAX_MENU_STRING, "%s\n", m_szMenuTitle);
+                szMenuString += m_szMenuTitle;
+                szMenuString += "\n";
 	}
 
 	for (int i=1; i<10; i++)
@@ -131,19 +134,22 @@ void CFFLuaMenu::Display(IRecipientFilter &filter)
 		if (m_MenuOptions[i].szText[0])
 		{
 			optionBits |= 0x1 << (i-1);
-			Q_snprintf(szMenuString, MAX_MENU_STRING, "%s->%d) %s", szMenuString, i, m_MenuOptions[i].szText);
+			szMenuString += "->" + std::to_string(i) + ") " + m_MenuOptions[i].szText;
 		}
-		Q_snprintf(szMenuString, MAX_MENU_STRING, "%s\n", szMenuString);
+		szMenuString += "\n";
 	}
 	
 	if (m_MenuOptions[0].szText[0])
 	{
 		optionBits |= 0x1 << 9;
-		Q_snprintf(szMenuString, MAX_MENU_STRING, "%s->%d) %s\n", szMenuString, 0, m_MenuOptions[0].szText);
+		szMenuString += szMenuString + "->0) " + m_MenuOptions[0].szText + "\n";
 	}
 	
-	int len = strlen(szMenuString);
-	
+	int len = strlen(szMenuStringBuf);
+
+	char *szMenuStringBuf = new char[512]();
+	Q_snprintf(szMenuStringBuf, MAX_MENU_STRING, "%s", szMenuString.c_str());
+
 	char save = '\0';
 	
 	bool bMoreToCome = true;
@@ -151,8 +157,8 @@ void CFFLuaMenu::Display(IRecipientFilter &filter)
 	{
 		if (len > 240)
 		{
-			save = szMenuString[240];
-			szMenuString[240] = '\0';
+			save = szMenuStringBuf[240];
+			szMenuStringBuf[240] = '\0';
 		}
 		else
 		{
@@ -163,14 +169,14 @@ void CFFLuaMenu::Display(IRecipientFilter &filter)
 			WRITE_WORD(optionBits);
 			WRITE_CHAR(m_flDisplayTime);
 			WRITE_BYTE(bMoreToCome ? 0xFF : 0x00);
-			WRITE_STRING(szMenuString);
+			WRITE_STRING(szMenuStringBuf);
 			WRITE_BOOL(true);
 		MessageEnd();
 
 		if (len > 240)
 		{
-			szMenuString[240] = save;
-			szMenuString = &szMenuString[240];
+			szMenuStringBuf[240] = save;
+			szMenuStringBuf = &szMenuStringBuf[240];
 			len -= 240;
 		}
 	}
@@ -203,7 +209,7 @@ void CFFLuaMenu::Display(IRecipientFilter &filter)
 
 	//Msg("active: %d sent: %d\n", m_iNumPlayersActive, m_iNumPlayersSent);
 
-	delete [] szMenuString;
+	delete [] szMenuStringBuf;
 }
 
 /////////////////////////////////////////////////////////////////////////////
