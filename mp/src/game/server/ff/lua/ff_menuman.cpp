@@ -144,12 +144,11 @@ void CFFLuaMenu::Display(IRecipientFilter &filter)
 		optionBits |= 0x1 << 9;
 		szMenuString += szMenuString + "->0) " + m_MenuOptions[0].szText + "\n";
 	}
-	
-	int len = strlen(szMenuStringBuf);
 
 	char *szMenuStringBuf = new char[512]();
 	Q_snprintf(szMenuStringBuf, MAX_MENU_STRING, "%s", szMenuString.c_str());
-
+	
+	int len = strlen(szMenuStringBuf);
 	char save = '\0';
 	
 	bool bMoreToCome = true;
