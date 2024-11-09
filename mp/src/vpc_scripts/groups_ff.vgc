@@ -65,6 +65,7 @@ $Group "dedicated"
 	"mathlib"
 	"server"
 	"tier1"
+	"lua"
 }
 
 $Group "lualibs"
