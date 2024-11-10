@@ -22,7 +22,6 @@ private:
 	void Shutdown();
 
 	void SetupEnvironmentForFF();
-	void MakeEnvironmentSafe();
 
 public:
 	bool LoadFileIntoFunction( const char *filename );
@@ -57,9 +56,6 @@ public:
 
 	bool GetFunction(CBaseEntity* pEntity, const char* szFunctionName, luabridge::LuaRef& outObject);
 	bool GetFunction(luabridge::LuaRef& tableObject, const char* szFunctionName, luabridge::LuaRef& outObject);
-
-	void RemoveVarsFromGlobal( const char **ppszVars );
-	void RemoveKeysFromGlobalTable( const char *pszTableName, const char **ppszKeys );
 
 	bool RunPredicates_LUA( CBaseEntity *pObject, CFFLuaSC *pContext, const char *szFunctionName );
 

@@ -35,6 +35,7 @@ static int os_pushresult (lua_State *L, int i, const char *filename) {
 }
 
 
+#ifndef FF_LUA
 static int os_execute (lua_State *L) {
   lua_pushinteger(L, system(luaL_optstring(L, 1, NULL)));
   return 1;
@@ -69,6 +70,7 @@ static int os_getenv (lua_State *L) {
   lua_pushstring(L, getenv(luaL_checkstring(L, 1)));  /* if NULL push nil */
   return 1;
 }
+#endif
 
 
 static int os_clock (lua_State *L) {
@@ -201,6 +203,7 @@ static int os_difftime (lua_State *L) {
 /* }====================================================== */
 
 
+#ifndef FF_LUA
 static int os_setlocale (lua_State *L) {
   static const int cat[] = {LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY,
                       LC_NUMERIC, LC_TIME};
@@ -216,19 +219,24 @@ static int os_setlocale (lua_State *L) {
 static int os_exit (lua_State *L) {
   exit(luaL_optint(L, 1, EXIT_SUCCESS));
 }
+#endif
 
 static const luaL_Reg syslib[] = {
   {"clock",     os_clock},
   {"date",      os_date},
   {"difftime",  os_difftime},
+#ifndef FF_LUA
   {"execute",   os_execute},
   {"exit",      os_exit},
   {"getenv",    os_getenv},
   {"remove",    os_remove},
   {"rename",    os_rename},
   {"setlocale", os_setlocale},
+#endif
   {"time",      os_time},
+#ifndef FF_LUA
   {"tmpname",   os_tmpname},
+#endif
   {NULL, NULL}
 };
 

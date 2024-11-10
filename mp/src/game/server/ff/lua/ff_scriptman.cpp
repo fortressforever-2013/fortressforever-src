@@ -116,9 +116,6 @@ bool CFFScriptManager::Init()
 	// initialize all the FF specific stuff
 	SetupEnvironmentForFF();
 
-	// make the standard libraries safe
-	MakeEnvironmentSafe();
-
 	// allow throwing exceptions for LuaBridge3
 	luabridge::enableExceptions(L);
 
@@ -175,52 +172,8 @@ void CFFScriptManager::SetupEnvironmentForFF()
 	lua_settable(L, -3); // -3 is the package table
 	lua_pop(L, 1); // pop _G.package
 
-	// YoYo178: I don't think this is needed anymore since now FF uses LuaBridge3
-	// instead of luabind...
-	// remove luabind's 'class' implementation because it seems to be broken
-	//lua_pushnil(L);
-	//lua_setglobal(L, "class");
-
 	// initialize game-specific library
 	CFFLuaLib::Init(L);
-}
-
-/** Gets rid of or alter any unsafe Lua functions in the current environment
-*/
-void CFFScriptManager::MakeEnvironmentSafe()
-{
-	Assert(L);
-	if (!L) return;
-
-	// See: http://lua-users.org/wiki/SandBoxes for a general overview of the safety of Lua functions
-
-	// dofile, load, loadfile, loadstring
-	const char* ppszUnsafeGlobalFunctions[] = { "dofile", "load", "loadfile", "loadstring", NULL };
-	RemoveVarsFromGlobal( ppszUnsafeGlobalFunctions );
-
-	// os.*
-	const char* ppszUnsafeOSFunctions[] = { "execute", "exit", "getenv", "remove", "rename", "setlocale", "tmpname", NULL };
-	RemoveKeysFromGlobalTable( LUA_OSLIBNAME, ppszUnsafeOSFunctions );
-
-	// package.*
-	const char* ppszUnsafePackageFunctions[] = { "loadlib", NULL };
-	RemoveKeysFromGlobalTable( LUA_LOADLIBNAME, ppszUnsafePackageFunctions );
-
-	// io.* gives access to the filesystem, just remove it totally
-	const char* ppszUnsafeLibraries[] = { "io", NULL };
-	RemoveVarsFromGlobal( ppszUnsafeLibraries );
-
-	// require can load .dll/.so, need to disable the loaders that search for them
-	// the third index checks package.cpath and loads .so/.dll files
-	// the fourth index is an all-in-one loader that can load .so/.dll files
-	lua_getglobal(L, LUA_LOADLIBNAME);
-	lua_pushstring(L, "loaders");
-	lua_gettable(L, -2); // get _G.package.loaders
-	lua_pushnil(L);
-	lua_rawseti(L, -2, 4); // _G.package.loaders[4] = nil
-	lua_pushnil(L);
-	lua_rawseti(L, -2, 3); // _G.package.loaders[3] = nil
-	lua_pop(L, 2); // pop _G.package.loaders and _G.package
 }
 
 /** Loads a Lua file into a function that is pushed on the top of the Lua stack (only when the file is succesfully loaded)
@@ -540,30 +493,6 @@ bool CFFScriptManager::GetFunction(LuaRef& tableObject,
 	}
 
 	return false;
-}
-
-void CFFScriptManager::RemoveVarsFromGlobal( const char** ppszVars )
-{
-	for( int i=0; ppszVars[i] != NULL; ++i )
-	{
-		lua_pushnil(L);
-		lua_setglobal(L, ppszVars[i]);
-	}
-}
-
-void CFFScriptManager::RemoveKeysFromGlobalTable( const char *pszTableName, const char** ppszKeys )
-{
-	lua_getglobal(L, pszTableName);
-	if (lua_type(L, -1) == LUA_TTABLE)
-	{
-		for( int i=0; ppszKeys[i] != NULL; ++i )
-		{
-			lua_pushstring(L, ppszKeys[i]);
-			lua_pushnil(L);
-			lua_settable(L, -3);
-		}
-	}
-	lua_pop(L, 1);
 }
 
 /////////////////////////////////////////////////////////////////////////////
