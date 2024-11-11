@@ -1896,7 +1896,21 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 	m_flSaveMeTime = 0.0f;
 
 	if( GetClassSlot() == CLASS_SPY )
+	{
+		if( IsCloaked() )
+		{
+			// Cleanup ragdoll
+			CFFRagdoll *pRagdoll = dynamic_cast< CFFRagdoll * >( m_hRagdoll.Get() );
+			if( pRagdoll )
+			{
+				// Remove the ragdoll after 5 seconds
+				pRagdoll->SetThink( &CBaseEntity::SUB_Remove );
+				pRagdoll->SetNextThink( gpGlobals->curtime + 5.0f );
+			}
+		}
+
 		SpyCloakFadeIn( true );
+	}
 
 	// TODO: Take SGs into account here?
 	CFFPlayer *pKiller = ToFFPlayer(dynamic_cast<CMultiplayRules *>(g_pGameRules)->GetDeathScorer( info.GetAttacker(), info.GetInflictor() ));
