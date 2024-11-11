@@ -58,6 +58,8 @@ C_PlayerResource *g_PR;
 
 IGameResources * GameResources( void ) { return g_PR; }
 
+extern ConVar hud_newteamcolors;
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------

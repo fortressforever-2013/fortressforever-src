@@ -34,44 +34,7 @@ ConVar cl_chat_color_default("cl_chat_color_default", "255 170 0", FCVAR_ARCHIVE
 
 // customizable team colors!
 
-ConVar cl_teamcolor_unassigned("cl_teamcolor_unassigned", "204 204 204", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the unassigned team's color in chat and killfeed.");
-ConVar cl_teamcolor_spec("cl_teamcolor_spec", "204 204 204", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the spectator team's color in chat and killfeed.");
-
-ConVar cl_teamcolor_blue("cl_teamcolor_blue", "153 204 255", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the blue team's color in chat and killfeed.");
-ConVar cl_teamcolor_red("cl_teamcolor_red", "255 63 63", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the red team's color in chat and killfeed.");
-ConVar cl_teamcolor_yellow("cl_teamcolor_yellow", "255 178 0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the yellow team's color in chat and killfeed.");
-ConVar cl_teamcolor_green("cl_teamcolor_green", "153 255 153", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Defines the green team's color in chat and killfeed.");
-
-CON_COMMAND(cl_teamcolors_reset, "Resets the client's custom team color definitions.\nno args - Reset the team colors to the new team colors.\n\"old\" - Reset the team colors to use the old team colors.")
-{
-	if (args.ArgC() == 1)
-	{
-		cl_teamcolor_spec.SetValue("204 204 204");
-
-		cl_teamcolor_blue.SetValue("153 204 255");
-		cl_teamcolor_red.SetValue("255 63 63");
-		cl_teamcolor_yellow.SetValue("255 178 0");
-		cl_teamcolor_green.SetValue("153 255 153");
-
-		Msg("Team colors were successfully reset to use the new team colors!\n");
-	}
-	else
-	{
-		if (!stricmp(args[1], "old"))
-		{
-			cl_teamcolor_spec.SetValue("0 200 200");
-
-			cl_teamcolor_blue.SetValue("56 100 171");
-			cl_teamcolor_red.SetValue("188 0 0");
-			cl_teamcolor_yellow.SetValue("202 173 33");
-			cl_teamcolor_green.SetValue("68 144 65");
-
-			Msg("Team colors were successfully reset to use the old team colors!\n");
-		}
-	}
-
-	cl_teamcolor_unassigned.SetValue("204 204 204");
-}
+ConVar hud_newteamcolors("hud_newteamcolors", "1", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Enables new team colours");
 
 // customizable team colors!
 
@@ -123,8 +86,6 @@ Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/)
 	else
 	{
 		int iTeam;
-		int r, g, b;
-		bool bValid = false;
 		Color clr;
 
 		IGameResources* gr = GameResources();
@@ -146,42 +107,37 @@ Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/)
 		switch (iTeam)
 		{
 			case TEAM_UNASSIGNED:
-				bValid = sscanf(cl_teamcolor_unassigned.GetString(), "%i %i %i", &r, &g, &b) == 3;
+			{
+				clr = COLOR_GREY;
 				break;
+			}
 			case TEAM_SPECTATOR:
 			{
-				bValid = sscanf(cl_teamcolor_spec.GetString(), "%i %i %i", &r, &g, &b) == 3;
+				clr = hud_newteamcolors.GetBool() ? NEW_TEAM_COLOR_SPECTATOR : TEAM_COLOR_SPECTATOR;
 				break;
 			}
 			case TEAM_BLUE:
 			{
-				bValid = sscanf(cl_teamcolor_blue.GetString(), "%i %i %i", &r, &g, &b) == 3;
+				clr = hud_newteamcolors.GetBool() ? NEW_TEAM_COLOR_BLUE : TEAM_COLOR_BLUE;
 				break;
 			}
 			case TEAM_RED:
 			{
-				bValid = sscanf(cl_teamcolor_red.GetString(), "%i %i %i", &r, &g, &b) == 3;
+				clr = hud_newteamcolors.GetBool() ? NEW_TEAM_COLOR_RED : TEAM_COLOR_RED;
 				break;
 			}
 			case TEAM_YELLOW:
 			{
-				bValid = sscanf(cl_teamcolor_yellow.GetString(), "%i %i %i", &r, &g, &b) == 3;
+				clr = hud_newteamcolors.GetBool() ? NEW_TEAM_COLOR_RED : TEAM_COLOR_YELLOW;
 				break;
 			}
 			case TEAM_GREEN:
 			{
-				bValid = sscanf(cl_teamcolor_green.GetString(), "%i %i %i", &r, &g, &b) == 3;
+				clr = hud_newteamcolors.GetBool() ? NEW_TEAM_COLOR_GREEN : TEAM_COLOR_GREEN;
 				break;
 			}
 		}
-		if (!bValid)
-			return gr->GetTeamColor(iTeamIndex);
 
-		r = clamp(r, 0, 255);
-		g = clamp(g, 0, 255);
-		b = clamp(b, 0, 255);
-
-		clr = Color(r, g, b, 255);
 		return clr;
 	}
 }
