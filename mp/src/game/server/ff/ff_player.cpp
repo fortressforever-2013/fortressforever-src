@@ -1896,7 +1896,21 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 	m_flSaveMeTime = 0.0f;
 
 	if( GetClassSlot() == CLASS_SPY )
+	{
+		if( IsCloaked() )
+		{
+			// Cleanup ragdoll
+			CFFRagdoll *pRagdoll = dynamic_cast< CFFRagdoll * >( m_hRagdoll.Get() );
+			if( pRagdoll )
+			{
+				// Remove the ragdoll after 5 seconds
+				pRagdoll->SetThink( &CBaseEntity::SUB_Remove );
+				pRagdoll->SetNextThink( gpGlobals->curtime + 5.0f );
+			}
+		}
+
 		SpyCloakFadeIn( true );
+	}
 
 	// TODO: Take SGs into account here?
 	CFFPlayer *pKiller = ToFFPlayer(dynamic_cast<CMultiplayRules *>(g_pGameRules)->GetDeathScorer( info.GetAttacker(), info.GetInflictor() ));
@@ -3805,8 +3819,7 @@ void CFFPlayer::Command_DropItems(const CCommand& args)
 
 void CFFPlayer::Command_DetPipes(const CCommand& args)
 {	
-	if( ( GetPipebombShotTime() + PIPE_DET_DELAY ) < gpGlobals->curtime )
-		CFFProjectilePipebomb::DestroyAllPipes(this);
+	m_bQueueDetonation = true;
 }
 
 /**
@@ -5528,11 +5541,11 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 	// Display any effect associate with this damage type
 	DamageEffect(info.GetDamage(),bitsDamage);
 
-	// Emit a pain sound but not when we're falling, because that is already handled
-	if (IsAlive() && !(info.GetDamageType() & DMG_FALL))
-	{
+	// Emit a pain sound if we take normal damage or are drowning, because that is already handled
+	if (IsAlive() && !(info.GetDamageType() & (DMG_FALL | DMG_DROWN)))
 		EmitSound("Player.Pain");
-	}
+	if (IsAlive() && (info.GetDamageType() & DMG_DROWN))
+		EmitSound("Player.DrownContinue");
 	
 	// Send hit indicator to attacker
 	CFFPlayer *pAttacker = ToFFPlayer( info.GetAttacker() );

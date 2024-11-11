@@ -167,7 +167,7 @@ void CHudBuildState::MsgFunc_DispenserMsg(bf_read &msg)
     int iHealth = (int) msg.ReadByte();
     int iAmmo = (int) msg.ReadByte();
 
-	_snwprintf(m_wszDispenser, 127, L"%ls: %i%% %ls: %i%%", m_wszHealth, iHealth, m_wszAmmo, iAmmo);
+	V_snwprintf(m_wszDispenser, 127, L"%ls: %i%% %ls: %i%%", m_wszHealth, iHealth, m_wszAmmo, iAmmo);
 }
 
 void CHudBuildState::MsgFunc_SentryMsg(bf_read &msg)
@@ -185,7 +185,7 @@ void CHudBuildState::MsgFunc_SentryMsg(bf_read &msg)
 		iAmmo -= 128;
 	}
 
-	_snwprintf(m_wszSentry, 127, L"Level %i - %ls: %i%% %ls: %i%% %ls", iLevel , m_wszHealth, iHealth, m_wszAmmo, iAmmo, fNoRockets ? m_wszNoRockets : L"");
+	V_snwprintf(m_wszSentry, 127, L"Level %i - %ls: %i%% %ls: %i%% %ls", iLevel , m_wszHealth, iHealth, m_wszAmmo, iAmmo, fNoRockets ? m_wszNoRockets : L"");
 }
 
 void CHudBuildState::MsgFunc_ManCannonMsg(bf_read &msg)
@@ -193,7 +193,7 @@ void CHudBuildState::MsgFunc_ManCannonMsg(bf_read &msg)
     int iHealth = (int) msg.ReadByte();
     //m_flManCannonTimeoutTime = msg.ReadFloat();
 	
-	_snwprintf(m_wszManCannon, 127, L"%ls: %i%%", m_wszHealth, iHealth);
+	V_snwprintf(m_wszManCannon, 127, L"%ls: %i%%", m_wszHealth, iHealth);
 }
 
 void CHudBuildState::MsgFunc_DetpackMsg(bf_read &msg)
@@ -303,7 +303,7 @@ void CHudBuildState::Paint()
 		surface()->DrawSetTextPos(text2_xpos, text2_ypos);
 		
 		// commenting out to not draw a time remaining -GreenMushy
-		//_snwprintf(m_wszManCannon, 127, L"Time Left: %i seconds", (int)(m_flManCannonTimeoutTime - gpGlobals->curtime + 1) );
+		//V_snwprintf(m_wszManCannon, 127, L"Time Left: %i seconds", (int)(m_flManCannonTimeoutTime - gpGlobals->curtime + 1) );
 
 		for (wchar_t *wch = m_wszManCannon; *wch != 0; wch++) 
 			surface()->DrawUnicodeChar(*wch);
@@ -313,7 +313,7 @@ void CHudBuildState::Paint()
 	{
 		surface()->DrawSetTextPos(text1_xpos, text1_ypos);
 
-		_snwprintf(m_wszDetpack, 127, L"Time Left: %i seconds", (int)(m_flDetpackDetonateTime - gpGlobals->curtime + 1) );
+		V_snwprintf(m_wszDetpack, 127, L"Time Left: %i seconds", (int)(m_flDetpackDetonateTime - gpGlobals->curtime + 1) );
 
 		for (wchar_t *wch = m_wszDetpack; *wch != 0; wch++) 
 			surface()->DrawUnicodeChar(*wch);
@@ -323,7 +323,7 @@ void CHudBuildState::Paint()
 	{
 		surface()->DrawSetTextPos(text2_xpos, text2_ypos);
 
-		_snwprintf(m_wszPipes, 127, L"%i / %i", m_iNumPipes/*clamp(m_iNumPipes, 0, 8)*/, 8 );
+		V_snwprintf(m_wszPipes, 127, L"%i / %i", m_iNumPipes/*clamp(m_iNumPipes, 0, 8)*/, 8 );
 
 		for (wchar_t *wch = m_wszPipes; *wch != 0; wch++) 
 			surface()->DrawUnicodeChar(*wch);
@@ -333,7 +333,7 @@ void CHudBuildState::Paint()
 	{
 		surface()->DrawSetTextPos(text2_xpos, text2_ypos);
 
-		_snwprintf(m_wszMedpacks, 127, L"%i / %i Tossable Medpacks", m_iNumMedpacks, 5 );
+		V_snwprintf(m_wszMedpacks, 127, L"%i / %i Tossable Medpacks", m_iNumMedpacks, 5 );
 
 		for (wchar_t *wch = m_wszMedpacks; *wch != 0; wch++) 
 			surface()->DrawUnicodeChar(*wch);
@@ -362,7 +362,7 @@ void CHudBuildState::Paint()
 	{
 		surface()->DrawSetTextPos(text1_xpos, text1_ypos);
 
-		_snwprintf(m_wszCloak, 127, L"Time Left: %.2f seconds", m_flCloakTimeLeft);
+		V_snwprintf(m_wszCloak, 127, L"Time Left: %.2f seconds", m_flCloakTimeLeft);
 
 		for (wchar_t* wch = m_wszCloak; *wch != 0; wch++)
 			surface()->DrawUnicodeChar(*wch);

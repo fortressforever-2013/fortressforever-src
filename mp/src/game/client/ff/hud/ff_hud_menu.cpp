@@ -484,15 +484,15 @@ void CHudContextMenu::VidInit()
 			wchar_t *localised = g_pVGuiLocalize->Find(pOption->szName);
 			if (localised)
 			{
-				int len = Q_wcslen(localised) + 1;
-				pOption->wszText = new wchar_t [len];
-				_snwprintf(pOption->wszText, (len * 2), L"%ls", localised);	// Takes length in bytes
+				pOption->wszText = localised;
 			}
 			else
 			{
-				int len = strlen(pOption->szName) + 1;
-				pOption->wszText = new wchar_t [len * 2];
-				g_pVGuiLocalize->ConvertANSIToUnicode(pOption->szName, pOption->wszText, len * 2);	// Takes length in bytes
+				int len = V_strlen(pOption->szName) + 1;
+				wchar_t *wszBuffer = new wchar_t[len];
+				g_pVGuiLocalize->ConvertANSIToUnicode( pOption->szName, wszBuffer, len * sizeof(wchar_t) );
+				pOption->wszText = wszBuffer;
+				delete[] wszBuffer;
 			}
 		}
 	}
@@ -712,7 +712,7 @@ void CHudContextMenu::Paint()
 		int iconOffsetY = surface()->GetFontTall(m_hMenuIcon) / 2;
 
 		wchar_t unicode[2];
-		V_snwprintf(unicode, sizeof(unicode), L"%c", character);
+		V_snwprintf(unicode, ARRAYSIZE(unicode), L"%c", character);
 
 		surface()->DrawSetTextPos(m_flPositions[i][0] - iconOffsetX, m_flPositions[i][1] - iconOffsetY);
 		surface()->DrawUnicodeChar(unicode[0]);
@@ -724,10 +724,10 @@ void CHudContextMenu::Paint()
 		surface()->DrawSetTextFont(m_hTextFont);
 
 		// Work out centering and position & draw text
-		int textOffsetX = 0.5f * UTIL_ComputeStringWidth(m_hTextFont, m_pMenu->options[i].wszText);
+		int textOffsetX = 0.5f * UTIL_ComputeStringWidth( m_hTextFont, m_pMenu->options[i].wszText.c_str() );
 		surface()->DrawSetTextPos(m_flPositions[i][0] - textOffsetX, m_flPositions[i][1] + iconOffsetY + py);
 		
-		for (const wchar_t *wch = m_pMenu->options[i].wszText; *wch != 0; wch++)
+		for (const wchar_t *wch = m_pMenu->options[i].wszText.c_str(); *wch != 0; wch++)
 			surface()->DrawUnicodeChar(*wch);
 
 		//
@@ -740,7 +740,7 @@ void CHudContextMenu::Paint()
 		int textHeightX = surface()->GetFontTall(m_hTextFont);
 		surface()->DrawSetTextPos(m_flPositions[i][0] - numberOffsetX, m_flPositions[i][1] + iconOffsetY + py + textHeightX);
 
-		V_snwprintf(unicode, sizeof(unicode), L"%c", chDisplay);
+		V_snwprintf(unicode, ARRAYSIZE(unicode), L"%c", chDisplay);
 		surface()->DrawUnicodeChar(unicode[0]);
 	}
 

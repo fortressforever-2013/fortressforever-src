@@ -81,10 +81,10 @@ public:
 
 		// --> Mirv: [HACK] Quick way to get round renaming files for now (V SILLY)
 		char name[128];
-		sprintf( name, "%s", GetName() );
+		V_sprintf_safe( name, "%s", GetName() );
 		
-		if( strlen(name) > 6 )
-			name[strlen(name) - 6] = 0;
+		if( V_strlen(name) > 6 )
+			name[V_strlen(name) - 6] = 0;
 
 		Q_snprintf( classPanel, sizeof( classPanel ), "resource/classes/%s.html", /*className*/ name );
 		// <-- Mirv: [HACK] Quick way to get round renaming files for now (V SILLY)

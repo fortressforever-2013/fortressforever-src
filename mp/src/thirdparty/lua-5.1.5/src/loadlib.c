@@ -306,6 +306,7 @@ static int ll_loadfunc (lua_State *L, const char *path, const char *sym) {
 }
 
 
+#ifndef FF_LUA
 static int ll_loadlib (lua_State *L) {
   const char *path = luaL_checkstring(L, 1);
   const char *init = luaL_checkstring(L, 2);
@@ -319,6 +320,7 @@ static int ll_loadlib (lua_State *L) {
     return 3;  /* return nil, error message, and where */
   }
 }
+#endif
 
 
 
@@ -607,7 +609,9 @@ static void setpath (lua_State *L, const char *fieldname, const char *envname,
 
 
 static const luaL_Reg pk_funcs[] = {
+#ifndef FF_LUA
   {"loadlib", ll_loadlib},
+#endif
   {"seeall", ll_seeall},
   {NULL, NULL}
 };
@@ -621,7 +625,15 @@ static const luaL_Reg ll_funcs[] = {
 
 
 static const lua_CFunction loaders[] =
-  {loader_preload, loader_Lua, loader_C, loader_Croot, NULL};
+  {
+    loader_preload,
+    loader_Lua,
+#ifndef FF_LUA
+    loader_C,
+    loader_Croot,
+#endif
+    NULL
+  };
 
 
 LUALIB_API int luaopen_package (lua_State *L) {

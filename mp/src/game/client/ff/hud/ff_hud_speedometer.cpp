@@ -194,7 +194,7 @@ void CHudSpeedometer::Paint()
 		surface()->DrawSetTextPos( SpeedFont_xpos, SpeedFont_ypos );
 
 		wchar_t unicode[6];
-		V_snwprintf(unicode, sizeof(unicode), L"%d", (int)m_iVelocity);
+		V_snwprintf(unicode, ARRAYSIZE(unicode), L"%d", (int)m_iVelocity);
 
 		for( wchar_t *wch = unicode; *wch != 0; wch++ )
 			surface()->DrawUnicodeChar( *wch );
@@ -237,7 +237,7 @@ void CHudSpeedometer::Paint()
 		surface()->DrawSetTextColor( speedColor );
 
 		wchar_t unicode[6];
-		V_snwprintf(unicode, sizeof(unicode), L"%d", (int)m_flAvgVelocity);
+		V_snwprintf(unicode, ARRAYSIZE(unicode), L"%d", (int)m_flAvgVelocity);
 
 		for( wchar_t *wch = unicode; *wch != 0; wch++ )
 			surface()->DrawUnicodeChar( *wch );

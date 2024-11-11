@@ -70,6 +70,8 @@ private:
 
 	float			m_flSelectionTime;
 
+	bool			m_bIsFromMenuMan;
+
 	CPanelAnimationVar( float, m_flOpenCloseTime, "OpenCloseTime", "1" );
 
 	CPanelAnimationVar( float, m_flBlur, "Blur", "0" );

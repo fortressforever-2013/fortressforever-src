@@ -58,6 +58,8 @@ C_PlayerResource *g_PR;
 
 IGameResources * GameResources( void ) { return g_PR; }
 
+extern ConVar hud_newteamcolors;
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -422,7 +424,7 @@ int	C_PlayerResource::GetClass(int iIndex)
 
 const Color &C_PlayerResource::GetTeamColor(int index )
 {
-	if ( index < 1 || index >= MAX_TEAMS )
+	if ( index < 0 || index >= MAX_TEAMS )
 	{
 		Assert( false );
 		static Color blah;

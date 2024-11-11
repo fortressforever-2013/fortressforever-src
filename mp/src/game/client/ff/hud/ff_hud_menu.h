@@ -14,6 +14,7 @@
 
 
 #include "cbase.h"
+#include "stdstring.h"
 
 #define MENU_SHOW	0
 #define MENU_DIM	1
@@ -24,7 +25,7 @@ class MenuOption
 {
 public:
 	const char		*szName;
-	wchar_t			*wszText;
+	std::wstring	wszText;
 	const char		*szCommand;
 	void			*pNextMenu;
 	char			chIcon;
@@ -39,13 +40,11 @@ public:
 		conditionfunc	= cfnc;
 		pNextMenu		= nextmenu;
 		chIcon			= icon;
-		wszText			= NULL;
+		wszText.clear();
 	}
 
 	~MenuOption()
 	{
-		if (wszText)
-			delete wszText;
 	}
 };
 

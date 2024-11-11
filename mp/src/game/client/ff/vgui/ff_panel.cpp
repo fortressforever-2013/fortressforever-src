@@ -118,6 +118,8 @@ namespace vgui
 	//-----------------------------------------------------------------------------
 	void FFPanel::InitFFPanel()
 	{
+		m_pFFPlayer = NULL;
+
 		m_iPlayerTeam = -1;
 		
 		m_pHudBackground = NULL;

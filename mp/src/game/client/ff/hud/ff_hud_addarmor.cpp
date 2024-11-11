@@ -47,6 +47,10 @@ public:
 	{
 		SetParent( g_pClientMode->GetViewport() );
 		SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED );
+
+		m_flStartTime = 0.0f;
+		m_flDuration = 0.0f;
+		m_iArmorToAdd = 0;
 	}
 
 	virtual ~CHudPlayerAddArmor( void )
@@ -60,8 +64,7 @@ public:
 	void MsgFunc_PlayerAddArmor( bf_read &msg );
 
 protected:
-	wchar_t		m_pTextArmor[ 1024 ];	// Unicode text buffer
-	int			m_iArmor;
+	int			m_iArmorToAdd;
 
 private:
 
@@ -86,8 +89,6 @@ DECLARE_HUD_MESSAGE( CHudPlayerAddArmor, PlayerAddArmor );
 void CHudPlayerAddArmor::Init( void )
 {
 	HOOK_HUD_MESSAGE( CHudPlayerAddArmor, PlayerAddArmor );
-
-	m_pTextArmor[ 0 ] = '\0';
 }
 
 //-----------------------------------------------------------------------------
@@ -96,8 +97,10 @@ void CHudPlayerAddArmor::Init( void )
 void CHudPlayerAddArmor::VidInit( void )
 {
 	SetPaintBackgroundEnabled( false );
-	
-	m_pTextArmor[ 0 ] = '\0'; 
+
+	m_flStartTime = 0.0f;
+	m_flDuration = 0.0f;
+	m_iArmorToAdd = 0;
 }
 
 void CHudPlayerAddArmor::MsgFunc_PlayerAddArmor( bf_read &msg )
@@ -106,12 +109,6 @@ void CHudPlayerAddArmor::MsgFunc_PlayerAddArmor( bf_read &msg )
 	const int ptVal = msg.ReadShort();
 	if(ptVal==0)
 		return;
-
-	char szString2[ 1024 ];
-	Q_snprintf( szString2, sizeof(szString2), "%s%i", ptVal>0?"+":"",ptVal );
-
-	// convert int-string to unicode
-	g_pVGuiLocalize->ConvertANSIToUnicode( szString2, m_pTextArmor, sizeof( m_pTextArmor ) );
 
 	// play animation (new points value)
 	if(ptVal > 0)
@@ -123,6 +120,8 @@ void CHudPlayerAddArmor::MsgFunc_PlayerAddArmor( bf_read &msg )
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "NewSubtractArmor" );
 	}
 
+	m_iArmorToAdd = ptVal;
+
 	m_flStartTime = gpGlobals->curtime;
 	m_flDuration = 3.0f;
 }
@@ -132,11 +131,7 @@ void CHudPlayerAddArmor::MsgFunc_PlayerAddArmor( bf_read &msg )
 //-----------------------------------------------------------------------------
 void CHudPlayerAddArmor::Paint() 
 {
-	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer(); 
-	if ( !pPlayer ) 
-		return; 
-
-	if(!hud_addarmor.GetBool())
+	if( !hud_addarmor.GetBool() )
 		return;
 
 	if ( m_flStartTime + m_flDuration < gpGlobals->curtime )
@@ -144,14 +139,13 @@ void CHudPlayerAddArmor::Paint()
 
 	FFPanel::Paint(); // Draws the background glyphs 
 
-	if( m_pTextArmor[ 0 ] != '\0' )
-	{
-		surface()->DrawSetTextFont( m_hArmorFont );
-		surface()->DrawSetTextColor( GetFgColor() );
-		surface()->DrawSetTextPos( ArmorFont_xpos, ArmorFont_ypos );
+	surface()->DrawSetTextFont( m_hArmorFont );
+	surface()->DrawSetTextColor( GetFgColor() );
+	surface()->DrawSetTextPos( ArmorFont_xpos, ArmorFont_ypos );
 
-		for( wchar_t *wch = m_pTextArmor; *wch != 0; wch++ )
-			surface()->DrawUnicodeChar( *wch );
+	wchar_t wBuf[20];
 
-	}
+	V_swprintf_safe( wBuf, L"%ls%d", m_iArmorToAdd > 0 ? L"+" : L"", m_iArmorToAdd );
+
+	vgui::surface()->DrawPrintText( wBuf, V_wcslen( wBuf ), FONT_DRAW_NONADDITIVE );
 }

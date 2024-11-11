@@ -304,10 +304,9 @@ void CHudWeaponSelection::Paint()
 					// setup our localized string
 					if ( wszTempString )
 					{
-						_snwprintf(text, sizeof(text)/sizeof(wchar_t) - 1, L"%ls", wszTempString);
-						text[sizeof(text)/sizeof(wchar_t) - 1] = 0;
-					}
-					else
+						V_snwprintf( text, ARRAYSIZE(text), L"%ls", wszTempString );
+					} 
+					else 
 					{
 						// string wasn't found by g_pVGuiLocalize->Find()
 						g_pVGuiLocalize->ConvertANSIToUnicode(weaponInfo.szPrintName, text, sizeof(text));

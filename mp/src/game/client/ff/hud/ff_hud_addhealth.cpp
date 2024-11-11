@@ -47,6 +47,10 @@ public:
 	{
 		SetParent( g_pClientMode->GetViewport() );
 		SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED  );
+		
+		m_flStartTime = 0.0f;
+		m_flDuration = 0.0f;
+		m_iHealthToAdd = 0;
 	}
 
 	virtual ~CHudPlayerAddHealth( void )
@@ -60,8 +64,7 @@ public:
 	void MsgFunc_PlayerAddHealth( bf_read &msg );
 
 protected:
-	wchar_t		m_pTextHealth[ 1024 ];	// Unicode text buffer
-	int			m_iHealth;
+	int			m_iHealthToAdd;
 
 private:
 
@@ -86,8 +89,6 @@ DECLARE_HUD_MESSAGE( CHudPlayerAddHealth, PlayerAddHealth );
 void CHudPlayerAddHealth::Init( void )
 {
 	HOOK_HUD_MESSAGE( CHudPlayerAddHealth, PlayerAddHealth );
-
-	m_pTextHealth[ 0 ] = '\0';
 }
 
 //-----------------------------------------------------------------------------
@@ -96,8 +97,10 @@ void CHudPlayerAddHealth::Init( void )
 void CHudPlayerAddHealth::VidInit( void )
 {
 	SetPaintBackgroundEnabled( false );
-	
-	m_pTextHealth[ 0 ] = '\0'; 
+
+	m_flStartTime = 0.0f;
+	m_flDuration = 0.0f;
+	m_iHealthToAdd = 0;
 }
 
 void CHudPlayerAddHealth::MsgFunc_PlayerAddHealth( bf_read &msg )
@@ -106,12 +109,6 @@ void CHudPlayerAddHealth::MsgFunc_PlayerAddHealth( bf_read &msg )
 	const int ptVal = msg.ReadShort();
 	if(ptVal==0)
 		return;
-
-	char szString2[ 1024 ];
-	Q_snprintf( szString2, sizeof(szString2), "%s%i", ptVal>0?"+":"",ptVal );
-
-	// convert int-string to unicode
-	g_pVGuiLocalize->ConvertANSIToUnicode( szString2, m_pTextHealth, sizeof( m_pTextHealth ) );
 
 	// play animation (new points value)
 	if(ptVal > 0)
@@ -122,6 +119,8 @@ void CHudPlayerAddHealth::MsgFunc_PlayerAddHealth( bf_read &msg )
 	{
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "NewSubtractHealth" );
 	}
+	
+	m_iHealthToAdd = ptVal;
 
 	m_flStartTime = gpGlobals->curtime;
 	m_flDuration = 3.0f;
@@ -132,10 +131,6 @@ void CHudPlayerAddHealth::MsgFunc_PlayerAddHealth( bf_read &msg )
 //-----------------------------------------------------------------------------
 void CHudPlayerAddHealth::Paint() 
 {
-	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer(); 
-	if ( !pPlayer ) 
-		return; 
-
 	if(!hud_addhealth.GetBool())
 		return;
 
@@ -144,14 +139,13 @@ void CHudPlayerAddHealth::Paint()
 
 	FFPanel::Paint(); // Draws the background glyphs 
 
-	if( m_pTextHealth[ 0 ] != '\0' )
-	{
-		surface()->DrawSetTextFont( m_hHealthFont );
-		surface()->DrawSetTextColor( GetFgColor() );
-		surface()->DrawSetTextPos( HealthFont_xpos, HealthFont_ypos );
+	surface()->DrawSetTextFont( m_hHealthFont );
+	surface()->DrawSetTextColor( GetFgColor() );
+	surface()->DrawSetTextPos( HealthFont_xpos, HealthFont_ypos );
 
-		for( wchar_t *wch = m_pTextHealth; *wch != 0; wch++ )
-			surface()->DrawUnicodeChar( *wch );
+	wchar_t wBuf[20];
 
-	}
+	V_swprintf_safe( wBuf, L"%ls%d", m_iHealthToAdd > 0 ? L"+" : L"", m_iHealthToAdd );
+
+	vgui::surface()->DrawPrintText( wBuf, V_wcslen( wBuf ), FONT_DRAW_NONADDITIVE );
 }

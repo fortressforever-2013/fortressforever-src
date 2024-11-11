@@ -731,7 +731,7 @@ void CClientScoreBoardDialog::UpdateHeaders( void )
 		}
 		else
 		{
-			V_snwprintf( szName, sizeof(szName), L"%ls - (%i players)", szTeamName, iNumPlayers );
+			V_snwprintf( szName, ARRAYSIZE(szName), L"%ls - (%i players)", szTeamName, iNumPlayers );
 			szTeamName = szName;
 		}
 
@@ -739,7 +739,7 @@ void CClientScoreBoardDialog::UpdateHeaders( void )
 
 		// Look up team fort points (currently hacked to get team score (frags) which is what was previously used)
 		wchar_t szFortPoints[ 6 ];
-		V_snwprintf( szFortPoints, sizeof(szFortPoints), L"%d", pGR->GetTeamScore( iTeam ) );
+		V_snwprintf( szFortPoints, ARRAYSIZE(szFortPoints), L"%d", pGR->GetTeamScore( iTeam ) );
 
 		// Display team fort points (probably will actually be team score e.g. captures *10)
 		m_pPlayerList->ModifyColumn( i, "fortpoints", szFortPoints );
@@ -773,7 +773,7 @@ void CClientScoreBoardDialog::UpdateHeaders( void )
 		else
 		{
 			wchar_t szLatency[ 12 ];
-			V_snwprintf( szLatency, sizeof(szLatency), L"%i", iLatency );
+			V_snwprintf( szLatency, ARRAYSIZE(szLatency), L"%i", iLatency );
 			m_pPlayerList->ModifyColumn( i, "ping", szLatency );
 		}
 	}

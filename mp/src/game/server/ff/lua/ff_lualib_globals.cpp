@@ -3138,7 +3138,7 @@ namespace FFLib
 	
 	void CreateMenu( const char *szMenuName, const char *szMenuTitle )
 	{
-		if (!szMenuName[0])
+		if (!szMenuName[0] || !szMenuTitle[0])
 			return;
 
 		_menuman.AddLuaMenu( szMenuName, szMenuTitle );
@@ -3146,7 +3146,7 @@ namespace FFLib
 	
 	void CreateMenu( const char *szMenuName, const char *szMenuTitle, float flDisplayTime )
 	{
-		if (!szMenuName[0])
+		if (!szMenuName[0] || !szMenuTitle[0])
 			return;
 
 		_menuman.AddLuaMenu( szMenuName, szMenuTitle, flDisplayTime );
@@ -3162,7 +3162,7 @@ namespace FFLib
 	
 	void SetMenuTitle( const char *szMenuName, const char *szMenuTitle )
 	{
-		if (!szMenuName[0])
+		if (!szMenuName[0] || !szMenuTitle[0])
 			return;
 
 		_menuman.SetLuaMenuTitle( szMenuName, szMenuTitle );
@@ -3170,7 +3170,7 @@ namespace FFLib
 	
 	void AddMenuOption( const char *szMenuName, int iSlot, const char *szOptionText )
 	{
-		if (!szMenuName[0])
+		if (!szMenuName[0] || !szOptionText[0])
 			return;
 
 		_menuman.AddLuaMenuOption( szMenuName, iSlot, szOptionText );

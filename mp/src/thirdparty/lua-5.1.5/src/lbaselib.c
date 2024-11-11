@@ -274,6 +274,7 @@ static int load_aux (lua_State *L, int status) {
 }
 
 
+#ifndef FF_LUA
 static int luaB_loadstring (lua_State *L) {
   size_t l;
   const char *s = luaL_checklstring(L, 1, &l);
@@ -286,6 +287,7 @@ static int luaB_loadfile (lua_State *L) {
   const char *fname = luaL_optstring(L, 1, NULL);
   return load_aux(L, luaL_loadfile(L, fname));
 }
+#endif
 
 
 /*
@@ -312,6 +314,7 @@ static const char *generic_reader (lua_State *L, void *ud, size_t *size) {
 }
 
 
+#ifndef FF_LUA
 static int luaB_load (lua_State *L) {
   int status;
   const char *cname = luaL_optstring(L, 2, "=(load)");
@@ -329,6 +332,7 @@ static int luaB_dofile (lua_State *L) {
   lua_call(L, 0, LUA_MULTRET);
   return lua_gettop(L) - n;
 }
+#endif
 
 
 static int luaB_assert (lua_State *L) {
@@ -447,14 +451,18 @@ static int luaB_newproxy (lua_State *L) {
 static const luaL_Reg base_funcs[] = {
   {"assert", luaB_assert},
   {"collectgarbage", luaB_collectgarbage},
+#ifndef FF_LUA
   {"dofile", luaB_dofile},
+#endif
   {"error", luaB_error},
   {"gcinfo", luaB_gcinfo},
   {"getfenv", luaB_getfenv},
   {"getmetatable", luaB_getmetatable},
+#ifndef FF_LUA
   {"loadfile", luaB_loadfile},
   {"load", luaB_load},
   {"loadstring", luaB_loadstring},
+#endif
   {"next", luaB_next},
   {"pcall", luaB_pcall},
   {"print", luaB_print},

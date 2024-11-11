@@ -99,7 +99,7 @@ public:
 
 public:
 	void Init();
-	void Shutdown();
+	void Reset();
 	void Update();
 
 public:

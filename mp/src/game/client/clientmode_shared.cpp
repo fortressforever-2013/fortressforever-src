@@ -13,7 +13,8 @@
 #include "iinput.h"
 #include "view_shared.h"
 #include "iviewrender.h"
-#include "hud_basechat.h"
+// #include "hud_basechat.h"
+#include "ff_hud_chat.h"
 #include "weapon_selection.h"
 #include <vgui/IVGui.h>
 #include <vgui/Cursor.h>
@@ -1175,7 +1176,7 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 			}
 			else
 			{
-				_snwprintf ( wszTeam, sizeof( wszTeam ) / sizeof( wchar_t ), L"%d", team );
+				V_snwprintf ( wszTeam, sizeof( wszTeam ) / sizeof( wchar_t ), L"%d", team );
 			}
 
 			if ( !IsInCommentaryMode() )
@@ -1183,16 +1184,18 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 				wchar_t wszLocalized[100];
 				if ( bAutoTeamed )
 				{
-					g_pVGuiLocalize->ConstructString( wszLocalized, sizeof( wszLocalized ), g_pVGuiLocalize->Find( "#game_player_joined_autoteam" ), 2, wszPlayerName, wszTeam );
+					g_pVGuiLocalize->ConstructString( wszLocalized, sizeof( wszLocalized ), g_pVGuiLocalize->Find( "#FF_Joined_AutoTeam" ), 2, wszPlayerName, wszTeam );
 				}
 				else
 				{
-					g_pVGuiLocalize->ConstructString( wszLocalized, sizeof( wszLocalized ), g_pVGuiLocalize->Find( "#game_player_joined_team" ), 2, wszPlayerName, wszTeam );
+					g_pVGuiLocalize->ConstructString( wszLocalized, sizeof( wszLocalized ), g_pVGuiLocalize->Find( "#FF_Joined_Team" ), 2, wszPlayerName, wszTeam );
 				}
 
 				char szLocalized[100];
 				g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalized, szLocalized, sizeof(szLocalized) );
 
+				Color col = GetCustomClientColor( -1, team );
+				hudChat->SetCustomColor( col );
 				hudChat->Printf( CHAT_FILTER_TEAMCHANGE, "%s", szLocalized );
 			}
 		}
@@ -1208,6 +1211,7 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 		if ( !hudChat )
 			return;
 
+		int iPlayerIndex = engine->GetPlayerForUserID( event->GetInt( "userid" ) );
 		const char *pszOldName = event->GetString("oldname");
 		if ( PlayerNameNotSetYet(pszOldName) )
 			return;
@@ -1219,11 +1223,13 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 		g_pVGuiLocalize->ConvertANSIToUnicode( event->GetString( "newname" ), wszNewName, sizeof(wszNewName) );
 
 		wchar_t wszLocalized[100];
-		g_pVGuiLocalize->ConstructString( wszLocalized, sizeof( wszLocalized ), g_pVGuiLocalize->Find( "#game_player_changed_name" ), 2, wszOldName, wszNewName );
+		g_pVGuiLocalize->ConstructString( wszLocalized, sizeof( wszLocalized ), g_pVGuiLocalize->Find( "#FF_Name_Change" ), 2, wszOldName, wszNewName );
 
 		char szLocalized[100];
 		g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalized, szLocalized, sizeof(szLocalized) );
 
+		Color col = GetCustomClientColor( iPlayerIndex );
+		hudChat->SetCustomColor( col );
 		hudChat->Printf( CHAT_FILTER_NAMECHANGE, "%s", szLocalized );
 	}
 	else if (Q_strcmp( "teamplay_broadcast_audio", eventname ) == 0 )
@@ -1373,7 +1379,7 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 			if ( pszLocString )
 			{
 				wchar_t wszItemFound[256];
-				_snwprintf( wszItemFound, ARRAYSIZE( wszItemFound ), L"%ls", g_pVGuiLocalize->Find( pszLocString ) );
+				V_snwprintf( wszItemFound, ARRAYSIZE( wszItemFound ), L"%ls", g_pVGuiLocalize->Find( pszLocString ) );
 
 				wchar_t *colorMarker = wcsstr( wszItemFound, L"::" );
 				const CEconItemRarityDefinition* pItemRarity = GetItemSchema()->GetRarityDefinition( pItemDefinition->GetRarity() );

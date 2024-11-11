@@ -2833,7 +2833,7 @@ BEGIN_NETWORK_TABLE_NOBASE( CBaseCombatWeapon, DT_LocalActiveWeaponData )
 	SendPropTime( SENDINFO( m_flNextSecondaryAttack ) ),
 	SendPropInt( SENDINFO( m_nNextThinkTick ) ),
 	SendPropTime( SENDINFO( m_flTimeWeaponIdle ) ),
-	SendPropTime( SENDINFO( m_bInReload ) ),
+	SendPropBool( SENDINFO( m_bInReload ) ),
 
 #if defined( TF_DLL )
 	SendPropExclude( "DT_AnimTimeMustBeFirst" , "m_flAnimTime" ),
@@ -2844,7 +2844,7 @@ BEGIN_NETWORK_TABLE_NOBASE( CBaseCombatWeapon, DT_LocalActiveWeaponData )
 	RecvPropTime( RECVINFO( m_flNextSecondaryAttack ) ),
 	RecvPropInt( RECVINFO( m_nNextThinkTick ) ),
 	RecvPropTime( RECVINFO( m_flTimeWeaponIdle ) ),
-	RecvPropTime( RECVINFO( m_bInReload ) ),
+	RecvPropBool( RECVINFO( m_bInReload ) ),
 #endif
 END_NETWORK_TABLE()
 
