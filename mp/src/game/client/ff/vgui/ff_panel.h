@@ -36,7 +36,7 @@ namespace vgui
 		void InitFFPanel();
 
 	protected:
-		CFFPlayer		*m_pFFPlayer;
+		CHandle<CFFPlayer> m_pFFPlayer;
 		CHudTexture		*m_pHudForeground;
 		CHudTexture		*m_pHudBackground;
 
