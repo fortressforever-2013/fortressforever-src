@@ -385,7 +385,7 @@ bool CFFWeaponBase::CanBeSelected()
 {
 	CFFPlayer *pPlayer = GetPlayerOwner();
 
-	if (pPlayer->IsStaticBuilding())
+	if (pPlayer && pPlayer->IsStaticBuilding())
 		return false;
 	//else if( pPlayer->IsCloaked() )
 	//	return false;
