@@ -1304,6 +1304,8 @@ C_FFPlayer::C_FFPlayer() :
 
 	m_flNextJumpTimeForDouble = 0;
 
+	m_iClassStatus = 0;
+
 	//VOOGRU: I'll have bad nightmares if I don't do this.
 	memset(&m_DisguisedWeapons, 0, sizeof(m_DisguisedWeapons));
 

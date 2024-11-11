@@ -416,7 +416,7 @@ public:
 	// <-- Mirv: Conc stuff
 
 	// --> Mirv: Hold some class info on the player side
-	int m_iClassStatus;
+	CNetworkVar( int, m_iClassStatus );
 	int GetClassSlot(void) const;
 
 	void ClassSpecificSkill();
