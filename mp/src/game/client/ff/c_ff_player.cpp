@@ -1276,6 +1276,7 @@ C_FFPlayer::C_FFPlayer() :
 	m_pOldActiveWeapon = NULL;
 
 	m_flConcTime = 0;
+	m_angConced = vec3_angle;
 	m_bConcussed = false;
 
 	m_flTrueAimTime = 0.0f;
