@@ -23,8 +23,6 @@ bool g_fBlockedStatus[256] = { false };		// |-- Mirv: Hold whether these dudes a
 
 extern ConVar hud_saytext_time;
 extern ConVar cl_showtextmsg;
-extern ConVar cl_chatfilters;
-extern ConVar cl_chatfilter_version;
 extern ConVar cl_mute_all_comms;
 
 CVoiceStatus* g_VoiceStatus = NULL;

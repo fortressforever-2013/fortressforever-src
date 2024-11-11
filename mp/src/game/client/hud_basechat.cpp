@@ -42,7 +42,6 @@
 ConVar hud_saytext_time("hud_saytext_time", "12", FCVAR_ARCHIVE);
 ConVar cl_showtextmsg( "cl_showtextmsg", "1", 0, "Enable/disable text messages printing on the screen." );
 ConVar cl_chatfilters( "cl_chatfilters", "63", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Stores the chat filter settings " );
-ConVar cl_chatfilter_version( "cl_chatfilter_version", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE | FCVAR_HIDDEN, "Stores the chat filter version" );
 ConVar cl_mute_all_comms("cl_mute_all_comms", "1", FCVAR_ARCHIVE, "If 1, then all communications from a player will be blocked when that player is muted, including chat messages.");
 
 const int kChatFilterVersion = 1;
@@ -1818,37 +1817,6 @@ void CBaseHudChat::Clear( void )
 void CBaseHudChat::LevelInit( const char *newmap )
 {
 	Clear();
-
-	//=============================================================================
-	// HPE_BEGIN:
-	// [pfreese] initialize new chat filters to defaults. We do this because
-	// unused filter bits are zero, and we might want them on for new filters that
-	// are added.
-	//
-	// Also, we have to do this here instead of somewhere more sensible like the 
-	// c'tor or Init() method, because cvars are currently loaded twice: once
-	// during initialization from the local file, and later (after HUD elements
-	// have been construction and initialized) from Steam Cloud remote storage.
-	//=============================================================================
-
-	switch ( cl_chatfilter_version.GetInt() )
-	{
-	case 0:
-		m_iFilterFlags |= CHAT_FILTER_ACHIEVEMENT;
-		// fall through
-	case kChatFilterVersion:
-		break;
-	}
-
-	if ( cl_chatfilter_version.GetInt() != kChatFilterVersion )
-	{
-		cl_chatfilters.SetValue( m_iFilterFlags );
-		cl_chatfilter_version.SetValue( kChatFilterVersion );
-	}
-
-	//=============================================================================
-	// HPE_END
-	//=============================================================================
 }
 
 void CBaseHudChat::LevelShutdown( void )
