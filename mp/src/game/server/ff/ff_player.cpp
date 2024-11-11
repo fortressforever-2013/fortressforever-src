@@ -3819,8 +3819,7 @@ void CFFPlayer::Command_DropItems(const CCommand& args)
 
 void CFFPlayer::Command_DetPipes(const CCommand& args)
 {	
-	if( ( GetPipebombShotTime() + PIPE_DET_DELAY ) < gpGlobals->curtime )
-		CFFProjectilePipebomb::DestroyAllPipes(this);
+	m_bQueueDetonation = true;
 }
 
 /**
