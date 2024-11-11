@@ -1550,6 +1550,22 @@ void C_FFPlayer::Spawn(void)
 	// was breaking a lot of stuff.
 	if (m_bFirstSpawn)
 	{
+		// Stop grenade 1 timers if they're playing
+		if (g_pGrenade1Timer && (m_iGrenadeState != FF_GREN_PRIMEONE))
+		{
+			// TODO: Stop sound
+			if (g_pGrenade1Timer->ActiveTimer())
+				g_pGrenade1Timer->ResetTimer();
+		}
+
+		// Stop grenade 2 timers if they're playing
+		if (g_pGrenade2Timer && (m_iGrenadeState != FF_GREN_PRIMETWO))
+		{
+			// TODO: Stop sound
+			if (g_pGrenade2Timer->ActiveTimer())
+				g_pGrenade2Timer->ResetTimer();
+		}
+
 		BaseClass::Spawn();
 		m_bFirstSpawn = false;
 	}
@@ -1582,22 +1598,6 @@ void C_FFPlayer::Spawn(void)
 
 	// Reset pipebomb counter!
 	GetPipebombCounter()->Reset();
-
-	// Stop grenade 1 timers if they're playing
-	if (g_pGrenade1Timer && (m_iGrenadeState != FF_GREN_PRIMEONE))
-	{
-		// TODO: Stop sound
-		if (g_pGrenade1Timer->ActiveTimer())
-			g_pGrenade1Timer->ResetTimer();
-	}
-
-	// Stop grenade 2 timers if they're playing
-	if (g_pGrenade2Timer && (m_iGrenadeState != FF_GREN_PRIMETWO))
-	{
-		// TODO: Stop sound
-		if (g_pGrenade2Timer->ActiveTimer())
-			g_pGrenade2Timer->ResetTimer();
-	}
 
 	// Jiggles: Start Hint Code
 	// Class Spawn Hints -- Display 7 seconds after spawning
