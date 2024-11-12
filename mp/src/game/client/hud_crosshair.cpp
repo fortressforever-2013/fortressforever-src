@@ -280,9 +280,7 @@ void CHudCrosshair::Paint(void)
 	x = ScreenWidth() / 2;
 	y = ScreenHeight() / 2;
 
-	float x_chargebar, y_chargebar;
-	x_chargebar = ScreenWidth() / 2;
-	y_chargebar = ScreenHeight() / 2;
+	float x_chargebar = x, y_chargebar = y;
 
 	// MattB - m_vecCrossHairOffsetAngle is the autoaim angle.
 	// if we're not using autoaim, just draw in the middle of the 
@@ -302,8 +300,8 @@ void CHudCrosshair::Paint(void)
 
 		x += 0.5f * screen[0] * ScreenWidth() + 0.5f;
 		y += 0.5f * screen[1] * ScreenHeight() + 0.5f;
-		x_chargebar += 0.5f * screen[0] * ScreenWidth() + 0.5f;
-		y_chargebar += 0.5f * screen[1] * ScreenHeight() + 0.5f;
+		x_chargebar += x;
+		y_chargebar += y;
 	}
 
 	// AfterShock: Conc aim -> plot crosshair properly
