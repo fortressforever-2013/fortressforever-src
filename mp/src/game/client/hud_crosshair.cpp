@@ -300,8 +300,8 @@ void CHudCrosshair::Paint(void)
 
 		x += 0.5f * screen[0] * ScreenWidth() + 0.5f;
 		y += 0.5f * screen[1] * ScreenHeight() + 0.5f;
-		x_chargebar += x;
-		y_chargebar += y;
+		x_chargebar += 0.5f * screen[0] * ScreenWidth() + 0.5f;
+		y_chargebar += 0.5f * screen[1] * ScreenHeight() + 0.5f;
 	}
 
 	// AfterShock: Conc aim -> plot crosshair properly
