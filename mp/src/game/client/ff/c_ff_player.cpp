@@ -167,7 +167,11 @@ extern IFileSystem** pFilesystem;
 // Need this to remove the HUD context menus on spawn
 extern void HudContextForceClose();
 
-// this needs to match the value from ff_player.cpp!!
+// the values should match with ff_player.cpp!!
+// grenade information
+//ConVar gren_timer("ffdev_gren_timer","3.81",0,"Timer length for all grenades.");
+#define GREN_TIMER 3.81f
+//ConVar gren_throw_delay("ffdev_throw_delay","0.5",0,"Delay before primed grenades can be thrown.");
 #define GREN_THROW_DELAY 0.5f
 
 // #0000331: impulse 81 not working (weapon_cubemap)
@@ -432,7 +436,7 @@ bool CC_PrimeOne(const CCommand& args)
 
 	// dexter: uncomment this timer - use to to manage our number of active grenade sounds fuck
 	/* JUST KIDDING IT DOESNT WORK
-	C_FFTimer *pTimer = g_FFTimers.Create("PrimeGren", 3.81f);
+	C_FFTimer *pTimer = g_FFTimers.Create("PrimeGren", GREN_TIMER);
 	if (pTimer)
 	{
 		pTimer->m_bRemoveWhenExpired = true;
@@ -459,7 +463,7 @@ bool CC_PrimeOne(const CCommand& args)
 	pLocalPlayer->EmitSound(filter, pLocalPlayer->entindex(), params);
 
 	Assert(g_pGrenade1Timer);
-	g_pGrenade1Timer->SetTimer(3.81f);
+	g_pGrenade1Timer->SetTimer(GREN_TIMER);
 
 	// dexter: increase their active nade sound
 	//pLocalPlayer->m_iActiveGrenTimers++;
@@ -547,7 +551,7 @@ bool CC_PrimeTwo(const CCommand& args)
 	pLocalPlayer->EmitSound(filter, pLocalPlayer->entindex(), params);
 
 	Assert(g_pGrenade2Timer);
-	g_pGrenade2Timer->SetTimer(3.81f);
+	g_pGrenade2Timer->SetTimer(GREN_TIMER);
 
 	// Tracks gren prime time to see if a player released the grenade right away (unprimed)
 	pLocalPlayer->m_flGrenPrimeTime = gpGlobals->curtime;
@@ -890,7 +894,8 @@ DEFINE_PRED_FIELD(m_iJetpackFuel, FIELD_INTEGER, FTYPEDESC_INSENDTABLE),
 DEFINE_PRED_FIELD(m_flNextClassSpecificSkill, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
 DEFINE_PRED_FIELD(m_flJetpackNextFuelRechargeTime, FIELD_FLOAT, FTYPEDESC_OVERRIDE | FTYPEDESC_PRIVATE | FTYPEDESC_NOERRORCHECK),
 DEFINE_PRED_FIELD(m_bCanDoubleJump, FIELD_BOOLEAN, FTYPEDESC_OVERRIDE ),
-DEFINE_PRED_FIELD_TOL(m_flNextJumpTimeForDouble, FIELD_FLOAT, FTYPEDESC_OVERRIDE | FTYPEDESC_NOERRORCHECK, TD_MSECTOLERANCE)
+DEFINE_PRED_FIELD_TOL(m_flNextJumpTimeForDouble, FIELD_FLOAT, FTYPEDESC_OVERRIDE | FTYPEDESC_NOERRORCHECK, TD_MSECTOLERANCE),
+DEFINE_PRED_FIELD(m_iGrenadeState, FIELD_INTEGER, FTYPEDESC_INSENDTABLE)
 END_PREDICTION_DATA()
 
 class C_FFRagdoll : public C_BaseAnimatingOverlay
@@ -2712,6 +2717,12 @@ void C_FFPlayer::ClientThink(void)
 			StopSound("Player.JetpackLoop");
 			m_bJetpackSFXPlaying = false;
 		}
+	}
+
+	// see CFFPlayer::GrenadeThink()
+	if (m_flGrenPrimeTime > 0 && gpGlobals->curtime - m_flGrenPrimeTime >= GREN_TIMER)
+	{
+		CC_ThrowGren();
 	}
 
 	_mathackman.Update();
