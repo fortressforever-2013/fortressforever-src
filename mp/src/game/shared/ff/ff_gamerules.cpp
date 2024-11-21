@@ -655,6 +655,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 					pPlayer->ResetFortPointsCount();
 					pPlayer->ResetDeathCount();
 					pPlayer->ResetAsisstsCount();
+					FF_SendStopGrenTimerMessage(pPlayer);
 
 					if( FF_IsPlayerSpec( pPlayer ) )
 						continue;
