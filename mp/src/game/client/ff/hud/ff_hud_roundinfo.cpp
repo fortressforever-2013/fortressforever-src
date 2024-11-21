@@ -52,8 +52,6 @@ public:
 	{
 	}
 
-	void Reset( void );
-
 	virtual bool ShouldDraw( void );
 	virtual void Paint( void );
 	virtual void VidInit( void );
@@ -67,8 +65,8 @@ private:
 
 	CPanelAnimationVar( vgui::HFont, m_hTimerFont, "TimerFont", "HUD_TextRoundInfo" );
 	CPanelAnimationVar( Color, m_hTimerColor, "TimerColor", "HUD_Tone_Default" );
-	CPanelAnimationVarAliasType( float, m_flTimerX, "TimerX", "46", "proportional_float" );
-	CPanelAnimationVarAliasType( float, m_flTimerY, "TimerY", "18", "proportional_float" );
+	CPanelAnimationVarAliasType( float, m_flTimerX, "TimerX", "12", "proportional_float" );
+	CPanelAnimationVarAliasType( float, m_flTimerY, "TimerY", "23", "proportional_float" );
 	
 	wchar_t		m_szMapName[ MAX_PATH ];
 	wchar_t		m_szRoundTimer[ 8 ];
@@ -77,23 +75,25 @@ private:
 DECLARE_HUDELEMENT( CHudRoundInfo );
 
 //-----------------------------------------------------------------------------
-// Purpose: Reset variables
-//-----------------------------------------------------------------------------
-void CHudRoundInfo::Reset(void)
-{
-	// Set up map name
-	g_pVGuiLocalize->ConvertANSIToUnicode( UTIL_GetFormattedMapName(), m_szMapName, sizeof( m_szMapName ) );
-
-	// Set up round timer
-	g_pVGuiLocalize->ConvertANSIToUnicode( "00:00", m_szRoundTimer, sizeof( m_szRoundTimer ) );
-}
-
-//-----------------------------------------------------------------------------
 // Purpose: Done each map load
 //-----------------------------------------------------------------------------
 void CHudRoundInfo::VidInit( void )
 {
-	Reset();
+	// Set up map name
+	g_pVGuiLocalize->ConvertANSIToUnicode( UTIL_GetFormattedMapName(), m_szMapName, sizeof( m_szMapName ) );
+
+	int iMapWide, iMapTall;
+	surface()->GetTextSize( m_hMapNameFont, m_szMapName, iMapWide, iMapTall );
+
+	m_flMapNameX = ( GetWide() / 2 ) - ( iMapWide / 2 );
+
+	// Set up round timer
+	g_pVGuiLocalize->ConvertANSIToUnicode( "00:00", m_szRoundTimer, sizeof( m_szRoundTimer ) );
+
+	int iTimerWide, iTimerTall;
+	surface()->GetTextSize( m_hTimerFont, m_szRoundTimer, iTimerWide, iTimerTall );
+
+	m_flTimerX = ( GetWide() / 2 ) - ( iTimerWide / 2 );
 }
 
 //-----------------------------------------------------------------------------
