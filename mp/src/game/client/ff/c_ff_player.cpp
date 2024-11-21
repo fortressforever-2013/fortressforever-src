@@ -2726,7 +2726,7 @@ void C_FFPlayer::ClientThink(void)
 	}
 
 	// see CFFPlayer::GrenadeThink()
-	if (m_iGrenadeState != 0 && m_flGrenPrimeTime > 0 && gpGlobals->curtime - m_flGrenPrimeTime >= GREN_TIMER)
+	if (m_flGrenPrimeTime > 0 && gpGlobals->curtime - m_flGrenPrimeTime >= GREN_TIMER)
 	{
 		CC_ThrowGren();
 	}
