@@ -483,6 +483,7 @@ IMPLEMENT_SERVERCLASS_ST( CFFPlayer, DT_FFPlayer )
 	SendPropBool(SENDINFO(m_bCanDoubleJump)),
 	SendPropTime(SENDINFO(m_flNextJumpTimeForDouble)),
 	SendPropTime(SENDINFO(m_flLastSpawnTime)),
+	SendPropBool(SENDINFO(m_bClassicViewModelsParity)),
 END_SEND_TABLE( )
 
 LINK_ENTITY_TO_CLASS( ff_ragdoll, CFFRagdoll );
@@ -634,6 +635,8 @@ CFFPlayer::CFFPlayer()
 	//m_iStatsID = -1;
 	m_bRequireRePressBuildable = false;
 	m_bQueueDetonation = false;
+	m_bClassicViewModels = false;
+	m_bClassicViewModelsParity = false;
 }
 
 CFFPlayer::~CFFPlayer()
@@ -1368,6 +1371,8 @@ void CFFPlayer::Spawn( void )
 	m_iActiveSabotages = 0;
 	m_iSabotagedSentries = 0;
 	m_iSabotagedDispensers = 0;
+
+	m_bClassicViewModels = m_bClassicViewModelsParity;
 
 	// If we get spawned, kill any primed grenades!
 	ResetGrenadeState();

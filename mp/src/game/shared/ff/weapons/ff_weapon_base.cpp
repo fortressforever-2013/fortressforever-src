@@ -149,6 +149,15 @@ void CFFWeaponBase::Spawn()
 	CBaseCombatWeapon::Spawn();
 }
 
+void CFFWeaponBase::Precache()
+{
+	BaseClass::Precache();
+
+#ifdef GAME_DLL
+	PrecacheModel( GetNewViewModel() );
+#endif
+}
+
 //----------------------------------------------------------------------------
 // Purpose: All weapons use the same silence sound
 //----------------------------------------------------------------------------
@@ -211,6 +220,20 @@ void CFFWeaponBase::WeaponSoundLocal( WeaponSound_t sound_type, float soundtime 
 CFFPlayer * CFFWeaponBase::GetPlayerOwner() const
 {
 	return ToFFPlayer(GetOwner());
+}
+
+const char *CFFWeaponBase::GetViewModel( int /*viewmodelindex = 0 -- this is ignored in the base class here*/ ) const
+{
+	CFFPlayer *pFFPlayer = GetPlayerOwner();
+	if( pFFPlayer && !pFFPlayer->m_bClassicViewModels )
+		return GetNewViewModel();
+
+	return GetWpnData().szViewModel;
+}
+
+const char *CFFWeaponBase::GetNewViewModel( int /*viewmodelindex = 0 -- this is ignored in the base class here*/ ) const
+{
+	return GetFFWpnData().szNewViewModel;
 }
 
 const char *CFFWeaponBase::GetWorldModel( void ) const

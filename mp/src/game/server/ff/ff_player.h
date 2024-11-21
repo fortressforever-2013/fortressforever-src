@@ -1041,6 +1041,8 @@ public:
 	bool m_bRequireRePressBuildable;
 	CNetworkVar(float, m_flLastSpawnTime);
 	bool m_bQueueDetonation;
+	bool m_bClassicViewModels;
+	CNetworkVar(bool, m_bClassicViewModelsParity);
 };
 
 inline CFFPlayer *ToFFPlayer( CBaseEntity *pEntity )

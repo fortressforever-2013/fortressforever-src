@@ -280,9 +280,7 @@ void CHudCrosshair::Paint(void)
 	x = ScreenWidth() / 2;
 	y = ScreenHeight() / 2;
 
-	float x_chargebar, y_chargebar;
-	x_chargebar = ScreenWidth() / 2;
-	y_chargebar = ScreenHeight() / 2;
+	float x_chargebar = x, y_chargebar = y;
 
 	// MattB - m_vecCrossHairOffsetAngle is the autoaim angle.
 	// if we're not using autoaim, just draw in the middle of the 

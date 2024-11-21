@@ -60,6 +60,9 @@ void CFFWeaponInfo::Parse( KeyValues *pKeyValuesData, const char *szWeaponName )
 
 	const char *pAnimEx = pKeyValuesData->GetString( "PlayerAnimationExtension", "mp5" );
 	Q_strncpy( m_szAnimExtension, pAnimEx, sizeof( m_szAnimExtension ) );
+
+	const char *pNewViewmodel = pKeyValuesData->GetString( "viewmodel_new", szViewModel );
+	Q_strncpy( szNewViewModel, pNewViewmodel, sizeof( szNewViewModel ) );
 }
 
 

@@ -127,8 +127,10 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 
 
 #ifdef CLIENT_DLL
+	ConVar cl_classic_viewmodels( "cl_classic_viewmodels", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
 
 #else
+	ConVar sv_force_classic_viewmodels( "sv_force_classic_viewmodels", "0", FCVAR_REPLICATED );
 
 	// --> Mirv: Class limits
 
@@ -479,6 +481,23 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 			func.CallFunction( "player_namechange" );
 		}
 
+		CFFPlayer *pFFPlayer = ToFFPlayer( pPlayer );
+		if( pFFPlayer )
+		{
+			if( sv_force_classic_viewmodels.GetBool() )
+			{
+				pFFPlayer->m_bClassicViewModelsParity = true;
+			}
+			else
+			{
+				const char *pszViewmodel = engine->GetClientConVarValue( pPlayer->entindex(), "cl_classic_viewmodels" );
+				if( pszViewmodel && pszViewmodel[0] )
+				{
+					pFFPlayer->m_bClassicViewModelsParity = Q_atoi( pszViewmodel ) ? true : false;
+				}
+			}
+		}
+
 		BaseClass::ClientSettingsChanged( pPlayer );
 	}
 
@@ -636,6 +655,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 					pPlayer->ResetFortPointsCount();
 					pPlayer->ResetDeathCount();
 					pPlayer->ResetAsisstsCount();
+					FF_SendStopGrenTimerMessage(pPlayer);
 
 					if( FF_IsPlayerSpec( pPlayer ) )
 						continue;
