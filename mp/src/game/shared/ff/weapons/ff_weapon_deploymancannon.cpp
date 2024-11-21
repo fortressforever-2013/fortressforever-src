@@ -13,6 +13,8 @@
 
 #include "cbase.h"
 #include "ff_weapon_base.h"
+#include "ff_buildableobject.h"
+#include "ff_buildable_mancannon.h"
 #include "ff_fx_shared.h"
 #include "in_buttons.h"
 
@@ -340,3 +342,33 @@ bool CFFWeaponDeployManCannon::Deploy()
 
 	return BaseClass::Deploy();
 }
+
+#ifdef GAME_DLL
+	CON_COMMAND(detmancannon, "Detonates mancannon")
+	{
+		CFFPlayer *pPlayer = ToFFPlayer(UTIL_GetCommandClient());
+
+		if ( !pPlayer )
+			return;
+
+		if( !pPlayer->IsAlive() )
+		{
+			ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDETWHENDEAD" );
+			return;
+		}
+
+		// Bug #0000333: Buildable Behavior (non build slot) while building
+		if( pPlayer->IsBuilding() && ( pPlayer->GetCurrentBuild() == FF_BUILD_MANCANNON ) )
+		{
+			ClientPrint( pPlayer, HUD_PRINTCENTER, "#FF_ENGY_CANTDETMIDBUILD" );
+			return;
+		}
+
+		CFFManCannon* pJumpPadToDet = pPlayer->GetManCannon();
+		if ( pJumpPadToDet )
+		{
+			pJumpPadToDet->DetonateNextFrame();
+			ClientPrint(pPlayer, HUD_PRINTCENTER, "#FF_MANCANNON_DESTROYED");
+		}
+	}
+#endif
