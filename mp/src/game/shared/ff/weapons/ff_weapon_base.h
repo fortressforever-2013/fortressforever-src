@@ -204,6 +204,7 @@ public:
 	#endif
 
 	virtual void		Spawn( void );
+	virtual void		Precache( void );
 
 	// All FF weapons are predicted
 	virtual bool		IsPredicted() const { return true; }
@@ -251,6 +252,8 @@ public:
 	// Should override the fov
 	virtual float		GetFOV() { return -1; }
 
+	virtual const char	*GetViewModel( int viewmodelindex = 0 ) const;
+	virtual const char	*GetNewViewModel( int viewmodelindex = 0 ) const;
 	const char			*GetWorldModel( void ) const;
 	int					GetWorldModelIndex( void );
 

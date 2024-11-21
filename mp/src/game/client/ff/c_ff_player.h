@@ -631,6 +631,8 @@ private:
 public:
 	CNetworkVar(float, m_flLastSpawnTime);
 	float GetNextCloak() { return m_flNextCloak; }
+	bool m_bClassicViewModels;
+	CNetworkVar(bool, m_bClassicViewModelsParity);
 };
 
 // Just straight up copying the server version. Tired

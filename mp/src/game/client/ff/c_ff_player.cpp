@@ -885,6 +885,7 @@ RecvPropBool(RECVINFO(m_bCanUseJetpack)),
 RecvPropInt(RECVINFO(m_bCanDoubleJump)),
 RecvPropTime(RECVINFO(m_flNextJumpTimeForDouble)),
 RecvPropTime(RECVINFO(m_flLastSpawnTime)),
+RecvPropBool(RECVINFO(m_bClassicViewModelsParity)),
 END_RECV_TABLE()
 
 BEGIN_PREDICTION_DATA(C_FFPlayer)
@@ -1318,6 +1319,9 @@ C_FFPlayer::C_FFPlayer() :
 
 	m_bMathackDetected = false;
 
+	m_bClassicViewModels = false;
+	m_bClassicViewModelsParity = false;
+
 	// dexter - hook up a lua client relevent message
 	usermessages->HookMessage("FFStopGrenTimers", &StopGrenTimersListener);
 
@@ -1551,6 +1555,8 @@ extern void ClearStatusIcons();
 //-----------------------------------------------------------------------------
 void C_FFPlayer::Spawn(void)
 {
+	m_bClassicViewModels = m_bClassicViewModelsParity;
+
 	// Okay, not calling the base spawn when this was created
 	// was breaking a lot of stuff.
 	if (m_bFirstSpawn)
