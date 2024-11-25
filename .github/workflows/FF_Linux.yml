@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Create Project
-        working-directory: /mp/src
+        working-directory: mp/src
         run: devtools/bin/vpc /ff +game /mksln Game_FF
 
       - name: Build Project
