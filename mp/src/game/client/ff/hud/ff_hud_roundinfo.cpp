@@ -20,7 +20,7 @@
 #include <vgui/ISurface.h>
 #include <vgui/ISystem.h>
 
-#include "ff_panel.h"
+#include <vgui_controls/Panel.h>
 #include "c_ff_player.h"
 #include "ff_utils.h"
 #include "ff_gamerules.h"
@@ -32,29 +32,29 @@
 
 using namespace vgui;
 
+#define ROUNDINFO_BACKGROUND_TEXTURE "hud/RoundInfoBG"
+#define ROUNDINFO_FOREGROUND_TEXTURE "hud/RoundInfoFG"
+
 extern ConVar mp_timelimit;
+extern Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/);
 
 //-----------------------------------------------------------------------------
 // Purpose: Displays current disguised class
 //-----------------------------------------------------------------------------
-class CHudRoundInfo : public CHudElement, public vgui::FFPanel
+class CHudRoundInfo : public CHudElement, public vgui::Panel
 {
 public:
-	DECLARE_CLASS_SIMPLE( CHudRoundInfo, vgui::FFPanel );
+	DECLARE_CLASS_SIMPLE( CHudRoundInfo, vgui::Panel );
 
-	CHudRoundInfo( const char *pElementName ) : vgui::FFPanel( NULL, "HudRoundInfo" ), CHudElement( pElementName )
-	{
-		SetParent( g_pClientMode->GetViewport() );
-		SetHiddenBits( HIDEHUD_UNASSIGNED );
-	}
-
-	virtual ~CHudRoundInfo( void )
-	{
-	}
+	CHudRoundInfo( const char* pElementName );
+	virtual ~CHudRoundInfo( void );
 
 	virtual bool ShouldDraw( void );
 	virtual void Paint( void );
 	virtual void VidInit( void );
+	virtual void Init( void );
+
+	void	CacheTextures(void);
 
 private:
 	// Stuff we need to know
@@ -70,9 +70,70 @@ private:
 	
 	wchar_t		m_szMapName[ MAX_PATH ];
 	wchar_t		m_szRoundTimer[ 8 ];
+
+	CHudTexture* m_pBGTexture;
+	CHudTexture* m_pFGTexture;
 };
 
 DECLARE_HUDELEMENT( CHudRoundInfo );
+
+//-----------------------------------------------------------------------------
+// Purpose: Constructor
+//-----------------------------------------------------------------------------
+CHudRoundInfo::CHudRoundInfo(const char* pElementName) : CHudElement(pElementName), vgui::Panel(NULL, "HudRoundInfo")
+{
+	SetParent(g_pClientMode->GetViewport());
+	SetHiddenBits(HIDEHUD_UNASSIGNED);
+
+	m_pBGTexture = NULL;
+	m_pFGTexture = NULL;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Deconstructor
+//-----------------------------------------------------------------------------
+CHudRoundInfo::~CHudRoundInfo( void )
+{
+	if (m_pBGTexture)
+	{
+		delete m_pBGTexture;
+		m_pBGTexture = NULL;
+	}
+
+	if (m_pFGTexture)
+	{
+		delete m_pFGTexture;
+		m_pFGTexture = NULL;
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Initialization
+//-----------------------------------------------------------------------------
+void CHudRoundInfo::Init( void )
+{
+	CacheTextures();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Load and precache textures
+//-----------------------------------------------------------------------------
+void CHudRoundInfo::CacheTextures(void)
+{
+	if (!m_pBGTexture)
+	{
+		m_pBGTexture = new CHudTexture();
+		m_pBGTexture->textureId = vgui::surface()->CreateNewTextureID();
+		PrecacheMaterial(ROUNDINFO_BACKGROUND_TEXTURE);
+	}
+
+	if (!m_pFGTexture)
+	{
+		m_pFGTexture = new CHudTexture();
+		m_pFGTexture->textureId = vgui::surface()->CreateNewTextureID();
+		PrecacheMaterial(ROUNDINFO_FOREGROUND_TEXTURE);
+	}
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Done each map load
@@ -94,6 +155,8 @@ void CHudRoundInfo::VidInit( void )
 	surface()->GetTextSize( m_hTimerFont, m_szRoundTimer, iTimerWide, iTimerTall );
 
 	m_flTimerX = ( GetWide() / 2 ) - ( iTimerWide / 2 );
+
+	CacheTextures();
 }
 
 //-----------------------------------------------------------------------------
@@ -125,6 +188,23 @@ bool CHudRoundInfo::ShouldDraw( void )
 //-----------------------------------------------------------------------------
 void CHudRoundInfo::Paint( void )
 {
+	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
+
+	if ( !pPlayer )
+		return;
+
+	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
+
+	surface()->DrawSetTextureFile( m_pBGTexture->textureId, ROUNDINFO_BACKGROUND_TEXTURE, true, false );
+	surface()->DrawSetTexture( m_pBGTexture->textureId );
+	surface()->DrawSetColor( cColor );
+	surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
+
+	surface()->DrawSetTextureFile( m_pFGTexture->textureId, ROUNDINFO_FOREGROUND_TEXTURE, true, false );
+	surface()->DrawSetTexture( m_pFGTexture->textureId );
+	surface()->DrawSetColor( Color( 255, 255, 255, 255 ) );
+	surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
+
 	// Draw map text
 	surface()->DrawSetTextFont( m_hMapNameFont );
 	surface()->DrawSetTextColor( m_hMapNameColor );
