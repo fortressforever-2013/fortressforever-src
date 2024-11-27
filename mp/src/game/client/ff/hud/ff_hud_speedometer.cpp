@@ -46,12 +46,12 @@ Color ColorFade( int currentVal, int minVal, int maxVal, Color minColor, Color m
 //-----------------------------------------------------------------------------
 // Purpose: Displays current disguised class
 //-----------------------------------------------------------------------------
-class CHudSpeedometer : public CHudElement, public vgui::FFPanel
+class CHudSpeedometer : public CHudElement, public vgui::Panel
 {
 public:
-	DECLARE_CLASS_SIMPLE( CHudSpeedometer, vgui::FFPanel );
+	DECLARE_CLASS_SIMPLE( CHudSpeedometer, vgui::Panel );
 
-	CHudSpeedometer( const char *pElementName ) : vgui::FFPanel( NULL, "HudSpeedometer" ), CHudElement( pElementName )
+	CHudSpeedometer( const char *pElementName ) : CHudElement( pElementName ), vgui::Panel( NULL, "HudSpeedometer" )
 	{
 		SetParent( g_pClientMode->GetViewport() );
 		SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_UNASSIGNED );
