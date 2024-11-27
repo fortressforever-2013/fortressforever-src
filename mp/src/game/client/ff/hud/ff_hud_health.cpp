@@ -193,7 +193,7 @@ void CHudHealth::Paint()
 
 	surface()->DrawSetTextureFile( m_pFGTexture->textureId, HEALTH_FOREGROUND_TEXTURE, true, false );
 	surface()->DrawSetTexture( m_pFGTexture->textureId );
-	surface()->DrawSetColor( GetFgColor() ); // blame CHudNumericDisplay
+	surface()->DrawSetColor( GetFgColor() );
 	surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
 
 	// then the numbers
