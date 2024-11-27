@@ -28,34 +28,32 @@ using namespace vgui;
 
 #include "c_ff_player.h"
 #include "ff_utils.h"
-#include "ff_panel.h"
 
-int g_iHudLocation2Pos = 0;
+#define LOCATION_BACKGROUND_TEXTURE "hud/HudLocationBG"
+#define LOCATION_FOREGROUND_TEXTURE "hud/HudLocationFG"
+
+extern Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/);
 
 //=============================================================================
 //
 //	class CHudLocation
 //
 //=============================================================================
-class CHudLocation : public CHudElement, public vgui::FFPanel
+class CHudLocation : public CHudElement, public vgui::Panel
 {
 private:
-	DECLARE_CLASS_SIMPLE( CHudLocation, vgui::FFPanel );
+	DECLARE_CLASS_SIMPLE( CHudLocation, vgui::Panel );
 
 public:
-	CHudLocation( const char *pElementName ) : vgui::FFPanel( NULL, "HudLocation" ), CHudElement( pElementName )
-	{
-		SetParent(g_pClientMode->GetViewport());
-		SetHiddenBits(HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED);
-	}
+	CHudLocation( const char *pElementName );
+	~CHudLocation( void );
 
-	~CHudLocation( void ) {}
-
-	void Init( void );
-	void VidInit( void );
-	void Paint( void );
+	virtual void Init( void );
+	virtual void VidInit( void );
+	virtual void Paint( void );
 
 	void MsgFunc_SetPlayerLocation( bf_read &msg );
+	void CacheTextures( void );
 
 protected:
 	wchar_t		m_pText[ 1024 ];	// Unicode text buffer
@@ -68,23 +66,77 @@ private:
 
 	CPanelAnimationVarAliasType( float, text1_xpos, "text1_xpos", "8", "proportional_float" );
 	CPanelAnimationVarAliasType( float, text1_ypos, "text1_ypos", "20", "proportional_float" );
+
+	CHudTexture* m_pBGTexture;
+	CHudTexture* m_pFGTexture;
 };
 
 DECLARE_HUDELEMENT( CHudLocation );
 DECLARE_HUD_MESSAGE( CHudLocation, SetPlayerLocation );
+
+//-----------------------------------------------------------------------------
+// Purpose: Constructor
+//-----------------------------------------------------------------------------
+CHudLocation::CHudLocation(const char* pElementName) : CHudElement(pElementName), vgui::Panel(NULL, "HudLocation")
+{
+	SetParent(g_pClientMode->GetViewport());
+	SetHiddenBits(HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED);
+
+	m_pBGTexture = NULL;
+	m_pFGTexture = NULL;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Destructor
+//-----------------------------------------------------------------------------
+CHudLocation::~CHudLocation(void)
+{
+	if (m_pBGTexture)
+	{
+		delete m_pBGTexture;
+		m_pBGTexture = NULL;
+	}
+
+	if (m_pFGTexture)
+	{
+		delete m_pFGTexture;
+		m_pFGTexture = NULL;
+	}
+}
 
 void CHudLocation::Init( void )
 {
 	HOOK_HUD_MESSAGE( CHudLocation, SetPlayerLocation );
 
 	m_pText[ 0 ] = '\0';
+	CacheTextures();
 }
 
 void CHudLocation::VidInit( void )
 {	
 	SetPaintBackgroundEnabled( true );
-	m_pText[ 0 ] = '\0'; // Bug 0000293: clear location text buffer on map change	
-	g_iHudLocation2Pos = 0;
+	m_pText[ 0 ] = '\0'; // Bug 0000293: clear location text buffer on map change
+	CacheTextures();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Load and precache the textures
+//-----------------------------------------------------------------------------
+void CHudLocation::CacheTextures()
+{
+	if (!m_pBGTexture)
+	{
+		m_pBGTexture = new CHudTexture();
+		m_pBGTexture->textureId = vgui::surface()->CreateNewTextureID();
+		PrecacheMaterial(LOCATION_BACKGROUND_TEXTURE);
+	}
+
+	if (!m_pFGTexture)
+	{
+		m_pFGTexture = new CHudTexture();
+		m_pFGTexture->textureId = vgui::surface()->CreateNewTextureID();
+		PrecacheMaterial(LOCATION_FOREGROUND_TEXTURE);
+	}
 }
 
 void CHudLocation::MsgFunc_SetPlayerLocation( bf_read &msg )
@@ -105,23 +157,24 @@ void CHudLocation::MsgFunc_SetPlayerLocation( bf_read &msg )
 
 void CHudLocation::Paint( void )
 {
-	if( g_iHudLocation2Pos == 0 )
-	{
-		// We do a bit of hackery here... location block takes a total
-		// of 4 glyphs spanning 2 different c++ classes. So, we offset
-		// the 2nd location class from the first location's class
-		// position so they can be RIGHT next to each other.
+	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
-		if( m_pHudForeground )
-		{
-			int x, y;
-			GetPos( x, y );
-			vgui::Panel *pParent = g_pClientMode->GetViewport();
-			int newX = 1.3f * ((float)pParent->GetTall() / (float)480);
-			//g_iHudLocation2Pos = x + m_pHudForeground->Width() - scheme()->GetProportionalScaledValue( 1 );
-			g_iHudLocation2Pos = x + m_pHudForeground->Width() - 2 + newX ;
-		}
-	}
+	if ( !pPlayer )
+		return;
+
+	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
+	cColor.setA(150);
+
+	// draw our background first
+	surface()->DrawSetTextureFile( m_pBGTexture->textureId, LOCATION_BACKGROUND_TEXTURE, true, false );
+	surface()->DrawSetTexture( m_pBGTexture->textureId );
+	surface()->DrawSetColor( cColor );
+	surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
+
+	surface()->DrawSetTextureFile( m_pFGTexture->textureId, LOCATION_FOREGROUND_TEXTURE, true, false );
+	surface()->DrawSetTexture( m_pFGTexture->textureId );
+	surface()->DrawSetColor( GetFgColor() );
+	surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
 
 	if( m_pText )
 	{
@@ -135,63 +188,6 @@ void CHudLocation::Paint( void )
 
 		for( wchar_t *wch = m_pText; *wch != 0; wch++ )
 			surface()->DrawUnicodeChar( *wch );
-	}
-
-	BaseClass::Paint();
-}
-
-//=============================================================================
-//
-//	class CHudLocation2
-//
-//=============================================================================
-class CHudLocation2 : public CHudElement, public vgui::FFPanel
-{
-private:
-	DECLARE_CLASS_SIMPLE( CHudLocation2, vgui::FFPanel );
-
-public:
-	CHudLocation2( const char *pElementName ) : vgui::FFPanel( NULL, "HudLocation2" ), CHudElement( pElementName )
-	{
-		SetParent(g_pClientMode->GetViewport());
-		SetHiddenBits(HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED);
-	}
-
-	~CHudLocation2( void ) {}
-
-	void Init( void );
-	void VidInit( void );
-	void Paint( void );
-
-private:
-	bool		m_bSetup;
-};
-
-DECLARE_HUDELEMENT( CHudLocation2 );
-
-void CHudLocation2::Init( void )
-{
-}
-
-void CHudLocation2::VidInit( void )
-{	
-	SetPaintBackgroundEnabled( true );		
-	m_bSetup = false;
-}
-
-void CHudLocation2::Paint( void )
-{
-	if( g_iHudLocation2Pos == 0 )
-		return;
-
-	if( !m_bSetup )
-	{
-		int x, y;
-		GetPos( x, y );
-
-		SetPos( g_iHudLocation2Pos, y );
-
-		m_bSetup = true;
 	}
 
 	BaseClass::Paint();
