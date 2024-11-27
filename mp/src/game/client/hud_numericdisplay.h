@@ -11,15 +11,14 @@
 #endif
 
 #include <vgui_controls/Panel.h>
-#include "ff_panel.h"
 
 //-----------------------------------------------------------------------------
 // Purpose: Base class for all the hud elements that are just a numeric display
 //			with some options for text and icons
 //-----------------------------------------------------------------------------
-class CHudNumericDisplay : public vgui::FFPanel
+class CHudNumericDisplay : public vgui::Panel
 {
-	DECLARE_CLASS_SIMPLE(CHudNumericDisplay, vgui::FFPanel);
+	DECLARE_CLASS_SIMPLE(CHudNumericDisplay, vgui::Panel);
 
 public:
 	CHudNumericDisplay(vgui::Panel* parent, const char* name);
