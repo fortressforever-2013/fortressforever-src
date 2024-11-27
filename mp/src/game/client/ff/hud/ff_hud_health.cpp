@@ -114,6 +114,7 @@ void CHudHealth::Init()
 	HOOK_HUD_MESSAGE( CHudHealth, Damage );
 	HOOK_HUD_MESSAGE( CHudHealth, PlayerAddHealth );
 	Reset();
+	CacheTextures();
 }
 
 //-----------------------------------------------------------------------------

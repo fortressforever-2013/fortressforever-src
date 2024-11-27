@@ -39,6 +39,11 @@ using namespace vgui;
 
 #define INIT_ARMOR -1
 
+#define ARMOR_BACKGROUND_TEXTURE "hud/ArmorBG"
+#define ARMOR_FOREGROUND_TEXTURE "hud/ArmorFG"
+
+extern Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/);
+
 //-----------------------------------------------------------------------------
 // Purpose: Health panel
 //-----------------------------------------------------------------------------
@@ -48,19 +53,25 @@ class CHudArmor : public CHudElement, public CHudNumericDisplay
 
 public:
 	CHudArmor( const char *pElementName );
+	~CHudArmor( void );
 	virtual void Init( void );
 	virtual void VidInit( void );
-	virtual void OnTick( void );
 	virtual void Reset( void );
+	virtual void Paint( void );
+	virtual void ApplySchemeSettings( IScheme* pScheme );
 			void MsgFunc_Damage( bf_read &msg );
 			void MsgFunc_PlayerAddArmor( bf_read &msg );
 			void UpdateDisplay( void );
+			void CacheTextures( void );
 
 private:
 	// old variables
 	int		m_iArmor;
 
 	int		m_bitsDamage;
+
+	CHudTexture* m_pBGTexture;
+	CHudTexture* m_pFGTexture;
 };	
 
 DECLARE_HUDELEMENT( CHudArmor );
@@ -73,9 +84,27 @@ DECLARE_HUD_MESSAGE( CHudArmor, PlayerAddArmor );
 CHudArmor::CHudArmor( const char *pElementName ) : CHudElement( pElementName ), CHudNumericDisplay(NULL, "HudArmor")
 {
 	SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED );
-	//updating armor is fairly important!
-	//the only reason we need the tick signal is for when we respawn and get a new armor value
-	ivgui()->AddTickSignal( GetVPanel(), 250 ); 
+
+	m_pBGTexture = NULL;
+	m_pFGTexture = NULL;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Destructor
+//-----------------------------------------------------------------------------
+CHudArmor::~CHudArmor()
+{
+	if (m_pBGTexture)
+	{
+		delete m_pBGTexture;
+		m_pBGTexture = NULL;
+	}
+
+	if (m_pFGTexture)
+	{
+		delete m_pFGTexture;
+		m_pFGTexture = NULL;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -86,6 +115,18 @@ void CHudArmor::Init()
 	HOOK_HUD_MESSAGE( CHudArmor, Damage );
 	HOOK_HUD_MESSAGE( CHudArmor, PlayerAddArmor );
 	Reset();
+	CacheTextures();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CHudArmor::ApplySchemeSettings(IScheme* pScheme)
+{
+	BaseClass::ApplySchemeSettings(pScheme);
+
+	// blame CHudNumericDisplay
+	Panel::SetFgColor( GetSchemeColor( "HUD_Tone_Default", Color( 199, 219, 255, 215 ), pScheme ) );
 }
 
 //-----------------------------------------------------------------------------
@@ -106,7 +147,58 @@ void CHudArmor::Reset()
 //-----------------------------------------------------------------------------
 void CHudArmor::VidInit()
 {
+	CacheTextures();
 	Reset();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Load and precache the textures
+//-----------------------------------------------------------------------------
+void CHudArmor::CacheTextures()
+{
+	if (!m_pBGTexture)
+	{
+		m_pBGTexture = new CHudTexture();
+		m_pBGTexture->textureId = vgui::surface()->CreateNewTextureID();
+		PrecacheMaterial(ARMOR_BACKGROUND_TEXTURE);
+	}
+
+	if (!m_pFGTexture)
+	{
+		m_pFGTexture = new CHudTexture();
+		m_pFGTexture->textureId = vgui::surface()->CreateNewTextureID();
+		PrecacheMaterial(ARMOR_FOREGROUND_TEXTURE);
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: paint maybe?
+//-----------------------------------------------------------------------------
+void CHudArmor::Paint()
+{
+	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
+
+	if ( !pPlayer )
+		return;
+
+	UpdateDisplay();
+
+	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
+	cColor.setA(150);
+
+	// draw our background first
+	surface()->DrawSetTextureFile( m_pBGTexture->textureId, ARMOR_BACKGROUND_TEXTURE, true, false );
+	surface()->DrawSetTexture( m_pBGTexture->textureId );
+	surface()->DrawSetColor( cColor );
+	surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
+
+	surface()->DrawSetTextureFile( m_pFGTexture->textureId, ARMOR_FOREGROUND_TEXTURE, true, false );
+	surface()->DrawSetTexture( m_pFGTexture->textureId );
+	surface()->DrawSetColor( GetFgColor() );
+	surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
+
+	// then the numbers
+	BaseClass::Paint();
 }
 
 //-----------------------------------------------------------------------------
@@ -116,18 +208,20 @@ void CHudArmor::UpdateDisplay()
 {
 	int iArmor = 0;
 	int iMaxArmor = 0;
+
+	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
 	
-	if (!m_pFFPlayer)
+	if (!pPlayer)
 		return;
 
 	// Never below zero
-	iArmor = max( m_pFFPlayer->GetArmor(), 0 );
-	iMaxArmor = m_pFFPlayer->GetMaxArmor();
+	iArmor = max(pPlayer->GetArmor(), 0 );
+	iMaxArmor = pPlayer->GetMaxArmor();
 
 	// Hullucination
-	if (m_pFFPlayer->m_iHallucinationIndex)
+	if (pPlayer->m_iHallucinationIndex)
 	{
-		iArmor = m_pFFPlayer->m_iHallucinationIndex * 4;
+		iArmor = pPlayer->m_iHallucinationIndex * 4;
 	}
 
 	// Only update the fade if we've changed armor
@@ -164,15 +258,6 @@ void CHudArmor::UpdateDisplay()
 	SetDisplayValue( m_iArmor );
 	SetShouldDisplayValue(true);
 }
-
-//TODO remove on tick and fix it so it updates properly all the time using msgfunc
-void CHudArmor::OnTick( void )
-{
-	BaseClass::OnTick();
-
-	UpdateDisplay();
-}
-
 
 //-----------------------------------------------------------------------------
 // Purpose: 
