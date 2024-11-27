@@ -20,7 +20,6 @@
 #include <vgui/ISurface.h>
 #include <vgui/ISystem.h>
 
-#include "ff_panel.h"
 #include "c_ff_player.h"
 #include "c_ff_team.h"
 #include "ff_utils.h"
@@ -38,12 +37,12 @@ static ConVar hud_teamscores("hud_teamscores", "1", FCVAR_CLIENTDLL | FCVAR_ARCH
 //-----------------------------------------------------------------------------
 // Purpose: Displays current disguised class
 //-----------------------------------------------------------------------------
-class CHudTeamScores : public CHudElement, public vgui::FFPanel
+class CHudTeamScores : public CHudElement, public vgui::Panel
 {
 public:
-	DECLARE_CLASS_SIMPLE( CHudTeamScores, vgui::FFPanel );
+	DECLARE_CLASS_SIMPLE( CHudTeamScores, vgui::Panel );
 
-	CHudTeamScores( const char *pElementName ) : vgui::FFPanel( NULL, "HudTeamScores" ), CHudElement( pElementName )
+	CHudTeamScores( const char *pElementName ) : CHudElement( pElementName ), vgui::Panel( NULL, "HudTeamScores" )
 	{
 		SetParent( g_pClientMode->GetViewport() );
 		SetHiddenBits( HIDEHUD_UNASSIGNED );
@@ -102,9 +101,7 @@ void CHudTeamScores::VidInit( void )
 // Purpose: Draw stuff!
 //-----------------------------------------------------------------------------
 void CHudTeamScores::Paint() 
-{ 
-	FFPanel::Paint(); // Draws the background glyphs 
-
+{
 	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer(); 
 	if ( !pPlayer ) 
 		return; 

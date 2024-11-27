@@ -22,7 +22,6 @@
 #include <vgui/ISurface.h>
 #include <vgui/ISystem.h>
 
-#include "ff_panel.h"
 #include "c_ff_player.h"
 #include "ff_utils.h"
 #include "c_playerresource.h"
@@ -38,12 +37,12 @@ static ConVar hud_addarmor("hud_addarmor", "1", FCVAR_CLIENTDLL | FCVAR_ARCHIVE,
 //-----------------------------------------------------------------------------
 // Purpose: Displays current disguised class
 //-----------------------------------------------------------------------------
-class CHudPlayerAddArmor : public CHudElement, public vgui::FFPanel
+class CHudPlayerAddArmor : public CHudElement, public vgui::Panel
 {
 public:
-	DECLARE_CLASS_SIMPLE( CHudPlayerAddArmor, vgui::FFPanel );
+	DECLARE_CLASS_SIMPLE( CHudPlayerAddArmor, vgui::Panel );
 
-	CHudPlayerAddArmor( const char *pElementName ) : vgui::FFPanel( NULL, "HudPlayerAddArmor" ), CHudElement( pElementName )
+	CHudPlayerAddArmor( const char *pElementName ) : CHudElement( pElementName ), vgui::Panel( NULL, "HudPlayerAddArmor" )
 	{
 		SetParent( g_pClientMode->GetViewport() );
 		SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED );
@@ -136,8 +135,6 @@ void CHudPlayerAddArmor::Paint()
 
 	if ( m_flStartTime + m_flDuration < gpGlobals->curtime )
 		return;
-
-	FFPanel::Paint(); // Draws the background glyphs 
 
 	surface()->DrawSetTextFont( m_hArmorFont );
 	surface()->DrawSetTextColor( GetFgColor() );

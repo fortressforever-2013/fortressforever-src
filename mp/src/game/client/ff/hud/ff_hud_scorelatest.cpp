@@ -22,7 +22,6 @@
 #include <vgui/ISurface.h>
 #include <vgui/ISystem.h>
 
-#include "ff_panel.h"
 #include "c_ff_player.h"
 #include "ff_utils.h"
 #include "c_playerresource.h"
@@ -38,12 +37,12 @@ static ConVar hud_fortpoints_latest("hud_fortpoints_latest", "1", FCVAR_CLIENTDL
 //-----------------------------------------------------------------------------
 // Purpose: Displays current disguised class
 //-----------------------------------------------------------------------------
-class CHudPlayerLatestScore : public CHudElement, public vgui::FFPanel
+class CHudPlayerLatestScore : public CHudElement, public vgui::Panel
 {
 public:
-	DECLARE_CLASS_SIMPLE( CHudPlayerLatestScore, vgui::FFPanel );
+	DECLARE_CLASS_SIMPLE( CHudPlayerLatestScore, vgui::Panel );
 
-	CHudPlayerLatestScore( const char *pElementName ) : vgui::FFPanel( NULL, "HudPlayerLatestScore" ), CHudElement( pElementName )
+	CHudPlayerLatestScore( const char *pElementName ) : CHudElement( pElementName ), vgui::Panel( NULL, "HudPlayerLatestScore" )
 	{
 		SetParent( g_pClientMode->GetViewport() );
 		SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED );
@@ -142,8 +141,6 @@ void CHudPlayerLatestScore::Paint()
 
 	if(!hud_fortpoints_latest.GetBool())
 		return;
-
-	FFPanel::Paint(); // Draws the background glyphs 
 
 	if( m_pTextDesc[ 0 ] != '\0' )
 	{

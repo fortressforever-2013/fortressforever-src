@@ -22,7 +22,6 @@
 #include <vgui/ISurface.h>
 #include <vgui/ISystem.h>
 
-#include "ff_panel.h"
 #include "c_ff_player.h"
 #include "ff_utils.h"
 #include "c_playerresource.h"
@@ -38,12 +37,12 @@ static ConVar hud_addhealth("hud_addhealth", "1", FCVAR_CLIENTDLL | FCVAR_ARCHIV
 //-----------------------------------------------------------------------------
 // Purpose: Displays current disguised class
 //-----------------------------------------------------------------------------
-class CHudPlayerAddHealth : public CHudElement, public vgui::FFPanel
+class CHudPlayerAddHealth : public CHudElement, public vgui::Panel
 {
 public:
-	DECLARE_CLASS_SIMPLE( CHudPlayerAddHealth, vgui::FFPanel );
+	DECLARE_CLASS_SIMPLE( CHudPlayerAddHealth, vgui::Panel );
 
-	CHudPlayerAddHealth( const char *pElementName ) : vgui::FFPanel( NULL, "HudPlayerAddHealth" ), CHudElement( pElementName )
+	CHudPlayerAddHealth( const char *pElementName ) : CHudElement( pElementName ), vgui::Panel( NULL, "HudPlayerAddHealth" )
 	{
 		SetParent( g_pClientMode->GetViewport() );
 		SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED  );
@@ -136,8 +135,6 @@ void CHudPlayerAddHealth::Paint()
 
 	if ( m_flStartTime + m_flDuration < gpGlobals->curtime )
 		return;
-
-	FFPanel::Paint(); // Draws the background glyphs 
 
 	surface()->DrawSetTextFont( m_hHealthFont );
 	surface()->DrawSetTextColor( GetFgColor() );
