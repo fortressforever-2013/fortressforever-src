@@ -194,6 +194,7 @@ void CHudRoundInfo::Paint( void )
 		return;
 
 	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
+	cColor.setA(150); // hud background alpha
 
 	surface()->DrawSetTextureFile( m_pBGTexture->textureId, ROUNDINFO_BACKGROUND_TEXTURE, true, false );
 	surface()->DrawSetTexture( m_pBGTexture->textureId );
@@ -202,7 +203,7 @@ void CHudRoundInfo::Paint( void )
 
 	surface()->DrawSetTextureFile( m_pFGTexture->textureId, ROUNDINFO_FOREGROUND_TEXTURE, true, false );
 	surface()->DrawSetTexture( m_pFGTexture->textureId );
-	surface()->DrawSetColor( Color( 255, 255, 255, 255 ) );
+	surface()->DrawSetColor( GetFgColor() );
 	surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
 
 	// Draw map text
