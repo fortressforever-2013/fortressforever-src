@@ -249,8 +249,6 @@ void CHudGrenade2::Paint()
 	if ( !pPlayer )
 		return;
 
-	UpdateDisplay();
-
 	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
 	cColor.setA( 150 );
 
