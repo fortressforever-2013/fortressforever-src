@@ -506,7 +506,7 @@ private:
 CHudAmmoInfo::CHudAmmoInfo( const char* pElementName ) : CHudElement( pElementName ), Panel( NULL, "HudAmmoInfo" )
 {
 	SetParent(g_pClientMode->GetViewport());
-	SetHiddenBits(HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED/* | HIDEHUD_WEAPONSELECTION*/);
+	SetHiddenBits(HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED | HIDEHUD_WEAPONSELECTION);
 
 	m_pBGTexture = NULL;
 	m_pFGTexture = NULL;
@@ -598,31 +598,30 @@ bool CHudAmmoInfo::ShouldDraw()
 	C_BaseCombatWeapon *lastWeapon = m_pWeapon;
 	m_pWeapon = pPlayer->GetActiveWeapon();
 
-	// still want to draw but need to return early
-	if (m_pWeapon == lastWeapon)
-		return true;
-
 	if (!m_pWeapon)
 		return false;
 
-	if (m_pWeapon->GetSpriteInactive())
+	if (m_pWeapon != lastWeapon)
 	{
-		*m_pWeaponIcon = *m_pWeapon->GetSpriteInactive();
+		if (m_pWeapon->GetSpriteInactive())
+		{
+			*m_pWeaponIcon = *m_pWeapon->GetSpriteInactive();
 
-		// Change the font so it uses 28 size instead of 64
-		m_pWeaponIcon->hFont = m_hIconFont;
-		m_pWeaponIcon->bRenderUsingFont = true;
-	}
-	else
-		*m_pWeaponIcon = CHudTexture();
+			// Change the font so it uses 28 size instead of 64
+			m_pWeaponIcon->hFont = m_hIconFont;
+			m_pWeaponIcon->bRenderUsingFont = true;
+		}
+		else
+			*m_pWeaponIcon = CHudTexture();
 
-	if (m_pWeapon->GetSpriteAmmo())
-	{
-		*m_pAmmoIcon = *m_pWeapon->GetSpriteAmmo();
-		m_pAmmoIcon->hFont = m_hAmmoIconFont;
+		if (m_pWeapon->GetSpriteAmmo())
+		{
+			*m_pAmmoIcon = *m_pWeapon->GetSpriteAmmo();
+			m_pAmmoIcon->hFont = m_hAmmoIconFont;
+		}
+		else
+			*m_pAmmoIcon = CHudTexture();
 	}
-	else
-		*m_pAmmoIcon = CHudTexture();
 
 	return true;
 }
