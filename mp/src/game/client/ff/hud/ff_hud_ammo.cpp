@@ -478,11 +478,26 @@ public:
 	virtual void Init( void );
 	virtual void VidInit( void );
 	virtual void Paint( void );
+	virtual bool ShouldDraw( void );
 			void CacheTextures( void );
 
 private:
 	CHudTexture* m_pBGTexture;
 	CHudTexture* m_pFGTexture;
+
+	CHudTexture* m_pWeaponIcon;
+	CHudTexture* m_pAmmoIcon;
+	C_BaseCombatWeapon* m_pWeapon;
+
+	// Stuff we need to know
+	CPanelAnimationVar( vgui::HFont, m_hIconFont, "IconFont", "WeaponIconsHUD" );
+	CPanelAnimationVar( vgui::HFont, m_hAmmoIconFont, "AmmoFont", "WeaponIconsHUD" );
+
+	CPanelAnimationVarAliasType( float, ammo_xpos, "ammo_xpos", "10", "proportional_float" );
+	CPanelAnimationVarAliasType( float, ammo_ypos, "ammo_ypos", "32", "proportional_float" );
+
+	CPanelAnimationVarAliasType( float, weapon_xpos, "weapon_xpos", "10", "proportional_float" );
+	CPanelAnimationVarAliasType( float, weapon_ypos, "weapon_ypos", "32", "proportional_float" );
 };
 
 //-----------------------------------------------------------------------------
@@ -491,10 +506,13 @@ private:
 CHudAmmoInfo::CHudAmmoInfo( const char* pElementName ) : CHudElement( pElementName ), Panel( NULL, "HudAmmoInfo" )
 {
 	SetParent(g_pClientMode->GetViewport());
-	SetHiddenBits(HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED | HIDEHUD_WEAPONSELECTION);
+	SetHiddenBits(HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED/* | HIDEHUD_WEAPONSELECTION*/);
 
 	m_pBGTexture = NULL;
 	m_pFGTexture = NULL;
+
+	m_pWeaponIcon = NULL;
+	m_pAmmoIcon = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -513,6 +531,18 @@ CHudAmmoInfo::~CHudAmmoInfo()
 		delete m_pFGTexture;
 		m_pFGTexture = NULL;
 	}
+
+	if (m_pWeaponIcon)
+	{
+		delete m_pWeaponIcon;
+		m_pWeaponIcon = NULL;
+	}
+
+	if (m_pAmmoIcon)
+	{
+		delete m_pAmmoIcon;
+		m_pAmmoIcon = NULL;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -529,6 +559,7 @@ void CHudAmmoInfo::Init()
 void CHudAmmoInfo::VidInit()
 {
 	CacheTextures();
+	m_pWeapon = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -549,6 +580,51 @@ void CHudAmmoInfo::CacheTextures()
 		m_pFGTexture->textureId = vgui::surface()->CreateNewTextureID();
 		PrecacheMaterial(AMMOINFO_FOREGROUND_TEXTURE);
 	}
+
+	if (!m_pWeaponIcon)
+		m_pWeaponIcon = new CHudTexture();
+
+	if (!m_pAmmoIcon)
+		m_pAmmoIcon = new CHudTexture();
+}
+
+bool CHudAmmoInfo::ShouldDraw()
+{
+	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
+
+	if ( !pPlayer )
+		return false;
+	
+	C_BaseCombatWeapon *lastWeapon = m_pWeapon;
+	m_pWeapon = pPlayer->GetActiveWeapon();
+
+	// still want to draw but need to return early
+	if (m_pWeapon == lastWeapon)
+		return true;
+
+	if (!m_pWeapon)
+		return false;
+
+	if (m_pWeapon->GetSpriteInactive())
+	{
+		*m_pWeaponIcon = *m_pWeapon->GetSpriteInactive();
+
+		// Change the font so it uses 28 size instead of 64
+		m_pWeaponIcon->hFont = m_hIconFont;
+		m_pWeaponIcon->bRenderUsingFont = true;
+	}
+	else
+		*m_pWeaponIcon = CHudTexture();
+
+	if (m_pWeapon->GetSpriteAmmo())
+	{
+		*m_pAmmoIcon = *m_pWeapon->GetSpriteAmmo();
+		m_pAmmoIcon->hFont = m_hAmmoIconFont;
+	}
+	else
+		*m_pAmmoIcon = CHudTexture();
+
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -574,6 +650,16 @@ void CHudAmmoInfo::Paint()
 	surface()->DrawSetTexture( m_pFGTexture->textureId );
 	surface()->DrawSetColor( GetFgColor() );
 	surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
+
+	if(m_pWeaponIcon)
+	{
+		m_pWeaponIcon->DrawSelf(weapon_xpos, weapon_ypos, GetFgColor());
+	}
+
+	if(m_pAmmoIcon)
+	{
+		m_pAmmoIcon->DrawSelf(ammo_xpos, ammo_ypos, GetFgColor());
+	}
 }
 
 

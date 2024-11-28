@@ -139,7 +139,7 @@ $Project "Client (FF)"
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_spydisguise.cpp"
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_statusicons.cpp"
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_teamscores.cpp"
-			$File "$SRCDIR\game\client\ff\hud\ff_hud_weaponinfo.cpp"
+			//$File "$SRCDIR\game\client\ff\hud\ff_hud_weaponinfo.cpp"
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_weaponselection.cpp"
 		}
 		
