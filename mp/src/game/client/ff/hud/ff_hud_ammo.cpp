@@ -56,7 +56,7 @@ public:
 	virtual void VidInit( void );
 	virtual void ApplySchemeSettings( IScheme* pScheme );
 	virtual void Paint( void );
-			void UpdateDisplay( void );
+	virtual bool ShouldDraw( void );
 			void CacheTextures( void );
 
 protected:
@@ -188,12 +188,12 @@ void CHudAmmo::CacheTextures()
 	}
 }
 
-void CHudAmmo::UpdateDisplay()
+bool CHudAmmo::ShouldDraw()
 {
 	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
 	if (!pPlayer)
-		return;
+		return false;
 
 	C_BaseCombatWeapon *pWeapon = pPlayer->GetActiveWeapon();
 
@@ -205,16 +205,7 @@ void CHudAmmo::UpdateDisplay()
 	}
 
 	if ( iAmmo < 0 )
-	{
-		SetPaintEnabled(false);
-		SetPaintBackgroundEnabled(false);
-		return;
-	}
-	else
-	{
-		SetPaintEnabled(true);
-		SetPaintBackgroundEnabled(true);
-	}
+		return false;
 
 	if (pWeapon == m_hCurrentActiveWeapon)
 	{
@@ -227,9 +218,9 @@ void CHudAmmo::UpdateDisplay()
 		SetAmmo(iAmmo, false);
 		m_hCurrentActiveWeapon = pWeapon;
 	}
+
+	return true;
 }
-
-
 
 //-----------------------------------------------------------------------------
 // Purpose:
@@ -240,8 +231,6 @@ void CHudAmmo::Paint()
 
 	if ( !pPlayer )
 		return;
-
-	UpdateDisplay();
 
 	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
 	cColor.setA(150);
@@ -280,7 +269,7 @@ public:
 	virtual void VidInit( void );
 	virtual void ApplySchemeSettings( IScheme* pScheme );
 	virtual void Paint( void );
-			void UpdateDisplay( void );
+	virtual bool ShouldDraw( void );
 			void CacheTextures( void );
 
 protected:
@@ -412,12 +401,12 @@ void CHudAmmoClip::CacheTextures()
 	}
 }
 
-void CHudAmmoClip::UpdateDisplay()
+bool CHudAmmoClip::ShouldDraw()
 {
 	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
 	if (!pPlayer)
-		return;
+		return false;
 
 	C_BaseCombatWeapon *pWeapon = pPlayer->GetActiveWeapon();
 
@@ -429,16 +418,7 @@ void CHudAmmoClip::UpdateDisplay()
 	}
 
 	if ( iAmmo < 0 )
-	{
-		SetPaintEnabled(false);
-		SetPaintBackgroundEnabled(false);
-		return;
-	}
-	else
-	{
-		SetPaintEnabled(true);
-		SetPaintBackgroundEnabled(true);
-	}
+		return false;
 
 	if (pWeapon == m_hCurrentActiveWeapon)
 	{
@@ -451,6 +431,8 @@ void CHudAmmoClip::UpdateDisplay()
 		SetAmmo(iAmmo, false);
 		m_hCurrentActiveWeapon = pWeapon;
 	}
+
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -462,8 +444,6 @@ void CHudAmmoClip::Paint()
 
 	if ( !pPlayer )
 		return;
-
-	UpdateDisplay();
 
 	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
 	cColor.setA(150);

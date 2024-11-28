@@ -18,6 +18,11 @@
 
 using namespace vgui;
 
+#define GREN2_BACKGROUND_TEXTURE "hud/Gren2BG"
+#define GREN2_FOREGROUND_TEXTURE "hud/Gren2FG"
+
+extern Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/);
+
 //-----------------------------------------------------------------------------
 // Purpose: Displays current ammunition level
 //-----------------------------------------------------------------------------
@@ -27,20 +32,24 @@ class CHudGrenade2 : public CHudNumericDisplay, public CHudElement
 
 public:
 	CHudGrenade2(const char *pElementName);
-	void Init();
-	void Reset();
-
-	void SetGrenade(int Grenade, bool playAnimation);
-	virtual void Paint();
-
-protected:
-	virtual void OnTick();
+	~CHudGrenade2( void );
+	virtual void Init( void );
+	virtual void VidInit( void );
+	virtual void Reset( void );
+	virtual void Paint( void );
+	virtual void ApplySchemeSettings( IScheme* pScheme );
+	virtual bool ShouldDraw( void );
+			void SetGrenade( int Grenade, bool playAnimation );
+			void CacheTextures( void );
 
 private:
 	int		m_iGrenade;
 	int		m_iClass;
 
 	CHudTexture *m_pIconTexture;
+
+	CHudTexture* m_pBGTexture;
+	CHudTexture* m_pFGTexture;
 };
 
 DECLARE_HUDELEMENT(CHudGrenade2);
@@ -51,6 +60,27 @@ DECLARE_HUDELEMENT(CHudGrenade2);
 CHudGrenade2::CHudGrenade2(const char *pElementName) : BaseClass(NULL, "HudGrenade2"), CHudElement(pElementName) 
 {
 	SetHiddenBits(HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED);
+
+	m_pBGTexture = NULL;
+	m_pFGTexture = NULL;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Destructor
+//-----------------------------------------------------------------------------
+CHudGrenade2::~CHudGrenade2()
+{
+	if (m_pBGTexture)
+	{
+		delete m_pBGTexture;
+		m_pBGTexture = NULL;
+	}
+
+	if (m_pFGTexture)
+	{
+		delete m_pFGTexture;
+		m_pFGTexture = NULL;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -62,7 +92,46 @@ void CHudGrenade2::Init()
 	m_iClass		= 0;
 
 	SetLabelText(L"");
-	ivgui()->AddTickSignal( GetVPanel(), 100 );
+	CacheTextures();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CHudGrenade2::VidInit()
+{
+	CacheTextures();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CHudGrenade2::ApplySchemeSettings(IScheme* pScheme)
+{
+	BaseClass::ApplySchemeSettings(pScheme);
+
+	// blame CHudNumericDisplay
+	Panel::SetFgColor(GetSchemeColor("HUD_Tone_Default", Color(199, 219, 255, 215), pScheme));
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Load and precache the textures
+//-----------------------------------------------------------------------------
+void CHudGrenade2::CacheTextures()
+{
+	if (!m_pBGTexture)
+	{
+		m_pBGTexture = new CHudTexture();
+		m_pBGTexture->textureId = vgui::surface()->CreateNewTextureID();
+		PrecacheMaterial(GREN2_BACKGROUND_TEXTURE);
+	}
+
+	if (!m_pFGTexture)
+	{
+		m_pFGTexture = new CHudTexture();
+		m_pFGTexture->textureId = vgui::surface()->CreateNewTextureID();
+		PrecacheMaterial(GREN2_FOREGROUND_TEXTURE);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -79,27 +148,21 @@ void CHudGrenade2::Reset()
 //-----------------------------------------------------------------------------
 // Purpose: called every frame to get Grenade info from the weapon
 //-----------------------------------------------------------------------------
-void CHudGrenade2::OnTick() 
+bool CHudGrenade2::ShouldDraw() 
 {
-	BaseClass::OnTick();
+	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
-	if (!m_pFFPlayer) 
-	{
-		SetPaintEnabled(false);
-		SetPaintBackgroundEnabled(false);
-		return;
-	}
+	if (!pPlayer)
+		return false;
 
-	int iClass = m_pFFPlayer->GetClassSlot();
-	int iGrenade2 = m_pFFPlayer->m_iSecondary;
+	int iClass = pPlayer->GetClassSlot();
+	int iGrenade2 = pPlayer->m_iSecondary;
 
 	//if no class or class doesn't have grenades
 	if(iClass == 0 || iGrenade2 == -1)
 	{
-		SetPaintEnabled(false);
-		SetPaintBackgroundEnabled(false);
 		m_iClass = iClass;
-		return;
+		return false;
 	}
 	else if(m_iClass != iClass)
 	{
@@ -116,20 +179,12 @@ void CHudGrenade2::OnTick()
 		bool bReadInfo = ReadPlayerClassDataFromFileForSlot( filesystem, szClassNames[m_iClass - 1], &hClassInfo, g_pGameRules->GetEncryptionKey() );
 
 		if (!bReadInfo)
-		{
-			SetPaintEnabled(false);
-			SetPaintBackgroundEnabled(false);
-			return;
-		}
+			return false;
 
 		const CFFPlayerClassInfo *pClassInfo = GetFilePlayerClassInfoFromHandle(hClassInfo);
 
 		if (!pClassInfo)
-		{
-			SetPaintEnabled(false);
-			SetPaintBackgroundEnabled(false);
-			return;
-		}
+			return false;
 
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence("ClassHasGrenades");
 
@@ -139,29 +194,25 @@ void CHudGrenade2::OnTick()
 
 			GRENADE_FILE_INFO_HANDLE hGrenInfo = LookupGrenadeInfoSlot(grenade_name);
 			if (!hGrenInfo)
-				return;
+				return false;
 
 			CFFGrenadeInfo *pGrenInfo = GetFileGrenadeInfoFromHandle(hGrenInfo);
 			if (!pGrenInfo)
-				return;
+				return false;
 
 			m_pIconTexture = pGrenInfo->iconHud;
-			SetPaintEnabled(true);
-			SetPaintBackgroundEnabled(true);
 			SetGrenade(iGrenade2, false);
 		}
-		else
-		//Player doesn't have grenades
-		{
-			SetPaintEnabled(false);
-			SetPaintBackgroundEnabled(false);
-		}
+		else // Player doesn't have grenades
+			return false;
 	}
 	else
 	{
 		// Same class, just update counts
 		SetGrenade(iGrenade2, true);
 	}
+
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -193,6 +244,28 @@ void CHudGrenade2::SetGrenade(int iGrenade, bool playAnimation)
 
 void CHudGrenade2::Paint() 
 {
+	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
+
+	if ( !pPlayer )
+		return;
+
+	UpdateDisplay();
+
+	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
+	cColor.setA( 150 );
+
+	// draw our background first
+	surface()->DrawSetTextureFile( m_pBGTexture->textureId, GREN2_BACKGROUND_TEXTURE, true, false );
+	surface()->DrawSetTexture( m_pBGTexture->textureId );
+	surface()->DrawSetColor( cColor );
+	surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
+
+	surface()->DrawSetTextureFile( m_pFGTexture->textureId, GREN2_FOREGROUND_TEXTURE, true, false );
+	surface()->DrawSetTexture( m_pFGTexture->textureId );
+	surface()->DrawSetColor( GetFgColor() );
+	surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
+
+
 	if(m_pIconTexture)
 	{
 		Color iconColor( 255, 255, 255, 125 );
