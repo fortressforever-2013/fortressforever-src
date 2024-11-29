@@ -164,6 +164,8 @@ struct SpyDisguiseWeapon
 #define TEAM_COLOR_YELLOW Color( 202, 173, 33, 255 )
 #define TEAM_COLOR_GREEN Color( 68, 144, 65, 255 )
 
+#define NON_TEAMCOLORED_HUD_COLOR Color( 109, 124, 142, 115 )
+
 // Some damage modifiers.
 enum DamageTypes_t
 {
