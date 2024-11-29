@@ -15,6 +15,7 @@
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+#include <c_playerresource.h>
 
 using namespace vgui;
 static ConVar hud_keystate("hud_keystate", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Toggle visibility of the keys you are pressing.");
@@ -59,13 +60,17 @@ public:
 		if ( !pPlayer ) 
 			return; 
 
+		Color cColor = Color( 255, 255, 255, 255 );
+		if( g_PR )
+			cColor = g_PR->GetTeamColor( pPlayer->GetTeamNumber() );
+
 		int textWidth, textHeight;
 		surface()->GetTextSize(m_font, m_text, textWidth, textHeight);
 		int keyBoxHeight = this->GetTall();
 		int keyBoxWidth = this->GetWide();
 		Color fgColor = IsKeyPressedByPlayer(pPlayer) ? m_activeColor : GetFgColor();
 
-		surface()->DrawSetColor(m_TeamColorHudBackgroundColour);
+		surface()->DrawSetColor(cColor);
 		surface()->DrawFilledRect(0, 0, keyBoxWidth, keyBoxHeight);
 
 		surface()->DrawSetColor(fgColor);
