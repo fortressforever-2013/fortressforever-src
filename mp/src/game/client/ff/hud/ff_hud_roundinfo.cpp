@@ -193,11 +193,18 @@ void CHudRoundInfo::Paint( void )
 	if ( !pPlayer )
 		return;
 
+	ConVarRef cl_teamcolourhud("cl_teamcolourhud");
 	Color cColor = Color(255, 255, 255, 255);
-	if ( g_PR )
-		cColor = g_PR->GetTeamColor(pPlayer->GetTeamNumber());
-
-	cColor.setA(150); // hud background alpha
+	if( cl_teamcolourhud.GetBool() )
+	{
+		if ( g_PR )
+			cColor = g_PR->GetTeamColor( pPlayer->GetTeamNumber() );
+	}
+	else
+	{
+		cColor = COLOR_GREY;
+	}
+	cColor.setA(150);
 
 	surface()->DrawSetTextureFile( m_pBGTexture->textureId, ROUNDINFO_BACKGROUND_TEXTURE, true, false );
 	surface()->DrawSetTexture( m_pBGTexture->textureId );

@@ -233,10 +233,17 @@ void CHudCellCount::Paint()
 
 	UpdateCellCount();
 
+	ConVarRef cl_teamcolourhud("cl_teamcolourhud");
 	Color cColor = Color(255, 255, 255, 255);
-	if ( g_PR )
-		cColor = g_PR->GetTeamColor(pPlayer->GetTeamNumber());
-
+	if( cl_teamcolourhud.GetBool() )
+	{
+		if ( g_PR )
+			cColor = g_PR->GetTeamColor( pPlayer->GetTeamNumber() );
+	}
+	else
+	{
+		cColor = COLOR_GREY;
+	}
 	cColor.setA(150);
 
 	// draw our background first

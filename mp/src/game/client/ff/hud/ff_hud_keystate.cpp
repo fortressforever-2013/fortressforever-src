@@ -58,11 +58,20 @@ public:
 		C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayerOrAnyObserverTarget(); 
 
 		if ( !pPlayer ) 
-			return; 
+			return;
 
-		Color cColor = Color( 255, 255, 255, 255 );
-		if( g_PR )
-			cColor = g_PR->GetTeamColor( pPlayer->GetTeamNumber() );
+		ConVarRef cl_teamcolourhud("cl_teamcolourhud");
+		Color cColor = Color(255, 255, 255, 255);
+		if( cl_teamcolourhud.GetBool() )
+		{
+			if ( g_PR )
+				cColor = g_PR->GetTeamColor( pPlayer->GetTeamNumber() );
+		}
+		else
+		{
+			cColor = COLOR_GREY;
+		}
+		cColor.setA(150);
 
 		int textWidth, textHeight;
 		surface()->GetTextSize(m_font, m_text, textWidth, textHeight);
