@@ -2890,7 +2890,7 @@ int CGameMovement::TryPlayerMove( Vector *pFirstDest, trace_t *pFirstTrace )
 	{
 		VectorCopy (vec3_origin, mv->m_vecVelocity);
 	}
-
+/*
 	// Check if they slammed into a wall
 	float fSlamVol = 0.0f;
 
@@ -2905,7 +2905,7 @@ int CGameMovement::TryPlayerMove( Vector *pFirstDest, trace_t *pFirstTrace )
 	}
 
 	PlayerRoughLandingEffects( fSlamVol );
-
+*/
 	return blocked;
 }
 
@@ -4101,11 +4101,6 @@ void CGameMovement::PlayerRoughLandingEffects( float fvol )
 		// --> Mirv: Use a fall sound, and reduce the volume for spies
 		CFFPlayer* pFFPlayer = ToFFPlayer(player);
 		Assert(pFFPlayer);
-
-		// SDK2013 bug: fall damage played when the player
-		// hits a wall at high speed
-		if (!pFFPlayer->GetGroundEntity())
-			return;
 
 		pFFPlayer->PlayFallSound(mv->m_vecAbsOrigin, player->m_pSurfaceData, fvol);
 
