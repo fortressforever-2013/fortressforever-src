@@ -55,7 +55,7 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-// Purpose:
+// Purpose: Constructor
 //-----------------------------------------------------------------------------
 CHudJetpackFuelBar::CHudJetpackFuelBar( const char *pElementName ) : vgui::Panel( NULL, "HudJetpackFuelBar" ), CHudElement( pElementName )
 {
@@ -64,7 +64,7 @@ CHudJetpackFuelBar::CHudJetpackFuelBar( const char *pElementName ) : vgui::Panel
 }
 
 //-----------------------------------------------------------------------------
-// Purpose:
+// Purpose: Destructor
 //-----------------------------------------------------------------------------
 CHudJetpackFuelBar::~CHudJetpackFuelBar()
 {
@@ -118,7 +118,7 @@ void CHudJetpackFuelBar::CacheTextures()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Done each map load
+// Purpose: Defines when to draw and when to not
 //-----------------------------------------------------------------------------
 bool CHudJetpackFuelBar::ShouldDraw( void )
 {
