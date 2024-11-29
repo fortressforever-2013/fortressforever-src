@@ -260,7 +260,7 @@ void CHudGrenade2::Paint()
 	}
 	else
 	{
-		cColor = COLOR_GREY;
+		cColor = NON_TEAMCOLORED_HUD_COLOR;
 	}
 	cColor.setA(150);
 
