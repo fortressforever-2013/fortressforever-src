@@ -20,7 +20,6 @@
 #include <vgui/ISurface.h>
 #include <vgui/ISystem.h>
 
-#include "ff_panel.h"
 #include "c_ff_player.h"
 #include "ff_utils.h"
 #include "c_playerresource.h"
@@ -33,6 +32,12 @@
 using namespace vgui;
 
 #define SPY_DISGUISE_TIME 3.5f
+
+#define SPY_DISGUISE_BOX_BACKGROUND_TEXTURE "hud/SpyDisguiseBoxBG"
+#define SPY_DISGUISE_BOX_FOREGROUND_TEXTURE "hud/SpyDisguiseBoxFG"
+
+#define SPY_DISGUISE_PROGRESS_BAR_BACKGROUND_TEXTURE "hud/SpyDisguiseProgressBarBG"
+#define SPY_DISGUISE_PROGRESS_BAR_FOREGROUND_TEXTURE "hud/SpyDisguiseProgressBarFG"
 
 inline void MapClassToGlyph( int iClass, char& cGlyph )
 {
@@ -68,34 +73,20 @@ inline void MapClassToGlyph( int iClass, char& cGlyph )
 //-----------------------------------------------------------------------------
 // Purpose: Displays current disguised class
 //-----------------------------------------------------------------------------
-class CHudSpyDisguise : public CHudElement, public vgui::FFPanel
+class CHudSpyDisguise : public CHudElement, public vgui::Panel
 {
 public:
-	DECLARE_CLASS_SIMPLE( CHudSpyDisguise, vgui::FFPanel );
+	DECLARE_CLASS_SIMPLE( CHudSpyDisguise, vgui::Panel );
 
-	CHudSpyDisguise( const char *pElementName ) : vgui::FFPanel( NULL, "HudSpyDisguise" ), CHudElement( pElementName )
-	{
-		SetParent( g_pClientMode->GetViewport() );
-		SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED );
-
-		m_flDisguiseStartTime = 0.0f;
-		m_iDisguising = 0;
-	}
-
-	virtual ~CHudSpyDisguise( void )
-	{
-		if( m_pHudSpyDisguise )
-		{
-			delete m_pHudSpyDisguise;
-			m_pHudSpyDisguise = NULL;
-		}
-	}
-
-	virtual void Paint( void );
+	CHudSpyDisguise( const char *pElementName );
+	virtual ~CHudSpyDisguise( void );
+	
+	virtual void Init( void );
 	virtual void VidInit( void );
+	virtual void Paint( void );
+	virtual bool ShouldDraw( void );
 
-protected:
-	CHudTexture		*m_pHudSpyDisguise;
+			void CacheTextures( void );
 
 private:
 	// Stuff we need to know
@@ -109,13 +100,65 @@ private:
 	CPanelAnimationVarAliasType( float, image1_ypos, "image1_ypos", "4", "proportional_float" );
 
 	// For the disguising progress bar
-	CPanelAnimationVar( Color, m_BarColor, "HUD_Tone_Default", "HUD_Tone_Default" );
+	CPanelAnimationVar( Color, m_BarColor, "bar_color", "HUD_Tone_Default" );
+
+	CPanelAnimationVarAliasType( float, bar_xpos, "bar_xpos", "0", "proportional_float" );
+	CPanelAnimationVarAliasType( float, bar_ypos, "bar_ypos", "0", "proportional_float" );
 	CPanelAnimationVarAliasType( float, bar_width, "bar_width", "75", "proportional_float" );
 	CPanelAnimationVarAliasType( float, bar_height, "bar_height", "24", "proportional_float" );
 	
 	float m_flDisguiseStartTime;
 	int	m_iDisguising;
+
+	CHudTexture* m_pHudSpyDisguise;
+
+	CHudTexture* m_pBGTexture;
+	CHudTexture* m_pFGTexture;
 };
+
+//-----------------------------------------------------------------------------
+// Purpose: Constructor
+//-----------------------------------------------------------------------------
+CHudSpyDisguise::CHudSpyDisguise( const char *pElementName ) : vgui::Panel( NULL, "HudSpyDisguise" ), CHudElement( pElementName )
+{
+	SetParent( g_pClientMode->GetViewport() );
+	SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED );
+
+	m_flDisguiseStartTime = 0.0f;
+	m_iDisguising = 0;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Destructor
+//-----------------------------------------------------------------------------
+CHudSpyDisguise::~CHudSpyDisguise(void)
+{
+	if (m_pBGTexture)
+	{
+		delete m_pBGTexture;
+		m_pBGTexture = NULL;
+	}
+
+	if (m_pFGTexture)
+	{
+		delete m_pFGTexture;
+		m_pFGTexture = NULL;
+	}
+
+	if (m_pHudSpyDisguise)
+	{
+		delete m_pHudSpyDisguise;
+		m_pHudSpyDisguise = NULL;
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Done each map load
+//-----------------------------------------------------------------------------
+void CHudSpyDisguise::Init(void)
+{
+	CacheTextures();
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Done each map load
@@ -127,7 +170,52 @@ void CHudSpyDisguise::VidInit( void )
 	m_pHudSpyDisguise->hFont = m_hDisguiseFont;
 	m_pHudSpyDisguise->cCharacterInFont = '_';
 
-	SetPaintBackgroundEnabled( false );
+	CacheTextures();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Load and precache the textures
+//-----------------------------------------------------------------------------
+void CHudSpyDisguise::CacheTextures()
+{
+	if (!m_pBGTexture)
+	{
+		m_pBGTexture = new CHudTexture();
+		m_pBGTexture->textureId = vgui::surface()->CreateNewTextureID();
+		PrecacheMaterial(SPY_DISGUISE_PROGRESS_BAR_BACKGROUND_TEXTURE);
+	}
+
+	if (!m_pFGTexture)
+	{
+		m_pFGTexture = new CHudTexture();
+		m_pFGTexture->textureId = vgui::surface()->CreateNewTextureID();
+		PrecacheMaterial(SPY_DISGUISE_PROGRESS_BAR_FOREGROUND_TEXTURE);
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: When to draw and when to not
+//-----------------------------------------------------------------------------
+bool CHudSpyDisguise::ShouldDraw(void)
+{
+	if( !CHudElement::ShouldDraw() )
+		return false;
+
+	/*C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+
+	if( !pPlayer )
+		return false;
+
+	if( pPlayer->GetClassSlot() != CLASS_SPY || FF_IsPlayerSpec( pPlayer ) || !FF_HasPlayerPickedClass( pPlayer ) )
+		return false;
+
+	if( !pPlayer->IsDisguising() )
+		return false;
+
+	if( !pPlayer->IsDisguised() )
+		return false;*/
+
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -135,10 +223,27 @@ void CHudSpyDisguise::VidInit( void )
 //-----------------------------------------------------------------------------
 void CHudSpyDisguise::Paint( void )
 {
-	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
-	if( !pPlayer )
+	if ( !pPlayer )
 		return;
+
+	Color cColor = Color(255, 255, 255, 255);
+	if ( g_PR )
+		cColor = g_PR->GetTeamColor(pPlayer->GetTeamNumber());
+
+	cColor.setA(150);
+
+	// draw our background first
+	surface()->DrawSetTextureFile( m_pBGTexture->textureId, SPY_DISGUISE_PROGRESS_BAR_BACKGROUND_TEXTURE, true, false );
+	surface()->DrawSetTexture( m_pBGTexture->textureId );
+	surface()->DrawSetColor( cColor );
+	surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
+
+	surface()->DrawSetTextureFile( m_pFGTexture->textureId, SPY_DISGUISE_PROGRESS_BAR_FOREGROUND_TEXTURE, true, false );
+	surface()->DrawSetTexture( m_pFGTexture->textureId );
+	surface()->DrawSetColor( GetFgColor() );
+	surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
 
 	// Let's calculate and draw the disguising progress bar
 	if ( pPlayer->IsDisguising() )
@@ -151,24 +256,10 @@ void CHudSpyDisguise::Paint( void )
 
 		float flRemainingTime = gpGlobals->curtime - m_flDisguiseStartTime;
 		float iProgressPercent = ( ( 1 - ( SPY_DISGUISE_TIME - flRemainingTime ) / SPY_DISGUISE_TIME ) );
-	
-		// Paint foreground/background stuff
-		BaseClass::PaintBackground();
-
-		//char szProgress[3];
-		//wchar_t wsProgress[3];
-		//Q_snprintf( szProgress, sizeof( szProgress ), "%i", iProgressPercent );
-		//g_pVGuiLocalize->ConvertANSIToUnicode( szProgress, wsProgress, sizeof(wsProgress) );
-
-		//// Draw text
-		//surface()->DrawSetTextFont( m_hTextFont );
-		//surface()->DrawSetTextColor( pPlayer->GetTeamColor() );
-		//surface()->DrawSetTextPos( text1_xpos, text1_ypos );
-		//surface()->DrawUnicodeString( wsProgress );
 
 		// Draw progress bar
 		surface()->DrawSetColor( m_BarColor );
-		surface()->DrawFilledRect( image1_xpos, image1_ypos, image1_xpos + bar_width * iProgressPercent, image1_ypos + bar_height );
+		surface()->DrawFilledRect( bar_xpos, bar_ypos, ( bar_xpos + ( ( bar_width - bar_xpos ) * iProgressPercent ) ), bar_ypos + bar_height );
 	}
 	else
 		m_iDisguising = 0;
@@ -179,10 +270,6 @@ void CHudSpyDisguise::Paint( void )
 	// Draw!
 	if( m_pHudSpyDisguise )
 	{
-		// Don't paint foreground/background stuff twice!
-		if ( !pPlayer->IsDisguising() )
-			BaseClass::PaintBackground();
-
 		// Figure out which glyph to use for the actual icon
 		MapClassToGlyph( pPlayer->GetDisguisedClass(), m_pHudSpyDisguise->cCharacterInFont );
 
@@ -216,28 +303,32 @@ void CHudSpyDisguise::Paint( void )
 	}
 }
 
+DECLARE_HUDELEMENT(CHudSpyDisguise);
 
 //-----------------------------------------------------------------------------
 // Purpose: Displays current disguised weapon
 //-----------------------------------------------------------------------------
-class CHudSpyDisguise2 : public CHudElement, public vgui::FFPanel
+class CHudSpyDisguise2 : public CHudElement, public vgui::Panel
 {
 public:
-	DECLARE_CLASS_SIMPLE( CHudSpyDisguise2, vgui::FFPanel );
+	DECLARE_CLASS_SIMPLE( CHudSpyDisguise2, vgui::Panel );
 
-	CHudSpyDisguise2( const char *pElementName ) : vgui::FFPanel( NULL, "HudSpyDisguise2" ), CHudElement( pElementName )
-	{
-		SetParent( g_pClientMode->GetViewport() );
-		SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED );
-	}
+	CHudSpyDisguise2( const char* pElementName );
+	virtual ~CHudSpyDisguise2( void );
 
-	virtual void Paint( void );
+	virtual void Init( void );
 	virtual void VidInit( void );
+	virtual void Paint( void );
+	virtual bool ShouldDraw( void );
 
-protected:
-	CHudTexture		*m_pWeaponIcon;
+	void	CacheTextures( void );
 
 private:
+	CHudTexture* m_pBGTexture;
+	CHudTexture* m_pFGTexture;
+
+	CHudTexture* m_pWeaponIcon;
+
 	// Stuff we need to know
 	CPanelAnimationVar( vgui::HFont, m_hDisguisedWeaponFont, "WeaponFont", "WeaponIconsHUD" )
 	CPanelAnimationVar( Color, m_hDisguisedWeaponColor, "WeaponColor", "HUD_Tone_Default" )
@@ -248,6 +339,44 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+// Purpose: Constructor
+//-----------------------------------------------------------------------------
+CHudSpyDisguise2::CHudSpyDisguise2( const char *pElementName ) : vgui::Panel( NULL, "HudSpyDisguise2" ), CHudElement( pElementName )
+{
+	SetParent( g_pClientMode->GetViewport() );
+	SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED );
+
+	m_pBGTexture = NULL;
+	m_pFGTexture = NULL;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Destructor
+//-----------------------------------------------------------------------------
+CHudSpyDisguise2::~CHudSpyDisguise2()
+{
+	if (m_pBGTexture)
+	{
+		delete m_pBGTexture;
+		m_pBGTexture = NULL;
+	}
+
+	if (m_pFGTexture)
+	{
+		delete m_pFGTexture;
+		m_pFGTexture = NULL;
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CHudSpyDisguise2::Init(void)
+{
+	CacheTextures();
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: Once per map load
 //-----------------------------------------------------------------------------
 void CHudSpyDisguise2::VidInit( void )
@@ -255,8 +384,53 @@ void CHudSpyDisguise2::VidInit( void )
 	m_pWeaponIcon = new CHudTexture;
 	m_pWeaponIcon->bRenderUsingFont = true;
 	m_pWeaponIcon->hFont = m_hDisguisedWeaponFont;
-	
-	SetPaintBackgroundEnabled( false );
+
+	CacheTextures();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Load and precache the textures
+//-----------------------------------------------------------------------------
+void CHudSpyDisguise2::CacheTextures()
+{
+	if (!m_pBGTexture)
+	{
+		m_pBGTexture = new CHudTexture();
+		m_pBGTexture->textureId = vgui::surface()->CreateNewTextureID();
+		PrecacheMaterial(SPY_DISGUISE_BOX_BACKGROUND_TEXTURE);
+	}
+
+	if (!m_pFGTexture)
+	{
+		m_pFGTexture = new CHudTexture();
+		m_pFGTexture->textureId = vgui::surface()->CreateNewTextureID();
+		PrecacheMaterial(SPY_DISGUISE_BOX_FOREGROUND_TEXTURE);
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: When to draw and when to not
+//-----------------------------------------------------------------------------
+bool CHudSpyDisguise2::ShouldDraw(void)
+{
+	if( !CHudElement::ShouldDraw() )
+		return false;
+
+	/*C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+
+	if( !pPlayer )
+		return false;
+
+	if( pPlayer->GetClassSlot() != CLASS_SPY || FF_IsPlayerSpec( pPlayer ) || !FF_HasPlayerPickedClass( pPlayer ) )
+		return false;
+
+	if( !pPlayer->IsDisguising() )
+		return false;
+
+	if( !pPlayer->IsDisguised() )
+		return false;*/
+
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -264,15 +438,30 @@ void CHudSpyDisguise2::VidInit( void )
 //-----------------------------------------------------------------------------
 void CHudSpyDisguise2::Paint( void )
 {
-	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
-	if( !pPlayer )
+	if ( !pPlayer )
 		return;
+
+	Color cColor = Color(255, 255, 255, 255);
+	if ( g_PR )
+		cColor = g_PR->GetTeamColor(pPlayer->GetTeamNumber());
+
+	cColor.setA(150);
+
+	// draw our background first
+	surface()->DrawSetTextureFile( m_pBGTexture->textureId, SPY_DISGUISE_BOX_BACKGROUND_TEXTURE, true, false );
+	surface()->DrawSetTexture( m_pBGTexture->textureId );
+	surface()->DrawSetColor( cColor );
+	surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
+
+	surface()->DrawSetTextureFile( m_pFGTexture->textureId, SPY_DISGUISE_BOX_FOREGROUND_TEXTURE, true, false );
+	surface()->DrawSetTexture( m_pFGTexture->textureId );
+	surface()->DrawSetColor( GetFgColor() );
+	surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
 
 	if ( !pPlayer->IsDisguising() && !pPlayer->IsDisguised() )
 		return;
-
-	BaseClass::PaintBackground();
 
 	if ( pPlayer->IsDisguised() )
 	{
@@ -310,39 +499,4 @@ void CHudSpyDisguise2::Paint( void )
 	}
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Displays current disguised class
-//-----------------------------------------------------------------------------
-class CHudSpyDisguise3 : public CHudElement, public vgui::FFPanel
-{
-public:
-	DECLARE_CLASS_SIMPLE( CHudSpyDisguise3, vgui::FFPanel );
-
-	CHudSpyDisguise3( const char *pElementName ) : vgui::FFPanel( NULL, "HudSpyDisguise3" ), CHudElement( pElementName )
-	{
-		SetParent( g_pClientMode->GetViewport() );
-		SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED );
-	}
-
-	virtual void VidInit( void )
-	{
-		SetPaintBackgroundEnabled( false );
-	}
-
-	virtual void Paint( void )
-	{
-		C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
-
-		if( !pPlayer )
-			return;
-
-		if ( !pPlayer->IsDisguising() && !pPlayer->IsDisguised() )
-			return;
-
-		BaseClass::PaintBackground();
-	}
-};
-
-DECLARE_HUDELEMENT(CHudSpyDisguise);
 DECLARE_HUDELEMENT(CHudSpyDisguise2);
-DECLARE_HUDELEMENT(CHudSpyDisguise3);
