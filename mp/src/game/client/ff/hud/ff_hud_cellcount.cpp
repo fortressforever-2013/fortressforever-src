@@ -27,7 +27,6 @@
 using namespace vgui;
 
 #include "hudelement.h"
-#include "ff_panel.h"
 
 #include "convar.h"
 
@@ -39,12 +38,17 @@ using namespace vgui;
 
 #define INIT_CELLCOUNT -1
 
+#define CELLCOUNT_BACKGROUND_TEXTURE "hud/CellCountBG"
+#define CELLCOUNT_FOREGROUND_TEXTURE "hud/CellCountFG"
+
+extern Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/);
+
 //-----------------------------------------------------------------------------
 // Purpose: Cell count panel
 //-----------------------------------------------------------------------------
-class CHudCellCount : public CHudElement, public vgui::FFPanel
+class CHudCellCount : public CHudElement, public vgui::Panel
 {
-	DECLARE_CLASS_SIMPLE( CHudCellCount, vgui::FFPanel );
+	DECLARE_CLASS_SIMPLE( CHudCellCount, vgui::Panel );
 
 public:
 	CHudCellCount( const char *pElementName );
@@ -52,17 +56,16 @@ public:
 	virtual void Init( void );
 	virtual void VidInit( void );
 	virtual void Reset( void );
-	virtual void OnThink();
 	virtual void Paint();
-
-protected:
-	CHudTexture		*m_pHudCellIcon;
+	virtual bool ShouldDraw();
+			void UpdateCellCount();
+			void CacheTextures();
 
 private:
-	
 	CPanelAnimationVar( vgui::HFont, m_hIconFont, "IconFont", "WeaponIconsSmall" );
 	CPanelAnimationVar( vgui::HFont, m_hTextFont, "TextFont", "HUD_TextSmall" );
-	CPanelAnimationVar( Color, m_IconColor, "HUD_Tone_Default", "HUD_Tone_Default" );
+	CPanelAnimationVar( Color, m_IconColor, "IconColor", "HUD_Tone_Default" );
+	CPanelAnimationVar( Color, m_TextColor, "TextColor", "HUD_Tone_Default" );
 
 	CPanelAnimationVarAliasType( float, text_xpos, "text_xpos", "34", "proportional_float" );
 	CPanelAnimationVarAliasType( float, text_ypos, "text_ypos", "10", "proportional_float" );
@@ -71,6 +74,11 @@ private:
 	CPanelAnimationVarAliasType( float, image_ypos, "image_ypos", "4", "proportional_float" );
 
 	int		m_iCellCount;
+
+	CHudTexture* m_pHudCellIcon;
+
+	CHudTexture* m_pBGTexture;
+	CHudTexture* m_pFGTexture;
 };	
 
 DECLARE_HUDELEMENT( CHudCellCount );
@@ -78,14 +86,29 @@ DECLARE_HUDELEMENT( CHudCellCount );
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CHudCellCount::CHudCellCount( const char *pElementName ) : CHudElement( pElementName ), vgui::FFPanel( NULL, "HudCellCount" )
+CHudCellCount::CHudCellCount( const char *pElementName ) : CHudElement( pElementName ), vgui::Panel( NULL, "HudCellCount" )
 {
 	SetParent( g_pClientMode->GetViewport() );
 	SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED );
+
+	m_pBGTexture = NULL;
+	m_pFGTexture = NULL;
 }
 
 CHudCellCount::~CHudCellCount()
 {
+	if( m_pBGTexture )
+	{
+		delete m_pBGTexture;
+		m_pBGTexture = NULL;
+	}
+
+	if( m_pFGTexture )
+	{
+		delete m_pFGTexture;
+		m_pFGTexture = NULL;
+	}
+
 	if( m_pHudCellIcon )
 	{
 		delete m_pHudCellIcon;
@@ -99,6 +122,7 @@ CHudCellCount::~CHudCellCount()
 void CHudCellCount::Init()
 {
 	Reset();
+	CacheTextures();
 }
 
 //-----------------------------------------------------------------------------
@@ -107,12 +131,13 @@ void CHudCellCount::Init()
 void CHudCellCount::Reset()
 {
 	m_iCellCount	= INIT_CELLCOUNT;
-	m_pHudCellIcon = new CHudTexture;
+
+	// this shit fucking breaks when moved to CacheTextures() so i'm leaving it here
+	// until we replace all font icons
+	m_pHudCellIcon = new CHudTexture();
 	m_pHudCellIcon->bRenderUsingFont = true;
 	m_pHudCellIcon->hFont = m_hIconFont;
 	m_pHudCellIcon->cCharacterInFont = '6';
-
-	SetPaintBackgroundEnabled( false );
 }
 
 //-----------------------------------------------------------------------------
@@ -121,12 +146,49 @@ void CHudCellCount::Reset()
 void CHudCellCount::VidInit()
 {
 	Reset();
+	CacheTextures();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Load and precache the textures
+//-----------------------------------------------------------------------------
+void CHudCellCount::CacheTextures()
+{
+	if (!m_pBGTexture)
+	{
+		m_pBGTexture = new CHudTexture();
+		m_pBGTexture->textureId = vgui::surface()->CreateNewTextureID();
+		PrecacheMaterial(CELLCOUNT_BACKGROUND_TEXTURE);
+	}
+
+	if (!m_pFGTexture)
+	{
+		m_pFGTexture = new CHudTexture();
+		m_pFGTexture->textureId = vgui::surface()->CreateNewTextureID();
+		PrecacheMaterial(CELLCOUNT_FOREGROUND_TEXTURE);
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Load and precache the textures
+//-----------------------------------------------------------------------------
+bool CHudCellCount::ShouldDraw()
+{
+	if ( !CHudElement::ShouldDraw() )
+		return false;
+	
+	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+
+	if(pPlayer->GetClassSlot() != CLASS_ENGINEER)
+		return false;
+
+	return true;
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CHudCellCount::OnThink()
+void CHudCellCount::UpdateCellCount()
 {
 	// Fix for ToFFPlayer( NULL ) being called.
 	if( !engine->IsInGame() )
@@ -164,12 +226,27 @@ void CHudCellCount::OnThink()
 
 void CHudCellCount::Paint()
 {
-	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+	
+	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
-	if(pPlayer->GetClassSlot() != CLASS_ENGINEER)
+	if ( !pPlayer )
 		return;
 
-	BaseClass::PaintBackground();
+	UpdateCellCount();
+
+	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
+	cColor.setA(150);
+
+	// draw our background first
+	surface()->DrawSetTextureFile( m_pBGTexture->textureId, CELLCOUNT_BACKGROUND_TEXTURE, true, false );
+	surface()->DrawSetTexture( m_pBGTexture->textureId );
+	surface()->DrawSetColor( cColor );
+	surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
+
+	surface()->DrawSetTextureFile( m_pFGTexture->textureId, CELLCOUNT_FOREGROUND_TEXTURE, true, false );
+	surface()->DrawSetTexture( m_pFGTexture->textureId );
+	surface()->DrawSetColor( GetFgColor() );
+	surface()->DrawTexturedRect( 0, 0, GetWide(), GetTall() );
 
 	if (m_pHudCellIcon)
 	{
@@ -181,7 +258,7 @@ void CHudCellCount::Paint()
 
 		// Draw text
 		surface()->DrawSetTextFont( m_hTextFont );
-		surface()->DrawSetTextColor( m_IconColor );
+		surface()->DrawSetTextColor( m_TextColor );
 		surface()->DrawSetTextPos( text_xpos, text_ypos );
 		surface()->DrawUnicodeString( unicode );
 	}
