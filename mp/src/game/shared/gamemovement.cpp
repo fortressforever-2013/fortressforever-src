@@ -4862,8 +4862,6 @@ void CGameMovement::Duck( void )
 //	}
 }
 
-static ConVar sv_optimizedmovement( "sv_optimizedmovement", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
-
 //-----------------------------------------------------------------------------
 // Purpose: Movement while building in Fortress Forever
 //-----------------------------------------------------------------------------
@@ -4908,24 +4906,7 @@ void CGameMovement::PlayerMove( void )
 		}
 	}
 
-	CFFPlayer* pFFPlayer = dynamic_cast<CFFPlayer*>(player);
-	if (pFFPlayer->IsRampsliding() && pFFPlayer->m_nButtons & IN_JUMP)
-		CategorizePosition();
-
-	// Now that we are "unstuck", see where we are (player->GetWaterLevel() and type, player->GetGroundEntity()).
-	if ( player->GetMoveType() != MOVETYPE_WALK ||
-		mv->m_bGameCodeMovedPlayer || 
-		!sv_optimizedmovement.GetBool()  )
-	{
-		CategorizePosition();
-	}
-	else
-	{
-		if ( mv->m_vecVelocity.z > 250.0f )
-		{
-			SetGroundEntity( NULL );
-		}
-	}
+	CategorizePosition();
 
 	// Store off the starting water level
 	m_nOldWaterLevel = player->GetWaterLevel();
