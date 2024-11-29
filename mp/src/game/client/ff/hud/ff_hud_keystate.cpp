@@ -7,7 +7,6 @@
 #include <vgui/ISurface.h>
 #include <vgui/ISystem.h>
 
-#include "ff_panel.h"
 #include "c_ff_player.h"
 #include "ff_utils.h"
 #include "in_buttons.h"
@@ -21,10 +20,10 @@ using namespace vgui;
 static ConVar hud_keystate("hud_keystate", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Toggle visibility of the keys you are pressing.");
 static ConVar hud_keystate_spec("hud_keystate_spec", "1", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Toggle visibility of the keys being pressed by your spectator target.");
 
-class CHudKeyStateElement : public vgui::FFPanel
+class CHudKeyStateElement : public vgui::Panel
 {
 public:
-	DECLARE_CLASS_SIMPLE( CHudKeyStateElement, vgui::FFPanel );
+	DECLARE_CLASS_SIMPLE( CHudKeyStateElement, vgui::Panel );
 
 	CHudKeyStateElement(Panel *parent, const char *unlocalizedText, int buttonBit) : BaseClass(parent)
 	{
@@ -84,12 +83,12 @@ public:
 //-----------------------------------------------------------------------------
 // Purpose: Displays current disguised class
 //-----------------------------------------------------------------------------
-class CHudKeyState : public CHudElement, public vgui::FFPanel
+class CHudKeyState : public CHudElement, public vgui::Panel
 {
 public:
-	DECLARE_CLASS_SIMPLE( CHudKeyState, vgui::FFPanel );
+	DECLARE_CLASS_SIMPLE( CHudKeyState, vgui::Panel );
 
-	CHudKeyState( const char *pElementName ) : vgui::FFPanel( NULL, "HudKeyState" ), CHudElement( pElementName )
+	CHudKeyState( const char *pElementName ) : vgui::Panel( NULL, "HudKeyState" ), CHudElement( pElementName )
 	{
 		SetParent( g_pClientMode->GetViewport() );
 		SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_UNASSIGNED );
