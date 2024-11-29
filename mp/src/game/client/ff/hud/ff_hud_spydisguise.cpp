@@ -209,11 +209,8 @@ bool CHudSpyDisguise::ShouldDraw(void)
 	if( pPlayer->GetClassSlot() != CLASS_SPY || FF_IsPlayerSpec( pPlayer ) || !FF_HasPlayerPickedClass( pPlayer ) )
 		return false;
 
-	/*if( !pPlayer->IsDisguising() )
+	if( !pPlayer->IsDisguising() && !pPlayer->IsDisguised() )
 		return false;
-
-	if( !pPlayer->IsDisguised() )
-		return false;*/
 
 	return true;
 }
@@ -431,11 +428,8 @@ bool CHudSpyDisguise2::ShouldDraw(void)
 	if( pPlayer->GetClassSlot() != CLASS_SPY || FF_IsPlayerSpec( pPlayer ) || !FF_HasPlayerPickedClass( pPlayer ) )
 		return false;
 
-	/*if( !pPlayer->IsDisguising() )
+	if( !pPlayer->IsDisguising() && !pPlayer->IsDisguised() )
 		return false;
-
-	if( !pPlayer->IsDisguised() )
-		return false;*/
 
 	return true;
 }
