@@ -201,7 +201,7 @@ bool CHudSpyDisguise::ShouldDraw(void)
 	if( !CHudElement::ShouldDraw() )
 		return false;
 
-	/*C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
 	if( !pPlayer )
 		return false;
@@ -209,7 +209,7 @@ bool CHudSpyDisguise::ShouldDraw(void)
 	if( pPlayer->GetClassSlot() != CLASS_SPY || FF_IsPlayerSpec( pPlayer ) || !FF_HasPlayerPickedClass( pPlayer ) )
 		return false;
 
-	if( !pPlayer->IsDisguising() )
+	/*if( !pPlayer->IsDisguising() )
 		return false;
 
 	if( !pPlayer->IsDisguised() )
@@ -423,7 +423,7 @@ bool CHudSpyDisguise2::ShouldDraw(void)
 	if( !CHudElement::ShouldDraw() )
 		return false;
 
-	/*C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
 	if( !pPlayer )
 		return false;
@@ -431,7 +431,7 @@ bool CHudSpyDisguise2::ShouldDraw(void)
 	if( pPlayer->GetClassSlot() != CLASS_SPY || FF_IsPlayerSpec( pPlayer ) || !FF_HasPlayerPickedClass( pPlayer ) )
 		return false;
 
-	if( !pPlayer->IsDisguising() )
+	/*if( !pPlayer->IsDisguising() )
 		return false;
 
 	if( !pPlayer->IsDisguised() )
