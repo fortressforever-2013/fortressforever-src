@@ -150,6 +150,9 @@ void CHudGrenade2::Reset()
 //-----------------------------------------------------------------------------
 bool CHudGrenade2::ShouldDraw() 
 {
+	if ( !CHudElement::ShouldDraw() )
+		return false;
+
 	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
 	if (!pPlayer)

@@ -190,6 +190,9 @@ void CHudAmmo::CacheTextures()
 
 bool CHudAmmo::ShouldDraw()
 {
+	if ( !CHudElement::ShouldDraw() )
+		return false;
+
 	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
 	if (!pPlayer)
@@ -403,6 +406,9 @@ void CHudAmmoClip::CacheTextures()
 
 bool CHudAmmoClip::ShouldDraw()
 {
+	if ( !CHudElement::ShouldDraw() )
+		return false;
+
 	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
 	if (!pPlayer)
@@ -590,6 +596,9 @@ void CHudAmmoInfo::CacheTextures()
 
 bool CHudAmmoInfo::ShouldDraw()
 {
+	if ( !CHudElement::ShouldDraw() )
+		return false;
+
 	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
 	if ( !pPlayer )
