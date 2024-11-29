@@ -2,15 +2,38 @@
 #define FF_HUD_BUILDTIMER_H
 
 #include "cbase.h"
-#include "ff_panel.h"
+#include "vgui_controls/Panel.h"
+#include "hudelement.h"
 
 using namespace vgui;
 
-class CHudBuildTimer : public CHudElement, public FFPanel
-{
-private:
-	DECLARE_CLASS_SIMPLE(CHudBuildTimer, FFPanel);
+#define BUILD_TIMER_BACKGROUND_TEXTURE "hud/Gren1TimerBG"
+#define BUILD_TIMER_FOREGROUND_TEXTURE "hud/Gren1TimerFG"
 
+extern Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/);
+
+class CHudBuildTimer : public CHudElement, public Panel
+{
+	DECLARE_CLASS_SIMPLE(CHudBuildTimer, Panel);
+
+public:
+	CHudBuildTimer(const char *pElementName);
+	~CHudBuildTimer();
+
+	virtual void	Init( void );
+	virtual void	VidInit( void );
+	virtual void	Paint( void );
+	virtual bool	ShouldDraw( void );
+	virtual void	Reset( void );
+
+	void	CacheTextures(void);
+
+	void	SetBuildTimer( int iBuildType, float flDuration );
+
+	// Callback functions for setting
+	void	MsgFunc_FF_BuildTimer( bf_read &msg );
+
+private:
 	int		m_iBuildType;
 	int		m_iPlayerTeam;
 	bool	m_fVisible;
@@ -26,25 +49,15 @@ private:
 	
 	CPanelAnimationVarAliasType(float, bar_xpos, "bar_xpos", "0", "proportional_float");
 	CPanelAnimationVarAliasType(float, bar_ypos, "bar_ypos", "0", "proportional_float");
-	CPanelAnimationVarAliasType(float, bar_width, "bar_width", "1", "proportional_float");
-	CPanelAnimationVarAliasType(float, bar_height, "bar_height", "1", "proportional_float");
-	CPanelAnimationVarAliasType(float, icon_offset, "icon_offset", "2", "proportional_float");
 
-public:
-	CHudBuildTimer(const char *pElementName);
-	~CHudBuildTimer();
+	CPanelAnimationVarAliasType(float, icon_xpos, "icon_xpos", "0", "proportional_float");
+	CPanelAnimationVarAliasType(float, icon_ypos, "icon_ypos", "0", "proportional_float");
 
-	virtual void	Init();
-	virtual void	VidInit();
-	virtual void	Paint();
-	virtual void	PaintBackground();
-	virtual void	OnTick();
-	virtual void	Reset();
+	CPanelAnimationVarAliasType(float, icon_width, "icon_width", "0", "proportional_float");
+	CPanelAnimationVarAliasType(float, icon_height, "icon_height", "0", "proportional_float");
 
-	void	SetBuildTimer(int iBuildType, float flDuration);
-
-	// Callback functions for setting
-	void	MsgFunc_FF_BuildTimer(bf_read &msg);
+	CHudTexture* m_pBGTexture;
+	CHudTexture* m_pFGTexture;
 };
 
 #endif

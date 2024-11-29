@@ -20,28 +20,51 @@ ConVar hud_buildtimers("hud_buildtimers", "1", FCVAR_ARCHIVE, "Turns visual buil
 
 using namespace vgui;
 
-DECLARE_HUDELEMENT(CHudBuildTimer);
 DECLARE_HUD_MESSAGE(CHudBuildTimer, FF_BuildTimer);
 
+//-----------------------------------------------------------------------------
+// Purpose: Constructor
+//-----------------------------------------------------------------------------
 CHudBuildTimer::CHudBuildTimer(const char *pElementName) : CHudElement(pElementName), BaseClass(NULL, "HudBuildTimer") 
 {
 	SetParent( g_pClientMode->GetViewport() );
 	SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED );
+
+	m_pBGTexture = NULL;
+	m_pFGTexture = NULL;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Destructor
+//-----------------------------------------------------------------------------
 CHudBuildTimer::~CHudBuildTimer() 
 {
+	if (m_pBGTexture)
+	{
+		delete m_pBGTexture;
+		m_pBGTexture = NULL;
+	}
+
+	if (m_pFGTexture)
+	{
+		delete m_pFGTexture;
+		m_pFGTexture = NULL;
+	}
 }
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 void CHudBuildTimer::Init() 
 {
 	HOOK_HUD_MESSAGE(CHudBuildTimer, FF_BuildTimer);
-	
-	ivgui()->AddTickSignal( GetVPanel(), 100 );
-
 	Reset();
+	CacheTextures();
 }
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 void CHudBuildTimer::VidInit()
 {
 	m_pDispenserIconTexture = gHUD.GetIcon("build_dispenser");
@@ -50,8 +73,32 @@ void CHudBuildTimer::VidInit()
 	m_pMancannonIconTexture = gHUD.GetIcon("build_jumppad");
 	
 	Reset();
+	CacheTextures();
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Load and precache the textures
+//-----------------------------------------------------------------------------
+void CHudBuildTimer::CacheTextures()
+{
+	if (!m_pBGTexture)
+	{
+		m_pBGTexture = new CHudTexture();
+		m_pBGTexture->textureId = vgui::surface()->CreateNewTextureID();
+		PrecacheMaterial(BUILD_TIMER_BACKGROUND_TEXTURE);
+	}
+
+	if (!m_pFGTexture)
+	{
+		m_pFGTexture = new CHudTexture();
+		m_pFGTexture->textureId = vgui::surface()->CreateNewTextureID();
+		PrecacheMaterial(BUILD_TIMER_FOREGROUND_TEXTURE);
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 void CHudBuildTimer::Reset()
 {
 	m_fVisible = false;
@@ -59,12 +106,11 @@ void CHudBuildTimer::Reset()
 	m_iPlayerTeam = -1;
 	m_flStartTime = 0.0f;
 	m_flDuration = 0.0f;
-	
-	SetAlpha( 0 );
-	SetPaintEnabled(false);
-	SetPaintBackgroundEnabled(false);
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Set timer
+//-----------------------------------------------------------------------------
 void CHudBuildTimer::SetBuildTimer(int iBuildType, float flDuration) 
 {
 	if(m_iBuildType != iBuildType)
@@ -90,9 +136,6 @@ void CHudBuildTimer::SetBuildTimer(int iBuildType, float flDuration)
 		}
 	}
 
-	SetPaintEnabled(true);
-	SetPaintBackgroundEnabled(true);
-
 	m_flStartTime = gpGlobals->curtime;
 	m_flDuration = flDuration;
 
@@ -104,6 +147,9 @@ void CHudBuildTimer::SetBuildTimer(int iBuildType, float flDuration)
 	}
 }
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 void CHudBuildTimer::MsgFunc_FF_BuildTimer(bf_read &msg) 
 {
 	int type = msg.ReadShort();
@@ -112,14 +158,18 @@ void CHudBuildTimer::MsgFunc_FF_BuildTimer(bf_read &msg)
 	SetBuildTimer(type, duration);
 }
 
-void CHudBuildTimer::OnTick()
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CHudBuildTimer::ShouldDraw()
 {
-	BaseClass::OnTick();
+	if( !CHudElement::ShouldDraw() )
+		return false;
 
 	if (!hud_buildtimers.GetBool())
 	{
 		Reset();
-		return;
+		return false;
 	}
 
 	if ( gpGlobals->curtime > m_flStartTime + m_flDuration ) 
@@ -134,43 +184,42 @@ void CHudBuildTimer::OnTick()
 		// Fading time is over
 		else if ( gpGlobals->curtime > m_flStartTime + m_flDuration + iFadeLength) 
 		{
-			SetPaintEnabled(false);
-			SetPaintBackgroundEnabled(false);
+			return false;
 		}
 	}
-	else
-	{
-		SetPaintEnabled(true);
-		SetPaintBackgroundEnabled(true);
-	}
-}
 
-void CHudBuildTimer::PaintBackground() 
-{
-	// Draw progress bar background
-	if(cl_teamcolourhud.GetBool())
-		surface()->DrawSetColor(m_TeamColorHudBackgroundColour);
-	else
-		surface()->DrawSetColor(m_HudBackgroundColour);
-	surface()->DrawFilledRect(bar_xpos, bar_ypos, bar_xpos + bar_width, bar_ypos + bar_height);
-
-	// Draw progress bar border
-	surface()->DrawSetColor(m_HudForegroundColour);
-	surface()->DrawOutlinedRect(bar_xpos-1, bar_ypos-1, bar_xpos + bar_width+1, bar_ypos + bar_height+1);
-	surface()->DrawOutlinedRect(bar_xpos-2, bar_ypos-2, bar_xpos + bar_width+2, bar_ypos + bar_height+2);
+	return true;
 }
 
 void CHudBuildTimer::Paint() 
 {
+	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
+
+	if ( !pPlayer )
+		return;
+
+	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
+	cColor.setA(150);
+
+	// draw our background first
+	surface()->DrawSetTextureFile( m_pBGTexture->textureId, BUILD_TIMER_BACKGROUND_TEXTURE, true, false );
+	surface()->DrawSetTexture( m_pBGTexture->textureId );
+	surface()->DrawSetColor( cColor );
+	surface()->DrawTexturedRect( bar_xpos, bar_ypos, GetWide(), GetTall() );
+
+	surface()->DrawSetTextureFile( m_pFGTexture->textureId, BUILD_TIMER_FOREGROUND_TEXTURE, true, false );
+	surface()->DrawSetTexture( m_pFGTexture->textureId );
+	surface()->DrawSetColor( GetFgColor() );
+	surface()->DrawTexturedRect( bar_xpos, bar_ypos, GetWide(), GetTall() );
+
 	if(m_pIconTexture)
-	{
-		int iconWide = 32.0f; //m_pIconTexture->Width();
-		int iconTall = 32.0f; //m_pIconTexture->Height();
-		
-		m_pIconTexture->DrawSelf( bar_xpos - 2/*boarderwidth*/ - iconWide - icon_offset, bar_ypos + bar_height/2 - iconTall/2, iconWide, iconTall, m_HudForegroundColour );
+	{		
+		m_pIconTexture->DrawSelf( icon_xpos, icon_ypos, icon_width, icon_height, Color(255, 255, 255, 255) );
 	}
 	
 	float amount = clamp((gpGlobals->curtime - m_flStartTime) / m_flDuration, 0, 1.0f);
-	surface()->DrawSetColor(m_HudForegroundColour);
-	surface()->DrawFilledRect(bar_xpos, bar_ypos, bar_xpos + bar_width * amount, bar_ypos + bar_height);
+	surface()->DrawSetColor( GetFgColor() );
+	surface()->DrawFilledRect(bar_xpos, bar_ypos, ( bar_xpos + ( ( GetWide() - bar_xpos ) * amount ) ), bar_ypos + GetTall());
 }
+
+DECLARE_HUDELEMENT(CHudBuildTimer);
