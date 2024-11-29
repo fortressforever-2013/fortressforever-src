@@ -10,8 +10,6 @@ using namespace vgui;
 #define BUILD_TIMER_BACKGROUND_TEXTURE "hud/BuildTimerBG"
 #define BUILD_TIMER_FOREGROUND_TEXTURE "hud/BuildTimerFG"
 
-extern Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/);
-
 class CHudBuildTimer : public CHudElement, public Panel
 {
 	DECLARE_CLASS_SIMPLE(CHudBuildTimer, Panel);

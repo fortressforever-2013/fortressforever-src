@@ -27,6 +27,7 @@
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+#include <c_playerresource.h>
 
 using namespace vgui;
 
@@ -36,8 +37,6 @@ using namespace vgui;
 #define AMMOCLIP_FOREGROUND_TEXTURE "hud/AmmoClipFG"
 #define AMMOINFO_BACKGROUND_TEXTURE "hud/AmmoInfoBG"
 #define AMMOINFO_FOREGROUND_TEXTURE "hud/AmmoInfoFG"
-
-extern Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/);
 
 //-----------------------------------------------------------------------------
 // Purpose: Displays current ammunition level
@@ -235,7 +234,10 @@ void CHudAmmo::Paint()
 	if ( !pPlayer )
 		return;
 
-	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
+	Color cColor = Color(255, 255, 255, 255);
+	if ( g_PR )
+		cColor = g_PR->GetTeamColor(pPlayer->GetTeamNumber());
+
 	cColor.setA(150);
 
 	// draw our background first
@@ -451,7 +453,10 @@ void CHudAmmoClip::Paint()
 	if ( !pPlayer )
 		return;
 
-	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
+	Color cColor = Color(255, 255, 255, 255);
+	if ( g_PR )
+		cColor = g_PR->GetTeamColor(pPlayer->GetTeamNumber());
+
 	cColor.setA(150);
 
 	// draw our background first
@@ -645,7 +650,10 @@ void CHudAmmoInfo::Paint()
 	if ( !pPlayer )
 		return;
 
-	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
+	Color cColor = Color(255, 255, 255, 255);
+	if ( g_PR )
+		cColor = g_PR->GetTeamColor(pPlayer->GetTeamNumber());
+
 	cColor.setA(150);
 
 	// draw our background first

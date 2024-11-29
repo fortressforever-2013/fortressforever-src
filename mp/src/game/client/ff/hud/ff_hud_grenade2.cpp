@@ -15,13 +15,12 @@
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+#include <c_playerresource.h>
 
 using namespace vgui;
 
 #define GREN2_BACKGROUND_TEXTURE "hud/Gren2BG"
 #define GREN2_FOREGROUND_TEXTURE "hud/Gren2FG"
-
-extern Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/);
 
 //-----------------------------------------------------------------------------
 // Purpose: Displays current ammunition level
@@ -252,8 +251,11 @@ void CHudGrenade2::Paint()
 	if ( !pPlayer )
 		return;
 
-	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
-	cColor.setA( 150 );
+	Color cColor = Color(255, 255, 255, 255);
+	if ( g_PR )
+		cColor = g_PR->GetTeamColor(pPlayer->GetTeamNumber());
+
+	cColor.setA(150);
 
 	// draw our background first
 	surface()->DrawSetTextureFile( m_pBGTexture->textureId, GREN2_BACKGROUND_TEXTURE, true, false );

@@ -231,7 +231,10 @@ void CHudGrenade1Timer::Paint()
 	if ( !pPlayer )
 		return;
 
-	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
+	Color cColor = Color(255, 255, 255, 255);
+	if ( g_PR )
+		cColor = g_PR->GetTeamColor(pPlayer->GetTeamNumber());
+
 	cColor.setA(150);
 
 	// draw our background first

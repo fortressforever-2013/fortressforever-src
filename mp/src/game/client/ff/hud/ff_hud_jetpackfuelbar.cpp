@@ -22,8 +22,6 @@ using namespace vgui;
 
 #define JETPACK_FUEL_BAR_PROGRESS_TEXTURE "hud/JetpackFuelBarProgress"
 
-extern Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/);
-
 //-----------------------------------------------------------------------------
 // Purpose: Displays jetpack fuel remaining on the HUD
 //-----------------------------------------------------------------------------
@@ -149,7 +147,10 @@ void CHudJetpackFuelBar::Paint( void )
 	if ( !pPlayer )
 		return;
 
-	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
+	Color cColor = Color(255, 255, 255, 255);
+	if ( g_PR )
+		cColor = g_PR->GetTeamColor(pPlayer->GetTeamNumber());
+
 	cColor.setA(150);
 
 	// draw our background first

@@ -29,6 +29,7 @@
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+#include <c_playerresource.h>
 
 using namespace vgui;
 
@@ -36,7 +37,6 @@ using namespace vgui;
 #define ROUNDINFO_FOREGROUND_TEXTURE "hud/RoundInfoFG"
 
 extern ConVar mp_timelimit;
-extern Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/);
 
 //-----------------------------------------------------------------------------
 // Purpose: Displays current disguised class
@@ -193,7 +193,10 @@ void CHudRoundInfo::Paint( void )
 	if ( !pPlayer )
 		return;
 
-	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
+	Color cColor = Color(255, 255, 255, 255);
+	if ( g_PR )
+		cColor = g_PR->GetTeamColor(pPlayer->GetTeamNumber());
+
 	cColor.setA(150); // hud background alpha
 
 	surface()->DrawSetTextureFile( m_pBGTexture->textureId, ROUNDINFO_BACKGROUND_TEXTURE, true, false );

@@ -35,13 +35,12 @@ using namespace vgui;
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+#include <c_playerresource.h>
 
 #define INIT_CELLCOUNT -1
 
 #define CELLCOUNT_BACKGROUND_TEXTURE "hud/CellCountBG"
 #define CELLCOUNT_FOREGROUND_TEXTURE "hud/CellCountFG"
-
-extern Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/);
 
 //-----------------------------------------------------------------------------
 // Purpose: Cell count panel
@@ -234,7 +233,10 @@ void CHudCellCount::Paint()
 
 	UpdateCellCount();
 
-	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
+	Color cColor = Color(255, 255, 255, 255);
+	if ( g_PR )
+		cColor = g_PR->GetTeamColor(pPlayer->GetTeamNumber());
+
 	cColor.setA(150);
 
 	// draw our background first

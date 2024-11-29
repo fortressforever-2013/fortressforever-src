@@ -28,11 +28,10 @@ using namespace vgui;
 
 #include "c_ff_player.h"
 #include "ff_utils.h"
+#include <c_playerresource.h>
 
 #define LOCATION_BACKGROUND_TEXTURE "hud/HudLocationBG"
 #define LOCATION_FOREGROUND_TEXTURE "hud/HudLocationFG"
-
-extern Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/);
 
 //=============================================================================
 //
@@ -162,7 +161,10 @@ void CHudLocation::Paint( void )
 	if ( !pPlayer )
 		return;
 
-	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
+	Color cColor = Color(255, 255, 255, 255);
+	if ( g_PR )
+		cColor = g_PR->GetTeamColor(pPlayer->GetTeamNumber());
+
 	cColor.setA(150);
 
 	// draw our background first

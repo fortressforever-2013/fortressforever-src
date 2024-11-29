@@ -9,8 +9,6 @@ using namespace vgui;
 #define GREN2_TIMER_BACKGROUND_TEXTURE "hud/Gren2TimerBG"
 #define GREN2_TIMER_FOREGROUND_TEXTURE "hud/Gren2TimerFG"
 
-extern Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/);
-
 class CHudGrenade2Timer : public CHudElement, public Panel
 {
 	DECLARE_CLASS_SIMPLE(CHudGrenade2Timer, Panel);

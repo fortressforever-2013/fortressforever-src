@@ -36,13 +36,12 @@ using namespace vgui;
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+#include <c_playerresource.h>
 
 #define INIT_HEALTH -1
 
 #define HEALTH_BACKGROUND_TEXTURE "hud/HealthBG"
 #define HEALTH_FOREGROUND_TEXTURE "hud/HealthFG"
-
-extern Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/);
 
 //-----------------------------------------------------------------------------
 // Purpose: Health panel
@@ -183,7 +182,10 @@ void CHudHealth::Paint()
 
 	UpdateDisplay();
 
-	Color cColor = GetCustomClientColor( -1, pPlayer->GetTeamNumber() );
+	Color cColor = Color(255, 255, 255, 255);
+	if ( g_PR )
+		cColor = g_PR->GetTeamColor(pPlayer->GetTeamNumber());
+
 	cColor.setA(150);
 
 	// draw our background first
