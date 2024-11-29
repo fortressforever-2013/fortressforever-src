@@ -38,6 +38,9 @@
 
 static 	CClassMemoryPool< CHudTexture >	 g_HudTextureMemoryPool(128);
 
+// if FFPanel is added (for whatever reason) then comment this out
+ConVar cl_teamcolourhud("cl_teamcolourhud", "1", FCVAR_ARCHIVE);
+
 //-----------------------------------------------------------------------------
 // Purpose: Parses the weapon txt files to get the sprites needed.
 //-----------------------------------------------------------------------------
