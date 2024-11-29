@@ -7,8 +7,8 @@
 
 using namespace vgui;
 
-#define BUILD_TIMER_BACKGROUND_TEXTURE "hud/Gren1TimerBG"
-#define BUILD_TIMER_FOREGROUND_TEXTURE "hud/Gren1TimerFG"
+#define BUILD_TIMER_BACKGROUND_TEXTURE "hud/BuildTimerBG"
+#define BUILD_TIMER_FOREGROUND_TEXTURE "hud/BuildTimerFG"
 
 extern Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/);
 
