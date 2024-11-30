@@ -546,8 +546,8 @@ CFFPlayer::CFFPlayer()
 
 	// Grenade Related
 	ResetGrenadeState();
-	m_iPrimary = 0;
-	m_iSecondary = 0;
+	m_iPrimary = -1;
+	m_iSecondary = -1;
 
 	// Status Effects
 	m_iBurnLevel = 0;
