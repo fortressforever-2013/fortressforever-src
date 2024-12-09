@@ -39,7 +39,7 @@ public:
 
 private:
 	void Hit(trace_t &traceHit, Activity nHitActivity);
-
+	CNetworkVar( bool, m_bBackstabAnimation );
 	CFFWeaponKnife(const CFFWeaponKnife &);
 };
 
