@@ -61,7 +61,17 @@ void CFFWeaponInfo::Parse( KeyValues *pKeyValuesData, const char *szWeaponName )
 	const char *pAnimEx = pKeyValuesData->GetString( "PlayerAnimationExtension", "mp5" );
 	Q_strncpy( m_szAnimExtension, pAnimEx, sizeof( m_szAnimExtension ) );
 
-	const char *pNewViewmodel = pKeyValuesData->GetString( "viewmodel_new", szViewModel );
+	const char *pNewViewmodel = pKeyValuesData->GetString( "viewmodel_new" );
+	if( pNewViewmodel && pNewViewmodel[0] != '\0' )
+	{
+		bUsesFallbackNewViewmodel = false;
+	}
+	else
+	{
+		bUsesFallbackNewViewmodel = true;
+		pNewViewmodel = szViewModel;
+	}
+
 	Q_strncpy( szNewViewModel, pNewViewmodel, sizeof( szNewViewModel ) );
 }
 

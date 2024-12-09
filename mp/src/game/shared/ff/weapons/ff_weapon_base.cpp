@@ -236,6 +236,11 @@ const char *CFFWeaponBase::GetNewViewModel( int /*viewmodelindex = 0 -- this is 
 	return GetFFWpnData().szNewViewModel;
 }
 
+bool CFFWeaponBase::IsPlayerUsingNonFallbackNewViewmodel( CFFPlayer *pPlayer ) const
+{
+	return !pPlayer->m_bClassicViewModels && !GetFFWpnData().bUsesFallbackNewViewmodel;
+}
+
 const char *CFFWeaponBase::GetWorldModel( void ) const
 {
 #ifdef CLIENT_DLL

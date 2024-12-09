@@ -53,6 +53,7 @@ public:
 
 	// SDK2013
 	char	szNewViewModel[MAX_WEAPON_STRING];
+	bool	bUsesFallbackNewViewmodel;
 };
 
 
