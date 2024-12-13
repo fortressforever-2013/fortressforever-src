@@ -46,6 +46,9 @@ public:
 	{
 		SetParent( g_pClientMode->GetViewport() );
 		SetHiddenBits( HIDEHUD_UNASSIGNED );
+
+		m_flTimerX = 0;
+		m_flMapNameX = 0;
 	}
 
 	virtual ~CHudRoundInfo( void )
@@ -55,17 +58,20 @@ public:
 	virtual bool ShouldDraw( void );
 	virtual void Paint( void );
 	virtual void VidInit( void );
+	virtual void Reset( void );
 
 private:
 	// Stuff we need to know
 	CPanelAnimationVar( vgui::HFont, m_hMapNameFont, "MapNameFont", "HUD_TextRoundInfo" );
 	CPanelAnimationVar( Color, m_hMapNameColor, "MapNameColor", "HUD_Tone_Default" );
-	CPanelAnimationVarAliasType( float, m_flMapNameX, "MapNameX", "32", "proportional_float" );
+	//CPanelAnimationVarAliasType( float, m_flMapNameX, "MapNameX", "32", "proportional_float" );
+	float m_flMapNameX;
 	CPanelAnimationVarAliasType( float, m_flMapNameY, "MapNameY", "3", "proportional_float" );
 
 	CPanelAnimationVar( vgui::HFont, m_hTimerFont, "TimerFont", "HUD_TextRoundInfo" );
 	CPanelAnimationVar( Color, m_hTimerColor, "TimerColor", "HUD_Tone_Default" );
-	CPanelAnimationVarAliasType( float, m_flTimerX, "TimerX", "12", "proportional_float" );
+	//CPanelAnimationVarAliasType( float, m_flTimerX, "TimerX", "12", "proportional_float" );
+	float m_flTimerX;
 	CPanelAnimationVarAliasType( float, m_flTimerY, "TimerY", "23", "proportional_float" );
 	
 	wchar_t		m_szMapName[ MAX_PATH ];
@@ -75,9 +81,9 @@ private:
 DECLARE_HUDELEMENT( CHudRoundInfo );
 
 //-----------------------------------------------------------------------------
-// Purpose: Done each map load
+// Purpose:
 //-----------------------------------------------------------------------------
-void CHudRoundInfo::VidInit( void )
+void CHudRoundInfo::Reset( void )
 {
 	// Set up map name
 	g_pVGuiLocalize->ConvertANSIToUnicode( UTIL_GetFormattedMapName(), m_szMapName, sizeof( m_szMapName ) );
@@ -94,6 +100,14 @@ void CHudRoundInfo::VidInit( void )
 	surface()->GetTextSize( m_hTimerFont, m_szRoundTimer, iTimerWide, iTimerTall );
 
 	m_flTimerX = ( GetWide() / 2 ) - ( iTimerWide / 2 );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Done each map load
+//-----------------------------------------------------------------------------
+void CHudRoundInfo::VidInit( void )
+{
+	Reset();
 }
 
 //-----------------------------------------------------------------------------
