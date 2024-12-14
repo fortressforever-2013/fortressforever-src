@@ -70,15 +70,18 @@ namespace vgui
 		//if( FF_IsPlayerSpec( pPlayer ) || !FF_HasPlayerPickedClass( pPlayer ) )
 		//	return;
 
+		int wide = GetWide();
+		int tall = GetTall();
+
 		if (m_pHudBackground)
 		{
 			if (cl_teamcolourhud.GetBool())
-				m_pHudBackground->DrawSelf(0, 0, m_TeamColorHudBackgroundColour);
+				m_pHudBackground->DrawSelf(0, 0, wide, tall, m_TeamColorHudBackgroundColour);
 			else
-				m_pHudBackground->DrawSelf(0, 0, m_HudBackgroundColour);
+				m_pHudBackground->DrawSelf(0, 0, wide, tall, m_HudBackgroundColour);
 		}
 		if (m_pHudForeground)
-			m_pHudForeground->DrawSelf(0, 0, m_HudForegroundColour);
+			m_pHudForeground->DrawSelf(0, 0, wide, tall, m_HudForegroundColour);
 
 		BaseClass::PaintBackground();
 	}
