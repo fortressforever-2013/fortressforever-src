@@ -878,6 +878,7 @@ void CFFPlayer::Precache()
 				{
 					PrecacheModel( pClassInfo->m_szModel );
 				}
+			}
 		}
 	}
 
