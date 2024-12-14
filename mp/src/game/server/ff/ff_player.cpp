@@ -859,17 +859,27 @@ void CFFPlayer::Precache()
 	// #0000331: impulse 81 not working (weapon_cubemap)
 	PrecacheModel("models/shadertest/envballs.mdl");
 
-	// Quick addition to precache all the player models
-	PrecacheModel("models/player/scout/scout.mdl");
-	PrecacheModel("models/player/sniper/sniper.mdl");
-	PrecacheModel("models/player/soldier/soldier.mdl");
-	PrecacheModel("models/player/demoman/demoman.mdl");
-	PrecacheModel("models/player/medic/medic.mdl");
-	PrecacheModel("models/player/hwguy/hwguy.mdl");
-	PrecacheModel("models/player/pyro/pyro.mdl");
-	PrecacheModel("models/player/spy/spy.mdl");
-	PrecacheModel("models/player/engineer/engineer.mdl");
-	PrecacheModel("models/player/civilian/civilian.mdl");
+	const char *szClassNames[] = { 
+		"scout", "sniper", "soldier", 
+		"demoman", "medic", "hwguy", 
+		"pyro", "spy", "engineer", 
+		"civilian" 
+	};
+
+	for( const char *szClassname : szClassNames )
+	{
+		PLAYERCLASS_FILE_INFO_HANDLE hClassInfo;
+		if( ReadPlayerClassDataFromFileForSlot( filesystem, szClassname, &hClassInfo, g_pGameRules->GetEncryptionKey() ) )
+		{
+			const CFFPlayerClassInfo *pClassInfo = GetFilePlayerClassInfoFromHandle( hClassInfo );
+			if ( pClassInfo )
+			{
+				if( pClassInfo->m_szModel && pClassInfo->m_szModel[0] )
+				{
+					PrecacheModel( pClassInfo->m_szModel );
+				}
+		}
+	}
 
 	// Sounds
 	//PrecacheScriptSound("Grenade.Timer");
