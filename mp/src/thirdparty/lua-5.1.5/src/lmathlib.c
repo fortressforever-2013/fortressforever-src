@@ -125,6 +125,7 @@ static int math_log (lua_State *L) {
     if (base == 10.0) res = log10(x);
     else res = log(x)/log(base);
   }
+  lua_pushnumber(L, res);
   return 1;
 }
 
