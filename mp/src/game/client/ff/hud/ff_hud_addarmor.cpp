@@ -61,6 +61,8 @@ public:
 	virtual void Paint( void );
 	virtual void Init( void );
 	virtual void VidInit( void );
+	virtual void Reset( void );
+
 	void MsgFunc_PlayerAddArmor( bf_read &msg );
 
 protected:
@@ -72,12 +74,7 @@ private:
 	float		m_flDuration;		// Duration of the message
 
 	// Stuff we need to know	
-	CPanelAnimationVar( vgui::HFont, m_hArmorFont, "ArmorFont", "Default" );
-
-	CPanelAnimationVar( vgui::HFont, m_hArmorFontBG, "ArmorFontBG", "Default" );
-
-	CPanelAnimationVarAliasType( float, ArmorFont_xpos, "ArmorFont_xpos", "0", "proportional_float" );
-	CPanelAnimationVarAliasType( float, ArmorFont_ypos, "ArmorFont_ypos", "0", "proportional_float" );
+	CPanelAnimationVar( vgui::HFont, m_hTextFont, "text_font", "HudAddHealth" );
 };
 
 DECLARE_HUDELEMENT( CHudPlayerAddArmor );
@@ -94,7 +91,15 @@ void CHudPlayerAddArmor::Init( void )
 //-----------------------------------------------------------------------------
 // Purpose: Done each map load
 //-----------------------------------------------------------------------------
-void CHudPlayerAddArmor::VidInit( void )
+void CHudPlayerAddArmor::VidInit(void)
+{
+	Reset();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CHudPlayerAddArmor::Reset( void )
 {
 	SetPaintBackgroundEnabled( false );
 
@@ -137,11 +142,9 @@ void CHudPlayerAddArmor::Paint()
 	if ( m_flStartTime + m_flDuration < gpGlobals->curtime )
 		return;
 
-	FFPanel::Paint(); // Draws the background glyphs 
-
-	surface()->DrawSetTextFont( m_hArmorFont );
+	surface()->DrawSetTextFont( m_hTextFont );
 	surface()->DrawSetTextColor( GetFgColor() );
-	surface()->DrawSetTextPos( ArmorFont_xpos, ArmorFont_ypos );
+	surface()->DrawSetTextPos( 0, 0 );
 
 	wchar_t wBuf[20];
 
