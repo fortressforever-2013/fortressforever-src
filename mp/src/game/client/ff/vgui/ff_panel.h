@@ -41,15 +41,15 @@ namespace vgui
 		CHudTexture		*m_pHudBackground;
 
 		int				m_iPlayerTeam;
-
-		Color			m_HudForegroundColour;
-		Color			m_HudBackgroundColour;
 		Color			m_TeamColorHudBackgroundColour;
 		
 		void ApplySettings(KeyValues *inResourceData);
 		void ApplySchemeSettings(IScheme *pScheme);
 		void PaintBackground();
 		void OnTick();
+		
+		CPanelAnimationVar( Color, m_HudForegroundColour, "ForegroundColour", "HudItem.Foreground" );
+		CPanelAnimationVar( Color, m_HudBackgroundColour, "BackgroundColour", "HudItem.Background" );
 	};
 }
 

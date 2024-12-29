@@ -53,8 +53,6 @@ namespace vgui
 		//this is needed when changing resolutions!
 		m_iPlayerTeam = -1;
 
-		m_HudForegroundColour = GetSchemeColor( "HudItem.Foreground", pScheme );
-		m_HudBackgroundColour = GetSchemeColor( "HudItem.Background", pScheme );
 		m_TeamColorHudBackgroundColour = GetSchemeColor( "TeamColorHud.BackgroundAlpha", pScheme );
 
 		BaseClass::ApplySchemeSettings( pScheme );
@@ -111,7 +109,8 @@ namespace vgui
 			{
 				m_iPlayerTeam = iPlayerTeam;
 				Color newTeamColor = g_PR->GetTeamColor( m_iPlayerTeam );
-				m_TeamColorHudBackgroundColour.SetColor( newTeamColor.r(), newTeamColor.g(), newTeamColor.b(), m_TeamColorHudBackgroundColour.a() );
+				newTeamColor.setA( m_TeamColorHudBackgroundColour.a() );
+				m_TeamColorHudBackgroundColour = newTeamColor;
 			}
 		}
 	}
@@ -128,8 +127,6 @@ namespace vgui
 		m_pHudBackground = NULL;
 		m_pHudForeground = NULL;
 
-		m_HudForegroundColour = Color(255, 255, 255, 255);
-		m_HudBackgroundColour = Color(255, 255, 255, 255);
 		m_TeamColorHudBackgroundColour = Color(255, 255, 255, 255);
 
 		ivgui()->AddTickSignal( GetVPanel(), 500 );
