@@ -118,7 +118,7 @@ $Project "Client (FF)"
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_hitindicator.cpp"
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_jetpackfuelbar.cpp"
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_keystate.cpp"
-			$File "$SRCDIR\game\client\ff\hud\ff_hud_keystate.h"
+			//$File "$SRCDIR\game\client\ff\hud\ff_hud_keystate.h" // empty file (??)
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_location.cpp"
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_lua.cpp"
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_lua.h"
@@ -139,7 +139,7 @@ $Project "Client (FF)"
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_spydisguise.cpp"
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_statusicons.cpp"
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_teamscores.cpp"
-			$File "$SRCDIR\game\client\ff\hud\ff_hud_weaponinfo.cpp"
+			//$File "$SRCDIR\game\client\ff\hud\ff_hud_weaponinfo.cpp" // merged into ff_hud_ammo (CHudAmmoInfo)
 			$File "$SRCDIR\game\client\ff\hud\ff_hud_weaponselection.cpp"
 		}
 		
