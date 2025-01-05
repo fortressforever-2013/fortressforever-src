@@ -37,7 +37,6 @@ CHudGrenade2Timer::~CHudGrenade2Timer()
 
 void CHudGrenade2Timer::Init() 
 {
-	g_pGrenade2Timer = this;
 	ivgui()->AddTickSignal( GetVPanel(), 100 );
 
 	ResetTimer();
@@ -93,6 +92,9 @@ void CHudGrenade2Timer::OnTick()
 		SetPaintBackgroundEnabled(false);
 		return;
 	}
+
+	if (!m_pFFPlayer->m_pGrenade2Timer)
+		m_pFFPlayer->m_pGrenade2Timer = this;
 	
 	if (!hud_grenadetimers.GetBool()) 
 	{

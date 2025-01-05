@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright 1996-2006, Valve Corporation, All rights reserved. ============//
 // TODO: Can the copyright above be updated?
 // Purpose:	HL1/TFC-based player class for Fortress Forever.
 // $NoKeywords: $
@@ -394,7 +394,8 @@ BEGIN_SEND_TABLE_NOBASE( CFFPlayer, DT_FFLocalPlayerExclusive )
 	SendPropInt( SENDINFO( m_iGrenadeState ), 2, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_iPrimary ), 4 ),		// Not unsigned because can be -1
 	SendPropInt( SENDINFO( m_iSecondary ), 4 ),
-	SendPropFloat( SENDINFO( m_flServerPrimeTime ) ),
+	//SendPropTime( SENDINFO( m_flPrimeTime ) ),
+	SendPropBool( SENDINFO( m_bWantToThrowGrenade ) ),
 
 	// Map guide
 	SendPropEHandle( SENDINFO( m_hNextMapGuide ) ),
@@ -1955,7 +1956,7 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 	// Drop any grenades
 	if (m_iGrenadeState != FF_GREN_NONE)
 	{
-		ThrowGrenade(GREN_TIMER - (gpGlobals->curtime - m_flServerPrimeTime), 0.0f);
+		ThrowGrenade(GREN_TIMER - (gpGlobals->curtime - m_flPrimeTime), 0.0f);
 		ResetGrenadeState();
 	}
 	
@@ -4903,180 +4904,6 @@ void CFFPlayer::IncreaseBurnLevel( int iAmount )
 	}
 }
 
-// Toggle grenades (requested by defrag)
-void CFFPlayer::Command_ToggleOne(const CCommand& args)
-{
-	if( IsGrenadePrimed() )
-		Command_ThrowGren(args);
-	else
-		Command_PrimeOne(args);
-}
-
-void CFFPlayer::Command_ToggleTwo(const CCommand& args)
-{
-	if( IsGrenadePrimed() )
-		Command_ThrowGren(args);
-	else
-		Command_PrimeTwo(args);
-}
-
-void CFFPlayer::Command_PrimeOne(const CCommand& args)
-{
-	if (IsGrenadePrimed())
-		return;
-
-	if( GetFlags() & FL_FROZEN )
-		return;
-
-	// Can't throw grenade while building
-	if( m_bStaticBuilding )
-		return;
-
-	// Bug #0000366: Spy's cloaking & grenade quirks
-	// Spy shouldn't be able to prime grenades when Cloaked
-	if (IsCloaked())
-		return;
-
-	const CFFPlayerClassInfo &pPlayerClassInfo = GetFFClassData();
-
-	// we have a primary grenade type
-	if (strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None" ))
-	{
-		if(m_iPrimary > 0)
-		{
-			// ax1
-			EmitSoundShared("Grenade.Prime"); // This is mirrored in CC_PrimeOne for client
-
-			// Jiggles: Added lua callback for squeek's training map
-			CFFLuaSC hContext( 1, this );
-			_scriptman.RunPredicates_LUA( NULL, &hContext, "player_onprimegren1" );
-			// End callback
-
-			m_iGrenadeState = FF_GREN_PRIMEONE;
-			m_flServerPrimeTime = gpGlobals->curtime;
-#ifndef _DEBUG
-			m_iPrimary--;
-		}
-		else
-		{
-			DevMsg("[Grenades] You are out of primary grenades!\n");
-#endif
-		}
-	}
-}
-
-void CFFPlayer::Command_PrimeTwo(const CCommand& args)
-{
-	if (IsGrenadePrimed())
-		return;
-
-	if( GetFlags() & FL_FROZEN )
-		return;
-
-	// Can't throw grenade while building
-	if( m_bStaticBuilding )
-		return;
-
-	// Bug #0000366: Spy's cloaking & grenade quirks
-	// Spy shouldn't be able to prime grenades when Cloaked
-	if (IsCloaked())
-		return;
-
-    const CFFPlayerClassInfo &pPlayerClassInfo = GetFFClassData();
-
-	// we have a secondary grenade type
-	if (strcmp( pPlayerClassInfo.m_szSecondaryClassName, "None" ))
-	{
-		if(m_iSecondary > 0)
-		{
-			// ax1
-			EmitSoundShared("Grenade.Prime"); // This is mirrored in CC_PrimeTwo for client
-
-			// Jiggles: Added lua callback for squeek's training map
-			CFFLuaSC hContext( 1, this );
-			_scriptman.RunPredicates_LUA( NULL, &hContext, "player_onprimegren2" );
-			// End callback
-
-			// Hint Code
-			//Msg("\nSecondary Class Name: %s\n", pPlayerClassInfo.m_szSecondaryClassName );
-			//if ( strcmp( pPlayerClassInfo.m_szSecondaryClassName, "ff_grenade_nail" ) == 0 )
-			//	FF_SendHint( this, SOLDIER_NAILGREN, 4, PRIORITY_NORMAL, "#FF_HINT_SOLDIER_NAILGREN" );
-			//else if ( strcmp( pPlayerClassInfo.m_szSecondaryClassName, "ff_grenade_concussion" ) == 0 )
-			//	FF_SendHint( this, SCOUT_CONC1, 1, PRIORITY_NORMAL, "#FF_HINT_SCOUT_CONC1" );
-
-			// Jiggles: Let's try it this way to avoid the above string compares
-				switch( GetClassSlot() )
-				{
-					case CLASS_SOLDIER: 
-						FF_SendHint( this, SOLDIER_LASERGREN, 1, PRIORITY_NORMAL, "#FF_HINT_SOLDIER_LASERGREN" );
-						break;
-					case CLASS_HWGUY:
-						FF_SendHint( this, HWGUY_SLOWFIELD, 1, PRIORITY_NORMAL, "#FF_HINT_HWGUY_SLOWFIELD" );
-						break;
-					case CLASS_MEDIC:
-					case CLASS_SCOUT:
-						FF_SendHint( this, SCOUT_CONC1, 1, PRIORITY_NORMAL, "#FF_HINT_SCOUT_CONC1" );
-						break;
-				}
-			// End hint code
-
-			m_iGrenadeState = FF_GREN_PRIMETWO;
-			m_flServerPrimeTime = gpGlobals->curtime;
-#ifndef _DEBUG
-			m_iSecondary--;
-		}
-		else
-		{
-			DevMsg("[Grenades] You are out of secondary grenades!\n");
-#endif
-		}
-	}
-}
-
-void CFFPlayer::Command_ThrowGren(const CCommand& args)
-{
-	if (!IsGrenadePrimed())
-		return;
-
-	// ted_maul: 0000614: Grenade timer issues
-	// release delay
-	if(gpGlobals->curtime - m_flServerPrimeTime < GREN_THROW_DELAY)
-	{
-		// release this grenade at the earliest opportunity
-		m_bWantToThrowGrenade = true;
-		return;
-	}
-
-	bool bThrowGrenade = true;
-	float fPrimeTimer = GREN_TIMER - (gpGlobals->curtime - m_flServerPrimeTime);
-
-	// Give lua the chance to override grenade throwing.
-	// It should return false to avoid throwing the grenade
-	CFFLuaSC hContext( 1, this );
-	hContext.Push(1.0f - (fPrimeTimer / GREN_TIMER));
-	
-	const char *pLuaFn = 0;
-	if(m_iGrenadeState == FF_GREN_PRIMEONE)
-		pLuaFn = "player_onthrowgren1";
-	else if(m_iGrenadeState == FF_GREN_PRIMETWO)
-		pLuaFn = "player_onthrowgren2";	
-	if( pLuaFn && _scriptman.RunPredicates_LUA( NULL, &hContext, pLuaFn ) )
-		bThrowGrenade = hContext.GetBool();
-
-	if(bThrowGrenade)
-		ThrowGrenade(fPrimeTimer);
-	
-	ResetGrenadeState();
-}
-
-void CFFPlayer::ResetGrenadeState( void )
-{
-	m_bWantToThrowGrenade = false;
-	m_iGrenadeState = FF_GREN_NONE;
-	m_flServerPrimeTime = 0.0f;
-	m_bEngyGrenWarned = false;
-}
-
 int CFFPlayer::GetPrimaryGrenades( void )
 {
 	return m_iPrimary;
@@ -5115,19 +4942,6 @@ int CFFPlayer::AddSecondaryGrenades( int iNewCount )
 	return ret;
 }
 
-bool CFFPlayer::IsGrenade1Primed()
-{
-	return ( ( m_iGrenadeState == FF_GREN_PRIMEONE ) );
-}
-bool CFFPlayer::IsGrenade2Primed()
-{
-	return ( ( m_iGrenadeState == FF_GREN_PRIMETWO ) );
-}
-bool CFFPlayer::IsGrenadePrimed()
-{
-	return IsGrenade1Primed() || IsGrenade2Primed();
-}
-
 void CFFPlayer::GrenadeThink(void)
 {
 	if (!IsGrenadePrimed())
@@ -5138,20 +4952,20 @@ void CFFPlayer::GrenadeThink(void)
 	// we've gotta play the sound here if applicable
 	if( ( GetClassSlot() == CLASS_ENGINEER ) && ( m_iGrenadeState == FF_GREN_PRIMETWO ) )
 	{
-		if( !m_bEngyGrenWarned && ( gpGlobals->curtime > ( m_flServerPrimeTime + GREN_TIMER - 0.685f ) ) )
+		if( !m_bEngyGrenWarned && ( gpGlobals->curtime > ( m_flPrimeTime + GREN_TIMER - 0.685f ) ) )
 		{
 			m_bEngyGrenWarned = true;
 			EmitSound( EMP_SOUND );
 		}
 	}	
 
-	if(m_bWantToThrowGrenade && gpGlobals->curtime - m_flServerPrimeTime >= GREN_THROW_DELAY)
+	if(m_bWantToThrowGrenade && gpGlobals->curtime - m_flPrimeTime >= GREN_THROW_DELAY)
 	{
-		Command_ThrowGren();
+		ThrowPrimedGrenade();
 		return;
 	}
 
-	if ( (m_flServerPrimeTime != 0 ) && ( ( gpGlobals->curtime - m_flServerPrimeTime ) >= GREN_TIMER ) )
+	if ( (m_flPrimeTime != 0 ) && ( ( gpGlobals->curtime - m_flPrimeTime ) >= GREN_TIMER ) )
 	{
 		ThrowGrenade(0); // "throw" a grenade that immediately explodes at the player's origin
 		ResetGrenadeState();
