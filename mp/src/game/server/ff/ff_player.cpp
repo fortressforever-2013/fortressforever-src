@@ -1,4 +1,4 @@
-//========= Copyright 1996-2006, Valve Corporation, All rights reserved. ============//
+//========= Copyright 1996-2005, Valve Corporation, All rights reserved. ============//
 // TODO: Can the copyright above be updated?
 // Purpose:	HL1/TFC-based player class for Fortress Forever.
 // $NoKeywords: $
