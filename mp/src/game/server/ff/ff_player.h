@@ -486,7 +486,8 @@ private:
 	CNetworkVar(FFPlayerGrenadeState, m_iGrenadeState);
 	CNetworkVar(int, m_iPrimary);
 	CNetworkVar(int, m_iSecondary);
-	CNetworkVar(float, m_flPrimeTime);
+	//CNetworkVar(float, m_flPrimeTime);
+	float m_flPrimeTime;
 	CNetworkVar(bool, m_bWantToThrowGrenade);			// does the client want to throw this grenade as soon as possible?
 	bool m_bEngyGrenWarned;
 	// Backpacks

@@ -376,11 +376,11 @@ public:
 	// Beg: Added by L0ki for grenade stuff
 public:
 	CNetworkVar(int, m_iGrenadeState);
-	CNetworkVar(float, m_flServerPrimeTime);
 	CNetworkVar(int, m_iPrimary);
 	CNetworkVar(int, m_iSecondary);
 
-	CNetworkVar(float, m_flPrimeTime);
+	//CNetworkVar(float, m_flPrimeTime);
+	float m_flPrimeTime;
 	CNetworkVar(bool, m_bWantToThrowGrenade);			// does the client want to throw this grenade as soon as possible?
 	// End: Added by L0ki for grenade stuff
 
