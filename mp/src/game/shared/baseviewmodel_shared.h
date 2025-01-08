@@ -46,6 +46,8 @@ public:
 
 	virtual int				InternalDrawModel( int flags );
 
+	int GetSkin(void);
+
 	CHandle<CBaseViewModel> m_hViewModel;
 };
 #endif // CLIENT_DLL
