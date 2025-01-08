@@ -753,7 +753,6 @@ void CBaseViewModel::SetArmModel( int iModelIndex, CBaseCombatWeapon *weapon )
 
 		m_hArmModel = pArms;
 
-		pArms->m_nSkin = GetTeamNumber() - FF_TEAM_BLUE;
 		pArms->m_hViewModel.Set( this );
 		pArms->FollowEntity( this );
 		pArms->SetModelIndex( iModelIndex );
@@ -827,6 +826,15 @@ int C_BaseViewModelArms::InternalDrawModel( int flags )
 	pRenderContext->CullMode( MATERIAL_CULLMODE_CCW );
 
 	return iRet;
+}
+
+int C_BaseViewModelArms::GetSkin( void )
+{
+	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayerOrObserverTarget();
+	if( pPlayer )
+		return pPlayer->GetTeamNumber() - FF_TEAM_BLUE;
+
+	return 0;
 }
 #endif
 #endif
