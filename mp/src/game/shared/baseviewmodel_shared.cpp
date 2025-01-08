@@ -27,6 +27,12 @@ extern ConVar in_forceuser;
 #include "iclientmode.h"
 #endif
 
+#ifdef FF
+#ifdef CLIENT_DLL
+#include "c_ff_player.h"
+#endif
+#endif
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -53,6 +59,10 @@ CBaseViewModel::CBaseViewModel()
 	m_nViewModelIndex	= 0;
 
 	m_nAnimationParity	= 0;
+
+#ifdef FF
+	m_iArmModelIndex = -1;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -64,6 +74,10 @@ CBaseViewModel::~CBaseViewModel()
 
 void CBaseViewModel::UpdateOnRemove( void )
 {
+#ifdef FF
+	RemoveArmModel();
+#endif
+
 	BaseClass::UpdateOnRemove();
 
 	DestroyControlPanels();
@@ -311,6 +325,13 @@ void CBaseViewModel::RemoveEffects( int nEffects )
 //-----------------------------------------------------------------------------
 void CBaseViewModel::SetWeaponModel( const char *modelname, CBaseCombatWeapon *weapon )
 {
+#ifdef FF
+	if ( !modelname || !modelname[0] )
+	{
+		RemoveArmModel();
+	}
+#endif
+
 	m_hWeapon = weapon;
 
 #if defined( CLIENT_DLL )
@@ -575,6 +596,10 @@ BEGIN_NETWORK_TABLE_NOBASE(CBaseViewModel, DT_BaseViewModel)
 #if !defined( INVASION_DLL ) && !defined( INVASION_CLIENT_DLL )
 	SendPropArray	(SendPropFloat(SENDINFO_ARRAY(m_flPoseParameter),	8, 0, 0.0f, 1.0f), m_flPoseParameter),
 #endif
+
+#ifdef FF
+	SendPropModelIndex( SENDINFO(m_iArmModelIndex) ),
+#endif
 #else
 	RecvPropInt		(RECVINFO(m_nModelIndex)),
 	RecvPropInt		(RECVINFO(m_nSkin)),
@@ -593,6 +618,9 @@ BEGIN_NETWORK_TABLE_NOBASE(CBaseViewModel, DT_BaseViewModel)
 
 #if !defined( INVASION_DLL ) && !defined( INVASION_CLIENT_DLL )
 	RecvPropArray(RecvPropFloat(RECVINFO(m_flPoseParameter[0]) ), m_flPoseParameter ),
+#endif
+#ifdef FF
+	RecvPropInt( RECVINFO( m_iArmModelIndex ) ),
 #endif
 #endif
 END_NETWORK_TABLE()
@@ -618,6 +646,9 @@ BEGIN_PREDICTION_DATA( CBaseViewModel )
 	DEFINE_FIELD( m_Activity, FIELD_INTEGER ),
 	DEFINE_PRED_FIELD( m_flCycle, FIELD_FLOAT, FTYPEDESC_PRIVATE | FTYPEDESC_OVERRIDE | FTYPEDESC_NOERRORCHECK ),
 
+#ifdef FF
+	DEFINE_PRED_FIELD( m_iArmModelIndex, FIELD_INTEGER, FTYPEDESC_INSENDTABLE | FTYPEDESC_MODELINDEX ),
+#endif
 END_PREDICTION_DATA()
 
 void RecvProxy_SequenceNum( const CRecvProxyData *pData, void *pStruct, void *pOut )
@@ -688,4 +719,114 @@ bool CBaseViewModel::GetAttachmentVelocity( int number, Vector &originVel, Quate
 	return BaseClass::GetAttachmentVelocity( number, originVel, angleVel );
 }
 
+#endif
+
+#ifdef FF
+void CBaseViewModel::SetArmModel( int iModelIndex, CBaseCombatWeapon *weapon )
+{
+	m_iArmModelIndex = iModelIndex;
+
+#ifdef CLIENT_DLL
+	CFFPlayer *pFFPlayer = CFFPlayer::GetLocalFFPlayerOrObserverTarget();
+	if( !pFFPlayer )
+		return;
+
+	CFFWeaponBase *pFFWeapon = static_cast<CFFWeaponBase *>( weapon );
+	if( !pFFWeapon )
+		return;
+
+	bool bCanDraw = pFFWeapon->IsPlayerUsingNonFallbackNewViewmodel( pFFPlayer );
+
+	C_BaseViewModelArms *pArms = m_hArmModel.Get();
+	if ( !pArms )
+	{
+		if ( !bCanDraw )
+			return;
+
+		pArms = new C_BaseViewModelArms();
+
+		if ( !pArms->InitializeAsClientEntity( NULL, RENDER_GROUP_VIEW_MODEL_OPAQUE ) )
+		{
+			pArms->Release();
+			return;
+		}
+
+		m_hArmModel = pArms;
+
+		pArms->m_nSkin = GetTeamNumber() - FF_TEAM_BLUE;
+		pArms->m_hViewModel.Set( this );
+		pArms->FollowEntity( this );
+		pArms->SetModelIndex( iModelIndex );
+		pArms->UpdateVisibility();
+		pArms->SetRenderColorA( 20 );
+
+		return;
+	}
+
+	if ( !bCanDraw )
+	{
+		pArms->Release();
+	}
+	else
+	{
+		pArms->SetModelIndex( iModelIndex );
+	}
+#endif
+}
+
+void CBaseViewModel::RemoveArmModel()
+{
+	m_iArmModelIndex = -1;
+
+#ifdef CLIENT_DLL
+	if ( m_hArmModel.Get() )
+	{
+		m_hArmModel->Release();
+	}
+#endif
+}
+
+#ifdef CLIENT_DLL
+void FormatViewModelAttachment( Vector &vOrigin, bool bInverse );
+
+bool C_BaseViewModelArms::InitializeAsClientEntity( const char *pszModelName, RenderGroup_t renderGroup )
+{
+	if ( BaseClass::InitializeAsClientEntity( pszModelName, renderGroup ) )
+	{
+		// EF_NODRAW so it won't get drawn directly. We want to draw it from the viewmodel.
+		AddEffects( EF_BONEMERGE | EF_BONEMERGE_FASTCULL | EF_NODRAW );
+		return true;
+	}
+
+	return false;
+}
+
+void C_BaseViewModelArms::FormatViewModelAttachment( int nAttachment, matrix3x4_t &attachmentToWorld )
+{
+	Vector vecOrigin;
+	MatrixPosition( attachmentToWorld, vecOrigin );
+	::FormatViewModelAttachment( vecOrigin, false );
+	PositionMatrix( vecOrigin, attachmentToWorld );
+}
+
+void C_BaseViewModelArms::UncorrectViewModelAttachment( Vector &vOrigin )
+{
+	::FormatViewModelAttachment( vOrigin, true );
+}
+
+int C_BaseViewModelArms::InternalDrawModel( int flags )
+{
+	CMatRenderContextPtr pRenderContext( materials );
+	if ( m_hViewModel && m_hViewModel->ShouldFlipViewModel() )
+	{
+		pRenderContext->CullMode( MATERIAL_CULLMODE_CW );
+	}
+
+	int iRet = BaseClass::InternalDrawModel( flags );
+
+	pRenderContext->CullMode( MATERIAL_CULLMODE_CCW );
+
+	return iRet;
+}
+#endif
 #endif

@@ -65,7 +65,8 @@ public:
 	char					m_szRole[MAX_PLAYERCLASS_STRING];
 	char					m_szDescription[MAX_PLAYERCLASS_STRING_LONG];
 	char					m_szModel[MAX_PLAYERCLASS_STRING];
-	
+	char					m_szArmModel[MAX_PLAYERCLASS_STRING];
+
 	int						m_iMaxArmour;
 	int						m_iInitialArmour;
 	int						m_iArmourType;

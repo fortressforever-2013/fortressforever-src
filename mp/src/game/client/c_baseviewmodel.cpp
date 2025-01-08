@@ -372,6 +372,14 @@ int C_BaseViewModel::InternalDrawModel( int flags )
 
 	pRenderContext->CullMode( MATERIAL_CULLMODE_CCW );
 
+#ifdef FF
+	if ( m_hArmModel.Get() )
+	{
+		m_hArmModel->CreateModelInstance();
+		m_hArmModel->InternalDrawModel( flags );
+	}
+#endif
+
 	return ret;
 }
 
@@ -386,6 +394,11 @@ int C_BaseViewModel::DrawOverriddenViewmodel( int flags )
 		if (!pPlayer->IsCloaked())
 		{
 			ReleaseOverrideMaterial(FF_CLOAK_MATERIAL);
+
+			if ( m_hArmModel.Get() )
+			{
+				m_hArmModel->ReleaseOverrideMaterial(FF_CLOAK_MATERIAL);
+			}
 		}
 		else
 		{
@@ -394,6 +407,11 @@ int C_BaseViewModel::DrawOverriddenViewmodel( int flags )
 				return 1;
 
 			FindOverrideMaterial(FF_CLOAK_MATERIAL, FF_CLOAK_TEXTURE_GROUP);
+
+			if ( m_hArmModel.Get() )
+			{
+				m_hArmModel->FindOverrideMaterial(FF_CLOAK_MATERIAL, FF_CLOAK_TEXTURE_GROUP);
+			}
 		}
 	}
 
@@ -496,6 +514,17 @@ void C_BaseViewModel::OnDataChanged( DataUpdateType_t updateType )
 {
 	SetPredictionEligible( true );
 	BaseClass::OnDataChanged(updateType);
+
+#ifdef FF
+	if ( m_iArmModelIndex != -1 )
+	{
+		SetArmModel( m_iArmModelIndex, GetOwningWeapon() );
+	}
+	else
+	{
+		RemoveArmModel();
+	}
+#endif
 }
 
 void C_BaseViewModel::PostDataUpdate( DataUpdateType_t updateType )
@@ -540,3 +569,27 @@ RenderGroup_t C_BaseViewModel::GetRenderGroup()
 {
 	return RENDER_GROUP_VIEW_MODEL_OPAQUE;
 }
+
+#ifdef FF
+void CBaseViewModel::SetDormant( bool bDormant )
+{
+	if ( bDormant )
+	{
+		RemoveArmModel();
+	}
+
+	BaseClass::SetDormant( bDormant );
+}
+
+bool C_BaseViewModel::OnInternalDrawModel( ClientModelRenderInfo_t *pInfo )
+{
+	bool bRet = BaseClass::OnInternalDrawModel( pInfo );
+
+	if ( m_hArmModel.Get() )
+	{
+		m_hArmModel->OnInternalDrawModel( pInfo );
+	}
+
+	return bRet;
+}
+#endif
