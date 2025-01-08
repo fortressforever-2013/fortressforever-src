@@ -1780,8 +1780,8 @@ static ConCommand joyadvancedupdate("joyadvancedupdate", IN_Joystick_Advanced_f,
 static ConCommand startzoom("+zoom", IN_ZoomDown);
 static ConCommand endzoom("-zoom", IN_ZoomUp);
 
-static ConCommand startgrenade1("+grenade1", IN_Grenade1Down);
-static ConCommand endgrenade1("-grenade1", IN_Grenade1Up);
+static ConCommand startgrenade1("+gren1", IN_Grenade1Down);
+static ConCommand endgrenade1("-gren1", IN_Grenade1Up);
 
 static ConCommand startgrenade2("+grenade2", IN_Grenade2Down);
 static ConCommand endgrenade2("-grenade2", IN_Grenade2Up);
