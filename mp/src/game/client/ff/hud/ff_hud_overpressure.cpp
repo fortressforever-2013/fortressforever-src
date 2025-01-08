@@ -47,39 +47,59 @@ public:
 	{
 		SetParent( g_pClientMode->GetViewport() );
 		SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED );
+
+		m_pProgressBarTexture = NULL;
 	}
 
 	virtual ~CHudOverpressure( void )
 	{
 	}
 
+	virtual void ApplySettings( KeyValues *inResourceData )
+	{
+		const char* pszTexture = inResourceData->GetString( "bar_texture", NULL );
+		m_pProgressBarTexture = ( pszTexture ? gHUD.GetIcon( pszTexture ) : NULL );
+
+		BaseClass::ApplySettings( inResourceData );
+	}
+
 	virtual void Paint( void );
-	virtual void VidInit( void );
+	virtual bool ShouldDraw( void );
 
 protected:
 
 private:
-	// Stuff we need to know
-	CPanelAnimationVar( vgui::HFont, m_hTextFont, "TextFont", "HUD_TextSmall" );
+	CPanelAnimationVarAliasType( float, bar_x_offset, "bar_x_offset", "3", "proportional_float" );
+	CPanelAnimationVarAliasType( float, bar_y_offset, "bar_y_offset", "3", "proportional_float" );
 
-	CPanelAnimationVarAliasType( float, text1_xpos, "text1_xpos", "34", "proportional_float" );
-	CPanelAnimationVarAliasType( float, text1_ypos, "text1_ypos", "10", "proportional_float" );
+	CPanelAnimationVar( Color, bar_color, "bar_color", "HUD_Tone_Default" );
 
-	CPanelAnimationVarAliasType( float, image1_xpos, "image1_xpos", "2", "proportional_float" );
-	CPanelAnimationVarAliasType( float, image1_ypos, "image1_ypos", "4", "proportional_float" );
-
-	// For the disguising progress bar
-	CPanelAnimationVar( Color, m_BarColor, "HUD_Tone_Default", "HUD_Tone_Default" );
-	CPanelAnimationVarAliasType( float, bar_width, "bar_width", "75", "proportional_float" );
-	CPanelAnimationVarAliasType( float, bar_height, "bar_height", "24", "proportional_float" );
+	CHudTexture* m_pProgressBarTexture;
 };
 
 //-----------------------------------------------------------------------------
-// Purpose: Done each map load
+// Purpose: Decides when to draw and when to not
 //-----------------------------------------------------------------------------
-void CHudOverpressure::VidInit( void )
+bool CHudOverpressure::ShouldDraw( void )
 {
-	SetPaintBackgroundEnabled( false );
+	if( !engine->IsInGame() )
+		return false;
+
+	if( !CHudElement::ShouldDraw() )
+		return false;
+
+	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+
+	if( !pPlayer )
+		return false;
+
+	if( pPlayer->GetClassSlot() != CLASS_HWGUY || FF_IsPlayerSpec( pPlayer ) || !FF_HasPlayerPickedClass( pPlayer ) )
+		return false;
+
+	if( pPlayer->m_flNextClassSpecificSkill < gpGlobals->curtime )
+		return false;
+
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -87,30 +107,19 @@ void CHudOverpressure::VidInit( void )
 //-----------------------------------------------------------------------------
 void CHudOverpressure::Paint( void )
 {
-	if( !engine->IsInGame() )
-		return;
-
 	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
 	if( !pPlayer )
 		return;
 
-	if( pPlayer->GetClassSlot() != CLASS_HWGUY || FF_IsPlayerSpec( pPlayer ) || !FF_HasPlayerPickedClass( pPlayer ) )
-		return;
+	// New cloak percent timer -GreenMushy
+	float iProgressPercent = ( OVERPRESSURE_COOLDOWN - (pPlayer->m_flNextClassSpecificSkill - gpGlobals->curtime) ) / ( OVERPRESSURE_COOLDOWN );
 
-	// Let's calculate and draw the disguising progress bar
-	if ( pPlayer->m_flNextClassSpecificSkill > gpGlobals->curtime )
-	{	
-		//New cloak percent timer -GreenMushy
-		float iProgressPercent = ( OVERPRESSURE_COOLDOWN - (pPlayer->m_flNextClassSpecificSkill - gpGlobals->curtime) ) / ( OVERPRESSURE_COOLDOWN );
+	int offsetX = ( GetWide() - bar_x_offset * 2 );
+	int offsetY = ( GetTall() - bar_y_offset * 2 );
 	
-		// Paint foreground/background stuff
-		BaseClass::PaintBackground();
-
-		// Draw progress bar
-		surface()->DrawSetColor( m_BarColor );
-		surface()->DrawFilledRect( image1_xpos, image1_ypos, image1_xpos + bar_width * iProgressPercent, image1_ypos + bar_height );
-	}
+	if ( m_pProgressBarTexture )
+		m_pProgressBarTexture->DrawSelf( bar_x_offset, bar_y_offset, offsetX * iProgressPercent, offsetY, bar_color );
 }
 
 DECLARE_HUDELEMENT(CHudOverpressure);

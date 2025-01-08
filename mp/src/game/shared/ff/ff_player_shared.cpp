@@ -27,6 +27,9 @@
 
 	extern void HudContextShow(bool visible);
 
+#include "ff_hud_grenade1timer.h"
+#include "ff_hud_grenade2timer.h"
+
 #else
 
 	#include "ff_player.h"
@@ -177,6 +180,20 @@ ConVar sv_motd_enable( "sv_motd_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "
 //0001279: Need convar for pipe det delay
 #define PIPE_DET_DELAY 0.55 // this is mirrored in ff_projectile_pipebomb.cpp and ff_player.cpp
 extern ConVar ai_debug_shoot_positions;
+
+// grenade information
+//ConVar gren_timer("ffdev_gren_timer","3.81",0,"Timer length for all grenades.");
+#define GREN_TIMER 3.81f
+//ConVar gren_throw_delay("ffdev_throw_delay","0.5",0,"Delay before primed grenades can be thrown.");
+#define GREN_THROW_DELAY 0.5f
+
+#ifdef CLIENT_DLL
+	extern char g_szTimerFile[MAX_PATH];
+
+	void TimerChange_Callback(IConVar* var, const char* pOldValue, float flOldValue);
+
+	extern ConVar cl_togglegrenades;
+#endif
 
 void DispatchEffect(const char *pName, const CEffectData &data);
 
@@ -1833,6 +1850,53 @@ void CFFPlayer::SharedPreThink( void )
 		}
 	}
 #endif
+
+#ifdef CLIENT_DLL
+	bool bToggleGrenades = cl_togglegrenades.GetBool();
+#else
+	bool bToggleGrenades = atoi( engine->GetClientConVarValue( engine->IndexOfEdict( edict() ), "cl_togglegrenades" ) );
+#endif
+
+	// grenades
+	if ( m_afButtonPressed & IN_GRENADE1 )
+	{
+		if ( bToggleGrenades && IsGrenade1Primed() )
+		{
+			ThrowPrimedGrenade();
+#ifdef CLIENT_DLL
+			m_bLastPrimed = false;
+#endif
+			return;
+		}
+		else
+		{
+			if( !IsGrenade1Primed() )
+				PrimeGrenade1();
+		}
+	}
+	else if ( m_afButtonPressed & IN_GRENADE2 )
+	{
+		if ( bToggleGrenades && IsGrenade2Primed() )
+		{
+			ThrowPrimedGrenade();
+#ifdef CLIENT_DLL
+			m_bLastPrimed = false;
+#endif
+			return;
+		}
+		else
+		{
+			if( !IsGrenade2Primed() )
+				PrimeGrenade2();
+		}
+	}
+	else if (m_afButtonReleased & ( IN_GRENADE1 | IN_GRENADE2 ) && IsGrenadePrimed() && !m_bWantToThrowGrenade )
+	{
+		if (bToggleGrenades)
+			return;
+
+		ThrowPrimedGrenade();
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -2027,4 +2091,317 @@ void CFFPlayer::Command_EngyMe(const CCommand& args)
 		// End Hint Code
 #endif
 	}
+}
+
+bool CFFPlayer::IsGrenade1Primed( void )
+{
+	return ( ( m_iGrenadeState == FF_GREN_PRIMEONE ) );
+}
+bool CFFPlayer::IsGrenade2Primed( void )
+{
+	return ( ( m_iGrenadeState == FF_GREN_PRIMETWO ) );
+}
+bool CFFPlayer::IsGrenadePrimed( void )
+{
+	return IsGrenade1Primed() || IsGrenade2Primed();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CFFPlayer::PrimeGrenade1( void )
+{
+#ifdef CLIENT_DLL
+	if ( !engine->IsConnected() || !engine->IsInGame() )
+		return;
+#endif
+
+	if (IsGrenadePrimed())
+		return;
+
+	// Don't want timers going when frozen
+	if ( GetFlags() & FL_FROZEN )
+		return;
+
+	if ( IsStaticBuilding() )
+		return;
+
+	// Bug #0000366: Spy's cloaking & grenade quirks
+	// Spy shouldn't be able to prime grenades when Cloaked
+	if ( IsCloaked() )
+		return;
+
+	// Bug #0000176: Sniper gren2 shouldn't trigger timer.wav
+	// Bug #0000064: Civilian has primary & secondary grenade.
+	if ( m_iPrimary <= 0 )
+	{
+		//DevMsg("[Grenades] You are out of primary grenades!\n");
+		return;
+	}
+
+	// Bug #0000169: Grenade timer is played when player is dead and primes a grenade
+	if ( !IsAlive() || GetTeamNumber() < TEAM_BLUE )
+		return;
+
+	// Make sure we can't insta-prime on the client either
+	// This should match the grenade throw delay with the server
+	// otherwise it results in ghost nades
+	if (gpGlobals->curtime < m_flPrimeTime + GREN_THROW_DELAY)
+		return;
+
+	m_flPrimeTime = gpGlobals->curtime;
+	m_iGrenadeState = FF_GREN_PRIMEONE;
+
+	EmitSoundShared("Grenade.Prime");
+
+#ifndef _DEBUG
+	m_iPrimary--;
+#endif
+
+#ifdef CLIENT_DLL
+	// dexter: if g_szTimerFile hasnt been set yet, force update to default. this happens first run of a new install etc
+	ConVarRef cl_timerwav("cl_grenadetimer");
+
+	if (Q_strlen(g_szTimerFile) < 1 && cl_timerwav.IsValid())
+		TimerChange_Callback(cl_timerwav.GetLinkedConVar(), NULL, NULL);
+
+	CPASAttenuationFilter filter(this, g_szTimerFile);
+
+	EmitSound_t params;
+	params.m_pSoundName = g_szTimerFile;
+	params.m_flSoundTime = 0.0f;
+	params.m_pflSoundDuration = NULL;
+	params.m_bWarnOnDirectWaveReference = false;
+
+	EmitSound(filter, entindex(), params);
+
+	Assert(m_pGrenade1Timer);
+	m_pGrenade1Timer->SetTimer(3.81f);
+
+	if (cl_togglegrenades.GetBool())
+	{
+		// Hint Code: Check for 2 consecutive unthrown grenades (player got blowed up!)
+		if (m_bLastPrimed == true)
+		{
+			m_iUnthrownGrenCount++;
+			if (m_iUnthrownGrenCount > 1)
+			{
+				FF_SendHint(GLOBAL_NOPRIME2, 2, PRIORITY_NORMAL, "#FF_HINT_GLOBAL_NOPRIME2");
+				m_iUnthrownGrenCount = 0;
+				m_bLastPrimed = false;
+			}
+		}
+		else
+			m_bLastPrimed = true;
+	}
+#else
+	const CFFPlayerClassInfo &pPlayerClassInfo = GetFFClassData();
+
+	// we have a primary grenade type
+	if (strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None" ))
+	{
+		// Jiggles: Added lua callback for squeek's training map
+		CFFLuaSC hContext( 1, this );
+		_scriptman.RunPredicates_LUA( NULL, &hContext, "player_onprimegren1" );
+		// End callback
+	}
+#endif
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CFFPlayer::PrimeGrenade2( void )
+{
+#ifdef CLIENT_DLL
+	if ( !engine->IsConnected() || !engine->IsInGame() )
+		return;
+#endif
+
+	if ( IsGrenadePrimed() )
+		return;
+
+	// Don't want timers going when frozen
+	if ( GetFlags() & FL_FROZEN )
+		return;
+
+	if ( IsStaticBuilding() )
+		return;
+
+	// Bug #0000366: Spy's cloaking & grenade quirks
+	// Spy shouldn't be able to prime grenades when Cloaked
+	if ( IsCloaked() )
+		return;
+
+	// Bug #0000176: Sniper gren2 shouldn't trigger timer.wav
+	// Bug #0000064: Civilian has primary & secondary grenade.
+	if ( m_iSecondary <= 0 )
+	{
+		//DevMsg("[Grenades] You are out of primary grenades!\n");
+		return;
+	}
+
+	// Bug #0000169: Grenade timer is played when player is dead and primes a grenade
+	if ( !IsAlive() || GetTeamNumber() < TEAM_BLUE )
+		return;
+
+	// Make sure we can't insta-prime on the client either
+	// This should match the grenade throw delay with the server
+	// otherwise it results in ghost nades
+	if (gpGlobals->curtime < m_flPrimeTime + GREN_THROW_DELAY)
+		return;
+
+	m_flPrimeTime = gpGlobals->curtime;
+	m_iGrenadeState = FF_GREN_PRIMETWO;
+
+	EmitSoundShared("Grenade.Prime");
+
+#ifndef _DEBUG
+	m_iSecondary--;
+#endif
+
+#ifdef CLIENT_DLL
+	// dexter: if g_szTimerFile hasnt been set yet, force update to default. this happens first run of a new install etc
+	ConVarRef cl_timerwav("cl_grenadetimer");
+
+	if (Q_strlen(g_szTimerFile) < 1 && cl_timerwav.IsValid())
+		TimerChange_Callback(cl_timerwav.GetLinkedConVar(), NULL, NULL);
+
+	CPASAttenuationFilter filter(this, g_szTimerFile);
+
+	EmitSound_t params;
+	params.m_pSoundName = g_szTimerFile;
+	params.m_flSoundTime = 0.0f;
+	params.m_pflSoundDuration = NULL;
+	params.m_bWarnOnDirectWaveReference = false;
+
+	EmitSound(filter, entindex(), params);
+
+	Assert(m_pGrenade2Timer);
+	m_pGrenade2Timer->SetTimer(3.81f);
+
+	if (cl_togglegrenades.GetBool())
+	{
+		// Hint Code: Check for 2 consecutive unthrown grenades (player got blowed up!)
+		if (m_bLastPrimed == true)
+		{
+			m_iUnthrownGrenCount++;
+			if (m_iUnthrownGrenCount > 1)
+			{
+				FF_SendHint(GLOBAL_NOPRIME2, 2, PRIORITY_NORMAL, "#FF_HINT_GLOBAL_NOPRIME2");
+				m_iUnthrownGrenCount = 0;
+				m_bLastPrimed = false;
+			}
+		}
+		else
+			m_bLastPrimed = true;
+	}
+
+#else
+	const CFFPlayerClassInfo &pPlayerClassInfo = GetFFClassData();
+
+	// we have a primary grenade type
+	if (strcmp( pPlayerClassInfo.m_szSecondaryClassName, "None" ))
+	{
+		// Jiggles: Added lua callback for squeek's training map
+		CFFLuaSC hContext( 1, this );
+		_scriptman.RunPredicates_LUA( NULL, &hContext, "player_onprimegren2" );
+		// End callback
+
+		// Hint Code
+		//Msg("\nSecondary Class Name: %s\n", pPlayerClassInfo.m_szSecondaryClassName );
+		//if ( strcmp( pPlayerClassInfo.m_szSecondaryClassName, "ff_grenade_nail" ) == 0 )
+		//	FF_SendHint( this, SOLDIER_NAILGREN, 4, PRIORITY_NORMAL, "#FF_HINT_SOLDIER_NAILGREN" );
+		//else if ( strcmp( pPlayerClassInfo.m_szSecondaryClassName, "ff_grenade_concussion" ) == 0 )
+		//	FF_SendHint( this, SCOUT_CONC1, 1, PRIORITY_NORMAL, "#FF_HINT_SCOUT_CONC1" );
+
+		// Jiggles: Let's try it this way to avoid the above string compares
+		switch( GetClassSlot() )
+		{
+			case CLASS_SOLDIER: 
+				FF_SendHint( this, SOLDIER_LASERGREN, 1, PRIORITY_NORMAL, "#FF_HINT_SOLDIER_LASERGREN" );
+				break;
+			case CLASS_HWGUY:
+				FF_SendHint( this, HWGUY_SLOWFIELD, 1, PRIORITY_NORMAL, "#FF_HINT_HWGUY_SLOWFIELD" );
+				break;
+			case CLASS_MEDIC:
+			case CLASS_SCOUT:
+				FF_SendHint( this, SCOUT_CONC1, 1, PRIORITY_NORMAL, "#FF_HINT_SCOUT_CONC1" );
+				break;
+		}
+		// End hint code
+	}
+#endif
+}
+
+void CFFPlayer::ResetGrenadeState(void)
+{
+	m_bWantToThrowGrenade = false;
+	m_iGrenadeState = FF_GREN_NONE;
+	m_flPrimeTime = 0.0f;
+#ifdef CLIENT_DLL
+	m_iUnthrownGrenCount = 0;
+	//m_bLastPrimed = false; // see CFFPlayer::SharedPreThink()
+#else
+	m_bEngyGrenWarned = false;
+#endif
+}
+
+void CFFPlayer::ThrowPrimedGrenade( void )
+{
+#ifdef CLIENT_DLL
+	if (!engine->IsConnected() || !engine->IsInGame())
+		return;
+#endif
+
+	if ( !IsGrenadePrimed() )
+		return;
+
+	// Jiggles: Hint Code
+	// Let's see if the player is throwing an "unprimed" grenade
+	if ( ( gpGlobals->curtime - m_flPrimeTime ) <= GREN_THROW_DELAY)
+	{
+#ifdef CLIENT_DLL
+		m_iUnprimedGrenCount++;
+		// Event: 2 consecutive unprimed grenades thrown
+		if (m_iUnprimedGrenCount > 1)
+		{
+			FF_SendHint(GLOBAL_NOPRIME1, 4, PRIORITY_NORMAL, "#FF_HINT_GLOBAL_NOPRIME1");
+			m_iUnprimedGrenCount = 0;
+		}
+#endif
+		m_bWantToThrowGrenade = true;
+		return;
+	}
+	else  // Not an "unprimed" grenade -- the time between priming and throwing was > 0.5 seconds
+	{
+#ifdef CLIENT_DLL
+		m_iUnprimedGrenCount = 0;
+#endif
+	}
+
+#ifdef GAME_DLL
+	bool bThrowGrenade = true;
+	float fPrimeTimer = GREN_TIMER - (gpGlobals->curtime - m_flPrimeTime);
+
+	// Give lua the chance to override grenade throwing.
+	// It should return false to avoid throwing the grenade
+	CFFLuaSC hContext(1, this);
+	hContext.Push(1.0f - (fPrimeTimer / GREN_TIMER));
+
+	const char* pLuaFn = 0;
+
+	if (m_iGrenadeState == FF_GREN_PRIMEONE)
+		pLuaFn = "player_onthrowgren1";
+	else if (m_iGrenadeState == FF_GREN_PRIMETWO)
+		pLuaFn = "player_onthrowgren2";
+
+	if (pLuaFn && _scriptman.RunPredicates_LUA(NULL, &hContext, pLuaFn))
+		bThrowGrenade = hContext.GetBool();
+
+	if (bThrowGrenade)
+		ThrowGrenade(fPrimeTimer);
+#endif
+
+	ResetGrenadeState();
 }

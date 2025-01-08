@@ -34,9 +34,10 @@ private:
 
 	CPanelAnimationVarAliasType(float, bar_xpos, "bar_xpos", "0", "proportional_float");
 	CPanelAnimationVarAliasType(float, bar_ypos, "bar_ypos", "0", "proportional_float");
-	CPanelAnimationVarAliasType(float, bar_width, "bar_width", "1", "proportional_float");
-	CPanelAnimationVarAliasType(float, bar_height, "bar_height", "1", "proportional_float");
-	CPanelAnimationVarAliasType(float, icon_offset, "icon_offset", "2", "proportional_float");
+
+	CPanelAnimationVarAliasType(float, icon_xpos, "icon_xpos", "0", "proportional_float");
+	CPanelAnimationVarAliasType(float, icon_ypos, "icon_ypos", "-1", "proportional_float");
+
 	CPanelAnimationVar( Color, icon_color, "icon_color", "HUD_Tone_Default" );
 
 public:

@@ -48,6 +48,7 @@
 #ifdef GAME_DLL
 	#include "ff_scriptman.h"
 #endif
+#include "const.h"
 
 // This function takes a class name like "scout"
 // and returns its integer value
@@ -947,10 +948,8 @@ bool FF_IsAirshot( CBaseEntity *pEntity, float flThresholdMultiplier/*=1.0f*/ )
 //-----------------------------------------------------------------------------
 char *UTIL_GetFormattedMapName( void )
 {	
-	static char szText[ 256 ];
-	Q_strcpy( szText, engine->GetLevelName() + 5 ); // Skip the "maps/" part
-	szText[ ( int )strlen( szText ) - 4 ] = '\0'; // Skip the ".bsp" part
-
+	static char szText[MAX_MAP_NAME] = { 0 };
+	V_FileBase( engine->GetLevelName(), szText, sizeof( szText ) );
 	return szText;
 }
 #endif

@@ -31,13 +31,15 @@ public:
 
 	CFFWeaponKnife();
 
+	virtual void PrimaryAttack();
 	virtual bool Deploy();
+	virtual bool SendWeaponAnim( int iActivity );
 
 	virtual FFWeaponID GetWeaponID() const		{ return FF_WEAPON_KNIFE; }
 
 private:
 	void Hit(trace_t &traceHit, Activity nHitActivity);
-
+	CNetworkVar( bool, m_bBackstabAnimation );
 	CFFWeaponKnife(const CFFWeaponKnife &);
 };
 
@@ -47,10 +49,18 @@ private:
 
 IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponKnife, DT_FFWeaponKnife) 
 
-BEGIN_NETWORK_TABLE(CFFWeaponKnife, DT_FFWeaponKnife) 
+BEGIN_NETWORK_TABLE(CFFWeaponKnife, DT_FFWeaponKnife)
+#ifdef CLIENT_DLL
+	RecvPropInt( RECVINFO( m_bBackstabAnimation ) ),
+#else
+	SendPropInt( SENDINFO( m_bBackstabAnimation ), 1, SPROP_UNSIGNED ),
+#endif
 END_NETWORK_TABLE() 
 
-BEGIN_PREDICTION_DATA(CFFWeaponKnife) 
+BEGIN_PREDICTION_DATA(CFFWeaponKnife)
+#ifdef CLIENT_DLL
+	DEFINE_PRED_FIELD( m_bBackstabAnimation, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
+#endif
 END_PREDICTION_DATA() 
 
 LINK_ENTITY_TO_CLASS(ff_weapon_knife, CFFWeaponKnife);
@@ -68,6 +78,20 @@ PRECACHE_WEAPON_REGISTER(ff_weapon_knife);
 //----------------------------------------------------------------------------
 CFFWeaponKnife::CFFWeaponKnife() 
 {
+}
+
+void CFFWeaponKnife::PrimaryAttack()
+{
+	m_bBackstabAnimation = false;
+	BaseClass::PrimaryAttack();
+}
+
+bool CFFWeaponKnife::SendWeaponAnim( int iActivity )
+{
+	if( m_bBackstabAnimation && iActivity == ACT_VM_HITCENTER )
+		iActivity = ACT_VM_SWINGHARD;
+
+	return BaseClass::SendWeaponAnim( iActivity );
 }
 
 //----------------------------------------------------------------------------
@@ -94,17 +118,19 @@ bool CFFWeaponKnife::Deploy()
 void CFFWeaponKnife::Hit(trace_t &traceHit, Activity nHitActivity) 
 {
 	//DevMsg("[CFFWeaponKnife] Hit\n");
-#ifdef GAME_DLL
 	CFFPlayer *pPlayer = ToFFPlayer(GetOwner());
 
 	CBaseEntity	*pHitEntity = traceHit.m_pEnt;
 
-	if (pHitEntity != NULL && pHitEntity->IsPlayer()) 
+	if (pPlayer && pHitEntity != NULL && pHitEntity->IsPlayer()) 
 	{
 		CFFPlayer *pTarget = ToFFPlayer(pHitEntity);
 
 		if (g_pGameRules->FCanTakeDamage(pPlayer, pTarget)) 
 		{
+#ifdef CLIENT_DLL
+			WeaponSound(SPECIAL2);
+#endif
 			// check to see if we got a backstab
 
 			// get the displacement between the players
@@ -122,9 +148,13 @@ void CFFWeaponKnife::Hit(trace_t &traceHit, Activity nHitActivity)
 			float angle = vFacing.Dot(vDisplacement);
 			if (angle > KNIFE_BACKSTAB_ANGLE) // cos(45deg) 
 			{
+				if( IsPlayerUsingNonFallbackNewViewmodel( pPlayer ) )
+				{
+					m_bBackstabAnimation = true;
+				}
 				//DevMsg("BACKSTAB!!!!!\n");
 				// we get to totally kerplown this guy
-
+#ifdef GAME_DLL
 				// Mulch: armor doesn't protect against DMG_DIRECT
 				Vector hitDirection;
 				pPlayer->EyeVectors(&hitDirection, NULL, NULL);
@@ -165,7 +195,7 @@ void CFFWeaponKnife::Hit(trace_t &traceHit, Activity nHitActivity)
 					// He's not dead, so lose our disguise as normal
 					pPlayer->ResetDisguise();
 				}
-
+#endif
 				// we don't need to call BaseClass since we already did damage.
 				return;
 			}
@@ -175,26 +205,9 @@ void CFFWeaponKnife::Hit(trace_t &traceHit, Activity nHitActivity)
 		}
 	}
 
+#ifdef GAME_DLL
 	// It wasn't a backstab (which returned early), so remove any disguise here
 	pPlayer->ResetDisguise();
-
-#endif
-
-#ifdef CLIENT_DLL
-	CFFPlayer *pPlayer = ToFFPlayer(GetOwner());
-
-	CBaseEntity	*pHitEntity = traceHit.m_pEnt;
-
-	if (pHitEntity != NULL && pHitEntity->IsPlayer()) 
-	{
-		CFFPlayer *pTarget = ToFFPlayer(pHitEntity);
-
-		if (g_pGameRules->FCanTakeDamage(pPlayer, pTarget)) 
-		{
-			// we scored a hit, so play the knife slash sound
-			WeaponSound(SPECIAL2);
-		}
-	}
 #endif
 
 	BaseClass::Hit(traceHit, nHitActivity);

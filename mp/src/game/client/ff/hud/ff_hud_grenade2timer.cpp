@@ -37,7 +37,6 @@ CHudGrenade2Timer::~CHudGrenade2Timer()
 
 void CHudGrenade2Timer::Init() 
 {
-	g_pGrenade2Timer = this;
 	ivgui()->AddTickSignal( GetVPanel(), 100 );
 
 	ResetTimer();
@@ -93,6 +92,9 @@ void CHudGrenade2Timer::OnTick()
 		SetPaintBackgroundEnabled(false);
 		return;
 	}
+
+	if (!m_pFFPlayer->m_pGrenade2Timer)
+		m_pFFPlayer->m_pGrenade2Timer = this;
 	
 	if (!hud_grenadetimers.GetBool()) 
 	{
@@ -177,38 +179,38 @@ void CHudGrenade2Timer::OnTick()
 
 void CHudGrenade2Timer::PaintBackground() 
 {
-	// Draw progress bar background
-	if(cl_teamcolourhud.GetBool())
-		surface()->DrawSetColor(m_TeamColorHudBackgroundColour);
-	else
-		surface()->DrawSetColor(m_HudBackgroundColour);
-	surface()->DrawFilledRect(bar_xpos, bar_ypos, bar_xpos + bar_width, bar_ypos + bar_height);
+	int wide = GetWide() - bar_xpos;
+	int tall = GetTall();
 
-	// Draw progress bar border
-	surface()->DrawSetColor(m_HudForegroundColour);
-	surface()->DrawOutlinedRect(bar_xpos-1, bar_ypos-1, bar_xpos + bar_width+1, bar_ypos + bar_height+1);
-	surface()->DrawOutlinedRect(bar_xpos-2, bar_ypos-2, bar_xpos + bar_width+2, bar_ypos + bar_height+2);
+	if (m_pHudBackground)
+	{
+		if (cl_teamcolourhud.GetBool())
+			m_pHudBackground->DrawSelf(bar_xpos, bar_ypos, wide, tall, m_TeamColorHudBackgroundColour);
+		else
+			m_pHudBackground->DrawSelf(bar_xpos, bar_ypos, wide, tall, m_HudBackgroundColour);
+	}
+	if (m_pHudForeground)
+		m_pHudForeground->DrawSelf(bar_xpos, bar_ypos, wide, tall, m_HudForegroundColour);
 }
 
 void CHudGrenade2Timer::Paint() 
 {
 	if(m_pIconTexture)
 	{
-		int iconWide = m_pIconTexture->Width();
-		int iconTall = m_pIconTexture->Height();
-
-		m_pIconTexture->DrawSelf( bar_xpos - 2/*boarderwidth*/ - iconWide - icon_offset, bar_ypos + bar_height/2 - iconTall/2, iconWide, iconTall, icon_color );
+		m_pIconTexture->DrawSelf( icon_xpos, icon_ypos, icon_color );
 	}
 
 	int num_timers = m_Timers.Count();
 	int timer_to_remove = -1;
-	float timer_height = bar_height / num_timers;
 	float bar_newypos = bar_ypos;
 
 	CFFPlayer *pPlayer = ToFFPlayer(CBasePlayer::GetLocalPlayer());
 
 	for (int i = m_Timers.Head(); i != m_Timers.InvalidIndex(); i = m_Timers.Next(i)) 
 	{
+		// moved here to avoid division by zero
+		float timer_height = GetTall() / num_timers;
+
 		bool bIsLastTimer = (m_Timers.Next(i) == m_Timers.InvalidIndex());
 		timer_t *timer = &m_Timers.Element(i);
 
@@ -219,14 +221,20 @@ void CHudGrenade2Timer::Paint()
 		else
 		{
 			float amount = clamp((gpGlobals->curtime - timer->m_flStartTime) / timer->m_flDuration, 0, 1.0f);
+			Color fgColor = m_HudForegroundColour;
 
 			// Draw progress bar
 			if (amount < 0.15f || ( bIsLastTimer && pPlayer && pPlayer->m_iGrenadeState == FF_GREN_PRIMETWO ))
-				surface()->DrawSetColor(m_HudForegroundColour.r(), m_HudForegroundColour.g(), m_HudForegroundColour.b(), m_HudForegroundColour.a());
+			{
+				surface()->DrawSetColor(fgColor);
+			}
 			else
-				surface()->DrawSetColor(m_HudForegroundColour.r(), m_HudForegroundColour.g(), m_HudForegroundColour.b(), m_HudForegroundColour.a() * 0.3f);
+			{
+				fgColor.setA(fgColor.a() * 0.3f); // this method really only exists for lua but ehhh
+				surface()->DrawSetColor(fgColor);
+			}
 
-			surface()->DrawFilledRect(bar_xpos, bar_newypos, bar_xpos + bar_width * amount, bar_newypos + timer_height);
+			surface()->DrawFilledRect(bar_xpos, bar_newypos, ( bar_xpos + ( ( GetWide() - bar_xpos ) * amount ) ), bar_newypos + timer_height);
 
 			bar_newypos += timer_height;
 		}

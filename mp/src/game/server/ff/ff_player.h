@@ -346,11 +346,6 @@ public:
 	void Command_BuildDetpack(const CCommand& args = CCommand());
 	void Command_BuildManCannon(const CCommand& args = CCommand());
 	void Command_DispenserText(const CCommand& args = CCommand());	// to set custom dispenser text messages on the server
-	void Command_PrimeOne(const CCommand& args = CCommand()); // prime primary grenade
-	void Command_PrimeTwo(const CCommand& args = CCommand()); // prime secondary grenade
-	void Command_ThrowGren(const CCommand& args = CCommand()); // throw currently primed grenade
-	void Command_ToggleOne(const CCommand& args = CCommand());
-	void Command_ToggleTwo(const CCommand& args = CCommand());
 	void Command_FlagInfo(const CCommand& args = CCommand()); // flaginfo
 	void Command_DropItems(const CCommand& args = CCommand());
 	void Command_DetPipes(const CCommand& args = CCommand());
@@ -363,6 +358,12 @@ public:
 	void Command_SabotageSentry(const CCommand& args = CCommand());
 	void Command_SabotageDispenser(const CCommand& args = CCommand());
 	// ---> end of FF server-side player command handlers
+
+	// --> shared
+	void PrimeGrenade1( void ); // prime primary grenade
+	void PrimeGrenade2( void ); // prime secondary grenade
+	void ThrowPrimedGrenade( void ); // throw currently primed grenade (this is also not ThrowGrenade() because that already exists)
+	// <-- shared
 
 protected:
     // Beg: Added by Mulchman for building objects and such
@@ -472,9 +473,9 @@ public:
 	int AddPrimaryGrenades( int iNewCount );
 	int AddSecondaryGrenades( int iNewCount );
 
-	bool IsGrenade1Primed();
-	bool IsGrenade2Primed();
-	bool IsGrenadePrimed();	
+	bool IsGrenade1Primed( void );
+	bool IsGrenade2Primed( void );
+	bool IsGrenadePrimed( void );	
 private:	
 	void GrenadeThink(void);
 	void ThrowGrenade(float fTimer, float speed = 630.0f);		// |-- Mirv: So we can drop grens
@@ -483,10 +484,11 @@ public:
 	void RemovePrimedGrenades( void );
 private:
 	CNetworkVar(FFPlayerGrenadeState, m_iGrenadeState);
-	CNetworkVar(float, m_flServerPrimeTime);
 	CNetworkVar(int, m_iPrimary);
 	CNetworkVar(int, m_iSecondary);
-	bool m_bWantToThrowGrenade;			// does the client want to throw this grenade as soon as possible?
+	//CNetworkVar(float, m_flPrimeTime);
+	float m_flPrimeTime;
+	CNetworkVar(bool, m_bWantToThrowGrenade);			// does the client want to throw this grenade as soon as possible?
 	bool m_bEngyGrenWarned;
 	// Backpacks
 public:
@@ -1043,6 +1045,7 @@ public:
 	bool m_bQueueDetonation;
 	bool m_bClassicViewModels;
 	CNetworkVar(bool, m_bClassicViewModelsParity);
+	CNetworkVar(int, m_iHandViewModelMode);
 };
 
 inline CFFPlayer *ToFFPlayer( CBaseEntity *pEntity )

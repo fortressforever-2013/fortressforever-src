@@ -34,6 +34,9 @@ class C_FFDispenser;
 class C_FFSentryGun;
 class C_FFManCannon;
 
+class CHudGrenade1Timer;
+class CHudGrenade2Timer;
+
 #define FF_BUILD_NONE		0
 #define FF_BUILD_DISPENSER	1
 #define FF_BUILD_SENTRYGUN	2
@@ -60,10 +63,6 @@ bool CanStealMouseForAimSentry(void);
 
 //void SetStealMouseForCloak( bool bValue );
 //bool CanStealMouseForCloak( void );
-
-bool CC_PrimeOne(const CCommand& args = CCommand());
-bool CC_PrimeTwo(const CCommand& args = CCommand());
-bool CC_ThrowGren(const CCommand& args = CCommand());
 
 // --> Mirv: More gren priming functions
 bool CC_ToggleOne(const CCommand& args = CCommand());
@@ -309,7 +308,6 @@ public:
 	// ---> end
 
 	// ---> Jiggles: Tracks priming times for hint logic
-	float m_flGrenPrimeTime;
 	int m_iUnprimedGrenCount;
 
 	int m_iUnthrownGrenCount;
@@ -378,19 +376,16 @@ public:
 	// Beg: Added by L0ki for grenade stuff
 public:
 	CNetworkVar(int, m_iGrenadeState);
-	CNetworkVar(float, m_flServerPrimeTime);
 	CNetworkVar(int, m_iPrimary);
 	CNetworkVar(int, m_iSecondary);
 
+	//CNetworkVar(float, m_flPrimeTime);
 	float m_flPrimeTime;
-	float m_flLatency;
+	CNetworkVar(bool, m_bWantToThrowGrenade);			// does the client want to throw this grenade as soon as possible?
 	// End: Added by L0ki for grenade stuff
 
 	// squeek: If the player has been detected as attempting to mathack
 	bool m_bMathackDetected;
-
-	// 0000818: Grenade timer not playing on second of double primes
-	float m_flLastServerPrimeTime;
 
 	// --> Mirv: Map guide stuff
 	CNetworkHandle(CFFMapGuide, m_hNextMapGuide);
@@ -560,6 +555,20 @@ public:
 	void Command_SaveMe(const CCommand& args = CCommand());
 	void Command_EngyMe(const CCommand& args = CCommand());
 
+	bool IsGrenade1Primed( void );
+	bool IsGrenade2Primed( void );
+	bool IsGrenadePrimed( void );
+	void ResetGrenadeState( void );
+
+	// --> shared
+	void PrimeGrenade1( void ); // prime primary grenade
+	void PrimeGrenade2( void ); // prime secondary grenade
+	void ThrowPrimedGrenade( void ); // throw currently primed grenade (this is also not ThrowGrenade() because that already exists)
+	// <-- shared
+
+	CHudGrenade1Timer *m_pGrenade1Timer;
+	CHudGrenade2Timer *m_pGrenade2Timer;
+
 	bool IsCloaked(void) const { return m_iCloaked != 0; }
 private:
 	void Cloak(void);
@@ -633,6 +642,7 @@ public:
 	float GetNextCloak() { return m_flNextCloak; }
 	bool m_bClassicViewModels;
 	CNetworkVar(bool, m_bClassicViewModelsParity);
+	CNetworkVar(int, m_iHandViewModelMode);
 };
 
 // Just straight up copying the server version. Tired

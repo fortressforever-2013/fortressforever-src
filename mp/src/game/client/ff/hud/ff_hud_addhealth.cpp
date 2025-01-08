@@ -61,6 +61,8 @@ public:
 	virtual void Paint( void );
 	virtual void Init( void );
 	virtual void VidInit( void );
+	virtual void Reset( void );
+
 	void MsgFunc_PlayerAddHealth( bf_read &msg );
 
 protected:
@@ -71,13 +73,8 @@ private:
 	float		m_flStartTime;		// When the message was recevied
 	float		m_flDuration;		// Duration of the message
 
-	// Stuff we need to know	
-	CPanelAnimationVar( vgui::HFont, m_hHealthFont, "HealthFont", "Default" );
-
-	CPanelAnimationVar( vgui::HFont, m_hHealthFontBG, "HealthFontBG", "Default" );
-
-	CPanelAnimationVarAliasType( float, HealthFont_xpos, "HealthFont_xpos", "0", "proportional_float" );
-	CPanelAnimationVarAliasType( float, HealthFont_ypos, "HealthFont_ypos", "0", "proportional_float" );
+	// Stuff we need to know
+	CPanelAnimationVar( vgui::HFont, m_hTextFont, "text_font", "HudAddHealth" );
 };
 
 DECLARE_HUDELEMENT( CHudPlayerAddHealth );
@@ -95,6 +92,14 @@ void CHudPlayerAddHealth::Init( void )
 // Purpose: Done each map load
 //-----------------------------------------------------------------------------
 void CHudPlayerAddHealth::VidInit( void )
+{
+	Reset();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Done each map load
+//-----------------------------------------------------------------------------
+void CHudPlayerAddHealth::Reset( void )
 {
 	SetPaintBackgroundEnabled( false );
 
@@ -137,11 +142,9 @@ void CHudPlayerAddHealth::Paint()
 	if ( m_flStartTime + m_flDuration < gpGlobals->curtime )
 		return;
 
-	FFPanel::Paint(); // Draws the background glyphs 
-
-	surface()->DrawSetTextFont( m_hHealthFont );
+	surface()->DrawSetTextFont( m_hTextFont );
 	surface()->DrawSetTextColor( GetFgColor() );
-	surface()->DrawSetTextPos( HealthFont_xpos, HealthFont_ypos );
+	surface()->DrawSetTextPos( 0, 0 );
 
 	wchar_t wBuf[20];
 

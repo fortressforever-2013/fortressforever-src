@@ -24,6 +24,7 @@
 	#include "ff_player.h"
 	#include "eventqueue.h"
 #endif
+#include <ff_playerclass_parse.h>
 
 // All our weapons (no longer static)
 const char *s_WeaponAliasInfo[] = 
@@ -222,6 +223,46 @@ CFFPlayer * CFFWeaponBase::GetPlayerOwner() const
 	return ToFFPlayer(GetOwner());
 }
 
+void CFFWeaponBase::SetViewModel()
+{
+	CFFPlayer *pOwner = ToFFPlayer( GetOwner() );
+	if ( !pOwner )
+		return;
+
+	CBaseViewModel *vm = pOwner->GetViewModel( m_nViewModelIndex, false );
+	if ( vm == NULL )
+		return;
+
+	vm->SetWeaponModel( GetViewModel( m_nViewModelIndex ), this );
+
+	PLAYERCLASS_FILE_INFO_HANDLE hClassInfo;
+	if( !ReadPlayerClassDataFromFileForSlot( filesystem, Class_IntToString( pOwner->GetClassSlot() ), &hClassInfo, g_pGameRules->GetEncryptionKey() ) )
+		return;
+
+	const CFFPlayerClassInfo *pClassInfo = GetFilePlayerClassInfoFromHandle(hClassInfo);
+	if( !pClassInfo )
+		return;
+
+	const char* pszModel = NULL;
+
+	if( pOwner->m_iHandViewModelMode == 0 )
+	{
+		if( pClassInfo->m_szArmModel[0] )
+		{
+			pszModel = pClassInfo->m_szArmModel;
+		}
+	}
+	else if( pOwner->m_iHandViewModelMode == 1 )
+	{
+		pszModel = "models/player/arms/default_arms.mdl";
+	}
+
+	if( pszModel && pszModel[0] )
+		vm->SetArmModel( modelinfo->GetModelIndex( pszModel ), this );
+	else
+		vm->RemoveArmModel();
+}
+
 const char *CFFWeaponBase::GetViewModel( int /*viewmodelindex = 0 -- this is ignored in the base class here*/ ) const
 {
 	CFFPlayer *pFFPlayer = GetPlayerOwner();
@@ -234,6 +275,11 @@ const char *CFFWeaponBase::GetViewModel( int /*viewmodelindex = 0 -- this is ign
 const char *CFFWeaponBase::GetNewViewModel( int /*viewmodelindex = 0 -- this is ignored in the base class here*/ ) const
 {
 	return GetFFWpnData().szNewViewModel;
+}
+
+bool CFFWeaponBase::IsPlayerUsingNonFallbackNewViewmodel( CFFPlayer *pPlayer ) const
+{
+	return !pPlayer->m_bClassicViewModels && !GetFFWpnData().bUsesFallbackNewViewmodel;
 }
 
 const char *CFFWeaponBase::GetWorldModel( void ) const

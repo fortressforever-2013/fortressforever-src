@@ -252,8 +252,11 @@ public:
 	// Should override the fov
 	virtual float		GetFOV() { return -1; }
 
+	virtual void		SetViewModel();
 	virtual const char	*GetViewModel( int viewmodelindex = 0 ) const;
 	virtual const char	*GetNewViewModel( int viewmodelindex = 0 ) const;
+	virtual bool		IsPlayerUsingNonFallbackNewViewmodel( CFFPlayer *pPlayer ) const;
+
 	const char			*GetWorldModel( void ) const;
 	int					GetWorldModelIndex( void );
 

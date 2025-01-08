@@ -314,7 +314,21 @@ void CFFWeaponRailgun::Fire( void )
 	if (m_bMuzzleFlash)
 		pPlayer->DoMuzzleFlash();
 
-	SendWeaponAnim( GetPrimaryAttackActivity() );
+	if( IsPlayerUsingNonFallbackNewViewmodel(pPlayer) )
+	{
+		if ( gpGlobals->curtime - m_flStartTime >= RAILGUN_MAXCHARGETIME )
+		{
+			SendWeaponAnim( ACT_VM_SECONDARYATTACK );
+		}
+		else
+		{
+			SendWeaponAnim( ACT_VM_PRIMARYATTACK );
+		}
+	}
+	else
+	{
+		SendWeaponAnim( GetPrimaryAttackActivity() );
+	}
 
 	//Player "shoot" animation
 	pPlayer->DoAnimationEvent(PLAYERANIMEVENT_FIRE_GUN_PRIMARY);
@@ -401,6 +415,11 @@ void CFFWeaponRailgun::ItemPostFrame(void)
 			// play an overcharge sound
 			WeaponSound(BURST);
 
+			if( IsPlayerUsingNonFallbackNewViewmodel(pPlayer) )
+			{
+				SendWeaponAnim( ACT_VM_RELEASE );
+			}
+
 			m_flNextPrimaryAttack = gpGlobals->curtime + RAILGUN_COOLDOWNTIME_OVERCHARGE;
 		}
 		else if ((flTimeSinceStart >= RAILGUN_MAXCHARGETIME * 0.5f && m_iAmmoUsed < RAILGUN_AMMOAMOUNT_HALFCHARGE) || (flTimeSinceStart >= RAILGUN_MAXCHARGETIME && m_iAmmoUsed < RAILGUN_AMMOAMOUNT_FULLCHARGE))
@@ -471,6 +490,12 @@ void CFFWeaponRailgun::ItemPostFrame(void)
 				// remove ammo immediately
 				pPlayer->RemoveAmmo(1, m_iPrimaryAmmoType);
 #endif
+
+				if( IsPlayerUsingNonFallbackNewViewmodel(pPlayer) )
+				{
+					SendWeaponAnim( ACT_VM_PULLBACK );
+				}
+
 				// client needs to know, too
 				m_iAmmoUsed++;
 			}

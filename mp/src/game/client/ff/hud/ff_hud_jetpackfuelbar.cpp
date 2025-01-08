@@ -31,37 +31,54 @@ public:
 	{
 		SetParent( g_pClientMode->GetViewport() );
 		SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED );
+
+		m_pProgressBarTexture = NULL;
 	}
 
 	virtual ~CHudJetpackFuelBar( void )
 	{
 	}
 
-	virtual void Paint( void );
-	virtual void VidInit( void );
+	virtual void ApplySettings( KeyValues *inResourceData )
+	{
+		const char* pszTexture = inResourceData->GetString( "bar_texture", NULL );
+		m_pProgressBarTexture = ( pszTexture ? gHUD.GetIcon( pszTexture ) : NULL );
 
-protected:
+		BaseClass::ApplySettings( inResourceData );
+	}
+
+	virtual void Paint( void );
+	virtual bool ShouldDraw( void );
 
 private:
-	CPanelAnimationVar( vgui::HFont, m_hTextFont, "TextFont", "HUD_TextSmall" );
+	CPanelAnimationVarAliasType( float, bar_x_offset, "bar_x_offset", "3", "proportional_float" );
+	CPanelAnimationVarAliasType( float, bar_y_offset, "bar_y_offset", "3", "proportional_float" );
 
-	CPanelAnimationVarAliasType( float, text1_xpos, "text1_xpos", "34", "proportional_float" );
-	CPanelAnimationVarAliasType( float, text1_ypos, "text1_ypos", "10", "proportional_float" );
+	CPanelAnimationVar( Color, bar_color, "bar_color", "HUD_Tone_Default" );
 
-	CPanelAnimationVarAliasType( float, image1_xpos, "image1_xpos", "2", "proportional_float" );
-	CPanelAnimationVarAliasType( float, image1_ypos, "image1_ypos", "4", "proportional_float" );
-
-	CPanelAnimationVar( Color, m_BarColor, "HUD_Tone_Default", "HUD_Tone_Default" );
-	CPanelAnimationVarAliasType( float, bar_width, "bar_width", "75", "proportional_float" );
-	CPanelAnimationVarAliasType( float, bar_height, "bar_height", "24", "proportional_float" );
+	CHudTexture* m_pProgressBarTexture;
 };
 
 //-----------------------------------------------------------------------------
-// Purpose: Done each map load
+// Purpose: Decides when to draw and when to not
 //-----------------------------------------------------------------------------
-void CHudJetpackFuelBar::VidInit( void )
+bool CHudJetpackFuelBar::ShouldDraw( void )
 {
-	SetPaintBackgroundEnabled( false );
+	if( !engine->IsInGame() )
+		return false;
+
+	if( !CHudElement::ShouldDraw() )
+		return false;
+
+	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+
+	if( !pPlayer )
+		return false;
+
+	if( pPlayer->GetClassSlot() != CLASS_PYRO || FF_IsPlayerSpec( pPlayer ) || !FF_HasPlayerPickedClass( pPlayer ) || !pPlayer->m_bCanUseJetpack )
+		return false;
+
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -69,23 +86,18 @@ void CHudJetpackFuelBar::VidInit( void )
 //-----------------------------------------------------------------------------
 void CHudJetpackFuelBar::Paint( void )
 {
-	if( !engine->IsInGame() )
-		return;
-
-	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
 	if( !pPlayer )
 		return;
 
-	if( pPlayer->GetClassSlot() != CLASS_PYRO || FF_IsPlayerSpec( pPlayer ) || !FF_HasPlayerPickedClass( pPlayer ) || !pPlayer->m_bCanUseJetpack )
-		return;
-
-	BaseClass::PaintBackground();
-
 	float iProgressPercent = pPlayer->m_iJetpackFuel / 200.0f;
-	surface()->DrawSetColor( m_BarColor );
 
-	surface()->DrawFilledRect( image1_xpos, image1_ypos, image1_xpos + bar_width * iProgressPercent, image1_ypos + bar_height );
+	int offsetX = ( GetWide() - bar_x_offset * 2 );
+	int offsetY = ( GetTall() - bar_y_offset * 2 );
+
+	if ( m_pProgressBarTexture )
+		m_pProgressBarTexture->DrawSelf( bar_x_offset, bar_y_offset, offsetX * iProgressPercent, offsetY, bar_color );
 }
 
 DECLARE_HUDELEMENT(CHudJetpackFuelBar);

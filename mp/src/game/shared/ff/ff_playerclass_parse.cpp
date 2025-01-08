@@ -286,7 +286,8 @@ CFFPlayerClassInfo::CFFPlayerClassInfo()
 	Q_strncpy(m_szPrintName, "unselected class", MAX_PLAYERCLASS_STRING);
 	Q_strncpy(m_szDescription, "You need to select a class!", MAX_PLAYERCLASS_STRING_LONG);
 	Q_strncpy(m_szModel, "models/player/scout/scout.mdl", MAX_PLAYERCLASS_STRING);
-	
+	Q_strncpy(m_szArmModel, "models/player/arms/default_arms.mdl", MAX_PLAYERCLASS_STRING);
+
 	m_iMaxArmour = 0;
 	m_iInitialArmour = 0;
 	m_iArmourType = 0;
@@ -340,6 +341,7 @@ void CFFPlayerClassInfo::Parse(KeyValues *pKeyValuesData, const char *szPlayerCl
 
 	// View model & world model
 	Q_strncpy(m_szModel, pKeyValuesData->GetString("model"), MAX_PLAYERCLASS_STRING);
+	Q_strncpy(m_szArmModel, pKeyValuesData->GetString( "arm_model" ), MAX_PLAYERCLASS_STRING);
 
 	// Health and armour values
 	m_iMaxArmour		= pKeyValuesData->GetInt("max_armour", 0);

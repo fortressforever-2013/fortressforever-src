@@ -2890,7 +2890,7 @@ int CGameMovement::TryPlayerMove( Vector *pFirstDest, trace_t *pFirstTrace )
 	{
 		VectorCopy (vec3_origin, mv->m_vecVelocity);
 	}
-
+/*
 	// Check if they slammed into a wall
 	float fSlamVol = 0.0f;
 
@@ -2905,7 +2905,7 @@ int CGameMovement::TryPlayerMove( Vector *pFirstDest, trace_t *pFirstTrace )
 	}
 
 	PlayerRoughLandingEffects( fSlamVol );
-
+*/
 	return blocked;
 }
 
@@ -4102,11 +4102,6 @@ void CGameMovement::PlayerRoughLandingEffects( float fvol )
 		CFFPlayer* pFFPlayer = ToFFPlayer(player);
 		Assert(pFFPlayer);
 
-		// SDK2013 bug: fall damage played when the player
-		// hits a wall at high speed
-		if (!pFFPlayer->GetGroundEntity())
-			return;
-
 		pFFPlayer->PlayFallSound(mv->m_vecAbsOrigin, player->m_pSurfaceData, fvol);
 
 		// Play landing sound right away.
@@ -4862,8 +4857,6 @@ void CGameMovement::Duck( void )
 //	}
 }
 
-static ConVar sv_optimizedmovement( "sv_optimizedmovement", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
-
 //-----------------------------------------------------------------------------
 // Purpose: Movement while building in Fortress Forever
 //-----------------------------------------------------------------------------
@@ -4908,24 +4901,7 @@ void CGameMovement::PlayerMove( void )
 		}
 	}
 
-	CFFPlayer* pFFPlayer = dynamic_cast<CFFPlayer*>(player);
-	if (pFFPlayer->IsRampsliding() && pFFPlayer->m_nButtons & IN_JUMP)
-		CategorizePosition();
-
-	// Now that we are "unstuck", see where we are (player->GetWaterLevel() and type, player->GetGroundEntity()).
-	if ( player->GetMoveType() != MOVETYPE_WALK ||
-		mv->m_bGameCodeMovedPlayer || 
-		!sv_optimizedmovement.GetBool()  )
-	{
-		CategorizePosition();
-	}
-	else
-	{
-		if ( mv->m_vecVelocity.z > 250.0f )
-		{
-			SetGroundEntity( NULL );
-		}
-	}
+	CategorizePosition();
 
 	// Store off the starting water level
 	m_nOldWaterLevel = player->GetWaterLevel();

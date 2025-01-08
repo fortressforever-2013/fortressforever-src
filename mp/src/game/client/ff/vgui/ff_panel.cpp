@@ -53,8 +53,6 @@ namespace vgui
 		//this is needed when changing resolutions!
 		m_iPlayerTeam = -1;
 
-		m_HudForegroundColour = GetSchemeColor( "HudItem.Foreground", pScheme );
-		m_HudBackgroundColour = GetSchemeColor( "HudItem.Background", pScheme );
 		m_TeamColorHudBackgroundColour = GetSchemeColor( "TeamColorHud.BackgroundAlpha", pScheme );
 
 		BaseClass::ApplySchemeSettings( pScheme );
@@ -70,15 +68,18 @@ namespace vgui
 		//if( FF_IsPlayerSpec( pPlayer ) || !FF_HasPlayerPickedClass( pPlayer ) )
 		//	return;
 
+		int wide = GetWide();
+		int tall = GetTall();
+
 		if (m_pHudBackground)
 		{
 			if (cl_teamcolourhud.GetBool())
-				m_pHudBackground->DrawSelf(0, 0, m_TeamColorHudBackgroundColour);
+				m_pHudBackground->DrawSelf(0, 0, wide, tall, m_TeamColorHudBackgroundColour);
 			else
-				m_pHudBackground->DrawSelf(0, 0, m_HudBackgroundColour);
+				m_pHudBackground->DrawSelf(0, 0, wide, tall, m_HudBackgroundColour);
 		}
 		if (m_pHudForeground)
-			m_pHudForeground->DrawSelf(0, 0, m_HudForegroundColour);
+			m_pHudForeground->DrawSelf(0, 0, wide, tall, m_HudForegroundColour);
 
 		BaseClass::PaintBackground();
 	}
@@ -108,7 +109,8 @@ namespace vgui
 			{
 				m_iPlayerTeam = iPlayerTeam;
 				Color newTeamColor = g_PR->GetTeamColor( m_iPlayerTeam );
-				m_TeamColorHudBackgroundColour.SetColor( newTeamColor.r(), newTeamColor.g(), newTeamColor.b(), m_TeamColorHudBackgroundColour.a() );
+				newTeamColor.setA( m_TeamColorHudBackgroundColour.a() );
+				m_TeamColorHudBackgroundColour = newTeamColor;
 			}
 		}
 	}
@@ -125,8 +127,6 @@ namespace vgui
 		m_pHudBackground = NULL;
 		m_pHudForeground = NULL;
 
-		m_HudForegroundColour = Color(255, 255, 255, 255);
-		m_HudBackgroundColour = Color(255, 255, 255, 255);
 		m_TeamColorHudBackgroundColour = Color(255, 255, 255, 255);
 
 		ivgui()->AddTickSignal( GetVPanel(), 500 );

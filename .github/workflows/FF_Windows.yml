@@ -1,14 +1,14 @@
-name: FF_Windows
+name: Windows Build
 
 on:
   pull_request:
     branches:
       - main
-  
   workflow_dispatch:
 
 jobs:
-  build:
+  build_windows:
+    name: Build Windows Binaries
     runs-on:
       windows-latest
     
@@ -16,21 +16,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure dependencies
+      - name: Configure Dependencies
         uses: ilammy/msvc-dev-cmd@v1
         
-      - name: Create project
-        run: cd mp/src;devtools/bin/vpc.exe /2013 /ff +game /mksln Game_FF.sln
+      - name: Create Project
+        working-directory: mp/src
+        run: devtools/bin/vpc.exe /2013 /ff +game /mksln Game_FF.sln
 
-      - name: Build project
-        run: cd mp/src;devenv Game_FF.sln /Build Release
+      - name: Build Project
+        working-directory: mp/src
+        run: devenv Game_FF.sln /Build Release
 
-      - name: Pack
-        shell: bash
-        run: tar cJfv Windows.tar.xz mp/game/FortressForever2013/bin
-
-      - name: Upload product
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: FF_2013
-          path: Windows.tar.xz
+          name: ff_windows
+          path: |
+            mp/game/FortressForever2013/bin/*.dll
+            mp/game/FortressForever2013/bin/*.pdb
+          retention-days: 1

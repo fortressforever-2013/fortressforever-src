@@ -480,8 +480,11 @@ void CHud::Init(void)
 	CUtlDict< CHudTexture*, int >	textureList;
 
 	// check to see if we have sprites for this res; if not, step down
-	LoadHudTextures(textureList, "scripts/ff_hud_textures", NULL);	// |-- Mirv: Renamed
+	LoadHudTextures(textureList, "scripts/hud_textures", NULL);
 	LoadHudTextures(textureList, "scripts/mod_textures", NULL);
+
+	// load FF HUD textures
+	LoadHudTextures(textureList, "scripts/ff_hud_textures", NULL);	// |-- Mirv: Renamed
 
 	int c = textureList.Count();
 	for (int index = 0; index < c; index++)
@@ -833,6 +836,9 @@ void CHud::RefreshHudTextures()
 	// check to see if we have sprites for this res; if not, step down
 	LoadHudTextures(textureList, "scripts/hud_textures", NULL);
 	LoadHudTextures(textureList, "scripts/mod_textures", NULL);
+
+	// load FF HUD textures
+	LoadHudTextures(textureList, "scripts/ff_hud_textures", NULL);	// |-- Mirv: Renamed
 
 	// fix up all the texture icons first
 	int c = textureList.Count();

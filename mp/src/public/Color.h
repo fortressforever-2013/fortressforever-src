@@ -71,9 +71,9 @@ public:
 
 	// -- setters for LuaBridge3
 	inline void setR(int r) { _color[0] = (unsigned char) r; }
-	inline void setG(int g) { _color[0] = (unsigned char) g; }
-	inline void setB(int b) { _color[0] = (unsigned char) b; }
-	inline void setA(int a) { _color[0] = (unsigned char) a; }
+	inline void setG(int g) { _color[1] = (unsigned char) g; }
+	inline void setB(int b) { _color[2] = (unsigned char) b; }
+	inline void setA(int a) { _color[3] = (unsigned char) a; }
 	// -- setters for LuaBridge3
 	
 	unsigned char &operator[](int index)
