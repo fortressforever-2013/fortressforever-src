@@ -42,6 +42,23 @@ void CHudGrenade2Timer::Init()
 	ResetTimer();
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Reset stuff
+//-----------------------------------------------------------------------------
+void CHudGrenade2Timer::Reset()
+{
+	ResetTimer();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Run on every video initialization
+//			(first time loading into map, changing resolution, etc)
+//-----------------------------------------------------------------------------
+void CHudGrenade2Timer::VidInit()
+{
+	Reset();
+}
+
 void CHudGrenade2Timer::SetTimer(float duration) 
 {
 	// Fade it in if needed
