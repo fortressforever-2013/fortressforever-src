@@ -52,6 +52,9 @@ public:
 	virtual void	PaintBackground();
 	virtual void	OnTick();
 
+	virtual void	Reset();
+	virtual void	VidInit();
+
 	void	SetTimer(float duration);
 	bool	ActiveTimer( void ) const;
 	void	ResetTimer( void );
