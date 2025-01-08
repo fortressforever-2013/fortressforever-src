@@ -243,26 +243,24 @@ void CFFWeaponBase::SetViewModel()
 	if( !pClassInfo )
 		return;
 
-	const char* pszModel = "models/player/arms/default_arms.mdl";
+	const char* pszModel = NULL;
 
-	switch( pOwner->m_iHandViewModelMode )
+	if( pOwner->m_iHandViewModelMode == 0 )
 	{
-		case 0:
+		if( pClassInfo->m_szArmModel[0] )
 		{
-			if( pClassInfo->m_szArmModel[0] )
-				pszModel = pClassInfo->m_szArmModel;
-		}
-		case 1:
-		{
-			vm->SetArmModel( modelinfo->GetModelIndex( pszModel ), this );
-			break;
-		}
-		default:
-		{
-			vm->RemoveArmModel();
-			return;
+			pszModel = pClassInfo->m_szArmModel;
 		}
 	}
+	else if( pOwner->m_iHandViewModelMode == 1 )
+	{
+		pszModel = "models/player/arms/default_arms.mdl";
+	}
+
+	if( pszModel && pszModel[0] )
+		vm->SetArmModel( modelinfo->GetModelIndex( pszModel ), this );
+	else
+		vm->RemoveArmModel();
 }
 
 const char *CFFWeaponBase::GetViewModel( int /*viewmodelindex = 0 -- this is ignored in the base class here*/ ) const

@@ -62,6 +62,9 @@ CBaseViewModel::CBaseViewModel()
 
 #ifdef FF
 	m_iArmModelIndex = -1;
+#ifdef CLIENT_DLL
+	m_hArmModel = NULL;
+#endif
 #endif
 }
 
@@ -735,7 +738,7 @@ void CBaseViewModel::SetArmModel( int iModelIndex, CBaseCombatWeapon *weapon )
 	if( !pFFWeapon )
 		return;
 
-	bool bCanDraw = pFFWeapon->IsPlayerUsingNonFallbackNewViewmodel( pFFPlayer );
+	bool bCanDraw = pFFWeapon->IsPlayerUsingNonFallbackNewViewmodel( pFFPlayer ) && pFFPlayer->m_iHandViewModelMode != 2;
 
 	C_BaseViewModelArms *pArms = m_hArmModel.Get();
 	if ( !pArms )

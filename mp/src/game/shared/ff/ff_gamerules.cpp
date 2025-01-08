@@ -498,7 +498,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 				const char *pszHands = engine->GetClientConVarValue( pPlayer->entindex(), "cl_hand_viewmodel_mode" );
 				if( pszHands && pszHands[0] )
 				{
-					pFFPlayer->m_iHandViewModelModeParity = Q_atoi( pszHands );
+					pFFPlayer->m_iHandViewModelMode = Q_atoi( pszHands );
 				}
 			}
 		}

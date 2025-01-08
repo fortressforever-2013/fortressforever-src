@@ -583,7 +583,7 @@ RecvPropInt(RECVINFO(m_bCanDoubleJump)),
 RecvPropTime(RECVINFO(m_flNextJumpTimeForDouble)),
 RecvPropTime(RECVINFO(m_flLastSpawnTime)),
 RecvPropBool(RECVINFO(m_bClassicViewModelsParity)),
-RecvPropInt(RECVINFO(m_iHandViewModelModeParity)),
+RecvPropInt(RECVINFO(m_iHandViewModelMode)),
 END_RECV_TABLE()
 
 BEGIN_PREDICTION_DATA(C_FFPlayer)
@@ -1029,7 +1029,6 @@ C_FFPlayer::C_FFPlayer() :
 	m_bClassicViewModelsParity = false;
 
 	m_iHandViewModelMode = 0;
-	m_iHandViewModelModeParity = 0;
 
 	// dexter - hook up a lua client relevent message
 	usermessages->HookMessage("FFStopGrenTimers", &StopGrenTimersListener);
@@ -1265,7 +1264,6 @@ extern void ClearStatusIcons();
 void C_FFPlayer::Spawn(void)
 {
 	m_bClassicViewModels = m_bClassicViewModelsParity;
-	m_iHandViewModelMode = m_iHandViewModelModeParity;
 
 	// Okay, not calling the base spawn when this was created
 	// was breaking a lot of stuff.

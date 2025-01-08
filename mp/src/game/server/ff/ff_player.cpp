@@ -485,7 +485,7 @@ IMPLEMENT_SERVERCLASS_ST( CFFPlayer, DT_FFPlayer )
 	SendPropTime(SENDINFO(m_flNextJumpTimeForDouble)),
 	SendPropTime(SENDINFO(m_flLastSpawnTime)),
 	SendPropBool(SENDINFO(m_bClassicViewModelsParity)),
-	SendPropBool(SENDINFO(m_iHandViewModelModeParity)),
+	SendPropInt(SENDINFO(m_iHandViewModelMode)),
 END_SEND_TABLE( )
 
 LINK_ENTITY_TO_CLASS( ff_ragdoll, CFFRagdoll );
@@ -640,7 +640,6 @@ CFFPlayer::CFFPlayer()
 	m_bClassicViewModels = false;
 	m_bClassicViewModelsParity = false;
 	m_iHandViewModelMode = 0;
-	m_iHandViewModelModeParity = 0;
 }
 
 CFFPlayer::~CFFPlayer()
@@ -1395,7 +1394,6 @@ void CFFPlayer::Spawn( void )
 	m_iSabotagedDispensers = 0;
 
 	m_bClassicViewModels = m_bClassicViewModelsParity;
-	m_iHandViewModelMode = m_iHandViewModelModeParity;
 
 	// If we get spawned, kill any primed grenades!
 	ResetGrenadeState();

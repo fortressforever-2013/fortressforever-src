@@ -1045,8 +1045,7 @@ public:
 	bool m_bQueueDetonation;
 	bool m_bClassicViewModels;
 	CNetworkVar(bool, m_bClassicViewModelsParity);
-	int m_iHandViewModelMode;
-	CNetworkVar(int, m_iHandViewModelModeParity);
+	CNetworkVar(int, m_iHandViewModelMode);
 };
 
 inline CFFPlayer *ToFFPlayer( CBaseEntity *pEntity )
