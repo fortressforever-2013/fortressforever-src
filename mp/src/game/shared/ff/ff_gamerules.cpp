@@ -1,4 +1,4 @@
-//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: The TF Game rules 
 //
@@ -660,9 +660,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 					pPlayer->ResetFortPointsCount();
 					pPlayer->ResetDeathCount();
 					pPlayer->ResetAsisstsCount();
-
-					if(!pPlayer->IsHLTV())
-						FF_SendStopGrenTimerMessage(pPlayer);
+					FF_SendStopGrenTimerMessage(pPlayer);
 
 					if( FF_IsPlayerSpec( pPlayer ) )
 						continue;
