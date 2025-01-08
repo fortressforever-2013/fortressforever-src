@@ -865,20 +865,14 @@ void Bot_HandleSendCmd( CFFBot *pBot )
 		if( Q_strcmp( "disguise21", bot_sendcmd.GetString() ) == 0 )
 			pBot->Bot_Disguise( TEAM_RED, CLASS_SCOUT );
 
-		if( Q_strcmp( "toggleone", bot_sendcmd.GetString() ) == 0 )
-			pBot->Command_ToggleOne();
-
-		if( Q_strcmp( "toggletwo", bot_sendcmd.GetString() ) == 0 )
-			pBot->Command_ToggleTwo();
-
 		if( Q_strcmp( "primeone", bot_sendcmd.GetString() ) == 0 )
-			pBot->Command_PrimeOne();
+			pBot->PrimeGrenade1();
 
 		if( Q_strcmp( "primetwo", bot_sendcmd.GetString() ) == 0 )
-			pBot->Command_PrimeTwo();
+			pBot->PrimeGrenade2();
 
 		if( Q_strcmp( "throwgren", bot_sendcmd.GetString() ) == 0 )
-			pBot->Command_ThrowGren();
+			pBot->ThrowPrimedGrenade();
 
 		if( Q_strcmp( "dispensertext", bot_sendcmd.GetString() ) == 0 )
 		{
