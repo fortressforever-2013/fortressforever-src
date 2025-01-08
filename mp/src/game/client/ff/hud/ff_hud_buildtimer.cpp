@@ -147,30 +147,28 @@ void CHudBuildTimer::OnTick()
 
 void CHudBuildTimer::PaintBackground() 
 {
-	// Draw progress bar background
-	if(cl_teamcolourhud.GetBool())
-		surface()->DrawSetColor(m_TeamColorHudBackgroundColour);
-	else
-		surface()->DrawSetColor(m_HudBackgroundColour);
-	surface()->DrawFilledRect(bar_xpos, bar_ypos, bar_xpos + bar_width, bar_ypos + bar_height);
+	int wide = GetWide() - bar_xpos;
+	int tall = GetTall();
 
-	// Draw progress bar border
-	surface()->DrawSetColor(m_HudForegroundColour);
-	surface()->DrawOutlinedRect(bar_xpos-1, bar_ypos-1, bar_xpos + bar_width+1, bar_ypos + bar_height+1);
-	surface()->DrawOutlinedRect(bar_xpos-2, bar_ypos-2, bar_xpos + bar_width+2, bar_ypos + bar_height+2);
+	if (m_pHudBackground)
+	{
+		if (cl_teamcolourhud.GetBool())
+			m_pHudBackground->DrawSelf(bar_xpos, bar_ypos, wide, tall, m_TeamColorHudBackgroundColour);
+		else
+			m_pHudBackground->DrawSelf(bar_xpos, bar_ypos, wide, tall, m_HudBackgroundColour);
+	}
+	if (m_pHudForeground)
+		m_pHudForeground->DrawSelf(bar_xpos, bar_ypos, wide, tall, m_HudForegroundColour);
 }
 
 void CHudBuildTimer::Paint() 
 {
 	if(m_pIconTexture)
-	{
-		int iconWide = 32.0f; //m_pIconTexture->Width();
-		int iconTall = 32.0f; //m_pIconTexture->Height();
-		
-		m_pIconTexture->DrawSelf( bar_xpos - 2/*boarderwidth*/ - iconWide - icon_offset, bar_ypos + bar_height/2 - iconTall/2, iconWide, iconTall, m_HudForegroundColour );
+	{		
+		m_pIconTexture->DrawSelf( icon_xpos, icon_ypos, icon_width, icon_height, m_HudForegroundColour );
 	}
 	
 	float amount = clamp((gpGlobals->curtime - m_flStartTime) / m_flDuration, 0, 1.0f);
 	surface()->DrawSetColor(m_HudForegroundColour);
-	surface()->DrawFilledRect(bar_xpos, bar_ypos, bar_xpos + bar_width * amount, bar_ypos + bar_height);
+	surface()->DrawFilledRect(bar_xpos, bar_ypos, ( bar_xpos + ( ( GetWide() - bar_xpos ) * amount ) ), GetTall());
 }

@@ -109,9 +109,10 @@ private:
 	CPanelAnimationVarAliasType( float, image1_ypos, "image1_ypos", "4", "proportional_float" );
 
 	// For the disguising progress bar
+	CPanelAnimationVarAliasType( float, bar_x_offset, "bar_x_offset", "3", "proportional_float" );
+	CPanelAnimationVarAliasType( float, bar_y_offset, "bar_y_offset", "3", "proportional_float" );
+
 	CPanelAnimationVar( Color, m_BarColor, "HUD_Tone_Default", "HUD_Tone_Default" );
-	CPanelAnimationVarAliasType( float, bar_width, "bar_width", "75", "proportional_float" );
-	CPanelAnimationVarAliasType( float, bar_height, "bar_height", "24", "proportional_float" );
 	
 	float m_flDisguiseStartTime;
 	int	m_iDisguising;
@@ -166,9 +167,12 @@ void CHudSpyDisguise::Paint( void )
 		//surface()->DrawSetTextPos( text1_xpos, text1_ypos );
 		//surface()->DrawUnicodeString( wsProgress );
 
+		int offsetX = ( GetWide() - bar_x_offset );
+		int offsetY = ( GetTall() - bar_y_offset );
+
 		// Draw progress bar
 		surface()->DrawSetColor( m_BarColor );
-		surface()->DrawFilledRect( image1_xpos, image1_ypos, image1_xpos + bar_width * iProgressPercent, image1_ypos + bar_height );
+		surface()->DrawFilledRect( bar_x_offset, bar_y_offset, offsetX * iProgressPercent, offsetY );
 	}
 	else
 		m_iDisguising = 0;
@@ -310,39 +314,5 @@ void CHudSpyDisguise2::Paint( void )
 	}
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Displays current disguised class
-//-----------------------------------------------------------------------------
-class CHudSpyDisguise3 : public CHudElement, public vgui::FFPanel
-{
-public:
-	DECLARE_CLASS_SIMPLE( CHudSpyDisguise3, vgui::FFPanel );
-
-	CHudSpyDisguise3( const char *pElementName ) : vgui::FFPanel( NULL, "HudSpyDisguise3" ), CHudElement( pElementName )
-	{
-		SetParent( g_pClientMode->GetViewport() );
-		SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED );
-	}
-
-	virtual void VidInit( void )
-	{
-		SetPaintBackgroundEnabled( false );
-	}
-
-	virtual void Paint( void )
-	{
-		C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
-
-		if( !pPlayer )
-			return;
-
-		if ( !pPlayer->IsDisguising() && !pPlayer->IsDisguised() )
-			return;
-
-		BaseClass::PaintBackground();
-	}
-};
-
 DECLARE_HUDELEMENT(CHudSpyDisguise);
 DECLARE_HUDELEMENT(CHudSpyDisguise2);
-DECLARE_HUDELEMENT(CHudSpyDisguise3);
