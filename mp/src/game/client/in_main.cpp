@@ -1783,8 +1783,8 @@ static ConCommand endzoom("-zoom", IN_ZoomUp);
 static ConCommand startgrenade1("+gren1", IN_Grenade1Down);
 static ConCommand endgrenade1("-gren1", IN_Grenade1Up);
 
-static ConCommand startgrenade2("+grenade2", IN_Grenade2Down);
-static ConCommand endgrenade2("-grenade2", IN_Grenade2Up);
+static ConCommand startgrenade2("+gren2", IN_Grenade2Down);
+static ConCommand endgrenade2("-gren2", IN_Grenade2Up);
 
 static ConCommand startattack3("+attack3", IN_Attack3Down);
 static ConCommand endattack3("-attack3", IN_Attack3Up);
