@@ -26,6 +26,31 @@ class CVGuiScreen;
 #define CBaseCombatWeapon C_BaseCombatWeapon
 #endif
 
+#ifdef FF
+#ifdef CLIENT_DLL
+class C_BaseViewModelArms : public C_BaseAnimating
+{
+	DECLARE_CLASS( C_BaseViewModelArms, C_BaseAnimating );
+
+public:
+	virtual bool			InitializeAsClientEntity( const char *pszModelName, RenderGroup_t renderGroup );
+
+	virtual bool			ShouldReceiveProjectedTextures( int flags ) { return false; }
+
+	virtual void			FormatViewModelAttachment( int nAttachment, matrix3x4_t &attachmentToWorld );
+	virtual void			UncorrectViewModelAttachment( Vector &vOrigin );
+	virtual bool			IsViewModel() const { return true; }
+
+	virtual RenderGroup_t	GetRenderGroup( void ) { return RENDER_GROUP_VIEW_MODEL_OPAQUE; }
+	virtual ShadowType_t	ShadowCastType() { return SHADOWS_NONE; }
+
+	virtual int				InternalDrawModel( int flags );
+
+	CHandle<CBaseViewModel> m_hViewModel;
+};
+#endif // CLIENT_DLL
+#endif // FF
+
 #define VIEWMODEL_INDEX_BITS 1
 
 class CBaseViewModel : public CBaseAnimating, public IHasOwner
@@ -133,6 +158,9 @@ public:
 
 	virtual bool			ShouldDraw();
 	virtual int				DrawModel( int flags );
+#ifdef FF
+	virtual bool			OnInternalDrawModel( ClientModelRenderInfo_t *pInfo );
+#endif
 	virtual int				InternalDrawModel( int flags );
 	int						DrawOverriddenViewmodel( int flags );
 	virtual int				GetFxBlend( void );
@@ -205,6 +233,17 @@ private:
 	// Control panel
 	typedef CHandle<CVGuiScreen>	ScreenHandle_t;
 	CUtlVector<ScreenHandle_t>	m_hScreens;
+
+#ifdef FF
+public:
+	virtual void SetArmModel( int iIndex, CBaseCombatWeapon *weapon );
+	virtual void RemoveArmModel();
+	CNetworkVar( int, m_iArmModelIndex );
+#ifdef CLIENT_DLL
+	virtual void SetDormant( bool bDormant );
+	CHandle<C_BaseViewModelArms> m_hArmModel;
+#endif
+#endif
 };
 
 #endif // BASEVIEWMODEL_SHARED_H

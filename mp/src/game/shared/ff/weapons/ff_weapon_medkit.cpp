@@ -38,10 +38,13 @@ public:
 
 	virtual FFWeaponID GetWeaponID() const		{ return FF_WEAPON_MEDKIT; }
 
+	virtual void PrimaryAttack();
+	virtual bool SendWeaponAnim( int iActivity );
+
 	virtual void	Precache();
 	virtual void	WeaponSound(WeaponSound_t sound_type, float soundtime = 0.0f);
 
-
+	CNetworkVar( bool, m_bInfectAnimation );
 private:
 	void			Hit(trace_t &traceHit, Activity nHitActivity);
 	CFFWeaponMedkit(const CFFWeaponMedkit &);
@@ -54,9 +57,17 @@ private:
 IMPLEMENT_NETWORKCLASS_ALIASED(FFWeaponMedkit, DT_FFWeaponMedkit) 
 
 BEGIN_NETWORK_TABLE(CFFWeaponMedkit, DT_FFWeaponMedkit) 
+#ifdef CLIENT_DLL
+	RecvPropInt( RECVINFO( m_bInfectAnimation ) ),
+#else
+	SendPropInt( SENDINFO( m_bInfectAnimation ), 1, SPROP_UNSIGNED ),
+#endif
 END_NETWORK_TABLE() 
 
-BEGIN_PREDICTION_DATA(CFFWeaponMedkit) 
+BEGIN_PREDICTION_DATA(CFFWeaponMedkit)
+#ifdef CLIENT_DLL
+	DEFINE_PRED_FIELD( m_bInfectAnimation, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
+#endif
 END_PREDICTION_DATA() 
 
 LINK_ENTITY_TO_CLASS(ff_weapon_medkit, CFFWeaponMedkit);
@@ -97,6 +108,8 @@ void CFFWeaponMedkit::Hit(trace_t &traceHit, Activity nHitActivity)
 	{
 		CFFPlayer *pTarget = ToFFPlayer(pHitEntity);
 		//DevMsg("[medkit] hit other player.. team: %d(mine: %d) \n", pPlayer->GetTeamNumber(), pTarget->GetTeamNumber());
+
+		m_bInfectAnimation = true;
 
 		// check if they are allies
 		if (g_pGameRules->PlayerRelationship(pPlayer, pTarget) == GR_TEAMMATE) 
@@ -163,6 +176,20 @@ void CFFWeaponMedkit::Hit(trace_t &traceHit, Activity nHitActivity)
 			return;
 		}
 	}
+}
+
+void CFFWeaponMedkit::PrimaryAttack()
+{
+	m_bInfectAnimation = false;
+	BaseClass::PrimaryAttack();
+}
+
+bool CFFWeaponMedkit::SendWeaponAnim( int iActivity )
+{
+	if( !m_bInfectAnimation && iActivity == ACT_VM_HITCENTER )
+		iActivity = ACT_VM_MISSCENTER;
+
+	return BaseClass::SendWeaponAnim( iActivity );
 }
 
 //----------------------------------------------------------------------------

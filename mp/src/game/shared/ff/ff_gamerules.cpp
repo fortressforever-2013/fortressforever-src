@@ -119,7 +119,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 		pRecipients->SetAllRecipients();
 		return pRules;
 	}
-
+	
 	BEGIN_SEND_TABLE( CFFGameRulesProxy, DT_FFGameRulesProxy )
 		SendPropDataTable( "ff_gamerules_data", 0, &REFERENCE_SEND_TABLE( DT_FFGameRules ), SendProxy_FFGameRules )
 	END_SEND_TABLE()
@@ -128,7 +128,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 
 #ifdef CLIENT_DLL
 	ConVar cl_classic_viewmodels( "cl_classic_viewmodels", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
-
+	ConVar cl_classic_hand_viewmodels( "cl_hand_viewmodel_mode", "0", FCVAR_ARCHIVE | FCVAR_USERINFO, "0 = class specific models 1 = classic model 2 = invisible");
 #else
 	ConVar sv_force_classic_viewmodels( "sv_force_classic_viewmodels", "0", FCVAR_REPLICATED );
 
@@ -494,6 +494,11 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 				if( pszViewmodel && pszViewmodel[0] )
 				{
 					pFFPlayer->m_bClassicViewModelsParity = Q_atoi( pszViewmodel ) ? true : false;
+				}
+				const char *pszHands = engine->GetClientConVarValue( pPlayer->entindex(), "cl_hand_viewmodel_mode" );
+				if( pszHands && pszHands[0] )
+				{
+					pFFPlayer->m_iHandViewModelModeParity = Q_atoi( pszHands );
 				}
 			}
 		}

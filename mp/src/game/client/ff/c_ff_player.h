@@ -642,6 +642,8 @@ public:
 	float GetNextCloak() { return m_flNextCloak; }
 	bool m_bClassicViewModels;
 	CNetworkVar(bool, m_bClassicViewModelsParity);
+	int m_iHandViewModelMode;
+	CNetworkVar(int, m_iHandViewModelModeParity);
 };
 
 // Just straight up copying the server version. Tired
