@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: The TF Game rules 
 //
@@ -1562,8 +1562,9 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 				float flTimeLimit = mp_timelimit.GetFloat() * 60;
 
 				// Changelevel after intermission
-				if (g_fGameOver && gpGlobals->curtime > m_flIntermissionEndTime)
+				if (g_fGameOver && m_flIntermissionEndTime != 0 && gpGlobals->curtime > m_flIntermissionEndTime)
 				{
+					m_flIntermissionEndTime = 0.0f;
 					ChangeLevel();
 					return;
 				}
