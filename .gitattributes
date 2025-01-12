@@ -1,3 +1,5 @@
+* text=auto eol=lf
+
 creategameprojects text
 createallprojects text
 xcode_ccache_wrapper text
