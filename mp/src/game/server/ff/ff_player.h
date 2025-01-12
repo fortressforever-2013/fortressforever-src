@@ -490,6 +490,7 @@ private:
 	float m_flPrimeTime;
 	CNetworkVar(bool, m_bWantToThrowGrenade);			// does the client want to throw this grenade as soon as possible?
 	bool m_bEngyGrenWarned;
+	bool m_bLastPrimed;
 	// Backpacks
 public:
 	void PackDeadPlayerItems( void );

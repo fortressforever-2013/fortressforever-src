@@ -144,8 +144,6 @@ ConVar cl_rampslidefx_debug("cl_rampslidefx_alwayson", "0", FCVAR_CLIENTDLL | FC
 ConVar r_selfshadows("r_selfshadows", "0", FCVAR_CLIENTDLL, "Toggles player & player carried objects' shadows", true, 0, true, 1);
 static ConVar cl_classautokill("cl_classautokill", "0", FCVAR_USERINFO | FCVAR_ARCHIVE, "Change class instantly");
 
-ConVar cl_togglegrenades("cl_togglegrenades", "0", FCVAR_USERINFO | FCVAR_ARCHIVE, "Enables 2-Tap grenades if set to 1.");
-
 char g_szTimerFile[MAX_PATH];
 void TimerChange_Callback(IConVar* var, const char* pOldValue, float flOldValue);
 ConVar cl_timerwav("cl_grenadetimer", "default", FCVAR_ARCHIVE, "Timer file to use", TimerChange_Callback);

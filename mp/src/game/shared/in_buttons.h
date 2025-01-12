@@ -36,6 +36,8 @@
 #define IN_BULLRUSH		(1 << 22)
 #define IN_GRENADE1		(1 << 23)	// grenade 1
 #define IN_GRENADE2		(1 << 24)	// grenade 2
-#define	IN_ATTACK3		(1 << 25)
+#define IN_TOGGLEGRENADE1		(1 << 25)	// grenade 1 (toggle)
+#define IN_TOGGLEGRENADE2		(1 << 26)	// grenade 2 (toggle)
+#define	IN_ATTACK3		(1 << 27)
 
 #endif // IN_BUTTONS_H

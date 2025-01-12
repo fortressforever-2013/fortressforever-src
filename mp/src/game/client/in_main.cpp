@@ -147,6 +147,8 @@ static	kbutton_t	in_break;
 static	kbutton_t	in_zoom;
 static  kbutton_t   in_grenade1;
 static  kbutton_t   in_grenade2;
+static  kbutton_t   in_togglegrenade1;
+static  kbutton_t   in_togglegrenade2;
 
 static	kbutton_t	in_attack3;
 kbutton_t	in_ducktoggle;
@@ -493,6 +495,10 @@ void IN_Grenade1Down(const CCommand& args) { KeyDown( &in_grenade1, args[1] ); }
 void IN_Grenade1Up(const CCommand& args) { KeyUp( &in_grenade1, args[1] ); }
 void IN_Grenade2Down(const CCommand& args) { KeyDown( &in_grenade2, args[1] ); }
 void IN_Grenade2Up(const CCommand& args) { KeyUp( &in_grenade2, args[1] ); }
+void IN_ToggleGrenade1Down(const CCommand& args) { KeyDown( &in_togglegrenade1, args[1] ); }
+void IN_ToggleGrenade1Up(const CCommand& args) { KeyUp( &in_togglegrenade1, args[1] ); }
+void IN_ToggleGrenade2Down(const CCommand& args) { KeyDown( &in_togglegrenade2, args[1] ); }
+void IN_ToggleGrenade2Up(const CCommand& args) { KeyUp( &in_togglegrenade2, args[1] ); }
 
 void IN_XboxStub(const CCommand& args) { /*do nothing*/ }
 void IN_Attack3Down(const CCommand& args) { KeyDown(&in_attack3, args[1]); }
@@ -1627,6 +1633,9 @@ int CInput::GetButtonBits(int bResetState)
 	CalcButtonBits(bits, IN_GRENADE1, s_ClearInputState, &in_grenade1, bResetState);
 	CalcButtonBits(bits, IN_GRENADE2, s_ClearInputState, &in_grenade2, bResetState);
 
+	CalcButtonBits(bits, IN_TOGGLEGRENADE1, s_ClearInputState, &in_togglegrenade1, bResetState);
+	CalcButtonBits(bits, IN_TOGGLEGRENADE2, s_ClearInputState, &in_togglegrenade2, bResetState);
+
 	CalcButtonBits(bits, IN_ATTACK3, s_ClearInputState, &in_attack3, bResetState);
 
 	if (KeyState(&in_ducktoggle))
@@ -1780,11 +1789,19 @@ static ConCommand joyadvancedupdate("joyadvancedupdate", IN_Joystick_Advanced_f,
 static ConCommand startzoom("+zoom", IN_ZoomDown);
 static ConCommand endzoom("-zoom", IN_ZoomUp);
 
+// === Grenades ===
+// Hold
 static ConCommand startgrenade1("+gren1", IN_Grenade1Down);
 static ConCommand endgrenade1("-gren1", IN_Grenade1Up);
-
 static ConCommand startgrenade2("+gren2", IN_Grenade2Down);
 static ConCommand endgrenade2("-gren2", IN_Grenade2Up);
+
+// Toggle
+static ConCommand starttogglegrenade1("+togglegren1", IN_ToggleGrenade1Down);
+static ConCommand endtogglegrenade1("-togglegren1", IN_ToggleGrenade1Up);
+static ConCommand starttogglegrenade2("+togglegren2", IN_ToggleGrenade2Down);
+static ConCommand endtogglegrenade2("-togglegren2", IN_ToggleGrenade2Up);
+// ================
 
 static ConCommand startattack3("+attack3", IN_Attack3Down);
 static ConCommand endattack3("-attack3", IN_Attack3Up);
