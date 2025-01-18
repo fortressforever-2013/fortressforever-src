@@ -191,8 +191,6 @@ extern ConVar ai_debug_shoot_positions;
 	extern char g_szTimerFile[MAX_PATH];
 
 	void TimerChange_Callback(IConVar* var, const char* pOldValue, float flOldValue);
-
-	extern ConVar cl_togglegrenades;
 #endif
 
 void DispatchEffect(const char *pName, const CEffectData &data);
@@ -1851,50 +1849,87 @@ void CFFPlayer::SharedPreThink( void )
 	}
 #endif
 
-#ifdef CLIENT_DLL
-	bool bToggleGrenades = cl_togglegrenades.GetBool();
-#else
-	bool bToggleGrenades = atoi( engine->GetClientConVarValue( engine->IndexOfEdict( edict() ), "cl_togglegrenades" ) );
-#endif
-
 	// grenades
-	if ( m_afButtonPressed & IN_GRENADE1 )
+	// 2-tap binds
+	// HACK: this is not what m_bLastPrimed is for
+	if ( m_bLastPrimed && m_afButtonPressed & ( IN_TOGGLEGRENADE1 | IN_TOGGLEGRENADE2 ) && IsGrenadePrimed() ) // throw either grenade on releasing key (2-tap)
 	{
-		if ( bToggleGrenades && IsGrenade1Primed() )
-		{
-			ThrowPrimedGrenade();
-#ifdef CLIENT_DLL
-			m_bLastPrimed = false;
-#endif
-			return;
-		}
-		else
-		{
-			if( !IsGrenade1Primed() )
-				PrimeGrenade1();
-		}
+		m_bLastPrimed = false;
+		ThrowPrimedGrenade();
+		return;
 	}
-	else if ( m_afButtonPressed & IN_GRENADE2 )
+	else if ( m_afButtonPressed & IN_TOGGLEGRENADE1 )
 	{
-		if ( bToggleGrenades && IsGrenade2Primed() )
-		{
-			ThrowPrimedGrenade();
-#ifdef CLIENT_DLL
-			m_bLastPrimed = false;
-#endif
-			return;
-		}
-		else
-		{
-			if( !IsGrenade2Primed() )
-				PrimeGrenade2();
-		}
-	}
-	else if (m_afButtonReleased & ( IN_GRENADE1 | IN_GRENADE2 ) && IsGrenadePrimed() && !m_bWantToThrowGrenade )
-	{
-		if (bToggleGrenades)
-			return;
+		if ( !IsGrenade1Primed() )
+			PrimeGrenade1();
 
+#ifdef CLIENT_DLL
+		// Hint Code: Check for 2 consecutive unthrown grenades (player got blowed up!)
+		if (m_bLastPrimed == true)
+		{
+			m_iUnthrownGrenCount++;
+			if (m_iUnthrownGrenCount > 1)
+			{
+				FF_SendHint(GLOBAL_NOPRIME2, 2, PRIORITY_NORMAL, "#FF_HINT_GLOBAL_NOPRIME2");
+				m_iUnthrownGrenCount = 0;
+				m_bLastPrimed = false;
+			}
+		}
+		else
+#endif
+			m_bLastPrimed = true;
+	}
+	else if ( m_afButtonPressed & IN_TOGGLEGRENADE2 )
+	{
+		if ( !IsGrenade2Primed() )
+			PrimeGrenade2();
+
+#ifdef CLIENT_DLL
+		// Hint Code: Check for 2 consecutive unthrown grenades (player got blowed up!)
+		if (m_bLastPrimed == true)
+		{
+			m_iUnthrownGrenCount++;
+			if (m_iUnthrownGrenCount > 1)
+			{
+				FF_SendHint(GLOBAL_NOPRIME2, 2, PRIORITY_NORMAL, "#FF_HINT_GLOBAL_NOPRIME2");
+				m_iUnthrownGrenCount = 0;
+				m_bLastPrimed = false;
+			}
+		}
+		else
+#endif
+			m_bLastPrimed = true;
+	}
+
+	// hold binds
+	if ( m_afButtonPressed & IN_GRENADE1 && !IsGrenade1Primed() ) // prime grenade 1 (hold)
+	{
+		// throw the other primed grenade before priming another one
+		if ( IsGrenade2Primed() )
+		{
+			ThrowPrimedGrenade();
+			return; // allowing player to prime another right away breaks shit
+		}
+
+		PrimeGrenade1();
+	}
+	else if ( m_afButtonPressed & IN_GRENADE2 && !IsGrenade2Primed() ) // prime grenade 2 (hold)
+	{
+		// throw the other primed grenade before priming another one
+		if ( IsGrenade1Primed() )
+		{
+			ThrowPrimedGrenade();
+			return; // allowing player to prime another right away breaks shit
+		}
+
+		PrimeGrenade2();
+	}
+	else if ( m_afButtonReleased & IN_GRENADE1 && IsGrenade1Primed() && !m_bWantToThrowGrenade ) // throw grenade 1 on releasing key (hold)
+	{
+		ThrowPrimedGrenade();
+	}
+	else if ( m_afButtonReleased & IN_GRENADE2 && IsGrenade2Primed() && !m_bWantToThrowGrenade ) // throw grenade 1 on releasing key (hold)
+	{
 		ThrowPrimedGrenade();
 	}
 }
@@ -2177,23 +2212,6 @@ void CFFPlayer::PrimeGrenade1( void )
 
 	Assert(m_pGrenade1Timer);
 	m_pGrenade1Timer->SetTimer(3.81f);
-
-	if (cl_togglegrenades.GetBool())
-	{
-		// Hint Code: Check for 2 consecutive unthrown grenades (player got blowed up!)
-		if (m_bLastPrimed == true)
-		{
-			m_iUnthrownGrenCount++;
-			if (m_iUnthrownGrenCount > 1)
-			{
-				FF_SendHint(GLOBAL_NOPRIME2, 2, PRIORITY_NORMAL, "#FF_HINT_GLOBAL_NOPRIME2");
-				m_iUnthrownGrenCount = 0;
-				m_bLastPrimed = false;
-			}
-		}
-		else
-			m_bLastPrimed = true;
-	}
 #else
 	const CFFPlayerClassInfo &pPlayerClassInfo = GetFFClassData();
 
@@ -2279,24 +2297,6 @@ void CFFPlayer::PrimeGrenade2( void )
 
 	Assert(m_pGrenade2Timer);
 	m_pGrenade2Timer->SetTimer(3.81f);
-
-	if (cl_togglegrenades.GetBool())
-	{
-		// Hint Code: Check for 2 consecutive unthrown grenades (player got blowed up!)
-		if (m_bLastPrimed == true)
-		{
-			m_iUnthrownGrenCount++;
-			if (m_iUnthrownGrenCount > 1)
-			{
-				FF_SendHint(GLOBAL_NOPRIME2, 2, PRIORITY_NORMAL, "#FF_HINT_GLOBAL_NOPRIME2");
-				m_iUnthrownGrenCount = 0;
-				m_bLastPrimed = false;
-			}
-		}
-		else
-			m_bLastPrimed = true;
-	}
-
 #else
 	const CFFPlayerClassInfo &pPlayerClassInfo = GetFFClassData();
 
