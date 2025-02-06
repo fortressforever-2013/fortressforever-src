@@ -122,6 +122,9 @@ static int math_log (lua_State *L) {
     res = log(x);
   else {
     lua_Number base = luaL_checknumber(L, 2);
+#if ((defined __STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)) || ((defined __cplusplus) && (__cplusplus >= 201103L)) || ((defined _MSC_VER) && (_MSC_VER < 1700))
+    if (base == 2.0) res = log2(x); else
+#endif
     if (base == 10.0) res = log10(x);
     else res = log(x)/log(base);
   }
