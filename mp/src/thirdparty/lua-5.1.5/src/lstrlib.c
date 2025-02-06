@@ -91,14 +91,21 @@ static int str_upper (lua_State *L) {
 }
 
 static int str_rep (lua_State *L) {
-  size_t l;
-  luaL_Buffer b;
+  size_t l, lsep;
   const char *s = luaL_checklstring(L, 1, &l);
   int n = luaL_checkint(L, 2);
-  luaL_buffinit(L, &b);
-  while (n-- > 0)
-    luaL_addlstring(&b, s, l);
-  luaL_pushresult(&b);
+  const char *sep = luaL_optlstring(L, 3, "", &lsep);
+  if (n <= 0) lua_pushliteral(L, "");
+  else {
+    luaL_Buffer b;
+    luaL_buffinit(L, &b);
+    while(n-- > 1) { /* first n-1 copies (followed by separator) */
+      luaL_addlstring(&b, s, l);
+      luaL_addlstring(&b, sep, lsep);
+    }
+    luaL_addlstring(&b, s, l); /* last copy (not followed by separator) */
+    luaL_pushresult(&b);
+  }
   return 1;
 }
 
