@@ -34,6 +34,6 @@ jobs:
         with:
           name: ff_linux
           path: |
-            mp/game/FortressForever2013/bin/*.so
-            mp/game/FortressForever2013/bin/*.dbg
+            game/FortressForever2013/bin/*.so
+            game/FortressForever2013/bin/*.dbg
           retention-days: 1

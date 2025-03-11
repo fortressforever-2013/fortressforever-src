@@ -32,6 +32,6 @@ jobs:
         with:
           name: ff_windows
           path: |
-            mp/game/FortressForever2013/bin/*.dll
-            mp/game/FortressForever2013/bin/*.pdb
+            game/FortressForever2013/bin/*.dll
+            game/FortressForever2013/bin/*.pdb
           retention-days: 1
