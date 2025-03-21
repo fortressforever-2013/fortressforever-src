@@ -418,7 +418,7 @@ class TreeNode : public Panel
 
 public:
     TreeNode(Panel *parent, TreeView *pTreeView);
-	virtual ~TreeNode();
+	~TreeNode();
     void SetText(const char *pszText);
     void SetFont(HFont font);
     void SetKeyValues(KeyValues *data);

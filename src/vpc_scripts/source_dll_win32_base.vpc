@@ -12,12 +12,15 @@ $MacroRequired				"OUTBINDIR"
 		
 $Macro OUTBINDIR	"$OUTBINDIR$PLATSUBDIR"
 $Macro LIBPUBLIC	"$SRCDIR\lib\public$PLATSUBDIR"
-$Macro LIBCOMMON	"$SRCDIR\lib\common$PLATSUBDIR"
+$Macro LIBCOMMON	"$SRCDIR\lib\common$PLATSUBDIR\2015\release" [!$WIN32]
+$Macro LIBCOMMON	"$SRCDIR\lib\common\win32\2015\release" [$WIN32]
 
 $Include "$SRCDIR\vpc_scripts\loadaddress.vpc"
 $Include "$SRCDIR\vpc_scripts\source_dll_win32_debug.vpc"
 $Include "$SRCDIR\vpc_scripts\source_dll_win32_release.vpc"
 $Include "$SRCDIR\vpc_scripts\source_win32_base.vpc"
+
+$MacroRequired				"VSIGN_SERVER"
 
 $IgnoreRedundancyWarning	"ON"
 
@@ -39,12 +42,12 @@ $Configuration
 
 	$Compiler [$WIN32]
 	{
-		$EnableEnhancedInstructionSet	"Streaming SIMD Extensions 2 (/arch:SSE2)"
+		$EnableEnhancedInstructionSet	"Streaming SIMD Extensions (/arch:SSE)"
 	}
 	
 	$Linker
 	{
-		$AdditionalDependencies				"$BASE shell32.lib user32.lib advapi32.lib gdi32.lib comdlg32.lib ole32.lib legacy_stdio_definitions.lib" [$WIN32||$WIN64]
+		$AdditionalDependencies				"$BASE shell32.lib user32.lib advapi32.lib gdi32.lib comdlg32.lib ole32.lib" [$WIN32||$WIN64]
 		$TargetMachine						"MachineX86 (/MACHINE:X86)"	[$WIN32]
 		$TargetMachine						"MachineX64 (/MACHINE:X64)"	[$WIN64]
 		// Suppress this pointless warning using the undocumented /ignore linker switch
@@ -58,18 +61,18 @@ $Configuration
 		$CommandLine		"if EXIST $OUTBINDIR\$(TargetFileName) for /f $QUOTEdelims=$QUOTE %%A in ('attrib $QUOTE$OUTBINDIR\$(TargetFileName)$QUOTE') do set valveTmpIsReadOnly=$QUOTE%%A$QUOTE" "\n" \
 							"set valveTmpIsReadOnlyLetter=%valveTmpIsReadOnly:~6,1%" "\n" \
 							"if $QUOTE%valveTmpIsReadOnlyLetter%$QUOTE==$QUOTER$QUOTE del /q $QUOTE$(TargetDir)$QUOTE$(TargetFileName)" "\n" \
-							"$CRCCHECK" "\n"
+							"$HOST_VPC_EXE -crc2 $QUOTE$VPC_OUTPUT_FILE$QUOTE" "\n"
 	}
 
 	$PostBuildEvent [!$ANALYZE]
 	{
 		$CommandLine		"if not exist $QUOTE$OUTBINDIR$QUOTE mkdir $QUOTE$OUTBINDIR$QUOTE" "\n" 
-		$CommandLine		"$BASE" "call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $QUOTE$OUTBINDIR\$(TargetFileName)$QUOTE $SRCDIR" "\n" [!$SOURCESDK]
+		$CommandLine		"$BASE" "call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $QUOTE$OUTBINDIR\$(TargetFileName)$QUOTE $SRCDIR" "\n" [!$SOURCESDK && !$JOSH]
 		$CommandLine		"$BASE" "copy $QUOTE$(TargetDir)$(TargetFileName)$QUOTE $QUOTE$OUTBINDIR\$(TargetFileName)$QUOTE" "\n" \
 							"if ERRORLEVEL 1 goto BuildEventFailed" "\n" \
 							"if exist $QUOTE$(TargetDir)$(TargetName).map$QUOTE copy $QUOTE$(TargetDir)$(TargetName).map$QUOTE $OUTBINDIR\$(TargetName).map" "\n" 
-		$CommandLine		"$BASE" "call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $QUOTE$OUTBINDIR\$(TargetName).pdb$QUOTE $SRCDIR" "\n"  [!$SOURCESDK] 
-		$CommandLine		"$BASE" "copy $QUOTE$(TargetDir)$(TargetName).pdb$QUOTE $QUOTE$OUTBINDIR\$(TargetName).pdb$QUOTE" "\n" \
+		$CommandLine		"$BASE" "call $SRCDIR\vpc_scripts\valve_p4_edit.cmd $QUOTE$OUTBINDIR\$(TargetName).pdb$QUOTE $SRCDIR" "\n"  [!$SOURCESDK && !$JOSH] 
+		$CommandLine		"$BASE" "copy $QUOTE$(TargetDir)$(TargetName).pdb$QUOTE $OUTBINDIR\$(TargetName).pdb" "\n" \
 							"if ERRORLEVEL 1 goto BuildEventFailed" "\n" \
 							"goto BuildEventOK" "\n" \
 							":BuildEventFailed" "\n" \
@@ -79,10 +82,10 @@ $Configuration
 							":BuildEventOK" "\n" 
 
 		$CommandLine		"$BASE" "\n" \
-							"call $SRCDIR\devtools\bin\vsign.bat -sign $OUTBINDIR\$(TargetFileName)" "\n" [$RETAIL && $PUBLISH]
+							"$SRCDIR\devtools\signservice\signclient.exe $VSIGN_SERVER $OUTBINDIR\$(TargetFileName)" "\n" [$RETAIL && $PUBLISH && !$JOSH]
 
 		$CommandLine		"$BASE" "\n" \
-							"call $SRCDIR\devtools\bin\vsign.bat -signvalve $OUTBINDIR\$(TargetFileName)" "\n" [!$RETAIL && !$PUBLISH && !$SOURCESDK]
+							"call $SRCDIR\devtools\bin\vsign.bat -signvalve $OUTBINDIR\$(TargetFileName)" "\n" [!$RETAIL && !$PUBLISH && !$SOURCESDK && !$JOSH]
 
 		$Description		"Publishing to $OUTBINDIR"
 		$ExcludedFromBuild	"No"
@@ -102,6 +105,22 @@ $Project
 				{
 					$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
 				}
+			}
+		}
+
+		// Implement __imp__EncodePointer and __imp__DecodePointer so that we can run on XP SP1
+		// when building with VS 2010 and higher.
+		$File	"$SRCDIR\public\tier0\pointeroverride.asm" [$WIN32]
+		{
+			$Configuration
+			{	
+				$CustomBuildStep
+				{
+					// General
+					$CommandLine				"$QUOTE$(VC_ExecutablePath_x64_x86)\ml.exe$QUOTE /safeseh /c /Cp /Zi /Fo$QUOTE$(IntDir)\$(InputName).obj$QUOTE $QUOTE$(InputPath)$QUOTE"
+					$Description				"Compiling pointeroverride.asm"
+					$Outputs					"$(IntDir)\$(InputName).obj"
+				}		
 			}
 		}
 

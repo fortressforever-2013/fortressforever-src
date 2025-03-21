@@ -16,12 +16,10 @@ $Configuration
 	$Compiler
 	{
 		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\thirdparty;$SRCDIR\thirdparty\cef;$GENERATED_PROTO_DIR"
-		
-		$AdditionalOptions				"$BASE /std:c++17"
 	}
 }
 
-$Project "vgui_controls"
+$Project "VGUI Controls"
 {
 	$Folder	"Source Files"
 	{

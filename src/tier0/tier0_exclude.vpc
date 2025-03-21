@@ -8,7 +8,8 @@ $Project
 {
 	$Folder	"Link Libraries"
 	{
-		-$Lib "$LIBPUBLIC\tier0"
+		// Should match the sites that include this
+		-$Lib "$LIBPUBLIC\tier0"	[$POSIX && !$IS_LIB_PROJECT]
 	}
 	$Folder	"Source Files"
 	{

@@ -43,7 +43,7 @@
 //		)
 //
 SendProp SendPropUtlVector(
-	const char *pVarName,		// Use SENDINFO_UTLVECTOR to generate these first 4 parameters.
+	char *pVarName,		// Use SENDINFO_UTLVECTOR to generate these first 4 parameters.
 	int offset,
 	int sizeofVar,
 	EnsureCapacityFn ensureFn,

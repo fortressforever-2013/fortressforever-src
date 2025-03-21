@@ -17,6 +17,7 @@ $Group "gamedlls"
 $Group "game"
 {
 	"client"
+	"launcher_main"
 	"mathlib"
 	"raytrace"
 	"server"
@@ -26,7 +27,9 @@ $Group "game"
 
 $Group "shaders"
 {
-	"game_shader_dx9"
+	//"game_shader_dx9"
+	"game_shader_generic_example"
+	//"game_shader_generic_std"
 }
 
 $Group "everything"
@@ -34,16 +37,17 @@ $Group "everything"
 	"captioncompiler"
 	"client"
 	"fgdlib"
-	"game_shader_dx9"
+	//"game_shader_dx9"
 	"glview"
 	"height2normal"
+	"launcher_main"
 	"mathlib"
 	"motionmapper"
-	//"phonemeextractor"
+	"phonemeextractor"
+	"qc_eyes"
 	"raytrace"
-	//"qc_eyes"
 	"server"
-	//"serverplugin_empty"
+	"serverplugin_empty"
 	"tgadiff"
 	"tier1"
 	"vbsp"
@@ -56,6 +60,12 @@ $Group "everything"
 	"vvis_dll"
 	"vvis_launcher"
 	"togl"
+
+	"game_shader_generic_example"
+
+	// You probably don't want to override all shaders by default.
+	// This is just an example mainly! Pick and choose what you want from this project. :D
+	//"game_shader_generic_std"
 }
 
 $Group "dedicated"

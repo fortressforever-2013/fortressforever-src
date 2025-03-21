@@ -287,8 +287,8 @@ void DirectorySelectDialog::ExpandTreeToPath( const char *lpszPath, bool bSelect
 //-----------------------------------------------------------------------------
 void DirectorySelectDialog::SetStartDirectory(const char *path)
 {
-	Q_strncpy(m_szCurrentDir, path, sizeof(m_szCurrentDir));
-	Q_strncpy(m_szCurrentDrive, path, sizeof(m_szCurrentDrive));
+	V_strncpy(m_szCurrentDir, path, sizeof(m_szCurrentDir));
+	V_strncpy(m_szCurrentDrive, path, sizeof(m_szCurrentDrive));
 	m_szCurrentDrive[sizeof(m_szCurrentDrive) - 1] = 0;
 	char *firstSlash = strstr(m_szCurrentDrive, "\\");
 	if (firstSlash)
@@ -316,7 +316,7 @@ void DirectorySelectDialog::SetStartDirectory(const char *path)
 //-----------------------------------------------------------------------------
 void DirectorySelectDialog::SetDefaultCreateDirectoryName(const char *defaultCreateDirName)
 {
-	Q_strncpy(m_szDefaultCreateDirName, defaultCreateDirName, sizeof(m_szDefaultCreateDirName));
+	strncpy(m_szDefaultCreateDirName, defaultCreateDirName, sizeof(m_szDefaultCreateDirName));
 	m_szDefaultCreateDirName[sizeof(m_szDefaultCreateDirName) - 1] = 0;
 }
 
