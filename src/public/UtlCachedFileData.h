@@ -83,7 +83,6 @@ public:
 		m_Data.RemoveAll();
 	}
 
-	// If bExpectMissing is set, don't complain if this causes synchronous disk I/O to build the cache.
 	T* Get( char const *filename );
 	const T* Get( char const *filename ) const;
 
@@ -918,7 +917,7 @@ void	CUtlCachedFileData<T>::CheckDiskInfo( bool forcerebuild, long cacheFileTime
 		{
 			ElementType_t& element = m_Elements[ i ];
 			g_pFullFileSystem->String( element.handle, fn, sizeof( fn ) );
-			Get( fn );
+			Get(fn);
 		}
 		return;
 	}

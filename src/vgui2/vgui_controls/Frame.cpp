@@ -514,13 +514,13 @@ namespace vgui
 		
 		FrameButton(Panel *parent, const char *name, const char *text) : Button(parent, name, text)
 		{
-			SetSize( QuickPropScale( FrameButton::GetButtonSide( (Frame *)parent ) ), QuickPropScale( FrameButton::GetButtonSide( (Frame *)parent ) ) );
+			SetSize( FrameButton::GetButtonSide( (Frame *)parent ), FrameButton::GetButtonSide( (Frame *)parent ) );
 			_brightBorder = NULL;
 			_depressedBorder = NULL;
 			_disabledBorder = NULL;
 			_disabledLook = true;
 			SetContentAlignment(Label::a_northwest);
-			SetTextInset( QuickPropScale( 2 ), QuickPropScale( 1 ) );
+			SetTextInset(2, 1);
 			SetBlockDragChaining( true );
 		}
 		
@@ -1024,9 +1024,15 @@ void Frame::LayoutProportional( FrameButton *bt )
 {
 	float scale = 1.0;
 
-	if ( IsProportional() )
+	if( IsProportional() )
 	{	
-		scale = scheme()->GetProportionalScaledValueEx( GetScheme(), 65535 ) / 65535.f;
+		int screenW, screenH;
+		surface()->GetScreenSize( screenW, screenH );
+
+		int proW,proH;
+		surface()->GetProportionalBase( proW, proH );
+
+		scale =	( (float)( screenH ) / (float)( proH ) );
 	}
 
 	bt->SetSize( (int)( FrameButton::GetButtonSide( this ) * scale ), (int)( FrameButton::GetButtonSide( this ) * scale ) );
@@ -1220,10 +1226,10 @@ void Frame::PerformLayout()
 	GetSize(wide, tall);
 		
 #if !defined( _X360 )
-	int DRAGGER_SIZE = QuickPropScale( GetDraggerSize() );
-	int CORNER_SIZE = QuickPropScale( GetCornerSize() );
+	int DRAGGER_SIZE = GetDraggerSize();
+	int CORNER_SIZE = GetCornerSize();
 	int CORNER_SIZE2 = CORNER_SIZE * 2;
-	int BOTTOMRIGHTSIZE = QuickPropScale( GetBottomRightSize() );
+	int BOTTOMRIGHTSIZE = GetBottomRightSize();
 
 	_topGrip->SetBounds(CORNER_SIZE, 0, wide - CORNER_SIZE2, DRAGGER_SIZE);
 	_leftGrip->SetBounds(0, CORNER_SIZE, DRAGGER_SIZE, tall - CORNER_SIZE2);
@@ -1237,7 +1243,7 @@ void Frame::PerformLayout()
 
 	_bottomRightGrip->SetBounds(wide - BOTTOMRIGHTSIZE, tall - BOTTOMRIGHTSIZE, BOTTOMRIGHTSIZE, BOTTOMRIGHTSIZE);
 	
-	_captionGrip->SetSize(wide- QuickPropScale(10), QuickPropScale( GetCaptionHeight() ));
+	_captionGrip->SetSize(wide-10,GetCaptionHeight());
 	
 	_topGrip->MoveToFront();
 	_bottomGrip->MoveToFront();
@@ -1252,13 +1258,19 @@ void Frame::PerformLayout()
 	_menuButton->MoveToFront();
 	_minimizeButton->MoveToFront();
 	_minimizeToSysTrayButton->MoveToFront();
-	_menuButton->SetBounds( QuickPropScale(5+2), QuickPropScale(5+3), QuickPropScale( GetCaptionHeight()-5 ), QuickPropScale( GetCaptionHeight()-5 ));
+	_menuButton->SetBounds(5+2, 5+3, GetCaptionHeight()-5, GetCaptionHeight()-5);
 #endif
 
 	float scale = 1;
 	if (IsProportional())
 	{
-		scale = scheme()->GetProportionalScaledValueEx( GetScheme(), 65535 ) / 65535.f;
+		int screenW, screenH;
+		surface()->GetScreenSize( screenW, screenH );
+
+		int proW,proH;
+		surface()->GetProportionalBase( proW, proH );
+
+		scale =	( (float)( screenH ) / (float)( proH ) );
 	}
 	
 #if !defined( _X360 )
@@ -1426,18 +1438,18 @@ void Frame::GetClientArea(int &x, int &y, int &wide, int &tall)
 	{
 		int captionTall = surface()->GetFontTall(_title->GetFont());
 
-		int border = QuickPropScale( m_bSmallCaption ? CAPTION_TITLE_BORDER_SMALL : CAPTION_TITLE_BORDER );
-		int yinset = QuickPropScale( m_bSmallCaption ? 0 : m_iClientInsetY );
+		int border = m_bSmallCaption ? CAPTION_TITLE_BORDER_SMALL : CAPTION_TITLE_BORDER;
+		int yinset = m_bSmallCaption ? 0 : m_iClientInsetY;
 
-		yinset += QuickPropScale( m_iTitleTextInsetYOverride );
+		yinset += m_iTitleTextInsetYOverride;
 
-		y = yinset + captionTall + border + QuickPropScale( 1 );
+		y = yinset + captionTall + border + 1;
 		tall = (tall - yinset) - y;
 	}
 	
 	if ( m_bSmallCaption )
 	{
-		tall -= QuickPropScale( 5 );
+		tall -= 5;
 	}
 
 	wide = (wide - m_iClientInsetX) - x;
@@ -1595,15 +1607,15 @@ void Frame::PaintBackground()
 
 		// caption
 		surface()->DrawSetColor(titleColor);
-		int inset = QuickPropScale( m_bSmallCaption ? 3 : 5 );
-		int captionHeight = QuickPropScale( m_bSmallCaption ? 14: 28 );
+		int inset = m_bSmallCaption ? 3 : 5;
+		int captionHeight = m_bSmallCaption ? 14: 28;
 
 		surface()->DrawFilledRect(inset, inset, wide - inset, captionHeight );
 		
 		if (_title)
 		{
-			int nTitleX = QuickPropScale( m_iTitleTextInsetXOverride ? m_iTitleTextInsetXOverride : m_iTitleTextInsetX );
-			int nTitleWidth = wide - QuickPropScale( 72 );
+			int nTitleX = m_iTitleTextInsetXOverride ? m_iTitleTextInsetXOverride : m_iTitleTextInsetX;
+			int nTitleWidth = wide - 72;
 #if !defined( _X360 )
 			if ( _menuButton && _menuButton->IsVisible() )
 			{
@@ -1616,11 +1628,11 @@ void Frame::PaintBackground()
 			int nTitleY;
 			if ( m_iTitleTextInsetYOverride )
 			{
-				nTitleY = QuickPropScale( m_iTitleTextInsetYOverride );
+				nTitleY = m_iTitleTextInsetYOverride;
 			}
 			else
 			{
-				nTitleY = QuickPropScale( m_bSmallCaption ? 2 : 9 );
+				nTitleY = m_bSmallCaption ? 2 : 9;
 			}
 			_title->SetPos( nTitleX, nTitleY );		
 			_title->SetSize( nTitleWidth, tall);

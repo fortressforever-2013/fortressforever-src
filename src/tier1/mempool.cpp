@@ -268,7 +268,7 @@ void *CUtlMemoryPool::AllocZero( size_t amount )
 	void *mem = Alloc( amount );
 	if ( mem )
 	{
-		memset( mem, 0x00, amount );
+		V_memset( mem, 0x00, amount );
 	}
 	return mem;
 }

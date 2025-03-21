@@ -114,7 +114,7 @@ public:
 	/// Iteration over all cvars. 
 	/// (THIS IS A SLOW OPERATION AND YOU SHOULD AVOID IT.)
 	/// usage: 
-	/// { ICvar::Iterator iter(g_pCVar); 
+	/// { ICVar::Iterator iter(g_pCVar); 
 	///   for ( iter.SetFirst() ; iter.IsValid() ; iter.Next() )
 	///   {  
 	///       ConCommandBase *cmd = iter.Get();

@@ -126,9 +126,11 @@ enum SoundFlags_t
  
 	SND_SHOULDPAUSE		= (1<<7),		// this sound should be paused if the game is paused
 	SND_IGNORE_PHONEMES	= (1<<8),
-	SND_IGNORE_NAME		= (1<<9),		// used to change all sounds emitted by an entity, regardless of scriptname
+	// needed for ac rev sound to play at the same time as ac loop shot sound - Jon
+	SND_CHANGE_CHAN		= (1<<9),		// change sound pitch
+	SND_IGNORE_NAME		= (1<<10),		// used to change all sounds emitted by an entity, regardless of scriptname
 
-	SND_DO_NOT_OVERWRITE_EXISTING_ON_CHANNEL = (1<<10),
+	SND_DO_NOT_OVERWRITE_EXISTING_ON_CHANNEL = (1<<11),
 };
 
 #define SND_FLAG_BITS_ENCODE 11

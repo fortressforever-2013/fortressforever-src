@@ -92,9 +92,9 @@ bool CCommandBuffer::ParseArgV0( CUtlBuffer &buf, char *pArgV0, int nMaxLen, con
 //-----------------------------------------------------------------------------
 // Insert a command into the command queue
 //-----------------------------------------------------------------------------
-void CCommandBuffer::InsertCommandAtAppropriateTime( intp hCommand )
+void CCommandBuffer::InsertCommandAtAppropriateTime( int hCommand )
 {
-	intp i;
+	int i;
 	Command_t &command = m_Commands[hCommand];
 	for ( i = m_Commands.Head(); i != m_Commands.InvalidIndex(); i = m_Commands.Next(i) )
 	{
@@ -108,7 +108,7 @@ void CCommandBuffer::InsertCommandAtAppropriateTime( intp hCommand )
 //-----------------------------------------------------------------------------
 // Insert a command into the command queue at the appropriate time
 //-----------------------------------------------------------------------------
-void CCommandBuffer::InsertImmediateCommand( intp hCommand )
+void CCommandBuffer::InsertImmediateCommand( int hCommand )
 {
 	m_Commands.LinkBefore( m_hNextCommand, hCommand );
 }
@@ -137,7 +137,7 @@ bool CCommandBuffer::InsertCommand( const char *pArgS, int nCommandSize, int nTi
 	m_pArgSBuffer[m_nArgSBufferSize + nCommandSize] = 0;
 	++nCommandSize;
 
-	intp hCommand = m_Commands.Alloc();
+	int hCommand = m_Commands.Alloc();
 	Command_t &command = m_Commands[hCommand];
 	command.m_nTick = nTick;
 	command.m_nFirstArgS = m_nArgSBufferSize;
@@ -264,7 +264,7 @@ void CCommandBuffer::DelayAllQueuedCommands( int nDelay )
 	if ( nDelay <= 0 )
 		return;
 
-	for ( intp i = m_Commands.Head(); i != m_Commands.InvalidIndex(); i = m_Commands.Next(i) )
+	for ( int i = m_Commands.Head(); i != m_Commands.InvalidIndex(); i = m_Commands.Next(i) )
 	{
 		m_Commands[i].m_nTick += nDelay;			
 	}
@@ -299,7 +299,7 @@ bool CCommandBuffer::DequeueNextCommand( )
 	if ( m_Commands.Count() == 0 )
 		return false;
 
-	intp nHead = m_Commands.Head();
+	int nHead = m_Commands.Head();
 	Command_t &command = m_Commands[ nHead ];
 	if ( command.m_nTick > m_nLastTickToProcess )
 		return false;
@@ -354,7 +354,7 @@ void CCommandBuffer::Compact()
 	m_nArgSBufferSize = 0;
 
 	char pTempBuffer[ ARGS_BUFFER_LENGTH ];
-	for ( intp i = m_Commands.Head(); i != m_Commands.InvalidIndex(); i = m_Commands.Next(i) )
+	for ( int i = m_Commands.Head(); i != m_Commands.InvalidIndex(); i = m_Commands.Next(i) )
 	{
 		Command_t &command = m_Commands[ i ];
 
@@ -382,7 +382,7 @@ void CCommandBuffer::EndProcessingCommands()
 
 	// Extract commands that are before the end time
 	// NOTE: This is a bug for this to 
-	intp i = m_Commands.Head();
+	int i = m_Commands.Head();
 	if ( i == m_Commands.InvalidIndex() )
 	{
 		m_nArgSBufferSize = 0;

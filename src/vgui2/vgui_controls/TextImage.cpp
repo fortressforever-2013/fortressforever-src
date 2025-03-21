@@ -497,12 +497,11 @@ void TextImage::GetTextSize(int &wide, int &tall)
 
 	// For height, use the remapped font
 	int fontHeight = surface()->GetFontTall(GetFont());
-	tall = 0;
+	tall = fontHeight;
 
-	int textLen = V_wcslen(text);
+	int textLen = wcslen(text);
 	for (int i = 0; i < textLen; i++)
 	{
-		tall = Max( tall, fontHeight );
 		wchar_t ch = text[i];
 
 		// handle stupid special characters, these should be removed
@@ -816,7 +815,7 @@ void TextImage::RecalculateEllipsesPosition()
 					float flWide = 0.0f, flabcA = 0.0f;
 					surface()->GetKernedCharWidth( font, *rwsz, chBefore, chAfter, flWide, flabcA );
 					int len = floor( flWide + 0.6 );
-					remainingLength += len;
+					remainingLength += floor( flWide + 0.6 );
 #else
 					remainingLength += surface()->GetCharacterWidth(font, *rwsz);
 #endif

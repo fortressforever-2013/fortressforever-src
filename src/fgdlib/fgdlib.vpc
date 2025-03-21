@@ -15,7 +15,7 @@ $Configuration
 	}
 }
 
-$Project "fgdlib"
+$Project "Fgdlib"
 {
 	$Folder	"Source Files"
 	{

@@ -5,14 +5,12 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#ifdef _WIN32
 #include <direct.h>
-#endif
 #include "mathlib/mathlib.h"
 #include "bitmap/tgawriter.h"
 #include "tier1/strtools.h"
 #include "vtf/vtf.h"
-#include "tier1/utlbuffer.h"
+#include "tier1/UtlBuffer.h"
 #include "tier0/dbg.h"
 #include "tier0/icommandline.h"
 #include "tier1/utlbuffer.h"
@@ -110,12 +108,12 @@ int main( int argc, char **argv )
 	}
 
 	fseek( vtfFp, 0, SEEK_END );
-	int srcVTFLength = (int)ftell( vtfFp );
+	int srcVTFLength = ftell( vtfFp );
 	fseek( vtfFp, 0, SEEK_SET );
 
 	CUtlBuffer buf;
 	buf.EnsureCapacity( srcVTFLength );
-	int nBytesRead = (int)fread( buf.Base(), 1, srcVTFLength, vtfFp );
+	int nBytesRead = fread( buf.Base(), 1, srcVTFLength, vtfFp );
 	fclose( vtfFp );
 	buf.SeekPut( CUtlBuffer::SEEK_HEAD, nBytesRead );
 

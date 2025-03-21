@@ -23,7 +23,7 @@ $Configuration
 	}
 }
 
-$Project "Server Plugin (Empty)"
+$Project "Serverplugin_empty"
 {
 	$Folder	"Source Files"
 	{

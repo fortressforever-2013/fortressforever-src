@@ -266,8 +266,8 @@ public:
 	void	SetDWord(int i, uint32 val);
 
 	CBitVecT<BASE_OPS>&	operator=(const CBitVecT<BASE_OPS> &other)	{ other.CopyTo( this ); return *this; }
-	bool			operator==(const CBitVecT<BASE_OPS> &other) const { return Compare( other ); }
-	bool			operator!=(const CBitVecT<BASE_OPS> &other) const { return !operator==( other ); }
+	bool			operator==(const CBitVecT<BASE_OPS> &other)		{ return Compare( other ); }
+	bool			operator!=(const CBitVecT<BASE_OPS> &other)		{ return !operator==( other ); }
 
 	static void GetOffsetMaskForBit( uint32 bitNum, uint32 *pOffset, uint32 *pMask )	{ *pOffset = BitVec_Int( bitNum ); *pMask = BitVec_Bit( bitNum ); }
 };
@@ -1065,18 +1065,14 @@ inline int CFixedBitVecBase<NUM_BITS>::FindNextSetBit( int startBit ) const
 			const uint32 * RESTRICT pCurElem = Base() + wordIndex;
 			unsigned int elem = *pCurElem;
 			elem &= startMask;
-			while ( wordIndex < NUM_INTS )
+			do 
 			{
 				if ( elem )
-				{
 					return FirstBitInWord(elem, wordIndex << 5);
-				}
-				else if ( ++wordIndex < NUM_INTS )
-				{
-					++pCurElem;
-					elem = *pCurElem;
-				}
-			}
+				++pCurElem;
+				elem = *pCurElem;
+				++wordIndex;
+			} while( wordIndex <= NUM_INTS-1);
 		}
 
 	}

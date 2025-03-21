@@ -13,7 +13,7 @@ $Configuration
 {
 	$Compiler
 	{
-		$AdditionalIncludeDirectories		"$BASE,..\common,$SRCDIR\Game_Shared"
+		$AdditionalIncludeDirectories		"$BASE,..\common,..\nvtristriplib,$SRCDIR\Game_Shared"
 		$PreprocessorDefinitions			"$BASE;PROTECTED_THINGS_DISABLE"
 	}
 
@@ -23,7 +23,7 @@ $Configuration
 	}
 }
 
-$Project "Motion Mapper"
+$Project "Motionmapper"
 {
 	$Folder	"Source Files"
 	{
@@ -82,6 +82,7 @@ $Project "Motion Mapper"
 	$Folder	"Link Libraries"
 	{
 		$Lib mathlib
+		$Lib nvtristrip
 		$Lib tier2
 	}
 }

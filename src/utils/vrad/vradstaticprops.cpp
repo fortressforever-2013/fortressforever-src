@@ -260,12 +260,10 @@ public:
 
 private:
 	// VMPI stuff.
-#ifdef MPI
 	static void VMPI_ProcessStaticProp_Static( int iThread, uint64 iStaticProp, MessageBuffer *pBuf );
 	static void VMPI_ReceiveStaticPropResults_Static( uint64 iStaticProp, MessageBuffer *pBuf, int iWorker );
 	void VMPI_ProcessStaticProp( int iThread, int iStaticProp, MessageBuffer *pBuf );
 	void VMPI_ReceiveStaticPropResults( int iStaticProp, MessageBuffer *pBuf, int iWorker );
-#endif
 	
 	// local thread version
 	static void ThreadComputeStaticPropLighting( int iThread, void *pUserData );
@@ -497,8 +495,8 @@ bool LoadStudioModel( char const* pModelName, CUtlBuffer& buf )
 	}
 
 	// ensure reset
-	pHdr->SetVertexBase( NULL );
-	pHdr->SetIndexBase( NULL );
+	pHdr->pVertexBase = NULL;
+	pHdr->pIndexBase  = NULL;
 
 	return true;
 }
@@ -1112,9 +1110,9 @@ void CVradStaticPropMgr::Shutdown()
 		studiohdr_t *pStudioHdr = m_StaticPropDict[i].m_pStudioHdr;
 		if ( pStudioHdr )
 		{
-			if ( pStudioHdr->VertexBase() )
+			if ( pStudioHdr->pVertexBase )
 			{
-				free( pStudioHdr->VertexBase() );
+				free( pStudioHdr->pVertexBase );
 			}
 			free( pStudioHdr );
 		}
@@ -1331,9 +1329,7 @@ void CVradStaticPropMgr::ComputeLighting( CStaticProp &prop, int iThread, int pr
 	const int skip_prop = (g_bDisablePropSelfShadowing || (prop.m_Flags & STATIC_PROP_NO_SELF_SHADOWING)) ? prop_index : -1;
 	const int nFlags = ( prop.m_Flags & STATIC_PROP_IGNORE_NORMALS ) ? GATHERLFLAGS_IGNORE_NORMALS : 0;
 
-#ifdef MPI
 	VMPI_SetCurrentStage( "ComputeLighting" );
-#endif
 
 	matrix3x4_t	matPos, matNormal;
 	AngleMatrix(prop.m_Angles, prop.m_Origin, matPos);
@@ -1659,7 +1655,6 @@ void CVradStaticPropMgr::SerializeLighting()
 	}
 }
 
-#ifdef MPI
 void CVradStaticPropMgr::VMPI_ProcessStaticProp_Static( int iThread, uint64 iStaticProp, MessageBuffer *pBuf )
 {
 	g_StaticPropMgr.VMPI_ProcessStaticProp( iThread, iStaticProp, pBuf );
@@ -1680,9 +1675,7 @@ void CVradStaticPropMgr::VMPI_ProcessStaticProp( int iThread, int iStaticProp, M
 	CComputeStaticPropLightingResults results;
 	ComputeLighting( m_StaticProps[iStaticProp], iThread, iStaticProp, &results );
 
-#ifdef MPI
 	VMPI_SetCurrentStage( "EncodeLightingResults" );
-#endif
 	
 	// Encode the results.
 	int nLists = results.m_ColorVertsArrays.Count();
@@ -1746,7 +1739,7 @@ void CVradStaticPropMgr::VMPI_ReceiveStaticPropResults( int iStaticProp, Message
 	// Apply the results.
 	ApplyLightingToStaticProp( iStaticProp, m_StaticProps[iStaticProp], &results );
 }
-#endif
+
 
 void CVradStaticPropMgr::ComputeLightingForProp( int iThread, int iStaticProp )
 {
@@ -1787,7 +1780,6 @@ void CVradStaticPropMgr::ComputeLighting( int iThread )
 	// ensure any traces against us are ignored because we have no inherit lighting contribution
 	m_bIgnoreStaticPropTrace = true;
 
-#ifdef MPI
 	if ( g_bUseMPI )
 	{
 		// Distribute the work among the workers.
@@ -1795,11 +1787,11 @@ void CVradStaticPropMgr::ComputeLighting( int iThread )
 		
 		DistributeWork( 
 			count, 
+			VMPI_DISTRIBUTEWORK_PACKETID,
 			&CVradStaticPropMgr::VMPI_ProcessStaticProp_Static, 
 			&CVradStaticPropMgr::VMPI_ReceiveStaticPropResults_Static );
 	}
 	else
-#endif
 	{
 		RunThreadsOn(count, true, ThreadComputeStaticPropLighting);
 	}
@@ -2177,9 +2169,9 @@ const vertexFileHeader_t * mstudiomodel_t::CacheVertexData( void *pModelData )
 	studiohdr_t *pActiveStudioHdr = static_cast<studiohdr_t *>(pModelData);
 	Assert( pActiveStudioHdr );
 
-	if ( pActiveStudioHdr->VertexBase() )
+	if ( pActiveStudioHdr->pVertexBase )
 	{
-		return (vertexFileHeader_t *)pActiveStudioHdr->VertexBase();
+		return (vertexFileHeader_t *)pActiveStudioHdr->pVertexBase;
 	}
 
 	// mandatory callback to make requested data resident
@@ -2238,7 +2230,7 @@ const vertexFileHeader_t * mstudiomodel_t::CacheVertexData( void *pModelData )
 	free( pVvdHdr );
 	pVvdHdr = pNewVvdHdr;
 
-	pActiveStudioHdr->SetVertexBase( (void*)pVvdHdr );
+	pActiveStudioHdr->pVertexBase = (void*)pVvdHdr;
 	return pVvdHdr;
 }
 
@@ -2584,66 +2576,51 @@ static void BuildFineMipmap(unsigned int _resX, unsigned int _resY, bool _applyF
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertLinearToRGB888( const Vector* pColorIn, RGB888_t* pColorOut )
+static void FilterCoarserMipmaps(unsigned int _resX, unsigned int _resY, CUtlVector<Vector>* _scratchLinear, CUtlVector<RGB888_t> *_outTexelsRGB888)
 {
-	RGBA8888_t outPixel;
-	ConvertLinearToRGBA8888( pColorIn, ( unsigned char* ) &outPixel );
-	pColorOut->r = outPixel.r;
-	pColorOut->g = outPixel.g;
-	pColorOut->b = outPixel.b;
-}
-
-// ------------------------------------------------------------------------------------------------
-static void FilterCoarserMipmaps( unsigned int _resX, unsigned int _resY, CUtlVector<Vector>* _scratchLinear, CUtlVector<RGB888_t>* _outTexelsRGB888 )
-{
-	Assert( _outTexelsRGB888 );
+	Assert(_outTexelsRGB888);
 
 	int srcResX = _resX;
 	int srcResY = _resY;
-	int dstResX = max( 1, ( srcResX >> 1 ) );
-	int dstResY = max( 1, ( srcResY >> 1 ) );
-	int dstOffset = GetTexelCount( srcResX, srcResY, false );
+	int dstResX = max(1, (srcResX >> 1));
+	int dstResY = max(1, (srcResY >> 1));
+	int dstOffset = GetTexelCount(srcResX, srcResY, false);
 
 	// Build mipmaps here, after being converted to linear space. 
 	// TODO: Should do better filtering for downsampling. But this will work for now.
-	while ( srcResX > 1 || srcResY > 1 )
+	while (srcResX > 1 || srcResY > 1)
 	{
-		int maxDestColumn = dstResX - 1;
-		int maxDestRow = dstResY - 1;
-
-		int maxColumn = srcResX - 1;
-		int maxRow = srcResY - 1;
-		for ( int j = 0; j < srcResY; j += 2 ) {
-			for ( int i = 0; i < srcResX; i += 2 ) {
+		for (int j = 0; j < srcResY; j += 2) {
+			for (int i = 0; i < srcResX; i += 2) {
 				int srcCol0 = i;
-				int srcCol1 = i + 1;
+				int srcCol1 = i + 1 > srcResX - 1 ? srcResX - 1 : i + 1;
 				int srcRow0 = j;
-				int srcRow1 = j + 1;
-				srcCol1 = min( srcCol1, maxColumn );
-				srcRow1 = min( srcRow1, maxRow );
+				int srcRow1 = j + 1 > srcResY - 1 ? srcResY - 1 : j + 1;;
 
-				int dstCol = min( i >> 1, maxDestColumn );
-				int dstRow = min( j >> 1, maxDestRow );
+				int dstCol = i >> 1;
+				int dstRow = j >> 1;
 
-				const Vector& tl = ( *_scratchLinear )[srcCol0 + ( srcRow0 * srcResX )];
-				const Vector& tr = ( *_scratchLinear )[srcCol1 + ( srcRow0 * srcResX )];
-				const Vector& bl = ( *_scratchLinear )[srcCol0 + ( srcRow1 * srcResX )];
-				const Vector& br = ( *_scratchLinear )[srcCol1 + ( srcRow1 * srcResX )];
 
-				Vector sample = ( tl + tr + bl + br ) / 4.0f;
+				const Vector& tl = (*_scratchLinear)[srcCol0 + (srcRow0 * srcResX)];
+				const Vector& tr = (*_scratchLinear)[srcCol1 + (srcRow0 * srcResX)];
+				const Vector& bl = (*_scratchLinear)[srcCol0 + (srcRow1 * srcResX)];
+				const Vector& br = (*_scratchLinear)[srcCol1 + (srcRow1 * srcResX)];
 
-				ConvertLinearToRGB888( &sample, &( *_outTexelsRGB888 )[dstOffset + dstCol + dstRow * dstResX] );
+				Vector sample = (tl + tr + bl + br) / 4.0f;
+
+				ConvertLinearToRGBA8888(&sample, (unsigned char*)&(*_outTexelsRGB888)[dstOffset + dstCol + dstRow * dstResX]);
+
 				// Also overwrite the srcBuffer to filter the next loop. This is safe because we won't be reading this source value
 				// again during this mipmap level.
-				( *_scratchLinear )[dstCol + dstRow * dstResX] = sample;
+				(*_scratchLinear)[dstCol + dstRow * dstResX] = sample;
 			}
 		}
 
 		srcResX = dstResX;
 		srcResY = dstResY;
-		dstResX = max( 1, ( srcResX >> 1 ) );
-		dstResY = max( 1, ( srcResY >> 1 ) );
-		dstOffset += GetTexelCount( srcResX, srcResY, false );
+		dstResX = max(1, (srcResX >> 1));
+		dstResY = max(1, (srcResY >> 1));
+		dstOffset += GetTexelCount(srcResX, srcResY, false);
 	}
 }
 

@@ -10,6 +10,9 @@
 
 #include "tier0/memdbgon.h"
 
+
+extern const char *s_ElementNames[MAX_ARRAY_ELEMENTS];
+
 // This gets associated with SendProps inside a utlvector and stores extra data needed to make it work.
 class CSendPropExtra_UtlVector
 {
@@ -131,7 +134,7 @@ void* SendProxy_LengthTable( const SendProp *pProp, const void *pStructBase, con
 // Note: you have to be DILIGENT about calling NetworkStateChanged whenever an element in your CUtlVector changes
 // since CUtlVector doesn't do this automatically.
 SendProp SendPropUtlVector(
-	char *pVarName,		// Use SENDINFO_UTLVECTOR to generate these 4.
+	const char *pVarName,		// Use SENDINFO_UTLVECTOR to generate these 4.
 	int offset,			// Used to generate pData in the function specified in varProxy.
 	int sizeofVar,		// The size of each element in the utlvector.
 	EnsureCapacityFn ensureFn,	// This is the value returned for elements out of the array's current range.
@@ -192,7 +195,7 @@ SendProp SendPropUtlVector(
 	{
 		pProps[i] = pArrayProp;	// copy array element property setting
 		pProps[i].SetOffset( 0 ); // leave offset at 0 so pStructBase is always a pointer to the CUtlVector
-		pProps[i].m_pVarName = DT_ArrayElementNameForIdx(i-1);	// give unique name
+		pProps[i].m_pVarName = s_ElementNames[i-1];	// give unique name
 		pProps[i].m_pParentArrayPropName = pParentArrayPropName; // TERROR: For debugging...
 		pProps[i].SetExtraData( pExtraData );
 		pProps[i].m_ElementStride = i-1;	// Kind of lame overloading element stride to hold the element index,

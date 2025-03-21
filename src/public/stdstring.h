@@ -23,9 +23,14 @@
 #pragma warning(disable:4511)
 #endif
 
-#include "tier0/valve_minmax_off.h"	// GCC 4.2.2 headers screw up our min/max defs.
+#undef min
+#undef max
 #include <string>
-#include "tier0/valve_minmax_on.h"	// GCC 4.2.2 headers screw up our min/max defs.
+#define min(a,b)  (((a) < (b)) ? (a) : (b))
+#define max(a,b)  (((a) > (b)) ? (a) : (b))
+
+#undef offsetof
+#define offsetof(s,m)	(size_t)&(((s *)0)->m)
 
 #ifdef _WIN32
 #pragma warning(pop)

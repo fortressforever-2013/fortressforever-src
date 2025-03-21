@@ -34,6 +34,7 @@
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+#include <vstdlib/random.h>
 
 bool s_bMathlibInitialized = false;
 
@@ -2676,7 +2677,7 @@ void Cubic_Spline(
 
 	output.Init();
 
-	Vector b, c;
+	Vector a, b, c, d;
 
 	// matrix row 1
 	VectorScale( p2, tSqrSqr * 2, b );
@@ -2811,7 +2812,7 @@ void Parabolic_Spline(
 
 	output.Init();
 
-	Vector a, b, c;
+	Vector a, b, c, d;
 
 	// matrix row 1
 	// no influence from t cubed
@@ -4204,9 +4205,9 @@ float RandomVectorInUnitSphere( Vector *pVector )
 {
 	// Guarantee uniform random distribution within a sphere
 	// Graphics gems III contains this algorithm ("Nonuniform random point sets via warping")
-	float u = ((float)rand() / VALVE_RAND_MAX);
-	float v = ((float)rand() / VALVE_RAND_MAX);
-	float w = ((float)rand() / VALVE_RAND_MAX);
+	float u = RandomFloat(1.0f);
+	float v = RandomFloat(1.0f);
+	float w = RandomFloat(1.0f);
 
 	float flPhi = acos( 1 - 2 * u );
 	float flTheta = 2 * M_PI * v;
@@ -4227,8 +4228,8 @@ float RandomVectorInUnitCircle( Vector2D *pVector )
 {
 	// Guarantee uniform random distribution within a sphere
 	// Graphics gems III contains this algorithm ("Nonuniform random point sets via warping")
-	float u = ((float)rand() / VALVE_RAND_MAX);
-	float v = ((float)rand() / VALVE_RAND_MAX);
+	float u = RandomFloat(1.0f);
+	float v = RandomFloat(1.0f);
 
 	float flTheta = 2 * M_PI * v;
 	float flRadius = powf( u, 1.0f / 2.0f );

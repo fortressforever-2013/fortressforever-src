@@ -18,12 +18,10 @@
 #include "tier1/strtools.h"
 #include <stddef.h>
 
-/* Stuff from pre-TF2 SDK version
 #ifdef LINUX
 #undef offsetof
 #define offsetof(s,m)	(size_t)&(((s *)0)->m)
 #endif
-*/
 
 // Max number of properties in a datatable and its children.
 #define MAX_DATATABLES		1024	// must be a power of 2.

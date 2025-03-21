@@ -35,9 +35,6 @@ const char* ParseFileInternal( const char* pFileBytes, char* pTokenOut, bool* pW
 
 	if (!pFileBytes)
 		return 0;
-	
-	if ( nMaxTokenLen <= 1 )
-		return 0;
 
 	InitializeCharacterSets();
 
@@ -103,15 +100,7 @@ skipwhite:
 				return pFileBytes;
 			}
 			pTokenOut[len] = c;
-			len++;
-			
-			// Ensure buffer length is not overrunning!
-			if ( len == nMaxTokenLen - 1 )
-			{
-				pTokenOut[len] = 0;
-				Assert( 0 );
-				return pFileBytes;
-			}
+			len += ( len < nMaxTokenLen-1 ) ? 1 : 0;
 		}
 	}
 
@@ -129,16 +118,7 @@ skipwhite:
 	{
 		pTokenOut[len] = c;
 		pFileBytes++;
-		len++;
-		
-		// Ensure buffer length is not overrunning!
-		if ( len == nMaxTokenLen - 1 )
-		{
-			pTokenOut[ len ] = 0;
-			Assert( 0 );
-			return pFileBytes;
-		}
-
+		len += ( len < nMaxTokenLen-1 ) ? 1 : 0;
 		c = *pFileBytes;
 		if ( IN_CHARACTERSET( breaks, c ) )
 			break;

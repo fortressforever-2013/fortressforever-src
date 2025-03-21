@@ -14,11 +14,11 @@ $Configuration
 	$Compiler
 	{
 		$AdditionalIncludeDirectories		"$BASE,..\common,$SRCDIR\game\shared,.\"
-		$PreprocessorDefinitions			"$BASE;captioncompiler"
+		$PreprocessorDefinitions			"$BASE;PROTECTED_THINGS_DISABLE;captioncompiler"
 	}
 }
 
-$Project "Caption Compiler"
+$Project "Captioncompiler"
 {
 	$Folder	"Source Files"
 	{

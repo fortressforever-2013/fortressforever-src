@@ -10,64 +10,50 @@
 
 $Project "captioncompiler"
 {
-	"utils\captioncompiler\captioncompiler.vpc" [$WINDOWS]
+	"utils\captioncompiler\captioncompiler.vpc" [$WIN32]
 }
+
 
 $Project "client"
 {
-	"game\client\client_tf.vpc"			[$TF]
-	"game\client\client_hl2mp.vpc"		[$HL2MP]
+	"game\client\client_hl2mp.vpc"		[($WIN32||$POSIX) && $HL2MP]
+	"game\client\client_sdk2013ce.vpc"		[($WIN32||$POSIX) && $SDK2013CE]
 }
 
 $Project "fgdlib"
 {
-	"fgdlib\fgdlib.vpc" [$WINDOWS]
+	"fgdlib\fgdlib.vpc" [$WIN32]
 }
 
-$Project "game_shader_generic_example"
+$Project "game_shader_dx9"
 {
-	"materialsystem\stdshaders\game_shader_generic_example_hl2mp.vpc" [$HL2MP]
-	"materialsystem\stdshaders\game_shader_generic_example_tf.vpc" [$TF]
-}
-
-// Use this project if you want to override all std shaders with your own.
-// By default it will override ALL of them. So feel free to cut it down if you want :)
-$Project "game_shader_generic_std"
-{
-	"materialsystem\stdshaders\game_shader_generic_std_hl2mp.vpc" [$HL2MP]
-	"materialsystem\stdshaders\game_shader_generic_std_tf.vpc" [$TF]
+	"materialsystem\stdshaders\game_shader_dx9_hl2mp.vpc" [$HL2MP]
 }
 
 $Project "glview"
 {
-	"utils\glview\glview.vpc" [$WINDOWS]
+	"utils\glview\glview.vpc" [$WIN32]
 }
 
 $Project "height2normal"
 {
-	"utils\height2normal\height2normal.vpc" [$WINDOWS]
+	"utils\height2normal\height2normal.vpc" [$WIN32]
 }
 
 $Project "server"
 {
-	"game\server\server_tf.vpc"			[$TF]
-	"game\server\server_hl2mp.vpc"		[$HL2MP]
-}
-
-$Project "launcher_main"
-{
-	"launcher_main\launcher_main_mod_hl2mp.vpc" [$HL2MP]
-	"launcher_main\launcher_main_mod_tf.vpc" [$TF]
+	"game\server\server_hl2mp.vpc"		[($WIN32||$POSIX) && $HL2MP]
+	"game\server\server_sdk2013ce.vpc"		[($WIN32||$POSIX) && $SDK2013CE]
 }
 
 $Project "mathlib"
 {
-	"mathlib\mathlib.vpc"
+	"mathlib\mathlib.vpc" [$WINDOWS||$X360||$POSIX]
 }
 
 $Project "motionmapper"
 {
-	"utils\motionmapper\motionmapper.vpc" [$WINDOWS]
+	"utils\motionmapper\motionmapper.vpc" [$WIN32]
 }
 
 $Project "phonemeextractor"
@@ -77,71 +63,75 @@ $Project "phonemeextractor"
 
 $Project "raytrace"
 {
-	"raytrace\raytrace.vpc"
+	"raytrace\raytrace.vpc" [$WIN32||$X360||$POSIX]
 }
 
 $Project "qc_eyes"
 {
-	"utils\qc_eyes\qc_eyes.vpc" [$WINDOWS]
+	"utils\qc_eyes\qc_eyes.vpc" [$WIN32]
 }
 
 $Project "serverplugin_empty"
 {
-	"utils\serverplugin_sample\serverplugin_empty.vpc"
+	"utils\serverplugin_sample\serverplugin_empty.vpc" [$WIN32||$POSIX]
 }
 
 $Project "tgadiff"
 {
-	"utils\tgadiff\tgadiff.vpc" [$WINDOWS]
+	"utils\tgadiff\tgadiff.vpc" [$WIN32]
 }
 
 $Project "tier1"
 {
-	"tier1\tier1.vpc"
+	"tier1\tier1.vpc" 	[$WINDOWS || $X360||$POSIX]
 }
 
 $Project "vbsp"
 {
-	"utils\vbsp\vbsp.vpc" [$WINDOWS]
+	"utils\vbsp\vbsp.vpc" [$WIN32]
 }
 
 $Project "vgui_controls"
 {
-	"vgui2\vgui_controls\vgui_controls.vpc"
+	"vgui2\vgui_controls\vgui_controls.vpc" [$WIN32||$X360||$POSIX]
 }
 
 $Project "vice"
 {
-	"utils\vice\vice.vpc" [$WINDOWS]
+	"utils\vice\vice.vpc" [$WIN32]
 }
 
 $Project "vrad_dll"
 {
-	"utils\vrad\vrad_dll.vpc" [$WINDOWS]
+	"utils\vrad\vrad_dll.vpc" [$WIN32]
 }
 
 $Project "vrad_launcher"
 {
-	"utils\vrad_launcher\vrad_launcher.vpc" [$WINDOWS]
+	"utils\vrad_launcher\vrad_launcher.vpc" [$WIN32]
 }
 
 $Project "vtf2tga"
 {
-	"utils\vtf2tga\vtf2tga.vpc" [$WINDOWS]
+	"utils\vtf2tga\vtf2tga.vpc" [$WIN32]
 }
 
 $Project "vtfdiff"
 {
-	"utils\vtfdiff\vtfdiff.vpc" [$WINDOWS]
+	"utils\vtfdiff\vtfdiff.vpc" [$WIN32]
 }
 
 $Project "vvis_dll"
 {
-	"utils\vvis\vvis_dll.vpc" [$WINDOWS]
+	"utils\vvis\vvis_dll.vpc" [$WIN32]
 }
 
 $Project "vvis_launcher"
 {
-	"utils\vvis_launcher\vvis_launcher.vpc" [$WINDOWS]
+	"utils\vvis_launcher\vvis_launcher.vpc" [$WIN32]
 }
 
+$Project "togl"
+{
+	"togl\togl.vpc" [$POSIX]
+}

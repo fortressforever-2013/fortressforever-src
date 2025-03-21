@@ -130,12 +130,10 @@ void EditablePanel::OnKeyCodePressed( KeyCode code )
 			case KEY_XSTICK1_UP:
 			case KEY_XSTICK2_UP:
 			case KEY_UP:
-			case STEAMCONTROLLER_DPAD_UP:
 			case KEY_XBUTTON_DOWN:
 			case KEY_XSTICK1_DOWN:
 			case KEY_XSTICK2_DOWN:
 			case KEY_DOWN:
-			case STEAMCONTROLLER_DPAD_DOWN:
 			case KEY_XBUTTON_LEFT:
 			case KEY_XSTICK1_LEFT:
 			case KEY_XSTICK2_LEFT:
@@ -145,14 +143,12 @@ void EditablePanel::OnKeyCodePressed( KeyCode code )
 			case KEY_XSTICK2_RIGHT:
 			case KEY_RIGHT:
 			case KEY_XBUTTON_B:
-			case STEAMCONTROLLER_B:
 				// Navigating menus
 				vgui_nav_lock_default_button.SetValue( 1 );
 				PostMessage( panel, new KeyValues( "KeyCodePressed", "code", code ) );
 				return;
 			
 			case KEY_XBUTTON_A:
-			case STEAMCONTROLLER_A:
 			case KEY_ENTER:
 				if ( ipanel()->IsVisible( panel ) && ipanel()->IsEnabled( panel ) )
 				{
@@ -569,6 +565,7 @@ void EditablePanel::ActivateBuildMode()
 void EditablePanel::LoadControlSettings(const char *resourceName, const char *pathID, KeyValues *pKeyValues, KeyValues *pConditions)
 {
 #if defined( DBGFLAG_ASSERT ) && !defined(OSX) && !defined(LINUX)
+	extern IFileSystem *g_pFullFileSystem;
 	// Since nobody wants to fix this assert, I'm making it a Msg instead:
 	//     editablepanel.cpp (535) : Resource file "resource\DebugOptionsPanel.res" not found on disk!
 	// AssertMsg( g_pFullFileSystem->FileExists( resourceName ), CFmtStr( "Resource file \"%s\" not found on disk!", resourceName ).Access() );
@@ -873,9 +870,9 @@ Panel *EditablePanel::HasHotkey(wchar_t key)
 //-----------------------------------------------------------------------------
 // Purpose: Shortcut function to setting enabled state of control
 //-----------------------------------------------------------------------------
-void EditablePanel::SetControlEnabled(const char *controlName, bool enabled, bool bRecurseDown /*= false*/ )
+void EditablePanel::SetControlEnabled(const char *controlName, bool enabled)
 {
-	Panel *control = FindChildByName(controlName, bRecurseDown);
+	Panel *control = FindChildByName(controlName);
 	if (control)
 	{
 		control->SetEnabled(enabled);
@@ -885,9 +882,9 @@ void EditablePanel::SetControlEnabled(const char *controlName, bool enabled, boo
 //-----------------------------------------------------------------------------
 // Purpose: Shortcut function to setting visibility state of control
 //-----------------------------------------------------------------------------
-void EditablePanel::SetControlVisible(const char *controlName, bool visible, bool bRecurseDown /*= false*/ )
+void EditablePanel::SetControlVisible(const char *controlName, bool visible)
 {
-	Panel *control = FindChildByName(controlName, bRecurseDown);
+	Panel *control = FindChildByName(controlName);
 	if (control)
 	{
 		control->SetVisible(visible);

@@ -10,7 +10,6 @@
 #pragma once
 #endif
 
-const char *DT_ArrayElementNameForIdx( size_t i );
 
 #include "utlvector.h"
 

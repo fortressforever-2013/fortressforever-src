@@ -23,7 +23,7 @@ $Configuration
 	}
 }
 
-$Project "GL View"
+$Project "Glview"
 {
 	$Folder	"Source Files"
 	{

@@ -22,7 +22,6 @@
 #include "vmpi_tools_shared.h"
 #include <conio.h>
 #include "scratchpad_helpers.h"
-#include "tier0/fasttimer.h"
 
 
 #define VMPI_VVIS_PACKET_ID						1
@@ -38,7 +37,7 @@
 	#define VMPI_SUBPACKETID_MC_ADDR			13
 
 // DistributeWork owns this packet ID.
-//#define VMPI_DISTRIBUTEWORK_PACKETID			2
+#define VMPI_DISTRIBUTEWORK_PACKETID			2
 
 
 extern bool fastvis;
@@ -108,6 +107,7 @@ bool VVIS_DispatchFn( MessageBuffer *pBuf, int iSource, int iPacketID )
 	}
 }
 CDispatchReg g_VVISDispatchReg( VMPI_VVIS_PACKET_ID, VVIS_DispatchFn ); // register to handle the messages we want
+CDispatchReg g_DistributeWorkReg( VMPI_DISTRIBUTEWORK_PACKETID, DistributeWorkDispatch );
 
 
 
@@ -224,6 +224,7 @@ void RunMPIBasePortalVis()
 	g_CPUTime.Init();
 	double elapsed = DistributeWork( 
 		g_numportals * 2,		// # work units
+		VMPI_DISTRIBUTEWORK_PACKETID,	// packet ID
 		ProcessBasePortalVis,	// Worker function to process work units
 		ReceiveBasePortalVis	// Master function to receive work results
 		);
@@ -604,6 +605,7 @@ void RunMPIPortalFlow()
 	g_CPUTime.Init();
 	double elapsed = DistributeWork( 
 		g_numportals * 2,		// # work units
+		VMPI_DISTRIBUTEWORK_PACKETID,	// packet ID
 		ProcessPortalFlow,		// Worker function to process work units
 		ReceivePortalFlow		// Master function to receive work results
 		);
@@ -626,7 +628,7 @@ void RunMPIPortalFlow()
 		Msg( "VVIS worker finished. Over and out.\n" );
 		VMPI_SetCurrentStage( "worker done" );
 
-		Plat_ExitProcess( 0 );
+		CmdLib_Exit( 0 );
 	}
 
 	if ( g_bMPIMaster )

@@ -66,7 +66,6 @@ CheckButton::CheckButton(Panel *parent, const char *panelName, const char *text)
 {
  	SetContentAlignment(a_west);
 	m_bCheckButtonCheckable = true;
-	m_bUseSmallCheckImage = false;
 
 	// create the image
 	_checkBoxImage = new CheckImage(this);
@@ -86,16 +85,6 @@ CheckButton::CheckButton(Panel *parent, const char *panelName, const char *text)
 CheckButton::~CheckButton()
 {
 	delete _checkBoxImage;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CheckButton::ApplySettings( KeyValues *inResourceData )
-{
-	BaseClass::ApplySettings( inResourceData );
-
-	m_bUseSmallCheckImage = inResourceData->GetBool( "smallcheckimage", false );
 }
 
 //-----------------------------------------------------------------------------
@@ -124,7 +113,7 @@ void CheckButton::ApplySchemeSettings(IScheme *pScheme)
 
 	SetContentAlignment(Label::a_west);
 
-	_checkBoxImage->SetFont( pScheme->GetFont( m_bUseSmallCheckImage ? "MarlettSmall" : "Marlett", IsProportional()) );
+	_checkBoxImage->SetFont( pScheme->GetFont("Marlett", IsProportional()) );
 	_checkBoxImage->ResizeImageToContent();
 	SetImageAtIndex(0, _checkBoxImage, CHECK_INSET);
 

@@ -145,7 +145,7 @@ bool KVPacker::WriteAsBinary( KeyValues *pNode, CUtlBuffer &buffer )
 			}
 		case KeyValues::TYPE_PTR:
 			{
-				buffer.PutPtr( dat->GetPtr() );
+				buffer.PutUnsignedInt( (int)dat->GetPtr() );
 				break;
 			}
 
@@ -258,7 +258,7 @@ bool KVPacker::ReadAsBinary( KeyValues *pNode, CUtlBuffer &buffer )
 			}
 		case PACKTYPE_PTR:
 			{
-				dat->SetPtr( NULL, buffer.GetPtr() );
+				dat->SetPtr( NULL, (void*)buffer.GetUnsignedInt() );
 				break;
 			}
 

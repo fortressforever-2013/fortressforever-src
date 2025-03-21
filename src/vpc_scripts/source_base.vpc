@@ -6,9 +6,14 @@
 //	Project Script
 //-----------------------------------------------------------------------------
 
-$MacroRequired VPC_TRIVIAL_DEPENDENCY_PATH "$SRCDIR/vpc_scripts/vpc_trivial_dependency.txt"
+// Set which branch we are building out of.
+// This is one file we expect to be different between branches and so it must be merged carefully
 
-$Macro "DEFAULT_RUN_ARGS" "-dev -w 1920 -h 1080 -windowed"
+// Staging branch:
+//$Conditional STAGING_ONLY	"1"
+
+// rel/tf_beta branch:
+//$Conditional TF_BETA	"1"
 
 $Configuration "Debug"
 {
@@ -16,10 +21,12 @@ $Configuration "Debug"
 	{
 		// Pass on appropriate branch define to preprocessor
 		$PreprocessorDefinitions		"VPC"
-		// Pass /Define:USE_MEM_DEBUG along, as it is off by default (and scattered everywhere)
-		$PreprocessorDefinitions		"$BASE;USE_MEM_DEBUG" [$USE_MEM_DEBUG]
-		$PreprocessorDefinitions		"$BASE;SOURCESDK" [$SOURCESDK]
-		$PreprocessorDefinitions		"$BASE;SOURCE_HAS_FREETYPE"
+		$PreprocessorDefinitions		"$BASE;STAGING_ONLY" [$STAGING_ONLY]
+		$PreprocessorDefinitions		"$BASE;TF_BETA" [$TF_BETA]
+		$PreprocessorDefinitions		"$BASE;RAD_TELEMETRY_DISABLED" [$SOURCESDK]
+// Need to revisit the code to make things run with the _RETAIL preprocessor definition
+// This line was added in the previous check-in, but had previously not been defined in this branch
+//		$PreprocessorDefinitions		"$BASE;_RETAIL"		[$RETAIL]
 	}
 }
 
@@ -29,7 +36,11 @@ $Configuration "Release"
 	{
 		// Pass on appropriate branch define to preprocessor
 		$PreprocessorDefinitions		"VPC"
-		$PreprocessorDefinitions		"$BASE;SOURCESDK" [$SOURCESDK]
-		$PreprocessorDefinitions		"$BASE;SOURCE_HAS_FREETYPE"
+		$PreprocessorDefinitions		"$BASE;STAGING_ONLY" [$STAGING_ONLY]
+		$PreprocessorDefinitions		"$BASE;TF_BETA" [$TF_BETA]
+		$PreprocessorDefinitions		"$BASE;RAD_TELEMETRY_DISABLED" [$SOURCESDK]
+// Need to revisit the code to make things run with the _RETAIL preprocessor definition
+// This line was added in the previous check-in, but had previously not been defined in this branch
+//		$PreprocessorDefinitions		"$BASE;_RETAIL"		[$RETAIL]
 	}
 }
