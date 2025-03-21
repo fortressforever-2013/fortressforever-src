@@ -10,6 +10,12 @@
 #include "steamtypes.h"
 #include "steamuniverse.h"
 
+// Josh: Fixes building gcsdk which passes in stuff from protobuf.
+#if defined( PLATFORM_64BITS ) && defined( LINUX )
+#include <stdint.h>
+#define INT64_DIFFERENT_FROM_INT64_T
+#endif
+
 // General result codes
 enum EResult
 {
@@ -141,8 +147,6 @@ enum EResult
 	k_EResultChargerRequired = 125,				// The operation requires a charger to be plugged in, which wasn't present
 	k_EResultCachedCredentialInvalid = 126,		// Cached credential was invalid - user must reauthenticate
 	K_EResultPhoneNumberIsVOIP = 127,			// The phone number provided is a Voice Over IP number
-	k_EResultNotSupported = 128,				// The data being accessed is not supported by this API
-	k_EResultFamilySizeLimitExceeded = 129,		// Reached the maximum size of the family
 };
 
 // Error codes for use with the voice functions
@@ -460,16 +464,6 @@ enum EDurationControlOnlineState
 	k_EDurationControlOnlineState_OnlineHighPri = 3,		// currently in online play and requests not to be interrupted
 };
 
-
-enum EBetaBranchFlags
-{
-	k_EBetaBranch_None			= 0,
-	k_EBetaBranch_Default		= 1,	// this is the default branch ("public")
-	k_EBetaBranch_Available		= 2,	// this branch can be selected (available)
-	k_EBetaBranch_Private		= 4,	// this is a private branch (password protected)
-	k_EBetaBranch_Selected		= 8,	// this is the currently selected branch (active)
-	k_EBetaBranch_Installed		= 16,	// this is the currently installed branch (mounted)
-};
 
 #pragma pack( push, 1 )
 
@@ -850,6 +844,7 @@ inline bool CSteamID::IsValid() const
 }
 
 #if defined( INCLUDED_STEAM2_USERID_STRUCTS ) 
+#include "steamcommon.h" // TSteamGlobalUserID
 
 //-----------------------------------------------------------------------------
 // Purpose: Initializes a steam ID from a Steam2 ID structure

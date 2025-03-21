@@ -8,6 +8,7 @@
 #ifndef VPROF_H
 #define VPROF_H
 
+#include "threadtools.h"
 #include "tier0/dbg.h"
 #include "tier0/fasttimer.h"
 #include "tier0/l2cache.h"
@@ -143,11 +144,6 @@
 #define VPROF_BUDGETGROUP_FINDATTRIBUTE				_T("FindAttribute")
 #define VPROF_BUDGETGROUP_FINDATTRIBUTEUNSAFE		_T("FindAttributeUnsafe")
 	
-// FF SPECIFIC VPROF ENTRIES
-#define VPROF_BUDGETGROUP_FF_BUILDABLE				_T( "FF Buildable Objects" )
-#define VPROF_BUDGETGROUP_FF_LUA					_T( "FF Lua" )
-#define VPROF_BUDGETGROUP_FF_MATHACKDETECT			_T( "FF Mathack Detection" )
-
 #ifdef _X360
 // update flags
 #define VPROF_UPDATE_BUDGET				0x01	// send budget data every frame
@@ -457,8 +453,8 @@ public:
 	void Start();
 	void Stop();
 
-	void SetTargetThreadId( unsigned id ) { m_TargetThreadId = id; }
-	unsigned GetTargetThreadId() { return m_TargetThreadId; }
+	void SetTargetThreadId( ThreadId_t id ) { m_TargetThreadId = id; }
+	ThreadId_t GetTargetThreadId() { return m_TargetThreadId; }
 	bool InTargetThread() { return ( m_TargetThreadId == ThreadGetCurrentId() ); }
 
 #ifdef _X360
@@ -679,7 +675,7 @@ protected:
 	bool					m_bTraceCompleteEvent;
 #endif
 
-	unsigned m_TargetThreadId;
+	ThreadId_t m_TargetThreadId;
 
 	StreamOut_t				m_pOutputStream;
 };

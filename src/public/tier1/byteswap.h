@@ -186,7 +186,7 @@ public:
 		if( !m_bSwapBytes || ( sizeof(T) == 1 ) )
 		{
 			// If we were just going to swap in place then return.
-			if(inputBuffer == outputBuffer)
+			if( !inputBuffer )
 				return;
 		
 			// Otherwise copy the inputBuffer to the outputBuffer:
@@ -207,7 +207,7 @@ private:
 	// The lowest level byte swapping workhorse of doom.  output always contains the 
 	// swapped version of input.  ( Doesn't compare machine to target endianness )
 	//-----------------------------------------------------------------------------
-	template<typename T> static void LowLevelByteSwap( T *output, T *input )
+	template<typename T> static void LowLevelByteSwap( T *output, const T *input )
 	{
 		T temp = *output;
 #if defined( _X360 )
@@ -234,9 +234,11 @@ private:
 			Assert( "Invalid size in CByteswap::LowLevelByteSwap" && 0 );
 		}
 #else
-		for( int i = 0; i < sizeof(T); i++ )
+		for( auto i = 0; i < sizeof(T); i++ )
 		{
-			((unsigned char* )&temp)[i] = ((unsigned char*)input)[sizeof(T)-(i+1)]; 
+			unsigned char *pByteOut = (unsigned char *) &temp;
+			const unsigned char *pByteIn = (const unsigned char *) input;
+			pByteOut[i] = pByteIn[ sizeof( T ) - ( i + 1 ) ]; 
 		}
 #endif
 		Q_memcpy( output, &temp, sizeof(T) );

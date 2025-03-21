@@ -1,1 +1,1 @@
-devtools\bin\vpc.exe /2013 /ff +game /mksln Game_FF.sln
+devtools\bin\vpc.exe /ff /define:SOURCESDK +game /mksln Game_FF.sln
