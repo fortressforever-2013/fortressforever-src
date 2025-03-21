@@ -225,6 +225,17 @@ BEGIN_VS_SHADER( Water_DX90,
 			Vector4D Scroll1;
 			params[SCROLL1]->GetVecValue( Scroll1.Base(), 4 );
 
+			NormalDecodeMode_t nNormalDecodeMode = NORMAL_DECODE_NONE;
+			if ( params[NORMALMAP]->IsTexture() && g_pHardwareConfig->SupportsNormalMapCompression() )
+			{
+				ITexture *pNormalMap = params[NORMALMAP]->GetTextureValue();
+				if ( pNormalMap )
+				{
+					// Clamp this to 0 or 1 since that's how we've authored the water shader (i.e. no separate alpha map/channel)
+					nNormalDecodeMode = pNormalMap->GetNormalDecodeMode() == NORMAL_DECODE_NONE ? NORMAL_DECODE_NONE : NORMAL_DECODE_ATI2N;
+				}
+			}
+
 			DECLARE_STATIC_VERTEX_SHADER( water_vs20 );
 			SET_STATIC_VERTEX_SHADER_COMBO( MULTITEXTURE,fabs(Scroll1.x) > 0.0);
 			SET_STATIC_VERTEX_SHADER_COMBO( BASETEXTURE, params[BASETEXTURE]->IsTexture() );
@@ -242,7 +253,7 @@ BEGIN_VS_SHADER( Water_DX90,
 				SET_STATIC_PIXEL_SHADER_COMBO( MULTITEXTURE,fabs(Scroll1.x) > 0.0);
 				SET_STATIC_PIXEL_SHADER_COMBO( BASETEXTURE, params[BASETEXTURE]->IsTexture() );
 				SET_STATIC_PIXEL_SHADER_COMBO( BLURRY_REFRACT, params[BLURREFRACT]->GetIntValue() );
-				SET_STATIC_PIXEL_SHADER_COMBO( NORMAL_DECODE_MODE, (int) NORMAL_DECODE_NONE );
+				SET_STATIC_PIXEL_SHADER_COMBO( NORMAL_DECODE_MODE, (int) nNormalDecodeMode );
 				SET_STATIC_PIXEL_SHADER( water_ps20b );
 			}
 			else
@@ -253,7 +264,7 @@ BEGIN_VS_SHADER( Water_DX90,
 				SET_STATIC_PIXEL_SHADER_COMBO( ABOVEWATER,  params[ABOVEWATER]->GetIntValue() );
 				SET_STATIC_PIXEL_SHADER_COMBO( MULTITEXTURE,fabs(Scroll1.x) > 0.0);
 				SET_STATIC_PIXEL_SHADER_COMBO( BASETEXTURE, params[BASETEXTURE]->IsTexture() );
-				SET_STATIC_PIXEL_SHADER_COMBO( NORMAL_DECODE_MODE, (int) NORMAL_DECODE_NONE );
+				SET_STATIC_PIXEL_SHADER_COMBO( NORMAL_DECODE_MODE, (int) nNormalDecodeMode );
 				SET_STATIC_PIXEL_SHADER( water_ps20 );
 			}
 
@@ -357,19 +368,13 @@ BEGIN_VS_SHADER( Water_DX90,
 
 			pShaderAPI->SetPixelShaderFogParams( 8 );
 
-
-			float vEyePos[4];
-			pShaderAPI->GetWorldSpaceCameraPosition( vEyePos );
-			vEyePos[3] = 0.0f;
-			pShaderAPI->SetPixelShaderConstant( 9, vEyePos );
-
 			DECLARE_DYNAMIC_VERTEX_SHADER( water_vs20 );
 			SET_DYNAMIC_VERTEX_SHADER( water_vs20 );
 			
 			if ( g_pHardwareConfig->SupportsPixelShaders_2_b() )
 			{
 				DECLARE_DYNAMIC_PIXEL_SHADER( water_ps20b );
-				SET_DYNAMIC_PIXEL_SHADER_COMBO( PIXELFOGTYPE, pShaderAPI->GetPixelFogCombo1( true ) );
+				SET_DYNAMIC_PIXEL_SHADER_COMBO( PIXELFOGTYPE, pShaderAPI->GetPixelFogCombo() );
 				SET_DYNAMIC_PIXEL_SHADER_COMBO( WRITE_DEPTH_TO_DESTALPHA, pShaderAPI->ShouldWriteDepthToDestAlpha() );
 				SET_DYNAMIC_PIXEL_SHADER( water_ps20b );
 			}
@@ -414,6 +419,17 @@ BEGIN_VS_SHADER( Water_DX90,
 			int fmt = VERTEX_POSITION | VERTEX_NORMAL | VERTEX_TANGENT_S | VERTEX_TANGENT_T;
 			pShaderShadow->VertexShaderVertexFormat( fmt, 1, 0, 0 );
 
+			NormalDecodeMode_t nNormalDecodeMode = NORMAL_DECODE_NONE;
+			if ( params[NORMALMAP]->IsTexture() && g_pHardwareConfig->SupportsNormalMapCompression() )
+			{
+				ITexture *pNormalMap = params[NORMALMAP]->GetTextureValue();
+				if ( pNormalMap )
+				{
+					// Clamp this to 0 or 1 since that's how we've authored the water shader (i.e. no separate alpha map/channel)
+					nNormalDecodeMode = pNormalMap->GetNormalDecodeMode() == NORMAL_DECODE_NONE ? NORMAL_DECODE_NONE : NORMAL_DECODE_ATI2N;
+				}
+			}
+
 			DECLARE_STATIC_VERTEX_SHADER( watercheap_vs20 );
 			SET_STATIC_VERTEX_SHADER_COMBO( BLEND,  bBlend && bRefraction );
 			SET_STATIC_VERTEX_SHADER( watercheap_vs20 );
@@ -428,7 +444,7 @@ BEGIN_VS_SHADER( Water_DX90,
 				Vector4D Scroll1;
 				params[SCROLL1]->GetVecValue( Scroll1.Base(), 4 );
 				SET_STATIC_PIXEL_SHADER_COMBO( MULTITEXTURE,fabs(Scroll1.x) > 0.0);
-				SET_STATIC_PIXEL_SHADER_COMBO( NORMAL_DECODE_MODE, (int) NORMAL_DECODE_NONE );
+				SET_STATIC_PIXEL_SHADER_COMBO( NORMAL_DECODE_MODE, (int) nNormalDecodeMode );
 				SET_STATIC_PIXEL_SHADER( watercheap_ps20b );
 			}
 			else
@@ -441,7 +457,7 @@ BEGIN_VS_SHADER( Water_DX90,
 				Vector4D Scroll1;
 				params[SCROLL1]->GetVecValue( Scroll1.Base(), 4 );
 				SET_STATIC_PIXEL_SHADER_COMBO( MULTITEXTURE,fabs(Scroll1.x) > 0.0);
-				SET_STATIC_PIXEL_SHADER_COMBO( NORMAL_DECODE_MODE, (int) NORMAL_DECODE_NONE );
+				SET_STATIC_PIXEL_SHADER_COMBO( NORMAL_DECODE_MODE, (int) nNormalDecodeMode );
 				SET_STATIC_PIXEL_SHADER( watercheap_ps20 );
 			}
 
@@ -479,11 +495,6 @@ BEGIN_VS_SHADER( Water_DX90,
 			};
 			pShaderAPI->SetPixelShaderConstant( 1, cheapWaterParams );
 
-			float vEyePos[4];
-			pShaderAPI->GetWorldSpaceCameraPosition( vEyePos );
-			vEyePos[3] = 0.0f;
-			pShaderAPI->SetPixelShaderConstant( 4, vEyePos );
-
 			if( g_pConfig->bShowSpecular )
 			{
 				SetPixelShaderConstant( 2, REFLECTTINT, REFLECTBLENDFACTOR );
@@ -517,7 +528,7 @@ BEGIN_VS_SHADER( Water_DX90,
 			{
 				DECLARE_DYNAMIC_PIXEL_SHADER( watercheap_ps20b );
 				SET_DYNAMIC_PIXEL_SHADER_COMBO( HDRENABLED,  IsHDREnabled() );
-				SET_DYNAMIC_PIXEL_SHADER_COMBO( PIXELFOGTYPE, pShaderAPI->GetPixelFogCombo1( true ) );
+				SET_DYNAMIC_PIXEL_SHADER_COMBO( PIXELFOGTYPE, pShaderAPI->GetPixelFogCombo() );
 				SET_DYNAMIC_PIXEL_SHADER( watercheap_ps20b );
 			}
 			else

@@ -535,7 +535,7 @@ void CBaseVSShader::LoadProjectionMatrixIntoVertexShaderConstant( int vertexReg 
 //-----------------------------------------------------------------------------
 void CBaseVSShader::LoadModelViewMatrixIntoVertexShaderConstant( int vertexReg )
 {
-	VMatrix view, model, modelView;
+	VMatrix view, model, modelView, transpose;
 	s_pShaderAPI->GetMatrix( MATERIAL_MODEL, model.m[0] );
 	MatrixTranspose( model, model );
 	s_pShaderAPI->GetMatrix( MATERIAL_VIEW, view.m[0] );
