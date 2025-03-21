@@ -28,7 +28,7 @@ class CUtlBuffer;
 //-----------------------------------------------------------------------------
 // Invalid command handle
 //-----------------------------------------------------------------------------
-typedef intp CommandHandle_t;
+typedef int CommandHandle_t;
 enum
 {
 	COMMAND_BUFFER_INVALID_COMMAND_HANDLE = 0
@@ -100,11 +100,11 @@ private:
 	};
 
 	// Insert a command into the command queue at the appropriate time
-	void InsertCommandAtAppropriateTime( intp hCommand );
+	void InsertCommandAtAppropriateTime( int hCommand );
 						   
 	// Insert a command into the command queue
 	// Only happens if it's inserted while processing other commands
-	void InsertImmediateCommand( intp hCommand );
+	void InsertImmediateCommand( int hCommand );
 
 	// Insert a command into the command queue
 	bool InsertCommand( const char *pArgS, int nCommandSize, int nTick );
@@ -125,7 +125,7 @@ private:
 	int		m_nCurrentTick;
 	int		m_nLastTickToProcess;
 	int		m_nWaitDelayTicks;
-	intp	m_hNextCommand;
+	int		m_hNextCommand;
 	int		m_nMaxArgSBufferLength;
 	bool	m_bIsProcessingCommands;
 	bool	m_bWaitEnabled;

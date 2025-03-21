@@ -20,10 +20,12 @@
 #include "tier0/basetypes.h"
 
 // For rand(). We really need a library!
-#include <stdlib.h>
+// #include <stdlib.h> // no we do not!
 
 #include "tier0/dbg.h"
 #include "mathlib/math_pfns.h"
+
+#include "vstdlib/random.h"
 
 //=========================================================
 // 2D Vector2D
@@ -36,11 +38,7 @@ public:
 	vec_t x, y;
 
 	// Construction/destruction
-#ifdef _DEBUG
-	Vector2D();
-#else
-	Vector2D() = default;
-#endif
+	Vector2D(void);
 	Vector2D(vec_t X, vec_t Y);
 	Vector2D(const float *pFloat);
 
@@ -199,13 +197,13 @@ void Vector2DLerp(const Vector2D& src1, const Vector2D& src2, vec_t t, Vector2D&
 // constructors
 //-----------------------------------------------------------------------------
 
-#ifdef _DEBUG
 inline Vector2D::Vector2D(void)									
 { 
+#ifdef _DEBUG
 	// Initialize to NAN to catch errors
 	x = y = VEC_T_NAN;
-}
 #endif
+}
 
 inline Vector2D::Vector2D(vec_t X, vec_t Y)						
 { 
@@ -243,8 +241,8 @@ inline void Vector2D::Init( vec_t ix, vec_t iy )
 
 inline void Vector2D::Random( float minVal, float maxVal )
 {
-	x = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
-	y = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
+	x = RandomFloat(minVal, maxVal);
+	y = RandomFloat(minVal, maxVal);
 }
 
 inline void Vector2DClear( Vector2D& a )

@@ -58,7 +58,9 @@ public:
 
 	void RecalculateDerivedValues(void);			 // calculate m_xxDot, m_Type for changed parms
 
-	LightDesc_t() = default;
+	LightDesc_t(void)
+	{
+	}
 
 	// constructors for various useful subtypes
 

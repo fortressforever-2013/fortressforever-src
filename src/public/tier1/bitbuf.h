@@ -15,7 +15,6 @@
 #pragma once
 #endif
 
-#include "platform.h"
 
 #include "mathlib/mathlib.h"
 #include "mathlib/vector.h"
@@ -226,7 +225,7 @@ public:
 	void			WriteByte(int val);
 	void			WriteShort(int val);
 	void			WriteWord(int val);
-	void			WriteLong(int32 val);
+	void			WriteLong(long val);
 	void			WriteLongLong(int64 val);
 	void			WriteFloat(float val);
 	bool			WriteBytes( const void *pBuf, int nBytes );
@@ -256,7 +255,7 @@ public:
 
 public:
 	// The current buffer.
-	uint32* RESTRICT m_pData;
+	unsigned long* RESTRICT m_pData;
 	int				m_nDataBytes;
 	int				m_nDataBits;
 	
@@ -337,13 +336,13 @@ BITBUF_INLINE void bf_write::SetOverflowFlag()
 
 BITBUF_INLINE void bf_write::WriteOneBitNoCheck(int nValue)
 {
-#if VALVE_LITTLE_ENDIAN
+#if __i386__
 	if(nValue)
 		m_pData[m_iCurBit >> 5] |= 1u << (m_iCurBit & 31);
 	else
 		m_pData[m_iCurBit >> 5] &= ~(1u << (m_iCurBit & 31));
 #else
-	extern uint32 g_LittleBits[32];
+	extern unsigned long g_LittleBits[32];
 	if(nValue)
 		m_pData[m_iCurBit >> 5] |= g_LittleBits[m_iCurBit & 31];
 	else
@@ -374,13 +373,13 @@ inline void	bf_write::WriteOneBitAt( int iBit, int nValue )
 		return;
 	}
 
-#if VALVE_LITTLE_ENDIAN
+#if __i386__
 	if(nValue)
 		m_pData[iBit >> 5] |= 1u << (iBit & 31);
 	else
 		m_pData[iBit >> 5] &= ~(1u << (iBit & 31));
 #else
-	extern uint32 g_LittleBits[32];
+	extern unsigned long g_LittleBits[32];
 	if(nValue)
 		m_pData[iBit >> 5] |= g_LittleBits[iBit & 31];
 	else
@@ -394,7 +393,7 @@ BITBUF_INLINE void bf_write::WriteUBitLong( unsigned int curData, int numbits, b
 	// Make sure it doesn't overflow.
 	if ( bCheckRange && numbits < 32 )
 	{
-		if ( curData >= (uint32)(1 << numbits) )
+		if ( curData >= (unsigned long)(1 << numbits) )
 		{
 			CallErrorHandler( BITBUFERROR_VALUE_OUT_OF_RANGE, GetDebugName() );
 		}
@@ -415,8 +414,8 @@ BITBUF_INLINE void bf_write::WriteUBitLong( unsigned int curData, int numbits, b
 	m_iCurBit += numbits;
 
 	// Mask in a dword.
-	Assert( (iDWord*4 + sizeof(int32)) <= (unsigned int)m_nDataBytes );
-	uint32 * RESTRICT pOut = &m_pData[iDWord];
+	Assert( (iDWord*4 + sizeof(long)) <= (unsigned int)m_nDataBytes );
+	unsigned long * RESTRICT pOut = &m_pData[iDWord];
 
 	// Rotate data into dword alignment
 	curData = (curData << iCurBitMasked) | (curData >> (32 - iCurBitMasked));
@@ -428,8 +427,8 @@ BITBUF_INLINE void bf_write::WriteUBitLong( unsigned int curData, int numbits, b
 	
 	// Only look beyond current word if necessary (avoid access violation)
 	int i = mask2 & 1;
-	uint32 dword1 = LoadLittleDWord( pOut, 0 );
-	uint32 dword2 = LoadLittleDWord( pOut, i );
+	unsigned long dword1 = LoadLittleDWord( pOut, 0 );
+	unsigned long dword2 = LoadLittleDWord( pOut, i );
 	
 	// Drop bits into place
 	dword1 ^= ( mask1 & ( curData ^ dword1 ) );
@@ -466,12 +465,12 @@ BITBUF_INLINE void bf_write::WriteUBitVar( unsigned int data )
 // write raw IEEE float bits in little endian form
 BITBUF_INLINE void bf_write::WriteBitFloat(float val)
 {
-	int32 intVal;
+	long intVal;
 
-	Assert(sizeof(int32) == sizeof(float));
+	Assert(sizeof(long) == sizeof(float));
 	Assert(sizeof(float) == 4);
 
-	intVal = *((int32*)&val);
+	intVal = *((long*)&val);
 	WriteUBitLong( intVal, 32 );
 }
 
@@ -604,7 +603,7 @@ public:
 	BITBUF_INLINE int	ReadByte() { return ReadUBitLong(8); }
 	BITBUF_INLINE int	ReadShort() { return (short)ReadUBitLong(16); }
 	BITBUF_INLINE int	ReadWord() { return ReadUBitLong(16); }
-	BITBUF_INLINE int32 ReadLong() { return ReadUBitLong(32); }
+	BITBUF_INLINE long ReadLong() { return ReadUBitLong(32); }
 	int64			ReadLongLong();
 	float			ReadFloat();
 	bool			ReadBytes(void *pOut, int nBytes);
@@ -729,7 +728,7 @@ inline bool bf_read::CheckForOverflow(int nBits)
 inline int bf_read::ReadOneBitNoCheck()
 {
 #if VALVE_LITTLE_ENDIAN
-	unsigned int value = ((uint32 * RESTRICT)m_pData)[m_iCurBit >> 5] >> (m_iCurBit & 31);
+	unsigned int value = ((unsigned long * RESTRICT)m_pData)[m_iCurBit >> 5] >> (m_iCurBit & 31);
 #else
 	unsigned char value = m_pData[m_iCurBit >> 3] >> (m_iCurBit & 7);
 #endif
@@ -785,15 +784,15 @@ BITBUF_INLINE unsigned int bf_read::ReadUBitLong( int numbits ) RESTRICT
 	unsigned int iWordOffset2 = iLastBit >> 5;
 	m_iCurBit += numbits;
 	
-#if VALVE_LITTLE_ENDIAN
+#if __i386__
 	unsigned int bitmask = (2 << (numbits-1)) - 1;
 #else
-	extern uint32 g_ExtraMasks[33];
+	extern unsigned long g_ExtraMasks[33];
 	unsigned int bitmask = g_ExtraMasks[numbits];
 #endif
 
-	unsigned int dw1 = LoadLittleDWord( (uint32* RESTRICT)m_pData, iWordOffset1 ) >> iStartBit;
-	unsigned int dw2 = LoadLittleDWord( (uint32* RESTRICT)m_pData, iWordOffset2 ) << (32 - iStartBit);
+	unsigned int dw1 = LoadLittleDWord( (unsigned long* RESTRICT)m_pData, iWordOffset1 ) >> iStartBit;
+	unsigned int dw2 = LoadLittleDWord( (unsigned long* RESTRICT)m_pData, iWordOffset2 ) << (32 - iStartBit);
 
 	return (dw1 | dw2) & bitmask;
 }

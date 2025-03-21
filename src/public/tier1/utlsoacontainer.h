@@ -29,17 +29,17 @@
 template<class T> class CStridedPtr
 {
 protected:
-	T *m_pData = nullptr;
-	size_t m_nStride = 0;
+	T *m_pData;
+	size_t m_nStride;
 	
 public:
-	FORCEINLINE CStridedPtr( void *pData, size_t nByteStride )
+	FORCEINLINE CStridedPtr<T>( void *pData, size_t nByteStride )
 	{
 		m_pData = reinterpret_cast<T *>( pData );
 		m_nStride = nByteStride / sizeof( T );
 	}
 
-	FORCEINLINE CStridedPtr( void ) {}
+	FORCEINLINE CStridedPtr<T>( void ) {}
 	T *operator->(void) const
 	{
 		return m_pData;
@@ -75,13 +75,13 @@ protected:
 	size_t m_nStride;
 
 public:
-	FORCEINLINE CStridedConstPtr( void const *pData, size_t nByteStride )
+	FORCEINLINE CStridedConstPtr<T>( void const *pData, size_t nByteStride )
 	{
 		m_pData = reinterpret_cast<T const *>( pData );
 		m_nStride = nByteStride / sizeof( T );
 	}
 
-	FORCEINLINE CStridedConstPtr( void ) {}
+	FORCEINLINE CStridedConstPtr<T>( void ) {}
 
 	const T *operator->(void) const
 	{

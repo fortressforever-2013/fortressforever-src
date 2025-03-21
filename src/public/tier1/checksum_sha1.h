@@ -28,8 +28,6 @@
 		34AA973C D4C4DAA4 F61EEB2B DBAD2731 6534016F
 */
 
-#include "tier0/platform.h"
-
 #if !defined(_MINIMUM_BUILD_)
 #include <stdio.h>  // Needed for file access
 #if defined( _PS3 )
@@ -46,7 +44,7 @@
 typedef union
 {
 	unsigned char c[64];
-	uint32 l[16];
+	unsigned long l[16];
 } SHA1_WORKSPACE_BLOCK;
 
 // SHA1 hash
@@ -79,8 +77,8 @@ public:
 	~Minimum_CSHA1() ;	// no virtual destructor's in the minimal builds !
 #endif	
 
-	uint32 m_state[5];
-	uint32 m_count[2];
+	unsigned long m_state[5];
+	unsigned long m_count[2];
 	unsigned char m_buffer[64];
 	unsigned char m_digest[k_cubHash];
 
@@ -101,7 +99,7 @@ public:
 
 private:
 	// Private SHA-1 transformation
-	void Transform(uint32 state[5], unsigned char buffer[64]);
+	void Transform(unsigned long state[5], unsigned char buffer[64]);
 
 	// Member variables
 	unsigned char m_workspace[64];

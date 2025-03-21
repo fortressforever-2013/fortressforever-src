@@ -41,9 +41,9 @@ class Image;
 class Point;
 
 // handles
-typedef uint32 HCursor;
-typedef uint32 HTexture;
-typedef uint32 HFont;
+typedef unsigned long HCursor;
+typedef unsigned long HTexture;
+typedef unsigned long HFont;
 
 
 //SRC only defines
@@ -51,7 +51,7 @@ typedef uint32 HFont;
 
 struct Vertex_t
 {
-	Vertex_t() = default;
+	Vertex_t() {}
 	Vertex_t( const Vector2D &pos, const Vector2D &coord = Vector2D( 0, 0 ) )
 	{
 		m_Position = pos;

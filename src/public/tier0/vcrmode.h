@@ -67,11 +67,6 @@ enum VCRMode_t
 	VCR_Playback
 };
 
-#ifdef PLATFORM_64BITS
-typedef uint64 VCRThreadId_t;
-#else
-typedef uint32 VCRThreadId_t;
-#endif
 
 //-----------------------------------------------------------------------------
 // Functions.
@@ -195,7 +190,7 @@ typedef struct VCR_s
 		void *lpStartAddress,
 		void *lpParameter,
 		unsigned long dwCreationFlags,
-		VCRThreadId_t *lpThreadID );
+		unsigned long *lpThreadID );
 	
 	unsigned long (*Hook_WaitForSingleObject)(
 		void *handle,

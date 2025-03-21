@@ -45,12 +45,6 @@ public:
 		return m_Vector[n];
 	}
 
-	unsigned int Count() const
-	{
-		Assert( m_Vector.Count() == m_SymbolTable.GetNumStrings() );
-		return m_Vector.Count();
-	}
-
 	bool Defined( const char *pString ) const
 	{
 		return m_SymbolTable.Find( pString ) != UTL_INVAL_SYMBOL;

@@ -35,9 +35,9 @@ const DmElementHandle_t DMELEMENT_HANDLE_INVALID;
 
 #else // PERFORM_HANDLE_TYPECHECKING
 
-enum DmElementHandle_t : intp
+enum DmElementHandle_t
 {
-	DMELEMENT_HANDLE_INVALID = (DmElementHandle_t)(intp)(~((uintp)(0)))
+	DMELEMENT_HANDLE_INVALID = 0xffffffff
 };
 
 #endif // PERFORM_HANDLE_TYPECHECKING

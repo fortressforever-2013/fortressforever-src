@@ -19,7 +19,7 @@ class Color;
 namespace vgui
 {
 
-typedef uint32 HTexture;
+typedef unsigned long HTexture;
 
 enum iimage_rotation_t
 {

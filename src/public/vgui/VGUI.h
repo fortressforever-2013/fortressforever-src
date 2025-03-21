@@ -12,8 +12,6 @@
 #pragma once
 #endif
 
-#include "tier0/platform.h"
-
 #define null 0L
 
 #ifndef NULL
@@ -35,6 +33,7 @@
 typedef unsigned char  uchar;
 typedef unsigned short ushort;
 typedef unsigned int   uint;
+typedef unsigned long  ulong;
 
 #ifndef _WCHAR_T_DEFINED
 // DAL - wchar_t is a built in define in gcc 3.2 with a size of 4 bytes
@@ -51,17 +50,17 @@ namespace vgui
 {
 // handle to an internal vgui panel
 // this is the only handle to a panel that is valid across dll boundaries
-typedef uintp VPANEL;
+typedef unsigned int VPANEL;
 
 // handles to vgui objects
 // NULL values signify an invalid value
-typedef uint32 HScheme;
+typedef unsigned long HScheme;
 // Both -1 and 0 are used for invalid textures. Be careful.
-typedef uint32 HTexture;
-typedef uint32 HCursor;
-typedef uint32 HPanel;
+typedef unsigned long HTexture;
+typedef unsigned long HCursor;
+typedef unsigned long HPanel;
 const HPanel INVALID_PANEL = 0xffffffff;
-typedef uint32 HFont;
+typedef unsigned long HFont;
 const HFont INVALID_FONT = 0; // the value of an invalid font handle
 }
 

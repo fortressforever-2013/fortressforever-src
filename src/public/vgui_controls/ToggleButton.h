@@ -35,8 +35,6 @@ public:
 			int "state"
 	*/
 
-	virtual bool IsToggleButton() { return true; }
-
 protected:
 	// overrides
 	virtual void OnMouseDoublePressed(MouseCode code);

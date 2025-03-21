@@ -14,7 +14,7 @@
 #include "tier1/interface.h"
 #include "bitmap/imageformat.h"
 
-typedef uintp ColorCorrectionHandle_t;
+typedef unsigned int ColorCorrectionHandle_t;
 struct ShaderColorCorrectionInfo_t;
 
 #define COLORCORRECTION_INTERFACE_VERSION "COLORCORRECTION_VERSION_1"

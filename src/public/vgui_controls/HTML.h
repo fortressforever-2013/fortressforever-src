@@ -146,12 +146,10 @@ public:
 	}
 #endif // DBGFLAG_VALIDATE
 
-	ISteamHTMLSurface *SteamHTMLSurface() { return m_SteamAPIContext.SteamHTMLSurface(); }
-
 	void OnHTMLMouseMoved( int x, int y )
 	{
-		if ( m_SteamAPIContext.SteamHTMLSurface() )
-			m_SteamAPIContext.SteamHTMLSurface()->MouseMove( m_unBrowserHandle, x, y );
+		if ( SteamHTMLSurface() )
+			SteamHTMLSurface()->MouseMove( m_unBrowserHandle, x, y );
 	}
 
 protected:
@@ -160,27 +158,27 @@ protected:
 	vgui::Menu *m_pContextMenu;
 
 private:
-	STEAM_CALLBACK( HTML, BrowserNeedsPaint, HTML_NeedsPaint_t, m_NeedsPaint );
-	STEAM_CALLBACK( HTML, BrowserStartRequest, HTML_StartRequest_t, m_StartRequest );
-	STEAM_CALLBACK( HTML, BrowserURLChanged, HTML_URLChanged_t, m_URLChanged );
-	STEAM_CALLBACK( HTML, BrowserFinishedRequest, HTML_FinishedRequest_t, m_FinishedRequest );
-	STEAM_CALLBACK( HTML, BrowserOpenNewTab, HTML_OpenLinkInNewTab_t, m_LinkInNewTab );
-	STEAM_CALLBACK( HTML, BrowserSetHTMLTitle, HTML_ChangedTitle_t, m_ChangeTitle );
-	STEAM_CALLBACK( HTML, BrowserPopupHTMLWindow, HTML_NewWindow_t, m_NewWindow );
-	STEAM_CALLBACK( HTML, BrowserFileLoadDialog, HTML_FileOpenDialog_t, m_FileLoadDialog );
-	STEAM_CALLBACK( HTML, BrowserSearchResults, HTML_SearchResults_t, m_SearchResults );
-	STEAM_CALLBACK( HTML, BrowserClose, HTML_CloseBrowser_t, m_CloseBrowser );
-	STEAM_CALLBACK( HTML, BrowserHorizontalScrollBarSizeResponse, HTML_HorizontalScroll_t, m_HorizScroll );
-	STEAM_CALLBACK( HTML, BrowserVerticalScrollBarSizeResponse, HTML_VerticalScroll_t, m_VertScroll );
-	STEAM_CALLBACK( HTML, BrowserLinkAtPositionResponse, HTML_LinkAtPosition_t, m_LinkAtPosResp );
-	STEAM_CALLBACK( HTML, BrowserJSAlert, HTML_JSAlert_t, m_JSAlert );
-	STEAM_CALLBACK( HTML, BrowserJSConfirm, HTML_JSConfirm_t, m_JSConfirm );
-	STEAM_CALLBACK( HTML, BrowserCanGoBackandForward, HTML_CanGoBackAndForward_t, m_CanGoBackForward );
-	STEAM_CALLBACK( HTML, BrowserSetCursor, HTML_SetCursor_t, m_SetCursor );
-	STEAM_CALLBACK( HTML, BrowserStatusText, HTML_StatusText_t, m_StatusText );
-	STEAM_CALLBACK( HTML, BrowserShowToolTip, HTML_ShowToolTip_t, m_ShowTooltip );
-	STEAM_CALLBACK( HTML, BrowserUpdateToolTip, HTML_UpdateToolTip_t, m_UpdateTooltip );
-	STEAM_CALLBACK( HTML, BrowserHideToolTip, HTML_HideToolTip_t, m_HideTooltip );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserNeedsPaint, HTML_NeedsPaint_t, m_NeedsPaint );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserStartRequest, HTML_StartRequest_t, m_StartRequest );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserURLChanged, HTML_URLChanged_t, m_URLChanged );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserFinishedRequest, HTML_FinishedRequest_t, m_FinishedRequest );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserOpenNewTab, HTML_OpenLinkInNewTab_t, m_LinkInNewTab );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserSetHTMLTitle, HTML_ChangedTitle_t, m_ChangeTitle );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserPopupHTMLWindow, HTML_NewWindow_t, m_NewWindow );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserFileLoadDialog, HTML_FileOpenDialog_t, m_FileLoadDialog );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserSearchResults, HTML_SearchResults_t, m_SearchResults );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserClose, HTML_CloseBrowser_t, m_CloseBrowser );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserHorizontalScrollBarSizeResponse, HTML_HorizontalScroll_t, m_HorizScroll );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserVerticalScrollBarSizeResponse, HTML_VerticalScroll_t, m_VertScroll );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserLinkAtPositionResponse, HTML_LinkAtPosition_t, m_LinkAtPosResp );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserJSAlert, HTML_JSAlert_t, m_JSAlert );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserJSConfirm, HTML_JSConfirm_t, m_JSConfirm );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserCanGoBackandForward, HTML_CanGoBackAndForward_t, m_CanGoBackForward );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserSetCursor, HTML_SetCursor_t, m_SetCursor );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserStatusText, HTML_StatusText_t, m_StatusText );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserShowToolTip, HTML_ShowToolTip_t, m_ShowTooltip );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserUpdateToolTip, HTML_UpdateToolTip_t, m_UpdateTooltip );
+	STEAM_CALLBACK_MANUAL( HTML, BrowserHideToolTip, HTML_HideToolTip_t, m_HideTooltip );
 
 	void OnBrowserReady( HTML_BrowserReady_t *pBrowserReady, bool bIOFailure );
 
@@ -313,7 +311,6 @@ private:
 	};
 	CUtlVector<CustomCursorCache_t> m_vecHCursor;
 
-	CSteamAPIContext m_SteamAPIContext;
 	HHTMLBrowser m_unBrowserHandle;
 	CCallResult< HTML, HTML_BrowserReady_t > m_SteamCallResultBrowserReady;
 };

@@ -45,7 +45,6 @@ public:
     //=============================================================================
 
 	virtual const char *GetHolidayString() = 0;
-	virtual const char *GetOperationString() = 0;
 };
 
 #define GAMECLIENTEXPORTS_INTERFACE_VERSION "GameClientExports001"

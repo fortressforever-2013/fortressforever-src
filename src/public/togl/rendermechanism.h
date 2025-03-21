@@ -25,7 +25,7 @@
 #ifndef RENDERMECHANISM_H
 #define RENDERMECHANISM_H
 
-#if defined(DX_TO_GL_ABSTRACTION) && !defined(USE_DXVK)
+#if defined(DX_TO_GL_ABSTRACTION)
 
 #undef PROTECTED_THINGS_ENABLE
 
@@ -34,8 +34,6 @@
 
 #include "tier0/basetypes.h"
 #include "tier0/platform.h"
-
-#include "togl/dxformats.h"
 
 #include "togl/linuxwin/glmdebug.h"
 #include "togl/linuxwin/glbase.h"
@@ -53,8 +51,6 @@
 #include "togl/linuxwin/dxabstract_types.h"
 #include "togl/linuxwin/dxabstract.h"
 
-#include "togl/d3dx_impl.h"
-
 #else
 	//USE_ACTUAL_DX
 	#ifdef WIN32
@@ -62,19 +58,10 @@
 			#include "d3d9.h"
 			#include "d3dx9.h"
 		#else
-			#include <WinSock2.h>
 			#include <windows.h>
-			#if __has_include( "../../dx9sdk/include/d3d9.h" )
-				#include "../../dx9sdk/include/d3d9.h"
-			#else
-				#include <d3d9.h>		
-			#endif
-			#include "togl/d3dx_impl.h"
+			#include "../../dx9sdk/include/d3d9.h"
+			#include "../../dx9sdk/include/d3dx9.h"
 		#endif
-		typedef HWND VD3DHWND;
-	#else
-		#include <d3d9.h>
-		#include "togl/d3dx_impl.h"
 		typedef HWND VD3DHWND;
 	#endif
 

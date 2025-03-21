@@ -494,7 +494,7 @@ inline CAverageTimeMarker::~CAverageTimeMarker()
 class CLimitTimer
 {
 public:
-	CLimitTimer() = default;
+	CLimitTimer() {}
 	CLimitTimer( uint64 cMicroSecDuration ) { SetLimit( cMicroSecDuration ); }
 	void SetLimit( uint64 m_cMicroSecDuration );
 	bool BLimitReached() const;

@@ -239,7 +239,7 @@ private:
 		m_nTempIndex = nIndex;
 	}
 
-	friend void EnableThreadedMaterialVarAccess( bool bEnable );
+	friend void EnableThreadedMaterialVarAccess( bool bEnable, IMaterialVar **ppParams, int nVarCount );
 };
 
 #endif // IMATERIALVAR_H

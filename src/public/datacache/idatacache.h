@@ -35,7 +35,7 @@ class IDataCache;
 //---------------------------------------------------------
 // Unique (per section) identifier for a cache item defined by client
 //---------------------------------------------------------
-typedef uintp DataCacheClientID_t;
+typedef uint32 DataCacheClientID_t;
 
 
 //---------------------------------------------------------
@@ -178,9 +178,6 @@ enum DataCacheAddFlags_t
 abstract_class IDataCacheSection
 {
 public:
-// misyl: Cannot add this without breaking ABI. Sad!
-//	virtual ~IDataCacheSection() {}
-
 	//--------------------------------------------------------
 
 	virtual IDataCache *GetSharedCache() = 0;

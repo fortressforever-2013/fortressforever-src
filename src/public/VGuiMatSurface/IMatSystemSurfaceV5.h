@@ -12,7 +12,7 @@
 
 
 #include <vgui/VGUI.h>
-#include "vgui/isurfacev30.h"
+#include "vgui/ISurfaceV30.h"
 
 
 namespace MatSystemSurfaceV5

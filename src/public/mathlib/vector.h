@@ -13,24 +13,25 @@
 #pragma once
 #endif
 
-#include <math.h>
-#include <float.h>
+// #include <math.h>
+// #include <float.h>
 
 // For vec_t, put this somewhere else?
 #include "tier0/basetypes.h"
 
 // For rand(). We really need a library!
-#include <stdlib.h>
+// #include <stdlib.h> // no we do not!
 
 #ifndef _X360
 // For MMX intrinsics
 #include <xmmintrin.h>
 #endif
 
-#include "tier0/dbg.h"
+// #include "tier0/dbg.h"
 #include "tier0/threadtools.h"
 #include "mathlib/vector2d.h"
-#include "mathlib/math_pfns.h"
+// #include "mathlib/math_pfns.h"
+#include "minmax.h"
 
 // Uncomment this to add extra Asserts to check for NANs, uninitialized vecs, etc.
 //#define VECTOR_PARANOIA	1
@@ -69,11 +70,7 @@ public:
 	vec_t x, y, z;
 
 	// Construction/destruction:
-#ifdef VECTOR_PARANOIA
-	Vector();
-#else
-	Vector() = default;
-#endif
+	Vector(void); 
 	Vector(vec_t X, vec_t Y, vec_t Z);
 	explicit Vector(vec_t XYZ); ///< broadcast initialize
 
@@ -114,6 +111,8 @@ public:
 	FORCEINLINE Vector&	operator/=(float s);	
 	FORCEINLINE Vector&	operator+=(float fl) ; ///< broadcast add
 	FORCEINLINE Vector&	operator-=(float fl) ; ///< broadcast sub			
+
+	void	ClampToAABB(const Vector& mins, const Vector& maxs);
 
 // negate the vector components
 	void	Negate(); 
@@ -231,7 +230,7 @@ public:
 	void Init(short ix = 0, short iy = 0, short iz = 0, short iw = 0 );
 
 
-#ifdef USE_M64S
+#if USE_M64S
 	__m64 &AsM64() { return *(__m64*)&x; }
 	const __m64 &AsM64() const { return *(const __m64*)&x; } 
 #endif
@@ -288,7 +287,7 @@ public:
 	// Initialization
 	void Init(int ix = 0, int iy = 0, int iz = 0, int iw = 0 );
 
-#ifdef USE_M64S
+#if USE_M64S
 	__m64 &AsM64() { return *(__m64*)&x; }
 	const __m64 &AsM64() const { return *(const __m64*)&x; } 
 #endif
@@ -404,7 +403,7 @@ public:
 	}
 	
 #endif
-	//float w;	// this space is used anyway
+	float w;	// this space is used anyway
 } ALIGN16_POST;
 
 //-----------------------------------------------------------------------------
@@ -504,13 +503,15 @@ float RandomVectorInUnitCircle( Vector2D *pVector );
 //-----------------------------------------------------------------------------
 // constructors
 //-----------------------------------------------------------------------------
-#ifdef VECTOR_PARANOIA
 inline Vector::Vector(void)									
-{
+{ 
+#ifdef _DEBUG
+#ifdef VECTOR_PARANOIA
 	// Initialize to NAN to catch errors
 	x = y = z = VEC_T_NAN;
-}
 #endif
+#endif
+}
 
 inline Vector::Vector(vec_t X, vec_t Y, vec_t Z)						
 { 
@@ -555,9 +556,9 @@ inline void Vector::Init( vec_t ix, vec_t iy, vec_t iz )
 
 inline void Vector::Random( vec_t minVal, vec_t maxVal )
 {
-	x = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
-	y = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
-	z = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
+	x = RandomFloat(minVal, maxVal);
+	y = RandomFloat(minVal, maxVal);
+	z = RandomFloat(minVal, maxVal);
 	CHECK_VALID(*this);
 }
 
@@ -697,6 +698,13 @@ inline void Vector::Negate()
 	CHECK_VALID(*this);
 	x = -x; y = -y; z = -z; 
 } 
+
+inline void Vector::ClampToAABB(const Vector& mins, const Vector& maxs)
+{
+	x = Clamp(x, mins.x, maxs.x);
+	y = Clamp(y, mins.y, maxs.y);
+	z = Clamp(z, mins.z, maxs.z);
+}
 
 FORCEINLINE  Vector& Vector::operator+=(const Vector& v)	
 { 
@@ -1455,34 +1463,16 @@ inline Vector CrossProduct(const Vector& a, const Vector& b)
 
 inline void VectorMin( const Vector &a, const Vector &b, Vector &result )
 {
-	result.x = MIN(a.x, b.x);
-	result.y = MIN(a.y, b.y);
-	result.z = MIN(a.z, b.z);
+	result.x = fpmin(a.x, b.x);
+	result.y = fpmin(a.y, b.y);
+	result.z = fpmin(a.z, b.z);
 }
 
 inline void VectorMax( const Vector &a, const Vector &b, Vector &result )
 {
-	result.x = MAX(a.x, b.x);
-	result.y = MAX(a.y, b.y);
-	result.z = MAX(a.z, b.z);
-}
-
-inline Vector VectorMin( const Vector &a, const Vector &b )
-{
-	Vector result;
-	result.x = fpmin(a.x, b.x);
-	result.y = fpmin(a.y, b.y);
-	result.z = fpmin(a.z, b.z);
-	return result;
-}
-
-inline Vector VectorMax( const Vector &a, const Vector &b )
-{
-	Vector result;
 	result.x = fpmax(a.x, b.x);
 	result.y = fpmax(a.y, b.y);
 	result.z = fpmax(a.z, b.z);
-	return result;
 }
 
 inline float ComputeVolume( const Vector &vecMins, const Vector &vecMaxs )
@@ -1495,9 +1485,9 @@ inline float ComputeVolume( const Vector &vecMins, const Vector &vecMaxs )
 // Get a random vector.
 inline Vector RandomVector( float minVal, float maxVal )
 {
-	Vector vRandom;
-	vRandom.Random( minVal, maxVal );
-	return vRandom;
+	Vector random;
+	random.Random( minVal, maxVal );
+	return random;
 }
 
 #endif //slow
@@ -1562,19 +1552,19 @@ class RadianEuler;
 class Quaternion				// same data-layout as engine's vec4_t,
 {								//		which is a vec_t[4]
 public:
+	inline Quaternion(void)	{ 
+	
+	// Initialize to NAN to catch errors
+#ifdef _DEBUG
 #ifdef VECTOR_PARANOIA
-	Quaternion()
-	{ 
-		// Initialize to NAN to catch errors
 		x = y = z = w = VEC_T_NAN;
-	}
-#else
-	Quaternion() = default;
 #endif
-	Quaternion(vec_t ix, vec_t iy, vec_t iz, vec_t iw) : x(ix), y(iy), z(iz), w(iw) { }
-	Quaternion(RadianEuler const &angle);	// evil auto type promotion!!!
+#endif
+	}
+	inline Quaternion(vec_t ix, vec_t iy, vec_t iz, vec_t iw) : x(ix), y(iy), z(iz), w(iw) { }
+	inline Quaternion(RadianEuler const &angle);	// evil auto type promotion!!!
 
-	void Init(vec_t ix=0.0f, vec_t iy=0.0f, vec_t iz=0.0f, vec_t iw=0.0f)	{ x = ix; y = iy; z = iz; w = iw; }
+	inline void Init(vec_t ix=0.0f, vec_t iy=0.0f, vec_t iz=0.0f, vec_t iw=0.0f)	{ x = ix; y = iy; z = iz; w = iw; }
 
 	bool IsValid() const;
 	void Invalidate();
@@ -1681,20 +1671,13 @@ class QAngle;
 class RadianEuler
 {
 public:
-#ifdef VECTOR_PARANOIA
-	RadianEuler()
-	{
-		x = y = z = VEC_T_NAN;
-	}
-#else
-	RadianEuler() = default;
-#endif
-	RadianEuler(vec_t X, vec_t Y, vec_t Z)		{ x = X; y = Y; z = Z; }
-	RadianEuler(Quaternion const &q);	// evil auto type promotion!!!
-	RadianEuler(QAngle const &angles);	// evil auto type promotion!!!
+	inline RadianEuler(void)							{ }
+	inline RadianEuler(vec_t X, vec_t Y, vec_t Z)		{ x = X; y = Y; z = Z; }
+	inline RadianEuler(Quaternion const &q);	// evil auto type promotion!!!
+	inline RadianEuler(QAngle const &angles);	// evil auto type promotion!!!
 
 	// Initialization
-	void Init(vec_t ix=0.0f, vec_t iy=0.0f, vec_t iz=0.0f)	{ x = ix; y = iy; z = iz; }
+	inline void Init(vec_t ix=0.0f, vec_t iy=0.0f, vec_t iz=0.0f)	{ x = ix; y = iy; z = iz; }
 
 	//	conversion to qangle
 	QAngle ToQAngle( void ) const;
@@ -1798,11 +1781,7 @@ public:
 	vec_t x, y, z;
 
 	// Construction/destruction
-#ifdef VECTOR_PARANOIA
-	QAngle();
-#else
-	QAngle() = default;
-#endif
+	QAngle(void);
 	QAngle(vec_t X, vec_t Y, vec_t Z);
 //	QAngle(RadianEuler const &angles);	// evil auto type promotion!!!
 
@@ -1902,13 +1881,15 @@ inline void VectorMA( const QAngle &start, float scale, const QAngle &direction,
 //-----------------------------------------------------------------------------
 // constructors
 //-----------------------------------------------------------------------------
-#ifdef VECTOR_PARANOIA
 inline QAngle::QAngle(void)									
 { 
+#ifdef _DEBUG
+#ifdef VECTOR_PARANOIA
 	// Initialize to NAN to catch errors
 	x = y = z = VEC_T_NAN;
-}
 #endif
+#endif
+}
 
 inline QAngle::QAngle(vec_t X, vec_t Y, vec_t Z)						
 { 
@@ -1928,9 +1909,9 @@ inline void QAngle::Init( vec_t ix, vec_t iy, vec_t iz )
 
 inline void QAngle::Random( vec_t minVal, vec_t maxVal )
 {
-	x = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
-	y = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
-	z = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
+	x = RandomFloat(minVal, maxVal);
+	y = RandomFloat(minVal, maxVal);
+	z = RandomFloat(minVal, maxVal);
 	CHECK_VALID(*this);
 }
 
@@ -1938,10 +1919,9 @@ inline void QAngle::Random( vec_t minVal, vec_t maxVal )
 
 inline QAngle RandomAngle( float minVal, float maxVal )
 {
-	Vector vRandom;
-	vRandom.Random( minVal, maxVal );
-	QAngle ret( vRandom.x, vRandom.y, vRandom.z );
-	return ret;
+	QAngle random;
+	random.Random( minVal, maxVal );
+	return random;
 }
 
 #endif
@@ -2206,7 +2186,7 @@ inline void AngularImpulseToQAngle( const AngularImpulse &impulse, QAngle &angle
 
 FORCEINLINE vec_t InvRSquared( float const *v )
 {
-#if defined( PLATFORM_INTEL )
+#if defined(__i386__) || defined(_M_IX86)
 	float sqrlen = v[0]*v[0]+v[1]*v[1]+v[2]*v[2] + 1.0e-10f, result;
 	_mm_store_ss(&result, _mm_rcp_ss( _mm_max_ss( _mm_set_ss(1.0f), _mm_load_ss(&sqrlen) ) ));
 	return result;
@@ -2220,8 +2200,8 @@ FORCEINLINE vec_t InvRSquared( const Vector &v )
 	return InvRSquared(&v.x);
 }
 
-#if defined( PLATFORM_INTEL )
-FORCEINLINE void _SSE_RSqrtInline( float a, float* out )
+#if defined(__i386__) || defined(_M_IX86)
+inline void _SSE_RSqrtInline( float a, float* out )
 {
 	__m128  xx = _mm_load_ss( &a );
 	__m128  xr = _mm_rsqrt_ss( xx );
@@ -2238,7 +2218,13 @@ FORCEINLINE void _SSE_RSqrtInline( float a, float* out )
 // FIXME: Change this back to a #define once we get rid of the vec_t version
 FORCEINLINE float VectorNormalize( Vector& vec )
 {
-#if defined( PLATFORM_INTEL )
+#ifndef DEBUG // stop crashing my edit-and-continue!
+	#if defined(__i386__) || defined(_M_IX86)
+		#define DO_SSE_OPTIMIZATION
+	#endif
+#endif
+
+#if defined( DO_SSE_OPTIMIZATION )
 	float sqrlen = vec.LengthSqr() + 1.0e-10f, invlen;
 	_SSE_RSqrtInline(sqrlen, &invlen);
 	vec.x *= invlen;

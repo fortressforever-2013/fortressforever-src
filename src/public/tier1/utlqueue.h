@@ -111,7 +111,7 @@ template <class T, class M>
 inline T CUtlQueue<T, M>::RemoveAtHead()
 {
 	T temp;
-	Verify( RemoveAtHead( temp ) );
+	RemoveAtHead( temp );
 	return temp;
 }
 

@@ -16,6 +16,5 @@
 
 #define MAX_IO_NAME_LEN				256
 
-#define VMF_IOPARAM_STRING_DELIMITER   0x1b // Use ESC as a delimiter so we can pass commas etc. in I/O parameters
 
 #endif // ENTITYDEFS_H

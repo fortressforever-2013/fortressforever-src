@@ -13,19 +13,7 @@
 #pragma once
 #endif
 
-#include <math.h>
-#include <stdlib.h>		// For rand(). We really need a library!
-#include <float.h>
-#if !defined( _X360 )
-#include <xmmintrin.h>	// For SSE
-#endif
-#include "basetypes.h"	// For vec_t, put this somewhere else?
-#include "tier0/dbg.h"
-#include "mathlib/math_pfns.h"
-
-// forward declarations
-class Vector;
-class Vector2D;
+#include "mathlib/vector.h"
 
 //=========================================================
 // 4D Vector4D
@@ -38,11 +26,7 @@ public:
 	vec_t x, y, z, w;
 
 	// Construction/destruction
-#ifdef _DEBUG
-	Vector4D();
-#else
-	Vector4D() = default;
-#endif
+	Vector4D(void);
 	Vector4D(vec_t X, vec_t Y, vec_t Z, vec_t W);
 	Vector4D(const float *pFloat);
 
@@ -80,14 +64,7 @@ public:
 	Vector4D&	operator*=(const Vector4D &v);			
 	Vector4D&	operator*=(float s);
 	Vector4D&	operator/=(const Vector4D &v);		
-	Vector4D&	operator/=(float s);				
-
-	Vector4D	operator-( void ) const;
-	Vector4D	operator*( float fl ) const;
-	Vector4D	operator/( float fl ) const;
-	Vector4D	operator*( const Vector4D& v ) const;
-	Vector4D	operator+( const Vector4D& v ) const;
-	Vector4D	operator-( const Vector4D& v ) const;
+	Vector4D&	operator/=(float s);					
 
 	// negate the Vector4D components
 	void	Negate(); 
@@ -212,13 +189,13 @@ void Vector4DLerp(Vector4D const& src1, Vector4D const& src2, vec_t t, Vector4D&
 // constructors
 //-----------------------------------------------------------------------------
 
-#ifdef _DEBUG
 inline Vector4D::Vector4D(void)									
 { 
+#ifdef _DEBUG
 	// Initialize to NAN to catch errors
 	x = y = z = w = VEC_T_NAN;
-}
 #endif
+}
 
 inline Vector4D::Vector4D(vec_t X, vec_t Y, vec_t Z, vec_t W )
 { 
@@ -256,10 +233,10 @@ inline void Vector4D::Init( vec_t ix, vec_t iy, vec_t iz, vec_t iw )
 
 inline void Vector4D::Random( vec_t minVal, vec_t maxVal )
 {
-	x = minVal + ((vec_t)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
-	y = minVal + ((vec_t)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
-	z = minVal + ((vec_t)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
-	w = minVal + ((vec_t)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
+	x = RandomFloat(minVal, maxVal);
+	y = RandomFloat(minVal, maxVal);
+	z = RandomFloat(minVal, maxVal);
+	w = RandomFloat(minVal, maxVal);
 }
 
 inline void Vector4DClear( Vector4D& a )
@@ -443,52 +420,6 @@ inline Vector4D& Vector4D::operator/=(Vector4D const& v)
 	w /= v.w;
 	Assert( IsValid() );
 	return *this;
-}
-
-inline Vector4D Vector4D::operator-(void) const
-{ 
-	return Vector4D(-x,-y,-z,-w);				
-}
-
-inline Vector4D Vector4D::operator+(const Vector4D& v) const	
-{ 
-	Vector4D res;
-	Vector4DAdd( *this, v, res );
-	return res;	
-}
-
-inline Vector4D Vector4D::operator-(const Vector4D& v) const	
-{ 
-	Vector4D res;
-	Vector4DSubtract( *this, v, res );
-	return res;	
-}
-
-
-inline Vector4D Vector4D::operator*(float fl) const	
-{ 
-	Vector4D res;
-	Vector4DMultiply( *this, fl, res );
-	return res;	
-}
-
-inline Vector4D Vector4D::operator*(const Vector4D& v) const	
-{ 
-	Vector4D res;
-	Vector4DMultiply( *this, v, res );
-	return res;	
-}
-
-inline Vector4D Vector4D::operator/(float fl) const	
-{ 
-	Vector4D res;
-	Vector4DDivide( *this, fl, res );
-	return res;	
-}
-
-inline Vector4D operator*( float fl, const Vector4D& v )	
-{ 
-	return v * fl; 
 }
 
 inline void Vector4DAdd( Vector4D const& a, Vector4D const& b, Vector4D& c )

@@ -36,7 +36,6 @@ protected:
 	virtual void ApplySchemeSettings(IScheme *pScheme);
 	virtual const char *GetDescription( void );
 
-	bool IsValidURL( const char *pszURL );
 	const char *GetURL( void ) { return m_pszURL; }
 
 private:
