@@ -25,7 +25,7 @@ void CFFBotSquad::Join( CFFBot *bot )
 	{
 		m_leader = bot;
 	}
-	else if ( FFGameRules() && FFGameRules()->IsMannVsMachineMode() )
+	else if ( FFGameRules() && false )
 	{
 		bot->SetFlagTarget( NULL );
 	}
@@ -54,7 +54,7 @@ void CFFBotSquad::Leave( CFFBot *bot )
 			}
 		}
 	}
-	else if ( FFGameRules() && FFGameRules()->IsMannVsMachineMode() )
+	else if ( FFGameRules() && false )
 	{
 		AssertMsg( !bot->HasFlagTaget(), "Squad member shouldn't have a flag target. Always follow the leader." );
 		CCaptureFlag *pFlag = bot->GetFlagToFetch();

@@ -180,23 +180,7 @@ bool CFFBotDestroyEnemySentry::IsPossible( CFFBot *me )
 		return false;
 	}
 
-#ifdef TF_RAID_MODE
-	if ( FFGameRules()->IsRaidMode() )
-	{
-		if ( me->GetTeamNumber() == FF_TEAM_PVE_INVADERS )
-		{
-			return false;
-		}
-	}
-#endif
 
-	if ( FFGameRules()->IsMannVsMachineMode() )
-	{
-		if ( me->GetTeamNumber() == FF_TEAM_PVE_INVADERS )
-		{
-			return false;
-		}
-	}
 
 	return true;
 }
@@ -653,21 +637,6 @@ ActionResult< CFFBot >	CFFBotDestroyEnemySentry::Update( CFFBot *me, float inter
 
 		if ( me->IsRangeLessThan( attackSpot, 200.0f ) )
 		{
-#ifdef FF_CREEP_MODE
-			if ( m_creepTimer.IsElapsed() )
-			{
-				m_canMove = !m_canMove;
-
-				if ( m_canMove )
-				{
-					m_creepTimer.Start( 0.1f );
-				}
-				else
-				{
-					m_creepTimer.Start( RandomFloat( 0.2f, 0.5f ) );
-				}
-			}
-#endif
 		}
 		else
 		{

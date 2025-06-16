@@ -20,9 +20,8 @@ ConVar ff_bot_sniper_choose_target_interval( "ff_bot_sniper_choose_target_interv
 // Update internal state
 void CFFBotVision::Update( void )
 {
-	if ( FFGameRules()->IsMannVsMachineMode() )
+	if ( false )
 	{
-		// Throttle vision update rate of robots in MvM for perf at the expense of reaction times
 		if ( !m_scanTimer.IsElapsed() )
 		{
 			return;
@@ -109,7 +108,7 @@ void CFFBotVision::UpdatePotentiallyVisibleNPCVector( void )
 		// collect list of active buildings
 		m_potentiallyVisibleNPCVector.RemoveAll();
 
-		bool bShouldSeeTeleporter = !FFGameRules()->IsMannVsMachineMode() || GetBot()->GetEntity()->GetTeamNumber() != FF_TEAM_PVE_INVADERS;
+		bool bShouldSeeTeleporter = true;
 		for ( int i=0; i<IBaseObjectAutoList::AutoList().Count(); ++i )
 		{
 			CBaseObject* pObj = static_cast< CBaseObject* >( IBaseObjectAutoList::AutoList()[i] );
@@ -151,16 +150,7 @@ bool CFFBotVision::IsIgnored( CBaseEntity *subject ) const
 {
 	CFFBot *me = (CFFBot *)GetBot()->GetEntity();
 
-#ifdef TF_RAID_MODE
-	if ( FFGameRules()->IsRaidMode() )
-	{
-		if ( me->IsPlayerClass( CLASS_SCOUT ) )
-		{
-			// Scouts are wandering defenders, and aggro purely on proximity or damage, not vision
-			return true;
-		}
-	}
-#endif // TF_RAID_MODE
+
 
 	if ( me->IsAttentionFocused() )
 	{
@@ -253,12 +243,6 @@ bool CFFBotVision::IsIgnored( CBaseEntity *subject ) const
 			break;
 		}
 
-#ifdef STAGING_ONLY
-		if ( enemy->m_Shared.InCond( TF_COND_REPROGRAMMED ) )
-		{
-			return true;
-		}
-#endif // STAGING_ONLY
 
 		if ( me->IsKnownSpy( enemy ) )
 		{
@@ -275,7 +259,6 @@ bool CFFBotVision::IsIgnored( CBaseEntity *subject ) const
 			return false;
 		}
 
-		// An upgrade in MvM grants AE stealth where the player can fire
 		// while in stealth, and for a short period after it drops
 		if ( enemy->m_Shared.InCond( TF_COND_STEALTHED_USER_BUFF_FADING ) )
 		{
@@ -292,10 +275,6 @@ bool CFFBotVision::IsIgnored( CBaseEntity *subject ) const
 			return true;
 		}
 
-		if ( enemy->IsPlacingSapper() )
-		{
-			return false;
-		}
 
 		{
 			return false;
@@ -314,9 +293,8 @@ bool CFFBotVision::IsIgnored( CBaseEntity *subject ) const
 			// ignore sapped enemy objects
 			if ( object->HasSapper() )
 			{
-				// unless we're in MvM where buildings can have really large health pools,
 				// so an engineer can die and run back in time to repair their stuff
-				if ( FFGameRules() && FFGameRules()->IsMannVsMachineMode() )
+				if ( FFGameRules() && false )
 				{
 					return false;
 				}
@@ -364,15 +342,7 @@ bool CFFBotVision::IsVisibleEntityNoticed( CBaseEntity *subject ) const
 			return true;
 		}
 
-#ifdef STAGING_ONLY
-		// Bots can be hacked/reprogrammed by spies.  Ignore.
-		if ( player->m_Shared.InCond( TF_COND_REPROGRAMMED ) )
-		{
-			return false;
-		}
-#endif // STAGING_ONLY
 
-		// An upgrade in MvM grants AE stealth where the player can fire
 		// while in stealth, and for a short period after it drops
 		if ( player->m_Shared.InCond( TF_COND_STEALTHED_USER_BUFF_FADING ) )
 		{
@@ -392,7 +362,6 @@ bool CFFBotVision::IsVisibleEntityNoticed( CBaseEntity *subject ) const
 			return false;
 		}
 
-		if ( FFGameRules()->IsMannVsMachineMode() )	// in MvM mode, forget spies as soon as they are fully disguised
 		{
 			CFFBot::SuspectedSpyInfo_t* pSuspectInfo = me->IsSuspectedSpy( player );
 			// But only if we aren't suspecting them currently.  This happens when we bump into them.
@@ -409,16 +378,6 @@ bool CFFBotVision::IsVisibleEntityNoticed( CBaseEntity *subject ) const
 		{
 			// always notice non-invisible revealed spies
 			return true;
-		}
-
-		if ( !FFGameRules()->IsMannVsMachineMode() )	// ignore in MvM mode
-		{
-			if ( player->IsPlacingSapper() )
-			{
-				// spotted a spy!
-				me->RealizeSpy( player );
-				return true;
-			}
 		}
 
 		{

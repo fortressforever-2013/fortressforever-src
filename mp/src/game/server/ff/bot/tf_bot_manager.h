@@ -99,9 +99,6 @@ public:
 	CStuckBot *FindOrCreateStuckBot( int id, const char *playerClass );	// for parsing and debugging stuck bot server logs
 	void DrawStuckBotData( float deltaT = 0.1f );
 
-#ifdef FF_CREEP_MODE
-	void OnCreepKilled( CFFPlayer *killer );
-#endif
 
 	bool RemoveBotFromTeamAndKick( int nTeam );
 
@@ -112,15 +109,6 @@ protected:
 
 	float m_flNextPeriodicThink;
 
-#ifdef FF_CREEP_MODE
-	void UpdateCreepWaves();
-	CountdownTimer m_creepWaveTimer;
-
-	void SpawnCreep( int team, CFFBotSquad *squad );
-	void SpawnCreepWave( int team );
-
-	int m_creepExperience[ FF_TEAM_COUNT ];
-#endif
 
 	void UpdateMedievalBossScenario();
 	bool m_isMedeivalBossScenarioSetup;

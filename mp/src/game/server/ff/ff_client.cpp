@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -170,9 +170,7 @@ void GameStartFrame( void )
 		return;
 
 	gpGlobals->teamplay = !!teamplay.GetInt();
-#ifdef _DEBUG
-	Bot_RunAll();
-#endif
+Bot_RunAll();
 }
 
 //=========================================================

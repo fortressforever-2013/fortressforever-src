@@ -298,12 +298,6 @@ void CFFBotGenerator::SpawnBot( void )
 	{										   
 		m_spawnedBotVector.AddToTail( bot );
 
-#ifdef TF_RAID_MODE
-		if ( FFGameRules()->IsRaidMode() )
-		{
-			bot->SetAttribute( CFFBot::IS_NPC );
-		}
-#endif // TF_RAID_MODE
 
 		bot->SetSpawner( this );
 

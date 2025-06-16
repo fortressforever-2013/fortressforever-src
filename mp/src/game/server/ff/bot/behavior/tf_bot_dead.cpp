@@ -45,13 +45,6 @@ ActionResult< CFFBot >	CFFBotDead::Update( CFFBot *me, float interval )
 		}
 	}
 
-#ifdef TF_RAID_MODE
-	if ( FFGameRules()->IsRaidMode() && me->GetTeamNumber() == FF_TEAM_RED )
-	{
-		// dead defenders go to spectator for recycling
-		me->ChangeTeam( TEAM_SPECTATOR, false, true );
-	}
-#endif // TF_RAID_MODE
 
 	return Continue();
 }

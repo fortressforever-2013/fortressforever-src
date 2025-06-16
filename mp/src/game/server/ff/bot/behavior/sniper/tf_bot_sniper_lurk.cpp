@@ -6,9 +6,6 @@
 #include "cbase.h"
 #include "ff_player.h"
 
-#ifdef TF_RAID_MODE
-#include "raid/ff_raid_logic.h"
-#endif // TF_RAID_MODE
 
 #include "bot/ff_bot.h"
 #include "bot/behavior/sniper/ff_bot_sniper_lurk.h"
@@ -30,7 +27,6 @@ ConVar ff_bot_sniper_patience_duration( "ff_bot_sniper_patience_duration", "10",
 ConVar ff_bot_sniper_target_linger_duration( "ff_bot_sniper_target_linger_duration", "2", FCVAR_CHEAT, "How long a Sniper bot will keep toward at a target it just lost sight of" );
 ConVar ff_bot_sniper_allow_opportunistic( "ff_bot_sniper_allow_opportunistic", "1", FCVAR_NONE, "If set, Snipers will stop on their way to their preferred lurking spot to snipe at opportunistic targets" );
 
-ConVar ff_mvm_bot_sniper_target_by_dps( "ff_mvm_bot_sniper_target_by_dps", "1", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY, "If set, Snipers in MvM mode target the victim that has the highest DPS" );
 
 #ifdef STAGING_ONLY
 extern ConVar ff_bot_use_items;
@@ -65,14 +61,6 @@ ActionResult< CFFBot >	CFFBotSniperLurk::OnStart( CFFBot *me, Action< CFFBot > *
 
 	m_priorHint = NULL;
 
-	if ( FFGameRules()->IsMannVsMachineMode() && me->GetTeamNumber() == FF_TEAM_PVE_INVADERS )
-	{
-		// mann vs machine snipers shouldn't stop until they reach their home
-		//m_isOpportunistic = false;
-
-		// mann vs machine snipers should ignore the scenario and just snipe
-		me->SetMission( CFFBot::MISSION_SNIPER, MISSION_DOESNT_RESET_BEHAVIOR_SYSTEM );
-	}
 
 
 
@@ -83,13 +71,7 @@ ActionResult< CFFBot >	CFFBotSniperLurk::OnStart( CFFBot *me, Action< CFFBot > *
 //---------------------------------------------------------------------------------------------
 ActionResult< CFFBot >	CFFBotSniperLurk::Update( CFFBot *me, float interval )
 {
-#ifdef TF_RAID_MODE
-	if ( FFGameRules()->IsRaidMode() )
-	{
-	}
-	else
-#endif
-	{
+       {
 		// continuously search for good sniping spots
 		me->AccumulateSniperSpots();
 
@@ -441,15 +423,7 @@ bool CFFBotSniperLurk::FindNewHome( CFFBot *me )
 	m_findHomeTimer.Start( RandomFloat( 1.0f, 2.0f ) );
 
 
-#ifdef TF_RAID_MODE
-	if ( FFGameRules()->IsRaidMode() )
-	{
-		// stay put for now
-		return true;
-	}
-	else
-#endif // TF_RAID_MODE
-	{
+       {
 		// if any sniper spot hints exist, pick one of them
 		if ( FindHint( me ) )
 		{
@@ -509,7 +483,6 @@ QueryResultType CFFBotSniperLurk::ShouldAttack( const INextBot *bot, const CKnow
 
 	CTFNavArea *area = me->GetLastKnownArea();
 
-	if ( FFGameRules()->IsMannVsMachineMode() && area && area->HasAttributeTF( TF_NAV_SPAWN_ROOM_BLUE ) )
 	{
 		// don't fire while in the spawn area
 		return ANSWER_NO;
@@ -523,7 +496,6 @@ QueryResultType CFFBotSniperLurk::ShouldAttack( const INextBot *bot, const CKnow
 //---------------------------------------------------------------------------------------------
 QueryResultType CFFBotSniperLurk::ShouldRetreat( const INextBot *me ) const
 {
-	if ( FFGameRules()->IsMannVsMachineMode() && me->GetEntity()->GetTeamNumber() == FF_TEAM_PVE_INVADERS )
 	{
 		return ANSWER_NO;
 	}
@@ -538,82 +510,5 @@ const CKnownEntity *CFFBotSniperLurk::SelectMoreDangerousThreat( const INextBot 
 																 const CKnownEntity *threat1, 
 																 const CKnownEntity *threat2 ) const
 {
-	if ( FFGameRules()->IsMannVsMachineMode() && ff_mvm_bot_sniper_target_by_dps.GetBool() )
-	{
-		CFFBot *me = ToTFBot( meBot->GetEntity() );
-
-		// If one threat is visible and the other not, always pick the visible one
-		if ( !threat1->IsVisibleRecently() )
-		{
-			if ( threat2->IsVisibleRecently() )
-			{
-				return threat2;
-			}
-		}
-		else if ( !threat2->IsVisibleRecently() )
-		{
-			return threat1;
-		}
-
-		// At this point, threat1 and threat2 are either both visible, or both not
-
-		CFFPlayer *playerThreat1 = ToFFPlayer( threat1->GetEntity() );
-		CFFPlayer *playerThreat2 = ToFFPlayer( threat2->GetEntity() );
-
-		if ( playerThreat1 && playerThreat2 )
-		{
-			float rangeSq1 = me->GetRangeSquaredTo( playerThreat1 );
-			float rangeSq2 = me->GetRangeSquaredTo( playerThreat2 );
-
-			if ( me->HasWeaponRestriction( CFFBot::MELEE_ONLY ) )
-			{
-				// Melee-only bots just use closest threat
-				if ( rangeSq1 < rangeSq2 )
-				{
-					return threat1;
-				}
-				return threat2;
-			}
-
-			// Very near threats are always immediately dangerous
-			const float nearbyRangeSq = 500.0f * 500.0f;
-			if ( rangeSq1 < nearbyRangeSq )
-			{
-				if ( rangeSq2 > nearbyRangeSq )
-				{
-					return threat1;
-				}
-			}
-			else if ( rangeSq2 < nearbyRangeSq )
-			{
-				return threat2;
-			}
-
-			// At this point, both threats are either both very near or both "far"
-
-			// Choose the threat that has the highest DPS
-			const int equalTolerance = 50;
-
-			if ( playerThreat1->GetDamagePerSecond() > playerThreat2->GetDamagePerSecond() + equalTolerance )
-			{
-				return threat1;
-			}
-			else if ( playerThreat2->GetDamagePerSecond() > playerThreat1->GetDamagePerSecond() + equalTolerance )
-			{
-				return threat2;
-			}
-			else
-			{
-				// approximately equal DPS, choose closest
-				if ( rangeSq1 < rangeSq2 )
-				{
-					return threat1;
-				}
-				return threat2;
-			}
-		}
-	}
-
-	// Use normal threat selection
-	return NULL;
+       return NULL;
 }

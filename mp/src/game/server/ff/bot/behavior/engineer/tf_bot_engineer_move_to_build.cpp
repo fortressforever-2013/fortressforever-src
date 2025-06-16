@@ -4,7 +4,7 @@
 // Michael Booth, February 2009
 
 #include "cbase.h"
-#include "nav_mesh/ff_nav_mesh.h"
+#include "../../../../tf/nav_mesh/tf_nav_mesh.h"
 #include "ff_player.h"
 #include "ff_gamerules.h"
 #include "ff_obj_sentrygun.h"
@@ -272,20 +272,6 @@ ActionResult< CFFBot >	CFFBotEngineerMoveToBuild::OnStart( CFFBot *me, Action< C
 {
 	m_path.SetMinLookAheadDistance( me->GetDesiredPathLookAheadRange() );
 
-#ifdef TF_RAID_MODE
-	if ( FFGameRules()->IsRaidMode() )
-	{
-		if ( me->GetHomeArea() && FFGameRules()->GetRaidLogic() )
-		{
-			// try to pick a new area
-			CTFNavArea *sentryArea = FFGameRules()->GetRaidLogic()->SelectRaidSentryArea();
-			if ( sentryArea )
-			{
-				me->SetHomeArea( sentryArea );
-			}
-		}
-	}
-#endif // TF_RAID_MODE
 
 	SelectBuildLocation( me );
 

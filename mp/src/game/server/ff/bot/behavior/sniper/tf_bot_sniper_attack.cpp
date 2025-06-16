@@ -208,18 +208,12 @@ bool CFFBotSniperAttack::IsImmediateThreat( const CBaseCombatCharacter *subject,
 		}
 	}
 
-#ifdef TF_RAID_MODE
-	if ( !FFGameRules()->IsRaidMode() )
-	{
-	}
-	else
-#endif // TF_RAID_MODE
-	{
-		if ( player->IsPlayerClass( CLASS_MEDIC ) )
-		{
-			// always try to kill these guys first
-			return true;
-		}
+       {
+               if ( player->IsPlayerClass( CLASS_MEDIC ) )
+               {
+                       // always try to kill these guys first
+                       return true;
+               }
 	}
 
 	return false;

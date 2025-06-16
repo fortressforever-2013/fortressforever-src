@@ -30,13 +30,7 @@ private:
 	CountdownTimer m_repathTimer;
 	float m_flTotalTravelDistance;
 
-	bool UpgradeOverTime( CFFBot *me );
-	CountdownTimer m_upgradeTimer;
-
-#define DONT_UPGRADE -1
-	int m_upgradeLevel;
-
-	CountdownTimer m_buffPulseTimer;
+       CountdownTimer m_buffPulseTimer;
 };
 
 

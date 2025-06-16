@@ -164,12 +164,6 @@ ActionResult< CFFBot >	CFFBotTacticalMonitor::Update( CFFBot *me, float interval
 {
 	if ( FFGameRules()->RoundHasBeenWon() )
 	{
-#ifdef TF_RAID_MODE
-		if ( FFGameRules()->IsBossBattleMode() )
-		{
-			return Continue();
-		}
-#endif // TF_RAID_MODE
 		if ( FFGameRules()->GetWinningTeam() == me->GetTeamNumber() )
 		{
 			// we won - kill all losers we see
@@ -251,11 +245,6 @@ ActionResult< CFFBot >	CFFBotTacticalMonitor::Update( CFFBot *me, float interval
 	// check if we need to get to cover
 	QueryResultType shouldRetreat = me->GetIntentionInterface()->ShouldRetreat( me );
 
-	if ( FFGameRules()->IsMannVsMachineMode() )
-	{
-		// never retreat in MvM mode
-		shouldRetreat = ANSWER_NO;
-	}
 
 	if ( shouldRetreat == ANSWER_YES )
 	{
@@ -282,10 +271,6 @@ ActionResult< CFFBot >	CFFBotTacticalMonitor::Update( CFFBot *me, float interval
 
 	bool isAvailable = ( me->GetIntentionInterface()->ShouldHurry( me ) != ANSWER_YES );
 
-	if ( FFGameRules()->IsMannVsMachineMode() && me->HasTheFlag() )
-	{
-		isAvailable = false;
-	}
 
 	// collect ammo and health kits, unless we're in a big hurry
 	if ( isAvailable && m_maintainTimer.IsElapsed() )
@@ -316,10 +301,6 @@ ActionResult< CFFBot >	CFFBotTacticalMonitor::Update( CFFBot *me, float interval
 
 		bool shouldDestroySentries = true;
 
-		if ( FFGameRules()->IsMannVsMachineMode() )
-		{
-			shouldDestroySentries = false;
-		}
 
 		// destroy enemy sentry guns we've encountered
 		if ( shouldDestroySentries && me->GetEnemySentry() && CFFBotDestroyEnemySentry::IsPossible( me ) )
@@ -459,91 +440,6 @@ EventDesiredResult< CFFBot > CFFBotTacticalMonitor::OnCommandString( CFFBot *me,
 	}
 #ifdef STAGING_ONLY
 	// !!! BountyMode prototype evaluation hacks below - this code will most likely be deleted soon
-	else if ( FStrEq( command, "become raider" ) )
-	{
-		me->SetIsMiniBoss( true );
-		me->SetScaleOverride( 1.75f );
-		me->ModifyMaxHealth( 5000 );
-		me->SetWeaponRestriction( CFFBot::PRIMARY_ONLY );
-		me->GetPlayerClass()->SetCustomModel( g_szBotBossModels[ me->GetPlayerClass()->GetClassIndex() ], USE_CLASS_ANIMATIONS );
-		me->UpdateModel();
-		me->SetBloodColor( DONT_BLEED );
-		engine->SetFakeClientConVarValue( me->edict(), "name", "Raider" );
-
-		// Custom attribs
-		struct botAttribs_t
-		{
-			char szName[MAX_ATTRIBUTE_DESCRIPTION_LENGTH];
-			float flValue;
-		};
-
-		botAttribs_t sAttribs[] = 
-		{
-			{ "move speed bonus", 0.5f },
-			{ "damage bonus", 1.5f },
-			{ "damage force reduction", 0.3f },
-			{ "airblast vulnerability multiplier", 0.3f },
-			{ "override footstep sound set", 2.f },
-		};
-
-		CAttributeList *pAttribList = me->GetAttributeList();
-		if ( pAttribList )
-		{
-			for ( int i = 0; i < ARRAYSIZE( sAttribs ); i++ )
-			{
-				const CEconItemAttributeDefinition *pDef = ItemSystem()->GetItemSchema()->GetAttributeDefinitionByName( sAttribs[i].szName );
-				if ( pDef )
-				{
-					pAttribList->SetRuntimeAttributeValue( pDef, sAttribs[i].flValue );
-				}
-			}
-			me->NetworkStateChanged();
-		}
-	}
-	// !!! BountyMode prototype evaluation hacks below - this code will most likely be deleted soon
-	else if ( FStrEq( command, "become guardian" ) )
-	{
-		me->SetIsMiniBoss( true );
-		me->SetScaleOverride( 1.75f );
-		me->ModifyMaxHealth( 3300 );
-		me->SetWeaponRestriction( CFFBot::PRIMARY_ONLY );
-		me->GetPlayerClass()->SetCustomModel( g_szBotBossModels[ me->GetPlayerClass()->GetClassIndex() ], USE_CLASS_ANIMATIONS );
-		me->UpdateModel();
-		me->SetBloodColor( DONT_BLEED );
-		engine->SetFakeClientConVarValue( me->edict(), "name", "Guardian" );
-		me->SetAttribute( CFFBot::PRIORITIZE_DEFENSE );
-
-		// Custom attribs
-		struct botAttribs_t
-		{
-			char szName[MAX_ATTRIBUTE_DESCRIPTION_LENGTH];
-			float flValue;
-		};
-
-		botAttribs_t sAttribs[] = 
-		{
-			{ "move speed bonus",	0.5f },
-			{ "faster reload rate", -0.4f },
-			{ "fire rate bonus", 0.75f },
-			{ "damage force reduction", 0.5f },
-			{ "airblast vulnerability multiplier", 0.5f },
-			{ "override footstep sound set", 4.f },
-		};
-
-		CAttributeList *pAttribList = me->GetAttributeList();
-		if ( pAttribList )
-		{
-			for ( int i = 0; i < ARRAYSIZE( sAttribs ); i++ )
-			{
-				const CEconItemAttributeDefinition *pDef = ItemSystem()->GetItemSchema()->GetAttributeDefinitionByName( sAttribs[i].szName );
-				if ( pDef )
-				{
-					pAttribList->SetRuntimeAttributeValue( pDef, sAttribs[i].flValue );
-				}
-			}
-			me->NetworkStateChanged();
-		}
-	}
 #endif // STAGING_ONLY
 
 	return TryContinue();

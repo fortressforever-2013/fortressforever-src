@@ -10,7 +10,6 @@
 #include "bot/behavior/spy/ff_bot_spy_sap.h"
 #include "bot/behavior/ff_bot_destroy_enemy_sentry.h"
 #include "bot/behavior/medic/ff_bot_medic_heal.h"
-#include "bot/behavior/missions/ff_bot_mission_suicide_bomber.h"
 #include "ff_obj_sentrygun.h"
 
 //
@@ -70,11 +69,7 @@ ActionResult< CFFBot > CFFBotMissionDestroySentries::Update( CFFBot *me, float i
 		}
 	}
 
-	// for suicide bombers, we never want them to revert to normal behavior even if there is no sentry to kill
-	if ( me->IsPlayerClass( CLASS_DEMOMAN ) )
-	{
-		return SuspendFor( new CFFBotMissionSuicideBomber, "On a suicide mission to blow up a sentry" );
-	}
+
 
 	if ( m_goalSentry == NULL )
 	{

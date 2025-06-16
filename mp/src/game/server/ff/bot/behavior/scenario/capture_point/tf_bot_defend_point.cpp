@@ -4,7 +4,7 @@
 // Michael Booth, February 2009
 
 #include "cbase.h"
-#include "nav_mesh/ff_nav_mesh.h"
+#include "../../../../../tf/nav_mesh/tf_nav_mesh.h"
 #include "ff_player.h"
 #include "ff_gamerules.h"
 #include "team_control_point_master.h"

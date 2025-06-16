@@ -67,7 +67,7 @@ ActionResult< CFFBot >	CFFBotAttack::Update( CFFBot *me, float interval )
 	{
 		if ( threat->IsVisibleRecently() )
 		{
-			if ( isUsingCloseRangeWeapon && !FFGameRules()->IsMannVsMachineMode() )	// all bots in MvM use the default route
+			if ( isUsingCloseRangeWeapon )	
 			{
 				CFFBotPathCost cost( me, SAFEST_ROUTE );
 				m_chasePath.Update( me, threat->GetEntity(), cost );
@@ -102,7 +102,7 @@ ActionResult< CFFBot >	CFFBotAttack::Update( CFFBot *me, float interval )
 				//m_repathTimer.Start( RandomFloat( 0.3f, 0.5f ) );
 				m_repathTimer.Start( RandomFloat( 3.0f, 5.0f ) );
 
-				if ( isUsingCloseRangeWeapon && !FFGameRules()->IsMannVsMachineMode() )	// all bots in MvM use the default route
+				if ( isUsingCloseRangeWeapon )	
 				{
 					CFFBotPathCost cost( me, SAFEST_ROUTE );
 					m_path.Compute( me, threat->GetLastKnownPosition(), cost );
@@ -110,7 +110,7 @@ ActionResult< CFFBot >	CFFBotAttack::Update( CFFBot *me, float interval )
 				else
 				{
 					CFFBotPathCost cost( me, DEFAULT_ROUTE );
-					float maxPathLength = FFGameRules()->IsMannVsMachineMode() ? TFBOT_MVM_MAX_PATH_LENGTH : 0.0f;
+					float maxPathLength = 0.0f;
 					m_path.Compute( me, threat->GetLastKnownPosition(), cost, maxPathLength );
 				}
 			}

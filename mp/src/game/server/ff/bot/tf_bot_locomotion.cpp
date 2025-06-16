@@ -41,14 +41,11 @@ void CFFBotLocomotion::Update( void )
 // Move directly towards the given position
 void CFFBotLocomotion::Approach( const Vector &pos, float goalWeight )
 {
-	if ( FFGameRules()->IsMannVsMachineMode() )
-	{
-		if ( !IsOnGround() && !IsClimbingOrJumping() )
-		{
-			// no air control
-			return;
-		}
-	}
+       if ( !IsOnGround() && !IsClimbingOrJumping() )
+       {
+               // no air control
+               return;
+       }
 
 	BaseClass::Approach( pos, goalWeight );
 }
@@ -123,15 +120,5 @@ void CFFBotLocomotion::Jump( void )
 		return;
 	}
 
-	if ( FFGameRules() && FFGameRules()->IsMannVsMachineMode() )
-	{
-		int iCustomJumpParticle = 0;
-		CALL_ATTRIB_HOOK_INT_ON_OTHER( me, iCustomJumpParticle, bot_custom_jump_particle );
-		if ( iCustomJumpParticle )
-		{
-			const char *pEffectName = "rocketjump_smoke";
-			DispatchParticleEffect( pEffectName, PATTACH_POINT_FOLLOW, me, "foot_L" );
-			DispatchParticleEffect( pEffectName, PATTACH_POINT_FOLLOW, me, "foot_R" );
-		}
-	}
+
 }

@@ -30,14 +30,9 @@
 #include "bot/behavior/spy/ff_bot_spy_leave_spawn_room.h"
 #include "bot/behavior/medic/ff_bot_medic_heal.h"
 #include "bot/behavior/engineer/ff_bot_engineer_build.h"
+#include "bot/behavior/missions/ff_bot_mission_destroy_sentries.h"
 #include "bot/map_entities/ff_bot_hint_sentrygun.h"
 
-#ifdef TF_RAID_MODE
-#include "bot/behavior/scenario/raid/ff_bot_wander.h"
-#include "bot/behavior/scenario/raid/ff_bot_companion.h"
-#include "bot/behavior/scenario/raid/ff_bot_squad_attack.h"
-#include "bot/behavior/scenario/raid/ff_bot_guard_area.h"
-#endif // TF_RAID_MODE
 
 #include "bot/behavior/ff_bot_attack.h"
 #include "bot/behavior/ff_bot_seek_and_destroy.h"
@@ -46,10 +41,7 @@
 #include "bot/behavior/scenario/capture_the_flag/ff_bot_fetch_flag.h"
 #include "bot/behavior/scenario/capture_the_flag/ff_bot_deliver_flag.h"
 
-#include "bot/behavior/missions/ff_bot_mission_suicide_bomber.h"
 #include "bot/behavior/squad/ff_bot_escort_squad_leader.h"
-#include "bot/behavior/engineer/mvm_engineer/ff_bot_mvm_engineer_idle.h"
-#include "bot/behavior/missions/ff_bot_mission_reprogrammed.h"
 
 #include "bot/behavior/ff_bot_scenario_monitor.h"
 
@@ -94,134 +86,16 @@ Action< CFFBot > *CFFBotScenarioMonitor::DesiredScenarioAndClassAction( CFFBot *
 	case CFFBot::MISSION_SEEK_AND_DESTROY:
 		break;
 
-	case CFFBot::MISSION_DESTROY_SENTRIES:
-		return new CFFBotMissionSuicideBomber;
+       case CFFBot::MISSION_DESTROY_SENTRIES:
+               return new CFFBotMissionDestroySentries;
 
 	case CFFBot::MISSION_SNIPER:
 		return new CFFBotSniperLurk;
 
-#ifdef STAGING_ONLY
-	case CFFBot::MISSION_REPROGRAMMED:
-		return new CFFBotMissionReprogrammed;
-#endif
 	}
 
-#ifdef TF_RAID_MODE
-	if ( me->HasAttribute( CFFBot::IS_NPC ) )
-	{
-		// map-spawned guardians
-		return new CFFBotGuardian;
-	}
-#endif // TF_RAID_MODE
 
-#ifdef TF_RAID_MODE
-	if ( FFGameRules()->IsBossBattleMode() )
-	{
-		if ( me->GetTeamNumber() == FF_TEAM_BLUE )
-		{
-			// bot teammates
-			return new CFFBotCompanion;
-		}
-		
-		if ( me->IsPlayerClass( CLASS_SNIPER ) )
-		{
-			return new CFFBotSniperLurk;
-		}
 
-		if ( me->IsPlayerClass( CLASS_SPY ) )
-		{
-			return new CFFBotSpyInfiltrate;
-		}
-
-		if ( me->IsPlayerClass( CLASS_MEDIC ) )
-		{
-			return new CFFBotMedicHeal;
-		}
-
-		if ( me->IsPlayerClass( CLASS_ENGINEER ) )
-		{
-			return new CFFBotEngineerBuild;
-		}
-
-		return new CFFBotEscort( FFGameRules()->GetActiveBoss() );
-	}
-	else if ( FFGameRules()->IsRaidMode() )
-	{
-		if ( me->GetTeamNumber() == FF_TEAM_BLUE )
-		{
-			// bot teammates
-			return new CFFBotCompanion;
-		}
-
-		if ( me->IsInASquad() )
-		{
-			// squad behavior
-			return new CFFBotSquadAttack;
-		}
-
-		if ( me->IsPlayerClass( CLASS_SCOUT ) || me->HasAttribute( CFFBot::AGGRESSIVE ) )
-		{
-			return new CFFBotWander;
-		}
-
-		if ( me->IsPlayerClass( CLASS_SNIPER ) )
-		{
-			return new CFFBotSniperLurk;
-		}
-
-		if ( me->IsPlayerClass( CLASS_SPY ) )
-		{
-			return new CFFBotSpyInfiltrate;
-		}
-
-		return new CFFBotGuardArea;
-	}
-#endif // TF_RAID_MODE	
-
-	if ( FFGameRules()->IsMannVsMachineMode() )
-	{
-		if ( me->IsPlayerClass( CLASS_SPY ) )
-		{
-			return new CFFBotSpyLeaveSpawnRoom;
-		}
-
-		if ( me->IsPlayerClass( CLASS_MEDIC ) )
-		{
-			// if I'm being healed by another medic, I should do something else other than healing
-			bool bIsBeingHealedByAMedic = false;
-			int nNumHealers = me->m_Shared.GetNumHealers();
-			for ( int i=0; i<nNumHealers; ++i )
-			{
-				CBaseEntity *pHealer = me->m_Shared.GetHealerByIndex(i);
-				if ( pHealer && pHealer->IsPlayer() )
-				{
-					bIsBeingHealedByAMedic = true;
-					break;
-				}
-			}
-
-			if ( !bIsBeingHealedByAMedic )
-			{
-				return new CFFBotMedicHeal;
-			}
-		}
-
-		if ( me->IsPlayerClass( CLASS_ENGINEER ) )
-		{
-			return new CFFBotMvMEngineerIdle;
-		}
-
-		// NOTE: Snipers are intentionally left out so they go after the flag. Actual sniping behavior is done as a mission.
-
-		if ( me->HasAttribute( CFFBot::AGGRESSIVE ) )
-		{
-			// push for the point first, then attack
-			return new CFFBotPushToCapturePoint( new CFFBotFetchFlag );
-		}
-
-		// capture the flag
-		return new CFFBotFetchFlag;
-	}
 
 	if ( me->IsPlayerClass( CLASS_SPY ) )
 	{

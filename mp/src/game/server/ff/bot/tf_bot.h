@@ -7,7 +7,7 @@
 #define FF_BOT_H
 
 #include "Player/NextBotPlayer.h"
-#include "../nav_mesh/ff_nav_mesh.h"
+#include "../../tf/nav_mesh/tf_nav_mesh.h"
 #include "ff_bot_vision.h"
 #include "ff_bot_body.h"
 #include "ff_bot_locomotion.h"
@@ -43,13 +43,29 @@ class CFFBotGenerator;
 
 #define TFBOT_ALL_BEHAVIOR_FLAGS		0xFFFF
 
-#define TFBOT_MVM_MAX_PATH_LENGTH		0.0f // 7000.0f			// in MvM, all pathfinds are limited to this (0 == no limit)
 
 
 //----------------------------------------------------------------------------
 class CFFBot: public NextBotPlayer< CFFPlayer >, public CGameEventListener
 {
 public:
+	struct BotSharedStub{
+		bool InCond(int) const { return false; }
+		bool IsControlStunned() const { return false; }
+		bool IsLoserStateStunned() const { return false; }
+		bool IsInvulnerable() const { return false; }
+		bool IsStealthed() const { return false; }
+		bool IsShieldEquipped() const { return false; }
+		bool IsParachuteEquipped() const { return false; }
+		bool InAirDueToKnockback() const { return false; }
+		bool IsParachuteDeployed() const { return false; }
+		void AddCond(int) {}
+		void Disguise(int,int) {}
+		int GetNumHealers() const { return 0; }
+		CBaseEntity* GetHealerByIndex(int) const { return nullptr; }
+		float GetMaxBuffedHealth() const { return 0.0f; }
+	};
+	BotSharedStub m_Shared;
 	DECLARE_CLASS( CFFBot, NextBotPlayer< CFFPlayer > );
 
 	CFFBot();
@@ -229,8 +245,7 @@ public:
 	enum AttributeType
 	{
 		REMOVE_ON_DEATH				= 1<<0,					// kick bot from server when killed
-		AGGRESSIVE					= 1<<1,					// in MvM mode, push for the cap point
-		IS_NPC						= 1<<2,					// a non-player support character
+		AGGRESSIVE					= 1<<1,					
 		SUPPRESS_FIRE				= 1<<3,
 		DISABLE_DODGE				= 1<<4,
 		BECOME_SPECTATOR_ON_DEATH	= 1<<5,					// move bot to spectator team when killed
@@ -243,8 +258,6 @@ public:
 		PRIORITIZE_DEFENSE			= 1<<12,				// bot prioritizes defending when possible
 		ALWAYS_FIRE_WEAPON			= 1<<13,				// constantly fire our weapon
 		TELEPORT_TO_HINT			= 1<<14,				// bot will teleport to hint target instead of walking out from the spawn point
-		MINIBOSS					= 1<<15,				// is miniboss?
-		USE_BOSS_HEALTH_BAR			= 1<<16,				// should I use boss health bar?
 		IGNORE_FLAG					= 1<<17,				// don't pick up flag/bomb
 		AUTO_JUMP					= 1<<18,				// auto jump
 		AIR_CHARGE_ONLY				= 1<<19,				// demo knight only charge in the air
@@ -323,7 +336,6 @@ public:
 		MISSION_SNIPER,					// maintain teams of snipers harassing the enemy
 		MISSION_SPY,					// maintain teams of spies harassing the enemy
 		MISSION_ENGINEER,				// maintain engineer nests for harassing the enemy
-		MISSION_REPROGRAMMED,			// MvM: robot has been hacked and will do bad things to their team
 	};
 	#define MISSION_DOESNT_RESET_BEHAVIOR_SYSTEM false
 	void SetMission( MissionType mission, bool resetBehaviorSystem = true );
@@ -356,7 +368,7 @@ public:
 
 	Action< CFFBot > *OpportunisticallyUseWeaponAbilities( void );
 
-	CFFPlayer *SelectRandomReachableEnemy( void );	// mostly for MvM - pick a random enemy player that is not in their spawn room
+	CFFPlayer *SelectRandomReachableEnemy( void );	
 
 	float GetDesiredPathLookAheadRange( void ) const;	// different sized bots used different lookahead distances
 
@@ -488,7 +500,7 @@ private:
 	CUtlVector< CTFNavArea * > m_sniperVantageAreaVector;
 	CUtlVector< CTFNavArea * > m_sniperTheaterAreaVector;
 
-	CBaseEntity *m_snipingGoalEntity;					// the entity we are guarding (control point, payload cart)
+	CBaseEntity *m_snipingGoalEntity;					
 	Vector m_lastSnipingGoalEntityPosition;
 
 	void SetupSniperSpotAccumulation( void );			// do internal setup when control point changes
@@ -949,7 +961,7 @@ public:
 			// add a random penalty unique to this character so they choose different routes to the same place
 			float preference = 1.0f;
 
-			if ( m_routeType == DEFAULT_ROUTE && !m_me->IsMiniBoss() ) 
+			if ( m_routeType == DEFAULT_ROUTE ) 
 			{
 				// this term causes the same bot to choose different routes over time,
 				// but keep the same route for a period in case of repaths
@@ -1059,7 +1071,6 @@ public:
 			return true;
 
 		CFFBot *bot = ToTFBot( player );
-		if ( bot && bot->HasAttribute( CFFBot::IS_NPC ) )
 			return true;
 
 		float rangeSq = ( m_where - player->GetAbsOrigin() ).LengthSqr();

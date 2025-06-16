@@ -62,7 +62,7 @@ ActionResult< CFFBot > CFFBotAttackFlagDefenders::Update( CFFBot *me, float inte
 		}
 
 		// can't reach flag if it is at home
-		if ( !FFGameRules()->IsMannVsMachineMode() || !flag->IsHome() )
+               if ( !flag->IsHome() )
 		{
 			CFFPlayer *carrier = ToFFPlayer( flag->GetOwnerEntity() );
 			if ( !carrier )
@@ -114,9 +114,9 @@ ActionResult< CFFBot > CFFBotAttackFlagDefenders::Update( CFFBot *me, float inte
 		{
 			m_repathTimer.Start( RandomFloat( 1.0f, 3.0f ) );
 
-			CFFBotPathCost cost( me, DEFAULT_ROUTE );
-			float maxPathLength = FFGameRules()->IsMannVsMachineMode() ? TFBOT_MVM_MAX_PATH_LENGTH : 0.0f;
-			m_path.Compute( me, m_chasePlayer, cost, maxPathLength );
+                       CFFBotPathCost cost( me, DEFAULT_ROUTE );
+                       float maxPathLength = 0.0f;
+                       m_path.Compute( me, m_chasePlayer, cost, maxPathLength );
 		}
 
 		m_path.Update( me );

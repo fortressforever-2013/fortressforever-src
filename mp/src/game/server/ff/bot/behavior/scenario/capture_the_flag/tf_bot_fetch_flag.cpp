@@ -33,36 +33,14 @@ ActionResult< CFFBot > CFFBotFetchFlag::Update( CFFBot *me, float interval )
 {
 	CCaptureFlag *flag = me->GetFlagToFetch();
 
-	if ( !flag )
-	{
-		if ( FFGameRules()->IsMannVsMachineMode() )
-		{
-			return SuspendFor( new CFFBotAttackFlagDefenders, "Flag flag exists - Attacking the enemy flag defenders" );
-		}
-
-		return Done( "No flag" );
-	}
+       if ( !flag )
+       {
+               return Done( "No flag" );
+       }
 
 
 
-	if ( FFGameRules()->IsMannVsMachineMode() && flag->IsHome() )
-	{
-		if ( gpGlobals->curtime - me->GetSpawnTime() < 1.0f && me->GetTeamNumber() != TEAM_SPECTATOR )
-		{
-			// we just spawned - give us the flag
-			flag->PickUp( me, true );
-		}
-		else
-		{
-			if ( m_isTemporary )
-			{
-				return Done( "Flag unreachable" );
-			}
 
-			// flag is at home and we're out in the world - can't reach it
-			return SuspendFor( new CFFBotAttackFlagDefenders, "Flag unreachable at home - Attacking the enemy flag defenders" );
-		}
-	}
 
 	const CKnownEntity *threat = me->GetVisionInterface()->GetPrimaryKnownThreat();
 	if ( threat )
@@ -86,8 +64,8 @@ ActionResult< CFFBot > CFFBotFetchFlag::Update( CFFBot *me, float interval )
 	if ( m_repathTimer.IsElapsed() )
 	{
 		CFFBotPathCost cost( me, DEFAULT_ROUTE );
-		float maxPathLength = FFGameRules()->IsMannVsMachineMode() ? TFBOT_MVM_MAX_PATH_LENGTH : 0.0f;
-		if ( m_path.Compute( me, flag->WorldSpaceCenter(), cost, maxPathLength ) == false )
+               float maxPathLength = 0.0f;
+               if ( m_path.Compute( me, flag->WorldSpaceCenter(), cost, maxPathLength ) == false )
 		{
 			if ( flag->IsDropped() )
 			{

@@ -399,7 +399,7 @@ public:
 bool CFFBotMedicHeal::CanDeployUber( CFFBot *me, const CWeaponMedigun* pMedigun ) const
 {
 #ifdef STAGING_ONLY
-	if ( FFGameRules()->IsMannVsMachineMode() && 
+	if ( false && 
 			me && me->HasAttribute( CFFBot::PROJECTILE_SHIELD ) && 
 			pMedigun && ( pMedigun->GetMedigunShield() != NULL ) && pMedigun->HasPermanentShield() && ( ( pMedigun->GetMedigunType() == MEDIGUN_STANDARD ) || ( pMedigun->GetMedigunType() == MEDIGUN_UBER ) ) )
 	{
@@ -455,7 +455,7 @@ ActionResult< CFFBot >	CFFBotMedicHeal::Update( CFFBot *me, float interval )
 	if ( me->IsInASquad() )
 	{
 		CFFBotSquad *squad = me->GetSquad();
-		if ( FFGameRules() && FFGameRules()->IsMannVsMachineMode() && squad->IsLeader( me ) )
+		if ( FFGameRules() && false && squad->IsLeader( me ) )
 		{
 			return ChangeTo( new CFFBotFetchFlag, "I'm now a squad leader! Going for the flag!" );
 		}
@@ -493,7 +493,7 @@ ActionResult< CFFBot >	CFFBotMedicHeal::Update( CFFBot *me, float interval )
 	m_patient = SelectPatient( me, m_patient );
 
 	// prevent a group of medic healing each other in a loop. always heal the top guy in the chain
-	if ( FFGameRules() && FFGameRules()->IsMannVsMachineMode() && m_patient != NULL && m_patient->IsPlayerClass( CLASS_MEDIC ) )
+	if ( FFGameRules() && false && m_patient != NULL && m_patient->IsPlayerClass( CLASS_MEDIC ) )
 	{
 		CUtlVector< CBaseEntity* > seenPatients;
 		seenPatients.AddToTail( m_patient );
@@ -514,7 +514,7 @@ ActionResult< CFFBot >	CFFBotMedicHeal::Update( CFFBot *me, float interval )
 	{
 		// no patients
 
-		if ( FFGameRules()->IsMannVsMachineMode() )
+		if ( false )
 		{
 			// no-one is left to heal - get the flag!
 			return ChangeTo( new CFFBotFetchFlag, "Everyone is gone! Going for the flag" );
@@ -668,7 +668,7 @@ ActionResult< CFFBot >	CFFBotMedicHeal::Update( CFFBot *me, float interval )
 				// uber if I'm getting low and have recently taken damage
 				if ( me->GetHealth() < me->GetUberHealthThreshold() )
 				{
-					if ( me->GetTimeSinceLastInjury( GetEnemyTeam( me->GetTeamNumber() ) ) < 1.0f || FFGameRules()->IsMannVsMachineMode() )
+					if ( me->GetTimeSinceLastInjury( GetEnemyTeam( me->GetTeamNumber() ) ) < 1.0f || false )
 					{
 						useUber = true;
 					}
@@ -680,15 +680,6 @@ ActionResult< CFFBot >	CFFBotMedicHeal::Update( CFFBot *me, float interval )
 					useUber = true;
 				}
 
-				// special case for bots in mvm spawn zones
-				if ( FFGameRules()->IsMannVsMachineMode() )
-				{
-					if ( m_patient->m_Shared.InCond( TF_COND_INVULNERABLE_HIDE_UNLESS_DAMAGED ) && 
-						 me->m_Shared.InCond( TF_COND_INVULNERABLE_HIDE_UNLESS_DAMAGED ) )
-					{
-						useUber = false;
-					}
-				}
 			}
 
 			if ( useUber )
@@ -708,48 +699,6 @@ ActionResult< CFFBot >	CFFBotMedicHeal::Update( CFFBot *me, float interval )
 			}
 		}
 		
-#ifdef STAGING_ONLY
-		// try to activate shield when I'm not using uber so I don't waste it
-		if ( FFGameRules()->IsMannVsMachineMode() && me->HasAttribute( CFFBot::PROJECTILE_SHIELD ) && medigun->GetMedigunShield() == NULL )
-		{
-			// activate shield ASAP for permanent shield medigun
-			if ( medigun->HasPermanentShield() )
-			{
-				me->PressSpecialFireButton();
-				isUsingProjectileShield = true;
-			}
-			else
-			{
-				isUsingProjectileShield = me->m_Shared.IsRageDraining();
-				// when the rage is ready to deploy and we're not using uber
-				if ( me->m_Shared.GetRageMeter() >= 100.f && !isUsingProjectileShield && !useUber )
-				{
-					// use shield if me or my patient is getting attacked
-					if ( me->GetTimeSinceLastInjury( GetEnemyTeam( me->GetTeamNumber() ) ) < 1.0f || m_patient->GetTimeSinceLastInjury( GetEnemyTeam( m_patient->GetTeamNumber() ) ) < 1.0f )
-					{
-						me->PressSpecialFireButton();
-						isUsingProjectileShield = true;
-					}
-				}
-			}
-		}
-#else // remove this when we ship medic shield MVM update
-		// try to activate shield when I'm not using uber so I don't waste it
-		if ( FFGameRules()->IsMannVsMachineMode() && me->HasAttribute( CFFBot::PROJECTILE_SHIELD ) )
-		{
-			isUsingProjectileShield = me->m_Shared.IsRageDraining();
-			// when the rage is ready to deploy and we're not using uber
-			if ( me->m_Shared.GetRageMeter() >= 100.f && !isUsingProjectileShield && !useUber )
-			{
-				// use shield if me or my patient is getting attacked
-				if ( me->GetTimeSinceLastInjury( GetEnemyTeam( me->GetTeamNumber() ) ) < 1.0f || m_patient->GetTimeSinceLastInjury( GetEnemyTeam( m_patient->GetTeamNumber() ) ) < 1.0f )
-				{
-					me->PressSpecialFireButton();
-					isUsingProjectileShield = true;
-				}
-			}
-		}
-#endif
 	}
 
 	bool isThreatened = false;
@@ -940,22 +889,12 @@ void CFFBotMedicHeal::ComputeFollowPosition( CFFBot *me )
 
 	m_followGoal = me->GetAbsOrigin();
 
-	if ( m_patient == NULL )
-	{
-		return;
-	}
+       if ( m_patient == NULL )
+       {
+               return;
+       }
 
-	bool isExposed;
-
-	if ( FFGameRules()->IsMannVsMachineMode() && me->GetTeamNumber() == FF_TEAM_PVE_INVADERS )
-	{
-		// robot medics in MvM don't care if the enemy sees them
-		isExposed = false;
-	}
-	else
-	{
-		isExposed = IsVisibleToEnemy( me, me->EyePosition() );
-	}
+       bool isExposed = IsVisibleToEnemy( me, me->EyePosition() );
 
 	Vector patientForward;
 	m_patient->EyeVectors( &patientForward );

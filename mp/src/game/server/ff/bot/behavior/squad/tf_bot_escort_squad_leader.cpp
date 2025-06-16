@@ -73,7 +73,7 @@ ActionResult< CFFBot > CFFBotEscortSquadLeader::Update( CFFBot *me, float interv
 		return Done( "Squad leader is dead" );
 	}
 
-	if ( FFGameRules() && FFGameRules()->IsMannVsMachineMode() && leader == me )
+	if ( FFGameRules() && false && leader == me )
 	{
 		const char* pszNowLeader = "I'm now the squad leader! Going for the flag!";
 		if ( me->HasAttribute( CFFBot::AGGRESSIVE ) )

@@ -115,7 +115,6 @@ void CFFBotProxy::InputSpawn( inputdata_t &inputdata )
 	{
 		m_bot->SetSpawnPoint( this );
 		m_bot->SetAttribute( CFFBot::REMOVE_ON_DEATH );
-		m_bot->SetAttribute( CFFBot::IS_NPC );
 
 		m_bot->SetActionPoint( (CFFBotActionPoint *)m_moveGoal.Get() );
 

@@ -23,7 +23,7 @@
 #include "func_respawnroom.h"
 #include "soundenvelope.h"
 
-#include "player_vs_environment/ff_population_manager.h"
+#include "player_vs_environment/tf_population_manager.h"
 
 #include "bot/behavior/ff_bot_behavior.h"
 #include "bot/map_entities/ff_bot_generator.h"
@@ -61,10 +61,8 @@ extern ConVar ff_bot_difficulty;
 extern ConVar ff_bot_farthest_visible_theater_sample_count;
 extern ConVar ff_bot_sniper_spot_min_range;
 extern ConVar ff_bot_sniper_spot_epsilon;
-extern ConVar ff_mvm_miniboss_min_health;
 extern ConVar ff_bot_path_lookahead_range;
 
-extern ConVar ff_mvm_miniboss_scale;
 
 
 //-----------------------------------------------------------------------------------------------------
@@ -1086,8 +1084,8 @@ void CFFBot::PhysicsSimulate( void )
 		m_Shared.AddCond( TF_COND_CRITBOOSTED_USER_BUFF );
 	}
 
-	// force my speed to be recalculated to keep squad together and restore speed afterwards
-	TeamFortress_SetSpeed();
+       // force my speed to be recalculated to keep squad together and restore speed afterwards
+       RecalculateSpeed();
 
 	if ( IsInASquad() )
 	{
@@ -1104,161 +1102,6 @@ void CFFBot::PhysicsSimulate( void )
 	// sometimes force an immediate respawn, which will destroy the bot's existing actions out from under it.
 	if ( !IsAlive() && !m_didReselectClass && ff_bot_keep_class_after_death.GetBool() == false && FFGameRules()->CanBotChangeClass( this ) )
 	{
-		if ( FFGameRules() && FFGameRules()->IsMannVsMachineMode() )
-			return;
-
-		const char *classname = FStrEq( ff_bot_force_class.GetString(), "" ) ? GetNextSpawnClassname() : ff_bot_force_class.GetString();
-
-		HandleCommand_JoinClass( classname );
-
-		m_didReselectClass = true;
-	}
-}
-
-
-//-----------------------------------------------------------------------------------------------------
-void CFFBot::Touch( CBaseEntity *pOther )
-{
-	BaseClass::Touch( pOther );
-
-	CFFPlayer *them = ToFFPlayer( pOther );
-	if ( them && IsEnemy( them ) )
-	{
-
-		// always notice if we bump an enemy
-		TheNextBots().OnWeaponFired( them, them->GetActiveFFWeapon() );
-	}
-}
-
-
-//-----------------------------------------------------------------------------------------------------
-// Avoid penetrating teammates
-void CFFBot::AvoidPlayers( CUserCmd *pCmd )
-{
-	// Turn off the avoid player code.
-	if ( !ff_avoidteammates.GetBool() || !ff_avoidteammates_pushaway.GetBool() )
-		return;
-
-	Vector forward, right;
-	EyeVectors( &forward, &right );
-
-	CUtlVector< CFFPlayer * > playerVector;
-	CollectPlayers( &playerVector, GetTeamNumber(), COLLECT_ONLY_LIVING_PLAYERS );
-
-	Vector avoidVector = vec3_origin;
-
-	float tooClose = 50.0f;
-	if ( FFGameRules() && FFGameRules()->IsMannVsMachineMode() )
-	{
-		// bots stay farther apart in MvM mode
-		tooClose = 150.0f;
-	}
-
-	for( int i=0; i<playerVector.Count(); ++i )
-	{
-		CFFPlayer *them = playerVector[i];
-
-		if ( IsSelf( them ) )
-		{
-			continue;
-		}
-
-		if ( HasTheFlag() )
-		{
-			// Don't push around the flag (bomb) carrier.
-			// We need this for MvM mode so friendly bots don't
-			// move the bomb jumper and cause him to restart.
-			continue;
-		}
-
-		if ( IsPlayerClass( CLASS_MEDIC ) )
-		{
-			if ( !them->IsPlayerClass( CLASS_MEDIC ) )
-			{
-				// medics only avoid other medics, so they stay with their patient
-				continue;
-			}
-		}
-		else if ( IsInASquad() )
-		{
-			// if I'm a non-Medic in a Squad, I'm part of a formation
-			continue;
-		}
-
-		Vector between = GetAbsOrigin() - them->GetAbsOrigin();
-		if ( between.IsLengthLessThan( tooClose ) )
-		{
-			float range = between.NormalizeInPlace();
-
-			avoidVector += ( 1.0f - ( range / tooClose ) ) * between;
-		}
-	}
-
-	if ( avoidVector.IsZero() )
-	{
-		m_Shared.SetSeparation( false );
-		m_Shared.SetSeparationVelocity( vec3_origin );
-		return;
-	}
-
-	avoidVector.NormalizeInPlace();
-
-	m_Shared.SetSeparation( true );
-
-	const float maxSpeed = 50.0f;
-	m_Shared.SetSeparationVelocity( avoidVector * maxSpeed );
-
-	float ahead = maxSpeed * DotProduct( forward, avoidVector );
-	float side = maxSpeed * DotProduct( right, avoidVector );
-
-	pCmd->forwardmove	+= ahead;
-	pCmd->sidemove		+= side;
-}
-
-
-//-----------------------------------------------------------------------------------------------------
-void CFFBot::UpdateOnRemove( void )
-{
-	StopIdleSound();
-
-	BaseClass::UpdateOnRemove();
-}
-
-
-//-----------------------------------------------------------------------------------------------------
-int CFFBot::ShouldTransmit( const CCheckTransmitInfo *pInfo )
-{
-	if ( HasAttribute( USE_BOSS_HEALTH_BAR ) )
-	{
-		return FL_EDICT_ALWAYS;
-	}
-
-	return BaseClass::ShouldTransmit( pInfo );
-}
-
-
-//-----------------------------------------------------------------------------------------------------
-void CFFBot::ChangeTeam( int iTeamNum, bool bAutoTeam, bool bSilent, bool bAutoBalance /*= false*/  )
-{
-	BaseClass::ChangeTeam( iTeamNum, bAutoTeam, bSilent, bAutoBalance );
-	
-	if ( FFGameRules()->IsMannVsMachineMode() )
-	{
-		SetPrevMission( CFFBot::NO_MISSION );
-		ClearAllAttributes();
-		// Clear Sound
-		StopIdleSound();
-	}
-}
-
-
-//-----------------------------------------------------------------------------------------------------
-bool CFFBot::ShouldGib( const CTakeDamageInfo &info )
-{
-	// only gib giant/miniboss
-	if ( FFGameRules()->IsMannVsMachineMode() && ( IsMiniBoss() || GetModelScale() > 1.f ) )
-	{
-		return true;
 	}
 
 	return BaseClass::ShouldGib( info );
@@ -1297,10 +1140,10 @@ void CFFBot::ModifyMaxHealth( int nNewMaxHealth, bool bSetCurrentHealth /*= true
 		SetHealth( nNewMaxHealth );
 	}
 
-	if ( bAllowModelScaling && IsMiniBoss() )
-	{
-		SetModelScale( m_fModelScaleOverride > 0.0f ? m_fModelScaleOverride : ff_mvm_miniboss_scale.GetFloat() );		
-	}
+if ( bAllowModelScaling )
+{
+SetModelScale( m_fModelScaleOverride > 0.0f ? m_fModelScaleOverride : 1.0f );
+}
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -1361,499 +1204,6 @@ void CFFBot::Event_Killed( const CTakeDamageInfo &info )
 	}
 
 	// announce Spies
-	if ( FFGameRules()->IsMannVsMachineMode() )
-	{
-		if ( IsPlayerClass( CLASS_SPY ) )
-		{
-			CUtlVector< CFFPlayer * > playerVector;
-			CollectPlayers( &playerVector, FF_TEAM_PVE_INVADERS, COLLECT_ONLY_LIVING_PLAYERS );
-
-			int spyCount = 0;
-			for( int i=0; i<playerVector.Count(); ++i )
-			{
-				if ( playerVector[i]->IsPlayerClass( CLASS_SPY ) )
-				{
-					++spyCount;
-				}
-			}
-
-			IGameEvent *event = gameeventmanager->CreateEvent( "mvm_mission_update" );
-			if ( event )
-			{
-				event->SetInt( "class", CLASS_SPY );
-				event->SetInt( "count", spyCount );
-				gameeventmanager->FireEvent( event );
-			}
-		}
-		else if ( IsPlayerClass( CLASS_ENGINEER ) )
-		{
-			// in MVM, when an engineer dies, we need to decouple his objects so they stay alive when his bot slot gets recycled
-			while ( GetObjectCount() > 0 )
-			{
-				// set to not have owner
-				CBaseObject *pObject = GetObject( 0 );
-				if ( pObject )
-				{
-					pObject->SetOwnerEntity( NULL );
-					pObject->SetBuilder( NULL );
-				}
-				RemoveObject( pObject );
-			}
-
-			// unown engineer nest if owned any
-			for ( int i=0; i<ITFBotHintEntityAutoList::AutoList().Count(); ++i )
-			{
-				CBaseTFBotHintEntity* pHint = static_cast< CBaseTFBotHintEntity* >( ITFBotHintEntityAutoList::AutoList()[i] );
-				if ( pHint->GetOwnerEntity() == this )
-				{
-					pHint->SetOwnerEntity( NULL );
-				}
-			}
-
-			CUtlVector< CFFPlayer* > playerVector;
-			CollectPlayers( &playerVector, FF_TEAM_PVE_INVADERS, COLLECT_ONLY_LIVING_PLAYERS );
-			bool bShouldAnnounceLastEngineerBotDeath = HasAttribute( CFFBot::TELEPORT_TO_HINT );
-			if ( bShouldAnnounceLastEngineerBotDeath )
-			{
-				for ( int i=0; i<playerVector.Count(); ++i )
-				{
-					if ( playerVector[i] != this && playerVector[i]->IsPlayerClass( CLASS_ENGINEER ) )
-					{
-						bShouldAnnounceLastEngineerBotDeath = false;
-						break;
-					}
-				}
-			}
-
-			if ( bShouldAnnounceLastEngineerBotDeath )
-			{
-				bool bEngineerTeleporterInTheWorld = false;
-				for ( int i=0; i<IBaseObjectAutoList::AutoList().Count(); ++i )
-				{
-					CBaseObject* pObj = static_cast< CBaseObject* >( IBaseObjectAutoList::AutoList()[i] );
-					if ( pObj->GetType() == OBJ_TELEPORTER && pObj->GetTeamNumber() == FF_TEAM_PVE_INVADERS )
-					{
-						bEngineerTeleporterInTheWorld = true;
-					}
-				}
-
-				if ( bEngineerTeleporterInTheWorld )
-				{
-					FFGameRules()->BroadcastSound( 255, "Announcer.MVM_An_Engineer_Bot_Is_Dead_But_Not_Teleporter" );
-				}
-				else
-				{
-					FFGameRules()->BroadcastSound( 255, "Announcer.MVM_An_Engineer_Bot_Is_Dead" );
-				}
-			}
-		}
-
-		// remove this bot from following flag
-		for ( int i=0; i<ICaptureFlagAutoList::AutoList().Count(); ++i )
-		{
-			for ( int i=0; i<ICaptureFlagAutoList::AutoList().Count(); ++i )
-			{
-				CCaptureFlag *flag = static_cast< CCaptureFlag* >( ICaptureFlagAutoList::AutoList()[i] );
-				flag->RemoveFollower( this );
-			}
-		}
-	} // MvM
-
-	if ( HasSpawner() )
-	{
-		GetSpawner()->OnBotKilled( this );
-	}
-
-	if ( IsInASquad() )
-	{
-		LeaveSquad();
-	}
-
-	CTFNavArea *lastArea = (CTFNavArea *)GetLastKnownArea();
-	if ( lastArea )
-	{
-		// remove us from old visible set
-		NavAreaCollector wasVisible;
-		lastArea->ForAllPotentiallyVisibleAreas( wasVisible );
-
-		int i;
-		for( i=0; i<wasVisible.m_area.Count(); ++i )
-		{
-			CTFNavArea *area = (CTFNavArea *)wasVisible.m_area[i];
-			area->RemovePotentiallyVisibleActor( this );
-		}
-	}
-
-
-	if ( info.GetInflictor() && info.GetInflictor()->GetTeamNumber() != GetTeamNumber() )
-	{
-		CObjectSentrygun *sentrygun = dynamic_cast< CObjectSentrygun * >( info.GetInflictor() );
-
-		if ( sentrygun )
-		{
-			// we were killed by an enemy sentry - remember it
-			RememberEnemySentry( sentrygun, GetAbsOrigin() );
-		}
-	}
-
-	StopIdleSound();
-}
-
-
-//-----------------------------------------------------------------------------------------------------
-CTeamControlPoint *CFFBot::SelectPointToCapture( CUtlVector< CTeamControlPoint * > *captureVector ) const
-{
-	if ( !captureVector || captureVector->Count() == 0 )
-	{
-		return NULL;
-	}
-
-	if ( captureVector->Count() == 1 )
-	{
-		// only one choice
-		return captureVector->Element(0);
-	}
-
-	// if we're capturing a point, stay on it
-	if ( const_cast< CFFBot * >( this )->IsCapturingPoint() )
-	{
-		CTriggerAreaCapture *trigger = const_cast< CFFBot * >( this )->GetControlPointStandingOn();
-		if ( trigger )
-		{
-			return trigger->GetControlPoint();
-		}
-	}
-
-	// if we're near a point that is being captured, go help (in the event multiple points are being simultaneously captured)
-	CTeamControlPoint *closestPoint = SelectClosestControlPointByTravelDistance( captureVector );
-	if ( closestPoint )
-	{
-		bool alwaysUseClosest = false;
-
-#ifdef STAGING_ONLY
-		alwaysUseClosest = FFGameRules() && FFGameRules()->IsBountyMode();
-#endif // STAGING_ONLY
-
-		if ( IsPointBeingCaptured( closestPoint ) || alwaysUseClosest )
-		{
-			return closestPoint;
-		}
-	}
-
-	// if any point is being captured by our team, go help
-	for( int i=0; i<captureVector->Count(); ++i )
-	{
-		CTeamControlPoint *point = captureVector->Element(i);
-
-		if ( IsPointBeingCaptured( point ) )
-		{
-			return point;
-		}
-	}
-
-	// no points are currently being captured - pick the point with the least combat
-	CTeamControlPoint *safestPoint = NULL;
-	float safestPointCombat = FLT_MAX;
-	bool areAllPointsCombatFree = true;
-
-	for( int i=0; i<captureVector->Count(); ++i )
-	{
-		CTeamControlPoint *point = captureVector->Element(i);
-		CTFNavArea *pointArea = TheTFNavMesh()->GetControlPointCenterArea( point->GetPointIndex() );
-
-		if ( !pointArea )
-		{
-			continue;
-		}
-
-		float combat = pointArea->GetCombatIntensity();
-
-		const float minCombat = 0.1f;
-		if ( combat > minCombat )
-		{
-			areAllPointsCombatFree = false;
-		}
-
-		if ( combat < safestPointCombat )
-		{
-			safestPoint = point;
-			safestPointCombat = combat;
-		}
-	}
-
-	// if no points are in combat, pick a random point
-	if ( areAllPointsCombatFree )
-	{
-		const float decisionPeriod = 60.0f;
-		int which = captureVector->Count() * TransientlyConsistentRandomValue( decisionPeriod );
-		which = clamp( which, 0, captureVector->Count()-1 );
-
-		return captureVector->Element( which );
-	}
-
-	// choose the point with the least combat
-	return safestPoint;
-}
-
-
-//---------------------------------------------------------------------------------------------
-CTeamControlPoint *CFFBot::SelectPointToDefend( CUtlVector< CTeamControlPoint * > *defendVector ) const
-{
-	if ( defendVector && defendVector->Count() > 0 )
-	{
-		if ( HasAttribute( CFFBot::PRIORITIZE_DEFENSE ) )
-		{
-			return SelectClosestControlPointByTravelDistance( defendVector );
-		}
-
-		return defendVector->Element( RandomInt( 0, defendVector->Count()-1 ) );
-	}
-
-	return NULL;
-}
-
-
-//-----------------------------------------------------------------------------------------------------
-/**
- * Return the point we have decided to capture or defend
- */
-CTeamControlPoint *CFFBot::GetMyControlPoint( void ) const
-{
-	if ( m_myControlPoint != NULL && !m_evaluateControlPointTimer.IsElapsed() )
-	{
-		return m_myControlPoint;
-	}
-
-	m_evaluateControlPointTimer.Start( RandomFloat( 1.0f, 2.0f ) );
-
-
-	CUtlVector< CTeamControlPoint * > captureVector;
-	FFGameRules()->CollectCapturePoints( const_cast< CFFBot * >( this ), &captureVector );
-
-	CUtlVector< CTeamControlPoint * > defendVector;
-	FFGameRules()->CollectDefendPoints( const_cast< CFFBot * >( this ), &defendVector );
-
-	if ( IsPlayerClass( CLASS_ENGINEER ) || IsPlayerClass( CLASS_SNIPER ) || HasAttribute( CFFBot::PRIORITIZE_DEFENSE ) )
-	{
-		// engineers always try to defend first
-		if ( defendVector.Count() > 0 )
-		{
-			m_myControlPoint = SelectPointToDefend( &defendVector );
-			return m_myControlPoint;
-		}
-	}
-
-	// if we have a point we can capture - do it
-	m_myControlPoint = SelectPointToCapture( &captureVector );
-
-	if ( m_myControlPoint == NULL )
-	{
-		// otherwise, defend our point(s) from capture
-		m_myControlPoint = SelectPointToDefend( &defendVector );
-	}
-
-	return m_myControlPoint;
-}
-
-
-//-----------------------------------------------------------------------------------------------------
-// Return flag we want to fetch
-CCaptureFlag *CFFBot::GetFlagToFetch( void ) const
-{
-	CUtlVector<CCaptureFlag *> flagsVector;
-	int nCarriedFlags = 0;
-
-	// MvM Engineer bot never pick up a flag
-	if ( FFGameRules() && FFGameRules()->IsMannVsMachineMode() )
-	{
-		if ( GetTeamNumber() == FF_TEAM_PVE_INVADERS && IsPlayerClass( CLASS_ENGINEER ) )
-		{
-			return NULL;
-		}
-
-		if( HasAttribute( CFFBot::IGNORE_FLAG ) )
-		{
-			return NULL;
-		}
-
-		if ( FFGameRules()->IsMannVsMachineMode() && HasFlagTaget() )
-		{
-			return GetFlagTarget();
-		}
-	}
-
-	// Collect flags
-	for ( int i=0; i<ICaptureFlagAutoList::AutoList().Count(); ++i )
-	{
-		CCaptureFlag *flag = static_cast< CCaptureFlag* >( ICaptureFlagAutoList::AutoList()[i] );
-
-		if ( flag->IsDisabled() )
-			continue;
-
-		// If I'm carrying a flag, look for mine and early-out
-		if ( HasTheFlag() )
-		{
-			if ( flag->GetOwnerEntity() == this )
-			{
-				return flag;
-			}
-		}
-
-		switch( flag->GetType() )
-		{
-		case TF_FLAGTYPE_CTF:
-			if ( flag->GetTeamNumber() == GetEnemyTeam( GetTeamNumber() ) )
-			{
-				// we want to steal the other team's flag
-				flagsVector.AddToTail( flag );
-			}
-			break;
-
-		case TF_FLAGTYPE_ATTACK_DEFEND:
-		case TF_FLAGTYPE_TERRITORY_CONTROL:
-		case TF_FLAGTYPE_INVADE:
-			if ( flag->GetTeamNumber() != GetEnemyTeam( GetTeamNumber() ) )
-			{
-				// we want to move our team's flag or a neutral flag
-				flagsVector.AddToTail( flag );
-			}
-			break;
-		}
-
-		if ( flag->IsStolen() )
-		{
-			nCarriedFlags++;
-		}
-	}
-
-	CCaptureFlag *pClosestFlag = NULL;
-	float flClosestFlagDist = FLT_MAX;
-	CCaptureFlag *pClosestUncarriedFlag = NULL;
-	float flClosestUncarriedFlagDist = FLT_MAX;
-
-	if ( FFGameRules() && FFGameRules()->IsMannVsMachineMode() )
-	{
-		int nMinFollower = INT_MAX;
-
-		FOR_EACH_VEC( flagsVector, i )
-		{
-			CCaptureFlag *pFlag = flagsVector[i];
-			if ( pFlag )
-			{
-				// find the one which needs the most love
-				if ( pFlag->GetNumFollowers() < nMinFollower )
-				{
-					nMinFollower = pFlag->GetNumFollowers();
-
-					pClosestFlag = NULL;
-					flClosestFlagDist = FLT_MAX;
-					pClosestUncarriedFlag = NULL;
-					flClosestUncarriedFlagDist = FLT_MAX;
-				}
-				
-				if ( pFlag->GetNumFollowers() == nMinFollower )
-				{
-					// Find the closest
-					float flDist = ( pFlag->GetAbsOrigin() - GetAbsOrigin() ).LengthSqr();
-					if ( flDist < flClosestFlagDist )
-					{
-						pClosestFlag = pFlag;
-						flClosestFlagDist = flDist;
-					}
-
-					// Find the closest uncarried
-					if ( nCarriedFlags < flagsVector.Count() && !pFlag->IsStolen() )
-					{
-						if ( flDist < flClosestUncarriedFlagDist )
-						{
-							pClosestUncarriedFlag = flagsVector[i];
-							flClosestUncarriedFlagDist = flDist;
-						}
-					}
-				}
-			}
-		}
-	}
-	else
-	{
-		FOR_EACH_VEC( flagsVector, i )
-		{
-			if ( flagsVector[i] )
-			{
-				// Find the closest
-				float flDist = ( flagsVector[i]->GetAbsOrigin() - GetAbsOrigin() ).LengthSqr();
-				if ( flDist < flClosestFlagDist )
-				{
-					pClosestFlag = flagsVector[i];
-					flClosestFlagDist = flDist;
-				}
-
-				// Find the closest uncarried
-				if ( nCarriedFlags < flagsVector.Count() && !flagsVector[i]->IsStolen() )
-				{
-					if ( flDist < flClosestUncarriedFlagDist )
-					{
-						pClosestUncarriedFlag = flagsVector[i];
-						flClosestUncarriedFlagDist = flDist;
-					}
-				}
-			}
-		}
-	}
-
-	// If we have an uncarried flag, prioritize
-	if ( pClosestUncarriedFlag )
-		return pClosestUncarriedFlag;
-
-	return pClosestFlag;
-}
-
-
-//-----------------------------------------------------------------------------------------------------
-// Return capture zone for our flag(s)
-CCaptureZone *CFFBot::GetFlagCaptureZone( void ) const
-{
-	for( int i=0; i<ICaptureZoneAutoList::AutoList().Count(); ++i )
-	{
-		CCaptureZone *zone = static_cast< CCaptureZone* >( ICaptureZoneAutoList::AutoList()[i] );
-		if ( zone->GetTeamNumber() == GetTeamNumber() )
-		{
-			return zone;
-		}
-	}
-
-	return NULL;
-}
-
-
-
-//-----------------------------------------------------------------------------------------------------
-void CFFBot::ClearMyControlPoint( void )
-{
-	m_myControlPoint = NULL;
-	m_evaluateControlPointTimer.Invalidate();
-}
-
-
-//-----------------------------------------------------------------------------------------------------
-/**
- * Return true if no enemy has contested any point yet
- */
-bool CFFBot::AreAllPointsUncontestedSoFar( void ) const
-{
-	CTeamControlPointMaster *master = g_hControlPointMasters.Count() ? g_hControlPointMasters[0] : NULL;
-	if ( master )
-	{
-		for( int i=0; i<master->GetNumPoints(); ++i )
-		{
-			CTeamControlPoint *point = master->GetControlPoint( i );
-			
-			if ( point && point->HasBeenContested() )
-				return false;
-		}
-	}
-
-	return true;
 }
 
 
@@ -1959,7 +1309,7 @@ void CFFBot::SetupSniperSpotAccumulation( void )
 
 	if ( goalEntity == m_snipingGoalEntity )
 	{
-		// if goal has moved too much (ie: payload cart), recompute our spots
+		
 		Vector toGoal = m_snipingGoalEntity->WorldSpaceCenter() - m_lastSnipingGoalEntityPosition;
 
 		if ( toGoal.IsLengthLessThan( ff_bot_sniper_goal_entity_move_tolerance.GetFloat() ) )
@@ -2764,98 +2114,6 @@ float CFFBot::GetMaxAttackRange( void ) const
 	
 	if ( myWeapon->IsWeapon( FF_WEAPON_FLAMETHROWER ) )
 	{
-		if ( FFGameRules()->IsMannVsMachineMode() )
-		{
-			const float flameRange = 350.0f;
-
-			static CSchemaItemDefHandle pItemDef_GiantFlamethrower( "MVM Giant Flamethrower" );
-
-			if ( IsActiveTFWeapon( pItemDef_GiantFlamethrower ) )
-			{
-				return 2.5f * flameRange;
-			}
-
-			return flameRange;
-		}
-
-		return 250.0f;
-	}
-
-	if ( WeaponID_IsSniperRifle( myWeapon->GetWeaponID() ) )
-	{
-		// infinite
-		return FLT_MAX;
-	}
-
-	if ( myWeapon->IsWeapon( FF_WEAPON_ROCKETLAUNCHER ) )
-	{
-		return 3000.0f;
-	}
-
-	// bullet spray weapons, grenades, etc
-	// for now, default to infinite so bot always returns fire and doesn't look dumb
-	return FLT_MAX;
-}
-
-
-//-----------------------------------------------------------------------------------------------------
-/**
- * Return the ideal range at which we can effectively attack
- */
-float CFFBot::GetDesiredAttackRange( void ) const
-{
-	CFFWeaponBase *myWeapon = GetActiveFFWeapon();
-	if ( !myWeapon )
-		return 0.0f;
-
-	if ( myWeapon->IsWeapon( FF_WEAPON_KNIFE ) )
-	{
-		// get very close and stab
-		return 70.0f;	// 60
-	}
-
-	if ( myWeapon->IsMeleeWeapon() )
-	{
-		return 100.0f;
-	}
-	
-	if ( myWeapon->IsWeapon( FF_WEAPON_FLAMETHROWER ) )
-	{
-		return 100.0f;
-	}
-
-	if ( WeaponID_IsSniperRifle( myWeapon->GetWeaponID() ) )
-	{
-		// infinite
-		return FLT_MAX;
-	}
-
-	if ( myWeapon->IsWeapon( FF_WEAPON_ROCKETLAUNCHER ) && !FFGameRules()->IsMannVsMachineMode() )
-	{
-		return 1250.0f;
-	}
-
-	// bullet spray weapons, grenades, etc
-	return 500.0f;
-}
-
-
-//-----------------------------------------------------------------------------------------------------
-// If we're required to equip a specific weapon, do it.
-bool CFFBot::EquipRequiredWeapon( void )
-{
-	// if we have a required weapon on our stack, it takes precedence (items, etc)
-	if ( m_requiredWeaponStack.Count() )
-	{
-		CBaseCombatWeapon *pWeapon = m_requiredWeaponStack.Top().Get();
-		return Weapon_Switch( pWeapon );
-	}
-
-	if ( TheTFBots().IsMeleeOnly() || FFGameRules()->IsInMedievalMode() || HasWeaponRestriction( MELEE_ONLY ) )
-	{
-		// force use of melee weapons
-		Weapon_Switch( Weapon_GetSlot( TF_WPN_TYPE_MELEE ) );
-		return true;
 	}
 
 	if ( HasWeaponRestriction( PRIMARY_ONLY ) )
@@ -2881,23 +2139,7 @@ void CFFBot::EquipBestWeaponForThreat( const CKnownEntity *threat )
 	if ( EquipRequiredWeapon() )
 		return;
 
-#ifdef TF_RAID_MODE
-	if ( FFGameRules()->IsRaidMode() )
-	{
-		if ( HasAttribute( CFFBot::AGGRESSIVE ) )
-		{
-			// mobs never equip other weapons
-			return;
-		}
 
-		if ( GetPlayerClass()->GetClassIndex() == CLASS_DEMOMAN && !IsInASquad() )
-		{
-			// wandering demomen use stickies only
-			Weapon_Switch( Weapon_GetSlot( TF_WPN_TYPE_SECONDARY ) );
-			return;
-		}
-	}
-#endif // TF_RAID_MODE
 	 
 	CFFWeaponBase *primary = dynamic_cast< CFFWeaponBase *>( Weapon_GetSlot( TF_WPN_TYPE_PRIMARY ) );
 	if ( !IsCombatWeapon( primary ) )
@@ -2911,169 +2153,7 @@ void CFFBot::EquipBestWeaponForThreat( const CKnownEntity *threat )
 		secondary = NULL;
 	}
 
-	// no secondary weapons in MvM
-	if ( FFGameRules()->IsMannVsMachineMode() )
-	{
-		if ( IsPlayerClass( CLASS_MEDIC ) && IsInASquad() && GetSquad() && !GetSquad()->IsLeader( this ) )
-		{
-			// always try to heal leader
-			Weapon_Switch( Weapon_GetSlot( TF_WPN_TYPE_SECONDARY ) );
-			return;
-		}
-
-		secondary = NULL;
-	}
-
-	CFFWeaponBase *melee = dynamic_cast< CFFWeaponBase *>( Weapon_GetSlot( TF_WPN_TYPE_MELEE ) );
-	if ( !IsCombatWeapon( melee ) )
-	{
-		melee = NULL;
-	}
-
-	CFFWeaponBase *gun = NULL;
-	if ( primary )
-	{
-		gun = primary;
-	}
-	else if ( secondary )
-	{
-		gun = secondary;
-	}
-	else
-	{
-		gun = melee;
-	}
-
-	if ( IsDifficulty( CFFBot::EASY ) )
-	{
-		// easy bots always use their primary weapon if they have one
-		if ( gun )
-		{
-			Weapon_Switch( gun );
-		}
-
-		return;
-	}
-
-	if ( !threat || !threat->WasEverVisible() || threat->GetTimeSinceLastSeen() > 5.0f )
-	{
-		// no threat - go back to primary weapon so it has a chance to reload
-		if ( gun )
-		{
-			Weapon_Switch( gun );
-		}
-
-		return;
-	}
-
-	// now filter weapons by available ammo
-	if ( GetAmmoCount( TF_AMMO_PRIMARY ) <= 0 )
-	{
-		primary = NULL;
-	}
-
-	if ( GetAmmoCount( TF_WPN_TYPE_SECONDARY ) <= 0 )
-	{
-		secondary = NULL;
-	}
-
-	// modify our gun choice based on threat situation (range, etc)
-	switch( GetPlayerClass()->GetClassIndex() )
-	{
-	case CLASS_DEMOMAN:
-	case CLASS_HEAVYWEAPONS:
-	case CLASS_SPY:
-	case CLASS_MEDIC:
-	case CLASS_ENGINEER:
-		// primary
-		break;
-
-	case CLASS_SCOUT:
-		{
-			if ( secondary )
-			{
-				if ( gun && !gun->Clip1() )
-				{
-					gun = secondary;
-				}
-			}
-		}
-		break;
-
-	case CLASS_SOLDIER:
-		{
-			// if we've emptied our rocket launcher clip and are fighting a nearby threat, switch to our secondary if it is ready to fire
-			if ( gun && !gun->Clip1() )
-			{
-				if ( secondary && secondary->Clip1() )
-				{
-					const float closeSoldierRange = 500.0f;
-					if ( IsRangeLessThan( threat->GetLastKnownPosition(), closeSoldierRange ) )
-					{
-						gun = secondary;
-					}
-				}
-			}
-		}
-		break;
-
-	case CLASS_SNIPER:
-		{
-			const float closeSniperRange = 750.0f;
-			if ( secondary && IsRangeLessThan( threat->GetLastKnownPosition(), closeSniperRange ) )
-				gun = secondary;
-		}
-		break;
-
-	case CLASS_PYRO:
-		{
-			const float flameRange = 750.0f;
-			if ( secondary && IsRangeGreaterThan( threat->GetLastKnownPosition(), flameRange ) )
-			{
-				gun = secondary;
-			}
-
-			// keep flamethrower out to reflect projectiles
-			if ( threat->GetEntity() && threat->GetEntity()->IsPlayer() )
-			{
-				CFFPlayer *enemy = ToFFPlayer( threat->GetEntity() );
-
-				if ( enemy->IsPlayerClass( CLASS_SOLDIER ) || enemy->IsPlayerClass( CLASS_DEMOMAN ) )
-				{
-					gun = primary;
-				}
-			}
-		}
-		break;
-	}
-
-	if ( gun )
-	{
-		Weapon_Switch( gun );
-	}
-}
-
-
-//-----------------------------------------------------------------------------------------------------
-// NOTE: This assumes default weapon loadouts
-bool CFFBot::EquipLongRangeWeapon( void )
-{
-	// no secondary weapons in MvM
-	if ( FFGameRules()->IsMannVsMachineMode() )
-		return false;
-
-	if ( IsPlayerClass( CLASS_SOLDIER ) || 
-		 IsPlayerClass( CLASS_DEMOMAN ) ||
-		 IsPlayerClass( CLASS_HEAVYWEAPONS ) ||
-		 IsPlayerClass( CLASS_SNIPER ) )
-	{
-		CBaseCombatWeapon *primary = Weapon_GetSlot( TF_WPN_TYPE_PRIMARY );
-		if ( primary )
-		{
-			if ( GetAmmoCount( TF_AMMO_PRIMARY ) > 0 )
-			{
-				Weapon_Switch( primary );
-				return true;
+	
 			}
 		}
 	}
@@ -3531,7 +2611,7 @@ void CFFBot::RealizeSpy( CFFPlayer *pPlayer )
 				if( !pOtherBot->IsKnownSpy( pPlayer ) )
 				{
 					// I was suspicious that they were a spy, make my friend suspicious as well.
-					// This will cause them to attack a disguised spy in MvM for a bit.
+					
 					pOtherBot->SuspectSpy( pPlayer );
 
 					// Tell them about it
@@ -3647,36 +2727,20 @@ void CFFBot::DeleteSquad( void )
 //---------------------------------------------------------------------------------------------
 bool CFFBot::IsWeaponRestricted( CFFWeaponBase *weapon ) const
 {
-	if ( !weapon )
-	{
-		return false;
-	}
+       if ( !weapon )
+       {
+               return false;
+       }
 
-	// Get the weapon's loadout slot
-	CEconItemView *pEconItemView = weapon->GetAttributeContainer()->GetItem();
-	if ( !pEconItemView )
-		return false;
-	CTFItemDefinition *pItemDef = pEconItemView->GetStaticData();
-	if ( !pItemDef )
-		return false;
-	int iLoadoutSlot = pItemDef->GetLoadoutSlot( GetPlayerClass()->GetClassIndex() );
+       if ( HasWeaponRestriction( MELEE_ONLY ) )
+       {
+               return !weapon->IsMeleeWeapon();
+       }
 
-	if ( HasWeaponRestriction( MELEE_ONLY ) )
-	{
-		return (iLoadoutSlot != LOADOUT_POSITION_MELEE);
-	}
+       // Fortress Forever does not maintain TF2-style loadout slots
+       // Ignore PRIMARY_ONLY and SECONDARY_ONLY restrictions
 
-	if ( HasWeaponRestriction( PRIMARY_ONLY ) )
-	{
-		return (iLoadoutSlot != LOADOUT_POSITION_PRIMARY);
-	}
-
-	if ( HasWeaponRestriction( SECONDARY_ONLY ) )
-	{
-		return (iLoadoutSlot != LOADOUT_POSITION_SECONDARY);
-	}
-
-	return false;
+       return false;
 }
 
 
@@ -3719,23 +2783,6 @@ bool CFFBot::ShouldFireCompressionBlast( void )
 		}
 	}
 
-	bool shouldPushPlayers = !FFGameRules()->IsMannVsMachineMode();
-
-	if ( shouldPushPlayers )
-	{
-		const CKnownEntity *threat = GetVisionInterface()->GetPrimaryKnownThreat( true );
-		if ( threat && threat->GetEntity() && threat->GetEntity()->IsPlayer() )
-		{
-			CFFPlayer *pushVictim = ToFFPlayer( threat->GetEntity() );
-
-			if ( IsRangeLessThan( pushVictim, ff_bot_pyro_shove_away_range.GetFloat() ) )
-			{
-				// our threat is very close - shove them!
-
-				// always shove ubers
-				if ( pushVictim && pushVictim->m_Shared.IsInvulnerable() )
-				{
-					return true;
 				}
 
 				if ( pushVictim->GetGroundEntity() == NULL )
@@ -3981,38 +3028,15 @@ void CFFBot::UpdateDelayedThreatNotices( void )
 //---------------------------------------------------------------------------------------------
 void CFFBot::GiveRandomItem( loadout_positions_t loadoutPosition )
 {
-	CUtlVector< const CEconItemDefinition * > itemVector;
-
-	const CEconItemSchema::ItemDefinitionMap_t& mapItemDefs = ItemSystem()->GetItemSchema()->GetItemDefinitionMap();
-	FOR_EACH_MAP_FAST( mapItemDefs, i )
-	{
-		const CTFItemDefinition *pItemDef = dynamic_cast< const CTFItemDefinition * >( mapItemDefs[i] );
-
-		if ( pItemDef && pItemDef->GetLoadoutSlot( GetPlayerClass()->GetClassIndex() ) == loadoutPosition )
-		{
-			itemVector.AddToTail( pItemDef );
-		}
-	}
-
-	if ( itemVector.Count() > 0 )
-	{
-		int which = RandomInt( 0, itemVector.Count()-1 );
-
-/*
-		CBaseCombatWeapon *myMelee = me->Weapon_GetSlot( TF_WPN_TYPE_MELEE );
-		me->Weapon_Detach( myMelee );
-		UTIL_Remove( myMelee );
-*/
-
-// Fortress Forever does not support wearable item generation
-	}
+       // Fortress Forever has no item schema support
+       // function intentionally left blank
 }
 
 
 //---------------------------------------------------------------------------------------------
 bool CFFBot::IsSquadmate( CFFPlayer *who ) const
 {
-	if ( !m_squad || !who || !who->IsBotOfType( TF_BOT_TYPE ) )
+       if ( !m_squad || !who || !who->IsBotOfType( FF_BOT_TYPE ) )
 		return false;
 
 	return GetSquad() == ToTFBot( who )->GetSquad();
@@ -4166,173 +3190,7 @@ Action< CFFBot > *CFFBot::OpportunisticallyUseWeaponAbilities( void )
 		}
 	}
 
-	// don't use items if we have the flag, since most of them are unusable (unless we're a bomb carrier in MvM)
-	if ( HasTheFlag() && !FFGameRules()->IsMannVsMachineMode() )
-	{
-		return NULL;
-	}
-
-	for ( int w=0; w<MAX_WEAPONS; ++w )
-	{
-		CFFWeaponBase *weapon = ( CFFWeaponBase * )GetWeapon( w );
-		if ( !weapon )
-			continue;
-
-		// if I have some kind of buff banner - use it!
-		if ( weapon->GetWeaponID() == FF_WEAPON_BUFF_ITEM )
-		{
-			CTFBuffItem *buff = (CTFBuffItem *)weapon;
-			if ( buff->IsFull() )
-			{
-				return new CFFBotUseItem( buff );
-			}
-		}
-		else if ( weapon->GetWeaponID() == FF_WEAPON_LUNCHBOX )
-		{
-			// if we have an eatable (drink, sandvich, etc) - eat it!
-			CTFLunchBox *lunchbox = (CTFLunchBox *)weapon;
-			if ( lunchbox->HasAmmo() )
-			{
-				// scout lunchboxes are also gated by their energy drink meter
-				if ( !IsPlayerClass( CLASS_SCOUT ) || m_Shared.GetScoutEnergyDrinkMeter() >= 100 )
-				{
-					return new CFFBotUseItem( lunchbox );
-				}
-			}
-		}
-		else if ( weapon->GetWeaponID() == FF_WEAPON_BAT_WOOD )
-		{
-			// sandman
-			if ( GetAmmoCount( TF_AMMO_GRENADES1 ) > 0 )
-			{
-				const CKnownEntity *threat = GetVisionInterface()->GetPrimaryKnownThreat();
-				if ( threat && threat->IsVisibleInFOVNow() )
-				{
-					// hit a stunball
-					PressAltFireButton();			
-				}
-			}
-		}
-	}
-
-	return NULL;
-}
-
-
-//-----------------------------------------------------------------------------------------
-// mostly for MvM - pick a random enemy player that is not in their spawn room
-CFFPlayer *CFFBot::SelectRandomReachableEnemy( void )
-{
-	CUtlVector< CFFPlayer * > livePlayerVector;
-	CollectPlayers( &livePlayerVector, GetEnemyTeam( GetTeamNumber() ), COLLECT_ONLY_LIVING_PLAYERS );
-
-	// only consider players who have left their spawn
-	CUtlVector< CFFPlayer * > playerVector;
-	for( int i=0; i<livePlayerVector.Count(); ++i )
-	{
-		CFFPlayer *player = livePlayerVector[i];
-		if ( !PointInRespawnRoom( player, player->WorldSpaceCenter() ) )
-		{
-			playerVector.AddToTail( player );
-		}
-	}
-
-	if ( playerVector.Count() > 0 )
-	{
-		return playerVector[ RandomInt( 0, playerVector.Count()-1 ) ];
-	}
-
-	return NULL;
-}
-
-
-//-----------------------------------------------------------------------------------------
-// Different sized bots used different lookahead distances
-float CFFBot::GetDesiredPathLookAheadRange( void ) const
-{
-	return ff_bot_path_lookahead_range.GetFloat() * GetModelScale();
-}
-
-//-----------------------------------------------------------------------------------------
-// Hack to apply idle loop sounds in MvM
-void CFFBot::StartIdleSound( void )
-{
-	StopIdleSound();
-
-	if ( FFGameRules() && !FFGameRules()->IsMannVsMachineMode() )
-		return;
-
-	// SHIELD YOUR EYES MIKEB!!!
-	if ( IsMiniBoss() )
-	{
-		const char *pszSoundName = NULL;
-
-		int iClass = GetPlayerClass()->GetClassIndex();
-		switch ( iClass )
-		{
-		case CLASS_HEAVYWEAPONS:
-			{
-				pszSoundName = "MVM.GiantHeavyLoop";
-				break;
-			}
-		case CLASS_SOLDIER:
-			{
-				pszSoundName = "MVM.GiantSoldierLoop";
-				break;
-			}
-		case CLASS_DEMOMAN:
-			{
-				if ( m_mission == MISSION_DESTROY_SENTRIES )
-				{
-					pszSoundName = "MVM.SentryBusterLoop";
-				}
-				else
-				{
-					pszSoundName = "MVM.GiantDemomanLoop";
-				}
-				break;
-			}
-		case CLASS_SCOUT:
-			{
-				pszSoundName = "MVM.GiantScoutLoop";
-				break;
-			}
-		case CLASS_PYRO:
-			{
-				pszSoundName = "MVM.GiantPyroLoop";
-				break;
-			}
-		}
-
-		if ( pszSoundName )
-		{
-			CReliableBroadcastRecipientFilter filter;
-			CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
-			m_pIdleSound = controller.SoundCreate( filter, entindex(), pszSoundName );
-			controller.Play( m_pIdleSound, 1.0, 100 );
-		}
-	}
-}
-
-//-----------------------------------------------------------------------------------------
-void CFFBot::StopIdleSound( void )
-{
-	if ( m_pIdleSound )
-	{
-		CSoundEnvelopeController::GetController().SoundDestroy( m_pIdleSound );
-		m_pIdleSound = NULL;
-	}
-}
-
-bool CFFBot::ShouldAutoJump()
-{
-	if ( !HasAttribute( CFFBot::AUTO_JUMP ) )
-		return false;
-
-	if ( !m_autoJumpTimer.HasStarted() )
-	{
-		m_autoJumpTimer.Start( RandomFloat( m_flAutoJumpMin, m_flAutoJumpMax ) );
-		return true;
+	
 	}
 	else if ( m_autoJumpTimer.IsElapsed() )
 	{
@@ -4415,96 +3273,3 @@ void CFFBot::OnEventChangeAttributes( const CFFBot::EventChangeAttributes_t* pEv
 
 		SetMaxVisionRangeOverride( pEvent->m_maxVisionRange );
 
-		if ( FFGameRules()->IsMannVsMachineMode() )
-		{
-			SetAttribute( CFFBot::BECOME_SPECTATOR_ON_DEATH );
-			SetAttribute( CFFBot::RETAIN_BUILDINGS );
-		}
-
-		// cache off health value before we clear attribute because ModifyMaxHealth adds new attribute and reset the health
-		int nHealth = GetHealth();
-		int nMaxHealth = GetMaxHealth();
-
-		// remove any player attributes
-		RemovePlayerAttributes( false );
-		// and add ones that we want specifically
-		FOR_EACH_VEC( pEvent->m_characterAttributes, i )
-		{
-			const CEconItemAttributeDefinition *pDef = pEvent->m_characterAttributes[i].GetAttributeDefinition();
-			if ( pDef )
-			{
-				Assert( GetAttributeList() );
-				GetAttributeList()->SetRuntimeAttributeValue( pDef, pEvent->m_characterAttributes[i].m_value.asFloat );
-			}
-		}
-		NetworkStateChanged();
-
-		// set health back to what it was before we clear bot's attributes
-		ModifyMaxHealth( nMaxHealth );
-		SetHealth( nHealth );
-
-               // tags
-               ClearTags();
-               for( int g=0; g<pEvent->m_tags.Count(); ++g )
-               {
-                       AddTag( pEvent->m_tags[g] );
-               }
-       }
-
-}
-
-
-
-
-int CFFBot::GetUberHealthThreshold()
-{
-	int iUberHealthThreshold = 0;
-	CALL_ATTRIB_HOOK_INT( iUberHealthThreshold, bot_medic_uber_health_threshold );
-	if ( iUberHealthThreshold > 0 )
-	{
-		return iUberHealthThreshold;
-	}
-
-	return 50;
-}
-
-
-float CFFBot::GetUberDeployDelayDuration()
-{
-	float flDelayUberDuration = 0;
-	CALL_ATTRIB_HOOK_INT( flDelayUberDuration, bot_medic_uber_deploy_delay_duration );
-	if ( flDelayUberDuration > 0 )
-	{
-		return flDelayUberDuration;
-	}
-	
-        return -1.f;
-}
-
-//------------------------------------------------------------------------------------
-void CFFBot::ThrowConcussionGrenade()
-{
-       if ( !IsAlive() )
-               return;
-
-       CFFPlayer *me = GetPlayerClass();
-       if ( me )
-       {
-               me->PrimeGrenade1();
-               me->ThrowPrimedGrenade();
-       }
-}
-
-//------------------------------------------------------------------------------------
-void CFFBot::ThrowEMPGrenade()
-{
-       if ( !IsAlive() )
-               return;
-
-       CFFPlayer *me = GetPlayerClass();
-       if ( me )
-       {
-               me->PrimeGrenade2();
-               me->ThrowPrimedGrenade();
-       }
-}

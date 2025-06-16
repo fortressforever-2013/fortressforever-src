@@ -125,7 +125,7 @@ ActionResult< CFFBot >	CFFBotSpyAttack::Update( CFFBot *me, float interval )
 	case CFFBot::EXPERT:	behindTolerance = 0.0f;		break;
 	}
 
-	if ( FFGameRules()->IsMannVsMachineMode() )
+	if ( false )
 	{
 		behindTolerance = 0.7071f;
 	}
@@ -199,14 +199,6 @@ ActionResult< CFFBot >	CFFBotSpyAttack::Update( CFFBot *me, float interval )
 					if ( threatRange < 100.0f )
 					{
 						isMovingTowardVictim = false;
-					}
-				}
-				else if ( FFGameRules()->IsMannVsMachineMode() )
-				{
-					if ( m_chuckleTimer.IsElapsed() )
-					{
-						m_chuckleTimer.Start( 1.0f );
-						me->EmitSound( "Spy.MVM_Chuckle" );
 					}
 				}
 			}

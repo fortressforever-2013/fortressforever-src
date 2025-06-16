@@ -1,8 +1,5 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
-//
-// Purpose: 
-//
-// $NoKeywords: $
+CBasePlayer *BotPutInServer(bool bFrozen, int iTeam, int iClass);
+#endif
 //=============================================================================//
 
 #ifndef FF_BOT_TEMP_H

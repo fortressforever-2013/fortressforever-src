@@ -140,10 +140,6 @@ void CFFBotManager::OnRoundRestart( void )
 	}
 
 
-#ifdef FF_CREEP_MODE
-	m_creepExperience[ FF_TEAM_RED ] = 0;
-	m_creepExperience[ FF_TEAM_BLUE ] = 0;
-#endif
 
 	m_isMedeivalBossScenarioSetup = false;
 }
@@ -156,126 +152,11 @@ void CFFBotManager::Update()
 
 	DrawStuckBotData();
 
-#ifdef FF_CREEP_MODE
-	UpdateCreepWaves();
-#endif
 
 	NextBotManager::Update();
 }
 
 
-#ifdef FF_CREEP_MODE
-ConVar ff_creep_initial_delay( "ff_creep_initial_delay", "30" );
-ConVar ff_creep_wave_interval( "ff_creep_wave_interval", "30" );
-ConVar ff_creep_wave_count( "ff_creep_wave_count", "3" );
-ConVar ff_creep_class( "ff_creep_class", "heavyweapons" );
-ConVar ff_creep_level_up( "ff_creep_level_up", "6" );
-
-
-//----------------------------------------------------------------------------------------------------------------
-void CFFBotManager::UpdateCreepWaves()
-{
-	if ( !FFGameRules()->IsCreepWaveMode() )
-		return;
-
-	if ( FFGameRules()->RoundHasBeenWon() )
-	{
-		// no more creep waves - game is over
-		return;
-	}
-
-	if ( FFGameRules()->InSetup() || FFGameRules()->State_Get() == GR_STATE_STARTGAME || FFGameRules()->State_Get() == GR_STATE_PREROUND )
-	{
-		// no creeps at start of round
-		m_creepWaveTimer.Start( ff_creep_initial_delay.GetFloat() );
-
-		// delete all creeps
-		for( int i=1; i<=gpGlobals->maxClients; ++i )
-		{
-			CBasePlayer *player = static_cast< CBasePlayer * >( UTIL_PlayerByIndex( i ) );
-
-			if ( !player )
-				continue;
-
-			if ( FNullEnt( player->edict() ) )
-				continue;
-
-			CFFBot *creep = ToTFBot( player );
-			if ( !creep || !creep->HasAttribute( CFFBot::IS_NPC ) )
-				continue;
-
-			engine->ServerCommand( UTIL_VarArgs( "kickid %d\n", player->GetUserID() ) );
-		}
-
-		return;
-	}	
-
-	if ( m_creepWaveTimer.IsElapsed() )
-	{
-		m_creepWaveTimer.Start( ff_creep_wave_interval.GetFloat() );
-
-		SpawnCreepWave( FF_TEAM_RED );
-		SpawnCreepWave( FF_TEAM_BLUE );
-	}
-}
-
-
-//----------------------------------------------------------------------------------------------------------------
-void CFFBotManager::SpawnCreepWave( int team )
-{
-	CFFBotSquad *squad = new CFFBotSquad;
-
-	for( int i=0; i<ff_creep_wave_count.GetInt(); ++i )
-	{
-		SpawnCreep( team, squad );
-	}
-}
-
-
-//----------------------------------------------------------------------------------------------------------------
-void CFFBotManager::SpawnCreep( int team, CFFBotSquad *squad )
-{
-	CFFBot *bot = NextBotCreatePlayerBot< CFFBot >( "Creep" );
-
-	if ( !bot ) 
-		return;
-
-	bot->SetAttribute( CFFBot::IS_NPC );
-	bot->HandleCommand_JoinTeam( team == FF_TEAM_RED ? "red" : "blue" );
-	bot->SetDifficulty( CFFBot::NORMAL );
-	bot->HandleCommand_JoinClass( ff_creep_class.GetString() );
-	bot->JoinSquad( squad );
-	bot->AddGlowEffect();
-}
-
-
-//----------------------------------------------------------------------------------------------------------------
-void CFFBotManager::OnCreepKilled( CFFPlayer *killer )
-{
-	CFFBot *bot = ToTFBot( killer );
-	if ( bot && bot->HasAttribute( CFFBot::IS_NPC ) )
-		return;
-
-	++m_creepExperience[ killer->GetTeamNumber() ];
-
-/*
-	int xp = m_creepExperience[ killer->GetTeamNumber() ];
-	int level = xp / ff_creep_level_up.GetInt();
-	int left = xp % ff_creep_level_up.GetInt();
-
-	char text[256];
-	Q_snprintf( text, sizeof(text), "%s killed a creep. %s team LVL = %d+%d/%d\n", 
-				killer->GetPlayerName(), 
-				killer->GetTeamNumber() == FF_TEAM_RED ? "Red" : "Blue", 
-				level+1, left, ff_creep_level_up.GetInt() );
-
-	UTIL_ClientPrintAll( HUD_PRINTTALK, text );
-*/
-
-	UTIL_ClientPrintAll( HUD_PRINTTALK, "%s killed a creep" );
-}
-
-#endif // FF_CREEP_MODE
 
 //----------------------------------------------------------------------------------------------------------------
 bool CFFBotManager::RemoveBotFromTeamAndKick( int nTeam )
@@ -710,7 +591,7 @@ CON_COMMAND_F( ff_bot_debug_stuck_log, "Given a server logfile, visually display
 
 			if ( !strcmp( first, "Loading" ) )
 			{
-				// L 08/08/2012 - 15:10:47: Loading map "mvm_coaltown"
+				
 				strtok( NULL, " " );
 				char *mapname = strtok( NULL, "\"" );
 

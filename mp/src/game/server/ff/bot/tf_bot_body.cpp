@@ -17,11 +17,6 @@ float CFFBotBody::GetHeadAimTrackingInterval( void ) const
 {
 	CFFBot *me = (CFFBot *)GetBot();
 
-	// don't let Spies in MvM mode aim too precisely
-	if ( FFGameRules()->IsMannVsMachineMode() && me->IsPlayerClass( CLASS_SPY ) )
-	{
-		return 0.25f;
-	}
 
 	switch( me->GetDifficulty() )
 	{

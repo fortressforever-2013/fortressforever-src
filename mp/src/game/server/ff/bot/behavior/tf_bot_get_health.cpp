@@ -108,18 +108,7 @@ bool CFFBotGetHealth::IsPossible( CFFBot *me )
 
 
 
-#ifdef TF_RAID_MODE
-	// mobs don't heal
-	if ( FFGameRules()->IsRaidMode() && me->HasAttribute( CFFBot::AGGRESSIVE ) )
-	{
-		return false;
-	}
-#endif // TF_RAID_MODE
 
-	if ( FFGameRules()->IsMannVsMachineMode() )
-	{
-		return false;
-	}
 
 	float healthRatio = (float)me->GetHealth() / (float)me->GetMaxHealth();
 

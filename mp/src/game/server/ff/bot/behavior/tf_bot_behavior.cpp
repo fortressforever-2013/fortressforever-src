@@ -26,8 +26,7 @@
 #include "bot/behavior/nav_entities/ff_bot_nav_ent_wait.h"
 #include "bot/behavior/ff_bot_tactical_monitor.h"
 #include "bot/behavior/ff_bot_taunt.h"
-#include "bot/behavior/scenario/creep_wave/ff_bot_creep_wave.h"
-#include "player_vs_environment/ff_population_manager.h"
+#include "player_vs_environment/tf_population_manager.h"
 
 
 extern ConVar ff_bot_health_ok_ratio;
@@ -84,12 +83,6 @@ ActionResult< CFFBot >	CFFBotMainAction::OnStart( CFFBot *me, Action< CFFBot > *
 		return ChangeTo( new CFFBotDead, "I'm actually dead" );
 	}
 
-#ifdef FF_CREEP_MODE
-	if ( FFGameRules()->IsCreepWaveMode() )
-	{
-		return ChangeTo( new CFFBotCreepWave, "I'm a creep" );
-	}
-#endif // FF_CREEP_MODE
 
 
 #ifdef STAGING_ONLY
@@ -160,58 +153,6 @@ ActionResult< CFFBot >	CFFBotMainAction::Update( CFFBot *me, float interval )
 // 		}
 	}
 
-	if ( FFGameRules()->IsMannVsMachineMode() && me->GetTeamNumber() == FF_TEAM_PVE_INVADERS )
-	{
-		// infinite ammo
-		// me->GiveAmmo( 100, TF_AMMO_PRIMARY, true );
-		// me->GiveAmmo( 100, TF_AMMO_SECONDARY, true );
-		// This resets the Sandman
-		//me->GiveAmmo( 100, TF_AMMO_GRENADES1, true );
-		// This resets the Bonk drink meter...
-		//me->GiveAmmo( 100, TF_AMMO_GRENADES2, true );
-               me->GiveAmmo( 100, TF_AMMO_METAL, true );
-
-		CTFNavArea *myArea = me->GetLastKnownArea();
-		int spawnRoomFlag = me->GetTeamNumber() == FF_TEAM_RED ? TF_NAV_SPAWN_ROOM_RED : TF_NAV_SPAWN_ROOM_BLUE;
-
-		if ( myArea && myArea->HasAttributeTF( spawnRoomFlag ) )
-		{
-			// invading bots get uber while they leave their spawn so they don't drop their cash where players can't pick it up
-			me->m_Shared.AddCond( TF_COND_INVULNERABLE, 0.5f );
-			me->m_Shared.AddCond( TF_COND_INVULNERABLE_HIDE_UNLESS_DAMAGED, 0.5f );
-			me->m_Shared.AddCond( TF_COND_INVULNERABLE_WEARINGOFF, 0.5f );
-		}
-
-		// watch for bots that have fallen through the ground
-		if ( myArea && myArea->GetZ( me->GetAbsOrigin() ) - me->GetAbsOrigin().z > 100.0f )
-		{
-			if ( !m_undergroundTimer.HasStarted() )
-			{
-				m_undergroundTimer.Start();
-			}
-			else if ( m_undergroundTimer.IsGreaterThen( 3.0f ) )
-			{
-				UTIL_LogPrintf( "\"%s<%i><%s><%s>\" underground (position \"%3.2f %3.2f %3.2f\")\n",
-								me->GetPlayerName(),
-								me->GetUserID(),
-								me->GetNetworkIDString(),
-								me->GetTeam()->GetName(),
-								me->GetAbsOrigin().x, me->GetAbsOrigin().y, me->GetAbsOrigin().z );
-
-				// teleport bot to a reasonable place
-				me->SetAbsOrigin( myArea->GetCenter() );
-			}
-		}
-		else
-		{
-			m_undergroundTimer.Invalidate();
-		}
-
-		if ( me->ShouldAutoJump() )
-		{
-			me->GetLocomotionInterface()->Jump();
-		}
-	}
 
 
 
@@ -369,22 +310,6 @@ EventDesiredResult< CFFBot > CFFBotMainAction::OnContact( CFFBot *me, CBaseEntit
 		m_lastTouch = other;
 		m_lastTouchTime = gpGlobals->curtime;
 
-		// Mini-bosses destroy non-Sentrygun objects they bump into (ie: Dispensers)
-		if ( FFGameRules()->IsMannVsMachineMode() && me->IsMiniBoss() )
-		{
-			if ( other->IsBaseObject() )
-			{
-				CBaseObject *pObject = assert_cast< CBaseObject* >( other );
-				if ( pObject->GetType() != OBJ_SENTRYGUN || pObject->IsMiniBuilding() )
-				{
-					int damage = MAX( other->GetMaxHealth(), other->GetHealth() );
-
-					Vector toVictim = other->WorldSpaceCenter() - me->WorldSpaceCenter();
-
-					CTakeDamageInfo info( me, me, 4 * damage, DMG_BLAST, TF_DMG_CUSTOM_NONE );
-					CalculateMeleeDamageForce( &info, toVictim, me->WorldSpaceCenter(), 1.0f );
-					other->TakeDamage( info );
-				}
 			}
 		}
 	}
@@ -436,13 +361,6 @@ EventDesiredResult< CFFBot > CFFBotMainAction::OnStuck( CFFBot *me )
 	}
 */
 
-	if ( FFGameRules()->IsMannVsMachineMode() )
-	{
-		if ( me->m_Shared.InCond( TF_COND_MVM_BOT_STUN_RADIOWAVE ) )
-		{
-			// bot is stunned, not stuck
-			return TryContinue();
-		}
 
 		if ( m_lastTouch != NULL && gpGlobals->curtime - m_lastTouchTime < 2.0f )
 		{
@@ -541,10 +459,6 @@ EventDesiredResult< CFFBot > CFFBotMainAction::OnOtherKilled( CFFBot *me, CBaseC
 		if ( !ToFFPlayer( victim )->IsBot() && me->IsEnemy( victim ) && me->IsSelf( info.GetAttacker() ) )
 		{
 			bool isTaunting = !me->HasTheFlag() && RandomFloat( 0.0f, 100.0f ) <= ff_bot_taunt_victim_chance.GetFloat();
-
-			if ( FFGameRules()->IsMannVsMachineMode() && me->IsMiniBoss() )
-			{
-				// Bosses don't taunt puny humans
 				isTaunting = false;
 			}
 
@@ -778,8 +692,6 @@ Vector CFFBotMainAction::SelectTargetPoint( const INextBot *meBot, const CBaseCo
 QueryResultType CFFBotMainAction::IsPositionAllowed( const INextBot *me, const Vector &pos ) const
 {
 	return ANSWER_YES;
-
-	// This is causing bots to get hung up on drop-downs, particularly in MvM. MSB 6/11/2012
 	/*
 	if ( me->GetLocomotionInterface()->IsScrambling() )
 	{
@@ -1045,11 +957,6 @@ const CKnownEntity *CFFBotMainAction::SelectMoreDangerousThreatInternal( const I
 	// close range sentries are the most dangerous of all
 	bool shouldFearSentryGuns = true;
 
-	if ( FFGameRules()->IsMannVsMachineMode() )
-	{
-		// MvM bots are not afraid of sentry guns and treat them like other enemy players
-		shouldFearSentryGuns = false;
-	}
 
 	if ( shouldFearSentryGuns )
 	{
@@ -1084,17 +991,6 @@ const CKnownEntity *CFFBotMainAction::SelectMoreDangerousThreatInternal( const I
 			return threat2;
 		}
 	}
-
-	// enforce Spy hatred in MvM mode
-	if ( FFGameRules()->IsMannVsMachineMode() )
-	{
-		const float spyHateRadius = 1000.0f;
-
-		const CKnownEntity *spyThreat = SelectClosestSpyToMe( me, threat1, threat2 );
-		if ( spyThreat && me->IsRangeLessThan( spyThreat->GetEntity(), spyHateRadius ) )
-		{
-			return spyThreat;
-		}
 	}
 
 
@@ -1276,21 +1172,6 @@ void CFFBotMainAction::FireWeaponAtEnemy( CFFBot *me )
 				return;
 		}
 	}
-
-	// if our target is uber'd, most weapons are useless - unless we're in MvM, where invuln tanking is valuable
-	if ( FFGameRules() && !FFGameRules()->IsMannVsMachineMode() )
-	{
-		CFFPlayer *playerThreat = ToFFPlayer( threat->GetEntity() );
-		if ( playerThreat && playerThreat->m_Shared.IsInvulnerable() )
-		{
-			if ( !myWeapon->IsWeapon( FF_WEAPON_ROCKETLAUNCHER ) &&
-				!myWeapon->IsWeapon( FF_WEAPON_GRENADELAUNCHER ) &&
-				!myWeapon->IsWeapon( FF_WEAPON_PIPEBOMBLAUNCHER ) &
-				!myWeapon->IsWeapon( FF_WEAPON_ROCKETLAUNCHER_DIRECTHIT ) )
-			{
-				// firing would just waste ammo, so don't
-				return;
-			}
 		}
 	}
 
@@ -1311,14 +1192,6 @@ void CFFBotMainAction::FireWeaponAtEnemy( CFFBot *me )
 		}
 		return;
 	}
-
-	// limit range of hitscan weapon fire in MvM
-	if ( FFGameRules()->IsMannVsMachineMode() && !me->IsPlayerClass( CLASS_SNIPER ) && me->IsHitScanWeapon( myWeapon ) )
-	{
-		if ( me->IsRangeGreaterThan( threat->GetEntity(), ff_bot_hitscan_range_limit.GetFloat() ) )
-		{
-			return;
-		}
 	}
 
 	if ( myWeapon->IsWeapon( FF_WEAPON_FLAMETHROWER ) )
@@ -1358,23 +1231,6 @@ void CFFBotMainAction::FireWeaponAtEnemy( CFFBot *me )
 			// only fire if zoomed in
 			if ( me->m_Shared.InCond( TF_COND_ZOOMED ) )
 			{
-				const float reactionTime = FFGameRules()->IsMannVsMachineMode() ? 0.5f : 0.1f;	// just a moment to stop headshots when obviously panning too fast to see
-				if ( m_steadyTimer.HasStarted() && m_steadyTimer.IsGreaterThen( reactionTime ) )
-				{
-					trace_t trace;
-					
-					Vector forward;
-					me->EyeVectors( &forward );
-
-					// allow bot to see through projectile shield
-					CTraceFilterIgnoreFriendlyCombatItems filter( me, COLLISION_GROUP_NONE, me->GetTeamNumber() );
-					UTIL_TraceLine( me->EyePosition(), me->EyePosition() + 9000.0f * forward, MASK_SHOT, &filter, &trace );
-
-					if ( trace.m_pEnt == threat->GetEntity() )
-					{
-						// we're on target - fire!
-						me->PressFireButton();
-					}
 				}
 			}
 		}
@@ -1545,10 +1401,7 @@ void CFFBotMainAction::Dodge( CFFBot *me )
 
 
 
-#ifdef TF_RAID_MODE
-	if ( FFGameRules()->IsRaidMode() )
-		return;
-#endif // TF_RAID_MODE
+
 
 	const CKnownEntity *threat = me->GetVisionInterface()->GetPrimaryKnownThreat();
 	if ( threat && threat->IsVisibleRecently() )

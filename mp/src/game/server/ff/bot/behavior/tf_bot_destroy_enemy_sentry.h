@@ -31,9 +31,6 @@ private:
 
 	bool m_canMove;
 
-#ifdef FF_CREEP_MODE
-	CountdownTimer m_creepTimer;
-#endif
 
 	Vector m_safeAttackSpot;
 	bool m_hasSafeAttackSpot;

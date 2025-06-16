@@ -192,13 +192,6 @@ bool CFFBotSpyInfiltrate::FindHidingSpot( CFFBot *me )
 	int myTeam = me->GetTeamNumber();
 	const CUtlVector< CTFNavArea * > *enemySpawnExitVector = TheTFNavMesh()->GetSpawnRoomExitAreas( GetEnemyTeam( myTeam ) );
 
-#ifdef TF_RAID_MODE
-	if ( FFGameRules()->IsRaidMode() )
-	{
-		// for now, just lurk where we are
-		return false;
-	}
-#endif
 
 	if ( !enemySpawnExitVector || enemySpawnExitVector->Count() == 0 )
 	{
