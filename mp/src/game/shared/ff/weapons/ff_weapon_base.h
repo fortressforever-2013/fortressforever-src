@@ -22,7 +22,7 @@
 #include "SoundEmitterSystem/isoundemittersystembase.h"
 #include "ff_buildabledefs.h"
 
-#ifdef CLIENT_DLL 
+#ifdef CLIENT_DLL
 	#define CFFWeaponBase C_FFWeaponBase
 #endif
 
@@ -34,7 +34,7 @@ class CFFPlayer;
 // GRENADES and BULLETS have now been removed
 #define AMMO_SHELLS				"AMMO_SHELLS"	// shotguns
 #define AMMO_NAILS				"AMMO_NAILS"	// nailguns
-#define AMMO_ROCKETS			"AMMO_ROCKETS"	// rpg
+#define AMMO_ROCKETS			"AMMO_ROCKETS"	// rpg, pipe launcher
 #define AMMO_CELLS				"AMMO_CELLS"	// for building dispenser, sentry gun
 #define AMMO_DETPACK			"AMMO_DETPACK"	// for "building" detpacks
 #define AMMO_MANCANNON			"AMMO_MANCANNON"	// for "building" man cannons
@@ -106,49 +106,49 @@ class CFFPlayer;
 // Weapon IDs for all FF Game weapons
 typedef enum
 {
-	FF_WEAPON_NONE = 0, 
+	FF_WEAPON_NONE = 0,
 
 	// Melee
-	FF_WEAPON_CROWBAR, 
-	FF_WEAPON_KNIFE, 
-	FF_WEAPON_MEDKIT, 
-	FF_WEAPON_SPANNER, 
-	FF_WEAPON_UMBRELLA, 
+	FF_WEAPON_CROWBAR,
+	FF_WEAPON_KNIFE,
+	FF_WEAPON_MEDKIT,
+	FF_WEAPON_SPANNER,
+	FF_WEAPON_UMBRELLA,
 
 	// Shutguns
-	FF_WEAPON_SHOTGUN, 
-	FF_WEAPON_SUPERSHOTGUN, 
+	FF_WEAPON_SHOTGUN,
+	FF_WEAPON_SUPERSHOTGUN,
 
 	// Nailguns
-	FF_WEAPON_NAILGUN, 
-	FF_WEAPON_SUPERNAILGUN, 
+	FF_WEAPON_NAILGUN,
+	FF_WEAPON_SUPERNAILGUN,
 
 	// Demomen Specific
-	FF_WEAPON_GRENADELAUNCHER, 
-	FF_WEAPON_PIPELAUNCHER, 
+	FF_WEAPON_GRENADELAUNCHER,
+	FF_WEAPON_PIPELAUNCHER,
 
 	// Sniper specific
-	FF_WEAPON_AUTORIFLE, 
-	FF_WEAPON_SNIPERRIFLE, 
+	FF_WEAPON_AUTORIFLE,
+	FF_WEAPON_SNIPERRIFLE,
 
 	// Pyro specific
-	FF_WEAPON_FLAMETHROWER, 
-	FF_WEAPON_IC, 
+	FF_WEAPON_FLAMETHROWER,
+	FF_WEAPON_IC,
 
 	// Engineer specific
-	FF_WEAPON_RAILGUN, 
+	FF_WEAPON_RAILGUN,
 
 	// Scout specific
 	FF_WEAPON_JUMPGUN,
 
 	// Spy specific
-	FF_WEAPON_TRANQUILISER, 
+	FF_WEAPON_TRANQUILISER,
 
 	// HWG Specific
-	FF_WEAPON_ASSAULTCANNON, 
+	FF_WEAPON_ASSAULTCANNON,
 
 	// Soldier specific
-	FF_WEAPON_RPG, 
+	FF_WEAPON_RPG,
 
 	// End of normal TFC weapons
 	// =========================
@@ -158,17 +158,17 @@ typedef enum
 
 	// End of physical weapons
 	// =======================
-	
+
 	// Cubemap
 	FF_WEAPON_CUBEMAP,
 
 	// Buildables
-	FF_WEAPON_DEPLOYDISPENSER, 
-	FF_WEAPON_DEPLOYSENTRYGUN, 
+	FF_WEAPON_DEPLOYDISPENSER,
+	FF_WEAPON_DEPLOYSENTRYGUN,
 	FF_WEAPON_DEPLOYDETPACK,
 	FF_WEAPON_DEPLOYMANCANNON,
 
-	// Don't put any more weapons down here! 
+	// Don't put any more weapons down here!
 	// Put the rest above the DEPLOY weapons please.
 	// =============================================
 
@@ -178,8 +178,8 @@ typedef enum
 
 typedef enum
 {
-	Primary_Mode = 0, 
-	Secondary_Mode, 
+	Primary_Mode = 0,
+	Secondary_Mode,
 } FFWeaponMode;
 
 int AliasToWeaponID(const char *alias);
@@ -193,7 +193,7 @@ class CFFWeaponBase : public CBaseCombatWeapon
 {
 public:
 	DECLARE_CLASS(CFFWeaponBase, CBaseCombatWeapon);
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_NETWORKCLASS();
 	DECLARE_PREDICTABLE();
 
 	CFFWeaponBase();
@@ -212,7 +212,7 @@ public:
 
 	// All predicted weapons need to implement and return true
 	virtual FFWeaponID	GetWeaponID() const { AssertMsg(0, "GetWeaponID() not defined for weapon"); return FF_WEAPON_NONE; }
-	
+
 	// Get FF weapon specific weapon data.
 	CFFWeaponInfo const	&GetFFWpnData() const;
 
@@ -225,7 +225,7 @@ public:
 
 	// Ensure that weapons cannot be selected while building
 	virtual bool		CanBeSelected();
-	
+
 	// Plays recoil on both client & server
 	virtual void		WeaponRecoil();
 
@@ -248,7 +248,7 @@ public:
 	// Overload drop function for our weapons. Makes it so they CANT be touched EVER
 	virtual void		Drop( const Vector& vecVelocity );
 			void		DropThink( void );
-	
+
 	// Should override the fov
 	virtual float		GetFOV() { return -1; }
 

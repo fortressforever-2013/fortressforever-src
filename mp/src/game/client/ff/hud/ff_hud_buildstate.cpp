@@ -6,14 +6,14 @@
 	file base:	ff_hud_buildstate
 	file ext:	cpp
 	author:		Gavin "Mirvin_Monkey" Bramhill
-	
+
 	purpose:	Show information for buildables
 *********************************************************************/
 
 #include "cbase.h"
 #include "ff_hud_buildstate.h"
 
-CHudBuildState::CHudBuildState(const char *pElementName) : CHudElement(pElementName), BaseClass(NULL, "HudBuildState") 
+CHudBuildState::CHudBuildState(const char *pElementName) : CHudElement(pElementName), BaseClass(NULL, "HudBuildState")
 {
 	SetParent(g_pClientMode->GetViewport());
 	SetHiddenBits( HIDEHUD_PLAYERDEAD | HIDEHUD_UNASSIGNED );
@@ -43,11 +43,11 @@ void CHudBuildState::VidInit()
 	m_pHudDispenser = new CHudTexture();
 	m_pHudDispenser->textureId = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile(m_pHudDispenser->textureId, "vgui/hud_buildable_dispenser", true, false);
-	
+
 	m_pHudManCannon = new CHudTexture();
 	m_pHudManCannon->textureId = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile(m_pHudManCannon->textureId, "vgui/hud_buildable_jumppad", true, false);
-	
+
 	m_pHudDetpack = new CHudTexture();
 	m_pHudDetpack->textureId = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile(m_pHudDetpack->textureId, "vgui/hud_buildable_detpack", true, false);
@@ -55,7 +55,7 @@ void CHudBuildState::VidInit()
 	m_pHudPipes = new CHudTexture();
 	m_pHudPipes->textureId = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile(m_pHudPipes->textureId, "vgui/hud_pipe", true, false);
-	
+
 	m_pHudMedpacks = new CHudTexture();
 	m_pHudMedpacks->textureId = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile(m_pHudMedpacks->textureId, "vgui/hud_medpack", true, false);
@@ -63,7 +63,7 @@ void CHudBuildState::VidInit()
 	// Precache the strings
 	wchar_t *tempString = g_pVGuiLocalize->Find("#FF_HUD_HEALTH");
 
-	if (!tempString) 
+	if (!tempString)
 		tempString = L"HEALTH";
 
 	wcsncpy(m_wszHealth, tempString, sizeof(m_wszHealth) / sizeof(wchar_t));
@@ -71,7 +71,7 @@ void CHudBuildState::VidInit()
 
 	tempString = g_pVGuiLocalize->Find("#FF_HUD_AMMO");
 
-	if (!tempString) 
+	if (!tempString)
 		tempString = L"AMMO";
 
 	wcsncpy(m_wszAmmo, tempString, sizeof(m_wszAmmo) / sizeof(wchar_t));
@@ -79,14 +79,14 @@ void CHudBuildState::VidInit()
 
 	tempString = g_pVGuiLocalize->Find("#FF_HUD_NOROCKETS");
 
-	if (!tempString) 
+	if (!tempString)
 		tempString = L"No Rockets";
 
 	wcsncpy(m_wszNoRockets, tempString, sizeof(m_wszNoRockets) / sizeof(wchar_t));
 	m_wszNoRockets[ (sizeof(m_wszNoRockets) / sizeof(wchar_t)) - 1] = 0;
 }
 
-void CHudBuildState::Init() 
+void CHudBuildState::Init()
 {
 	vgui::ivgui()->AddTickSignal(GetVPanel(), 100);
 
@@ -97,15 +97,15 @@ void CHudBuildState::Init()
 	HOOK_HUD_MESSAGE(CHudBuildState, PipeMsg);
 }
 
-void CHudBuildState::OnTick() 
+void CHudBuildState::OnTick()
 {
-	if (!engine->IsInGame()) 
+	if (!engine->IsInGame())
 		return;
 
 	// Get the local player
 	C_FFPlayer *pPlayer = ToFFPlayer(C_BasePlayer::GetLocalPlayer());
 
-	if (!pPlayer) 
+	if (!pPlayer)
 		return;
 
 	m_bDrawDispenser = m_bDrawSentry = m_bDrawManCannon = m_bDrawDetpack = m_bDrawPipes = m_bDrawMedpacks = m_bDrawCloak = false;
@@ -164,46 +164,45 @@ void CHudBuildState::OnTick()
 
 void CHudBuildState::MsgFunc_DispenserMsg(bf_read &msg)
 {
-    int iHealth = (int) msg.ReadByte();
-    int iAmmo = (int) msg.ReadByte();
+	int iHealth = (int) msg.ReadByte();
+	int iAmmo = (int) msg.ReadByte();
 
 	V_snwprintf(m_wszDispenser, 127, L"%ls: %i%% %ls: %i%%", m_wszHealth, iHealth, m_wszAmmo, iAmmo);
 }
 
 void CHudBuildState::MsgFunc_SentryMsg(bf_read &msg)
 {
-    int iHealth = (int) msg.ReadByte();
-    int iAmmo = (int) msg.ReadByte();
-	int iLevel = (int) msg.ReadByte();
+	int iHealth = (int) msg.ReadByte();
+	int iLevel = (int)msg.ReadByte();
+	int iShells = (int)msg.ReadByte();
 
 	bool fNoRockets = false;
-	
-	// Last bit of ammo is the rocket warning
-	if (iAmmo >= 128)
+
+	if (!msg.IsEnd())
 	{
-		fNoRockets = true;
-		iAmmo -= 128;
+		fNoRockets = !!msg.ReadOneBit();
+
 	}
 
-	V_snwprintf(m_wszSentry, 127, L"Level %i - %ls: %i%% %ls: %i%% %ls", iLevel , m_wszHealth, iHealth, m_wszAmmo, iAmmo, fNoRockets ? m_wszNoRockets : L"");
+	V_snwprintf(m_wszSentry, 127, L"Level %i - %ls: %i%% %ls: %i%% %ls", iLevel , m_wszHealth, iHealth, m_wszAmmo, iShells, fNoRockets ? m_wszNoRockets : L"");
 }
 
 void CHudBuildState::MsgFunc_ManCannonMsg(bf_read &msg)
 {
-    int iHealth = (int) msg.ReadByte();
-    //m_flManCannonTimeoutTime = msg.ReadFloat();
-	
+	int iHealth = (int) msg.ReadByte();
+	//m_flManCannonTimeoutTime = msg.ReadFloat();
+
 	V_snwprintf(m_wszManCannon, 127, L"%ls: %i%%", m_wszHealth, iHealth);
 }
 
 void CHudBuildState::MsgFunc_DetpackMsg(bf_read &msg)
 {
-    m_flDetpackDetonateTime = msg.ReadFloat();
+	m_flDetpackDetonateTime = msg.ReadFloat();
 }
 
 void CHudBuildState::MsgFunc_PipeMsg(bf_read &msg)
 {
-    int iIncrementPipes = (int) msg.ReadByte();
+	int iIncrementPipes = (int) msg.ReadByte();
 	switch (iIncrementPipes)
 	{
 	case INCREMENT_PIPES:
@@ -223,15 +222,15 @@ void CHudBuildState::MsgFunc_PipeMsg(bf_read &msg)
 	}
 }
 
-void CHudBuildState::Paint() 
+void CHudBuildState::Paint()
 {
-	if (!m_bDrawDispenser && !m_bDrawSentry && !m_bDrawManCannon && !m_bDrawDetpack && !m_bDrawPipes && !m_bDrawMedpacks && !m_bDrawCloak ) 
+	if (!m_bDrawDispenser && !m_bDrawSentry && !m_bDrawManCannon && !m_bDrawDetpack && !m_bDrawPipes && !m_bDrawMedpacks && !m_bDrawCloak )
 		return;
 
 	// Draw icons
 	surface()->DrawSetColor(255, 255, 255, 255);
 
-	if (m_bDrawSentry) 
+	if (m_bDrawSentry)
 	{
 		switch( m_iSentryLevel )
 		{
@@ -248,31 +247,31 @@ void CHudBuildState::Paint()
 		surface()->DrawTexturedRect(icon1_xpos, icon1_ypos, icon1_xpos + icon1_width, icon1_ypos + icon1_height);
 	}
 
-	if (m_bDrawDispenser) 
+	if (m_bDrawDispenser)
 	{
 		surface()->DrawSetTexture(m_pHudDispenser->textureId);
 		surface()->DrawTexturedRect(icon2_xpos, icon2_ypos, icon2_xpos + icon2_width, icon2_ypos + icon2_height);
 	}
 
-	if (m_bDrawManCannon) 
+	if (m_bDrawManCannon)
 	{
 		surface()->DrawSetTexture(m_pHudManCannon->textureId);
 		surface()->DrawTexturedRect(icon2_xpos, icon2_ypos, icon2_xpos + icon2_width, icon2_ypos + icon2_height);
 	}
 
-	if (m_bDrawDetpack) 
+	if (m_bDrawDetpack)
 	{
 		surface()->DrawSetTexture(m_pHudDetpack->textureId);
 		surface()->DrawTexturedRect(icon1_xpos, icon1_ypos, icon1_xpos + icon1_width, icon1_ypos + icon1_height);
 	}
-	
-	if (m_bDrawPipes) 
+
+	if (m_bDrawPipes)
 	{
 		surface()->DrawSetTexture(m_pHudPipes->textureId);
 		surface()->DrawTexturedRect(icon2_xpos, icon2_ypos, icon2_xpos + icon2_width, icon2_ypos + icon2_height);
 	}
 
-	if (m_bDrawMedpacks) 
+	if (m_bDrawMedpacks)
 	{
 		surface()->DrawSetTexture(m_pHudMedpacks->textureId);
 		surface()->DrawTexturedRect(icon2_xpos, icon2_ypos, icon2_xpos + icon2_width, icon2_ypos + icon2_height);
@@ -282,11 +281,11 @@ void CHudBuildState::Paint()
 	surface()->DrawSetTextFont(m_hTextFont);
 	surface()->DrawSetTextColor(GetFgColor());
 
-	if (m_bDrawSentry) 
+	if (m_bDrawSentry)
 	{
 		surface()->DrawSetTextPos(text1_xpos, text1_ypos);
 
-		for (wchar_t *wch = m_wszSentry; *wch != 0; wch++) 
+		for (wchar_t *wch = m_wszSentry; *wch != 0; wch++)
 			surface()->DrawUnicodeChar(*wch);
 	}
 
@@ -294,50 +293,50 @@ void CHudBuildState::Paint()
 	{
 		surface()->DrawSetTextPos(text2_xpos, text2_ypos);
 
-		for (wchar_t *wch = m_wszDispenser; *wch != 0; wch++) 
+		for (wchar_t *wch = m_wszDispenser; *wch != 0; wch++)
 			surface()->DrawUnicodeChar(*wch);
 	}
 
-	if (m_bDrawManCannon) 
+	if (m_bDrawManCannon)
 	{
 		surface()->DrawSetTextPos(text2_xpos, text2_ypos);
-		
+
 		// commenting out to not draw a time remaining -GreenMushy
 		//V_snwprintf(m_wszManCannon, 127, L"Time Left: %i seconds", (int)(m_flManCannonTimeoutTime - gpGlobals->curtime + 1) );
 
-		for (wchar_t *wch = m_wszManCannon; *wch != 0; wch++) 
+		for (wchar_t *wch = m_wszManCannon; *wch != 0; wch++)
 			surface()->DrawUnicodeChar(*wch);
 	}
-	
-	if (m_bDrawDetpack) 
+
+	if (m_bDrawDetpack)
 	{
 		surface()->DrawSetTextPos(text1_xpos, text1_ypos);
 
 		V_snwprintf(m_wszDetpack, 127, L"Time Left: %i seconds", (int)(m_flDetpackDetonateTime - gpGlobals->curtime + 1) );
 
-		for (wchar_t *wch = m_wszDetpack; *wch != 0; wch++) 
+		for (wchar_t *wch = m_wszDetpack; *wch != 0; wch++)
 			surface()->DrawUnicodeChar(*wch);
 	}
-	
-	if (m_bDrawPipes) 
+
+	if (m_bDrawPipes)
 	{
 		surface()->DrawSetTextPos(text2_xpos, text2_ypos);
 
 		V_snwprintf(m_wszPipes, 127, L"%i / %i", m_iNumPipes/*clamp(m_iNumPipes, 0, 8)*/, 8 );
 
-		for (wchar_t *wch = m_wszPipes; *wch != 0; wch++) 
+		for (wchar_t *wch = m_wszPipes; *wch != 0; wch++)
 			surface()->DrawUnicodeChar(*wch);
 	}
-	
-	if (m_bDrawMedpacks) 
+
+	if (m_bDrawMedpacks)
 	{
 		surface()->DrawSetTextPos(text2_xpos, text2_ypos);
 
 		V_snwprintf(m_wszMedpacks, 127, L"%i / %i Tossable Medpacks", m_iNumMedpacks, 5 );
 
-		for (wchar_t *wch = m_wszMedpacks; *wch != 0; wch++) 
+		for (wchar_t *wch = m_wszMedpacks; *wch != 0; wch++)
 			surface()->DrawUnicodeChar(*wch);
-		
+
 		if( m_flMedpackRegenPercent > 0.0f )
 		{
 			int stringWidth = UTIL_ComputeStringWidth( m_hTextFont, m_wszMedpacks );
@@ -353,7 +352,7 @@ void CHudBuildState::Paint()
 			surface()->DrawSetColor( clr.r(), clr.g(), clr.b(), 150 );
 			surface()->DrawFilledRect( iLeft, iTop, iLeft + ((float)(iRight - iLeft) * (m_flMedpackRegenPercent)), iBottom );
 
-			surface()->DrawSetColor( clr.r(), clr.g(), clr.b(), 200 );		
+			surface()->DrawSetColor( clr.r(), clr.g(), clr.b(), 200 );
 			surface()->DrawOutlinedRect( iLeft, iTop, iRight, iBottom );
 		}
 	}

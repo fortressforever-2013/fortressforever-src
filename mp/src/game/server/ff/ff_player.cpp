@@ -6698,6 +6698,14 @@ int CFFPlayer::GiveAmmo(int iCount, int iAmmoIndex, bool bSuppressSound)
 
 	m_iAmmo.Set(iAmmoIndex, m_iAmmo[iAmmoIndex] + iAdd);
 
+#ifdef GAME_DLL
+	if (GetClassSlot() == CLASS_MEDIC 
+		&& iAmmoIndex == GetAmmoDef()->Index(AMMO_CELLS))
+	{
+		SendMedpacksMsg();
+	}
+#endif
+
 	return iAdd;
 }
 

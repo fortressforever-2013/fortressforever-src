@@ -19,7 +19,7 @@ extern IFileSystem **pFilesystem;
 #include <vgui_controls/Button.h>
 */
 
-// memdbgon must be the last include file in a .cpp file!!! 
+// memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 //-----------------------------------------------------------------------------
@@ -34,7 +34,7 @@ CFFMiscOptions::CFFMiscOptions(Panel *parent, char const *panelName, const char 
 
 //-----------------------------------------------------------------------------
 // Purpose: Apply the player's changes
-//			
+//
 //-----------------------------------------------------------------------------
 void CFFMiscOptions::Apply()
 {
@@ -64,9 +64,11 @@ void CFFMiscOptions::Apply()
 		}
 		else if (ComboBox *cb = dynamic_cast <ComboBox *> (pChild))
 		{
+			char szCustomCaption[128];
+			g_pVGuiLocalize->ConvertUnicodeToANSI(g_pVGuiLocalize->Find("#GameUI_Custom"), szCustomCaption, sizeof(szCustomCaption));
 			// Only replace the cvar with this option if it is not a custom one
 			const char *pszValue = cb->GetActiveItemUserData()->GetString("value");
-			if (Q_strncmp(pszValue, "custom", 6) != 0)
+			if (Q_strcmp(pszValue, szCustomCaption) != 0)
 				pCvar->SetValue(pszValue);
 		}
 		else if (CFFInputSlider *slider = dynamic_cast <CFFInputSlider *> (pChild))
@@ -215,7 +217,7 @@ void CFFMiscOptions::Load()
 
 			if (!slider)
 				continue;
-			
+
 			int minval = kvOption->GetInt("minval");
 			int maxval = kvOption->GetInt("maxval");
 
@@ -262,22 +264,24 @@ void CFFMiscOptions::Load()
 		else if (ComboBox *cb = dynamic_cast <ComboBox *> (pChild))
 		{
 			int option = GetComboBoxOption(cb, pCvar->GetString());
+			char szCustomCaption[128];
+			g_pVGuiLocalize->ConvertUnicodeToANSI(g_pVGuiLocalize->Find("#GameUI_Custom"), szCustomCaption, sizeof(szCustomCaption));
 
 			// Option doesn't exist, so add a "custom field"
 			if (option == -1)
 			{
-				int custom = GetComboBoxOption(cb, "custom");
+				int custom = GetComboBoxOption(cb, szCustomCaption);
 
 				// Need to add the custom field
 				if (custom == -1)
 				{
 					KeyValues *kvItem = new KeyValues("kvItem");
-					kvItem->SetString("value", "custom");
-					cb->AddItem("custom", kvItem);
+					kvItem->SetString("value", pCvar->GetString());
+					cb->AddItem(szCustomCaption, kvItem);
 					kvItem->deleteThis();
 				}
 
-				custom = GetComboBoxOption(cb, "custom");
+				custom = GetComboBoxOption(cb, szCustomCaption);
 				cb->ActivateItem(custom);
 			}
 			else
@@ -286,7 +290,7 @@ void CFFMiscOptions::Load()
 				cb->ActivateItem(option);
 
 				// However lets remove the custom row if it exists
-				int custom = GetComboBoxOption(cb, "custom");
+				int custom = GetComboBoxOption(cb, szCustomCaption);
 				if (custom != -1)
 					cb->DeleteItem(custom);
 			}
