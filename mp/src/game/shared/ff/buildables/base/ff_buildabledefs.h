@@ -155,7 +155,8 @@ const RenderFx_t g_BuildableRenderFx = kRenderFxPulseSlowWide;
 #define FF_REPAIRAMOUNTPERCELL_SENTRYGUN 3.5f
 #define FF_REPAIRAMOUNTPERCELL_DISPENSER 5.0f
 
-#define FF_BUILD_DEBUG_VISUALIZATIONS
+// This is what shows those annoying boxes around buildables
+//#define FF_BUILD_DEBUG_VISUALIZATIONS
 
 // Array of char *'s to dispenser models
 extern const char *g_pszFFDispenserModels[ ];
