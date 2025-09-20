@@ -2214,15 +2214,6 @@ void CFFSentryGun::PhysicsSimulate()
 	CSingleUserRecipientFilter user(pPlayer);
 	user.MakeReliable();
 
-	UserMessageBegin(user, "SentryMsg");
-	WRITE_BYTE(m_iLevel);
-	WRITE_BYTE(iHealthPct);
-	WRITE_BYTE(iShellsPct);
-	if (m_iMaxRockets > 0) {
-		WRITE_BOOL(iRocketsPct);
-	}
-	MessageEnd();
-
 	UserMessageBegin(user, "SentryStatusMsg");
 	WRITE_BYTE(GetHealth());
 	WRITE_BYTE(m_iShells);

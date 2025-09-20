@@ -81,7 +81,6 @@ void RegisterUserMessages()
 	usermessages->Register("FFViewEffect", -1);
 
 	usermessages->Register("DispenserMsg", -1);
-	usermessages->Register("SentryMsg", -1);
 	usermessages->Register("SentryLevelMsg", -1);
 	usermessages->Register("SentryStatusMsg", -1);
 	usermessages->Register("ManCannonMsg", -1);
