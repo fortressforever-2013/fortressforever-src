@@ -24,6 +24,7 @@
 #include "ff_utils.h"
 #include "ff_grenade_base.h"
 #include "ff_buildableinfo.h"
+#include "ff_buildabledefs.h"
 #include "ff_item_backpack.h"
 
 #include "ff_team.h"			// team info
@@ -6856,6 +6857,7 @@ bool CFFPlayer::IsInNoBuild(const CFFBuildableInfo &hBuildInfo)
 {
 	Vector vecOrigin = hBuildInfo.GetBuildOrigin();
 
+#ifdef FF_BUILD_DEBUG_VISUALIZATIONS
 #ifdef _DEBUG
 	if( !engine->IsDedicatedServer() )
 	{
@@ -6863,6 +6865,7 @@ bool CFFPlayer::IsInNoBuild(const CFFBuildableInfo &hBuildInfo)
 		NDebugOverlay::Box( vecOrigin, Vector( -28, -28, -28 ), Vector( 28, 28, 28 ), 0, 255, 0, 100, 5.0f );
 	}
 #endif
+#endif // FF_BUILD_DEBUG_VISUALIZATIONS
 
 	luabridge::LuaRef luatblInfo = luabridge::newTable(_scriptman.GetLuaState());
 	luatblInfo["type"] = m_iWantBuild;
