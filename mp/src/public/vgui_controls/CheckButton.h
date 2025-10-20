@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================//
@@ -61,7 +61,8 @@ class CheckButton : public ToggleButton
 	DECLARE_CLASS_SIMPLE( CheckButton, ToggleButton );
 
 public:
-	CheckButton(Panel *parent, const char *panelName, const char *text);
+	CheckButton(Panel* parent, const char* panelName, const char* text);
+	CheckButton(Panel *parent, const char *panelName, const wchar_t* wszText);
 	~CheckButton();
 
 	// Check the button

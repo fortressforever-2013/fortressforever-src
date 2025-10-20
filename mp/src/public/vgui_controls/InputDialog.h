@@ -32,6 +32,7 @@ public:
 	BaseInputDialog( vgui::Panel *parent, const char *title );
 	~BaseInputDialog();
 
+	void OnKeyCodeTyped(KeyCode code);
 	void DoModal( KeyValues *pContextKeyValues = NULL );
 
 protected:
