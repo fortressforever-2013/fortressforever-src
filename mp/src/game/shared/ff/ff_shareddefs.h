@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -144,6 +144,12 @@ struct SpyDisguiseWeapon
 #define DECAP_RIGHT_ARM		( 1 << 2 )
 #define DECAP_LEFT_LEG		( 1 << 3 )
 #define DECAP_RIGHT_LEG		( 1 << 4 )
+
+#define BHOP_CAP_SOFT 1.4f
+#define BHOP_CAP_MID 1.55f
+#define BHOP_CAP_HARD 1.71f
+#define BHOP_PCFACTOR 0.65f
+#define BHOP_PCFACTOR_MID 0.4f
 
 // HUD Definitions
 #define INTENSITYSCALE_COLOR_RED Color(255,0,0,255)

@@ -288,53 +288,108 @@ const char *FF_GetDefaultWeapon( const char *classname )
 	return FF_GetDefaultWeapon( Class_StringToInt( classname ) );
 }
 
-Color ColorFade( int iValue, int iMin, int iMax, Color clrMin, Color clrMax )
+Color ColorFade(
+	int iValue,
+	int iLimit0,
+	int iLimit1,
+	Color clrMin,
+	Color clrMax,
+	bool bInvert)
 {
+	int iMin = min(iLimit0, iLimit1);
+	int iMax = max(iLimit0, iLimit1);
 	int iClamped = clamp(iValue, iMin, iMax);
 
 	float flRange = iMax - iMin;
-	float flMinAmount = (iMax - iClamped) / flRange;
-	float flMaxAmount = (iClamped - iMin) / flRange;
+
+	// Avoid divide by zero
+	if (flRange <= 0.0f)
+		return bInvert ? clrMin : clrMax;
+
+	float flFadeAmount
+		= (float)(iClamped - iMin)
+		/ flRange;
+
+	// Invert the color fade if needed
+	if (bInvert)
+		flFadeAmount = 1.0f - flFadeAmount;
 
 	return Color(
-		(int) (clrMax.r() * flMaxAmount + clrMin.r() * flMinAmount),
-		(int) (clrMax.g() * flMaxAmount + clrMin.g() * flMinAmount),
-		(int) (clrMax.b() * flMaxAmount + clrMin.b() * flMinAmount),
-		(int) (clrMax.a() * flMaxAmount + clrMin.a() * flMinAmount));
+		(int)(clrMin.r() + (clrMax.r() - clrMin.r()) * flFadeAmount),
+		(int)(clrMin.g() + (clrMax.g() - clrMin.g()) * flFadeAmount),
+		(int)(clrMin.b() + (clrMax.b() - clrMin.b()) * flFadeAmount),
+		(int)(clrMin.a() + (clrMax.a() - clrMin.a()) * flFadeAmount));
 }
 
-Color GetIntensityColor( int iAmount, int iMaxAmount, int iColorSetting, int iAlpha, int iRed, int iOrange, int iYellow, int iGreen )
+Color GetIntensityColor(
+	int iValue,
+	int iColorMode,
+	int iAlpha,
+	int iRedThreshold,
+	int iOrangeThreshold,
+	int iYellowThreshold,
+	int iGreenThreshold,
+	bool bInvert)
 {
-	Color clrResult;
+	Color clrResult = INTENSITYSCALE_COLOR_DEFAULT;
 
-	if( iAmount <= iRed && iColorSetting > 0)
+	if (iColorMode == 0) {
+
+		return Color(
+			clrResult.r(),
+			clrResult.g(),
+			clrResult.b(),
+			iAlpha);
+	}
+
+	bool bSteppedColorMode = iColorMode == 1;
+
+	if (!bInvert && iValue <= iRedThreshold
+		|| bInvert && iValue >= iRedThreshold)
 	{
 		clrResult = INTENSITYSCALE_COLOR_RED;
 	}
-	else if(iAmount  <= iOrange && iColorSetting > 0)
+	else if (!bInvert && iValue <= iOrangeThreshold
+		|| bInvert && iValue >= iOrangeThreshold)
 	{
-		if(iColorSetting == 2)
-			clrResult = ColorFade( iAmount, iRed, iOrange, INTENSITYSCALE_COLOR_RED, INTENSITYSCALE_COLOR_ORANGE );
-		else
-			clrResult = INTENSITYSCALE_COLOR_ORANGE;	
+		clrResult
+			= bSteppedColorMode
+			? INTENSITYSCALE_COLOR_ORANGE
+			: ColorFade(
+				iValue,
+				iRedThreshold,
+				iOrangeThreshold,
+				INTENSITYSCALE_COLOR_RED,
+				INTENSITYSCALE_COLOR_ORANGE,
+				bInvert);
 	}
-	else if(iAmount  <= iYellow && iColorSetting> 0)
+	else if (!bInvert && iValue <= iYellowThreshold
+		|| bInvert && iValue >= iYellowThreshold)
 	{
-		if(iColorSetting == 2)
-			clrResult = ColorFade( iAmount, iOrange, iYellow, INTENSITYSCALE_COLOR_ORANGE, INTENSITYSCALE_COLOR_YELLOW );
-		else
-			clrResult = INTENSITYSCALE_COLOR_YELLOW;
+		clrResult
+			= bSteppedColorMode
+			? INTENSITYSCALE_COLOR_YELLOW
+			: ColorFade(
+				iValue,
+				iOrangeThreshold,
+				iYellowThreshold,
+				INTENSITYSCALE_COLOR_ORANGE,
+				INTENSITYSCALE_COLOR_YELLOW,
+				bInvert);
 	}
-	else if(iColorSetting > 0)
+	else if (!bInvert && iValue <= iGreenThreshold
+		|| bInvert && iValue >= iGreenThreshold)
 	{
-		if(iColorSetting == 2)
-			clrResult = ColorFade( iAmount, iYellow, iGreen, INTENSITYSCALE_COLOR_YELLOW, INTENSITYSCALE_COLOR_GREEN );
-		else
-			clrResult = INTENSITYSCALE_COLOR_GREEN;
-	}
-	else
-	{
-		clrResult = INTENSITYSCALE_COLOR_DEFAULT;
+		clrResult
+			= bSteppedColorMode
+			? INTENSITYSCALE_COLOR_GREEN
+			: ColorFade(
+				iValue,
+				iYellowThreshold,
+				iGreenThreshold,
+				INTENSITYSCALE_COLOR_YELLOW,
+				INTENSITYSCALE_COLOR_GREEN,
+				bInvert);
 	}
 
 	return Color(
