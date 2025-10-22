@@ -435,6 +435,8 @@ public:
 	CFFWeaponBase* GetLastFFWeapon(){ return m_pLastWeapon; }
 	void SetLastFFWeapon( CFFWeaponBase* _pLastWeapon ){ m_pLastWeapon = _pLastWeapon; }
 
+	void SendHudStatusBuildTimer(int iBuildType, float flDuration);
+
 	void PreBuildGenericThink( void );	// *** NOT AN ACTUAL THINK FUNCTION ***
 	void PostBuildGenericThink( void );	// *** NOT AN ACTUAL THINK FUNCTION ***
 	// End: Added by Mulchman for building objects and such
@@ -489,8 +491,6 @@ private:
 	// time of the last class switch
 	float m_flLastClassSwitch;
 
-
-
 	//-- Added by L0ki -------------------------------------------------------
 	// Grenade related
 public:
@@ -525,7 +525,6 @@ private:
 public:
 	void PackDeadPlayerItems( void );
 	//------------------------------------------------------------------------
-
 
 public:
 	// lua code for handling stats for a player
@@ -968,7 +967,6 @@ public:
 protected:
 	CNetworkVar( bool, m_bTranqed );
 	// **********************************
-
 
 public:
 	// Some LuaBridge3 functions
