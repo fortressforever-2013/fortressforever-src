@@ -925,7 +925,6 @@ void CFFPlayer::PostThink()
 	}
 }
 
-
 void CFFPlayer::Precache()
 {
 	PrecacheModel(FF_PLAYER_MODEL);
@@ -2177,12 +2176,7 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 		m_iWantBuild = FF_BUILD_NONE;
 
 		// Mirv: Cancel build timer
-		CSingleUserRecipientFilter user(this);
-		user.MakeReliable();
-		UserMessageBegin(user, "FF_BuildTimer");
-		WRITE_SHORT(m_iCurBuild);
-		WRITE_FLOAT(0);
-		MessageEnd();
+		SendHudStatusBuildTimer(m_iCurBuild, 0);
 	}
 
 	// If the tag is still active, award a point
@@ -2720,7 +2714,6 @@ int CFFPlayer::ActivateClass()
 
 	// So the client can keep track
 	SetClassForClient(m_iNextClass);
-
 
 	return GetClassSlot();
 }
@@ -3626,6 +3619,17 @@ void CFFPlayer::Command_BuildManCannon(const CCommand& args)
 //ConVar sg_buildtime("ffdev_sg_buildtime", "7.0", FCVAR_REPLICATED | FCVAR_CHEAT, "Sentry Gun build time");
 #define SG_BUILDTIME 3.0f //sg_buildtime.GetFloat()  //
 
+void CFFPlayer::SendHudStatusBuildTimer(int iBuildType, float flDuration)
+{
+	CSingleUserRecipientFilter user(this);
+	user.MakeReliable();
+
+	UserMessageBegin(user, "FF_BuildTimer");
+		WRITE_SHORT(iBuildType);
+		WRITE_FLOAT(flDuration);
+	MessageEnd();
+}
+
 void CFFPlayer::PreBuildGenericThink( void )
 {
 	//
@@ -3874,12 +3878,7 @@ void CFFPlayer::PreBuildGenericThink( void )
 			}
 
 			// Mirv: Start build timer
-			CSingleUserRecipientFilter user( this );
-			user.MakeReliable();
-			UserMessageBegin( user, "FF_BuildTimer" );
-				WRITE_SHORT( m_iCurBuild );
-				WRITE_FLOAT( m_flBuildTime - gpGlobals->curtime );
-			MessageEnd();
+			SendHudStatusBuildTimer(m_iCurBuild, m_flBuildTime - gpGlobals->curtime);
 		}
 		else
 		{
@@ -3923,24 +3922,17 @@ void CFFPlayer::PreBuildGenericThink( void )
 					pBuildable->Cancel();
 				}
 
-
 				// Unlock the player
 				UnlockPlayer();
 
 				// Mirv: Cancel build timer
-				CSingleUserRecipientFilter user(this);
-				user.MakeReliable();
-				UserMessageBegin(user, "FF_BuildTimer");
-				WRITE_SHORT(FF_BUILD_NONE);
-				WRITE_FLOAT(0);
-				MessageEnd();
+				SendHudStatusBuildTimer(FF_BUILD_NONE, 0);
 
 				// Re-initialize
 				m_iCurBuild = FF_BUILD_NONE;
 				m_iWantBuild = FF_BUILD_NONE;
 				m_bBuilding = false;
 				m_bStaticBuilding = false;
-
 
 				if (m_hActiveWeapon)
 					m_hActiveWeapon->Deploy();
@@ -3978,7 +3970,6 @@ void CFFPlayer::PostBuildGenericThink( void )
 					}
 
 					FF_SendHint( this, ENGY_BUILTDISP, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_BUILTDISP" );
-
 
 				}
 			}
@@ -5850,7 +5841,6 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 		}
 	}
 
-
 	// add to the damage total for clients, which will be sent as a single
 	// message at the end of the frame
 	// todo: remove after combining shotgun blasts?
@@ -6335,7 +6325,6 @@ void CFFPlayer::Concuss(float flDuration, float flIconDuration, const QAngle *vi
 		WRITE_BYTE( FF_STATUSICON_CONCUSSION );
 		WRITE_FLOAT( flIconDuration );
 	MessageEnd();
-
 
 	if (viewjerk)
 	{
@@ -7442,7 +7431,6 @@ bool CFFPlayer::IsInNoBuild(const CFFBuildableInfo &hBuildInfo)
 	return !FFScriptRunPredicates( &hContext, "onbuild", true, vecOrigin, 40.0f );
 }
 
-
 //-----------------------------------------------------------------------------
 // Purpose: Is the flashlight on or off, taken from HL2MP
 //-----------------------------------------------------------------------------
@@ -7872,12 +7860,7 @@ void CFFPlayer::SpyStartSabotaging(CFFBuildableObject *pBuildable)
 	else
 		iBuildableType = FF_BUILD_DISPENSER;
 
-	CSingleUserRecipientFilter user(this);
-	user.MakeReliable();
-	UserMessageBegin(user, "FF_BuildTimer");
-	WRITE_SHORT(iBuildableType);
-	WRITE_FLOAT(3.0f);
-	MessageEnd();
+	SendHudStatusBuildTimer(iBuildableType, 3.0f);
 
 	// Now remember what we're sabotaging
 	m_hSabotaging = pBuildable;
@@ -7893,12 +7876,7 @@ void CFFPlayer::SpyStopSabotaging()
 	if (!m_hSabotaging)
 		return;
 
-	CSingleUserRecipientFilter user(this);
-	user.MakeReliable();
-	UserMessageBegin(user, "FF_BuildTimer");
-	WRITE_SHORT(0);
-	WRITE_FLOAT(0);
-	MessageEnd();
+	SendHudStatusBuildTimer(0, 0);
 
 	// Remember that we aren't sabotaging
 	m_hSabotaging = NULL;
