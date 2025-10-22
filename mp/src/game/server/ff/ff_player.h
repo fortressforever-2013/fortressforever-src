@@ -435,6 +435,8 @@ public:
 	CFFWeaponBase* GetLastFFWeapon(){ return m_pLastWeapon; }
 	void SetLastFFWeapon( CFFWeaponBase* _pLastWeapon ){ m_pLastWeapon = _pLastWeapon; }
 
+	void SendHudStatusBuildTimer(int iBuildType, float flDuration);
+
 	void PreBuildGenericThink( void );	// *** NOT AN ACTUAL THINK FUNCTION ***
 	void PostBuildGenericThink( void );	// *** NOT AN ACTUAL THINK FUNCTION ***
 	// End: Added by Mulchman for building objects and such
