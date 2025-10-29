@@ -7245,7 +7245,7 @@ bool CFFPlayer::SetAmmoInClip( const char *_name, int iAmount )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Give the player some ammo.
+// Purpose: Give ammo using this player's limits and update the medic's medpack display.
 //-----------------------------------------------------------------------------
 int CFFPlayer::GiveAmmo(int iCount, int iAmmoIndex, bool bSuppressSound)
 {
@@ -7266,12 +7266,15 @@ int CFFPlayer::GiveAmmo(int iCount, int iAmmoIndex, bool bSuppressSound)
 
 	m_iAmmo.Set(iAmmoIndex, m_iAmmo[iAmmoIndex] + iAdd);
 
+	if (GetClassSlot() == CLASS_MEDIC
+		&& iAmmoIndex == GetAmmoDef()->Index(AMMO_CELLS))
+	{
+		SendHudStatusMedpack();
+	}
+
 	return iAdd;
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Give the player some ammo.
-//-----------------------------------------------------------------------------
 int CFFPlayer::GiveAmmo(int iCount, const char *szName, bool bSuppressSound)
 {
 	int iAmmoType = GetAmmoDef()->Index(szName);
@@ -7281,6 +7284,20 @@ int CFFPlayer::GiveAmmo(int iCount, const char *szName, bool bSuppressSound)
 		return 0;
 	}
 	return GiveAmmo(iCount, iAmmoType, bSuppressSound);
+}
+
+void CFFPlayer::SendHudStatusMedpack()
+{
+	const int iMaxMedpacks = GetMaxCells() / FF_MEDPACK_COST;
+	const int iNumMedpacks = GetAmmoCount(AMMO_CELLS) / FF_MEDPACK_COST;
+
+	CSingleUserRecipientFilter user(this);
+	user.MakeReliable();
+
+	UserMessageBegin(user, "MedpacksMsg");
+		WRITE_BYTE(iMaxMedpacks);
+		WRITE_BYTE(iNumMedpacks);
+	MessageEnd();
 }
 
 // Find a map guide

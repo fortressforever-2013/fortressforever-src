@@ -274,7 +274,16 @@ public:
 
 	void	SetLastSpawn( CBaseEntity *pEntity );
 
+private:
+	// ----------------------
+	// Messages
+	// ----------------------
+	void SendHudStatusMedpack();
+
 public:
+	using BaseClass::GiveAmmo;
+	int GiveAmmo(int iCount, int iAmmoIndex, bool bSuppressSound = false) override;
+
 	// Networked the random player class var -> Defrag
 	CNetworkVar( bool, m_fRandomPC );
 	int m_iNextClass;
@@ -887,7 +896,6 @@ public:
 	bool SetAmmoInClip( int iAmount );
 	bool SetAmmoInClip( const char *_name, int iAmount );
 
-	virtual int GiveAmmo(int iCount, int iAmmoIndex, bool bSuppressSound = false);
 	int	GiveAmmo(int iCount, const char *szName, bool bSuppressSound = false);
 
 	int m_iMaxAmmo[MAX_AMMO_TYPES];

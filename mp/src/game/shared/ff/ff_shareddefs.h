@@ -25,6 +25,9 @@
 // Maximum deployed pipebombs per player.
 #define FF_MAX_PIPEBOMBS 6
 
+// How many cells each medpack costs
+#define FF_MEDPACK_COST 10
+
 #define DEFAULTWEAPON_SCOUT "shotgun"
 #define DEFAULTWEAPON_SNIPER "sniperrifle"
 #define DEFAULTWEAPON_SOLDIER "rpg"
