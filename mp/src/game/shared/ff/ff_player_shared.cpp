@@ -600,7 +600,6 @@ void CFFPlayer::FireBullet(
 	}
 #endif
 
-
 }
 
 // --> Mirv: Proper sounds
@@ -751,7 +750,7 @@ void CFFPlayer::ClassSpecificSkill()
 
 	case CLASS_MEDIC:
 		// Discard a health pack
-		if (IsAlive() && GetAmmoCount(AMMO_CELLS) >= 10)
+		if (IsAlive() && GetAmmoCount(AMMO_CELLS) >= FF_MEDPACK_COST)
 		{
 			CBaseEntity *pHealthDrop = CBaseEntity::Create("ff_item_healthdrop", GetAbsOrigin(), GetAbsAngles());
 
@@ -778,7 +777,8 @@ void CFFPlayer::ClassSpecificSkill()
 				// Play a sound
 				EmitSound("Item.Toss");
 
-				RemoveAmmo(10, AMMO_CELLS);
+				RemoveAmmo(FF_MEDPACK_COST, AMMO_CELLS);
+				SendHudStatusMedpack();
 				m_fLastMedicCellRegenTick = gpGlobals->curtime;
 			}
 		}
@@ -1841,7 +1841,6 @@ void CFFPlayer::Overpressure( void )
 			if (OVERPRESSURE_SLIDE)
 				pPlayer->StartSliding( OVERPRESSURE_SLIDE_DURATION, OVERPRESSURE_SLIDE_DURATION );
 #endif
-
 
 			Vector vecVelocity = pPlayer->GetAbsVelocity();
 			Vector vecLatVelocity = vecVelocity * Vector(1.0f, 1.0f, 0.0f);
