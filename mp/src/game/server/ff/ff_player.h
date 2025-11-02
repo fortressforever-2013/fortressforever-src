@@ -15,6 +15,7 @@
 
 #include "ff_playeranimstate.h"
 #include "ff_shareddefs.h"
+#include "ff_hud_status_mancannon_availability.h"
 #include "ff_playerclass_parse.h"
 #include "ff_esp_shared.h"
 #include "utlvector.h"
@@ -159,6 +160,7 @@ class CFFPlayer : public CBasePlayer, public IFFPlayerAnimStateHelpers
 public:
 	DECLARE_CLASS( CFFPlayer, CBasePlayer );
 	DECLARE_SERVERCLASS();
+	DECLARE_DATADESC();
 	DECLARE_PREDICTABLE();
 
 	CFFPlayer();
@@ -408,6 +410,12 @@ protected:
 	CNetworkHandle( CFFSentryGun, m_hSentryGun );
 	CNetworkHandle( CFFDetpack, m_hDetpack );
 	CNetworkHandle( CFFManCannon, m_hManCannon );
+
+	void QueueHudStatusManCannonAvailabilityUpdate();
+	void UpdateHudStatusManCannonAvailability();
+	void NetworkStateChanged_m_iAmmo() override;
+	void NetworkStateChanged_m_iAmmo(void* pVar) override;
+	FFHudStatusManCannonAvailability m_hudStatusManCannonAvailability;
 
 	// Used for seeing if a player is currently
 	// trying to build a detpack, dispenser, or sentry gun
