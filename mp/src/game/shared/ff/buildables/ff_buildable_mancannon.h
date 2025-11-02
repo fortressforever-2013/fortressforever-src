@@ -51,6 +51,7 @@ public:
 #else
 	virtual void Spawn( void );
 	virtual void GoLive( void );
+	virtual void RemoveQuietly(void);
 
 	void OnObjectTouch( CBaseEntity *pOther );
 	void OnJumpPadThink( void );
@@ -58,7 +59,8 @@ public:
 	// These are for updating the user
 	virtual void	PhysicsSimulate();
 	float			m_flLastClientUpdate;
-	int				m_iLastState;
+	int				m_iLastHealth;
+	int				m_iLastMaxHealth;
 	JumpPadState_t	m_iCombatState;
 	float			m_flLastHeal;
 	CNetworkVar( float, m_flLastDamage );
@@ -69,10 +71,14 @@ public:
 	virtual void Sabotage( CFFPlayer *pSaboteur ) {};
 	virtual void MaliciouslySabotage( CFFPlayer *pSaboteur ) { m_bMaliciouslySabotaged = true; m_flSabotageTime = gpGlobals->curtime + 8.0f; }
 
+	virtual void Explode(void) override;
 	virtual void Detonate( void );
 	virtual void DoExplosionDamage( void );
 
 	static CFFManCannon *Create( const Vector& vecOrigin, const QAngle& vecAngles, CBaseEntity *pentOwner = NULL );
+
+private:
+	void SendHudStatus(BuildState_t state);
 #endif
 };
 

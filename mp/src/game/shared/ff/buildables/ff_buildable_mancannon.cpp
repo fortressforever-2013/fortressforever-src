@@ -87,7 +87,8 @@ CFFManCannon::CFFManCannon( void )
 
 	m_bUsePhysics = true;
 	m_flLastClientUpdate = 0;
-	m_iLastState = 0;
+	m_iLastHealth = -1;
+	m_iLastMaxHealth = -1;
 #endif
 
 	// Health
@@ -197,6 +198,30 @@ int CFFManCannon::DrawModel(int flags)
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
+void CFFManCannon::SendHudStatus(BuildState_t state)
+{
+	CFFPlayer *pOwner = GetOwnerPlayer();
+	// The initial Spawn runs before Create assigns an owner.
+	if (!pOwner)
+		return;
+
+	int iHealth = 0;
+	int iMaxHealth = 0;
+	if (state != BUILDSTATE_NOTBUILT)
+	{
+		iHealth = GetHealth();
+		iMaxHealth = GetMaxHealth();
+	}
+
+	CSingleUserRecipientFilter user(pOwner);
+	user.MakeReliable();
+	UserMessageBegin(user, "ManCannonMsg");
+		WRITE_BYTE(state);
+		WRITE_BYTE(iHealth);
+		WRITE_BYTE(iMaxHealth);
+	MessageEnd();
+}
+
 void CFFManCannon::Spawn( void )
 {
 	VPROF_BUDGET( "CFFManCannon::Spawn", VPROF_BUDGETGROUP_FF_BUILDABLE );
@@ -211,13 +236,16 @@ void CFFManCannon::Spawn( void )
 
 	m_bTakesDamage = true;//Making the jumppad take damage -GreenMushy
 	m_flLastClientUpdate = 0;
-	m_iLastState = 0;
+	m_iLastHealth = -1;
+	m_iLastMaxHealth = -1;
 	m_iCombatState = JUMPPAD_IDLE;
 	m_flLastDamage = 0.0f;
 
 	//Set the current and max health to the same values -Green Mushy
 	m_iHealth = MANCANNON_HEALTH;
 	m_iMaxHealth = MANCANNON_HEALTH;
+
+	SendHudStatus(BuildState_t::BUILDSTATE_BUILDING);
 }
 
 //-----------------------------------------------------------------------------
@@ -247,6 +275,18 @@ void CFFManCannon::GoLive( void )
 		SetContextThink( &CFFManCannon::OnJumpPadThink, gpGlobals->curtime, "JumpPadThink" );
 	}
 	// caes
+
+	SendHudStatus(BuildState_t::BUILDSTATE_BUILT);
+}
+
+void CFFManCannon::RemoveQuietly(void)
+{
+	VPROF_BUDGET("CFFManCannon::RemoveQuietly", VPROF_BUDGETGROUP_FF_BUILDABLE);
+
+	SendHudStatus(BuildState_t::BUILDSTATE_NOTBUILT);
+
+	CFFBuildableObject::RemoveQuietly();
+
 }
 
 //-----------------------------------------------------------------------------
@@ -385,27 +425,18 @@ void CFFManCannon::PhysicsSimulate()
 		if (!pPlayer)
 			return;
 
-		int iHealth = (int) (100.0f * GetHealth() / MANCANNON_HEALTH);
-		//int iArmor = (int) ( 100.0f * m_iSGArmor / m_iMaxSGArmor); // no more armor, just reduce max health - shok
-		//int iAmmo = (int) (100.0f * (float) m_iShells / m_iMaxShells);
-
-		// Last bit of ammo signifies whether the SG needs rockets
-		//if (m_iMaxRockets && !m_iRockets)
-		//	m_iAmmoPercent += 128;
-
-		// If things haven't changed then do nothing more
-		int iState = iHealth;
-		if (m_iLastState == iState)
+		const int iHealth = GetHealth();
+		const int iMaxHealth = GetMaxHealth();
+		const bool bHealthUnchanged =
+			m_iLastHealth == iHealth
+			&& m_iLastMaxHealth == iMaxHealth;
+		if (bHealthUnchanged)
 			return;
 
-		CSingleUserRecipientFilter user(pPlayer);
-		user.MakeReliable();
+		SendHudStatus(BuildState_t::BUILDSTATE_BUILT);
 
-		UserMessageBegin(user, "ManCannonMsg");
-			WRITE_BYTE(iHealth);
-		MessageEnd();
-
-		m_iLastState = iState;
+		m_iLastHealth = iHealth;
+		m_iLastMaxHealth = iMaxHealth;
 	}
 }
 
@@ -429,6 +460,13 @@ void CFFManCannon::Detonate( void )
 	}
 
 	CFFBuildableObject::Detonate();
+}
+
+void CFFManCannon::Explode( void )
+{
+	SendHudStatus(BuildState_t::BUILDSTATE_NOTBUILT);
+
+	CFFBuildableObject::Explode();
 }
 
 //-----------------------------------------------------------------------------

@@ -895,6 +895,53 @@ void CFFPlayer::PreThink(void)
 	BaseClass::PreThink();
 }
 
+BEGIN_DATADESC(CFFPlayer)
+	DEFINE_THINKFUNC(UpdateHudStatusManCannonAvailability),
+END_DATADESC()
+
+void CFFPlayer::QueueHudStatusManCannonAvailabilityUpdate()
+{
+	// Ammo change notifications run before the new value is stored. Queue one
+	// update for the next tick, coalescing multiple writes in the same frame.
+	SetContextThink(&CFFPlayer::UpdateHudStatusManCannonAvailability,
+		gpGlobals->curtime + gpGlobals->interval_per_tick, "HudStatusManCannonAvailability");
+}
+
+void CFFPlayer::NetworkStateChanged_m_iAmmo()
+{
+	BaseClass::NetworkStateChanged_m_iAmmo();
+	QueueHudStatusManCannonAvailabilityUpdate();
+}
+
+void CFFPlayer::NetworkStateChanged_m_iAmmo(void* pVar)
+{
+	BaseClass::NetworkStateChanged_m_iAmmo(pVar);
+	const int iManCannonAmmoIndex = GetAmmoDef()->Index(AMMO_MANCANNON);
+	if (pVar == &m_iAmmo[iManCannonAmmoIndex])
+		QueueHudStatusManCannonAvailabilityUpdate();
+}
+
+void CFFPlayer::UpdateHudStatusManCannonAvailability()
+{
+	SetNextThink(TICK_NEVER_THINK, "HudStatusManCannonAvailability");
+
+	const bool bCanHave = GetClassSlot() != CLASS_NONE && GetMaxManCannon() > 0;
+	const bool bHas = GetAmmoCount(AMMO_MANCANNON) > 0;
+	const bool bStateUnchanged
+		= m_hudStatusManCannonAvailability.IsUnchanged(bCanHave, bHas);
+	if (bStateUnchanged)
+		return;
+
+	CSingleUserRecipientFilter user(this);
+	user.MakeReliable();
+	UserMessageBegin(user, "ManCannonAvailabilityMsg");
+		WRITE_BYTE(bCanHave);
+		WRITE_BYTE(bHas);
+	MessageEnd();
+
+	m_hudStatusManCannonAvailability.Remember(bCanHave, bHas);
+}
+
 void CFFPlayer::PostThink()
 {
 	BaseClass::PostThink();
@@ -1504,6 +1551,10 @@ void CFFPlayer::PreForceSpawn( void )
 // --------------------------------------------------------------------------------
 void CFFPlayer::Spawn( void )
 {
+	// Resend availability after spawning, even if its values are unchanged.
+	m_hudStatusManCannonAvailability.Invalidate();
+	QueueHudStatusManCannonAvailabilityUpdate();
+
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!
 	//  Please don't reinitialise class specific variables in here, but SetupClassVariables instead!
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1872,6 +1923,9 @@ void CFFPlayer::SetupClassVariables()
 	m_recentAttackers.Purge();
 
 	m_flLastSpawnTime = gpGlobals->curtime;
+
+	// Capability can change even when the ammo count does not.
+	QueueHudStatusManCannonAvailabilityUpdate();
 }
 
 void CFFPlayer::InitialSpawn( void )

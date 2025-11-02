@@ -44,10 +44,6 @@ void CHudBuildState::VidInit()
 	m_pHudDispenser->textureId = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile(m_pHudDispenser->textureId, "vgui/hud_buildable_dispenser", true, false);
 
-	m_pHudManCannon = new CHudTexture();
-	m_pHudManCannon->textureId = surface()->CreateNewTextureID();
-	surface()->DrawSetTextureFile(m_pHudManCannon->textureId, "vgui/hud_buildable_jumppad", true, false);
-
 	m_pHudDetpack = new CHudTexture();
 	m_pHudDetpack->textureId = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile(m_pHudDetpack->textureId, "vgui/hud_buildable_detpack", true, false);
@@ -88,7 +84,6 @@ void CHudBuildState::Init()
 
 	HOOK_HUD_MESSAGE(CHudBuildState, DispenserMsg);
 	HOOK_HUD_MESSAGE(CHudBuildState, SentryMsg);
-	HOOK_HUD_MESSAGE(CHudBuildState, ManCannonMsg);
 	HOOK_HUD_MESSAGE(CHudBuildState, DetpackMsg);
 	HOOK_HUD_MESSAGE(CHudBuildState, PipeMsg);
 }
@@ -104,12 +99,11 @@ void CHudBuildState::OnTick()
 	if (!pPlayer)
 		return;
 
-	m_bDrawDispenser = m_bDrawSentry = m_bDrawManCannon = m_bDrawDetpack = m_bDrawPipes = m_bDrawCloak = false;
+	m_bDrawDispenser = m_bDrawSentry = m_bDrawDetpack = m_bDrawPipes = m_bDrawCloak = false;
 	m_iSentryLevel = 0;
 
 	C_FFDispenser *pDispenser = pPlayer->GetDispenser();
 	C_FFSentryGun *pSentryGun = pPlayer->GetSentryGun();
-	C_FFManCannon *pManCannon = pPlayer->GetManCannon();
 	C_FFDetpack	*pDetpack = pPlayer->GetDetpack();
 
 	m_bDrawDispenser = pDispenser && pDispenser->IsBuilt();
@@ -117,8 +111,6 @@ void CHudBuildState::OnTick()
 	m_bDrawSentry = pSentryGun && pSentryGun->m_iLevel > 0;
 	if (m_bDrawSentry)
 		m_iSentryLevel = pSentryGun->m_iLevel;
-
-	m_bDrawManCannon = pManCannon && pManCannon->IsBuilt();
 
 	m_bDrawDetpack = pDetpack && pDetpack->IsBuilt();
 
@@ -172,14 +164,6 @@ void CHudBuildState::MsgFunc_SentryMsg(bf_read &msg)
 	V_snwprintf(m_wszSentry, 127, L"Level %i - %ls: %i%% %ls: %i%% %ls", iLevel , m_wszHealth, iHealth, m_wszAmmo, iAmmo, fNoRockets ? m_wszNoRockets : L"");
 }
 
-void CHudBuildState::MsgFunc_ManCannonMsg(bf_read &msg)
-{
-    int iHealth = (int) msg.ReadByte();
-    //m_flManCannonTimeoutTime = msg.ReadFloat();
-
-	V_snwprintf(m_wszManCannon, 127, L"%ls: %i%%", m_wszHealth, iHealth);
-}
-
 void CHudBuildState::MsgFunc_DetpackMsg(bf_read &msg)
 {
     m_flDetpackDetonateTime = msg.ReadFloat();
@@ -209,7 +193,7 @@ void CHudBuildState::MsgFunc_PipeMsg(bf_read &msg)
 
 void CHudBuildState::Paint()
 {
-	if (!m_bDrawDispenser && !m_bDrawSentry && !m_bDrawManCannon && !m_bDrawDetpack && !m_bDrawPipes && !m_bDrawCloak )
+	if (!m_bDrawDispenser && !m_bDrawSentry && !m_bDrawDetpack && !m_bDrawPipes && !m_bDrawCloak )
 		return;
 
 	// Draw icons
@@ -235,12 +219,6 @@ void CHudBuildState::Paint()
 	if (m_bDrawDispenser)
 	{
 		surface()->DrawSetTexture(m_pHudDispenser->textureId);
-		surface()->DrawTexturedRect(icon2_xpos, icon2_ypos, icon2_xpos + icon2_width, icon2_ypos + icon2_height);
-	}
-
-	if (m_bDrawManCannon)
-	{
-		surface()->DrawSetTexture(m_pHudManCannon->textureId);
 		surface()->DrawTexturedRect(icon2_xpos, icon2_ypos, icon2_xpos + icon2_width, icon2_ypos + icon2_height);
 	}
 
@@ -273,17 +251,6 @@ void CHudBuildState::Paint()
 		surface()->DrawSetTextPos(text2_xpos, text2_ypos);
 
 		for (wchar_t *wch = m_wszDispenser; *wch != 0; wch++)
-			surface()->DrawUnicodeChar(*wch);
-	}
-
-	if (m_bDrawManCannon)
-	{
-		surface()->DrawSetTextPos(text2_xpos, text2_ypos);
-
-		// commenting out to not draw a time remaining -GreenMushy
-		//V_snwprintf(m_wszManCannon, 127, L"Time Left: %i seconds", (int)(m_flManCannonTimeoutTime - gpGlobals->curtime + 1) );
-
-		for (wchar_t *wch = m_wszManCannon; *wch != 0; wch++)
 			surface()->DrawUnicodeChar(*wch);
 	}
 

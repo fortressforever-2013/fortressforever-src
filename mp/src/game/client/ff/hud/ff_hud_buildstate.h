@@ -69,21 +69,18 @@ private:
 	CHudTexture *m_pHudSentryLevel2;
 	CHudTexture *m_pHudSentryLevel3;
 	CHudTexture *m_pHudDispenser;
-	CHudTexture *m_pHudManCannon;
 	CHudTexture *m_pHudDetpack;
 	CHudTexture *m_pHudPipes;
 
 	// Lines of information
 	wchar_t m_wszDispenser[128];
 	wchar_t m_wszSentry[128];
-	wchar_t m_wszManCannon[128];
 	wchar_t m_wszDetpack[128];
 	wchar_t m_wszPipes[128];
 	wchar_t m_wszCloak[128];
 
 	bool m_bDrawDispenser;
 	bool m_bDrawSentry;
-	bool m_bDrawManCannon;
 	bool m_bDrawDetpack;
 	bool m_bDrawPipes;
 	bool m_bDrawCloak;
@@ -91,14 +88,12 @@ private:
 	int m_iHealthPerc, m_iAmmoPerc;
 	bool m_fNoRockets;
 	int m_iSentryLevel;
-    float m_flManCannonTimeoutTime;
     float m_flDetpackDetonateTime;
 	int m_iNumPipes;
 	float m_flCloakTimeLeft;
 
 	void MsgFunc_DispenserMsg(bf_read &msg);
 	void MsgFunc_SentryMsg(bf_read &msg);
-	void MsgFunc_ManCannonMsg(bf_read &msg);
 	void MsgFunc_DetpackMsg(bf_read &msg);
 	void MsgFunc_PipeMsg(bf_read &msg);
 
@@ -117,6 +112,5 @@ public:
 DECLARE_HUDELEMENT(CHudBuildState);
 DECLARE_HUD_MESSAGE(CHudBuildState, DispenserMsg);
 DECLARE_HUD_MESSAGE(CHudBuildState, SentryMsg);
-DECLARE_HUD_MESSAGE(CHudBuildState, ManCannonMsg);
 DECLARE_HUD_MESSAGE(CHudBuildState, DetpackMsg);
 DECLARE_HUD_MESSAGE(CHudBuildState, PipeMsg);

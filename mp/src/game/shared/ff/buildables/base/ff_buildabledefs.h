@@ -38,6 +38,13 @@ enum BuildInfoResult_t
 	BUILD_ERROR
 };
 
+enum BuildState_t
+{
+	BUILDSTATE_NOTBUILT = 0,
+	BUILDSTATE_BUILDING,
+	BUILDSTATE_BUILT,
+};
+
 //ConVar ffdev_mancannon_combatcooldown( "ffdev_mancannon_combatcooldown", "3", FCVAR_FF_FFDEV_REPLICATED );
 #define MANCANNON_COMBATCOOLDOWN 3.0f
 
