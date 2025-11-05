@@ -69,6 +69,8 @@
 #include "ai_navigator.h"
 #include "ai_pathfinder.h"
 #include "nav_mesh.h"
+#include "ff_info_script.h"
+#include "ff_gamerules.h"
 
 // TODO: REMOVE ME REMOVE ME
 //#include "ff_detpack.h"
@@ -505,6 +507,18 @@ public:
 	CNavArea*		m_pCurrentNavArea;
 	CNavArea*		m_pGoalNavArea;
 
+	// Combat
+	EHANDLE			m_hEnemy;
+	float			m_flNextEnemyCheckTime;
+	float			m_flNextWeaponSwitchTime;
+	float			m_flNextAbilityTime;
+
+	// CTF
+	EHANDLE			m_hTargetFlag;
+	float			m_flNextFlagCheckTime;
+	bool			m_bHasFlag;
+	bool			m_bGoingForFlag;
+
 };
 
 LINK_ENTITY_TO_CLASS( ff_bot, CFFBot );
@@ -526,6 +540,16 @@ public:
 			pPlayer->m_flNextNavigationUpdate = 0.0f;
 			pPlayer->m_pCurrentNavArea = NULL;
 			pPlayer->m_pGoalNavArea = NULL;
+			// Initialize combat
+			pPlayer->m_hEnemy = NULL;
+			pPlayer->m_flNextEnemyCheckTime = 0.0f;
+			pPlayer->m_flNextWeaponSwitchTime = 0.0f;
+			pPlayer->m_flNextAbilityTime = 0.0f;
+			// Initialize CTF
+			pPlayer->m_hTargetFlag = NULL;
+			pPlayer->m_flNextFlagCheckTime = 0.0f;
+			pPlayer->m_bHasFlag = false;
+			pPlayer->m_bGoingForFlag = false;
 		}
 
 		return pPlayer;
@@ -780,6 +804,379 @@ static void RunPlayerMove( CFFPlayer *fakeclient, CUserCmd &cmd, float frametime
 }
 
 
+
+//-----------------------------------------------------------------------------
+// Purpose: Find an enemy to attack
+//-----------------------------------------------------------------------------
+CFFPlayer* Bot_FindEnemy( CFFBot *pBot )
+{
+	CFFPlayer *pBestEnemy = NULL;
+	float flBestDistSq = FLT_MAX;
+
+	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
+	{
+		CFFPlayer *pPlayer = ToFFPlayer( UTIL_PlayerByIndex( i ) );
+		if ( !pPlayer || pPlayer == pBot || !pPlayer->IsAlive() )
+			continue;
+
+		// Check if enemy team
+		if ( g_pGameRules->PlayerRelationship( pBot, pPlayer ) != GR_NOTTEAMMATE )
+			continue;
+
+		// Check if visible
+		if ( !pBot->FVisible( pPlayer ) )
+			continue;
+
+		// Find closest enemy
+		float flDistSq = ( pPlayer->GetAbsOrigin() - pBot->GetAbsOrigin() ).LengthSqr();
+		if ( flDistSq < flBestDistSq )
+		{
+			flBestDistSq = flDistSq;
+			pBestEnemy = pPlayer;
+		}
+	}
+
+	return pBestEnemy;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Aim at target
+//-----------------------------------------------------------------------------
+void Bot_AimAtTarget( CFFBot *pBot, Vector vecTarget, QAngle &angle )
+{
+	Vector vecToTarget = vecTarget - pBot->EyePosition();
+	VectorAngles( vecToTarget, angle );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Check and engage enemies
+//-----------------------------------------------------------------------------
+bool Bot_HandleCombat( CFFBot *pBot, CUserCmd &cmd, QAngle &angle )
+{
+	// Update enemy periodically
+	if ( gpGlobals->curtime >= pBot->m_flNextEnemyCheckTime )
+	{
+		pBot->m_flNextEnemyCheckTime = gpGlobals->curtime + 0.5f;
+		pBot->m_hEnemy = Bot_FindEnemy( pBot );
+	}
+
+	CFFPlayer *pEnemy = ToFFPlayer( pBot->m_hEnemy.Get() );
+	if ( !pEnemy || !pEnemy->IsAlive() )
+	{
+		pBot->m_hEnemy = NULL;
+		return false;
+	}
+
+	// Aim at enemy
+	Vector vecEnemyHead = pEnemy->EyePosition();
+	Bot_AimAtTarget( pBot, vecEnemyHead, angle );
+
+	// Fire weapon
+	CBaseCombatWeapon *pWeapon = pBot->GetActiveWeapon();
+	if ( pWeapon )
+	{
+		// Primary attack
+		cmd.buttons |= IN_ATTACK;
+
+		// Switch weapons if out of ammo periodically
+		if ( gpGlobals->curtime >= pBot->m_flNextWeaponSwitchTime )
+		{
+			pBot->m_flNextWeaponSwitchTime = gpGlobals->curtime + 2.0f;
+
+			if ( pWeapon->UsesClipsForAmmo1() && pWeapon->Clip1() == 0 && pWeapon->GetReserveAmmoCount( AMMO_POSITION_PRIMARY ) == 0 )
+			{
+				// Try to switch to next weapon
+				for ( int i = 0; i < MAX_WEAPONS; i++ )
+				{
+					CBaseCombatWeapon *pTestWeapon = pBot->GetWeapon( i );
+					if ( pTestWeapon && pTestWeapon != pWeapon )
+					{
+						pBot->Weapon_Switch( pTestWeapon );
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Use class-specific abilities
+//-----------------------------------------------------------------------------
+void Bot_UseClassAbilities( CFFBot *pBot, CUserCmd &cmd )
+{
+	if ( gpGlobals->curtime < pBot->m_flNextAbilityTime )
+		return;
+
+	pBot->m_flNextAbilityTime = gpGlobals->curtime + RandomFloat( 5.0f, 10.0f );
+
+	int iClass = pBot->GetClassSlot();
+
+	switch ( iClass )
+	{
+		case CLASS_SCOUT:
+			// Concussion grenade occasionally
+			if ( RandomInt( 0, 2 ) == 0 )
+			{
+				pBot->PrimeGrenade2();
+				pBot->ThrowPrimedGrenade();
+			}
+			break;
+
+		case CLASS_MEDIC:
+			// Heal nearby teammates
+			{
+				CFFPlayer *pClosestTeammate = NULL;
+				float flClosestDistSq = 900.0f * 900.0f; // 900 unit radius
+
+				for ( int i = 1; i <= gpGlobals->maxClients; i++ )
+				{
+					CFFPlayer *pPlayer = ToFFPlayer( UTIL_PlayerByIndex( i ) );
+					if ( !pPlayer || pPlayer == pBot || !pPlayer->IsAlive() )
+						continue;
+
+					if ( g_pGameRules->PlayerRelationship( pBot, pPlayer ) != GR_TEAMMATE )
+						continue;
+
+					if ( pPlayer->GetHealth() >= pPlayer->GetMaxHealth() )
+						continue;
+
+					float flDistSq = ( pPlayer->GetAbsOrigin() - pBot->GetAbsOrigin() ).LengthSqr();
+					if ( flDistSq < flClosestDistSq )
+					{
+						flClosestDistSq = flDistSq;
+						pClosestTeammate = pPlayer;
+					}
+				}
+
+				if ( pClosestTeammate )
+				{
+					// Switch to medkit if we have one
+					CBaseCombatWeapon *pMedkit = pBot->Weapon_OwnsThisType( "ff_weapon_medkit" );
+					if ( pMedkit )
+					{
+						pBot->Weapon_Switch( pMedkit );
+					}
+				}
+			}
+			break;
+
+		case CLASS_ENGINEER:
+			// Build dispenser or sentry if we don't have them
+			if ( !pBot->GetDispenser() )
+			{
+				pBot->Command_BuildDispenser();
+			}
+			else if ( !pBot->GetSentryGun() )
+			{
+				pBot->Command_BuildSentryGun();
+			}
+			break;
+
+		case CLASS_SPY:
+			// Cloak when near enemies
+			if ( pBot->m_hEnemy.Get() )
+			{
+				pBot->Command_SpyCloak();
+			}
+			break;
+
+		case CLASS_DEMOMAN:
+			// Throw pipe bombs occasionally
+			if ( RandomInt( 0, 3 ) == 0 )
+			{
+				pBot->PrimeGrenade1();
+				pBot->ThrowPrimedGrenade();
+			}
+			break;
+
+		case CLASS_SOLDIER:
+		case CLASS_PYRO:
+		case CLASS_HWGUY:
+		case CLASS_SNIPER:
+			// These classes primarily rely on weapons
+			break;
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Find flags on the map
+//-----------------------------------------------------------------------------
+CFFInfoScript* Bot_FindFlag( CFFBot *pBot, bool bEnemyFlag )
+{
+	CFFInfoScript *pBestFlag = NULL;
+	float flBestDistSq = FLT_MAX;
+
+	CBaseEntity *pEntity = NULL;
+	while ( (pEntity = gEntList.FindEntityByClassname( pEntity, "info_ff_script" )) != NULL )
+	{
+		CFFInfoScript *pFlag = dynamic_cast<CFFInfoScript*>( pEntity );
+		if ( !pFlag )
+			continue;
+
+		// Skip if removed
+		if ( pFlag->IsRemoved() )
+			continue;
+
+		// For enemy flag, we want flags NOT carried by our team and NOT at their home base
+		// For our flag, we want our dropped flag to return it
+		int iFlagTeam = pFlag->GetTeamNumber();
+		int iBotTeam = pBot->GetTeamNumber();
+
+		if ( bEnemyFlag )
+		{
+			// Want enemy flag that we can pick up
+			if ( iFlagTeam == iBotTeam )
+				continue;
+
+			// Skip if already carried by teammate
+			if ( pFlag->IsCarried() )
+			{
+				CBaseEntity *pCarrier = pFlag->GetCarrier();
+				if ( pCarrier && g_pGameRules->PlayerRelationship( pBot, pCarrier ) == GR_TEAMMATE )
+					continue;
+			}
+		}
+		else
+		{
+			// Want our own dropped flag to return it
+			if ( iFlagTeam != iBotTeam )
+				continue;
+
+			// Only care about dropped flags
+			if ( !pFlag->IsDropped() )
+				continue;
+		}
+
+		// Find closest flag
+		float flDistSq = ( pFlag->GetAbsOrigin() - pBot->GetAbsOrigin() ).LengthSqr();
+		if ( flDistSq < flBestDistSq )
+		{
+			flBestDistSq = flDistSq;
+			pBestFlag = pFlag;
+		}
+	}
+
+	return pBestFlag;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Find capture point for flag
+//-----------------------------------------------------------------------------
+Vector Bot_FindCapturePoint( CFFBot *pBot )
+{
+	// Find info_ff_teamspawn for our team as approximation of capture point
+	CBaseEntity *pSpawn = NULL;
+	while ( (pSpawn = gEntList.FindEntityByClassname( pSpawn, "info_ff_teamspawn" )) != NULL )
+	{
+		if ( pSpawn->GetTeamNumber() == pBot->GetTeamNumber() )
+		{
+			return pSpawn->GetAbsOrigin();
+		}
+	}
+
+	// Fallback: just go towards center of map
+	return Vector( 0, 0, 0 );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Handle CTF objectives
+//-----------------------------------------------------------------------------
+bool Bot_HandleCTF( CFFBot *pBot, QAngle &angle )
+{
+	// Check if we're carrying a flag
+	pBot->m_bHasFlag = false;
+	CBaseEntity *pEntity = NULL;
+	while ( (pEntity = gEntList.FindEntityByClassname( pEntity, "info_ff_script" )) != NULL )
+	{
+		CFFInfoScript *pFlag = dynamic_cast<CFFInfoScript*>( pEntity );
+		if ( pFlag && pFlag->IsCarried() && pFlag->GetCarrier() == pBot )
+		{
+			pBot->m_bHasFlag = true;
+			break;
+		}
+	}
+
+	// If carrying flag, go to capture point
+	if ( pBot->m_bHasFlag )
+	{
+		Vector vecCapturePoint = Bot_FindCapturePoint( pBot );
+		pBot->m_vNavigationGoal = vecCapturePoint;
+		pBot->m_bHasNavigationGoal = true;
+		pBot->m_bGoingForFlag = false;
+
+		// Aim towards capture point
+		Vector vecToCapture = vecCapturePoint - pBot->GetAbsOrigin();
+		VectorAngles( vecToCapture, angle );
+
+		return true;
+	}
+
+	// Periodically look for flags
+	if ( gpGlobals->curtime >= pBot->m_flNextFlagCheckTime )
+	{
+		pBot->m_flNextFlagCheckTime = gpGlobals->curtime + 2.0f;
+
+		// First priority: return our dropped flag
+		CFFInfoScript *pOurFlag = Bot_FindFlag( pBot, false );
+		if ( pOurFlag )
+		{
+			pBot->m_hTargetFlag = pOurFlag;
+			pBot->m_vNavigationGoal = pOurFlag->GetAbsOrigin();
+			pBot->m_bHasNavigationGoal = true;
+			pBot->m_bGoingForFlag = true;
+			return true;
+		}
+
+		// Second priority: get enemy flag
+		CFFInfoScript *pEnemyFlag = Bot_FindFlag( pBot, true );
+		if ( pEnemyFlag )
+		{
+			pBot->m_hTargetFlag = pEnemyFlag;
+			pBot->m_vNavigationGoal = pEnemyFlag->GetAbsOrigin();
+			pBot->m_bHasNavigationGoal = true;
+			pBot->m_bGoingForFlag = true;
+			return true;
+		}
+
+		pBot->m_hTargetFlag = NULL;
+		pBot->m_bGoingForFlag = false;
+	}
+
+	// Continue going to flag if we have one targeted
+	if ( pBot->m_bGoingForFlag && pBot->m_hTargetFlag.Get() )
+	{
+		CFFInfoScript *pFlag = dynamic_cast<CFFInfoScript*>( pBot->m_hTargetFlag.Get() );
+		if ( pFlag && !pFlag->IsRemoved() )
+		{
+			pBot->m_vNavigationGoal = pFlag->GetAbsOrigin();
+			pBot->m_bHasNavigationGoal = true;
+
+			// Aim towards flag
+			Vector vecToFlag = pFlag->GetAbsOrigin() - pBot->GetAbsOrigin();
+			VectorAngles( vecToFlag, angle );
+
+			// Touch to pick up
+			float flDist = vecToFlag.Length();
+			if ( flDist < 100.0f )
+			{
+				// We should auto-pick up when we touch it
+			}
+
+			return true;
+		}
+		else
+		{
+			// Flag no longer valid
+			pBot->m_hTargetFlag = NULL;
+			pBot->m_bGoingForFlag = false;
+		}
+	}
+
+	return false;
+}
 
 void Bot_UpdateStrafing( CFFBot *pBot, CUserCmd &cmd )
 {
@@ -1222,10 +1619,29 @@ void Bot_Think( CFFBot *pBot )
 
 		if ( pBot->IsAlive() && (pBot->GetSolid() == SOLID_BBOX) )
 		{
+			QAngle angle = pBot->GetLocalAngles();
+			bool bHandledByAI = false;
+
+			// Priority 1: Handle combat if we have an enemy
+			if ( Bot_HandleCombat( pBot, cmd, angle ) )
+			{
+				bHandledByAI = true;
+				pBot->SetLocalAngles( angle );
+			}
+			// Priority 2: Handle CTF objectives
+			else if ( Bot_HandleCTF( pBot, angle ) )
+			{
+				bHandledByAI = true;
+				pBot->SetLocalAngles( angle );
+			}
+
+			// Use class abilities
+			Bot_UseClassAbilities( pBot, cmd );
+
 			Bot_SetForwardMovement( pBot, cmd );
 
-			// Only turn if I haven't been hurt
-			if ( !pBot->IsEFlagSet(EFL_BOT_FROZEN) && pBot->m_iHealth == pBot->GetMaxHealth() )
+			// Only turn if I haven't been hurt and AI hasn't already handled it
+			if ( !bHandledByAI && !pBot->IsEFlagSet(EFL_BOT_FROZEN) && pBot->m_iHealth == pBot->GetMaxHealth() )
 			{
 				Bot_UpdateDirection( pBot );
 				Bot_UpdateStrafing( pBot, cmd );
@@ -1245,8 +1661,8 @@ void Bot_Think( CFFBot *pBot )
 		// Fix up the m_fEffects flags
 		pBot->PostClientMessagesSent();
 
-		
-		
+
+
 		cmd.viewangles = pBot->GetLocalAngles();
 		cmd.upmove = 0;
 		cmd.impulse = 0;
