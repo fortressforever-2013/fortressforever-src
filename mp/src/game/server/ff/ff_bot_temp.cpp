@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright ï¿½ 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: Basic BOT handling.
 //
@@ -66,6 +66,9 @@
 #include "te_effect_dispatch.h"
 #include "bitbuf.h"
 #include "filesystem.h"
+#include "ai_navigator.h"
+#include "ai_pathfinder.h"
+#include "nav_mesh.h"
 
 // TODO: REMOVE ME REMOVE ME
 //#include "ff_detpack.h"
@@ -494,7 +497,14 @@ public:
 
 	QAngle			m_ForwardAngle;
 	QAngle			m_LastAngles;
-	
+
+	// AI Navigation
+	Vector			m_vNavigationGoal;
+	bool			m_bHasNavigationGoal;
+	float			m_flNextNavigationUpdate;
+	CNavArea*		m_pCurrentNavArea;
+	CNavArea*		m_pGoalNavArea;
+
 };
 
 LINK_ENTITY_TO_CLASS( ff_bot, CFFBot );
@@ -511,11 +521,61 @@ public:
 		if ( pPlayer )
 		{
 			pPlayer->SetPlayerName( playername );
+			// Initialize navigation
+			pPlayer->m_bHasNavigationGoal = false;
+			pPlayer->m_flNextNavigationUpdate = 0.0f;
+			pPlayer->m_pCurrentNavArea = NULL;
+			pPlayer->m_pGoalNavArea = NULL;
 		}
 
 		return pPlayer;
 	}
 };
+
+//-----------------------------------------------------------------------------
+// Purpose: Find teams that have spawn points available in the current map
+//-----------------------------------------------------------------------------
+int Bot_FindTeamWithSpawns()
+{
+	// Check which teams have spawn points by looking at info_ff_teamspawn entities
+	bool teamHasSpawns[TEAM_COUNT] = { false };
+
+	CBaseEntity *pSpawn = NULL;
+	while ( (pSpawn = gEntList.FindEntityByClassname( pSpawn, "info_ff_teamspawn" )) != NULL )
+	{
+		int iTeamNum = pSpawn->GetTeamNumber();
+		if ( iTeamNum >= TEAM_BLUE && iTeamNum <= TEAM_GREEN )
+		{
+			teamHasSpawns[iTeamNum] = true;
+		}
+	}
+
+	// Build list of valid teams
+	CUtlVector<int> validTeams;
+	for ( int i = TEAM_BLUE; i <= TEAM_GREEN; i++ )
+	{
+		if ( teamHasSpawns[i] )
+		{
+			validTeams.AddToTail( i );
+		}
+	}
+
+	// Return random valid team, or TEAM_BLUE if none found
+	if ( validTeams.Count() > 0 )
+	{
+		return validTeams[ RandomInt( 0, validTeams.Count() - 1 ) ];
+	}
+
+	return TEAM_BLUE; // Default to blue team
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Pick a random valid class
+//-----------------------------------------------------------------------------
+int Bot_PickRandomClass()
+{
+	return RandomInt( CLASS_SCOUT, CLASS_CIVILIAN );
+}
 
 
 //-----------------------------------------------------------------------------
@@ -594,11 +654,18 @@ void BotAdd_f( const CCommand &args )
 	while ( --count >= 0 )
 	{
 		// What class do they want?
-		int iClass = RandomInt( CLASS_SCOUT, CLASS_CIVILIAN );
+		int iClass = CLASS_SCOUT;
 		char const *pVal = args.FindArg( "-class" );
 		if ( pVal )
+		{
 			iClass = Class_StringToInt( pVal );
-			
+		}
+		else
+		{
+			// Automatic class selection when no parameter provided
+			iClass = Bot_PickRandomClass();
+		}
+
 		if ( args.FindArg( "-all" ) )
 			iClass = 9 - count;
 
@@ -612,6 +679,11 @@ void BotAdd_f( const CCommand &args )
 			}
 			else
 				iTeam = Team_StringToInt( pVal );
+		}
+		else
+		{
+			// Automatic team selection - find team with spawn points
+			iTeam = Bot_FindTeamWithSpawns();
 		}
 
 		char const *pName = args.FindArg( "-name" );
@@ -737,19 +809,83 @@ void Bot_UpdateStrafing( CFFBot *pBot, CUserCmd &cmd )
 }
 
 
+void Bot_UpdateNavigationGoal( CFFBot *pBot )
+{
+	// Update navigation goal periodically
+	if ( gpGlobals->curtime < pBot->m_flNextNavigationUpdate )
+		return;
+
+	pBot->m_flNextNavigationUpdate = gpGlobals->curtime + 5.0f;
+
+	// Update current nav area
+	pBot->m_pCurrentNavArea = TheNavMesh->GetNearestNavArea( pBot->GetAbsOrigin() );
+
+	if ( !pBot->m_pCurrentNavArea )
+		return;
+
+	// Find a random navigation goal
+	CNavArea *pRandomArea = TheNavMesh->GetRandomArea();
+	if ( pRandomArea )
+	{
+		pBot->m_pGoalNavArea = pRandomArea;
+		pBot->m_vNavigationGoal = pRandomArea->GetCenter();
+		pBot->m_bHasNavigationGoal = true;
+	}
+}
+
+void Bot_NavigateToGoal( CFFBot *pBot, QAngle &angle )
+{
+	if ( !pBot->m_bHasNavigationGoal )
+		return;
+
+	if ( !pBot->m_pCurrentNavArea )
+		return;
+
+	// Check if we reached the goal
+	Vector vecToGoal = pBot->m_vNavigationGoal - pBot->GetAbsOrigin();
+	float distToGoal = vecToGoal.Length2D();
+
+	if ( distToGoal < 100.0f )
+	{
+		// Reached goal, pick a new one
+		pBot->m_bHasNavigationGoal = false;
+		pBot->m_flNextNavigationUpdate = 0.0f;
+		return;
+	}
+
+	// Point towards the goal
+	QAngle angToGoal;
+	VectorAngles( vecToGoal, angToGoal );
+	angle.y = angToGoal.y;
+}
+
 void Bot_UpdateDirection( CFFBot *pBot )
 {
-	float angledelta = 15.0;
-	QAngle angle;
+	QAngle angle = pBot->GetLocalAngles();
 
+	// Use navigation mesh if available
+	if ( TheNavMesh && TheNavMesh->IsLoaded() )
+	{
+		Bot_UpdateNavigationGoal( pBot );
+
+		if ( pBot->m_bHasNavigationGoal )
+		{
+			Bot_NavigateToGoal( pBot, angle );
+			pBot->m_ForwardAngle = angle;
+			pBot->m_LastAngles = angle;
+			pBot->SetLocalAngles( angle );
+			return;
+		}
+	}
+
+	// Fallback to old random navigation
+	float angledelta = 15.0;
 	int maxtries = (int)360.0/angledelta;
 
 	if ( pBot->m_bLastTurnToRight )
 	{
 		angledelta = -angledelta;
 	}
-
-	angle = pBot->GetLocalAngles();
 
 	trace_t trace;
 	Vector vecSrc, vecEnd, forward;
@@ -761,7 +897,7 @@ void Bot_UpdateDirection( CFFBot *pBot )
 
 		vecEnd = vecSrc + forward * 10;
 
-		UTIL_TraceHull( vecSrc, vecEnd, VEC_HULL_MIN, VEC_HULL_MAX, 
+		UTIL_TraceHull( vecSrc, vecEnd, VEC_HULL_MIN, VEC_HULL_MAX,
 			MASK_PLAYERSOLID, pBot, COLLISION_GROUP_NONE, &trace );
 
 		if ( trace.fraction == 1.0 )
@@ -785,7 +921,7 @@ void Bot_UpdateDirection( CFFBot *pBot )
 		pBot->m_ForwardAngle = angle;
 		pBot->m_LastAngles = angle;
 	}
-	
+
 	pBot->SetLocalAngles( angle );
 }
 
@@ -1116,8 +1252,8 @@ void Bot_Think( CFFBot *pBot )
 		cmd.impulse = 0;
 	}
 
-//	float frametime = gpGlobals->frametime;
-//	RunPlayerMove( pBot, cmd, frametime );
+	float frametime = gpGlobals->frametime;
+	RunPlayerMove( pBot, cmd, frametime );
 }
 
 CON_COMMAND_F( bot_teleport, "Teleport the specified bot to the specified position & angles.\n\tFormat: bot_teleport <bot name> <X> <Y> <Z> <Pitch> <Yaw> <Roll>", FCVAR_CHEAT )
