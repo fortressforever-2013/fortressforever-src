@@ -903,28 +903,251 @@ bool Bot_HandleCombat( CFFBot *pBot, CUserCmd &cmd, QAngle &angle )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Use class-specific abilities
+// Purpose: Smart grenade usage based on situation
 //-----------------------------------------------------------------------------
-void Bot_UseClassAbilities( CFFBot *pBot, CUserCmd &cmd )
+void Bot_UseGrenades( CFFBot *pBot, CUserCmd &cmd )
 {
+	// Don't throw grenades too often
 	if ( gpGlobals->curtime < pBot->m_flNextAbilityTime )
 		return;
 
-	pBot->m_flNextAbilityTime = gpGlobals->curtime + RandomFloat( 5.0f, 10.0f );
+	// Check if we have grenades
+	int iPrimaryGrenades = pBot->GetPrimaryGrenades();
+	int iSecondaryGrenades = pBot->GetSecondaryGrenades();
+
+	if ( iPrimaryGrenades <= 0 && iSecondaryGrenades <= 0 )
+		return;
+
+	// Don't throw if already primed
+	if ( pBot->IsGrenadePrimed() )
+		return;
 
 	int iClass = pBot->GetClassSlot();
+	CFFPlayer *pEnemy = ToFFPlayer( pBot->m_hEnemy.Get() );
+	bool bHasEnemy = ( pEnemy && pEnemy->IsAlive() );
+
+	// Count nearby enemies for area denial grenades
+	int iNearbyEnemies = 0;
+	float flClosestEnemyDistSq = FLT_MAX;
+	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
+	{
+		CFFPlayer *pPlayer = ToFFPlayer( UTIL_PlayerByIndex( i ) );
+		if ( !pPlayer || pPlayer == pBot || !pPlayer->IsAlive() )
+			continue;
+
+		if ( g_pGameRules->PlayerRelationship( pBot, pPlayer ) != GR_NOTTEAMMATE )
+			continue;
+
+		float flDistSq = ( pPlayer->GetAbsOrigin() - pBot->GetAbsOrigin() ).LengthSqr();
+		if ( flDistSq < 600.0f * 600.0f ) // 600 unit radius
+		{
+			iNearbyEnemies++;
+			if ( flDistSq < flClosestEnemyDistSq )
+				flClosestEnemyDistSq = flDistSq;
+		}
+	}
+
+	bool bThrowGrenade = false;
+	bool bThrowPrimary = true; // Default to primary (frag)
 
 	switch ( iClass )
 	{
 		case CLASS_SCOUT:
-			// Concussion grenade occasionally
-			if ( RandomInt( 0, 2 ) == 0 )
+			// Primary: Frag - Use against enemies at medium range
+			// Secondary: Concussion - Use for mobility or disruption
+			if ( iSecondaryGrenades > 0 && RandomInt( 0, 3 ) == 0 )
 			{
-				pBot->PrimeGrenade2();
-				pBot->ThrowPrimedGrenade();
+				// Throw conc for mobility/escape
+				bThrowGrenade = true;
+				bThrowPrimary = false;
+				pBot->m_flNextAbilityTime = gpGlobals->curtime + RandomFloat( 8.0f, 12.0f );
+			}
+			else if ( iPrimaryGrenades > 0 && bHasEnemy && flClosestEnemyDistSq < 500.0f * 500.0f )
+			{
+				// Throw frag at close enemies
+				bThrowGrenade = true;
+				bThrowPrimary = true;
+				pBot->m_flNextAbilityTime = gpGlobals->curtime + RandomFloat( 5.0f, 8.0f );
 			}
 			break;
 
+		case CLASS_SOLDIER:
+			// Primary: Frag - Standard explosive
+			// Secondary: Nail - Commented out in code, may not be active
+			if ( iPrimaryGrenades > 0 && iNearbyEnemies >= 1 && flClosestEnemyDistSq < 400.0f * 400.0f )
+			{
+				// Throw frag at groups or close enemies
+				bThrowGrenade = true;
+				bThrowPrimary = true;
+				pBot->m_flNextAbilityTime = gpGlobals->curtime + RandomFloat( 6.0f, 10.0f );
+			}
+			break;
+
+		case CLASS_DEMOMAN:
+			// Primary: Frag - Standard explosive
+			// Secondary: MIRV - Splits into 4 mirvlets
+			if ( iSecondaryGrenades > 0 && iNearbyEnemies >= 2 )
+			{
+				// Use MIRV against groups (more effective with mirvlets)
+				bThrowGrenade = true;
+				bThrowPrimary = false;
+				pBot->m_flNextAbilityTime = gpGlobals->curtime + RandomFloat( 10.0f, 15.0f );
+			}
+			else if ( iPrimaryGrenades > 0 && bHasEnemy && flClosestEnemyDistSq < 450.0f * 450.0f )
+			{
+				// Use frag for single targets
+				bThrowGrenade = true;
+				bThrowPrimary = true;
+				pBot->m_flNextAbilityTime = gpGlobals->curtime + RandomFloat( 7.0f, 11.0f );
+			}
+			break;
+
+		case CLASS_MEDIC:
+			// Primary: Frag - Standard explosive
+			// Secondary: Concussion - Area denial/disruption
+			if ( iSecondaryGrenades > 0 && iNearbyEnemies >= 2 && flClosestEnemyDistSq < 350.0f * 350.0f )
+			{
+				// Use conc to disrupt groups
+				bThrowGrenade = true;
+				bThrowPrimary = false;
+				pBot->m_flNextAbilityTime = gpGlobals->curtime + RandomFloat( 8.0f, 12.0f );
+			}
+			else if ( iPrimaryGrenades > 0 && bHasEnemy && flClosestEnemyDistSq < 400.0f * 400.0f )
+			{
+				// Use frag for defense
+				bThrowGrenade = true;
+				bThrowPrimary = true;
+				pBot->m_flNextAbilityTime = gpGlobals->curtime + RandomFloat( 8.0f, 12.0f );
+			}
+			break;
+
+		case CLASS_HWGUY:
+			// Primary: Frag - Standard explosive
+			// Secondary: MIRV - Area saturation
+			if ( iSecondaryGrenades > 0 && iNearbyEnemies >= 2 )
+			{
+				// Use MIRV for area control
+				bThrowGrenade = true;
+				bThrowPrimary = false;
+				pBot->m_flNextAbilityTime = gpGlobals->curtime + RandomFloat( 10.0f, 15.0f );
+			}
+			else if ( iPrimaryGrenades > 0 && bHasEnemy && flClosestEnemyDistSq < 500.0f * 500.0f )
+			{
+				// Use frag against enemies
+				bThrowGrenade = true;
+				bThrowPrimary = true;
+				pBot->m_flNextAbilityTime = gpGlobals->curtime + RandomFloat( 7.0f, 11.0f );
+			}
+			break;
+
+		case CLASS_PYRO:
+			// Primary: Frag - Standard explosive
+			// Secondary: Napalm - Creates persistent fire
+			if ( iSecondaryGrenades > 0 && iNearbyEnemies >= 1 )
+			{
+				// Use napalm for area denial
+				bThrowGrenade = true;
+				bThrowPrimary = false;
+				pBot->m_flNextAbilityTime = gpGlobals->curtime + RandomFloat( 12.0f, 18.0f );
+			}
+			else if ( iPrimaryGrenades > 0 && bHasEnemy && flClosestEnemyDistSq < 400.0f * 400.0f )
+			{
+				// Use frag for direct damage
+				bThrowGrenade = true;
+				bThrowPrimary = true;
+				pBot->m_flNextAbilityTime = gpGlobals->curtime + RandomFloat( 6.0f, 10.0f );
+			}
+			break;
+
+		case CLASS_SPY:
+			// Primary: Frag - Standard explosive
+			// Secondary: Gas - Commented out, may not be active
+			if ( iPrimaryGrenades > 0 && bHasEnemy && flClosestEnemyDistSq < 400.0f * 400.0f )
+			{
+				// Use frag when discovered
+				bThrowGrenade = true;
+				bThrowPrimary = true;
+				pBot->m_flNextAbilityTime = gpGlobals->curtime + RandomFloat( 8.0f, 12.0f );
+			}
+			break;
+
+		case CLASS_ENGINEER:
+			// Primary: Frag - Standard explosive
+			// Secondary: EMP - Destroys electronics/buildings
+			if ( iSecondaryGrenades > 0 )
+			{
+				// Check for enemy buildings
+				CBaseEntity *pEntity = NULL;
+				bool bFoundBuilding = false;
+				while ( (pEntity = gEntList.FindEntityByClassname( pEntity, "ff_buildable*" )) != NULL )
+				{
+					if ( g_pGameRules->PlayerRelationship( pBot, pEntity ) == GR_NOTTEAMMATE )
+					{
+						float flDistSq = ( pEntity->GetAbsOrigin() - pBot->GetAbsOrigin() ).LengthSqr();
+						if ( flDistSq < 500.0f * 500.0f )
+						{
+							bFoundBuilding = true;
+							break;
+						}
+					}
+				}
+
+				if ( bFoundBuilding )
+				{
+					// Use EMP against enemy buildings
+					bThrowGrenade = true;
+					bThrowPrimary = false;
+					pBot->m_flNextAbilityTime = gpGlobals->curtime + RandomFloat( 10.0f, 15.0f );
+				}
+			}
+
+			if ( !bThrowGrenade && iPrimaryGrenades > 0 && iNearbyEnemies >= 1 && flClosestEnemyDistSq < 400.0f * 400.0f )
+			{
+				// Use frag for defense
+				bThrowGrenade = true;
+				bThrowPrimary = true;
+				pBot->m_flNextAbilityTime = gpGlobals->curtime + RandomFloat( 8.0f, 12.0f );
+			}
+			break;
+
+		case CLASS_SNIPER:
+		case CLASS_CIVILIAN:
+			// Primary: Frag - Standard explosive
+			if ( iPrimaryGrenades > 0 && bHasEnemy && flClosestEnemyDistSq < 400.0f * 400.0f )
+			{
+				// Use frag when enemies get close
+				bThrowGrenade = true;
+				bThrowPrimary = true;
+				pBot->m_flNextAbilityTime = gpGlobals->curtime + RandomFloat( 8.0f, 12.0f );
+			}
+			break;
+	}
+
+	// Actually throw the grenade
+	if ( bThrowGrenade )
+	{
+		if ( bThrowPrimary )
+		{
+			pBot->PrimeGrenade1();
+		}
+		else
+		{
+			pBot->PrimeGrenade2();
+		}
+		// Note: Grenade will be auto-thrown after delay or bot can manually throw
+		// The GrenadeThink() handles timing and auto-throw
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Use class-specific abilities (non-grenade)
+//-----------------------------------------------------------------------------
+void Bot_UseClassAbilities( CFFBot *pBot, CUserCmd &cmd )
+{
+	int iClass = pBot->GetClassSlot();
+
+	switch ( iClass )
+	{
 		case CLASS_MEDIC:
 			// Heal nearby teammates
 			{
@@ -965,11 +1188,11 @@ void Bot_UseClassAbilities( CFFBot *pBot, CUserCmd &cmd )
 
 		case CLASS_ENGINEER:
 			// Build dispenser or sentry if we don't have them
-			if ( !pBot->GetDispenser() )
+			if ( !pBot->GetDispenser() && RandomInt( 0, 10 ) == 0 )
 			{
 				pBot->Command_BuildDispenser();
 			}
-			else if ( !pBot->GetSentryGun() )
+			else if ( !pBot->GetSentryGun() && RandomInt( 0, 10 ) == 0 )
 			{
 				pBot->Command_BuildSentryGun();
 			}
@@ -977,26 +1200,10 @@ void Bot_UseClassAbilities( CFFBot *pBot, CUserCmd &cmd )
 
 		case CLASS_SPY:
 			// Cloak when near enemies
-			if ( pBot->m_hEnemy.Get() )
+			if ( pBot->m_hEnemy.Get() && RandomInt( 0, 5 ) == 0 )
 			{
 				pBot->Command_SpyCloak();
 			}
-			break;
-
-		case CLASS_DEMOMAN:
-			// Throw pipe bombs occasionally
-			if ( RandomInt( 0, 3 ) == 0 )
-			{
-				pBot->PrimeGrenade1();
-				pBot->ThrowPrimedGrenade();
-			}
-			break;
-
-		case CLASS_SOLDIER:
-		case CLASS_PYRO:
-		case CLASS_HWGUY:
-		case CLASS_SNIPER:
-			// These classes primarily rely on weapons
 			break;
 	}
 }
@@ -1634,6 +1841,9 @@ void Bot_Think( CFFBot *pBot )
 				bHandledByAI = true;
 				pBot->SetLocalAngles( angle );
 			}
+
+			// Use grenades intelligently
+			Bot_UseGrenades( pBot, cmd );
 
 			// Use class abilities
 			Bot_UseClassAbilities( pBot, cmd );
