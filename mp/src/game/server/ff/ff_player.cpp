@@ -896,6 +896,7 @@ void CFFPlayer::Precache()
 	//PrecacheScriptSound("Grenade.Timer");
 	PrecacheScriptSound("Grenade.Prime");
 	PrecacheScriptSound("Player.Jump");
+	PrecacheScriptSound("Player.JumpLanding");
 	PrecacheScriptSound("Player.SpyFall");
 	PrecacheScriptSound("Player.Deathbeep");
 	PrecacheScriptSound("Player.Ammotoss");

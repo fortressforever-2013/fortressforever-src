@@ -399,6 +399,190 @@ bool CC_AmmoMe(const CCommand& args)
 	return true;
 }
 
+bool CC_Acknowledge(const CCommand& args)
+{
+	if (!engine->IsConnected() || !engine->IsInGame())
+		return false;
+
+	C_FFPlayer* pLocalPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if (!pLocalPlayer)
+		return false;
+
+	pLocalPlayer->Command_Acknowledge(args);
+	return true;
+}
+bool CC_Negative(const CCommand& args)
+{
+	if (!engine->IsConnected() || !engine->IsInGame())
+		return false;
+
+	C_FFPlayer* pLocalPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if (!pLocalPlayer)
+		return false;
+
+	pLocalPlayer->Command_Negative(args);
+	return true;
+}
+
+bool CC_PassFlag(const CCommand& args)
+{
+	if (!engine->IsConnected() || !engine->IsInGame())
+		return false;
+
+	C_FFPlayer* pLocalPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if (!pLocalPlayer)
+		return false;
+
+	if (!pLocalPlayer->IsAlive())
+		return false;
+
+	pLocalPlayer->Command_PassFlag(args);
+	return true;
+}
+bool CC_TakeFlag(const CCommand& args)
+{
+	if (!engine->IsConnected() || !engine->IsInGame())
+		return false;
+
+	C_FFPlayer* pLocalPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if (!pLocalPlayer)
+		return false;
+
+	if (!pLocalPlayer->IsAlive())
+		return false;
+
+	pLocalPlayer->Command_TakeFlag(args);
+	return true;
+}
+bool CC_OnMyWay(const CCommand& args)
+{
+	if (!engine->IsConnected() || !engine->IsInGame())
+		return false;
+
+	C_FFPlayer* pLocalPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if (!pLocalPlayer)
+		return false;
+
+	pLocalPlayer->Command_OnMyWay(args);
+	return true;
+}
+
+bool CC_Attacking(const CCommand& args)
+{
+	if (!engine->IsConnected() || !engine->IsInGame())
+		return false;
+
+	C_FFPlayer* pLocalPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if (!pLocalPlayer)
+		return false;
+
+	pLocalPlayer->Command_Attacking(args);
+	return true;
+}
+bool CC_Defending(const CCommand& args)
+{
+	if (!engine->IsConnected() || !engine->IsInGame())
+		return false;
+
+	C_FFPlayer* pLocalPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if (!pLocalPlayer)
+		return false;
+
+	pLocalPlayer->Command_Defending(args);
+	return true;
+}
+
+bool CC_NeedSentry(const CCommand& args)
+{
+	if (!engine->IsConnected() || !engine->IsInGame())
+		return false;
+
+	C_FFPlayer* pLocalPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if (!pLocalPlayer)
+		return false;
+
+	if (!pLocalPlayer->IsAlive())
+		return false;
+
+	pLocalPlayer->Command_NeedSentry(args);
+	return true;
+}
+bool CC_SpottedSentry(const CCommand& args)
+{
+	if (!engine->IsConnected() || !engine->IsInGame())
+		return false;
+
+	C_FFPlayer* pLocalPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if (!pLocalPlayer)
+		return false;
+
+	pLocalPlayer->Command_SpottedSentry(args);
+	return true;
+}
+
+bool CC_NeedDetpack(const CCommand& args)
+{
+	if (!engine->IsConnected() || !engine->IsInGame())
+		return false;
+
+	C_FFPlayer* pLocalPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if (!pLocalPlayer)
+		return false;
+
+	pLocalPlayer->Command_NeedDetpack(args);
+	return true;
+}
+bool CC_SpottedDetpack(const CCommand& args)
+{
+	if (!engine->IsConnected() || !engine->IsInGame())
+		return false;
+
+	C_FFPlayer* pLocalPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if (!pLocalPlayer)
+		return false;
+
+	pLocalPlayer->Command_SpottedDetpack(args);
+	return true;
+}
+
+bool CC_SpottedPipes(const CCommand& args)
+{
+	if (!engine->IsConnected() || !engine->IsInGame())
+		return false;
+
+	C_FFPlayer* pLocalPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if (!pLocalPlayer)
+		return false;
+
+	pLocalPlayer->Command_SpottedPipes(args);
+	return true;
+}
+bool CC_SpottedSpy(const CCommand& args)
+{
+	if (!engine->IsConnected() || !engine->IsInGame())
+		return false;
+
+	C_FFPlayer* pLocalPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if (!pLocalPlayer)
+		return false;
+
+	pLocalPlayer->Command_SpottedSpy(args);
+	return true;
+}
+
+bool CC_Incoming(const CCommand& args)
+{
+	if (!engine->IsConnected() || !engine->IsInGame())
+		return false;
+
+	C_FFPlayer* pLocalPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if (!pLocalPlayer)
+		return false;
+
+	pLocalPlayer->Command_Incoming(args);
+	return true;
+}
+
 #define FF_PLAYER_MODEL "models/player/terror.mdl"
 
 // -------------------------------------------------------------------------------- //

@@ -354,6 +354,20 @@ public:
 	void Command_EngyMe(const CCommand& args = CCommand());
 	void Command_AmmoMe(const CCommand& args = CCommand());
 	void Command_Disguise(const CCommand& args = CCommand());
+	void Command_Acknowledge(const CCommand& args = CCommand());
+	void Command_Negative(const CCommand& args = CCommand());
+	void Command_PassFlag(const CCommand& args = CCommand());
+	void Command_TakeFlag(const CCommand& args = CCommand());
+	void Command_Attacking(const CCommand& args = CCommand());
+	void Command_SpottedSentry(const CCommand& args = CCommand());
+	void Command_SpottedPipes(const CCommand& args = CCommand());
+	void Command_NeedDetpack(const CCommand& args = CCommand());
+	void Command_OnMyWay(const CCommand& args = CCommand());
+	void Command_Defending(const CCommand& args = CCommand());
+	void Command_Incoming(const CCommand& args = CCommand());
+	void Command_SpottedSpy(const CCommand& args = CCommand());
+	void Command_NeedSentry(const CCommand& args = CCommand());
+	void Command_SpottedDetpack(const CCommand& args = CCommand());
 
 	void Command_SabotageSentry(const CCommand& args = CCommand());
 	void Command_SabotageDispenser(const CCommand& args = CCommand());

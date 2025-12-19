@@ -73,20 +73,6 @@
 #include "ff_buildableobject.h"
 #include "ff_buildable_sentrygun.h"
 
-CON_COMMAND_F(ffdev_tranqme, "tranqs you", FCVAR_CHEAT)
-{
-	CFFPlayer* you = ToFFPlayer(UTIL_GetCommandClient());
-	you->AddSpeedEffect(SE_TRANQ, 6.0, 0.3f, SEM_BOOLEAN | SEM_HEALABLE, FF_STATUSICON_TRANQUILIZED, 6.0f);
-
-	CSingleUserRecipientFilter user(you);
-	user.MakeReliable();
-
-	UserMessageBegin(user, "FFViewEffect");
-	WRITE_BYTE(FF_VIEWEFFECT_TRANQUILIZED);
-	WRITE_FLOAT(6.0f);
-	MessageEnd();
-}
-
 class CFFBot;
 void Bot_Think( CFFBot *pBot );
 bool Bot_GhostThinkRecord( CFFBot *pBot );
@@ -113,7 +99,7 @@ ConVar bot_ghostplayback( "bot_ghostplayback", "-1", 0, "Playback a clients user
 
 static int g_CurBotNumber = 1;
 
-CON_COMMAND( bot_immuneme, "immune me" )
+CON_COMMAND_F( bot_immuneme, "Temporary immunity", FCVAR_CHEAT )
 {
 	CFFPlayer *pHuman = ToFFPlayer( UTIL_GetCommandClient() );
 	if( pHuman )
@@ -395,7 +381,7 @@ CON_COMMAND( bot_status, "Make bot show health / armor" )
 	}
 }
 
-CON_COMMAND(ffdev_gibs, "gibs")
+CON_COMMAND_F(ffdev_gibs, "Create gibbing effect", FCVAR_CHEAT)
 {
 	CFFPlayer *you = ToFFPlayer(UTIL_GetCommandClient());
 
@@ -405,27 +391,27 @@ CON_COMMAND(ffdev_gibs, "gibs")
 	DispatchEffect("Gib", effect);
 }
 
-CON_COMMAND(ffdev_legshotme, "legshots you")
+CON_COMMAND_F(ffdev_legshotme, "Legshot effect test", FCVAR_CHEAT)
 {
 	CFFPlayer *you = ToFFPlayer(UTIL_GetCommandClient());
 	you->AddSpeedEffect(SE_LEGSHOT, 999, 0.5f, SEM_ACCUMULATIVE|SEM_HEALABLE, FF_STATUSICON_LEGINJURY, 15.0f);
 }
 
-//CON_COMMAND(ffdev_tranqme, "tranqs you")
-//{
-//	CFFPlayer *you = ToFFPlayer(UTIL_GetCommandClient());
-//	you->AddSpeedEffect(SE_TRANQ, 6.0, 0.3f, SEM_BOOLEAN|SEM_HEALABLE, FF_STATUSICON_TRANQUILIZED, 6.0f);
-//	
-//	CSingleUserRecipientFilter user(you);
-//	user.MakeReliable();
-//
-//	UserMessageBegin(user, "FFViewEffect");
-//	WRITE_BYTE(FF_VIEWEFFECT_TRANQUILIZED);
-//	WRITE_FLOAT(6.0f);
-//	MessageEnd();
-//}
+CON_COMMAND_F(ffdev_tranqme, "Tranq effect test", FCVAR_CHEAT)
+{
+	CFFPlayer *you = ToFFPlayer(UTIL_GetCommandClient());
+	you->AddSpeedEffect(SE_TRANQ, 6.0, 0.3f, SEM_BOOLEAN | SEM_HEALABLE, FF_STATUSICON_TRANQUILIZED, 6.0f);
 
-CON_COMMAND(ffdev_gasvieweffectme, "gas view effects you")
+	CSingleUserRecipientFilter user(you);
+	user.MakeReliable();
+
+	UserMessageBegin(user, "FFViewEffect");
+	WRITE_BYTE(FF_VIEWEFFECT_TRANQUILIZED);
+	WRITE_FLOAT(6.0f);
+	MessageEnd();
+}
+
+CON_COMMAND_F(ffdev_gasvieweffectme, "Gas view effect test", FCVAR_CHEAT)
 {
 	CFFPlayer *you = ToFFPlayer(UTIL_GetCommandClient());
 
@@ -438,28 +424,30 @@ CON_COMMAND(ffdev_gasvieweffectme, "gas view effects you")
 	MessageEnd();
 }
 
-CON_COMMAND(ffdev_score, "you score")
+CON_COMMAND_F(ffdev_score, "Add points to, or deduct from, your current team", FCVAR_CHEAT)
 {
+	if (!args[1] || args[1] == 0)
+		return;
+
 	CFFPlayer *you = ToFFPlayer(UTIL_GetCommandClient());
-	you->AddPointsToTeam(10, true);
+	you->AddPointsToTeam(atoi(args[1]), true);
 }
 
-CON_COMMAND(ffdev_conc, "some weird negative conc")
+CON_COMMAND_F(ffdev_conc, "Concussion effect test. (Default is infinite; argument determines length of effect.)", FCVAR_CHEAT)
 {
 	CFFPlayer *you = ToFFPlayer(UTIL_GetCommandClient());
-	you->m_flConcTime = -1;
+
+	you->m_flConcTime = args[1] ? atof(args[1]) : -1.0;
 }
 
-CON_COMMAND(ffdev_iclass, "instant switch")
+CON_COMMAND_F(ffdev_iclass, "Instantly switch classes", FCVAR_CHEAT)
 {
 	CFFPlayer *you = ToFFPlayer(UTIL_GetCommandClient());
 
 	if (!args[1] || !args[1][0])
 		return;
 
-	int iClass = atoi(args[1]);
-
-	you->InstaSwitch(iClass);
+	you->InstaSwitch(atoi(args[1]));
 }
 
 CON_COMMAND(bot_infectme, "infects you")

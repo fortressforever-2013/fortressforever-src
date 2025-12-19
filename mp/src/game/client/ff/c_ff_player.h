@@ -77,6 +77,23 @@ bool CC_EngyMe(const CCommand& args = CCommand());
 bool CC_SaveMe(const CCommand& args = CCommand());
 bool CC_AmmoMe(const CCommand& args = CCommand());
 
+bool CC_Acknowledge(const CCommand& args = CCommand());
+bool CC_Negative(const CCommand& args = CCommand());
+bool CC_PassFlag(const CCommand& args = CCommand());
+bool CC_TakeFlag(const CCommand& args = CCommand());
+bool CC_OnMyWay(const CCommand& args = CCommand());
+
+bool CC_Attacking(const CCommand& args = CCommand());
+bool CC_SpottedSentry(const CCommand& args = CCommand());
+bool CC_SpottedPipes(const CCommand& args = CCommand());
+bool CC_NeedDetpack(const CCommand& args = CCommand());
+
+bool CC_Defending(const CCommand& args = CCommand());
+bool CC_Incoming(const CCommand& args = CCommand());
+bool CC_SpottedSpy(const CCommand& args = CCommand());
+bool CC_NeedSentry(const CCommand& args = CCommand());
+bool CC_SpottedDetpack(const CCommand& args = CCommand());
+
 // Moved here from ff_shareddefs.h
 typedef struct SpyInfo_s
 {
@@ -551,9 +568,24 @@ public:
 	void Command_SpyCloak(const CCommand& args = CCommand());
 	void Command_SpySilentCloak(const CCommand& args = CCommand());
 	void Command_SpySmartCloak(const CCommand& args = CCommand());
+
 	void Command_AmmoMe(const CCommand& args = CCommand());
 	void Command_SaveMe(const CCommand& args = CCommand());
 	void Command_EngyMe(const CCommand& args = CCommand());
+	void Command_Acknowledge(const CCommand& args = CCommand());
+	void Command_Negative(const CCommand& args = CCommand());
+	void Command_PassFlag(const CCommand& args = CCommand());
+	void Command_TakeFlag(const CCommand& args = CCommand());
+	void Command_Attacking(const CCommand& args = CCommand());
+	void Command_SpottedSentry(const CCommand& args = CCommand());
+	void Command_SpottedPipes(const CCommand& args = CCommand());
+	void Command_NeedDetpack(const CCommand& args = CCommand());
+	void Command_OnMyWay(const CCommand& args = CCommand());
+	void Command_Defending(const CCommand& args = CCommand());
+	void Command_Incoming(const CCommand& args = CCommand());
+	void Command_SpottedSpy(const CCommand& args = CCommand());
+	void Command_NeedSentry(const CCommand& args = CCommand());
+	void Command_SpottedDetpack(const CCommand& args = CCommand());
 
 	bool IsGrenade1Primed( void );
 	bool IsGrenade2Primed( void );

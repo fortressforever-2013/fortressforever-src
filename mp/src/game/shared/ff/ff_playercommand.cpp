@@ -150,6 +150,20 @@ FF_AUTO_COMMAND( discard, &CFFPlayer::Command_Discard, "Discards unneeded ammo",
 FF_SHARED_COMMAND( saveme, &CFFPlayer::Command_SaveMe, CC_SaveMe, "Call for medical attention", FF_CMD_ALIVE | FF_CMD_PREMATCH );
 FF_SHARED_COMMAND( engyme, &CFFPlayer::Command_EngyMe, CC_EngyMe, "Call for engineer attention", FF_CMD_ALIVE | FF_CMD_PREMATCH );
 FF_SHARED_COMMAND( ammome, &CFFPlayer::Command_AmmoMe, CC_AmmoMe, "Call for ammo", FF_CMD_ALIVE | FF_CMD_PREMATCH );
+FF_SHARED_COMMAND( acknowledge, &CFFPlayer::Command_Acknowledge, CC_Acknowledge, "Accept someone's command", FF_CMD_NOFLAGS );
+FF_SHARED_COMMAND( negative, &CFFPlayer::Command_Negative, CC_Negative, "Decline someone's command", FF_CMD_NOFLAGS );
+FF_SHARED_COMMAND( passflag, &CFFPlayer::Command_PassFlag, CC_PassFlag, "Ask someone to pass the flag", FF_CMD_NOFLAGS );
+FF_SHARED_COMMAND( takeflag, &CFFPlayer::Command_TakeFlag, CC_TakeFlag, "Ask someone to take your flag", FF_CMD_NOFLAGS );
+FF_SHARED_COMMAND( offense, &CFFPlayer::Command_Attacking, CC_Attacking, "Inform your team you are on offense", FF_CMD_NOFLAGS );
+FF_SHARED_COMMAND( defensesentry, &CFFPlayer::Command_SpottedSentry, CC_SpottedSentry, "Warn about a sentry's position", FF_CMD_NOFLAGS );
+FF_SHARED_COMMAND( defensespottedpipes, &CFFPlayer::Command_SpottedPipes, CC_SpottedPipes, "Warn about pipe traps", FF_CMD_NOFLAGS );
+FF_SHARED_COMMAND( offensedetpack, &CFFPlayer::Command_NeedDetpack, CC_NeedDetpack, "Request a detpack", FF_CMD_NOFLAGS);
+FF_SHARED_COMMAND( onmyway, &CFFPlayer::Command_OnMyWay, CC_OnMyWay, "Notify that you are coming to help", FF_CMD_NOFLAGS );
+FF_SHARED_COMMAND( defense, &CFFPlayer::Command_Defending, CC_Defending, "Mention you are defending", FF_CMD_NOFLAGS );
+FF_SHARED_COMMAND( defenseincoming, &CFFPlayer::Command_Incoming, CC_Incoming, "Warn about incoming enemies", FF_CMD_NOFLAGS );
+FF_SHARED_COMMAND( defensespotspy, &CFFPlayer::Command_SpottedSpy, CC_SpottedSpy, "Warn about hostile Spy position", FF_CMD_NOFLAGS );
+FF_SHARED_COMMAND( defensesentry, &CFFPlayer::Command_NeedSentry, CC_NeedSentry, "Mention needing sentry defense", FF_CMD_NOFLAGS );
+FF_SHARED_COMMAND( defensedetpack, &CFFPlayer::Command_SpottedDetpack, CC_SpottedDetpack, "Warn about imploding detpack", FF_CMD_NOFLAGS );
 FF_AUTO_COMMAND( disguise, &CFFPlayer::Command_Disguise, "Disguise <team> <class>. To use last disguise, use 'disguise last'.", FF_CMD_SKILL_COMMAND | FF_CMD_ALIVE | FF_CMD_PREMATCH | FF_CMD_CLOAKED )
 
 // entity system interfacing stuffs

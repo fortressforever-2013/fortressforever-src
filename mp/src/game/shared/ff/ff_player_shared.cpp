@@ -31,7 +31,6 @@
 #include "ff_hud_grenade2timer.h"
 
 #else
-
 	#include "ff_player.h"
 	#include "iservervehicle.h"
 	#include "decals.h"
@@ -2125,6 +2124,115 @@ void CFFPlayer::Command_EngyMe(const CCommand& args)
 		}
 		// End Hint Code
 #endif
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: More voice commands
+//-----------------------------------------------------------------------------
+void CFFPlayer::Command_Acknowledge(const CCommand& args)
+{
+	if (m_flSaveMeTime < gpGlobals->curtime)
+	{
+		m_flSaveMeTime = gpGlobals->curtime + 2;
+	}
+}
+void CFFPlayer::Command_Negative(const CCommand& args)
+{
+	if (m_flSaveMeTime < gpGlobals->curtime)
+	{
+		m_flSaveMeTime = gpGlobals->curtime + 2;
+	}
+}
+
+void CFFPlayer::Command_PassFlag(const CCommand& args)
+{
+	if (m_flSaveMeTime < gpGlobals->curtime)
+	{
+		m_flSaveMeTime = gpGlobals->curtime + 2;
+	}
+}
+void CFFPlayer::Command_TakeFlag(const CCommand& args)
+{
+	if (m_flSaveMeTime < gpGlobals->curtime)
+	{
+		m_flSaveMeTime = gpGlobals->curtime + 2;
+	}
+}
+
+void CFFPlayer::Command_NeedSentry(const CCommand& args)
+{
+	if (m_flSaveMeTime < gpGlobals->curtime)
+	{
+		m_flSaveMeTime = gpGlobals->curtime + 2;
+	}
+}
+
+void CFFPlayer::Command_Attacking(const CCommand& args)
+{
+	if (m_flSaveMeTime < gpGlobals->curtime)
+	{
+		m_flSaveMeTime = gpGlobals->curtime + 2;
+	}
+}
+void CFFPlayer::Command_Defending(const CCommand& args)
+{
+	if (m_flSaveMeTime < gpGlobals->curtime)
+	{
+		m_flSaveMeTime = gpGlobals->curtime + 2;
+
+	}
+}
+
+void CFFPlayer::Command_SpottedSentry(const CCommand& args)
+{
+	if (m_flSaveMeTime < gpGlobals->curtime)
+	{
+		m_flSaveMeTime = gpGlobals->curtime + 2;
+	}
+}
+void CFFPlayer::Command_SpottedPipes(const CCommand& args)
+{
+	if (m_flSaveMeTime < gpGlobals->curtime)
+	{
+		m_flSaveMeTime = gpGlobals->curtime + 2;
+	}
+}
+void CFFPlayer::Command_SpottedSpy(const CCommand& args)
+{
+	if (m_flSaveMeTime < gpGlobals->curtime)
+	{
+		m_flSaveMeTime = gpGlobals->curtime + 2;
+	}
+}
+
+void CFFPlayer::Command_OnMyWay(const CCommand& args)
+{
+	if (m_flSaveMeTime < gpGlobals->curtime)
+	{
+		m_flSaveMeTime = gpGlobals->curtime + 2;
+	}
+}
+void CFFPlayer::Command_Incoming(const CCommand& args)
+{
+	if (m_flSaveMeTime < gpGlobals->curtime)
+	{
+		m_flSaveMeTime = gpGlobals->curtime + 2;
+	}
+}
+
+void CFFPlayer::Command_NeedDetpack(const CCommand& args)
+{
+	if (m_flSaveMeTime < gpGlobals->curtime)
+	{
+		m_flSaveMeTime = gpGlobals->curtime + 2;
+	}
+}
+void CFFPlayer::Command_SpottedDetpack(const CCommand& args)
+{
+	if (m_flSaveMeTime < gpGlobals->curtime)
+	{
+		m_flSaveMeTime = gpGlobals->curtime + 2;
 	}
 }
 

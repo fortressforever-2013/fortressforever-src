@@ -67,6 +67,8 @@ DECLARE_HUDELEMENT(CHudContextMenu);
 extern menu_t ClassDMenu;
 extern menu_t FriendlyDMenu;
 extern menu_t EnemyDMenu;
+extern menu_t OffVoiceMenu;
+extern menu_t DefVoiceMenu;
 
 // We buffer our commands onto here sequentially.
 char szCmdBuffer[MAX_CMD_LEN];
@@ -438,6 +440,28 @@ ADD_MENU_OPTION(dispensersabotage, "#FF_CM_SABOTAGEDISPENSER", 'I', "dispensersa
 ADD_MENU_OPTION(need_armor, "#FF_CM_CALLARMOR", '(', "engyme") { return MENU_SHOW; }
 ADD_MENU_OPTION(need_medic, "#FF_CM_CALLMEDIC", '%', "saveme") { return MENU_SHOW; }
 ADD_MENU_OPTION(need_ammo, "#FF_CM_CALLAMMO", '^', "ammome") { return MENU_SHOW; }
+ADD_MENU_OPTION(acknowledged, "#FF_CM_ACKNOWLEDGED", 'M', "acknowledge") { return MENU_SHOW; }
+ADD_MENU_OPTION(negative, "#FF_CM_NEGATIVE", 'M', "negative") { return MENU_SHOW; }
+ADD_MENU_OPTION(passflag, "#FF_CM_PASSFLAG", ')', "passflag") { return MENU_SHOW; }
+ADD_MENU_OPTION(takeflag, "#FF_CM_TAKEFLAG", ')', "takeflag") { return MENU_SHOW; }
+ADD_MENU_OPTION(onmyway, "FF_CM_ONMYWAY", '?', "onmyway") { return MENU_SHOW; }
+
+ADD_MENU_BRANCH(calls_offense, "#FF_CM_CALLOFFENSE", '$', "offense", &OffVoiceMenu) { return MENU_SHOW; }
+ADD_MENU_BRANCH(calls_defense, "#FF_CM_CALLDEFENSE", 'H', "defense", &DefVoiceMenu) { return MENU_SHOW; }
+
+//-----------------------------------------------------------------------------
+// Offense/Defense voice stuff
+//-----------------------------------------------------------------------------
+ADD_MENU_OPTION(attacking, "#FF_CM_ATTACKING", '#', "") { return MENU_SHOW; }
+ADD_MENU_OPTION(spottedsentry, "FF_CM_SPOTSENTRY", 'H', "sentry") { return MENU_SHOW; }
+ADD_MENU_OPTION(spottedpipes, "FF_CM_SPOTPIPES", '$', "spotpipes") { return MENU_SHOW; }
+ADD_MENU_OPTION(needdetpack, "FF_CM_NEEDDETPACK", 'C', "detpack") { return MENU_SHOW; }
+
+ADD_MENU_OPTION(defending, "#FF_CM_DEFENDING", '^', "") { return MENU_SHOW; }
+ADD_MENU_OPTION(incoming, "#FF_CM_INCOMING", '#', "incoming") { return MENU_SHOW; }
+ADD_MENU_OPTION(spottedspy, "#FF_CM_SPOTSPY", '*', "spotspy") { return MENU_SHOW; }
+ADD_MENU_OPTION(needsentry, "#FF_CM_NEEDSENTRY", 'H', "sentry") { return MENU_SHOW; }
+ADD_MENU_OPTION(spotteddetpack, "#FF_CM_SPOTDETPACK", 'C', "detpack") { return MENU_SHOW; }
 
 
 //-----------------------------------------------------------------------------
@@ -449,7 +473,9 @@ MenuOption SpyOptionList[] = { lastdisguise, disguiseenemy, smartcloak, sentrysa
 MenuOption ClassDOptionList[] = { disguisescout, disguisesniper, disguisesoldier, disguisedemoman, disguisemedic, disguisehwguy, disguisepyro, disguisespy, disguiseengineer, disguisecivilian };
 MenuOption FriendlyDOptionList[] = { disguise_blue_friendly, disguise_red_friendly, disguise_yellow_friendly, disguise_green_friendly };
 MenuOption EnemyDOptionList[] = { disguise_blue_enemy, disguise_red_enemy, disguise_yellow_enemy, disguise_green_enemy };
-MenuOption CallOptionList[] = { need_armor, need_medic, need_ammo };
+MenuOption CallOptionList[] = { need_armor, passflag, calls_defense, negative, need_ammo, onmyway, need_medic, acknowledged, calls_offense, takeflag };
+MenuOption OffenseOptionList[] = { attacking, spottedsentry, spottedpipes, needdetpack };
+MenuOption DefenseOptionList[] = { defending, incoming, spottedspy, needsentry, spotteddetpack };
 
 //-----------------------------------------------------------------------------
 // Menus themselves
@@ -461,8 +487,10 @@ menu_t ClassDMenu = { ARRAYSIZE(ClassDOptionList), ClassDOptionList, NULL };
 menu_t FriendlyDMenu = { ARRAYSIZE(FriendlyDOptionList), FriendlyDOptionList, NULL };
 menu_t EnemyDMenu = { ARRAYSIZE(EnemyDOptionList), EnemyDOptionList, NULL };
 menu_t CallMenu = { ARRAYSIZE(CallOptionList), CallOptionList, "saveme" };
+menu_t OffVoiceMenu = { ARRAYSIZE(OffenseOptionList), OffenseOptionList, NULL };
+menu_t DefVoiceMenu = { ARRAYSIZE(DefenseOptionList), DefenseOptionList, NULL };
 
-menu_t Menus[] = { EngineerMenu, DemomanMenu, SpyMenu, ClassDMenu, FriendlyDMenu, EnemyDMenu, CallMenu };
+menu_t Menus[] = { EngineerMenu, DemomanMenu, SpyMenu, ClassDMenu, FriendlyDMenu, EnemyDMenu, CallMenu, OffVoiceMenu, DefVoiceMenu };
 
 CHudContextMenu::~CHudContextMenu() 
 {
