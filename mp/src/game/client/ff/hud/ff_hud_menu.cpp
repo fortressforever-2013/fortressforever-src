@@ -568,7 +568,7 @@ void CHudContextMenu::Display(bool state)
 		return;
 
 	// no.
-	if ( ( !pPlayer->IsAlive() && pPlayer->m_iHealth <= 0 ) || pPlayer->GetTeamNumber() == TEAM_SPECTATOR )
+	if ( /*(!pPlayer->IsAlive() && pPlayer->m_iHealth <= 0) ||*/ pPlayer->GetTeamNumber() == TEAM_SPECTATOR)
 		return;
 
 	// There is a menu and it's cancelling

@@ -93,7 +93,7 @@ public:
 	{
 		SetParent(g_pClientMode->GetViewport());
 		m_flLastCommand = 0.0f;
-		SetHiddenBits(HIDEHUD_PLAYERDEAD | HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED);
+		SetHiddenBits(/*HIDEHUD_PLAYERDEAD |*/ HIDEHUD_SPECTATING | HIDEHUD_UNASSIGNED);
 	}
 
 	~CHudContextMenu();
