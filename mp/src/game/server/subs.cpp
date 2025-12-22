@@ -37,6 +37,20 @@ void CNullEntity::Spawn( void )
 	UTIL_Remove( this );
 }
 LINK_ENTITY_TO_CLASS(info_null,CNullEntity);
+LINK_ENTITY_TO_CLASS(func_null,CNullEntity); // from Mapbase; alias designed for brushes (mainly for invisible texlights)
+
+/*
+info_ladder gets created for each func_ladder by VBSP. It seems to have been intended for navmesh generation.
+However, the entity hasn't existed since 2009 or so; it was replaced with func_simpleladder in L4D, 
+and removed outright in Source SDK 2013 (which FF uses) and CSGO.
+As of this writing, the currently-disabled Omnibot relies upon the entity, but this is a bad idea,
+as ladders can be made out *any* CONTENTS_LADDER brush (or model!), as well as brushes with
+$surfaceprop "ladder" or "woodladder", so func_detail, func_brush, and prop_static ladders are perfectly valid.
+The original info_ladder can be found in the 2006 and 2007 SDKs, in "game/server/nav_ladder.cpp".
+
+To shut up complaints in the console about it not existing, we treat it as an alias for info_null.
+*/
+LINK_ENTITY_TO_CLASS(info_ladder,CNullEntity);
 
 class CBaseDMStart : public CPointEntity
 {
