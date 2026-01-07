@@ -596,18 +596,29 @@ void CFFPlayer::PlayFallSound(Vector &vecOrigin, surfacedata_t *psurface, float 
 		return;
 	}
 
-	if (m_flFallTime > gpGlobals->curtime)
+	if (m_flFallTime < gpGlobals->curtime)
+	{
+		// make landing sound if we fell far enough, aren't a Spy nor one disguised as one
+		if ( GetGroundEntity() != NULL && IsAlive() || GetClassSlot() != CLASS_SPY || IsDisguised() && ( GetDisguisedClass() != CLASS_SPY ) )
+		{
+			CPASFilter filter( GetAbsOrigin() );
+			filter.UsePredictionRules();
+			EmitSound( filter, entindex(), "Player.JumpLanding" );
+		}
 		return;
-
-	m_flFallTime = gpGlobals->curtime + 0.4f;
+	}
+	else
+	{
+		m_flFallTime = gpGlobals->curtime + 0.4f;
 
 #ifdef CLIENT_DLL
-	
-	if ( GetClassSlot() == 8 )
-		FF_SendHint( SPY_SPLAT, 3, PRIORITY_NORMAL, "#FF_HINT_SPY_SPLAT" );
+
+		if (GetClassSlot() == 8)
+			FF_SendHint(SPY_SPLAT, 3, PRIORITY_NORMAL, "#FF_HINT_SPY_SPLAT");
 #endif
 
-	EmitSoundShared("Player.FallDamage");
+		EmitSoundShared("Player.FallDamage");
+	}
 }
 
 void CFFPlayer::PlayStepSound(Vector &vecOrigin, surfacedata_t *psurface, float fvol, bool force)

@@ -791,8 +791,8 @@ void CBasePlayer::GetStepSoundVelocities( float *velwalk, float *velrun )
 	}
 	else
 	{
-		*velwalk = 90;
-		*velrun = 220;
+		*velwalk = 120;
+		*velrun = 210;
 	}
 }
 

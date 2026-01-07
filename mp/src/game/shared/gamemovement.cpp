@@ -4069,7 +4069,7 @@ void CGameMovement::CheckFalling( void )
 			else if ( player->m_Local.m_flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED / 2 )
 			{
 				// 0000608: Makes dropping damage sound from heights that dont inflict damage
-				fvol = 0; //0.85;
+				fvol = 0.85;
 			}
 			else if ( player->m_Local.m_flFallVelocity < PLAYER_MIN_BOUNCE_SPEED )
 			{
