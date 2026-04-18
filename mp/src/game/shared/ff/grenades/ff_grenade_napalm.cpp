@@ -20,7 +20,7 @@
 	#include "particles_simple.h"
 #else
 	//ConVar nap_flame_time("ffdev_nap_flame_time","5.0",FCVAR_FF_FFDEV,"How long the napalm grenade's fires burn");
-	#define NAP_FLAME_TIME 5.0f
+	#define NAP_FLAME_TIME 7.0f
 	//ConVar nap_burn_damage("ffdev_nap_burn_damage","15.0",FCVAR_FF_FFDEV,"How much damage being in the radius of a napalm grenade deals.");
 	#define NAP_BURN_DAMAGE 15.0f
 
