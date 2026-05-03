@@ -79,9 +79,9 @@ extern unsigned char g_uchRailColors[3][3];
 #define RAIL_DAMAGE_MAX 60.0f // ffdev_rail_damage_max.GetFloat()
 
 //ConVar ffdev_railgun_pushforce_min("ffdev_railgun_pushforce_min", "32.0", FCVAR_FF_FFDEV_REPLICATED, "Minimum force of backwards push (Like the HL Gauss Gun, WOOH YEAH!)");
-#define RAILGUN_PUSHFORCE_MIN 32.0f // ffdev_railgun_pushforce_min.GetFloat()
+#define RAILGUN_PUSHFORCE_MIN 0.0f // ffdev_railgun_pushforce_min.GetFloat()
 //ConVar ffdev_railgun_pushforce_max("ffdev_railgun_pushforce_max", "64.0", FCVAR_FF_FFDEV_REPLICATED, "Maximum force of backwards push (Like the HL Gauss Gun, WOOH YEAH!)");
-#define RAILGUN_PUSHFORCE_MAX 64.0f // ffdev_railgun_pushforce_max.GetFloat()
+#define RAILGUN_PUSHFORCE_MAX 300.0f // ffdev_railgun_pushforce_max.GetFloat()
 
 //ConVar ffdev_railgun_recoil_min("ffdev_railgun_recoil_min", "2", FCVAR_FF_FFDEV_REPLICATED, "Minimum recoil");
 #define RAILGUN_RECOIL_MIN 2 // ffdev_railgun_recoil_min.GetInt()
@@ -91,7 +91,7 @@ extern unsigned char g_uchRailColors[3][3];
 //ConVar ffdev_railgun_resupply_interval("ffdev_railgun_resupply_interval", "4.0", FCVAR_FF_FFDEV_REPLICATED, "Resupply every X seconds.");
 #define RAILGUN_RESUPPLY_INTERVAL 4.0f // ffdev_railgun_resupply_interval.GetFloat()
 //ConVar ffdev_railgun_resupply_rails("ffdev_railgun_resupply_rails", "1", FCVAR_FF_FFDEV_REPLICATED, "Resupply X rails");
-#define RAILGUN_RESUPPLY_RAILS 1 // ffdev_railgun_resupply_rails.GetInt()
+#define RAILGUN_RESUPPLY_RAILS 0 // ffdev_railgun_resupply_rails.GetInt()
 //ConVar ffdev_railgun_resupply_cells("ffdev_railgun_resupply_cells", "40", FCVAR_FF_FFDEV_REPLICATED, "Resupply X cells on overcharge");
 #define RAILGUN_RESUPPLY_CELLS 40 // ffdev_railgun_resupply_cells.GetInt()
 
