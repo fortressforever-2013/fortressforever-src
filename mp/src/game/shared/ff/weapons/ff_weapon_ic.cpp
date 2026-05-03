@@ -1,5 +1,5 @@
 #include "cbase.h"
-#include "ff_weapon_baseclip.h"
+#include "ff_weapon_base.h"
 #include "ff_projectile_incendiaryrocket.h"
 
 #ifdef CLIENT_DLL 
@@ -15,10 +15,10 @@
 // CFFWeaponIC
 //=============================================================================
 
-class CFFWeaponIC : public CFFWeaponBaseClip
+class CFFWeaponIC : public CFFWeaponBase
 {
 public:
-	DECLARE_CLASS(CFFWeaponIC, CFFWeaponBaseClip);
+	DECLARE_CLASS(CFFWeaponIC, CFFWeaponBase);
 	DECLARE_NETWORKCLASS(); 
 	DECLARE_PREDICTABLE();
 	
