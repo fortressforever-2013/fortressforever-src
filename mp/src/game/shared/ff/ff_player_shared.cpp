@@ -140,10 +140,10 @@ ConVar sv_motd_enable( "sv_motd_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "
 #define JETPACK_HORIZONTALPUSH_OFFGROUND 2.0f //ffdev_jetpack_horizontalpush_offground.GetFloat()
 
 //ConVar ffdev_jetpack_fuelrechargetime("ffdev_jetpack_fuelrechargetime", "0.08", FCVAR_REPLICATED | FCVAR_CHEAT);
-#define JETPACK_FUELRECHARGETIME 0.08f //ffdev_jetpack_fuelrechargetime.GetFloat()
+#define JETPACK_FUELRECHARGETIME 0.01f //ffdev_jetpack_fuelrechargetime.GetFloat()
 //ConVar ffdev_jetpack_fuelhovercost("ffdev_jetpack_fuelhovercost", "0.5", FCVAR_REPLICATED | FCVAR_CHEAT);
 // changed jetpack fuel to scalar, and increased to 200 to have same values
-#define JETPACK_FUELHOVERCOST 1 //ffdev_jetpack_fuelhovercost.GetFloat()
+#define JETPACK_FUELHOVERCOST 2 //ffdev_jetpack_fuelhovercost.GetFloat()
 
 #define JETPACK_MINFUEL 2
 #define JETPACK_MAXFUEL 200
@@ -778,6 +778,7 @@ void CFFPlayer::ClassSpecificSkillHold()
 	{
 		case CLASS_PYRO:
 			JetpackHold();
+			m_flJetpackCooldown = gpGlobals->curtime + 3.81f;
 			if (m_iJetpackFuel < JETPACK_MINFUEL)
 			{
 				m_bJetpacking = false;
@@ -805,6 +806,7 @@ void CFFPlayer::ClassSpecificSkill_Post()
 #endif
 		case CLASS_PYRO:
 			m_bJetpacking = false;
+			m_flJetpackCooldown = gpGlobals->curtime + 3.81f;
 			break;
 
 		default:
@@ -1943,17 +1945,20 @@ void CFFPlayer::JetpackRechargeThink( void )
 	{
 		return;
 	}
-
-	if (m_flJetpackNextFuelRechargeTime < gpGlobals->curtime)
+	if (gpGlobals->curtime < m_flJetpackCooldown)
 	{
-		if (m_iJetpackFuel < JETPACK_MAXFUEL)
-		{
-			m_flJetpackNextFuelRechargeTime = gpGlobals->curtime + JETPACK_FUELRECHARGETIME;
-			// dont forget: we doubled total fuel and hover cost when converrting to int,
-			// double fuel recharge rate to match old rates here
-			m_iJetpackFuel += 2;
-		}
+		return;
 	}
+		if (m_flJetpackNextFuelRechargeTime < gpGlobals->curtime)
+		{
+			if (m_iJetpackFuel < JETPACK_MAXFUEL)
+			{
+				m_flJetpackNextFuelRechargeTime = gpGlobals->curtime + JETPACK_FUELRECHARGETIME;
+				// dont forget: we doubled total fuel and hover cost when converrting to int,
+				// double fuel recharge rate to match old rates here
+				m_iJetpackFuel += 2;
+			}
+		}
 }
 
 bool CFFPlayer::CanJetpack()
