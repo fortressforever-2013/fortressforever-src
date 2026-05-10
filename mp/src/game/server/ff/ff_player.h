@@ -803,6 +803,7 @@ public:
 	CNetworkVar( int, m_iJetpackFuel );
 	CNetworkVar( bool, m_bCanUseJetpack );
 	float m_flJetpackNextFuelRechargeTime;
+	float m_flJetpackCooldown;
 
 	CNetworkVar( float, m_flConcTime );
 	void UnConcuss( void );
