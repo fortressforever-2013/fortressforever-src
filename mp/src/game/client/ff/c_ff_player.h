@@ -439,6 +439,7 @@ public:
 	CNetworkVar(float, m_flNextClassSpecificSkill);
 	CNetworkVar(int, m_iJetpackFuel);
 	float m_flJetpackNextFuelRechargeTime;
+	float m_flJetpackCooldown;
 
 	int	  m_iSpawnInterpCounter;
 	int	  m_iSpawnInterpCounterCache;
