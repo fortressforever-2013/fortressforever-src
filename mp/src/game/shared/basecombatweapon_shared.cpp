@@ -2420,7 +2420,9 @@ bool CBaseCombatWeapon::SetIdealActivity( Activity ideal )
 		SetActivity( ACT_TRANSITION );
 		SetSequence( nextSequence );	
 		SendViewModelAnim( nextSequence );
-		SetWeaponIdleTime(gpGlobals->curtime + SequenceDuration(nextSequence));
+#ifdef FF
+		SetWeaponIdleTime( gpGlobals->curtime + SequenceDuration( nextSequence ) );
+#endif
 	}
 	else
 	{
@@ -2432,14 +2434,14 @@ bool CBaseCombatWeapon::SetIdealActivity( Activity ideal )
 		// The weapon model sequence need clamping to either idle or firing for now
 		// Need to call ResetSequenceInfo for the muzzleflashes
 		// Melee weapons won't have a fire animation (for now)
-		if (m_IdealActivity == ACT_VM_PRIMARYATTACK && !IsMeleeWeapon())
+		if ( m_IdealActivity == ACT_VM_PRIMARYATTACK && !IsMeleeWeapon() )
 		{
-			SetSequence(1);
+			SetSequence( 1 );
 			ResetSequenceInfo();
 		}
 		else
 		{
-			SetSequence(0);
+			SetSequence( 0 );
 		}
 #endif
 		// Send the correct sequences to the viewmodel.

@@ -151,8 +151,11 @@ protected:
 	void			AddGravity( void );
 
 	// Handle movement in noclip mode.
+#ifdef FF
+	virtual
+#endif
+	void			FullNoClipMove( float factor, float maxacceleration );
 	virtual void	FullNoClipMove( float factor, float maxacceleration ); 	// |-- Mirv: Made virtual
-
 	// Returns true if he started a jump (ie: should he play the jump animation)?
 	virtual bool	CheckJumpButton( void );	// Overridden by each game.
 
@@ -164,13 +167,18 @@ protected:
 
 	// Handle movement when in MOVETYPE_LADDER mode.
 	virtual void	FullLadderMove();
-
+#ifdef FF
 	// Movement while building
 	virtual void	FullBuildMove( void );
-
+#endif
 	// The basic solid body movement clip that slides along multiple planes
+	// - flSlideMultiplier controls how much of a player's velocity should be redirected along walls vs nulled out.
+	//   Classic source behavior is always null-out, but some movement modes allow a redirection multiplier.
+#ifndef FF
+	virtual int		TryPlayerMove( Vector *pFirstDest=NULL, trace_t *pFirstTrace=NULL, float flSlideMultiplier = 0.f );
+#else
 	virtual int		TryPlayerMove( Vector *pFirstDest=NULL, trace_t *pFirstTrace=NULL );
-
+#endif
 	virtual bool	LadderMove( void );
 	virtual bool	OnLadder( trace_t &trace );
 	virtual float	LadderDistance( void ) const { return 2.0f; }	///< Returns the distance a player can be from a ladder and still attach to it
@@ -179,8 +187,11 @@ protected:
 	virtual float	LadderLateralMultiplier( void ) const { return 1.0f; }
 
 	// See if the player has a bogus velocity value.
-	virtual void			CheckVelocity( void );
-
+#ifndef FF
+	void			CheckVelocity( void );
+#else
+	virtual void	CheckVelocity( void );
+#endif
 	// Does not change the entities velocity at all
 	void			PushEntity( Vector& push, trace_t *pTrace );
 
@@ -188,8 +199,14 @@ protected:
 	// returns the blocked flags:
 	// 0x01 == floor
 	// 0x02 == step / wall
+	//
+	// redirectCoeff - multiplier on the clipped velocity to apply along their new direction. 0 -> stomp into-normal
+	//                 velocity, 1 -> redirect it all along new vector.
+#ifndef FF
+	int				ClipVelocity( Vector& in, Vector& normal, Vector& out, float overbounce, float redirectCoeff = 0.f );
+#else
 	int				ClipVelocity( Vector& in, Vector& normal, Vector& out, float overbounce );
-
+#endif
 	// If pmove.origin is in a solid position,
 	// try nudging slightly on all axis to
 	// allow for the cut precision of the net coordinates

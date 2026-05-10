@@ -107,6 +107,7 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+#ifdef FF
 // Purpose: fix spectator menu not closing once and for all
 //-----------------------------------------------------------------------------
 class CSpecComboBox : public ComboBox
@@ -131,7 +132,7 @@ private:
 
 	ButtonCode_t m_nDuckKey;
 };
-
+#endif
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
@@ -288,8 +289,8 @@ void CSpectatorMenu::FireGameEvent( IGameEvent * event )
 		{
 			for ( int i=0; i<m_pPlayerList->GetItemCount(); ++i )
 			{
-				KeyValues *kv = m_pPlayerList->GetItemUserData( i );
-				if ( kv && FStrEq( kv->GetString( "player" ), selectedPlayerName ) )
+				KeyValues *pKv = m_pPlayerList->GetItemUserData( i );
+				if ( pKv && FStrEq( pKv->GetString( "player" ), selectedPlayerName ) )
 				{
 					m_pPlayerList->ActivateItemByRow( i );
 					break;
@@ -444,7 +445,7 @@ void CSpectatorMenu::Update( void )
 	// HPE_END
 	//=============================================================================
 }
-
+#ifndef FF
 bool CSpectatorMenu::IsVisible()
 {
 	if ( !cl_drawhud.GetBool() )
@@ -452,7 +453,7 @@ bool CSpectatorMenu::IsVisible()
 
 	return BaseClass::IsVisible();
 }
-
+#endif
 //-----------------------------------------------------------------------------
 // main spectator panel
 
@@ -566,7 +567,7 @@ void CSpectatorGUI::PerformLayout()
 	m_pBottomBarBlank->GetPos(x,y);
 	m_pBottomBarBlank->SetSize( w, h - y );
 }
-
+#ifdef FF
 bool CSpectatorGUI::IsVisible()
 {
 	if ( !cl_drawhud.GetBool() )
@@ -574,15 +575,16 @@ bool CSpectatorGUI::IsVisible()
 
 	return BaseClass::IsVisible();
 }
-
+#endif
 //-----------------------------------------------------------------------------
 // Purpose: checks spec_scoreboard cvar to see if the scoreboard should be displayed
 //-----------------------------------------------------------------------------
 void CSpectatorGUI::OnThink()
 {
+#ifdef FF
 	if ( !cl_drawhud.GetBool() )
 		return;
-
+#endif
 	BaseClass::OnThink();
 
 	if ( IsVisible() )
@@ -760,7 +762,7 @@ void CSpectatorGUI::Update()
 			_snwprintf( health, ARRAYSIZE( health ), L"%i", iHealth );
 			_snwprintf( armor, ARRAYSIZE( armor ), L"%i", iArmor );
 			// TODO: Modify #Spec_PlayerItem_team to include a %s for armor
-			g_pVGuiLocalize->ConstructString( playerText, sizeof( playerText ), g_pVGuiLocalize->Find( "#Spec_PlayerItem_Team" ), 3, playerName, health, armor );
+			g_pVGuiLocalize->ConstructString( playerText, sizeof( playerText ), g_pVGuiLocalize->Find( "#Spec_PlayerItem_Team" ), 3, playerName,  health, armor );
 		}
 		else
 		{
@@ -775,7 +777,7 @@ void CSpectatorGUI::Update()
 	}
 
 	// update extra info field
-	wchar_t szExtraInfo[1024];
+	wchar_t szEtxraInfo[1024];
 	wchar_t szTitleLabel[1024];
 	char tempstr[128];
 
@@ -786,7 +788,7 @@ void CSpectatorGUI::Update()
 
 		// set spectator number and HLTV title
 		Q_snprintf(tempstr,sizeof(tempstr),"Spectators : %d", HLTVCamera()->GetNumSpectators() );
-		g_pVGuiLocalize->ConvertANSIToUnicode(tempstr,szExtraInfo,sizeof(szExtraInfo));
+		g_pVGuiLocalize->ConvertANSIToUnicode(tempstr,szEtxraInfo,sizeof(szEtxraInfo));
 		
 		Q_strncpy( tempstr, HLTVCamera()->GetTitleText(), sizeof(tempstr) );
 		g_pVGuiLocalize->ConvertANSIToUnicode(tempstr,szTitleLabel,sizeof(szTitleLabel));
@@ -801,10 +803,10 @@ void CSpectatorGUI::Update()
 
 		wchar_t wMapName[64];
 		g_pVGuiLocalize->ConvertANSIToUnicode(tempstr,wMapName,sizeof(wMapName));
-		g_pVGuiLocalize->ConstructString( szExtraInfo,sizeof( szExtraInfo ), g_pVGuiLocalize->Find("#Spec_Map" ),1, wMapName );*/
+		g_pVGuiLocalize->ConstructString( szExtraInfo,sizeof( szEtxraInfo ), g_pVGuiLocalize->Find("#Spec_Map" ),1, wMapName );*/
 
 		g_pVGuiLocalize->ConvertANSIToUnicode( "", szExtraInfo, sizeof(szExtraInfo) );
-		g_pVGuiLocalize->ConvertANSIToUnicode( "", szTitleLabel, sizeof(szTitleLabel) );
+		g_pVGuiLocalize->ConvertANSIToUnicode( "" ,szTitleLabel,sizeof(szTitleLabel));
 	}
 
 	SetLabelText("extrainfo", szExtraInfo );
@@ -969,7 +971,11 @@ CON_COMMAND_F( spec_player, "Spectate player by partial name, steamid, or userid
 		// we can only switch primary spectator targets is PVS isnt locked by auto-director
 		if ( !HLTVCamera()->IsPVSLocked() )
 		{
+#ifndef FF
+			HLTVCamera()->SpecPlayerByPredicate( args[i] );
+#else
 			HLTVCamera()->SpecNamedPlayer( args[1] );
+#endif
 		}
 	}
 	else
@@ -977,7 +983,7 @@ CON_COMMAND_F( spec_player, "Spectate player by partial name, steamid, or userid
 		ForwardSpecCmdToServer( args );
 	}
 }
-
+#ifdef FF
 CON_COMMAND( spec_item, "Spectate item by name" )
 {
 	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
@@ -1001,3 +1007,4 @@ CON_COMMAND( spec_item, "Spectate item by name" )
 		ForwardSpecCmdToServer( args );
 	}
 }
+#endif

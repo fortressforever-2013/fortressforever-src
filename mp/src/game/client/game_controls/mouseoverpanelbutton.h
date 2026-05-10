@@ -119,7 +119,7 @@ public:
 
 		char szLocalFile[_MAX_PATH];
 
-		g_pFullFileSystem->GetLocalPath(GetClassPage(GetName()), szLocalFile, sizeof(szLocalFile));
+		g_pFullFileSystem->GetLocalPath( GetClassPage( GetName() ), szLocalFile, sizeof( szLocalFile ) );
 		m_pPanel->OpenURL(szLocalFile, NULL);
 	}		
 

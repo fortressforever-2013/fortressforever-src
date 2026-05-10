@@ -439,7 +439,7 @@ enum PLAYER_ANIM
 	PLAYER_LEAVE_AIMING,
 };
 
-#ifdef HL2_DLL && !defined( FF_DLL )
+#ifdef HL2_DLL
 // HL2 has 600 gravity by default
 // NOTE: The discrete ticks can have quantization error, so these numbers are biased a little to
 // make the heights more exact
@@ -448,16 +448,15 @@ enum PLAYER_ANIM
 #define PLAYER_LAND_ON_FLOATING_OBJECT	173 // Can fall another 173 in/sec without getting hurt
 #define PLAYER_MIN_BOUNCE_SPEED		173
 #define PLAYER_FALL_PUNCH_THRESHOLD 303.0f // won't punch player's screen/make scrape noise unless player falling at least this fast - at least a 76" fall (sqrt( 2 * g * 76))
-#elif defined FF_DLL
-// --> Mirv: Changed fall speed limits
-#define PLAYER_FATAL_FALL_SPEED		1024	// This is a kind of arbitary figure
-#define PLAYER_MAX_SAFE_FALL_SPEED	640		// Just a bit more than the 2fort balc drop
-#define PLAYER_LAND_ON_FLOATING_OBJECT	200		// Can go another 200 units without getting hurt
-#define PLAYER_MIN_BOUNCE_SPEED		200
-#define PLAYER_FALL_PUNCH_THRESHOLD	(float)490 // Won't punch player's screen/make scrape noise unless player falling at least this fast.
-// <-- Mirv: Changed fall speed limits
-
 #else
+	#ifdef FF_DLL
+	// --> Mirv: Changed fall speed limits
+	#define PLAYER_FATAL_FALL_SPEED		1024	// This is a kind of arbitary figure
+	#define PLAYER_MAX_SAFE_FALL_SPEED	640		// Just a bit more than the 2fort balc drop
+	#define PLAYER_LAND_ON_FLOATING_OBJECT	200		// Can go another 200 units without getting hurt
+	#define PLAYER_MIN_BOUNCE_SPEED		200
+	#define PLAYER_FALL_PUNCH_THRESHOLD	(float)490 // Won't punch player's screen/make scrape noise unless player falling at least this fast.
+	#endif	// <-- Mirv: Changed fall speed limits
 #define PLAYER_FATAL_FALL_SPEED		1024 // approx 60 feet
 #define PLAYER_MAX_SAFE_FALL_SPEED	580 // approx 20 feet
 #define PLAYER_LAND_ON_FLOATING_OBJECT	200 // Can go another 200 units without getting hurt

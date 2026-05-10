@@ -1280,9 +1280,6 @@ void C_BaseEntity::Release()
 	}
 
 	UpdateOnRemove();
-#ifdef FF
-	PrintDeleteInfo();
-#endif
 	delete this;
 }
 

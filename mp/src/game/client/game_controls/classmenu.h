@@ -1,14 +1,14 @@
-/// =============== Fortress Forever ==============
-/// ======== A modification for Half-Life 2 =======
-///
-/// @file classmenu.h
-/// @author Gavin "Mirvin_Monkey" Bramhill
-/// @date August 15, 2005
-/// @brief New class selection menu
-///
-/// REVISIONS
-/// ---------
-/// Aug 15, 2005 Mirv: First creation
+//========= Fortress Forever ============//
+//========= A modification for Half-Life 2 ==
+// @file classmenu.h
+// @author Gavin "Mirvin_Monkey" Bramhill
+// @date August 15, 2005
+// @brief New class selection menu
+//
+// REVISIONS
+// ---------
+// Aug 15, 2005 Mirv: First creation
+//=============================================================================//
 
 #ifndef CLASSMENU_H
 #define CLASSMENU_H
@@ -69,15 +69,23 @@ public:
 	virtual void SetParent( vgui::VPANEL parent ) { BaseClass::SetParent( parent ); }
 
 	virtual GameActionSet_t GetPreferredActionSet() { return GAME_ACTION_SET_NONE; }
+#ifndef FF
 	virtual void OnKeyCodePressed(vgui::KeyCode code);
 	virtual void OnKeyCodeReleased(vgui::KeyCode code);
 
 	MESSAGE_FUNC_PARAMS(OnMouseOverMessage, "MouseOverEvent", data);
-
+#endif
 protected:
-
+#ifdef FF
 	void UpdateClassInfo(const char* pszClassName);
 	void SetClassInfoVisible(bool state);
+#else
+	virtual vgui::Panel *CreateControlByName(const char *controlName);
+	virtual MouseOverPanelButton* CreateNewMouseOverPanelButton(vgui::EditablePanel *panel);
+
+	//vgui2 overrides
+	virtual void OnKeyCodePressed(vgui::KeyCode code);
+#endif
 
 	// helper functions
 	void SetLabelText(const char *textEntryName, const char *text);
@@ -119,6 +127,8 @@ protected:
 
 	//virtual vgui::Panel* CreateControlByName(const char* controlName);
 	//virtual MouseOverPanelButton* CreateNewMouseOverPanelButton(vgui::EditablePanel* panel);
+#else
+	CUtlVector< MouseOverPanelButton * > m_mouseoverButtons;
 #endif
 };
 

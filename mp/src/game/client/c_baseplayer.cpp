@@ -633,7 +633,7 @@ void C_BasePlayer::SetObserverTarget( EHANDLE hObserverTarget )
 		}
 #ifdef FF
 		//AfterShock: update spectator name when you change target
-		IViewPortPanel* spectator = gViewPortInterface->FindPanelByName(PANEL_SPECGUI);
+		IViewPortPanel *spectator = gViewPortInterface->FindPanelByName(PANEL_SPECGUI);
 		if ( spectator && spectator->IsVisible() )
 		{
 			spectator->Update();
@@ -2407,17 +2407,22 @@ void C_BasePlayer::PhysicsSimulate( void )
 		ctx->cmd.forwardmove = 0;
 		ctx->cmd.sidemove = 0;
 		ctx->cmd.upmove = 0;
-		// Jiggles: Don't block the USE key b/c we need it for squeek's training map (but still block everything else)
+#ifndef FF
+		ctx->cmd.buttons= 0;
+#else	// Jiggles: Don't block the USE key b/c we need it for squeek's training map (but still block everything else)
 		ctx->cmd.buttons &= IN_USE;
+#endif
 		ctx->cmd.impulse = 0;
 		//VectorCopy ( pl.v_angle, ctx->cmd.viewangles );
 	}
 
 	// Run the next command
+	MoveHelper()->SetHost( this );
 	prediction->RunCommand( 
 		this, 
 		&ctx->cmd, 
 		MoveHelper() );
+	MoveHelper()->SetHost( NULL );
 #endif
 }
 
@@ -2664,8 +2669,11 @@ float C_BasePlayer::GetMinFOV()	const
 	}
 	else
 	{
-		//return 75;
-		return 20;		// |-- Mirv: BUG #0000040: Sniper Rifle & Radio Tag zoom sensitivity is not consistent with other HL2 stuff
+#ifndef FF
+		return 75;
+#else
+		return 20;	// |-- Mirv: BUG #0000040: Sniper Rifle & Radio Tag zoom sensitivity is not consistent with other HL2 stuff
+#endif
 	}
 }
 

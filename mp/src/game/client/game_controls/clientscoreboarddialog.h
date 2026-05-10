@@ -82,6 +82,10 @@ private:
 
 protected:
 // column widths at 640
+#ifndef FF
+	enum { NAME_WIDTH = 160, SCORE_WIDTH = 60, DEATH_WIDTH = 60, PING_WIDTH = 80, VOICE_WIDTH = 0, FRIENDS_WIDTH = 0 };
+	// total = 340
+#else
 	enum {
 		AVATAR_WIDTH		= 14, // unfinished avatar implementation
 		NAME_WIDTH			= 140, 
@@ -96,7 +100,7 @@ protected:
 		FRIENDS_WIDTH		= 0,
 	};
 	// total			   = 439  
-
+#endif
 public:
 	CClientScoreBoardDialog( IViewPort *pViewPort );
 	~CClientScoreBoardDialog();
@@ -128,11 +132,14 @@ public:
  	
 	// IGameEventListener interface:
 	virtual void FireGameEvent( IGameEvent *event);
+#ifdef FF
 	virtual void OnCommand( const char *command ); // |-- Mirv: Catch channel changing
-
+#endif
 	virtual void UpdatePlayerAvatar( int playerIndex, KeyValues *kv );
-
-	int KeyInput(int down, int keynum, const char* pszCurrentBinding);
+#ifndef FF
+	virtual GameActionSet_t GetPreferredActionSet() { return GAME_ACTION_SET_NONE;  }
+#else
+	int KeyInput( int down, int keynum, const char *pszCurrentBinding );
 			
 protected:
 	MESSAGE_FUNC_INT( OnPollHideCode, "PollHideCode", code );
@@ -140,53 +147,68 @@ protected:
 	// functions to override
 	virtual bool GetPlayerScoreInfo(int playerIndex, KeyValues *outPlayerInfo);
 	virtual void InitScoreboardSections();
+	virtual void UpdateTeamInfo();
 	virtual void UpdatePlayerInfo();
-
 	virtual void OnThink();
-
-	// Add sections to the scoreboard
 	virtual void AddHeader(); // add the start header of the scoreboard
+#ifndef FF
+	virtual void AddSection(int teamType, int teamNumber); //add a newsection header for a team
+#else
 	virtual int AddSection(int iType, int iSection); // add a new section header for a team
 	virtual void UpdateHeaders(void);
-
+#endif
 	virtual int GetAdditionalHeight() { return 0; }
 
 	// sorts players within a section
-	static bool StaticPlayerSortFunc_Score( vgui::SectionedListPanel *list, int itemID1, int itemID2 );
-	static bool StaticPlayerSortFunc_Name( vgui::SectionedListPanel *list, int itemID1, int itemID2 );
-
+#ifndef FF
+	static bool StaticPlayerSortFunc(vgui::SectionedListPanel *list, int itemID1, int itemID2);
+#else
+	static bool StaticPlayerSortFunc_Score(vgui::SectionedListPanel *list, int itemID1, int itemID2);
+	static bool StaticPlayerSortFunc_Name(vgui::SectionedListPanel *list, int itemID1, int itemID2);
+#endif
 	virtual void ApplySchemeSettings(vgui::IScheme *pScheme);
 
 	virtual void PostApplySchemeSettings( vgui::IScheme *pScheme );
-
+#ifdef FF
 	void PaintBackground();
 
-	// BEG: Added by Mulchman
+#endif	// BEG: Added by Mulchman
 	// finds the player in the scoreboard
 	int FindItemIDForPlayerIndex(int playerIndex);
+#ifdef FF
 	int FindPlayerIndexForItemID( int iItemID );
 	// END: Added by Mulchman
-
-	//int m_iNumTeams;
-
+#else
+	int m_iNumTeams;
+#endif
 	vgui::SectionedListPanel *m_pPlayerList;
+#ifndef FF
+	int				m_iSectionId; // the current section we are entering into
 
-	int s_VoiceImage[7];
+	int s_VoiceImage[5];
 	int s_ChannelImage[5];	// |-- Mirv: Channel Images
+#else
+	int s_VoiceImage[7];
+#endif
 	int TrackerImage;
 	int	m_HLTVSpectators;
 	int m_ReplaySpectators;
 	float m_fNextUpdateTime;
-
+#ifndef FF
+	bool m_bAllowGrowth = true;
+#else
 	vgui::Label* m_pMapName;		// |-- Mulch: map name
-
+#endif
 	void MoveLabelToFront(const char *textEntryName);
 	void MoveToCenterOfScreen();
 
 	vgui::ImageList				*m_pImageList;
 	CUtlMap<CSteamID,int>		m_mapAvatarsToImageList;
-
-	CPanelAnimationVar( int, m_iAvatarWidth, "avatar_width", "34" );		// Avatar width doesn't scale with resolution
+#ifndef FF
+	CPanelAnimationVarAliasType( int, m_iAvatarWidth, "avatar_width", "18", "proportional_int" );
+#else
+	CPanelAnimationVar( int, m_iAvatarWidth, "avatar_width", "34" ); // Avatar width doesn't scale with resolution
+#endif
 	CPanelAnimationVarAliasType( int, m_iNameWidth, "name_width", "136", "proportional_int" );
 	CPanelAnimationVarAliasType( int, m_iClassWidth, "class_width", "35", "proportional_int" );
 	CPanelAnimationVarAliasType( int, m_iScoreWidth, "score_width", "35", "proportional_int" );
@@ -199,10 +221,11 @@ private:
 	IViewPort	*m_pViewPort;
 	ButtonCode_t m_nCloseKey;
 
-	// BEG: Added by Mulchman for stuff
-	ButtonCode_t m_nJumpKey;
 
 	// methods
+#ifndef FF
+	void FillScoreBoard();
+#else
 	void FillScoreBoard(void);
 	bool NeedToSortTeams(void) const;
 	int  FindSectionByTeam(int iTeam) const;
@@ -215,6 +238,7 @@ protected:
 private:
 	MESSAGE_FUNC_PARAMS(OnItemSelected, "ItemSelected", data);
 	// END: Added by Mulchman for stuff
+#endif
 };
 
 

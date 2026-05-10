@@ -14,11 +14,11 @@
 #include <vgui_controls/Frame.h>
 #include <vgui_controls/Button.h>
 #include <vgui_controls/HTML.h>
-
+#ifdef FF
 #include <igameevents.h>
-
-#include <game/client/iviewport.h>
 #include <vgui/KeyCode.h>
+#endif
+#include <game/client/iviewport.h>
 #include "shareddefs.h"
 
 namespace vgui
@@ -46,12 +46,12 @@ public:
 	virtual bool NeedsUpdate( void ) { return false; }
 	virtual bool HasInputElements( void ) { return true; }
 	virtual void ShowPanel( bool bShow );
-	
+#ifdef FF
 	virtual void OnKeyCodePressed(vgui::KeyCode code);
 	virtual void OnKeyCodeReleased(vgui::KeyCode code);
-	
-	virtual void FireGameEvent(IGameEvent *event);
 
+	virtual void FireGameEvent(IGameEvent *event);
+#endif
 	// both vgui::Frame and IViewPortPanel define these, so explicitly define them here as passthroughs to vgui
 	vgui::VPANEL GetVPanel( void ) { return BaseClass::GetVPanel(); }
   	virtual bool IsVisible() { return BaseClass::IsVisible(); }
@@ -72,7 +72,9 @@ public:
 protected:	
 	// vgui overrides
 	virtual void OnCommand( const char *command );
-
+#ifndef FF
+	void OnKeyCodePressed( vgui::KeyCode code );
+#endif
 	IViewPort	*m_pViewPort;
 	char		m_szTitle[255];
 	char		m_szMessage[2048];

@@ -23,11 +23,11 @@
 #include <vgui_controls/Button.h>
 
 #include <game/client/iviewport.h>
-
+#ifdef FF
 #include "IGameUIFuncs.h"
 #include "ienginevgui.h"
 #include "ff_button.h"
-
+#endif
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -78,7 +78,7 @@ CON_COMMAND( showinfo, "Shows a info panel: <type> <title> <message> [<command n
 //=============================================================================
 // HPE_END
 //=============================================================================
-
+#ifdef FF
 CON_COMMAND( hud_reloadserverinfo, "hud_reloadserverinfo" )
 {
 	IViewPortPanel *pPanel = gViewPortInterface->FindPanelByName( PANEL_INFO );
@@ -96,7 +96,7 @@ CON_COMMAND( hud_reloadserverinfo, "hud_reloadserverinfo" )
 	pServerInfo->SetProportional( true );
 	pServerInfo->LoadControlSettings( "Resource/UI/TextWindow.res" );
 }
-
+#endif
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
@@ -401,7 +401,18 @@ void CTextWindow::OnCommand( const char *command )
 
 	BaseClass::OnCommand(command);
 }
+#ifdef FF
+void CTextWindow::OnKeyCodePressed( vgui::KeyCode code )
+{
+	if ( code == KEY_XBUTTON_A || code == KEY_XBUTTON_B || code == STEAMCONTROLLER_A || code == STEAMCONTROLLER_B )
+	{
+		OnCommand( "okay" );
+		return;
+	}
 
+	BaseClass::OnKeyCodePressed(code);
+}
+#endif
 void CTextWindow::SetData(KeyValues *data)
 {
 #ifdef SDK2013CE
@@ -436,18 +447,21 @@ void CTextWindow::ShowPanel( bool bShow )
 	{
 		Activate();
 		SetMouseInputEnabled( true );
+#ifdef FF
 		SetKeyBoardInputEnabled(true);
 		SetCloseButtonVisible(false);
 		SetEnabled(true);
 
 		MoveToFront();
+#endif
 	}
 	else
 	{
 		SetVisible( false );
 		SetMouseInputEnabled( false );
+#ifdef FF
 		SetKeyBoardInputEnabled(false);
-
+#endif
 		if ( m_bUnloadOnDismissal && m_bShownURL && m_pHTMLMessage )
 		{
 			m_pHTMLMessage->OpenURL( "about:blank", NULL );
@@ -463,7 +477,7 @@ bool CTextWindow::CMOTDHTML::OnStartRequest( const char *url, const char *target
 
 	return BaseClass::OnStartRequest( url, target, pchPostData, bIsRedirect );
 }
-
+#ifdef FF
 //-----------------------------------------------------------------------------
 // Purpose: Get the server name
 //-----------------------------------------------------------------------------
@@ -507,3 +521,4 @@ void CTextWindow::OnKeyCodeReleased(KeyCode code)
 
 	BaseClass::OnKeyCodeReleased(code);
 }
+#endif

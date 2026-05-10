@@ -527,7 +527,7 @@ void CBasePlayer::UpdateStepSound( surfacedata_t *psurface, const Vector &vecOri
 	if ( m_flStepSoundTime > 0 )
 		return;
 #else	// --> Mirv: Replaced to fix footsteps
-	if (m_flStepSoundTime > gpGlobals->curtime)
+	if ( m_flStepSoundTime > gpGlobals->curtime )
 		return;
 #endif	// <-- Mirv
 
@@ -659,8 +659,7 @@ void CBasePlayer::UpdateStepSound( surfacedata_t *psurface, const Vector &vecOri
 	{
 		fvol *= 0.65;
 	}
-#ifdef FF
-	// --> Mirv: Redone sound stuff
+#ifdef FF // --> Mirv: Redone sound stuff
 
 	// If we are walking or ducking, silence
 	if (GetFlags() & (FL_DUCKING) || m_nButtons & IN_SPEED)
@@ -1483,7 +1482,7 @@ void CBasePlayer::SmoothViewOnStairs( Vector& eyeOrigin )
 	// We're now only smoothing stairs if we've recently stepped up or down
 	// far enough (currently >= 8.0 units). This way the stair smoothing isn't
 	// affecting ramps
-	if (!m_bSmoothStair)
+	if ( !m_bSmoothStair )
 	{
 		m_flOldPlayerZ = flCurrentPlayerZ;
 	}
@@ -1492,7 +1491,7 @@ void CBasePlayer::SmoothViewOnStairs( Vector& eyeOrigin )
 		// Once we've got close enough to our actual position then stop stair 
 		// smoothing
 		float flDistance = flCurrentPlayerZ - m_flOldPlayerZ;
-		if (flDistance < 0.1f && flDistance > -0.1f)
+		if ( flDistance < 0.1f && flDistance > -0.1f )
 		{
 			m_flOldPlayerZ = flCurrentPlayerZ;
 			m_bSmoothStair = false;

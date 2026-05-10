@@ -1,14 +1,14 @@
-/// =============== Fortress Forever ==============
-/// ======== A modification for Half-Life 2 =======
-///
-/// @file classmenu.cpp
-/// @author Gavin "Mirvin_Monkey" Bramhill
-/// @date August 15, 2005
-/// @brief New class selection menu
-///
-/// REVISIONS
-/// ---------
-/// Aug 15, 2005 Mirv: First creation
+//========= Fortress Forever ============//
+//========= A modification for Half-Life 2 =======
+// @file classmenu.cpp
+// @author Gavin "Mirvin_Monkey" Bramhill
+// @date August 15, 2005
+// @brief New class selection menu
+//
+// REVISIONS
+// ---------
+// Aug 15, 2005 Mirv: First creation
+//=============================================================================//
 
 
 #include "cbase.h"
@@ -71,7 +71,8 @@ extern IGameUIFuncs* gameuifuncs;
 #define HUD_CLASSAUTOKILL_FLAGS		( FCVAR_CLIENTDLL | FCVAR_ARCHIVE )
 #endif // !TF_CLIENT_DLL
 
-//ConVar hud_classautokill( "hud_classautokill", "1", HUD_CLASSAUTOKILL_FLAGS, "Automatically kill player after choosing a new playerclass." );
+ConVar hud_classautokill( "hud_classautokill", "1", HUD_CLASSAUTOKILL_FLAGS, "Automatically kill player after choosing a new playerclass." );
+#ifdef FF
 // Button names
 const char *szClassButtons[] = { "scoutbutton", "sniperbutton", "soldierbutton",
 								 "demomanbutton", "medicbutton", "hwguybutton",
@@ -312,7 +313,7 @@ CON_COMMAND( hud_reloadclassmenu, "hud_reloadclassmenu" )
 	pClassMenu->SetProportional( true );
 	pClassMenu->LoadControlSettings( "Resource/UI/ClassMenu.res" );
 }
-
+#endif
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
@@ -501,7 +502,7 @@ void CClassMenu::OnCommand( const char *command )
 		// the new class right away
 		if ( hud_classautokill.GetBool() )
 		{
-			engine->ClientCmd( "kill" );
+            engine->ClientCmd( "kill" );
 		}
 #endif // !CSTRIKE_DLL && !TF_CLIENT_DLL
 	}
@@ -520,37 +521,62 @@ void CClassMenu::OnCommand( const char *command )
 //-----------------------------------------------------------------------------
 void CClassMenu::ShowPanel(bool bShow)
 {
+#ifdef FF
 	if (BaseClass::IsVisible() == bShow)
 		return;
 
 	m_pViewPort->ShowBackGround(bShow);
-
+#endif
 	if ( bShow )
 	{
 		Activate();
 		SetMouseInputEnabled( true );
-
+#ifdef FF
 		// Update straight away
 		Update();
 
 		MoveToFront();
 
 		SetCloseButtonVisible( false );
+#else
+		// load a default class page
+		for ( int i=0; i<m_mouseoverButtons.Count(); ++i )
+		{
+			if ( i == 0 )
+			{
+				m_mouseoverButtons[i]->ShowPage();	// Show the first page
+			}
+			else
+			{
+				m_mouseoverButtons[i]->HidePage();	// Hide the rest
+			}
+		}
+		
+		if ( m_iScoreBoardKey == BUTTON_CODE_INVALID ) 
+		{
+			m_iScoreBoardKey = gameuifuncs->GetButtonCodeForBind( "showscores" );
+		}
+#endif
 	}
 	else
 	{
 		SetVisible( false );
 		SetMouseInputEnabled( false );
+#ifdef FF
 		Reset();
+#endif
 	}
+#ifndef FF
+	m_pViewPort->ShowBackGround( bShow );
+#endif
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Nothing
-//-----------------------------------------------------------------------------
+
 void CClassMenu::SetData(KeyValues *data)
 {
-	// do nothing
+#ifndef FF
+	m_iTeam = data->GetInt( "team" );
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -607,46 +633,74 @@ void CClassMenu::OnKeyCodePressed(KeyCode code)
 		nDir = 1;
 		break;
 	}
+#ifndef FF
+	if ( m_iScoreBoardKey != BUTTON_CODE_INVALID && m_iScoreBoardKey == code )
+	{
+		gViewPortInterface->ShowPanel( PANEL_SCOREBOARD, true );
+		gViewPortInterface->PostMessageToPanel( PANEL_SCOREBOARD, new KeyValues( "PollHideCode", "code", code ) );
+	}
+	else if ( nDir != 0 )
+	{
+		CUtlSortVector< SortedPanel_t, CSortedPanelYLess > vecSortedButtons;
+		VguiPanelGetSortedChildButtonList( this, (void*)&vecSortedButtons, "&", 0 );
 
+		int nNewArmed = VguiPanelNavigateSortedChildButtonList( (void*)&vecSortedButtons, nDir );
+
+		if ( nNewArmed != -1 )
+		{
+			// Handled!
+			if ( nNewArmed < m_mouseoverButtons.Count() )
+			{
+				m_mouseoverButtons[ nNewArmed ]->OnCursorEntered();
+			}
+			return;
+		}
+	}
+	else
+	{
+		BaseClass::OnKeyCodePressed( code );
+	}
+#else
 	// Show the scoreboard over this if needed
-	if (gameuifuncs->GetButtonCodeForBind("showscores") == code)
-		gViewPortInterface->ShowPanel(PANEL_SCOREBOARD, true);
+	if ( gameuifuncs->GetButtonCodeForBind( "showscores" ) == code )
+		gViewPortInterface->ShowPanel( PANEL_SCOREBOARD, true );
 
-	if (gameuifuncs->GetButtonCodeForBind("serverinfo") == code)
-		engine->ClientCmd("serverinfo");
+	if ( gameuifuncs->GetButtonCodeForBind( "serverinfo" ) == code )
+		engine->ClientCmd( "serverinfo" );
 
 	// Support hiding the class menu by hitting your changeclass button again like TFC
 	// 0001232: Or if the user presses escape, kill the menu
-	if (gameuifuncs->GetButtonCodeForBind("changeclass") == code ||
-		gameuifuncs->GetButtonCodeForBind("cancelselect") == code)
-		gViewPortInterface->ShowPanel(this, false);
+	if ( gameuifuncs->GetButtonCodeForBind( "changeclass" ) == code ||
+		gameuifuncs->GetButtonCodeForBind( "cancelselect" ) == code)
+		gViewPortInterface->ShowPanel( this, false );
 
 	// Support bring the team menu back up if the class menu is showing
-	if (gameuifuncs->GetButtonCodeForBind("changeteam") == code)
+	if ( gameuifuncs->GetButtonCodeForBind( "changeteam" ) == code )
 	{
-		m_pViewPort->ShowPanel(this, false);
-		engine->ClientCmd("changeteam");
+		m_pViewPort->ShowPanel( this, false );
+		engine->ClientCmd( "changeteam" );
 	}
 
-	BaseClass::OnKeyCodePressed(code);
+	BaseClass::OnKeyCodePressed( code );
+#endif
 }
 
 void CClassMenu::OnKeyCodeReleased(KeyCode code)
 {
 	// Bug #0000524: Scoreboard gets stuck with the class menu up when you first join
 	// Hide the scoreboard now
-	if (gameuifuncs->GetButtonCodeForBind("showscores") == code)
+	if ( gameuifuncs->GetButtonCodeForBind( "showscores" ) == code )
 	{
-		gViewPortInterface->ShowPanel(PANEL_SCOREBOARD, false);
+		gViewPortInterface->ShowPanel( PANEL_SCOREBOARD, false );
 	}
 
-	BaseClass::OnKeyCodeReleased(code);
+	BaseClass::OnKeyCodeReleased( code );
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Update the main display
 //-----------------------------------------------------------------------------
-void CClassMenu::OnMouseOverMessage(KeyValues *data)
+void CClassMenu::OnMouseOverMessage( KeyValues *data )
 {
 	Button *pButton = (Button *) data->GetPtr("panel", NULL);
 
@@ -660,7 +714,7 @@ void CClassMenu::OnMouseOverMessage(KeyValues *data)
 		UpdateClassInfo(pButton->GetCommand()->GetString("command"));
 	}
 }
-
+#ifdef FF
 //-----------------------------------------------------------------------------
 // Purpose: Load the correct class into the model view
 //-----------------------------------------------------------------------------
@@ -758,3 +812,4 @@ void CClassMenu::UpdateClassInfo(const char *pszClassName)
 		}
 	}
 }
+#endif

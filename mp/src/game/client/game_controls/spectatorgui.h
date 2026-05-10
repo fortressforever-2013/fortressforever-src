@@ -146,8 +146,9 @@ private:
 
 	vgui::ComboBox *m_pPlayerList;
 	vgui::ComboBox *m_pViewOptions;
-	//vgui::ComboBox *m_pConfigSettings;
-
+#ifndef FF
+	vgui::ComboBox *m_pConfigSettings;
+#endif
 	vgui::Button *m_pLeftButton;
 	vgui::Button *m_pRightButton;
 

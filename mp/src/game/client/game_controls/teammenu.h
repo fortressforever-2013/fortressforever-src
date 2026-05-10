@@ -1,14 +1,14 @@
-/// =============== Fortress Forever ==============
-/// ======== A modification for Half-Life 2 =======
-///
-/// @file teammenu2.h
-/// @author Gavin "Mirvin_Monkey" Bramhill
-/// @date August 15, 2005
-/// @brief New team selection menu
-///
-/// REVISIONS
-/// ---------
-/// Aug 15, 2005 Mirv: First creation
+//========= Fortress Forever ============//
+//========= A modification for Half-Life 2 =======
+//
+// @file teammenu2.h
+// @author Gavin "Mirvin_Monkey" Bramhill
+// @date August 15, 2005
+// @brief New team selection menu
+//
+// REVISIONS
+// ---------
+// Aug 15, 2005 Mirv: First creation
 
 #ifndef TEAMMENU_H
 #define TEAMMENU_H

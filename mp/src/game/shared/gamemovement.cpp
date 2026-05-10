@@ -38,12 +38,12 @@ extern IFileSystem *filesystem;
 #ifndef CLIENT_DLL
 	#include "env_player_surface_trigger.h"
 	#ifdef FF_CLIENT_DLL
-	#include "ff_player.h"				// |-- Mirv: Fall sounds
+	#include "c_ff_player.h"				// |-- Mirv: Fall sounds
 	#endif
 	static ConVar dispcoll_drawplane( "dispcoll_drawplane", "0" );
 #else
 	#ifdef FF_DLL
-	#include "c_ff_player.h"					// |-- Mirv: Fall sounds
+	#include "ff_player.h"					// |-- Mirv: Fall sounds
 	#endif
 #endif
 
@@ -935,13 +935,17 @@ void CBasePlayer::UpdateWetness()
 //-----------------------------------------------------------------------------
 void CGameMovement::CategorizeGroundSurface( trace_t &pm )
 {
-	#ifdef FF
+#ifdef FF
 	IPhysicsSurfaceProps *physprops = MoveHelper()->GetSurfaceProps();
-	#endif
+#endif
 	player->m_surfaceProps = pm.surface.surfaceProps;
+#ifndef FF
+	player->m_pSurfaceData = MoveHelper()->GetSurfaceProps()->GetSurfaceData( player->m_surfaceProps );
+	MoveHelper()->GetSurfaceProps()->GetPhysicsProperties( player->m_surfaceProps, NULL, NULL, &player->m_surfaceFriction, NULL );
+#else
 	player->m_pSurfaceData = physprops->GetSurfaceData( player->m_surfaceProps );
 	physprops->GetPhysicsProperties( player->m_surfaceProps, NULL, NULL, &player->m_surfaceFriction, NULL );
-	
+#endif
 	// HACKHACK: Scale this to fudge the relationship between vphysics friction values and player friction values.
 	// A value of 0.8f feels pretty normal for vphysics, whereas 1.0f is normal for players.
 	// This scaling trivially makes them equivalent.  REVISIT if this affects low friction surfaces too much.
@@ -1058,7 +1062,7 @@ void CGameMovement::CheckParameters( void )
 	}
 #ifdef FF
 	// squeek: transition from walk -> crouch brought you back to full speed; only stop cropping speed when the player is fully ducked
-	if (!m_iSpeedCropped && (mv->m_nButtons & IN_SPEED) /*&& !(mv->m_nButtons & IN_DUCK)*/ && !(player->m_Local.m_bDucked /*&& !player->m_Local.m_bDucking*/))
+	if ( !m_iSpeedCropped && ( mv->m_nButtons & IN_SPEED ) /*&& !(mv->m_nButtons & IN_DUCK)*/ && !( player->m_Local.m_bDucked /*&& !player->m_Local.m_bDucking*/ ) )
 	{
 		// Bug ID #0000363: +speed command not fully implemented
 		float frac = 0.5f;
@@ -1335,19 +1339,14 @@ void CGameMovement::CheckWaterJump( void )
 
 	// Are we backing into water from steps or something?  If so, don't pop forward
 	if ( curspeed != 0.0 && ( DotProduct( flatvelocity, flatforward ) < 0.0 ) )
-	{
-		//DevMsg( "[Movement] (curspeed == 0.0) && (DotProduct(flatvelocity, flatforward) >= 0.0)\n" );
 		return;
-	}
-
-	//DevMsg( "[Movement] DotProduct( flatvelocity, flatforward ): %f\n", DotProduct( flatvelocity, flatforward ) );
 
 	Vector vecStart;
 	// Start line trace at waist height (using the center of the player for this here)
 #ifndef FF
 	vecStart = mv->GetAbsOrigin() + (GetPlayerMins() + GetPlayerMaxs() ) * 0.5;
 #else
-	vecStart = mv->GetAbsOrigin() /*+ (GetPlayerMins() + GetPlayerMaxs() ) * 0.5*/;	// |-- Mirv: AbsOrigin is already centred now
+	vecStart = mv->GetAbsOrigin()/*+ (GetPlayerMins() + GetPlayerMaxs() ) * 0.5*/;	// |-- Mirv: AbsOrigin is already centred now
 #endif
 	Vector vecEnd;
 	VectorMA( vecStart, 24.0f, flatforward, vecEnd );
@@ -1447,7 +1446,7 @@ void CGameMovement::WaterMove( void )
 		// Hey, get some up velocity wishing going on to buddy! Don't forget about us +moveup/+movedown users!
 		wishvel[i] = forward[i]*mv->m_flForwardMove + right[i]*mv->m_flSideMove;
 #else
-		wishvel[i] = forward[i]* mv->m_flForwardMove + right[i]* mv->m_flSideMove + up[i]* mv->m_flUpMove;
+		wishvel[i] = forward[i]*mv->m_flForwardMove + right[i]*mv->m_flSideMove + up[i]*mv->m_flUpMove;
 #endif
 	}
 #ifdef FF
@@ -1468,7 +1467,7 @@ void CGameMovement::WaterMove( void )
 	// Sinking after no other movement occurs
 	else if (!mv->m_flForwardMove && !mv->m_flSideMove && !mv->m_flUpMove)
 #else
-	if (!mv->m_flForwardMove && !mv->m_flSideMove && !mv->m_flUpMove && player->GetGroundEntity() == NULL)	// |-- Mirv: But only when not on ground, to fix #0000432: Standing underwater on a slope causes player to slip
+	if ( !mv->m_flForwardMove && !mv->m_flSideMove && !mv->m_flUpMove && player->GetGroundEntity() == NULL )	// |-- Mirv: But only when not on ground, to fix #0000432: Standing underwater on a slope causes player to slip
 #endif
 	{
 		wishvel[2] -= 60;		// drift towards bottom
@@ -1486,8 +1485,7 @@ void CGameMovement::WaterMove( void )
 	// Copy it over and determine speed
 	VectorCopy (wishvel, wishdir);
 	wishspeed = VectorNormalize(wishdir);
-#ifdef FF
-	// --> Jon: cap swimming speed if cloaked
+#ifdef FF	// --> Jon: cap swimming speed if cloaked
 	float flMaxSpeed = mv->m_flMaxSpeed;
 	if ( ToFFPlayer( player )->IsCloaked() )
 		flMaxSpeed = SPY_MAXCLOAKSPEED;
@@ -1510,7 +1508,7 @@ void CGameMovement::WaterMove( void )
 		#ifndef FF
 		newspeed = speed - gpGlobals->frametime * speed * sv_friction.GetFloat() * player->m_surfaceFriction;
 		#else
-		if (!bIsSharking)
+		if ( !bIsSharking )
 			newspeed = speed - gpGlobals->frametime * speed * /*sv_friction.GetFloat()*/ 4.0f * /*player->m_surfaceFriction*/ 1.0f;	// |-- Mirv: More TFC Feeling (tm) friction
 		else
 			newspeed = speed - gpGlobals->frametime * speed * SV_SHARKINGFRICTION * /*player->m_surfaceFriction*/ 1.0f;
@@ -1689,7 +1687,7 @@ void CGameMovement::StepMove( Vector &vecDestination, trace_t &trace )
 #ifdef FF // --> Mirv:
 		// If we have stepped up far enough then flag for smoothstairs
 		float flDistance = vecUpPos.z - vecPos.z;
-		if (flDistance >= 8.0f)
+		if ( flDistance >= 8.0f )
 		{
 			player->m_bSmoothStair = true;
 		}
@@ -1999,7 +1997,6 @@ void CGameMovement::StayOnGround( void )
 				player->m_bSmoothStair = true;
 			}
 #endif		// <-- Mirv
-
 			mv->SetAbsOrigin( trace.endpos );
 		}
 	}
@@ -2156,7 +2153,7 @@ void CGameMovement::FullWalkMove( )
 		return;
 		#else
 		// hlstriker: Make sure player isn't swimming before we return
-		if (player->GetWaterLevel() < WL_Waist)
+		if ( player->GetWaterLevel() < WL_Waist )
 		{
 			player->m_flWaterJumpTime = 0;
 			return;
@@ -2756,12 +2753,15 @@ int CGameMovement::TryPlayerMove( Vector *pFirstDest, trace_t *pFirstTrace )
 		//  are blocked by floor and wall.
 		if (pm.allsolid)
 		{	
-#ifdef EXTRA_LOCAL_ORIGIN_ACCURACY
+#ifdef FF	// entity is trapped in another solid
+	#ifdef EXTRA_LOCAL_ORIGIN_ACCURACY
 			// If we have the extra local origin accuracy fix in then normal behaviour
 			VectorCopy (vec3_origin, mv->m_vecVelocity);
 			return 4;
+	#endif
 #endif
-#ifdef FF	// this is limited by the network fractional bits used for coords
+#ifdef FF
+			// this is limited by the network fractional bits used for coords
 			// because net coords will be only be accurate to 5 bits fractional
 			// Standard collision test epsilon
 			// 1/32nd inch collision epsilon
@@ -2770,7 +2770,7 @@ int CGameMovement::TryPlayerMove( Vector *pFirstDest, trace_t *pFirstTrace )
 			UTIL_TraceRay(ray, PlayerSolidMask(), mv->m_nPlayerHandle.Get(), COLLISION_GROUP_PLAYER_MOVEMENT, &pm);
 
 			// entity is trapped in another solid
-			if (pm.allsolid)
+			if ( pm.allsolid )
 			{
 				VectorCopy(vec3_origin, mv->m_vecVelocity);
 				return 4;
@@ -2906,7 +2906,7 @@ int CGameMovement::TryPlayerMove( Vector *pFirstDest, trace_t *pFirstTrace )
 					#ifndef FF
 					1, flSlideMultiplier );
 					#else
-					1);
+					1 );
 					#endif
 				for (j=0 ; j<numplanes ; j++)
 					if (j != i)
@@ -4007,7 +4007,7 @@ void CGameMovement::CategorizePosition( void )
 	// --> Mirv: Changed value to accomodate for ramp bug
 	float flUpSpeedLimit;
 
-	if ((mv->m_nButtons & IN_JUMP) && !(mv->m_nOldButtons & IN_JUMP))
+	if ( ( mv->m_nButtons & IN_JUMP) && !( mv->m_nOldButtons & IN_JUMP ) )
 		flUpSpeedLimit = 260000;
 	else
 		flUpSpeedLimit = 180; //260;
@@ -4116,7 +4116,7 @@ void CGameMovement::CategorizePosition( void )
 //-----------------------------------------------------------------------------
 void CGameMovement::CheckFalling( void )
 {
-	#ifdef FF
+#ifdef FF
 	CFFPlayer *pPlayer = ToFFPlayer( player );
 
 	// Jiggles: To stop players from double jumping off other players
@@ -4124,7 +4124,7 @@ void CGameMovement::CheckFalling( void )
 		pPlayer->m_bCanDoubleJump = false;
 	else
 		pPlayer->m_bCanDoubleJump = true;
-	#endif
+#endif
 	// this function really deals with landing, not falling, so early out otherwise
 	if ( player->GetGroundEntity() == NULL || player->m_Local.m_flFallVelocity <= 0 )
 		return;
@@ -4168,7 +4168,6 @@ void CGameMovement::CheckFalling( void )
 			}
 			else if ( player->m_Local.m_flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED / 2 )
 			{
-				// 0000608: Makes dropping damage sound from heights that dont inflict damage
 				fvol = 0.85;
 			}
 			else if ( player->m_Local.m_flFallVelocity < PLAYER_MIN_BOUNCE_SPEED )
@@ -4186,7 +4185,7 @@ void CGameMovement::CheckFalling( void )
 				: PlayerRoughLandingEffects( fvol );
 		}
 #else
-		PlayRoughLandingEffects( fvol );
+		PlayerRoughLandingEffects( fvol );
 #endif
 		if (bAlive)
 		{
@@ -4208,11 +4207,11 @@ void CGameMovement::PlayerRoughLandingEffects( float fvol )
 	if ( fvol > 0.0 )
 	{
 #ifdef FF	// --> Mirv: Use a fall sound, and reduce the volume for spies
-		CFFPlayer* pFFPlayer = ToFFPlayer(player);
-		Assert(pFFPlayer);
+		CFFPlayer *pFFPlayer = ToFFPlayer( player );
+		Assert( pFFPlayer );
 
-		pFFPlayer->PlayFallSound(mv->m_vecAbsOrigin, player->m_pSurfaceData, fvol);
-		
+		pFFPlayer->PlayFallSound( mv->m_vecAbsOrigin, player->m_pSurfaceData, fvol );
+
 		// Play landing sound right away.
 		// #0000599: footstep continues to play after cratering
 		// #0000401: Oddity with the fall sound.
@@ -4238,7 +4237,7 @@ void CGameMovement::PlayerRoughLandingEffects( float fvol )
 #ifdef FF
 		if (fvol == 1.0f)
 		{
-#ifdef GAME_DLL
+	#ifdef GAME_DLL
 			if ( player->GetGroundEntity() && player->GetGroundEntity()->IsPlayer() )
 			{
 				CFFPlayer *pCrushedPlayer = ToFFPlayer( player->GetGroundEntity() );
@@ -4264,7 +4263,7 @@ void CGameMovement::PlayerRoughLandingEffects( float fvol )
 					pCrushedPlayer->TakeDamage( info );
 				}
 			}
-#endif
+	#endif
 		}
 #endif
 #if !defined( CLIENT_DLL )
@@ -4617,18 +4616,23 @@ bool CGameMovement::CanUnDuckJump( trace_t &trace )
 //-----------------------------------------------------------------------------
 void CGameMovement::Duck( void )
 {
-	if (!player->IsAlive())
+#ifdef FF
+	if ( !player->IsAlive() )
 		return;
 
 	int i;
 	float time;
 	float duckFraction;
+#endif
+	int buttonsChanged	= ( mv->m_nOldButtons ^ mv->m_nButtons );	// These buttons have changed this frame
+	int buttonsPressed	=  buttonsChanged & mv->m_nButtons;			// The changed ones still down are "pressed"
+	int buttonsReleased	=  buttonsChanged & mv->m_nOldButtons;		// The changed ones which were previously down are "released"
 
-	int buttonsChanged = (mv->m_nOldButtons ^ mv->m_nButtons);	// These buttons have changed this frame
-	int nButtonPressed = buttonsChanged & mv->m_nButtons;		// The changed ones still down are "pressed"
-
-	//int duckchange		= buttonsChanged & IN_DUCK ? 1 : 0;
-	//int duckpressed		= nButtonPressed & IN_DUCK ? 1 : 0;
+	// Check to see if we are in the air.
+	bool bInAir = ( player->GetGroundEntity() == NULL );
+	bool bInDuck = ( player->GetFlags() & FL_DUCKING ) ? true : false;
+	bool bDuckJump = ( player->m_Local.m_flJumpTime > 0.0f );
+	bool bDuckJumpTime = ( player->m_Local.m_flDuckJumpTime > 0.0f );
 
 	if ( mv->m_nButtons & IN_DUCK )
 	{
@@ -4645,24 +4649,172 @@ void CGameMovement::Duck( void )
 	//	pmove->cmd.sidemove    *= 0.333;
 	//	pmove->cmd.upmove      *= 0.333;
 	//}
+	// Handle death.
+	if ( IsDead() )
+		return;
 
+	// Slow down ducked players.
 	HandleDuckingSpeedCrop();
 
-	if ((mv->m_nButtons & IN_DUCK) || (player->m_Local.m_bDucking) || (player->GetFlags() & FL_DUCKING))
+	// If the player is holding down the duck button, the player is in duck transition, ducking, or duck-jumping.
+	bool bFirstTimePredicted = true; // Assumes we never rerun commands on the server.
+#ifdef CLIENT_DLL
+	bFirstTimePredicted = prediction->IsFirstTimePredicted();
+#endif
+
+	// If the player is holding down the duck button, the player is in duck transition, ducking, or duck-jumping.
+	if ( ( mv->m_nButtons & IN_DUCK ) || player->m_Local.m_bDucking  || bInDuck || bDuckJump )
 	{
-		if (mv->m_nButtons & IN_DUCK)
+		// DUCK
+		if ( ( mv->m_nButtons & IN_DUCK ) || bDuckJump )
 		{
-			if ((nButtonPressed & IN_DUCK) && !(player->GetFlags() & FL_DUCKING))
+// XBOX SERVER ONLY
+			// Have the duck button pressed, but the player currently isn't in the duck position.
+			if ( ( buttonsPressed & IN_DUCK ) && !bInDuck && !bDuckJump && !bDuckJumpTime )
 			{
+#ifdef FF
 				// Use 1 second so super long jump will work
 				player->m_Local.m_flDucktime = 1000;
+#else
+				player->m_Local.m_flDucktime = GAMEMOVEMENT_DUCK_TIME;
+#endif				
 				player->m_Local.m_bDucking = true;
 			}
-
+#ifdef FF			
 			time = max(0.0, (1.0 - (float)player->m_Local.m_flDucktime / 1000.0));
-
-			if (player->m_Local.m_bDucking)
+#endif
+			// The player is in duck transition and not duck-jumping.
+			if ( player->m_Local.m_bDucking && !bDuckJump && !bDuckJumpTime )
 			{
+#ifndef FF
+				float flDuckMilliseconds = MAX( 0.0f, GAMEMOVEMENT_DUCK_TIME - ( float )player->m_Local.m_flDucktime );
+				float flDuckSeconds = flDuckMilliseconds * 0.001f;
+				
+				// Finish in duck transition when transition time is over, in "duck", in air.
+				if ( ( flDuckSeconds > TIME_TO_DUCK ) || bInDuck || bInAir )
+				{
+					FinishDuck();
+				}
+				else
+				{
+					// Calc parametric time
+					float flDuckFraction = SimpleSpline( flDuckSeconds / TIME_TO_DUCK );
+					SetDuckedEyeOffset( flDuckFraction );
+				}
+			}
+
+			if ( bDuckJump )
+			{
+				// Make the bounding box small immediately.
+				if ( !bInDuck )
+				{
+					StartUnDuckJump();
+				}
+				else
+				{
+					// Check for a crouch override.
+					if ( !( mv->m_nButtons & IN_DUCK ) )
+					{
+						trace_t trace;
+						if ( CanUnDuckJump( trace ) )
+						{
+							FinishUnDuckJump( trace );
+							player->m_Local.m_flDuckJumpTime = ( GAMEMOVEMENT_TIME_TO_UNDUCK * ( 1.0f - trace.fraction ) ) + GAMEMOVEMENT_TIME_TO_UNDUCK_INV;
+						}
+					}
+				}
+			}
+		}
+		// UNDUCK (or attempt to...)
+		else
+		{
+			if ( player->m_Local.m_bInDuckJump )
+			{
+				// Check for a crouch override.
+   				if ( !( mv->m_nButtons & IN_DUCK ) )
+				{
+					trace_t trace;
+					if ( CanUnDuckJump( trace ) )
+					{
+						FinishUnDuckJump( trace );
+					
+						if ( trace.fraction < 1.0f )
+						{
+							player->m_Local.m_flDuckJumpTime = ( GAMEMOVEMENT_TIME_TO_UNDUCK * ( 1.0f - trace.fraction ) ) + GAMEMOVEMENT_TIME_TO_UNDUCK_INV;
+						}
+					}
+				}
+				else
+				{
+					player->m_Local.m_bInDuckJump = false;
+				}
+			}
+
+			if ( bDuckJumpTime )
+				return;
+
+			// Try to unduck unless automovement is not allowed
+			// NOTE: When not onground, you can always unduck
+			if ( player->m_Local.m_bAllowAutoMovement || bInAir || player->m_Local.m_bDucking )
+			{
+				// We released the duck button, we aren't in "duck" and we are not in the air - start unduck transition.
+				if ( ( buttonsReleased & IN_DUCK ) )
+				{
+					if ( bInDuck && !bDuckJump )
+					{
+						player->m_Local.m_flDucktime = GAMEMOVEMENT_DUCK_TIME;
+					}
+					else if ( player->m_Local.m_bDucking && !player->m_Local.m_bDucked )
+					{
+						// Invert time if release before fully ducked!!!
+						float unduckMilliseconds = 1000.0f * TIME_TO_UNDUCK;
+						float duckMilliseconds = 1000.0f * TIME_TO_DUCK;
+						float elapsedMilliseconds = GAMEMOVEMENT_DUCK_TIME - player->m_Local.m_flDucktime;
+
+						float fracDucked = elapsedMilliseconds / duckMilliseconds;
+						float remainingUnduckMilliseconds = fracDucked * unduckMilliseconds;
+
+						player->m_Local.m_flDucktime = GAMEMOVEMENT_DUCK_TIME - unduckMilliseconds + remainingUnduckMilliseconds;
+					}
+				}
+				
+
+				// Check to see if we are capable of unducking.
+				if ( CanUnduck() )
+				{
+					// or unducking
+					if ( ( player->m_Local.m_bDucking || player->m_Local.m_bDucked ) )
+					{
+						float flDuckMilliseconds = MAX( 0.0f, GAMEMOVEMENT_DUCK_TIME - (float)player->m_Local.m_flDucktime );
+						float flDuckSeconds = flDuckMilliseconds * 0.001f;
+						
+						// Finish ducking immediately if duck time is over or not on ground
+						if ( flDuckSeconds > TIME_TO_UNDUCK || ( bInAir && !bDuckJump ) )
+						{
+							FinishUnDuck();
+						}
+						else
+						{
+							// Calc parametric time
+							float flDuckFraction = SimpleSpline( 1.0f - ( flDuckSeconds / TIME_TO_UNDUCK ) );
+							SetDuckedEyeOffset( flDuckFraction );
+							player->m_Local.m_bDucking = true;
+						}
+					}
+				}
+				else
+				{
+					// Still under something where we can't unduck, so make sure we reset this timer so
+					//  that we'll unduck once we exit the tunnel, etc.
+					if ( player->m_Local.m_flDucktime != GAMEMOVEMENT_DUCK_TIME )
+					{
+						SetDuckedEyeOffset(1.0f);
+						player->m_Local.m_flDucktime = GAMEMOVEMENT_DUCK_TIME;
+						player->m_Local.m_bDucked = true;
+						player->m_Local.m_bDucking = false;
+						player->AddFlag( FL_DUCKING );
+					}
+#else
 				// Finish ducking immediately if duck time is over or not on ground
 				if ( ( ( float ) player->m_Local.m_flDucktime / 1000.0 <= ( 1.0 - TIME_TO_DUCK ) ) ||
 					( ( player->GetGroundEntity() == NULL ) && player->m_Local.m_flDucktime > 0 ) )
@@ -4671,9 +4823,9 @@ void CGameMovement::Duck( void )
 					//pmove->view_ofs[2] = VEC_DUCK_VIEW;
 					Vector vecOffset = player->GetViewOffset();
 					vecOffset[2] = VEC_DUCK_VIEW[2];
-					player->SetViewOffset(vecOffset);
+					player->SetViewOffset( vecOffset );
 
-					player->AddFlag(FL_DUCKING);	//player->GetFlags() |= FL_DUCKING;
+					player->AddFlag( FL_DUCKING );	//player->GetFlags() |= FL_DUCKING;
 
 					//player->m_Local.m_bDucking = false;
 
@@ -4709,226 +4861,44 @@ void CGameMovement::Duck( void )
 					Vector vecViewOfs = player->GetViewOffset();
 					vecViewOfs[2] = ((VEC_DUCK_VIEW[2] - fMore) * duckFraction) + (VEC_VIEW[2] * (1 - duckFraction));
 					player->SetViewOffset(vecViewOfs);
+#endif
 				}
 			}
 		}
+#ifdef FF
 		else
 		{
 			// Try to unduck
 			FinishUnDuck();
 		}
+#endif
 	}
+	// HACK: (jimd 5/25/2006) we have a reoccuring bug (#50063 in Tracker) where the player's
+	// view height gets left at the ducked height while the player is standing, but we haven't
+	// been  able to repro it to find the cause.  It may be fixed now due to a change I'm
+	// also making in UpdateDuckJumpEyeOffset but just in case, this code will sense the 
+	// problem and restore the eye to the proper position.  It doesn't smooth the transition,
+	// but it is preferable to leaving the player's view too low.
+	//
+	// If the player is still alive and not an observer, check to make sure that
+	// his view height is at the standing height.
+	else if ( bFirstTimePredicted && !IsDead() && !player->IsObserver() && !player->IsInAVehicle() )
+	{
+		float flOffsetDelta = player->GetViewOffset().z - GetPlayerViewOffset( false ).z;
+		if ( ( player->m_Local.m_flDuckJumpTime == 0.0f ) && ( fabs( flOffsetDelta ) > 0.1 ) )
+		{
+			// we should rarely ever get here, so assert so a coder knows when it happens
+			Assert(0);
+			DevMsg( 1, "Restoring player view height\n" );
 
-//	int buttonsChanged	= ( mv->m_nOldButtons ^ mv->m_nButtons );	// These buttons have changed this frame
-//	int buttonsPressed	=  buttonsChanged & mv->m_nButtons;			// The changed ones still down are "pressed"
-//	int buttonsReleased	=  buttonsChanged & mv->m_nOldButtons;		// The changed ones which were previously down are "released"
-//
-//	// Check to see if we are in the air.
-//	bool bInAir = ( player->GetGroundEntity() == NULL );
-//	bool bInDuck = ( player->GetFlags() & FL_DUCKING ) ? true : false;
-//	bool bDuckJump = ( player->m_Local.m_flJumpTime > 0.0f );
-//	bool bDuckJumpTime = ( player->m_Local.m_flDuckJumpTime > 0.0f );
-//
-//	if ( mv->m_nButtons & IN_DUCK )
-//	{
-//		mv->m_nOldButtons |= IN_DUCK;
-//	}
-//	else
-//	{
-//		mv->m_nOldButtons &= ~IN_DUCK;
-//	}
-//
-//	// Handle death.
-//	if ( IsDead() )
-//		return;
-//
-//	// Slow down ducked players.
-//	HandleDuckingSpeedCrop();
-//
-//	// If the player is holding down the duck button, the player is in duck transition, ducking, or duck-jumping.
-//	if ( ( mv->m_nButtons & IN_DUCK ) || player->m_Local.m_bDucking  || bInDuck || bDuckJump )
-//	{
-//		// DUCK
-//		if ( ( mv->m_nButtons & IN_DUCK ) || bDuckJump )
-//		{
-//// XBOX SERVER ONLY
-//#if !defined(CLIENT_DLL)
-//			if ( IsX360() && buttonsPressed & IN_DUCK )
-//			{
-//				// Hinting logic
-//				if ( player->GetToggledDuckState() && player->m_nNumCrouches < NUM_CROUCH_HINTS )
-//				{
-//					UTIL_HudHintText( player, "#Valve_Hint_Crouch" );
-//					player->m_nNumCrouches++;
-//				}
-//			}
-//#endif
-//			// Have the duck button pressed, but the player currently isn't in the duck position.
-//			if ( ( buttonsPressed & IN_DUCK ) && !bInDuck && !bDuckJump && !bDuckJumpTime )
-//			{
-//				player->m_Local.m_flDucktime = GAMEMOVEMENT_DUCK_TIME;
-//				player->m_Local.m_bDucking = true;
-//			}
-//			
-//			// The player is in duck transition and not duck-jumping.
-//			if ( player->m_Local.m_bDucking && !bDuckJump && !bDuckJumpTime )
-//			{
-//				float flDuckMilliseconds = MAX( 0.0f, GAMEMOVEMENT_DUCK_TIME - ( float )player->m_Local.m_flDucktime );
-//				float flDuckSeconds = flDuckMilliseconds * 0.001f;
-//				
-//				// Finish in duck transition when transition time is over, in "duck", in air.
-//				if ( ( flDuckSeconds > TIME_TO_DUCK ) || bInDuck || bInAir )
-//				{
-//					FinishDuck();
-//				}
-//				else
-//				{
-//					// Calc parametric time
-//					float flDuckFraction = SimpleSpline( flDuckSeconds / TIME_TO_DUCK );
-//					SetDuckedEyeOffset( flDuckFraction );
-//				}
-//			}
-//
-//			if ( bDuckJump )
-//			{
-//				// Make the bounding box small immediately.
-//				if ( !bInDuck )
-//				{
-//					StartUnDuckJump();
-//				}
-//				else
-//				{
-//					// Check for a crouch override.
-//					if ( !( mv->m_nButtons & IN_DUCK ) )
-//					{
-//						trace_t trace;
-//						if ( CanUnDuckJump( trace ) )
-//						{
-//							FinishUnDuckJump( trace );
-//							player->m_Local.m_flDuckJumpTime = ( GAMEMOVEMENT_TIME_TO_UNDUCK * ( 1.0f - trace.fraction ) ) + GAMEMOVEMENT_TIME_TO_UNDUCK_INV;
-//						}
-//					}
-//				}
-//			}
-//		}
-//		// UNDUCK (or attempt to...)
-//		else
-//		{
-//			if ( player->m_Local.m_bInDuckJump )
-//			{
-//				// Check for a crouch override.
-//   				if ( !( mv->m_nButtons & IN_DUCK ) )
-//				{
-//					trace_t trace;
-//					if ( CanUnDuckJump( trace ) )
-//					{
-//						FinishUnDuckJump( trace );
-//					
-//						if ( trace.fraction < 1.0f )
-//						{
-//							player->m_Local.m_flDuckJumpTime = ( GAMEMOVEMENT_TIME_TO_UNDUCK * ( 1.0f - trace.fraction ) ) + GAMEMOVEMENT_TIME_TO_UNDUCK_INV;
-//						}
-//					}
-//				}
-//				else
-//				{
-//					player->m_Local.m_bInDuckJump = false;
-//				}
-//			}
-//
-//			if ( bDuckJumpTime )
-//				return;
-//
-//			// Try to unduck unless automovement is not allowed
-//			// NOTE: When not onground, you can always unduck
-//			if ( player->m_Local.m_bAllowAutoMovement || bInAir || player->m_Local.m_bDucking )
-//			{
-//				// We released the duck button, we aren't in "duck" and we are not in the air - start unduck transition.
-//				if ( ( buttonsReleased & IN_DUCK ) )
-//				{
-//					if ( bInDuck && !bDuckJump )
-//					{
-//						player->m_Local.m_flDucktime = GAMEMOVEMENT_DUCK_TIME;
-//					}
-//					else if ( player->m_Local.m_bDucking && !player->m_Local.m_bDucked )
-//					{
-//						// Invert time if release before fully ducked!!!
-//						float unduckMilliseconds = 1000.0f * TIME_TO_UNDUCK;
-//						float duckMilliseconds = 1000.0f * TIME_TO_DUCK;
-//						float elapsedMilliseconds = GAMEMOVEMENT_DUCK_TIME - player->m_Local.m_flDucktime;
-//
-//						float fracDucked = elapsedMilliseconds / duckMilliseconds;
-//						float remainingUnduckMilliseconds = fracDucked * unduckMilliseconds;
-//
-//						player->m_Local.m_flDucktime = GAMEMOVEMENT_DUCK_TIME - unduckMilliseconds + remainingUnduckMilliseconds;
-//					}
-//				}
-//				
-//
-//				// Check to see if we are capable of unducking.
-//				if ( CanUnduck() )
-//				{
-//					// or unducking
-//					if ( ( player->m_Local.m_bDucking || player->m_Local.m_bDucked ) )
-//					{
-//						float flDuckMilliseconds = MAX( 0.0f, GAMEMOVEMENT_DUCK_TIME - (float)player->m_Local.m_flDucktime );
-//						float flDuckSeconds = flDuckMilliseconds * 0.001f;
-//						
-//						// Finish ducking immediately if duck time is over or not on ground
-//						if ( flDuckSeconds > TIME_TO_UNDUCK || ( bInAir && !bDuckJump ) )
-//						{
-//							FinishUnDuck();
-//						}
-//						else
-//						{
-//							// Calc parametric time
-//							float flDuckFraction = SimpleSpline( 1.0f - ( flDuckSeconds / TIME_TO_UNDUCK ) );
-//							SetDuckedEyeOffset( flDuckFraction );
-//							player->m_Local.m_bDucking = true;
-//						}
-//					}
-//				}
-//				else
-//				{
-//					// Still under something where we can't unduck, so make sure we reset this timer so
-//					//  that we'll unduck once we exit the tunnel, etc.
-//					if ( player->m_Local.m_flDucktime != GAMEMOVEMENT_DUCK_TIME )
-//					{
-//						SetDuckedEyeOffset(1.0f);
-//						player->m_Local.m_flDucktime = GAMEMOVEMENT_DUCK_TIME;
-//						player->m_Local.m_bDucked = true;
-//						player->m_Local.m_bDucking = false;
-//						player->AddFlag( FL_DUCKING );
-//					}
-//				}
-//			}
-//		}
-//	}
-//	// HACK: (jimd 5/25/2006) we have a reoccuring bug (#50063 in Tracker) where the player's
-//	// view height gets left at the ducked height while the player is standing, but we haven't
-//	// been  able to repro it to find the cause.  It may be fixed now due to a change I'm
-//	// also making in UpdateDuckJumpEyeOffset but just in case, this code will sense the 
-//	// problem and restore the eye to the proper position.  It doesn't smooth the transition,
-//	// but it is preferable to leaving the player's view too low.
-//	//
-//	// If the player is still alive and not an observer, check to make sure that
-//	// his view height is at the standing height.
-//	else if ( !IsDead() && !player->IsObserver() && !player->IsInAVehicle() )
-//	{
-//		if ( ( player->m_Local.m_flDuckJumpTime == 0.0f ) && ( fabs(player->GetViewOffset().z - GetPlayerViewOffset( false ).z) > 0.1 ) )
-//		{
-//			// we should rarely ever get here, so assert so a coder knows when it happens
-//			Assert(0);
-//			DevMsg( 1, "Restoring player view height\n" );
-//
-//			// set the eye height to the non-ducked height
-//			SetDuckedEyeOffset(0.0f);
-//		}
-//	}
+			// set the eye height to the non-ducked height
+			SetDuckedEyeOffset(0.0f);
+		}
+	}
 }
 
 static ConVar sv_optimizedmovement( "sv_optimizedmovement", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY );
-
+#ifdef FF
 //-----------------------------------------------------------------------------
 // Purpose: Movement while building in Fortress Forever
 //-----------------------------------------------------------------------------
@@ -4936,7 +4906,7 @@ void CGameMovement::FullBuildMove( void )
 {
 	// Do nothing, super class does the work.
 }
-
+#endif
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -5006,9 +4976,8 @@ void CGameMovement::PlayerMove( void )
 
 	// If statement modifed by Mulch so players don't
 	// get randomly stuck on ladders while flying around in observer mode
-
-	// Don't run ladder code if dead or on a train
-	if ( !player->pl.deadflag && !(player->GetFlags() & FL_ONTRAIN) && (player->GetMoveType() != MOVETYPE_OBSERVER) )
+	// Don't run ladder code if dead on on a train
+	if ( !player->pl.deadflag && !(player->GetFlags() & FL_ONTRAIN) && ( player->GetMoveType() != MOVETYPE_OBSERVER ) )
 	{
 		// If was not on a ladder now, but was on one before, 
 		//  get off of the ladder
