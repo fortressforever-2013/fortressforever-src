@@ -2240,7 +2240,7 @@ void CFFPlayer::CreateRagdollEntity(const CTakeDamageInfo *info)
 		pRagdoll->SetEffectEntity( pRagdollFlame );
 
 		//set the same lifetime the same as the ragdoll itself!
-		pRagdollFlame->SetLifetime( 5.0f );
+		pRagdollFlame->SetLifetime( 15.0f );
 	}
 
 	// not everything that gets here has an info
@@ -2256,7 +2256,7 @@ void CFFPlayer::CreateRagdollEntity(const CTakeDamageInfo *info)
 	}
 
 	// remove the ragdoll after a time
-	pRagdoll->SetNextThink( gpGlobals->curtime + 5.0f );
+	pRagdoll->SetNextThink( gpGlobals->curtime + 15.0f );
 	pRagdoll->SetThink( &CBaseEntity::SUB_Remove );
 
 	// ragdolls will be removed on round restart automatically
