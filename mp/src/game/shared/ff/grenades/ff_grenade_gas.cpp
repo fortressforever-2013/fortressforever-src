@@ -168,7 +168,7 @@ PRECACHE_WEAPON_REGISTER( ff_grenade_gas );
 		//}
 
 		// Been detonated for 10 secs now, so fade out
-		if (gpGlobals->curtime > m_flDetonateTime + 10.0f)
+		if (gpGlobals->curtime > m_flDetonateTime + 7.0f)
 		{
 			SetThink(&CBaseGrenade::SUB_FadeOut);
 		}		
@@ -189,7 +189,7 @@ PRECACHE_WEAPON_REGISTER( ff_grenade_gas );
 				m_vecLastPosition = GetAbsOrigin();
 			}
 
-			m_flNextHurt = gpGlobals->curtime + 0.2f;
+			m_flNextHurt = gpGlobals->curtime + 1.0f;
 
 			// If we were idling, deploy
 			if( m_Activity == ACT_GAS_IDLE )
@@ -226,6 +226,9 @@ PRECACHE_WEAPON_REGISTER( ff_grenade_gas );
 					continue;
 
 				pPlayer->Gas(10.0f, 10.0f, pGasser);
+
+				CTakeDamageInfo info(this, pGasser, 5.0f, DMG_DIRECT);
+				pPlayer->TakeDamage(info);
 			}
 		}
 
