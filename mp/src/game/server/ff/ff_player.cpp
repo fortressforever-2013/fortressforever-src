@@ -4014,14 +4014,14 @@ void CFFPlayer::StatusEffectsThink( void )
 				CFFPlayer *pGasser = GetGasser();
 				if( pGasser )
 				{
-					CTakeDamageInfo info(pGasser, pGasser, vec3_origin, GetAbsOrigin(), 1.0f, DMG_DIRECT);
+					CTakeDamageInfo info(pGasser, pGasser, vec3_origin, GetAbsOrigin(), 0.0f, DMG_DIRECT); // 1.0f, no more DoT
 					info.SetDamageCustom(DAMAGETYPE_GASSED);
 
 					TakeDamage(info);
 				}
 				else //must be lua set...
 				{
-					CTakeDamageInfo info(this, this, vec3_origin, GetAbsOrigin(), 1.0f, DMG_DIRECT);
+					CTakeDamageInfo info(this, this, vec3_origin, GetAbsOrigin(), 0.0f, DMG_DIRECT); // 1.0f, no more DoT
 					info.SetDamageCustom(DAMAGETYPE_GASSED);
 
 					TakeDamage(info);
