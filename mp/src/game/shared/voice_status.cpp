@@ -238,12 +238,13 @@ void CVoiceStatus::DrawHeadLabels()
 		if( pPlayer->IsPlayerDead() )
 			continue;
 #ifdef FF
-		C_FFPlayer* pLocalPlayer = dynamic_cast<C_FFPlayer*>(C_BasePlayer::GetLocalPlayer());
-		if (!pLocalPlayer)
+		C_FFPlayer *pLocalPlayer = dynamic_cast<C_FFPlayer*>(C_BasePlayer::GetLocalPlayer());
+		if ( !pLocalPlayer )
 			continue;
 
 		// Don't show an icon for cloaked enemies
-		if (pPlayer->IsCloaked() && (FFGameRules()->PlayerRelationship(pPlayer, pLocalPlayer) == GR_NOTTEAMMATE))
+		if ( pPlayer->IsCloaked()
+		&& ( FFGameRules()->PlayerRelationship( pPlayer, pLocalPlayer) == GR_NOTTEAMMATE ) )
 			continue;
 #endif
 		// Place it 20 units above his head.

@@ -36,7 +36,7 @@ public:
 	DECLARE_NETWORKCLASS(); 
 	DECLARE_PREDICTABLE();
 
-#if !defined( CLIENT_DLL ) || defined( SDK2013CE )
+#ifndef CLIENT_DLL || defined( SDK2013CE )
 	DECLARE_ACTTABLE();
 #endif
 

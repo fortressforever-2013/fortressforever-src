@@ -334,7 +334,7 @@ bool CTraceFilterSimple::ShouldHitEntity( IHandleEntity *pHandleEntity, int cont
 	// Don't test if the game code tells us we should ignore this collision...
 	CBaseEntity *pEntity = EntityFromEntityHandle( pHandleEntity );
 #ifdef FF
-	const CBaseEntity* pPassEnt = NULL;
+	const CBaseEntity *pPassEnt = NULL;
 	if (m_pPassEnt)
 		pPassEnt = EntityFromEntityHandle(m_pPassEnt);
 
@@ -407,7 +407,7 @@ bool CTraceFilterSimple::ShouldHitEntity( IHandleEntity *pHandleEntity, int cont
 				{
 					if (pPassEnt->IsPlayer())
 					{
-						CFFPlayer* pPassPlayer = static_cast<CFFPlayer*>(const_cast<CBaseEntity*>(pPassEnt));
+						CFFPlayer *pPassPlayer = static_cast<CFFPlayer*>(const_cast<CBaseEntity*>(pPassEnt));
 
 						if (pPassPlayer && pPassPlayer->IsDisguised())
 							iPassTeam = pPassPlayer->GetDisguisedTeam();
@@ -415,7 +415,7 @@ bool CTraceFilterSimple::ShouldHitEntity( IHandleEntity *pHandleEntity, int cont
 
 					if (pEntity->IsPlayer())
 					{
-						CFFPlayer* pHandlePlayer = ToFFPlayer(pEntity);
+						CFFPlayer *pHandlePlayer = ToFFPlayer(pEntity);
 
 						if (pHandlePlayer && pHandlePlayer->IsDisguised())
 							iHandleTeam = pHandlePlayer->GetDisguisedTeam();
@@ -427,7 +427,7 @@ bool CTraceFilterSimple::ShouldHitEntity( IHandleEntity *pHandleEntity, int cont
 					// If either of the entities are moving fast enough, then just ignore teammates entirely
 					if (pPassEnt->IsPlayer())
 					{
-						CFFPlayer* pPlayer = ToFFPlayer(const_cast<CBaseEntity*>(pPassEnt));
+						CFFPlayer *pPlayer = ToFFPlayer(const_cast<CBaseEntity*>(pPassEnt));
 						if (pPlayer)
 						{
 							float speed = pPlayer->GetMovementSpeed();
@@ -437,7 +437,7 @@ bool CTraceFilterSimple::ShouldHitEntity( IHandleEntity *pHandleEntity, int cont
 					}
 					if (pEntity->IsPlayer())
 					{
-						CFFPlayer* pPlayer = ToFFPlayer(const_cast<CBaseEntity*>(pPassEnt));
+						CFFPlayer *pPlayer = ToFFPlayer(const_cast<CBaseEntity*>(pPassEnt));
 						if (pPlayer)
 						{
 							float speed = pPlayer->GetMovementSpeed();
@@ -453,7 +453,7 @@ bool CTraceFilterSimple::ShouldHitEntity( IHandleEntity *pHandleEntity, int cont
 					Vector vecMin;
 					if (pPassEnt->IsPlayer())
 					{
-						CFFPlayer* pPlayer = static_cast<CFFPlayer*>(const_cast<CBaseEntity*>(pPassEnt));
+						CFFPlayer *pPlayer = static_cast<CFFPlayer*>(const_cast<CBaseEntity*>(pPassEnt));
 						vecMin = pPlayer->GetPlayerMins();
 					}
 					else
@@ -462,7 +462,7 @@ bool CTraceFilterSimple::ShouldHitEntity( IHandleEntity *pHandleEntity, int cont
 					Vector vecTeamMax;
 					if (pEntity->IsPlayer())
 					{
-						CFFPlayer* pPlayer = static_cast<CFFPlayer*>(pEntity);
+						CFFPlayer *pPlayer = static_cast<CFFPlayer*>(pEntity);
 						vecTeamMax = pPlayer->GetPlayerMaxs();
 					}
 					else
@@ -478,7 +478,7 @@ bool CTraceFilterSimple::ShouldHitEntity( IHandleEntity *pHandleEntity, int cont
 					if (vecMin[2] > vecTeamMax[2] - 5.0f)
 					{
 						// If a player is jumping through an entity to the top make sure they don't get stuck
-						CBaseEntity* pEnt = const_cast<CBaseEntity*>(pPassEnt);
+						CBaseEntity *pEnt = const_cast<CBaseEntity*>(pPassEnt);
 						pEnt->SetAbsOrigin(Vector(vecOrigin[0], vecOrigin[1], vecTeamMax[2] - fMinZ));
 					}
 
@@ -496,7 +496,7 @@ bool CTraceFilterSimple::ShouldHitEntity( IHandleEntity *pHandleEntity, int cont
 #ifdef _DEBUG
 			Assert(dynamic_cast<CFFTriggerClip*>(pHandle) != 0);
 #endif
-			CFFTriggerClip* pTriggerClip = static_cast<CFFTriggerClip*>(pEntity);
+			CFFTriggerClip *pTriggerClip = static_cast<CFFTriggerClip*>(pEntity);
 			if (pTriggerClip && pTriggerClip->GetClipMask())
 			{
 				if (pPassEnt)
@@ -527,7 +527,7 @@ bool CTraceFilterSimple::ShouldHitEntity( IHandleEntity *pHandleEntity, int cont
 					// Buildables
 					else if (FF_IsBuildableObject(const_cast<CBaseEntity*>(pPassEnt)))
 					{
-						CFFBuildableObject* pBuildable = FF_ToBuildableObject(const_cast<CBaseEntity*>(pPassEnt));
+						CFFBuildableObject *pBuildable = FF_ToBuildableObject(const_cast<CBaseEntity*>(pPassEnt));
 						if (!pBuildable)
 							return false;
 
@@ -550,7 +550,7 @@ bool CTraceFilterSimple::ShouldHitEntity( IHandleEntity *pHandleEntity, int cont
 					else if (pPassEnt->GetFlags() & FL_GRENADE)
 					{
 						// Get owner so we can get its team number
-						CBaseEntity* pOwner = pPassEnt->GetOwnerEntity();
+						CBaseEntity *pOwner = pPassEnt->GetOwnerEntity();
 						if (!pOwner)
 							return false;
 
@@ -562,7 +562,7 @@ bool CTraceFilterSimple::ShouldHitEntity( IHandleEntity *pHandleEntity, int cont
 					else if (const_cast<CBaseEntity*>(pPassEnt)->Classify() == CLASS_BACKPACK)
 					{
 						// Get owner so we can get its team number
-						CBaseEntity* pOwner = pPassEnt->GetOwnerEntity();
+						CBaseEntity *pOwner = pPassEnt->GetOwnerEntity();
 						if (!pOwner)
 							return false;
 
@@ -599,7 +599,7 @@ bool CTraceFilterSimple::ShouldHitEntity( IHandleEntity *pHandleEntity, int cont
 					else
 					{
 						// Get owner so we can get its team number
-						CBaseEntity* pOwner = pPassEnt->GetOwnerEntity();
+						CBaseEntity *pOwner = pPassEnt->GetOwnerEntity();
 						if (!pOwner)
 							return false;
 
@@ -1623,31 +1623,105 @@ CBasePlayer* UTIL_PlayerByUserId( int userID )
 // HPE_BEGIN:
 // [menglish] Added UTIL function for events in client win_panel which transmit the player as a user ID
 //=============================================================================
-
-	CBasePlayer* UTIL_PlayerByUserId( int userID )
+CBasePlayer *UTIL_PlayerByUserId( int userID )
+{
+	for (int i = 1; i<=gpGlobals->maxClients; i++ )
 	{
-		for (int i = 1; i<=gpGlobals->maxClients; i++ )
+		CBasePlayer *pPlayer = UTIL_PlayerByIndex( i );
+
+		if ( !pPlayer )
+			continue;
+
+		if ( pPlayer->GetUserID() == userID )
 		{
-			CBasePlayer *pPlayer = UTIL_PlayerByIndex( i );
-
-			if ( !pPlayer )
-				continue;
-
-			if ( pPlayer->GetUserID() == userID )
-			{
-				return pPlayer;
-			}
+			return pPlayer;
 		}
-
-		return NULL;
 	}
+
+	return NULL;
+}
 
 //=============================================================================
 // HPE_END
 //=============================================================================
 #endif
 
+#ifdef CLIENT_DLL
+char *UTIL_GetFilteredPlayerName( int iPlayerIndex, char *pszName )
+{
+	CSteamID steamIDPlayer;
+	CBasePlayer *pPlayer = UTIL_PlayerByIndex( iPlayerIndex );
+	if ( pPlayer )
+	{
+		pPlayer->GetSteamID( &steamIDPlayer );
+	}
+	return UTIL_GetFilteredPlayerName( steamIDPlayer, pszName );
+}
 
+
+char *UTIL_GetFilteredPlayerName( const CSteamID &steamID, char *pszName )
+{
+	if ( !pszName )
+	{
+		pszName = "";
+	}
+
+	if ( SteamUtils() )
+	{
+		SteamUtils()->FilterText( k_ETextFilteringContextName, steamID, pszName, pszName, MAX_PLAYER_NAME_LENGTH );
+	}
+	return pszName;
+}
+
+
+wchar_t *UTIL_GetFilteredPlayerNameAsWChar( int iPlayerIndex, const char *pszName, wchar_t *pwszName )
+{
+	CSteamID steamIDPlayer;
+	CBasePlayer *pPlayer = UTIL_PlayerByIndex( iPlayerIndex );
+	if ( pPlayer )
+	{
+		pPlayer->GetSteamID( &steamIDPlayer );
+	}
+	return UTIL_GetFilteredPlayerNameAsWChar( steamIDPlayer, pszName, pwszName );
+}
+
+
+wchar_t *UTIL_GetFilteredPlayerNameAsWChar( const CSteamID &steamID, const char *pszName, wchar_t *pwszName )
+{
+	if ( !pszName )
+	{
+		pszName = "";
+	}
+
+	if ( SteamUtils() )
+	{
+		char szName[ MAX_PLAYER_NAME_LENGTH ];
+		SteamUtils()->FilterText( k_ETextFilteringContextName, steamID, pszName, szName, sizeof( szName ) );
+		g_pVGuiLocalize->ConvertANSIToUnicode( szName, pwszName, MAX_PLAYER_NAME_LENGTH * sizeof( wchar_t ) );
+	}
+	else
+	{
+		g_pVGuiLocalize->ConvertANSIToUnicode( pszName, pwszName, MAX_PLAYER_NAME_LENGTH * sizeof( wchar_t ) );
+	}
+	return pwszName;
+}
+
+
+char *UTIL_GetFilteredChatText( int iPlayerIndex, char *pszText, int nTextBufferSize )
+{
+	if ( SteamUtils() )
+	{
+		CSteamID steamIDPlayer;
+		CBasePlayer *pPlayer = UTIL_PlayerByIndex( iPlayerIndex );
+		if ( pPlayer )
+		{
+			pPlayer->GetSteamID( &steamIDPlayer );
+		}
+		SteamUtils()->FilterText( k_ETextFilteringContextChat, steamIDPlayer, pszText, pszText, nTextBufferSize );
+	}
+	return pszText;
+}
+#endif // CLIENT_DLL
 
 char* ReadAndAllocStringValue( KeyValues *pSub, const char *pName, const char *pFilename )
 {

@@ -136,7 +136,11 @@ public:
 
 // Client damage rules
 	virtual float FlPlayerFallDamage( CBasePlayer *pPlayer );
+#ifndef FF
+	virtual bool  FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker, const CTakeDamageInfo &info );
+#else
 	virtual bool  FCanTakeDamage( CBaseEntity *pVictim, CBaseEntity *pAttacker, const CTakeDamageInfo &info );
+#endif
 	virtual bool AllowDamage( CBaseEntity *pVictim, const CTakeDamageInfo &info );
 
 // Client spawn/respawn control

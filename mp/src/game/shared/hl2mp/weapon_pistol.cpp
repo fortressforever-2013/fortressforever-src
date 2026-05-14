@@ -95,7 +95,7 @@ public:
 		return 0.5f; 
 	}
 	
-#if !defined( CLIENT_DLL ) || defined( SDK2013CE )
+#ifndef CLIENT_DLL || defined( SDK2013CE )
 	DECLARE_ACTTABLE();
 #endif
 
@@ -137,7 +137,7 @@ END_PREDICTION_DATA()
 LINK_ENTITY_TO_CLASS( weapon_pistol, CWeaponPistol );
 PRECACHE_WEAPON_REGISTER( weapon_pistol );
 
-#if !defined( CLIENT_DLL ) || defined( SDK2013CE )
+#ifndef CLIENT_DLL || defined( SDK2013CE )
 acttable_t CWeaponPistol::m_acttable[] = 
 {
 #ifdef SDK2013CE

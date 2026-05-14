@@ -906,7 +906,7 @@ public:
 
 		// HACK:  we have to stop all sounds if there are > 1 in the rndwave section...
 		int c = params->NumSoundNames();
-		for (int i = 0; i < c; ++i)
+		for ( int i = 0; i < c; ++i )
 		{
 			char const *wavename = soundemitterbase->GetWaveName( params->GetSoundNames()[ i ].symbol );
 			Assert( wavename );
@@ -924,7 +924,7 @@ public:
 	// Jon: so we can stop sounds in a specific channel that's different from what the script defines
 	void StopSoundInChannel( int entindex, const char *soundname, const int channel )
 	{
-		int soundindex = soundemitterbase->GetSoundIndex(soundname);
+		int soundindex = soundemitterbase->GetSoundIndex( soundname );
 		if ( soundindex == -1 )
 		{
 			return;

@@ -344,16 +344,14 @@ void CBaseGrenade::PreDetonate( void )
 
 void CBaseGrenade::Detonate( void )
 {
-
-#ifdef GAME_DLL
+#ifdef FF
 	// Verify our owner is still here!
-	if (!GetOwnerEntity())
+	if ( !GetOwnerEntity() )
 	{
 		Remove();
 		return;
 	}
 #endif
-
 	trace_t		tr;
 	Vector		vecSpot;// trace starts here!
 
@@ -389,13 +387,14 @@ void CBaseGrenade::Detonate( void )
 // 
 void CBaseGrenade::ExplodeTouch( CBaseEntity *pOther )
 {
+#ifdef FF
 	// Verify our owner is still here!
-	if (!GetOwnerEntity())
+	if ( !GetOwnerEntity() )
 	{
 		Remove();
 		return;
 	}
-
+#endif
 	trace_t		tr;
 	Vector		vecSpot;// trace starts here!
 
@@ -404,7 +403,7 @@ void CBaseGrenade::ExplodeTouch( CBaseEntity *pOther )
 		return;
 
 	// --> Mirv: Check collision rules first
-	if (!g_pGameRules->ShouldCollide(GetCollisionGroup(), pOther->GetCollisionGroup()))
+	if ( !g_pGameRules->ShouldCollide( GetCollisionGroup(), pOther->GetCollisionGroup() ) )
 		return;
 	// <-- Mirv: Check collision rules first
 
@@ -418,7 +417,7 @@ void CBaseGrenade::ExplodeTouch( CBaseEntity *pOther )
 #else
 	UTIL_TraceLine( vecSpot, vecSpot + velDir * 64, MASK_SHOT_HULL, this, COLLISION_GROUP_NONE, &tr );
 
-	if (FF_IsAirshot(pOther))
+	if ( FF_IsAirshot( pOther ) )
 		m_iDamageType |= DMG_AIRSHOT;
 
 	Explode( &tr, m_iDamageType );
@@ -449,13 +448,14 @@ void CBaseGrenade::DangerSoundThink( void )
 
 void CBaseGrenade::BounceTouch( CBaseEntity *pOther )
 {
+#ifdef FF
 	// Verify our owner is still here!
-	if (!GetOwnerEntity())
+	if ( !GetOwnerEntity() )
 	{
 		Remove();
 		return;
 	}
-
+#endif
 	if ( pOther->IsSolidFlagSet(FSOLID_TRIGGER | FSOLID_VOLUME_CONTENTS) )
 		return;
 
@@ -528,13 +528,14 @@ void CBaseGrenade::BounceTouch( CBaseEntity *pOther )
 
 void CBaseGrenade::SlideTouch( CBaseEntity *pOther )
 {
+#ifdef FF
 	// Verify our owner is still here!
-	if (!GetOwnerEntity())
+	if ( !GetOwnerEntity() )
 	{
 		Remove();
 		return;
 	}
-
+#endif
 	// don't hit the guy that launched this grenade
 	if ( pOther == GetThrower() )
 		return;
@@ -564,14 +565,14 @@ void CBaseGrenade ::BounceSound( void )
 
 void CBaseGrenade ::TumbleThink( void )
 {
+#ifdef FF
 	// Verify our owner is still here!
-	if (!GetOwnerEntity())
+	if ( !GetOwnerEntity() )
 	{
 		Remove();
 		return;
 	}
-
-
+#endif
 	if (!IsInWorld())
 	{
 		Remove( );

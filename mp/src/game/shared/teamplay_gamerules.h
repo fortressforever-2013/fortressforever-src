@@ -68,7 +68,11 @@ public:
 	virtual bool ClientCommand( CBaseEntity *pEdict, const CCommand &args );
 	virtual void ClientSettingsChanged( CBasePlayer *pPlayer );
 	virtual bool IsTeamplay( void );
+#ifndef FF
+	virtual bool FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker, const CTakeDamageInfo &info );
+#else
 	virtual bool FCanTakeDamage( CBaseEntity *pVictim, CBaseEntity *pAttacker, const CTakeDamageInfo &info );
+#endif
 	virtual int PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarget );
 	virtual bool PlayerCanHearChat( CBasePlayer *pListener, CBasePlayer *pSpeaker );
 	virtual const char *GetTeamID( CBaseEntity *pEntity );
@@ -76,8 +80,12 @@ public:
 	virtual int IPointsForKill( CBasePlayer *pAttacker, CBasePlayer *pKilled );
 	virtual void InitHUD( CBasePlayer *pl );
 	virtual void DeathNotice( CBasePlayer *pVictim, const CTakeDamageInfo &info );
+#ifndef FF
+	virtual const char *GetGameDescription( void ) { return "Teamplay"; }  // this is the game name that gets seen in the server browser
+#else
 	virtual const char *GetGameDescription( void ) { if (*m_szGameDescription) { return m_szGameDescription; } else { return "Fortress Forever"; } }  // this is the game name that gets seen in the server browser
 	virtual void SetGameDescription( const char *szGameDescription ) { Q_snprintf(m_szGameDescription, sizeof(m_szGameDescription), "FF %s", szGameDescription); }  // this is the game name that gets seen in the server browser
+#endif
 	virtual void PlayerKilled( CBasePlayer *pVictim, const CTakeDamageInfo &info );
 	virtual void Think ( void );
 	virtual int GetTeamIndex( const char *pTeamName );

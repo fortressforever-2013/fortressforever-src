@@ -45,38 +45,38 @@ ConVar log_verbose_interval( "log_verbose_interval", "3.0", FCVAR_GAMEDLL, "Dete
 #endif // CLIENT_DLL
 
 // --> Mirv: Changed some of the values
-//static CViewVectors g_DefaultViewVectors(
-//	Vector( 0, 0, 64 ),			//VEC_VIEW (m_vView)
-//								
-//	Vector(-16, -16, 0 ),		//VEC_HULL_MIN (m_vHullMin)
-//	Vector( 16,  16,  72 ),		//VEC_HULL_MAX (m_vHullMax)
-//													
-//	Vector(-16, -16, 0 ),		//VEC_DUCK_HULL_MIN (m_vDuckHullMin)
-//	Vector( 16,  16,  36 ),		//VEC_DUCK_HULL_MAX	(m_vDuckHullMax)
-//	Vector( 0, 0, 28 ),			//VEC_DUCK_VIEW		(m_vDuckView)
-//													
-//	Vector(-10, -10, -10 ),		//VEC_OBS_HULL_MIN	(m_vObsHullMin)
-//	Vector( 10,  10,  10 ),		//VEC_OBS_HULL_MAX	(m_vObsHullMax)
-//													
-//	Vector( 0, 0, 14 )			//VEC_DEAD_VIEWHEIGHT (m_vDeadViewHeight)
-//);													
 static CViewVectors g_DefaultViewVectors(
-	Vector(0, 0, 28),            // m_vView
+#ifndef FF
+	Vector( 0, 0, 64 ),			//VEC_VIEW (m_vView)
+								
+	Vector(-16, -16, 0 ),		//VEC_HULL_MIN (m_vHullMin)
+	Vector( 16,  16,  72 ),		//VEC_HULL_MAX (m_vHullMax)
+													
+	Vector(-16, -16, 0 ),		//VEC_DUCK_HULL_MIN (m_vDuckHullMin)
+	Vector( 16,  16,  36 ),		//VEC_DUCK_HULL_MAX	(m_vDuckHullMax)
+	Vector( 0, 0, 28 ),			//VEC_DUCK_VIEW		(m_vDuckView)
+													
+	Vector(-10, -10, -10 ),		//VEC_OBS_HULL_MIN	(m_vObsHullMin)
+	Vector( 10,  10,  10 ),		//VEC_OBS_HULL_MAX	(m_vObsHullMax)
+													
+	Vector( 0, 0, 14 )			//VEC_DEAD_VIEWHEIGHT (m_vDeadViewHeight)
+#else
+	Vector( 0, 0, 28 ),			//VEC_VIEW (m_vView)
+								
+	Vector(-16, -16, -36 ),		//VEC_HULL_MIN (m_vHullMin)
+	Vector( 16,  16,  36 ),		//VEC_HULL_MAX (m_vHullMax)
+													
+	Vector(-16, -16, -18 ),		//VEC_DUCK_HULL_MIN (m_vDuckHullMin)
+	Vector( 16,  16,  18 ),		//VEC_DUCK_HULL_MAX	(m_vDuckHullMax)
+	Vector( 0, 0, 12 ),			//VEC_DUCK_VIEW		(m_vDuckView) // |-- Mirv: Changed from 28
 
-	Vector(-16, -16, -36),         // m_vHullMin
-	Vector(16, 16, 36),         // m_vHullMax
-
-	Vector(-16, -16, -18),         // m_vDuckHullMin
-	Vector(16, 16, 18),         // m_vDuckHullMax
-	Vector(0, 0, 12),            // m_vDuckView         // |-- Mirv: Changed from 28
-
-	Vector(-10, -10, -10),         // m_vObsHullMin
-	Vector(10, 10, 10),         // m_vObsHullMax
-
-	Vector(0, 0, -2)            // m_vDeadViewHeight
-);
-// <-- Mirv: Changed some of the values
-
+	Vector(-10, -10, -10 ),		//VEC_OBS_HULL_MIN	(m_vObsHullMin)
+	Vector( 10,  10,  10 ),		//VEC_OBS_HULL_MAX	(m_vObsHullMax)
+													
+	Vector( 0, 0, -2 )			//VEC_DEAD_VIEWHEIGHT (m_vDeadViewHeight)
+#endif // <-- Mirv: Changed some of the values
+);													
+													
 
 // ------------------------------------------------------------------------------------ //
 // CGameRulesProxy implementation.
@@ -869,10 +869,13 @@ bool CGameRules::ShouldCollide( int collisionGroup0, int collisionGroup1 )
 	if ( collisionGroup1 == COLLISION_GROUP_PROJECTILE )
 	{
 		if ( collisionGroup0 == COLLISION_GROUP_DEBRIS || 
-			collisionGroup0 == COLLISION_GROUP_PLAYER ||
 			collisionGroup0 == COLLISION_GROUP_WEAPON ||
+#ifdef FF
+			collisionGroup0 == COLLISION_GROUP_PLAYER ||
 			collisionGroup0 == COLLISION_GROUP_ROCKET ||
+#endif
 			collisionGroup0 == COLLISION_GROUP_PROJECTILE )
+#ifdef FF
 		{
 			return false;
 		}
@@ -895,6 +898,7 @@ bool CGameRules::ShouldCollide( int collisionGroup0, int collisionGroup1 )
 	{
 		if (collisionGroup0 == COLLISION_GROUP_DEBRIS ||
 			collisionGroup0 == COLLISION_GROUP_INTERACTIVE_DEBRIS)
+#endif
 		{
 			return false;
 		}

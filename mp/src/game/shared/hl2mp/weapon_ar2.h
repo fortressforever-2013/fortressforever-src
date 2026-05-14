@@ -71,11 +71,11 @@ private:
 
 protected:
 
-	float					m_flDelayedFire;
-	bool					m_bShotDelayed;
+	CNetworkVar( float,		m_flDelayedFire );
+	CNetworkVar( bool,		m_bShotDelayed );
 	int						m_nVentPose;
 	
-#if !defined( CLIENT_DLL ) || defined( SDK2013CE )
+#ifndef CLIENT_DLL || defined( SDK2013CE )
 	DECLARE_ACTTABLE();
 #endif
 };

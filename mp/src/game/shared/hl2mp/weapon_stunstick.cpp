@@ -58,7 +58,7 @@ public:
 	DECLARE_NETWORKCLASS(); 
 	DECLARE_PREDICTABLE();
 
-#if !defined( CLIENT_DLL ) || defined( SDK2013CE )
+#ifndef CLIENT_DLL || defined( SDK2013CE )
 	DECLARE_ACTTABLE();
 #endif
 
@@ -96,6 +96,8 @@ public:
 #endif
 	
 	float		GetDamageForActivity( Activity hitActivity );
+
+	virtual bool	PlayFleshyHittySoundOnHit() const { return true; }
 
 	CWeaponStunStick( const CWeaponStunStick & );
 
@@ -156,7 +158,7 @@ LINK_ENTITY_TO_CLASS( weapon_stunstick, CWeaponStunStick );
 PRECACHE_WEAPON_REGISTER( weapon_stunstick );
 
 
-#if !defined( CLIENT_DLL ) || defined( SDK2013CE )
+#ifndef CLIENT_DLL || defined( SDK2013CE )
 
 acttable_t	CWeaponStunStick::m_acttable[] = 
 {
@@ -470,11 +472,9 @@ void CWeaponStunStick::SetStunState( bool state )
 bool CWeaponStunStick::Deploy( void )
 {
 	SetStunState( true );
-#ifdef SDK2013CE
-#ifdef CLIENT_DLL
+#ifdef SDK2013CE && defined( CLIENT_DLL )
 	//Tony; we need to just do this
 	SetupAttachmentPoints();
-#endif
 #endif // SDK2013CE
 
 	return BaseClass::Deploy();

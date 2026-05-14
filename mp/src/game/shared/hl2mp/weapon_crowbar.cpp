@@ -45,7 +45,7 @@ END_PREDICTION_DATA()
 LINK_ENTITY_TO_CLASS( weapon_crowbar, CWeaponCrowbar );
 PRECACHE_WEAPON_REGISTER( weapon_crowbar );
 
-#if !defined( CLIENT_DLL ) || defined( SDK2013CE )
+#ifndef CLIENT_DLL || defined( SDK2013CE )
 
 acttable_t	CWeaponCrowbar::m_acttable[] = 
 {

@@ -354,22 +354,34 @@ bool CTeamplayRules::IsTeamplay( void )
 {
 	return true;
 }
-
+#ifndef FF
+bool CTeamplayRules::FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker, const CTakeDamageInfo &info )
+#else
 bool CTeamplayRules::FCanTakeDamage( CBaseEntity *pVictim, CBaseEntity *pAttacker, const CTakeDamageInfo &info )
+#endif
 {
-	if ( pAttacker && PlayerRelationship(pVictim, pAttacker ) == GR_TEAMMATE && !info.IsForceFriendlyFire() )
+#ifndef FF
+	if ( pAttacker && PlayerRelationship( pPlayer, pAttacker ) == GR_TEAMMATE && !info.IsForceFriendlyFire() )
+#else
+	if ( pAttacker && PlayerRelationship( pVictim, pAttacker ) == GR_TEAMMATE && !info.IsForceFriendlyFire() )
+#endif
 	{
-		// If friendly fire is off and I'm not attacking myself, then
-		// someone else on my team/an ally is attacking me - don't
-		// take damage
+		// my teammate or ally hit me. damage also isn't self-inflicted.
+#ifndef FF
 		if ( (friendlyfire.GetInt() == 0) && (pAttacker != pVictim) )
+#else
+		if ( (friendlyfire.GetInt() == 0) && (pAttacker != pPlayer) )
+#endif
 		{
 			// friendly fire is off, and this hit came from someone other than myself,  then don't get hurt
 			return false;
 		}
 	}
-
+#ifndef FF
+	return BaseClass::FPlayerCanTakeDamage( pPlayer, pAttacker, info );
+#else
 	return BaseClass::FCanTakeDamage( pVictim, pAttacker, info );
+#endif
 }
 
 //=========================================================

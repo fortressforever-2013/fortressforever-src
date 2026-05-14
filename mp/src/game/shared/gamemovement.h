@@ -21,7 +21,7 @@
 #ifndef FF
 #define GAMEMOVEMENT_DUCK_TIME				1000.0f		// ms
 #else
-#define GAMEMOVEMENT_DUCK_TIME					400.0f		// |-- Mirv: Inline with TFC value now
+#define GAMEMOVEMENT_DUCK_TIME				400.0f		// |-- Mirv: Inline with TFC value now
 #endif
 #define GAMEMOVEMENT_JUMP_TIME				510.0f		// ms approx - based on the 21 unit height jump
 #define GAMEMOVEMENT_JUMP_HEIGHT			21.0f		// units
@@ -187,11 +187,11 @@ protected:
 	virtual float	LadderLateralMultiplier( void ) const { return 1.0f; }
 
 	// See if the player has a bogus velocity value.
-#ifndef FF
-	void			CheckVelocity( void );
-#else
-	virtual void	CheckVelocity( void );
+#ifdef FF
+	virtual
 #endif
+	void			CheckVelocity( void );
+
 	// Does not change the entities velocity at all
 	void			PushEntity( Vector& push, trace_t *pTrace );
 

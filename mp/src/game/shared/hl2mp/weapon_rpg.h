@@ -247,7 +247,7 @@ public:
 
 	CBaseEntity *GetMissile( void ) { return m_hMissile; }
 
-#if !defined( CLIENT_DLL ) || defined( SDK2013CE )
+#ifndef CLIENT_DLL || defined( SDK2013CE )
 	DECLARE_ACTTABLE();
 #endif
 	

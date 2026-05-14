@@ -29,8 +29,11 @@ namespace vgui
 //-----------------------------------------------------------------------------
 // Purpose: displays the MOTD
 //-----------------------------------------------------------------------------
-
+#ifndef FF
+class CTextWindow : public vgui::Frame, public IViewPortPanel
+#else
 class CTextWindow : public vgui::Frame, public IViewPortPanel, public IGameEventListener2
+#endif
 {
 private:
 	DECLARE_CLASS_SIMPLE( CTextWindow, vgui::Frame );

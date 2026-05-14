@@ -350,16 +350,16 @@ bool CSpriteTrail::IsEnabledByClient( void )
 {
 	CBaseEntity *pParent = GetMoveParent();
 
-	if ( grenadetrails.GetBool() == false &&
-		pParent && pParent->Classify() >= CLASS_GREN && pParent->Classify() <= CLASS_GREN_LASER )
+	if ( grenadetrails.GetBool() == false && pParent
+		&& pParent->Classify() >= CLASS_GREN && pParent->Classify() <= CLASS_GREN_LASER )
 		return false;
 
-	if ( pipetrails.GetBool() == false &&
-		pParent && pParent->Classify() >= CLASS_PIPEBOMB && pParent->Classify() <= CLASS_GLGRENADE )
+	if ( pipetrails.GetBool() == false && pParent
+		&& pParent->Classify() >= CLASS_PIPEBOMB && pParent->Classify() <= CLASS_GLGRENADE )
 		return false;
 
-	if ( flagtrails.GetBool() == false &&
-		pParent && pParent->Classify() == CLASS_INFOSCRIPT )
+	if ( flagtrails.GetBool() == false && pParent
+		&& pParent->Classify() == CLASS_INFOSCRIPT )
 		return false;
 
 	return true;

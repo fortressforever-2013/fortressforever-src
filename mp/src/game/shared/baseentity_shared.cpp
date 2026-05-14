@@ -324,19 +324,19 @@ void CBaseEntity::ParseMapData( CEntityMapData *mapData )
 #ifdef FF_DLL
 	// setup the event action for the output
 	// this is necessary for routing the ouputs to lua
-	for (datamap_t* dmap = GetDataDescMap(); dmap != NULL; dmap = dmap->baseMap)
+	for ( datamap_t *dmap = GetDataDescMap(); dmap != NULL; dmap = dmap->baseMap )
 	{
 		// search through all the actions in the data description, looking for a match
-		for (int i = 0; i < dmap->dataNumFields; i++)
+		for ( int i = 0; i < dmap->dataNumFields; i++ )
 		{
-			if (dmap->dataDesc[i].flags & FTYPEDESC_OUTPUT)
+			if ( dmap->dataDesc[i].flags & FTYPEDESC_OUTPUT )
 			{
-				const char* szEntName = STRING(GetEntityName());
-				COutputEvent* pEvent = (COutputEvent*)(((int)this) + dmap->dataDesc[i].fieldOffset[TD_OFFSET_NORMAL]);
+				const char *szEntName = STRING( GetEntityName() );
+				COutputEvent *pEvent = (COutputEvent*)(((int)this) + dmap->dataDesc[i].fieldOffset[TD_OFFSET_NORMAL]);
 
 				char szEvent[2048];
-				Q_snprintf(szEvent, sizeof(szEvent), "%s,%s", szEntName, dmap->dataDesc[i].externalName);
-				pEvent->ParseEventAction(szEvent);
+				Q_snprintf( szEvent, sizeof(szEvent), "%s,%s", szEntName, dmap->dataDesc[i].externalName );
+				pEvent->ParseEventAction( szEvent );
 			}
 		}
 	}
@@ -683,14 +683,14 @@ void CBaseEntity::SetPredictionRandomSeed( const CUserCmd *cmd )
 // Purpose : Base implimentation for entity handling decals
 //------------------------------------------------------------------------------
 #ifdef FF
-ConVar	ffdev_disableentitydecals("ffdev_disableentitydecals", "1", FCVAR_CHEAT | FCVAR_REPLICATED);
+ConVar	ffdev_disableentitydecals( "ffdev_disableentitydecals", "1", FCVAR_CHEAT | FCVAR_REPLICATED );
 #endif
 void CBaseEntity::DecalTrace( trace_t *pTrace, char const *decalName )
 {
 #ifdef FF
-	if (ffdev_disableentitydecals.GetBool())
+	if ( ffdev_disableentitydecals.GetBool() )
 	{
-		if (Classify() != CLASS_NONE && Classify() < NUM_AI_CLASSES)
+		if ( Classify() != CLASS_NONE && Classify() < NUM_AI_CLASSES )
 			return;
 	}
 #endif
@@ -1641,7 +1641,7 @@ void CBaseEntity::FireBullets( const FireBulletsInfo_t &info )
 	int			nDamageType	= pAmmoDef->DamageType(info.m_iAmmoType);
 	int			nAmmoFlags	= pAmmoDef->Flags(info.m_iAmmoType);
 #ifdef FF
-	float		flDmg = (info.m_iShots ? info.m_flDamage / info.m_iShots : info.m_flDamage);	// |-- Mirv: Split damage up into shots
+	float		flDmg = ( info.m_iShots ? info.m_flDamage / info.m_iShots : info.m_flDamage );	// |-- Mirv: Split damage up into shots
 #endif
 	bool bDoServerEffects = true;
 
@@ -1700,7 +1700,7 @@ void CBaseEntity::FireBullets( const FireBulletsInfo_t &info )
 	CBulletsTraceFilter traceFilter( COLLISION_GROUP_NONE );
 #else
 	//Testing if this is what makes sentryguns not damage players with projectile clipping -Green Mushy
-	CTraceFilterSkipTwoEntities traceFilter(this, info.m_pAdditionalIgnoreEnt, COLLISION_GROUP_NONE /*COLLISION_GROUP_PROJECTILE*/);	// |-- Mirv: Count bullets as projectiles so they don't hit weapon bags
+	CTraceFilterSkipTwoEntities traceFilter( this, info.m_pAdditionalIgnoreEnt, COLLISION_GROUP_NONE /*COLLISION_GROUP_PROJECTILE*/ );	// |-- Mirv: Count bullets as projectiles so they don't hit weapon bags
 #endif
 	traceFilter.SetPassEntity( this ); // Standard pass entity for THIS so that it can be easily removed from the list after passing through a portal
 #ifndef FF
@@ -1873,7 +1873,7 @@ void CBaseEntity::FireBullets( const FireBulletsInfo_t &info )
 #ifndef FF
 		CTakeDamageInfo triggerInfo( pAttacker, pAttacker, info.m_flDamage, nDamageType );
 #else
-		CTakeDamageInfo triggerInfo(this, pAttacker, /*info.m_flDamage*/flDmg, nDamageType); // |-- Mirv: Split damage into shots
+		CTakeDamageInfo triggerInfo( this, pAttacker, /*info.m_flDamage*/flDmg, nDamageType ); // |-- Mirv: Split damage into shots
 #endif
 		CalculateBulletDamageForce( &triggerInfo, info.m_iAmmoType, vecDir, tr.endpos );
 		triggerInfo.ScaleDamageForce( info.m_flDamageForceScale );

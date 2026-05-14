@@ -61,7 +61,7 @@ public:
 	void DryFire( void );
 	virtual float GetFireRate( void ) { return 0.7; };
 
-#if !defined( CLIENT_DLL ) || defined( SDK2013CE )
+#ifndef CLIENT_DLL || defined( SDK2013CE )
 	DECLARE_ACTTABLE();
 #endif
 
@@ -99,7 +99,7 @@ END_PREDICTION_DATA()
 LINK_ENTITY_TO_CLASS( weapon_shotgun, CWeaponShotgun );
 PRECACHE_WEAPON_REGISTER(weapon_shotgun);
 
-#if !defined( CLIENT_DLL ) || defined( SDK2013CE )
+#ifndef CLIENT_DLL || defined( SDK2013CE )
 acttable_t	CWeaponShotgun::m_acttable[] = 
 {
 #ifdef SDK2013CE

@@ -126,16 +126,24 @@ CTextWindow::CTextWindow(IViewPort *pViewPort) : Frame(NULL, PANEL_INFO	)
 	m_pTextMessage = new TextEntry( this, "TextMessage" );
 	m_pHTMLMessage = new CMOTDHTML( this,"HTMLMessage" );
 	m_pTitleLabel  = new Label( this, "MessageTitle", "Message Title" );
+#ifndef FF
+	m_pOK		   = new Button(this, "ok", "#PropertyDialog_OK");
+#else
 	m_pOK		   = new FFButton(this, "ok", "#PropertyDialog_OK");
-
+#endif
 	m_pOK->SetCommand("okay");
 	m_pTextMessage->SetMultiline( true );
+#ifdef FF
 	m_pTextMessage->SetVerticalScrollbar(true);
 	m_pHTMLMessage->SetScrollbarsEnabled(false);
 
 	// to get server name
 	gameeventmanager->AddListener(this, "server_spawn", false);
+#endif
 	m_nContentType = TYPE_TEXT;
+#ifndef FF
+	Reset();
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -146,8 +154,11 @@ void CTextWindow::ApplySchemeSettings( IScheme *pScheme )
 	BaseClass::ApplySchemeSettings( pScheme );
 
 	LoadControlSettings("Resource/UI/TextWindow.res");
-
+#ifdef FF
 	Reset();
+#else
+	Update();
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -173,7 +184,11 @@ void CTextWindow::Reset( void )
 	//=============================================================================
 
 	m_nExitCommand = TEXTWINDOW_CMD_NONE;
+#ifdef FF
 	m_nContentType = TYPE_INDEX;
+#else
+	m_nContentType = TYPE_TEXT;
+#endif
 	m_bShownURL = false;
 	m_bUnloadOnDismissal = false;
 	Update();
@@ -222,11 +237,11 @@ void CTextWindow::ShowURL( const char *URL, bool bAllowUserToDisable )
 
 void CTextWindow::ShowIndex( const char *entry )
 {
-	if (NULL == g_pStringTableInfoPanel)
-		return;
-
 	const char *data = NULL;
 	int length = 0;
+
+	if ( NULL == g_pStringTableInfoPanel )
+		return;
 
 	int index = g_pStringTableInfoPanel->FindStringIndex( m_szMessage );
 		
@@ -234,11 +249,14 @@ void CTextWindow::ShowIndex( const char *entry )
 		data = (const char *)g_pStringTableInfoPanel->GetStringUserData( index, &length );
 
 	if ( !data || !data[0] )
+#ifndef FF
+		return; // nothing to show
+#else
 	{
-		ShowURL("http://www.fortress-forever.com/defaultmotd/");
+		ShowURL( "http://www.fortress-forever.com/defaultmotd/" );
 		return; // show default
 	}
-
+#endif
 	// is this a web URL ?
 	if ( !Q_strncmp( data, "http://", 7 ) || !Q_strncmp( data, "https://", 8 ) )
 	{

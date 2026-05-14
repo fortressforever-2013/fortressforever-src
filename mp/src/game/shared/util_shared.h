@@ -394,7 +394,7 @@ char *UTIL_GetFilteredChatText( int iPlayerIndex, char *pszText, int nTextBuffer
 // HPE_BEGIN:
 // [menglish] Added UTIL function for events in client win_panel which transmit the player as a user ID
 //=============================================================================
-CBasePlayer *UTIL_PlayerByUserId( int userID );
+CBasePlayer* UTIL_PlayerByUserId( int userID );
 
 //=============================================================================
 // HPE_END

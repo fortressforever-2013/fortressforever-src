@@ -672,7 +672,11 @@ ConVarRef suitcharger( "sk_suitcharger" );
 
 	//=========================================================
 	//=========================================================
+#ifndef FF
+	bool CMultiplayRules::FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker, const CTakeDamageInfo &info )
+#else
 	bool CMultiplayRules::FCanTakeDamage( CBaseEntity *pVictim, CBaseEntity *pAttacker, const CTakeDamageInfo &info )
+#endif
 	{
 		return true;
 	}
@@ -901,8 +905,9 @@ ConVarRef suitcharger( "sk_suitcharger" );
 		// Find the killer & the scorer
 		CBaseEntity *pInflictor = info.GetInflictor();
 		CBaseEntity *pKiller = info.GetAttacker();
-		//CBasePlayer *pScorer = GetDeathScorer( pKiller, pInflictor, pVictim );
-
+#ifndef FF
+		CBasePlayer *pScorer = GetDeathScorer( pKiller, pInflictor, pVictim );
+#endif
 		// Removed, this is now handled further on
 		// Hack for sg rockets (might break other stuff?)
 		//if( pKiller->Classify() == CLASS_SENTRYGUN )

@@ -1309,7 +1309,7 @@ END_PREDICTION_DATA()
 
 #endif
 
-#if !defined( CLIENT_DLL ) || defined( SDK2013CE )
+#ifndef CLIENT_DLL || defined( SDK2013CE )
 acttable_t	CWeaponRPG::m_acttable[] = 
 {
 #ifdef SDK2013CE
