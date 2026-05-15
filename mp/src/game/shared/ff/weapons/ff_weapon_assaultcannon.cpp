@@ -520,7 +520,7 @@ void CFFWeaponAssaultCannon::ItemPostFrame()
 				m_bClamped = false;
 			}
 			// Weapon should be firing now
-			else if(m_flDeployTick + 0.5f <= gpGlobals->curtime)
+			else if (m_flDeployTick + 0.5f <= gpGlobals->curtime && (pOwner->GetFlags() & FL_ONGROUND))
 			{
 				// If the firing button was just pressed, reset the firing time
 				m_flNextPrimaryAttack = m_flLastTick;
@@ -559,7 +559,7 @@ void CFFWeaponAssaultCannon::ItemPostFrame()
 
 #ifdef GAME_DLL
 			CFFPlayer *pPlayer = GetPlayerOwner();
-			pPlayer->RemoveSpeedEffect(SE_ASSAULTCANNON);
+			pPlayer->AddSpeedEffect(SE_ASSAULTCANNON, 0.5f, FF_AC_SPEEDEFFECT_MAX, SEM_BOOLEAN);
 #endif
 
 			m_bFiring = false;
@@ -575,7 +575,7 @@ void CFFWeaponAssaultCannon::ItemPostFrame()
 		// HW is too mobile. Instantly slow him down on revving the AC -> Defrag
 		float flSpeed = FF_AC_SPEEDEFFECT_MAX;
 		
-		pOwner->AddSpeedEffect(SE_ASSAULTCANNON, FF_AC_MOVEMENTDELAY, flSpeed, SEM_BOOLEAN);
+		pOwner->AddSpeedEffect(SE_ASSAULTCANNON, FF_AC_MOVEMENTDELAY + 0.5f, flSpeed, SEM_BOOLEAN);
 	}
 
 #endif
