@@ -96,7 +96,7 @@ ConVar slowfield_glow_size("ffdev_slowfield_glow_size", "0.3", FCVAR_FF_FFDEV_CL
 #define SLOWFIELD_RADIUS_POWER 1 //ffdev_slowfield_radius_power.GetFloat()
 
 //ConVar ffdev_slowfield_duration("ffdev_slowfield_duration", "7", FCVAR_FF_FFDEV_REPLICATED, "Duration of slowfield grenade");
-#define SLOWFIELD_DURATION 7 //ffdev_slowfield_duration.GetFloat()
+#define SLOWFIELD_DURATION 10 //ffdev_slowfield_duration.GetFloat()
 
 //ConVar ffdev_slowfield_multiplier("ffdev_slowfield_multiplier", "28", FCVAR_FF_FFDEV_REPLICATED, "Multiplier to compensate for the effect of the ffdev_slowfield_power cvar");
 #define SLOWFIELD_MULTIPLIER 28 //ffdev_slowfield_multiplier.GetFloat()

@@ -2240,7 +2240,7 @@ void CFFPlayer::CreateRagdollEntity(const CTakeDamageInfo *info)
 		pRagdoll->SetEffectEntity( pRagdollFlame );
 
 		//set the same lifetime the same as the ragdoll itself!
-		pRagdollFlame->SetLifetime( 5.0f );
+		pRagdollFlame->SetLifetime( 15.0f );
 	}
 
 	// not everything that gets here has an info
@@ -2256,7 +2256,7 @@ void CFFPlayer::CreateRagdollEntity(const CTakeDamageInfo *info)
 	}
 
 	// remove the ragdoll after a time
-	pRagdoll->SetNextThink( gpGlobals->curtime + 5.0f );
+	pRagdoll->SetNextThink( gpGlobals->curtime + 15.0f );
 	pRagdoll->SetThink( &CBaseEntity::SUB_Remove );
 
 	// ragdolls will be removed on round restart automatically
@@ -4014,14 +4014,14 @@ void CFFPlayer::StatusEffectsThink( void )
 				CFFPlayer *pGasser = GetGasser();
 				if( pGasser )
 				{
-					CTakeDamageInfo info(pGasser, pGasser, vec3_origin, GetAbsOrigin(), 1.0f, DMG_DIRECT);
+					CTakeDamageInfo info(pGasser, pGasser, vec3_origin, GetAbsOrigin(), 0.0f, DMG_DIRECT); // 1.0f, no more DoT
 					info.SetDamageCustom(DAMAGETYPE_GASSED);
 
 					TakeDamage(info);
 				}
 				else //must be lua set...
 				{
-					CTakeDamageInfo info(this, this, vec3_origin, GetAbsOrigin(), 1.0f, DMG_DIRECT);
+					CTakeDamageInfo info(this, this, vec3_origin, GetAbsOrigin(), 0.0f, DMG_DIRECT); // 1.0f, no more DoT
 					info.SetDamageCustom(DAMAGETYPE_GASSED);
 
 					TakeDamage(info);

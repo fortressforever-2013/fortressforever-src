@@ -31,7 +31,7 @@
 #define FF_SLOWFIELD_TEXTURE_GROUP TEXTURE_GROUP_CLIENT_EFFECTS
 
 //extern ConVar ffdev_slowfield_duration;
-#define SLOWFIELD_DURATION 7 // in ff_grenade_slowfield.cpp
+#define SLOWFIELD_DURATION 10 // in ff_grenade_slowfield.cpp
 
 CLIENTEFFECT_REGISTER_BEGIN(PrecacheSlowfieldEmitter)
 	CLIENTEFFECT_MATERIAL(FF_SLOWFIELD_MATERIAL)

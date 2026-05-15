@@ -216,7 +216,7 @@ int CFFItemBackpack::GetHealth()
 
 #define HEALTHDROP_MODEL	"models/items/healthkit.mdl"
 #define HEALTHDROP_SOUND	"HealthVial.Touch"
-#define HEALTHDROP_LIFE		5.0f
+#define HEALTHDROP_LIFE		7.0f
 
 class CFFItemHealthDrop : public CBaseAnimating
 {

@@ -81,7 +81,7 @@ extern unsigned char g_uchRailColors[3][3];
 //ConVar ffdev_railgun_pushforce_min("ffdev_railgun_pushforce_min", "32.0", FCVAR_FF_FFDEV_REPLICATED, "Minimum force of backwards push (Like the HL Gauss Gun, WOOH YEAH!)");
 #define RAILGUN_PUSHFORCE_MIN 0.0f // ffdev_railgun_pushforce_min.GetFloat()
 //ConVar ffdev_railgun_pushforce_max("ffdev_railgun_pushforce_max", "64.0", FCVAR_FF_FFDEV_REPLICATED, "Maximum force of backwards push (Like the HL Gauss Gun, WOOH YEAH!)");
-#define RAILGUN_PUSHFORCE_MAX 300.0f // ffdev_railgun_pushforce_max.GetFloat()
+#define RAILGUN_PUSHFORCE_MAX 150.0f // ffdev_railgun_pushforce_max.GetFloat()
 
 //ConVar ffdev_railgun_recoil_min("ffdev_railgun_recoil_min", "2", FCVAR_FF_FFDEV_REPLICATED, "Minimum recoil");
 #define RAILGUN_RECOIL_MIN 2 // ffdev_railgun_recoil_min.GetInt()

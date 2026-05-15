@@ -1150,8 +1150,9 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 
 		// Jiggles: Scouts don't take fall damage; they're just cool like that 
 		// AfterShock: commenting this for a while in an attempt to stop 4x scout offense everywhere
-		//if ( pFFPlayer->GetClassSlot() == CLASS_SCOUT )
-		//	return 0;
+		// Hlieb: it doesnt affect the gameplay that much to just remove the coolest thing that pub and pug scout would like to have
+		if ( pFFPlayer->GetClassSlot() == CLASS_SCOUT )
+			return 0;
 
 		float flMaxSafe = PLAYER_MAX_SAFE_FALL_SPEED;
 

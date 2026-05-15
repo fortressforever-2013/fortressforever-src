@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -232,10 +232,10 @@ bool CFFPlayer::FFAnim_CanMove()
 }
 
 //ConVar sniperrifle_basedamage( "ffdev_sniperrifle_basedamage", "45", FCVAR_FF_FFDEV_REPLICATED, "Base Damage for Sniper Rifle" );
-#define	SR_BASE_DAMAGE 45.0f // sniperrifle_basedamage.GetFloat()
+#define	SR_BASE_DAMAGE 25.0f // sniperrifle_basedamage.GetFloat()
 
 //ConVar sniperrifle_basedamagemax( "ffdev_sniperrifle_basedamagemax", "275", FCVAR_FF_FFDEV_REPLICATED, "Base Max Damage for Sniper Rifle" );
-#define	SR_BASE_DAMAGE_MAX 275.0f // sniperrifle_basedamagemax.GetFloat()
+#define	SR_BASE_DAMAGE_MAX 225.0f // sniperrifle_basedamagemax.GetFloat()
 
 void CFFPlayer::FireBullet(
 						   Vector vecSrc, 	// shooting postion
