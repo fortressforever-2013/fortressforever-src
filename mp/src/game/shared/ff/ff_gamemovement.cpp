@@ -18,6 +18,7 @@
 #include "in_buttons.h"
 #include "movevars_shared.h"
 #include "ff_mapguide.h"
+#include "ff_weapon_assaultcannon.h"
 
 #define	STOP_EPSILON		0.1
 #define	MAX_CLIP_PLANES		5
@@ -176,6 +177,25 @@ bool CFFGameMovement::CheckJumpButton(void)
 //			}
 //		}
 		return false;		// in air, so no effect
+	}
+
+	if (ffplayer->GetClassSlot() == CLASS_HWGUY)
+	{
+		CFFWeaponBase* pWeapon = ffplayer->GetActiveFFWeapon();
+		if (pWeapon && pWeapon->GetWeaponID() == FF_WEAPON_ASSAULTCANNON)
+		{
+			if (mv->m_nButtons & IN_ATTACK)
+			{
+				ffplayer->m_flACNoJumpTime = gpGlobals->curtime + 0.2f;
+			}
+			if (gpGlobals->curtime < ffplayer->m_flACNoJumpTime)
+			{
+				mv->m_nButtons &= ~IN_JUMP;
+				mv->m_nOldButtons |= IN_JUMP;
+
+				return false;
+			}
+		}
 	}
 
 	// caes: do pogo stick!
