@@ -315,6 +315,7 @@ public:
 
 	float	m_flJumpTime;
 	float	m_flFallTime;
+	float	m_flACNoJumpTime;
 	// <-- Mirv: Proper sound effects
 
 	// ---> added by billdoor
