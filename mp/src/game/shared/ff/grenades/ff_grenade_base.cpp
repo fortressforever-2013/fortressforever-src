@@ -26,6 +26,7 @@
 	#include "ff_grenade_parse.h"
 	#include "beamdraw.h"
 	#include "cmodel.h"
+	#include "iefx.h"
 #endif
 
 //========================================================================
@@ -248,6 +249,23 @@ LINK_ENTITY_TO_CLASS(grenade_ff_base, CFFGrenadeBase);
 				SetMoveType( MOVETYPE_NONE );
 		}
 
+		// Nades emit light, some nades need to be edited directly
+		// Done
+			color32 col = GetColour();
+			dlight_t* dl = effects->CL_AllocDlight(entindex());
+			if (dl)
+			{
+				dl->origin = GetAbsOrigin() + Vector(0, 0, 1.0f);
+				dl->color.r = col.r;
+				dl->color.g = col.g;
+				dl->color.b = col.b;
+				dl->color.exponent = 4;
+				dl->radius = 64.0f;
+				dl->die = gpGlobals->curtime + 0.4f;
+				dl->decay = dl->radius / 0.4f;
+				dl->style = 0;
+			}
+		
 		BaseClass::ClientThink();
 
 		// Next think straight away

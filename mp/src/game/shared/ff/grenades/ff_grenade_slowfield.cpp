@@ -22,6 +22,7 @@
 #include "effect_dispatch_data.h"
 #include "IEffects.h"
 #include "beam_shared.h"
+#include "iefx.h"
 
 
 #ifdef GAME_DLL
@@ -190,6 +191,8 @@ public:
 #ifdef CLIENT_DLL
 	CFFGrenadeSlowfield() {}
 	CFFGrenadeSlowfield(const CFFGrenadeSlowfield&) {}
+	virtual void ClientThink();
+	virtual void OnDataChanged(DataUpdateType_t updateType);
 #else
 	DECLARE_DATADESC(); // Since we're adding new thinks etc
 	virtual void Spawn();
@@ -582,6 +585,7 @@ CFFGrenadeSlowfieldGlow *CFFGrenadeSlowfieldGlow::Create(const Vector &origin, C
 #else
 
 int CFFGrenadeSlowfieldGlow::DrawModel(int flags)
+
 {
 	//See if we should draw
 	if (m_bReadyToDraw == false)
@@ -656,6 +660,32 @@ void CFFGrenadeSlowfieldGlow::OnDataChanged(DataUpdateType_t updateType)
 	if (updateType == DATA_UPDATE_CREATED)
 	{
 		SetNextClientThink( CLIENT_THINK_ALWAYS );
+	}
+}
+#endif
+
+#ifdef CLIENT_DLL
+void CFFGrenadeSlowfield::OnDataChanged(DataUpdateType_t updateType)
+{
+	BaseClass::OnDataChanged(updateType);
+	SetNextClientThink(CLIENT_THINK_ALWAYS); // So the nade glows even after being activated
+}
+
+void CFFGrenadeSlowfield::ClientThink()
+{
+	color32 col = GetColour();
+	dlight_t* dl = effects->CL_AllocDlight(entindex());
+	if (dl)
+	{
+		dl->origin = GetAbsOrigin() + Vector(0, 0, 1.0f);
+		dl->color.r = col.r;
+		dl->color.g = col.g;
+		dl->color.b = col.b;
+		dl->color.exponent = 4;
+		dl->radius = 64.0f;
+		dl->die = gpGlobals->curtime + 0.4f;
+		dl->decay = dl->radius / 0.4f;
+		dl->style = 0;
 	}
 }
 #endif

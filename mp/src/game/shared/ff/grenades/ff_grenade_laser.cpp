@@ -19,6 +19,7 @@
 #include "effect_dispatch_data.h"
 #include "IEffects.h"
 #include "beam_shared.h"
+#include "iefx.h"
 
 #ifdef GAME_DLL
 	#include "ff_entity_system.h"
@@ -534,6 +535,22 @@ float CFFGrenadeLaser::getLengthPercent()
 	//-----------------------------------------------------------------------------
 	void CFFGrenadeLaser::ClientThink()
 	{
+		// Laser Grenade emits light too
+		color32 col = GetColour();
+		dlight_t* dl = effects->CL_AllocDlight(entindex());
+		if (dl)
+		{
+			dl->origin = GetAbsOrigin() + Vector(0, 0, 1.0f);
+			dl->color.r = col.r;
+			dl->color.g = col.g;
+			dl->color.b = col.b;
+			dl->color.exponent = 3; // with 4 the model glows incorrectly bc the center is not the center of the model
+			dl->radius = 64.0f;
+			dl->die = gpGlobals->curtime + 0.4f;
+			dl->decay = dl->radius / 0.4f;
+			dl->style = 0;
+		}
+
 		if ( m_bIsOn )
 		{
 			EmitSound("NailGrenade.LaserLoop");

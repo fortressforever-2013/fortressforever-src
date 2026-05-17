@@ -25,6 +25,7 @@
 	#include "c_te_effect_dispatch.h"
 	#include "ff_fx_gascloud_emitter.h"
 	#include <igameevents.h>
+	#include "iefx.h"
 #else
 	#include "te_effect_dispatch.h"
 	#include "ff_entity_system.h"
@@ -264,20 +265,39 @@ PRECACHE_WEAPON_REGISTER( ff_grenade_gas );
 	// Purpose: Emit gas.
 	//-----------------------------------------------------------------------------
 	void CFFGrenadeGas::ClientThink()
-	{
-		if (m_bIsEmitting)
-		{
-			if (!m_pGasEmitter)
-			{
-				// Grenade deals damage for 10 seconds, gas lasts for 5 seconds
-				// So we can die 5 seconds before
-				m_pGasEmitter = CGasCloud::Create("GasCloud");
-				m_pGasEmitter->SetDieTime(gpGlobals->curtime + 5.0f);
-			}
 
-			if (!!m_pGasEmitter)
+	{
+		// Gas Grenade emits light too
+		color32 col = GetColour();
+		dlight_t* dl = effects->CL_AllocDlight(entindex());
+		if (dl)
+		{
+			dl->origin = GetAbsOrigin() + Vector(0, 0, 1.0f);
+			dl->color.r = col.r;
+			dl->color.g = col.g;
+			dl->color.b = col.b;
+			dl->color.exponent = 4;
+			dl->radius = 64.0f;
+			dl->die = gpGlobals->curtime + 0.4f;
+			dl->decay = dl->radius / 0.4f;
+			dl->style = 0;
+		}
+
+		{
+			if (m_bIsEmitting)
 			{
-				m_pGasEmitter->UpdateEmitter(GetAbsOrigin(), GetAbsVelocity());
+				if (!m_pGasEmitter)
+				{
+					// Grenade deals damage for 10 seconds, gas lasts for 5 seconds
+					// So we can die 5 seconds before
+					m_pGasEmitter = CGasCloud::Create("GasCloud");
+					m_pGasEmitter->SetDieTime(gpGlobals->curtime + 5.0f);
+				}
+
+				if (!!m_pGasEmitter)
+				{
+					m_pGasEmitter->UpdateEmitter(GetAbsOrigin(), GetAbsVelocity());
+				}
 			}
 		}
 	}
@@ -309,3 +329,5 @@ void CFFGrenadeGas::Precache()
 	PrecacheScriptSound( "GasGrenade.Open" );
 	BaseClass::Precache();
 }
+
+
