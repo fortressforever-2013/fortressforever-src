@@ -17,7 +17,8 @@
 #ifdef GAME_DLL
 	#include "ff_entity_system.h"
 	#include "ff_utils.h"
-	#include "soundent.h"	
+	#include "soundent.h"
+	#include "iefx.h"
 #endif
 
 extern short	g_sModelIndexFireball;		// (in combatweapon.cpp) holds the index for the fireball 
@@ -47,7 +48,7 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_pl);
 #define PIPE_FRICTION 0.375f
 //0001279: Need convar for pipe det delay
 //ConVar pipebomb_time_till_live("ffdev_pipedetdelay", "0.55", FCVAR_FF_FFDEV_REPLICATED);
-#define PIPE_DET_DELAY 0.55	// this is mirrored in ff_player_shared.cpp(97) and ff_player.cpp
+#define PIPE_DET_DELAY 0.9	// this is mirrored in ff_player_shared.cpp(97) and ff_player.cpp
 
 //=============================================================================
 // CFFProjectilePipebomb implementation

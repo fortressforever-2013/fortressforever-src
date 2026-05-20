@@ -16,6 +16,7 @@
 #include "ff_buildableobject.h"
 #include "ff_shareddefs.h"
 #include "ff_utils.h"
+#include "iefx.h"
 
 #define GRENADE_MODEL "models/projectiles/pipe/w_pipe.mdl"
 
@@ -82,7 +83,7 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_gl);
 	//----------------------------------------------------------------------------
 	// Purpose: Spawn a grenade, set up model, size, etc
 	//----------------------------------------------------------------------------
-	void CFFProjectileGrenade::Spawn() 
+	void CFFProjectileGrenade::Spawn()
 	{
 		// Setup
 		SetModel(GRENADE_MODEL);
@@ -101,10 +102,7 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_gl);
 
 		// Creates the smoke trail
 		CreateProjectileEffects();
-
-		BaseClass::Spawn();
 	}
-
 	//----------------------------------------------------------------------------
 	// Purpose: Sets the time at which the grenade will explode
 	//----------------------------------------------------------------------------
@@ -308,32 +306,32 @@ CFFProjectileGrenade * CFFProjectileGrenade::CreateGrenade(const CBaseEntity *pS
 //----------------------------------------------------------------------------
 // Purpose: Grenade think function
 //----------------------------------------------------------------------------
-void CFFProjectileGrenade::GrenadeThink() 
+void CFFProjectileGrenade::GrenadeThink()
 {
 	// Remove if we're nolonger in the world
-	if (!IsInWorld()) 
+	if (!IsInWorld())
 	{
 		Remove();
 		return;
 	}
 
 	// Blow up if we've reached the end of our fuse
-	if (gpGlobals->curtime > m_flDetonateTime) 
+	if (gpGlobals->curtime > m_flDetonateTime)
 	{
 		Detonate();
 		return;
 	}
 
 	// Bug #0000501: Doors can be blocked by shit that shouldn't block them.
-	if( GetGroundEntity() && ( GetAbsVelocity() == vec3_origin ) )
+	if (GetGroundEntity() && (GetAbsVelocity() == vec3_origin))
 	{
-		if( GetGroundEntity()->GetMoveType() != MOVETYPE_PUSH )
-			SetMoveType( MOVETYPE_NONE );
+		if (GetGroundEntity()->GetMoveType() != MOVETYPE_PUSH)
+			SetMoveType(MOVETYPE_NONE);
 	}
 
 	// Next think straight away
 	SetNextThink(gpGlobals->curtime);
-
+}
 	// BEG: Mulch - don't slow down in water
 //	
 //	// Slow down in water(need to fix this, will slow to a halt) 
@@ -342,4 +340,29 @@ void CFFProjectileGrenade::GrenadeThink()
 //		SetAbsVelocity(GetAbsVelocity() * 0.5);
 //	}
 	// END: Mulch
-}
+
+#ifdef CLIENT_DLL
+	void CFFProjectileGrenade::OnDataChanged(DataUpdateType_t updateType)
+	{
+		BaseClass::OnDataChanged(updateType);
+		SetNextClientThink(CLIENT_THINK_ALWAYS);
+	}
+
+	void CFFProjectileGrenade::ClientThink()
+	{
+		color32 col = GetColour();
+		dlight_t* dl = effects->CL_AllocDlight(entindex());
+		if (dl)
+		{
+			dl->origin = GetAbsOrigin() + Vector(0, 0, 1.0f);
+			dl->color.r = col.r;
+			dl->color.g = col.g;
+			dl->color.b = col.b;
+			dl->color.exponent = 4;
+			dl->radius = 64.0f;
+			dl->die = gpGlobals->curtime + 0.4f;
+			dl->decay = dl->radius / 0.4f;
+			dl->style = 0;
+		}
+	}
+#endif

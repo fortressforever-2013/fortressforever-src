@@ -19,6 +19,7 @@
 
 #include "ff_projectile_base.h"
 #include "SpriteTrail.h"
+#include "iefx.h"
 
 #ifdef CLIENT_DLL
 	#define CFFProjectileGrenade C_FFProjectileGrenade
@@ -59,7 +60,9 @@ public:
 #ifdef CLIENT_DLL
 	CFFProjectileGrenade() {}
 	CFFProjectileGrenade(const CFFProjectileGrenade&) {}
-
+	virtual void OnDataChanged(DataUpdateType_t updateType);
+	virtual void ClientThink();
+	virtual color32 GetColour() { color32 col = { 85, 95, 205, 255 }; return col; }
 #else
 
 	DECLARE_DATADESC(); // Since we're adding new thinks etc

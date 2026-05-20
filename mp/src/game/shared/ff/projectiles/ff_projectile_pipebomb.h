@@ -19,6 +19,7 @@
 
 #include "ff_projectile_grenade.h"
 #include "Sprite.h"
+#include "iefx.h"
 
 #ifdef GAME_DLL
 	#include "baseentity.h"
@@ -71,6 +72,7 @@ public:
 
 #ifdef CLIENT_DLL
 	virtual int DrawModel(int flags);
+	virtual color32 GetColour() { color32 col = { 202, 217, 24, 255 }; return col; }
 #endif
 
 public:
