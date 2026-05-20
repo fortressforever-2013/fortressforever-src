@@ -178,7 +178,7 @@ ConVar sv_motd_enable( "sv_motd_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "
 #define OVERPRESSURE_EFFECT "FF_OverpressureEffect"
 
 //0001279: Need convar for pipe det delay
-#define PIPE_DET_DELAY 0.55 // this is mirrored in ff_projectile_pipebomb.cpp and ff_player.cpp
+#define PIPE_DET_DELAY 0.9 // this is mirrored in ff_projectile_pipebomb.cpp and ff_player.cpp
 extern ConVar ai_debug_shoot_positions;
 
 // grenade information
