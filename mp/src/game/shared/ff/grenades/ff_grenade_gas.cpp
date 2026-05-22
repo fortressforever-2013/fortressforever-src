@@ -228,7 +228,7 @@ PRECACHE_WEAPON_REGISTER( ff_grenade_gas );
 
 				pPlayer->Gas(10.0f, 10.0f, pGasser);
 
-				CTakeDamageInfo info(this, pGasser, 5.0f, DMG_DIRECT);
+				CTakeDamageInfo info(this, pGasser, 10.0f, DMG_DIRECT);
 				pPlayer->TakeDamage(info);
 			}
 		}
