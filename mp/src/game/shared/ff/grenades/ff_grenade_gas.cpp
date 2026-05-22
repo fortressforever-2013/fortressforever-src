@@ -291,7 +291,7 @@ PRECACHE_WEAPON_REGISTER( ff_grenade_gas );
 					// Grenade deals damage for 10 seconds, gas lasts for 5 seconds
 					// So we can die 5 seconds before
 					m_pGasEmitter = CGasCloud::Create("GasCloud");
-					m_pGasEmitter->SetDieTime(gpGlobals->curtime + 5.0f);
+					m_pGasEmitter->SetDieTime(gpGlobals->curtime + 2.0f);
 				}
 
 				if (!!m_pGasEmitter)
