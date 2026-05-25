@@ -94,14 +94,6 @@ void CFFGrenadeMirv::Spawn( void )
 //------------------------------------------------------------------------------
 void CFFGrenadeMirv::GrenadeThink()
 {
-	IPhysicsObject* pPhys = VPhysicsGetObject();
-
-	if (pPhys)
-	{
-		AngularImpulse angVel(0, 0, 0);
-		pPhys->SetVelocityInstantaneous(NULL, &angVel);
-	}
-
 	QAngle ang = GetAbsAngles();
 	ang.x = 0.0f;
 	ang.z = 0.0f;
