@@ -51,6 +51,7 @@ $Project
 			$File "$SRCDIR\game\shared\ff\grenades\ff_grenade_parse.cpp"
 			$File "$SRCDIR\game\shared\ff\grenades\ff_grenade_parse.h"
 			$File "$SRCDIR\game\shared\ff\grenades\ff_grenade_slowfield.cpp"
+			$File "$SRCDIR\game\shared\ff\grenades\ff_grenade_flare.cpp"
 		}
 		
 		$Folder "Projectiles"
