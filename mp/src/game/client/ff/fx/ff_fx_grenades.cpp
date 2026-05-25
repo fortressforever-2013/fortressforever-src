@@ -20,6 +20,7 @@
 #include "ff_grenade_base.h"
 #include "ff_fx_napalm_emitter.h"
 #include "ff_fx_gascloud_emitter.h"
+#include "ff_fx_flarecloud_emitter.h"
 #include "smoke_fog_overlay.h"
 
 extern ConVar conc_framerate;
@@ -36,6 +37,9 @@ ConVar nap_burst_vel_z_divisor("ffdev_nap_burst_vel_z_divisor","2.0", FCVAR_CHEA
 
 extern ConVar gas_scale;
 ConVar gas_speed("ffdev_gas_speed","0.75", FCVAR_CHEAT,"Speed gas particles expand outward.");
+
+extern ConVar flare_scale;
+ConVar flare_speed("ffdev_flare_speed", "0.75", FCVAR_CHEAT, "Speed flare particles expand outward.");
 
 void FF_FX_DrawCircle(Vector &center, float radius, int modelindex, float life = 1.0f)
 {

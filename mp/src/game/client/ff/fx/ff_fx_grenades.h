@@ -22,5 +22,6 @@ void FF_FX_ConcussionExplosion	( Vector &origin );
 void FF_FX_NapalmBurst			( Vector &origin );
 void FF_FX_GasCloud				( Vector &origin );
 void FF_FX_EmpExplosion			( Vector &origin );
+void FF_FX_FlareCLoud			( Vector &origin );
 
 #endif//FF_FX_GRENADES_H
