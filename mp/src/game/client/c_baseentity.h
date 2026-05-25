@@ -88,6 +88,7 @@ enum Class_T
 	CLASS_GREN_MIRVLET,	// Mirvlet (from mirv gren)
 	CLASS_GREN_NAPALM,	// Napalm grenade
 	CLASS_GREN_GAS,		// Gas grenade
+	CLASS_GREN_FLARE,	// Flare grenade
 	CLASS_GREN_CONC,	// Conc grenade
 	//CLASS_GREN_CALTROP,
 	CLASS_GREN_LASER,
