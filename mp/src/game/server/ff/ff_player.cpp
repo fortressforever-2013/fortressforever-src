@@ -4646,14 +4646,16 @@ void CFFPlayer::RecalculateSpeed( void )
 	if( bAssaultCannonIncluded ) 
 	{
 		// May as well clamp this at 0 for safety; dunno if it'll ever happen
-		if( flSpeed < 0.0f )
-			flSpeed = 0.0f;
+		// With changed sv_accelerate needed to be changed to this value
+		if( flSpeed < 0.24f )
+			flSpeed = 0.24f;
 	}
 	else
 	{
-		// no AC effect so just clamp @ 40%
-		if( flSpeed < 0.4f )
-			flSpeed = 0.4f;
+		// no AC effect so just clamp 40%
+		// Doesnt work this way anymore
+		if( flSpeed < 0.0f )
+			flSpeed = 0.0f;
 	}	
 
 	// If speed has gotten slower then delay the max speed change on the server.

@@ -60,6 +60,7 @@ public:
 	CFFGrenadeMirv( const CFFGrenadeMirv& ) {}
 #else
 	virtual void Spawn();
+	virtual void GrenadeThink();
 	virtual void Explode( trace_t *pTrace, int bitsDamageType );
 	virtual float GetGrenadeDamage()		{ return MIRV_DMG; }
 	virtual float GetGrenadeRadius()		{ return MIRV_RADIUS; }
@@ -84,7 +85,21 @@ void CFFGrenadeMirv::Spawn( void )
 	SetModel( MIRVGRENADE_MODEL );
 	BaseClass::Spawn();
 
-	SetLocalAngularVelocity(QAngle(0, RandomFloat(-5, 5), 0));
+	SetThink(&CFFGrenadeMirv::GrenadeThink);
+	SetNextThink(gpGlobals->curtime);
+}
+
+//------------------------------------------------------------------------------
+// Purpose: No Y and Z roll
+//------------------------------------------------------------------------------
+void CFFGrenadeMirv::GrenadeThink()
+{
+	QAngle ang = GetAbsAngles();
+	ang.x = 0.0f;
+	ang.z = 0.0f;
+	SetAbsAngles(ang);
+
+	BaseClass::GrenadeThink();
 }
 
 //-----------------------------------------------------------------------------

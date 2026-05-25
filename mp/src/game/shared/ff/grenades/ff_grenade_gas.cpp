@@ -228,7 +228,7 @@ PRECACHE_WEAPON_REGISTER( ff_grenade_gas );
 
 				pPlayer->Gas(10.0f, 10.0f, pGasser);
 
-				CTakeDamageInfo info(this, pGasser, 5.0f, DMG_DIRECT);
+				CTakeDamageInfo info(this, pGasser, 10.0f, DMG_DIRECT);
 				pPlayer->TakeDamage(info);
 			}
 		}
@@ -291,7 +291,7 @@ PRECACHE_WEAPON_REGISTER( ff_grenade_gas );
 					// Grenade deals damage for 10 seconds, gas lasts for 5 seconds
 					// So we can die 5 seconds before
 					m_pGasEmitter = CGasCloud::Create("GasCloud");
-					m_pGasEmitter->SetDieTime(gpGlobals->curtime + 5.0f);
+					m_pGasEmitter->SetDieTime(gpGlobals->curtime + 2.0f);
 				}
 
 				if (!!m_pGasEmitter)
