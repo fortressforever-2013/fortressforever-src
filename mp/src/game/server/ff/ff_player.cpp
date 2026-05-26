@@ -59,7 +59,7 @@ extern int gEvilImpulse101;
 // Oh no a gobal.
 int g_iLimbs[CLASS_CIVILIAN + 1][5] = { { 0 } };
 
-#define PIPE_DET_DELAY 0.9 // this is mirrored in ff_projectile_pipebomb.cpp and ff_player_shared.cpp
+#define PIPE_DET_DELAY 0.7 // this is mirrored in ff_projectile_pipebomb.cpp and ff_player_shared.cpp
 
 // grenade information
 //ConVar gren_timer("ffdev_gren_timer","3.81",0,"Timer length for all grenades.");
