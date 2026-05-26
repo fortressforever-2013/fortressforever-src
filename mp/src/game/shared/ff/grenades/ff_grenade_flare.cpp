@@ -200,7 +200,7 @@ void CFFGrenadeFlare::ClientThink()
 			if (!m_pFlareEmitter)
 			{
 				m_pFlareEmitter = CFlareCloud::Create("FlareCloud");
-				m_pFlareEmitter->SetDieTime(gpGlobals->curtime + 5.0f);
+				m_pFlareEmitter->SetDieTime(gpGlobals->curtime + 10.0f);
 			}
 
 			if (!!m_pFlareEmitter)
