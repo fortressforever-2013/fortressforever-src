@@ -141,7 +141,7 @@ void CFlareCloud::SimulateParticles( CParticleSimulateIterator *pIterator )
 			pParticle->m_Pos += pParticle->m_vVelocity * timeDelta * 0.5f;
 		}
 
-		pParticle->m_flAlpha = 0.8f * start + 0.0f * end;
+		pParticle->m_flAlpha = 1.0f * start + 0.0f * end;
 		pParticle->m_flSize = 1.0f * start + 96.0f * end;
 
 		if ( pParticle->m_flLifetime >= pParticle->m_flDieTime )
@@ -229,7 +229,7 @@ void CFlareCloud::Update(float flTimeDelta)
 		return;
 
 	// Pick a random direction
-	Vector vecDirection(RandomFloat(-1.0, 1.0f), RandomFloat(-1.0, 1.0f), RandomFloat(0, 2.0f));
+	Vector vecDirection(RandomFloat(-1.0, 1.0f), RandomFloat(-1.0, 1.0f), RandomFloat(3, 6.0f));
 	vecDirection.NormalizeInPlace();
 
 	// And a random distance
@@ -239,8 +239,7 @@ void CFlareCloud::Update(float flTimeDelta)
 	trace_t tr;
 	UTIL_TraceLine(m_vecOrigin, vecFinalPos, MASK_SOLID, NULL, COLLISION_GROUP_DEBRIS, &tr);
 
-	// Takes 5 seconds for a cloud to disperse
-	pParticle->m_vVelocity = m_vecVelocity + (tr.endpos - m_vecOrigin) * 0.2f;
+	pParticle->m_vVelocity = m_vecVelocity + (tr.endpos - m_vecOrigin) * 0.2f + Vector(RandomFloat(0.0f, 4.0f), RandomFloat(0.0f, 4.0f), RandomFloat(0.0f, 128.0f));
 
 	// This is the position we're going to, even though we may not reach it
 	pParticle->m_vFinalPos = tr.endpos;
