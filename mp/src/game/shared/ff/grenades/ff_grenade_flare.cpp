@@ -127,7 +127,7 @@ void CFFGrenadeFlare::GrenadeThink(void)
 			m_vecLastPosition = GetAbsOrigin();
 		}
 
-		m_flNextTag = gpGlobals->curtime + 1.0f;
+		m_flNextTag = gpGlobals->curtime + 0.5f;
 
 		if (m_flOpenTime == 0.0f)
 		{
