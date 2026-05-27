@@ -169,7 +169,7 @@ PRECACHE_WEAPON_REGISTER( ff_grenade_gas );
 		//}
 
 		// Been detonated for 10 secs now, so fade out
-		if (gpGlobals->curtime > m_flDetonateTime + 7.0f)
+		if (gpGlobals->curtime > m_flDetonateTime + 10.0f)
 		{
 			SetThink(&CBaseGrenade::SUB_FadeOut);
 		}		
@@ -190,7 +190,7 @@ PRECACHE_WEAPON_REGISTER( ff_grenade_gas );
 				m_vecLastPosition = GetAbsOrigin();
 			}
 
-			m_flNextHurt = gpGlobals->curtime + 1.0f;
+			m_flNextHurt = gpGlobals->curtime + 0.5f;
 
 			// If we were idling, deploy
 			if( m_Activity == ACT_GAS_IDLE )
@@ -228,7 +228,7 @@ PRECACHE_WEAPON_REGISTER( ff_grenade_gas );
 
 				pPlayer->Gas(10.0f, 10.0f, pGasser);
 
-				CTakeDamageInfo info(this, pGasser, 10.0f, DMG_DIRECT);
+				CTakeDamageInfo info(this, pGasser, 5.0f, DMG_DIRECT);
 				pPlayer->TakeDamage(info);
 			}
 		}
@@ -291,7 +291,7 @@ PRECACHE_WEAPON_REGISTER( ff_grenade_gas );
 					// Grenade deals damage for 10 seconds, gas lasts for 5 seconds
 					// So we can die 5 seconds before
 					m_pGasEmitter = CGasCloud::Create("GasCloud");
-					m_pGasEmitter->SetDieTime(gpGlobals->curtime + 2.0f);
+					m_pGasEmitter->SetDieTime(gpGlobals->curtime + 5.0f);
 				}
 
 				if (!!m_pGasEmitter)
