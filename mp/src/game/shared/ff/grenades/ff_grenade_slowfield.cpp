@@ -582,6 +582,7 @@ void CFFGrenadeSlowfield::SlowThink()
 	StudioFrameAdvance();
 
 	// Slow projectiles
+	int nBeamCount = 0;
 	CBaseEntity* pEnt = NULL;
 	while ((pEnt = gEntList.FindEntityByClassname(pEnt, "ff_projectile_*")) != NULL)
 	{
@@ -598,7 +599,31 @@ void CFFGrenadeSlowfield::SlowThink()
 				pProj->SetGravity(pProj->GetGravity() * 0.5f);
 				pProj->m_bInSlowfield = true;
 			}
+
+			if (nBeamCount < 2)
+			{
+			CFFPlayer* pGrenOwner = ToFFPlayer(this->GetOwnerEntity());
+			CBeam* pBeam = CBeam::BeamCreate(GRENADE_BEAM_SPRITE, 1);
+			pBeam->SetWidth(SLOWFIELD_BEAM_WIDTHSTART);
+			pBeam->SetEndWidth(SLOWFIELD_BEAM_WIDTHEND);
+			pBeam->LiveForTime(gpGlobals->interval_per_tick);
+			pBeam->SetNoise(SLOWFIELD_BEAM_NOISE);
+			pBeam->SetBrightness(128);
+			if (pGrenOwner->GetTeamNumber() == TEAM_RED)
+				pBeam->SetColor(255, 64, 64);
+			else if (pGrenOwner->GetTeamNumber() == TEAM_BLUE)
+				pBeam->SetColor(64, 128, 255);
+			else if (pGrenOwner->GetTeamNumber() == TEAM_GREEN)
+				pBeam->SetColor(153, 255, 153);
+			else if (pGrenOwner->GetTeamNumber() == TEAM_YELLOW)
+				pBeam->SetColor(255, 178, 0);
+			else
+				pBeam->SetColor(204, 204, 204);
+			pBeam->PointsInit(vecOrigin, pProj->GetAbsOrigin());
+			nBeamCount++;
 		}
+	}
+
 		else if (pProj->m_bInSlowfield)
 		{
 			pProj->SetAbsVelocity(pProj->m_vecOriginalVelocity);
@@ -607,6 +632,7 @@ void CFFGrenadeSlowfield::SlowThink()
 		}
 	}
 	// Slow grenades
+		nBeamCount = 0;
 		CBaseEntity* pEnt2 = NULL;
 		while ((pEnt2 = gEntList.FindEntityByClassname(pEnt2, "ff_grenade_*")) != NULL)
 		{
@@ -622,7 +648,31 @@ void CFFGrenadeSlowfield::SlowThink()
 					pProj->SetGravity(pProj->GetGravity() * 0.5f);
 					pProj->m_bInSlowfield = true;
 				}
+
+				if (nBeamCount < 2)
+				{
+				CFFPlayer* pGrenOwner = ToFFPlayer(this->GetOwnerEntity());
+				CBeam* pBeam = CBeam::BeamCreate(GRENADE_BEAM_SPRITE, 1);
+				pBeam->SetWidth(SLOWFIELD_BEAM_WIDTHSTART);
+				pBeam->SetEndWidth(SLOWFIELD_BEAM_WIDTHEND);
+				pBeam->LiveForTime(gpGlobals->interval_per_tick);
+				pBeam->SetNoise(SLOWFIELD_BEAM_NOISE);
+				pBeam->SetBrightness(128);
+				if (pGrenOwner->GetTeamNumber() == TEAM_RED)
+					pBeam->SetColor(255, 64, 64);
+				else if (pGrenOwner->GetTeamNumber() == TEAM_BLUE)
+					pBeam->SetColor(64, 128, 255);
+				else if (pGrenOwner->GetTeamNumber() == TEAM_GREEN)
+					pBeam->SetColor(153, 255, 153);
+				else if (pGrenOwner->GetTeamNumber() == TEAM_YELLOW)
+					pBeam->SetColor(255, 178, 0);
+				else
+					pBeam->SetColor(204, 204, 204);
+				pBeam->PointsInit(vecOrigin, pProj->GetAbsOrigin());
+				nBeamCount++;
+				}
 			}
+
 			else if (pProj->m_bInSlowfield)
 			{
 				pProj->SetGravity(pProj->m_flOriginalGravity);
