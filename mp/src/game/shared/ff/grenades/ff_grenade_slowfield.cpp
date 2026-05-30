@@ -23,14 +23,15 @@
 #include "IEffects.h"
 #include "beam_shared.h"
 #include "iefx.h"
+#include "ff_projectile_base.h"
 
 
 #ifdef GAME_DLL
-	#include "ff_entity_system.h"
-	#include "te_effect_dispatch.h"
-	#include "ai_basenpc.h"
+#include "ff_entity_system.h"
+#include "te_effect_dispatch.h"
+#include "ai_basenpc.h"
 #else
-	#include "c_te_effect_dispatch.h"
+#include "c_te_effect_dispatch.h"
 #endif
 
 #define SLOWFIELDGRENADE_MODEL			"models/grenades/gas/gas.mdl"
@@ -117,9 +118,13 @@ ConVar slowfield_glow_size("ffdev_slowfield_glow_size", "0.3", FCVAR_FF_FFDEV_CL
 //ConVar ffdev_slowfield_selfscale("ffdev_slowfield_selfscale", "1", FCVAR_FF_FFDEV_REPLICATED, "When selfignore is 0, modifies the slow amount for the thrower", true, 0.0f, true, 1.0f);
 #define SLOWFIELD_SELFSCALE 1 //ffdev_slowfield_selfscale.GetFloat()
 
+//Armor stripping values inside the field
+#define ARMORSTRIP_AMOUNT				5.0f
+#define ARMORSTRIP_RATE					0.5f
+
 #ifdef CLIENT_DLL
-	#define CFFGrenadeSlowfield C_FFGrenadeSlowfield
-	#define CFFGrenadeSlowfieldGlow C_FFGrenadeSlowfieldGlow
+#define CFFGrenadeSlowfield C_FFGrenadeSlowfield
+#define CFFGrenadeSlowfieldGlow C_FFGrenadeSlowfieldGlow
 #endif
 
 //=============================================================================
@@ -140,9 +145,9 @@ public:
 	virtual RenderGroup_t	GetRenderGroup() { return RENDER_GROUP_TRANSLUCENT_ENTITY; }
 	virtual int				DrawModel(int flags);
 	virtual void			OnDataChanged(DataUpdateType_t updateType);
-	virtual bool			ShouldDraw() { return (IsEffectActive(EF_NODRAW) ==false); }
+	virtual bool			ShouldDraw() { return (IsEffectActive(EF_NODRAW) == false); }
 #else
-	static CFFGrenadeSlowfieldGlow *Create(const Vector &origin, CBaseEntity *pOwner = NULL);
+	static CFFGrenadeSlowfieldGlow* Create(const Vector& origin, CBaseEntity* pOwner = NULL);
 #endif
 };
 
@@ -167,24 +172,24 @@ END_DATADESC()
 class CFFGrenadeSlowfield : public CFFGrenadeBase
 {
 public:
-	DECLARE_CLASS(CFFGrenadeSlowfield, CFFGrenadeBase) 
-	DECLARE_NETWORKCLASS(); 
+	DECLARE_CLASS(CFFGrenadeSlowfield, CFFGrenadeBase)
+	DECLARE_NETWORKCLASS();
 
 	CNetworkVector(m_vInitialVelocity);
 
 	virtual void Precache();
-	virtual const char *GetBounceSound() { return "ConcussionGrenade.Bounce"; }
-	
-	virtual float GetGrenadeDamage()		{ return 0.0f; }
-	virtual float GetGrenadeRadius()		{ return SLOWFIELD_RADIUS_OUTER; }
-	virtual float GetShakeAmplitude()		{ return 0.0f; }
+	virtual const char* GetBounceSound() { return "ConcussionGrenade.Bounce"; }
 
-	virtual Class_T Classify( void ) { return CLASS_GREN_SLOWFIELD; } 
+	virtual float GetGrenadeDamage() { return 0.0f; }
+	virtual float GetGrenadeRadius() { return SLOWFIELD_RADIUS_OUTER; }
+	virtual float GetShakeAmplitude() { return 0.0f; }
+
+	virtual Class_T Classify(void) { return CLASS_GREN_SLOWFIELD; }
 
 	virtual color32 GetColour() { color32 col = { 255, 225, 255, GREN_ALPHA_DEFAULT }; return col; }
 
-	virtual void StopLoopingSounds( void );
-	virtual void UpdateOnRemove( void );
+	virtual void StopLoopingSounds(void);
+	virtual void UpdateOnRemove(void);
 
 	CHandle<CFFGrenadeSlowfieldGlow> m_hGlowSprite;
 
@@ -197,11 +202,12 @@ public:
 	DECLARE_DATADESC(); // Since we're adding new thinks etc
 	virtual void Spawn();
 	virtual void SlowThink();
-	virtual void Explode(trace_t *pTrace, int bitsDamageType);
+	virtual void Explode(trace_t* pTrace, int bitsDamageType);
 
 protected:
 	bool m_bBeamLoopPlaying;
 	float	m_flLastThinkTime;
+	float m_flArmorStrip;
 
 	int m_iSequence;
 	Activity m_Activity;
@@ -210,9 +216,9 @@ protected:
 };
 
 #ifdef GAME_DLL
-	BEGIN_DATADESC(CFFGrenadeSlowfield) 
-		DEFINE_THINKFUNC(SlowThink), 
-	END_DATADESC() 
+BEGIN_DATADESC(CFFGrenadeSlowfield)
+DEFINE_THINKFUNC(SlowThink),
+END_DATADESC()
 #endif
 
 IMPLEMENT_NETWORKCLASS_ALIASED(FFGrenadeSlowfield, DT_FFGrenadeSlowfield)
@@ -226,7 +232,7 @@ PRECACHE_WEAPON_REGISTER(ff_grenade_slowfield);
 //-----------------------------------------------------------------------------
 // Purpose: Various precache things
 //-----------------------------------------------------------------------------
-void CFFGrenadeSlowfield::Precache() 
+void CFFGrenadeSlowfield::Precache()
 {
 	PrecacheModel(SLOWFIELDGRENADE_MODEL);
 	PrecacheModel("models/grenades/conc/conceffect.mdl");
@@ -242,7 +248,7 @@ void CFFGrenadeSlowfield::StopLoopingSounds()
 {
 #ifdef GAME_DLL
 	StopSound(SLOWFIELDGRENADE_LOOP);
-	if(m_bBeamLoopPlaying)
+	if (m_bBeamLoopPlaying)
 	{
 		m_bBeamLoopPlaying = false;
 		StopSound(SLOWFIELDGRENADE_BEAM_LOOP);
@@ -254,27 +260,54 @@ void CFFGrenadeSlowfield::UpdateOnRemove()
 {
 #ifdef GAME_DLL
 	// loop through all players
-	for(int i = 1 ; i <= gpGlobals->maxClients; i++)
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		CFFPlayer* pPlayer = ToFFPlayer(UTIL_EntityByIndex(i));
 
-		if( !pPlayer || pPlayer->IsObserver() )
+		if (!pPlayer || pPlayer->IsObserver())
 			continue;
 
 		if (pPlayer->GetActiveSlowfield() == this)
 		{
 			pPlayer->SetLaggedMovementValue(1.0f);
-			pPlayer->SetActiveSlowfield( NULL );
-			
+			pPlayer->SetActiveSlowfield(NULL);
+
 			// remove status icon
-			CSingleUserRecipientFilter user( ( CBasePlayer * )pPlayer );
+			CSingleUserRecipientFilter user((CBasePlayer*)pPlayer);
 			user.MakeReliable();
 
-			UserMessageBegin( user, "StatusIconUpdate" );
-				WRITE_BYTE( FF_STATUSICON_SLOWMOTION );
-				WRITE_FLOAT( 0.0f );
+			UserMessageBegin(user, "StatusIconUpdate");
+			WRITE_BYTE(FF_STATUSICON_SLOWMOTION);
+			WRITE_FLOAT(0.0f);
 			MessageEnd();
 		}
+	}
+
+		CBaseEntity* pEnt = NULL;
+		while ((pEnt = gEntList.FindEntityByClassname(pEnt, "ff_projectile_*")) != NULL)
+		{
+			CFFProjectileBase* pProj = dynamic_cast<CFFProjectileBase*>(pEnt);
+			if (!pProj) continue;
+
+			if (pProj->m_bInSlowfield)
+			{
+				pProj->SetAbsVelocity(pProj->m_vecOriginalVelocity);
+				pProj->SetGravity(pProj->m_flOriginalGravity);
+				pProj->m_bInSlowfield = false;
+			}
+		}
+
+			CBaseEntity* pEnt2 = NULL;
+			while ((pEnt2 = gEntList.FindEntityByClassname(pEnt2, "ff_grenade_*")) != NULL)
+			{
+				if (pEnt2 == this) continue;
+				CFFProjectileBase* pProj = dynamic_cast<CFFProjectileBase*>(pEnt2);
+				if (!pProj) continue;
+				if (pProj->m_bInSlowfield)
+				{
+					pProj->SetGravity(pProj->m_flOriginalGravity);
+					pProj->m_bInSlowfield = false;
+				}
 	}
 #endif
 	BaseClass::UpdateOnRemove();
@@ -282,281 +315,337 @@ void CFFGrenadeSlowfield::UpdateOnRemove()
 
 #ifdef GAME_DLL
 
-	extern Activity ACT_GAS_IDLE;
-	extern Activity ACT_GAS_DEPLOY;
-	extern Activity ACT_GAS_DEPLOY_IDLE;
+extern Activity ACT_GAS_IDLE;
+extern Activity ACT_GAS_DEPLOY;
+extern Activity ACT_GAS_DEPLOY_IDLE;
 
-	//-----------------------------------------------------------------------------
-	// Purpose: Various spawny flag things
-	//-----------------------------------------------------------------------------
-	void CFFGrenadeSlowfield::Spawn() 
+//-----------------------------------------------------------------------------
+// Purpose: Various spawny flag things
+//-----------------------------------------------------------------------------
+void CFFGrenadeSlowfield::Spawn()
+{
+	SetModel(SLOWFIELDGRENADE_MODEL);
+	BaseClass::Spawn();
+
+	ADD_CUSTOM_ACTIVITY(CFFGrenadeSlowfield, ACT_GAS_IDLE);
+	ADD_CUSTOM_ACTIVITY(CFFGrenadeSlowfield, ACT_GAS_DEPLOY);
+	ADD_CUSTOM_ACTIVITY(CFFGrenadeSlowfield, ACT_GAS_DEPLOY_IDLE);
+
+	m_Activity = (Activity)ACT_GAS_IDLE;
+	m_iSequence = SelectWeightedSequence(m_Activity);
+	m_bBeamLoopPlaying = false;
+	m_flArmorStrip = 0.0f;
+	SetSequence(m_iSequence);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Instead of exploding, change to 
+//-----------------------------------------------------------------------------
+void CFFGrenadeSlowfield::Explode(trace_t* pTrace, int bitsDamageType)
+{
+	CFFPlayer* pSlower = ToFFPlayer(GetOwnerEntity());
+
+	if (!pSlower)
+		return;
+
+	EmitSound(SLOWFIELDGRENADE_SOUND);
+
+	CEffectData data;
+	data.m_vOrigin = GetAbsOrigin();
+	data.m_flScale = 1.0f;
+	data.m_flRadius = GetGrenadeRadius();
+
+	// using m_nColor as team num
+	data.m_nColor = pSlower->GetTeamNumber();
+
+	DispatchEffect(SLOWFIELD_EFFECT, data);
+
+	/*
+	// add the sprite
+	//m_hGlowSprite = CSprite::SpriteCreate(CONCUSSIONGRENADE_GLOW_SPRITE, GetAbsOrigin(), false);
+	m_hGlowSprite = CFFGrenadeSlowfieldGlow::Create(GetAbsOrigin(), this);
+	m_hGlowSprite->SetAttachment(this, LookupAttachment("glowsprite"));
+	m_hGlowSprite->SetTransparency(kRenderTransAdd, 255, 255, 255, 128, kRenderFxNone);
+	m_hGlowSprite->SetBrightness(255, 0.2f);
+	m_hGlowSprite->SetScale(1.0f, 0.2f);
+	*/
+
+	// Clumsy, will do for now
+	if (GetMoveType() == MOVETYPE_FLY)
 	{
-		SetModel(SLOWFIELDGRENADE_MODEL);
-		BaseClass::Spawn();
-		
-		ADD_CUSTOM_ACTIVITY( CFFGrenadeSlowfield, ACT_GAS_IDLE );
-		ADD_CUSTOM_ACTIVITY( CFFGrenadeSlowfield, ACT_GAS_DEPLOY );
-		ADD_CUSTOM_ACTIVITY( CFFGrenadeSlowfield, ACT_GAS_DEPLOY_IDLE );
-
-		m_Activity = ( Activity )ACT_GAS_IDLE;
-		m_iSequence = SelectWeightedSequence( m_Activity );
-		m_bBeamLoopPlaying = false;
-		SetSequence( m_iSequence );		
+		BaseClass::Explode(pTrace, bitsDamageType);
+		return;
 	}
 
-	//-----------------------------------------------------------------------------
-	// Purpose: Instead of exploding, change to 
-	//-----------------------------------------------------------------------------
-	void CFFGrenadeSlowfield::Explode(trace_t *pTrace, int bitsDamageType)
+	SetDetonateTimerLength(SLOWFIELD_DURATION);
+	m_bIsOn = true;
+
+	// Should this maybe be noclip?
+	SetMoveType(MOVETYPE_FLY);
+
+	// Go into slow mode
+	SetThink(&CFFGrenadeSlowfield::SlowThink);
+	SetNextThink(gpGlobals->curtime);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Spin round emitting nails
+//-----------------------------------------------------------------------------
+void CFFGrenadeSlowfield::SlowThink()
+{
+	// If we're done deploying, deploy idle
+	if (m_Activity == ACT_GAS_DEPLOY)
 	{
-		CFFPlayer *pSlower = ToFFPlayer( GetOwnerEntity() );
-		
-		if (!pSlower)
-			return;
-
-		EmitSound(SLOWFIELDGRENADE_SOUND);
-		
-		CEffectData data;
-		data.m_vOrigin = GetAbsOrigin();
-		data.m_flScale = 1.0f;
-		data.m_flRadius = GetGrenadeRadius();
-
-		// using m_nColor as team num
-		data.m_nColor = pSlower->GetTeamNumber();
-		
-		DispatchEffect(SLOWFIELD_EFFECT, data);
-		
-		/*
-		// add the sprite
-		//m_hGlowSprite = CSprite::SpriteCreate(CONCUSSIONGRENADE_GLOW_SPRITE, GetAbsOrigin(), false);
-		m_hGlowSprite = CFFGrenadeSlowfieldGlow::Create(GetAbsOrigin(), this);
-		m_hGlowSprite->SetAttachment(this, LookupAttachment("glowsprite"));
-		m_hGlowSprite->SetTransparency(kRenderTransAdd, 255, 255, 255, 128, kRenderFxNone);
-		m_hGlowSprite->SetBrightness(255, 0.2f);
-		m_hGlowSprite->SetScale(1.0f, 0.2f);
-		*/
-
-		// Clumsy, will do for now
-		if (GetMoveType() == MOVETYPE_FLY)
-		{
-			BaseClass::Explode(pTrace, bitsDamageType);
-			return;
-		}
-
-		SetDetonateTimerLength(SLOWFIELD_DURATION);
-		m_bIsOn = true;
-
-		// Should this maybe be noclip?
-		SetMoveType(MOVETYPE_FLY);
-
-		// Go into slow mode
-		SetThink(&CFFGrenadeSlowfield::SlowThink);
-		SetNextThink(gpGlobals->curtime);
+		m_Activity = ACT_GAS_DEPLOY_IDLE;
+		m_iSequence = SelectWeightedSequence(m_Activity);
+		SetSequence(m_iSequence);
 	}
 
-	//-----------------------------------------------------------------------------
-	// Purpose: Spin round emitting nails
-	//-----------------------------------------------------------------------------
-	void CFFGrenadeSlowfield::SlowThink() 
+	// If we were idling, deploy
+	if (m_Activity == ACT_GAS_IDLE)
 	{
-		// If we're done deploying, deploy idle
-		if( m_Activity == ACT_GAS_DEPLOY )
+		m_Activity = ACT_GAS_DEPLOY;
+		m_iSequence = SelectWeightedSequence(m_Activity);
+		SetSequence(m_iSequence);
+	}
+
+	// Blow up if we've reached the end of our fuse
+	if (gpGlobals->curtime > m_flDetonateTime)
+	{
+		UTIL_Remove(this);
+		return;
+	}
+
+	// emit looping sound
+	EmitSound(SLOWFIELDGRENADE_LOOP);
+
+	float flRisingheight = 0;
+
+	float flOuterStartShrinkTime = m_flDetonateTime - SLOWFIELD_SHRINKTIME_OUTER;
+	float flOuterRadiusShrink = 1.0f;
+	if (gpGlobals->curtime >= flOuterStartShrinkTime)
+		flOuterRadiusShrink = 1 - (gpGlobals->curtime - flOuterStartShrinkTime) / (m_flDetonateTime - flOuterStartShrinkTime);
+
+	bool bShrinkStack = SLOWFIELD_SHRINKTIME_STACK;
+
+	float flInnerStartShrinkTime = (bShrinkStack ? m_flDetonateTime - (SLOWFIELD_SHRINKTIME_OUTER + SLOWFIELD_SHRINKTIME_INNER) : m_flDetonateTime - SLOWFIELD_SHRINKTIME_INNER);
+	float flInnerRadiusShrink = 1.0f;
+
+	if (bShrinkStack && gpGlobals->curtime >= flOuterStartShrinkTime)
+		flInnerRadiusShrink = 0.0f;
+	else if (bShrinkStack && gpGlobals->curtime >= flInnerStartShrinkTime)
+		flInnerRadiusShrink = 1 - (gpGlobals->curtime - flInnerStartShrinkTime) / (flOuterStartShrinkTime - flInnerStartShrinkTime);
+	else if (gpGlobals->curtime >= flInnerStartShrinkTime)
+		flInnerRadiusShrink = 1 - (gpGlobals->curtime - flInnerStartShrinkTime) / (m_flDetonateTime - flInnerStartShrinkTime);
+
+	float flInnerRadius = SLOWFIELD_RADIUS_INNER * flInnerRadiusShrink;
+	float flOuterRadius = SLOWFIELD_RADIUS_OUTER * flOuterRadiusShrink;
+
+	// Lasts for 3 seconds, rise for 0.3, but only if not handheld
+	//if (gpGlobals->curtime > m_flDetonateTime - 0.3 && !m_fIsHandheld)
+	//	flRisingheight = 80;
+
+	SetAbsVelocity(Vector(0, 0, flRisingheight + 20 * sin(DEG2RAD(GetAbsAngles().y))));
+	SetAbsAngles(GetAbsAngles() + QAngle(0, 15, 0));
+
+	Vector vecOrigin = GetAbsOrigin();
+
+	bool bHitPlayer = false;
+
+	bool bArmorStrip = (gpGlobals->curtime >= m_flArmorStrip);
+	if (bArmorStrip) m_flArmorStrip = gpGlobals->curtime + ARMORSTRIP_RATE;
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CFFPlayer* pPlayer = ToFFPlayer(UTIL_PlayerByIndex(i));
+		CFFPlayer* pSlower = ToFFPlayer(GetOwnerEntity());
+
+		if (!pPlayer || pPlayer->IsObserver() || !pSlower)
+			continue;
+
+		Vector vecDisplacement = pPlayer->GetAbsOrigin() - vecOrigin;
+		float flDistance = vecDisplacement.Length();
+
+		// inside the radius of the gren
+		if (flDistance < GetGrenadeRadius())
 		{
-			m_Activity = ACT_GAS_DEPLOY_IDLE;
-			m_iSequence = SelectWeightedSequence( m_Activity );
-			SetSequence( m_iSequence );
-		}
-		
-		// If we were idling, deploy
-		if( m_Activity == ACT_GAS_IDLE )
-		{
-			m_Activity = ACT_GAS_DEPLOY;
-			m_iSequence = SelectWeightedSequence( m_Activity );
-			SetSequence( m_iSequence );
-		}
-
-		// Blow up if we've reached the end of our fuse
-		if (gpGlobals->curtime > m_flDetonateTime) 
-		{
-			UTIL_Remove(this);
-			return;
-		}
-
-		// emit looping sound
-		EmitSound(SLOWFIELDGRENADE_LOOP);
-
-		float flRisingheight = 0;
-
-		float flOuterStartShrinkTime = m_flDetonateTime - SLOWFIELD_SHRINKTIME_OUTER;
-		float flOuterRadiusShrink = 1.0f;
-		if( gpGlobals->curtime >= flOuterStartShrinkTime )
-			flOuterRadiusShrink = 1 - ( gpGlobals->curtime - flOuterStartShrinkTime ) / ( m_flDetonateTime - flOuterStartShrinkTime );
-
-		bool bShrinkStack = SLOWFIELD_SHRINKTIME_STACK;
-	
-		float flInnerStartShrinkTime = ( bShrinkStack ? m_flDetonateTime - ( SLOWFIELD_SHRINKTIME_OUTER + SLOWFIELD_SHRINKTIME_INNER ) : m_flDetonateTime - SLOWFIELD_SHRINKTIME_INNER );
-		float flInnerRadiusShrink = 1.0f;
-
-		if( bShrinkStack && gpGlobals->curtime >= flOuterStartShrinkTime )
-			flInnerRadiusShrink = 0.0f;
-		else if( bShrinkStack && gpGlobals->curtime >= flInnerStartShrinkTime )
-			flInnerRadiusShrink = 1 - ( gpGlobals->curtime - flInnerStartShrinkTime ) / ( flOuterStartShrinkTime - flInnerStartShrinkTime );
-		else if( gpGlobals->curtime >= flInnerStartShrinkTime )
-			flInnerRadiusShrink = 1 - ( gpGlobals->curtime - flInnerStartShrinkTime ) / ( m_flDetonateTime - flInnerStartShrinkTime );
-
-		float flInnerRadius = SLOWFIELD_RADIUS_INNER * flInnerRadiusShrink;
-		float flOuterRadius = SLOWFIELD_RADIUS_OUTER * flOuterRadiusShrink;
-
-		// Lasts for 3 seconds, rise for 0.3, but only if not handheld
-		//if (gpGlobals->curtime > m_flDetonateTime - 0.3 && !m_fIsHandheld)
-		//	flRisingheight = 80;
-
-		SetAbsVelocity(Vector(0, 0, flRisingheight + 20 * sin(DEG2RAD(GetAbsAngles().y))));
-		SetAbsAngles(GetAbsAngles() + QAngle(0, 15, 0));
-
-		Vector vecOrigin = GetAbsOrigin();
-
-		bool bHitPlayer = false;
-
-		for (int i=1; i<=gpGlobals->maxClients; i++)
-		{
-			CFFPlayer *pPlayer = ToFFPlayer( UTIL_PlayerByIndex(i) );
-			CFFPlayer *pSlower = ToFFPlayer( GetOwnerEntity() );
-				
-			if( !pPlayer || pPlayer->IsObserver() || !pSlower)
+			if (SLOWFIELD_FRIENDLYIGNORE && !g_pGameRules->FCanTakeDamage(pPlayer, GetOwnerEntity()))
 				continue;
 
-			Vector vecDisplacement = pPlayer->GetAbsOrigin() - vecOrigin;
-			float flDistance = vecDisplacement.Length();
+			if (SLOWFIELD_SELFIGNORE && pPlayer == pSlower)
+				continue;
 
-			// inside the radius of the gren
-			if (flDistance < GetGrenadeRadius())
+			float flFriendlyScale = 1.0f;
+
+			// Check if is a teammate and scale accordingly
+			if (pPlayer != pSlower && g_pGameRules->PlayerRelationship(pPlayer, pSlower) == GR_TEAMMATE)
+				flFriendlyScale = SLOWFIELD_FRIENDLYSCALE;
+			else if (pPlayer == pSlower)
+				flFriendlyScale = SLOWFIELD_SELFSCALE;
+
+			float flDistanceMult = 1.0f;
+			//if we're scaling between outer and inner radius (linear!!)
+			//don't allow divide by zero or for inner/outer to be reversed
+			if (flDistance > (flInnerRadius * flInnerRadiusShrink) && (flOuterRadius - flInnerRadius) > 0.0f)
 			{
-				if( SLOWFIELD_FRIENDLYIGNORE && !g_pGameRules->FCanTakeDamage( pPlayer, GetOwnerEntity() ) )
-					continue;
-				
-				if( SLOWFIELD_SELFIGNORE && pPlayer == pSlower )
-					continue;
-
-				float flFriendlyScale = 1.0f;
-
-				// Check if is a teammate and scale accordingly
-				if (pPlayer != pSlower && g_pGameRules->PlayerRelationship(pPlayer, pSlower) == GR_TEAMMATE)
-					flFriendlyScale = SLOWFIELD_FRIENDLYSCALE;
-				else if (pPlayer == pSlower)
-					flFriendlyScale = SLOWFIELD_SELFSCALE;
-
-				float flDistanceMult = 1.0f;
-				//if we're scaling between outer and inner radius (linear!!)
-				//don't allow divide by zero or for inner/outer to be reversed
-				if(flDistance > (flInnerRadius * flInnerRadiusShrink) && ( flOuterRadius - flInnerRadius ) > 0.0f)
-				{
-					flDistanceMult = clamp(1.0f - ( flDistance - flInnerRadius ) / ( flOuterRadius - flInnerRadius ), 0.0f, 1.0f);
-				}
-
-				float flSpeed = pPlayer->GetAbsVelocity().Length();
-				float flSpeedReduction = flSpeed - ( pow( flSpeed, SLOWFIELD_POWER ) * SLOWFIELD_MULTIPLIER );
-				flSpeedReduction *= pow( flDistanceMult, SLOWFIELD_RADIUS_POWER );
-				flSpeedReduction *= flFriendlyScale;
-
-				float flLaggedMovement = 1.0f;
-				if(flSpeed > 0.0f)
-				//no divide by zero
-				{
-					flLaggedMovement = clamp( (flSpeed - flSpeedReduction), 1.0f, flSpeed ) / flSpeed;
-				}
-
-				// only change players active slowfield if they will be going slower
-				if ( pPlayer->GetActiveSlowfield() != this && ( pPlayer->GetLaggedMovementValue() > flLaggedMovement || pPlayer->GetActiveSlowfield() == NULL ) )
-				{
-					pPlayer->SetLaggedMovementValue(flLaggedMovement);
-					pPlayer->SetActiveSlowfield( this );
-
-					// add status icon
-					CSingleUserRecipientFilter user( ( CBasePlayer * )pPlayer );
-					user.MakeReliable();
-
-					UserMessageBegin( user, "StatusIconUpdate" );
-						WRITE_BYTE( FF_STATUSICON_SLOWMOTION );
-						WRITE_FLOAT( -1.0f );
-					MessageEnd();
-				}
-				// else just give them an updated laggedmovement value
-				else if (pPlayer->GetActiveSlowfield() == this)
-				{
-					pPlayer->SetLaggedMovementValue(flLaggedMovement);
-				}		
-
-				CFFPlayer *pGrenOwner = ToFFPlayer( this->GetOwnerEntity() );
-
-				bHitPlayer = true;
-	
-				CBeam *pBeam = CBeam::BeamCreate( GRENADE_BEAM_SPRITE, 1 );
-				pBeam->SetWidth( SLOWFIELD_BEAM_WIDTHSTART );
-				pBeam->SetEndWidth( SLOWFIELD_BEAM_WIDTHEND );
-				pBeam->LiveForTime(gpGlobals->interval_per_tick);
-				pBeam->SetNoise( SLOWFIELD_BEAM_NOISE );
-				pBeam->SetBrightness( (1 - flLaggedMovement) * 128 + 128 );
-				if(pGrenOwner->GetTeamNumber() == TEAM_RED)
-					pBeam->SetColor( 255, 64, 64 );
-				else if(pGrenOwner->GetTeamNumber() == TEAM_BLUE)
-					pBeam->SetColor( 64, 128, 255 );
-				else if(pGrenOwner->GetTeamNumber() == TEAM_GREEN)
-					pBeam->SetColor( 153, 255, 153 );
-				else if(pGrenOwner->GetTeamNumber() == TEAM_YELLOW)
-					pBeam->SetColor( 255, 178, 0 );
-				else // just in case
-					pBeam->SetColor( 204, 204, 204 );
-				pBeam->PointsInit( vecOrigin, pPlayer->GetAbsOrigin() );
+				flDistanceMult = clamp(1.0f - (flDistance - flInnerRadius) / (flOuterRadius - flInnerRadius), 0.0f, 1.0f);
 			}
-			// outside the radius of the gren
-			else if (pPlayer->GetActiveSlowfield() == this)
+
+			float flSpeed = pPlayer->GetAbsVelocity().Length();
+			float flSpeedReduction = flSpeed - (pow(flSpeed, SLOWFIELD_POWER) * SLOWFIELD_MULTIPLIER);
+			flSpeedReduction *= pow(flDistanceMult, SLOWFIELD_RADIUS_POWER);
+			flSpeedReduction *= flFriendlyScale;
+
+			float flLaggedMovement = 1.0f;
+			if (flSpeed > 0.0f)
+				//no divide by zero
 			{
-				pPlayer->SetLaggedMovementValue( 1.0f );
-				pPlayer->SetActiveSlowfield( NULL );
-				
-				// remove status icon
-				CSingleUserRecipientFilter user( ( CBasePlayer * )pPlayer );
+				flLaggedMovement = clamp((flSpeed - flSpeedReduction), 1.0f, flSpeed) / flSpeed;
+			}
+
+			// only change players active slowfield if they will be going slower
+			if (pPlayer->GetActiveSlowfield() != this && (pPlayer->GetLaggedMovementValue() > flLaggedMovement || pPlayer->GetActiveSlowfield() == NULL))
+			{
+				pPlayer->SetLaggedMovementValue(flLaggedMovement);
+				pPlayer->SetActiveSlowfield(this);
+
+				// add status icon
+				CSingleUserRecipientFilter user((CBasePlayer*)pPlayer);
 				user.MakeReliable();
 
-				UserMessageBegin( user, "StatusIconUpdate" );
-					WRITE_BYTE( FF_STATUSICON_SLOWMOTION );
-					WRITE_FLOAT( 0.0f );
+				UserMessageBegin(user, "StatusIconUpdate");
+				WRITE_BYTE(FF_STATUSICON_SLOWMOTION);
+				WRITE_FLOAT(-1.0f);
 				MessageEnd();
+			}
+			// else just give them an updated laggedmovement value
+			else if (pPlayer->GetActiveSlowfield() == this)
+			{
+				pPlayer->SetLaggedMovementValue(flLaggedMovement);
+			}
+
+			if (bArmorStrip)
+				pPlayer->m_iArmor = max(0, pPlayer->m_iArmor - ARMORSTRIP_AMOUNT);;
+
+			CFFPlayer* pGrenOwner = ToFFPlayer(this->GetOwnerEntity());
+
+			bHitPlayer = true;
+
+			CBeam* pBeam = CBeam::BeamCreate(GRENADE_BEAM_SPRITE, 1);
+			pBeam->SetWidth(SLOWFIELD_BEAM_WIDTHSTART);
+			pBeam->SetEndWidth(SLOWFIELD_BEAM_WIDTHEND);
+			pBeam->LiveForTime(gpGlobals->interval_per_tick);
+			pBeam->SetNoise(SLOWFIELD_BEAM_NOISE);
+			pBeam->SetBrightness((1 - flLaggedMovement) * 128 + 128);
+			if (pGrenOwner->GetTeamNumber() == TEAM_RED)
+				pBeam->SetColor(255, 64, 64);
+			else if (pGrenOwner->GetTeamNumber() == TEAM_BLUE)
+				pBeam->SetColor(64, 128, 255);
+			else if (pGrenOwner->GetTeamNumber() == TEAM_GREEN)
+				pBeam->SetColor(153, 255, 153);
+			else if (pGrenOwner->GetTeamNumber() == TEAM_YELLOW)
+				pBeam->SetColor(255, 178, 0);
+			else // just in case
+				pBeam->SetColor(204, 204, 204);
+			pBeam->PointsInit(vecOrigin, pPlayer->GetAbsOrigin());
+		}
+		// outside the radius of the gren
+		else if (pPlayer->GetActiveSlowfield() == this)
+		{
+			pPlayer->SetLaggedMovementValue(1.0f);
+			pPlayer->SetActiveSlowfield(NULL);
+
+			// remove status icon
+			CSingleUserRecipientFilter user((CBasePlayer*)pPlayer);
+			user.MakeReliable();
+
+			UserMessageBegin(user, "StatusIconUpdate");
+			WRITE_BYTE(FF_STATUSICON_SLOWMOTION);
+			WRITE_FLOAT(0.0f);
+			MessageEnd();
+		}
+	}
+
+
+	if (!bHitPlayer && m_bBeamLoopPlaying)
+	{
+		m_bBeamLoopPlaying = false;
+		StopSound(SLOWFIELDGRENADE_BEAM_LOOP);
+	}
+	else if (bHitPlayer && !m_bBeamLoopPlaying)
+	{
+		m_bBeamLoopPlaying = true;
+		EmitSound(SLOWFIELDGRENADE_BEAM_LOOP);
+	}
+
+	// Animate
+	StudioFrameAdvance();
+
+	// Slow projectiles
+	CBaseEntity* pEnt = NULL;
+	while ((pEnt = gEntList.FindEntityByClassname(pEnt, "ff_projectile_*")) != NULL)
+	{
+		CFFProjectileBase* pProj = dynamic_cast<CFFProjectileBase*>(pEnt);
+		if (!pProj) continue;
+
+		if (pProj->GetAbsOrigin().DistTo(vecOrigin) < GetGrenadeRadius())
+		{
+			if (!pProj->m_bInSlowfield)
+			{
+				pProj->m_vecOriginalVelocity = pProj->GetAbsVelocity();
+				pProj->m_flOriginalGravity = pProj->GetGravity();
+				pProj->SetAbsVelocity(pProj->GetAbsVelocity() / 2.0f);
+				pProj->SetGravity(pProj->GetGravity() * 0.5f);
+				pProj->m_bInSlowfield = true;
+			}
+		}
+		else if (pProj->m_bInSlowfield)
+		{
+			pProj->SetAbsVelocity(pProj->m_vecOriginalVelocity);
+			pProj->SetGravity(pProj->m_flOriginalGravity);
+			pProj->m_bInSlowfield = false;
+		}
+	}
+	// Slow grenades
+		CBaseEntity* pEnt2 = NULL;
+		while ((pEnt2 = gEntList.FindEntityByClassname(pEnt2, "ff_grenade_*")) != NULL)
+		{
+			CFFProjectileBase* pProj = dynamic_cast<CFFProjectileBase*>(pEnt2);
+			if (!pProj) continue;
+			if (pProj->GetAbsOrigin().DistTo(vecOrigin) < GetGrenadeRadius())
+			{
+				if (!pProj->m_bInSlowfield)
+				{
+					pProj->m_vecOriginalVelocity = pProj->GetAbsVelocity();
+					pProj->m_flOriginalGravity = pProj->GetGravity();
+					pProj->SetAbsVelocity(pProj->GetAbsVelocity() / 2.0f);
+					pProj->SetGravity(pProj->GetGravity() * 0.5f);
+					pProj->m_bInSlowfield = true;
+				}
+			}
+			else if (pProj->m_bInSlowfield)
+			{
+				pProj->SetGravity(pProj->m_flOriginalGravity);
+				pProj->m_bInSlowfield = false;
 			}
 		}
 
-
-		if(!bHitPlayer && m_bBeamLoopPlaying)
-		{
-			m_bBeamLoopPlaying = false;
-			StopSound( SLOWFIELDGRENADE_BEAM_LOOP );
-		}
-		else if(bHitPlayer && !m_bBeamLoopPlaying)
-		{
-			m_bBeamLoopPlaying = true;
-			EmitSound( SLOWFIELDGRENADE_BEAM_LOOP );
-		}
-
-		// Animate
-		StudioFrameAdvance();
-
-		SetNextThink(gpGlobals->curtime);
-		m_flLastThinkTime = gpGlobals->curtime;
-	}
+	SetNextThink(gpGlobals->curtime);
+	m_flLastThinkTime = gpGlobals->curtime;
+}
 
 #endif
 
-	
+
 //=============================================================================
 // CFFGrenadeSlowfieldGlow implementation
 //=============================================================================
 
 #ifdef GAME_DLL
 
-CFFGrenadeSlowfieldGlow *CFFGrenadeSlowfieldGlow::Create(const Vector &origin, CBaseEntity *pOwner)
+CFFGrenadeSlowfieldGlow* CFFGrenadeSlowfieldGlow::Create(const Vector& origin, CBaseEntity* pOwner)
 {
-	CFFGrenadeSlowfieldGlow *pSlowGlow = (CFFGrenadeSlowfieldGlow *) CBaseEntity::Create("env_ffslowfieldglow", origin, QAngle(0, 0, 0));
+	CFFGrenadeSlowfieldGlow* pSlowGlow = (CFFGrenadeSlowfieldGlow*)CBaseEntity::Create("env_ffslowfieldglow", origin, QAngle(0, 0, 0));
 
 	if (pSlowGlow == NULL)
 		return NULL;
@@ -598,7 +687,7 @@ int CFFGrenadeSlowfieldGlow::DrawModel(int flags)
 		return 0;
 	}
 
-	CFFGrenadeSlowfield *slowgren = dynamic_cast<CFFGrenadeSlowfield *> (GetOwnerEntity());
+	CFFGrenadeSlowfield* slowgren = dynamic_cast<CFFGrenadeSlowfield*> (GetOwnerEntity());
 #ifdef _DEBUG
 	Assert(slowgren != 0);
 #endif
@@ -627,26 +716,26 @@ int CFFGrenadeSlowfieldGlow::DrawModel(int flags)
 
 	if (alpha < 0)
 		alpha *= -1;
-	
+
 	alpha = 1.0f - alpha;
 	alpha *= alpha;
 
-	alpha = clamp(SLOWFIELD_GLOW_A * (54.0f + 200.0f * alpha), SLOWFIELD_GLOW_A_MIN, SLOWFIELD_GLOW_A_MAX );
+	alpha = clamp(SLOWFIELD_GLOW_A * (54.0f + 200.0f * alpha), SLOWFIELD_GLOW_A_MIN, SLOWFIELD_GLOW_A_MAX);
 
 	int drawn = DrawSprite(
-		this, 
-		GetModel(), 
-		GetAbsOrigin(), 
-		GetAbsAngles(), 
+		this,
+		GetModel(),
+		GetAbsOrigin(),
+		GetAbsAngles(),
 		m_flFrame, 				// sprite frame to render
 		m_hAttachedToEntity, 	// attach to
 		m_nAttachment, 			// attachment point
 		GetRenderMode(), 		// rendermode
-		m_nRenderFX, 
-		 (int) alpha, 		// alpha
-		/*m_clrRender->r */ SLOWFIELD_GLOW_R, 
-		/*m_clrRender->g */ SLOWFIELD_GLOW_G, 
-		/*m_clrRender->b */ SLOWFIELD_GLOW_B, 
+		m_nRenderFX,
+		(int)alpha, 		// alpha
+		/*m_clrRender->r */ SLOWFIELD_GLOW_R,
+		/*m_clrRender->g */ SLOWFIELD_GLOW_G,
+		/*m_clrRender->b */ SLOWFIELD_GLOW_B,
 		SLOWFIELD_RADIUS_INNER / 64 * SLOWFIELD_GLOW_SIZE);			// sprite scale
 
 	return drawn;
@@ -659,7 +748,7 @@ void CFFGrenadeSlowfieldGlow::OnDataChanged(DataUpdateType_t updateType)
 {
 	if (updateType == DATA_UPDATE_CREATED)
 	{
-		SetNextClientThink( CLIENT_THINK_ALWAYS );
+		SetNextClientThink(CLIENT_THINK_ALWAYS);
 	}
 }
 #endif
