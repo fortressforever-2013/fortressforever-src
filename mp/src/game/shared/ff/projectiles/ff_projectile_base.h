@@ -82,6 +82,9 @@ private:
 	void SetupInitialTransmittedVelocity(const Vector &velocity);
 	int TakeEmp();
 	virtual bool IsInWorld( void ) const;
+	bool m_bInSlowfield;
+	Vector m_vecOriginalVelocity;
+	float m_flOriginalGravity;
 
 #endif
 

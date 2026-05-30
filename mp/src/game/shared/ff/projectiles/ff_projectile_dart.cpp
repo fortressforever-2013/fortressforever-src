@@ -98,6 +98,18 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_dart);
 		UpdateWaterState();
 
 		BaseClass::Spawn();
+
+#ifdef GAME_DLL
+		CSpriteTrail* pTrail = CSpriteTrail::SpriteTrailCreate("sprites/bluelaser1.vmt", GetLocalOrigin(), false);
+		if (pTrail)
+		{
+			pTrail->FollowEntity(this);
+			pTrail->SetTransparency(kRenderTransAdd, 20, 168, 20, 255, kRenderFxNone);
+			pTrail->SetStartWidth(10.0f);
+			pTrail->SetEndWidth(7.5f);
+			pTrail->SetLifeTime(0.1f);
+		}
+#endif
 	}
 
 #endif
@@ -272,9 +284,12 @@ void CFFProjectileDart::DartTouch(CBaseEntity *pOther)
 				
 			UTIL_ImpactTrace(&tr, DMG_BULLET);
 
-			AddEffects(EF_NODRAW);
+			// AddEffects(EF_NODRAW);
 			SetTouch(NULL);
-			SetThink(&CFFProjectileDart::SUB_Remove);		// |-- Mirv: Account for GCC strictness
+			SetRenderMode(kRenderTransAlpha);
+			SetRenderColorA(255);
+			m_nRenderFX = kRenderFxFadeSlow;
+			SetThink(&CFFProjectileDart::SUB_Remove);
 			SetNextThink(gpGlobals->curtime + 2.0f);
 
 			// Shoot some sparks

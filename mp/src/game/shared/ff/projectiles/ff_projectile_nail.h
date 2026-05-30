@@ -33,6 +33,7 @@ class CFFProjectileNail : public CFFProjectileBase
 {
 public:
 	DECLARE_CLASS(CFFProjectileNail, CFFProjectileBase);
+	DECLARE_NETWORKCLASS();
 
 public:
 	bool m_bNailGrenadeNail;
@@ -45,7 +46,7 @@ public:
 
 	virtual bool CanClipOwnerEntity() const { return m_bNailGrenadeNail; }
 
-	int UpdateTransmitState() { return FL_EDICT_DONTSEND; }
+	// int UpdateTransmitState() { return FL_EDICT_DONTSEND; }
 
 #ifdef CLIENT_DLL
 	CFFProjectileNail() {}

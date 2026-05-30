@@ -10,18 +10,24 @@
 /// ---------
 /// Dec 21, 2004 Mirv: First creation logged
 
-// NB. THIS SHOULD BE A TEMPENT!!!!
-//		EDIT: THIS *IS* A TEMPENT NOW!!!!
-
 #include "cbase.h"
 #include "ff_projectile_nail.h"
 #include "effect_dispatch_data.h"
 #include "IEffects.h"
 #include "ammodef.h"
+#ifdef GAME_DLL
+	#include "ff_player.h"
+	#include "smoke_trail.h"
+#endif
 #include "ff_shareddefs.h"
 #include "ff_utils.h"
 
 #define NAIL_MODEL "models/projectiles/nail/w_nail.mdl"
+
+class CRecvProxyData;
+extern void RecvProxy_LocalVelocityX(const CRecvProxyData* pData, void* pStruct, void* pOut);
+extern void RecvProxy_LocalVelocityY(const CRecvProxyData* pData, void* pStruct, void* pOut);
+extern void RecvProxy_LocalVelocityZ(const CRecvProxyData* pData, void* pStruct, void* pOut);
 
 //ConVar ffdev_nail_speed("ffdev_nail_speed", "1000.0", FCVAR_FF_FFDEV_REPLICATED , "Nail speed");
 //ConVar ffdev_nail_pushmultiplier("ffdev_nail_pushmultiplier", "0.05", FCVAR_FF_FFDEV_REPLICATED, "Nail pushforce multiplier - was 0.1 for 2.1 release");
@@ -47,6 +53,24 @@
 	END_DATADESC() 
 #endif
 
+IMPLEMENT_NETWORKCLASS_ALIASED(FFProjectileNail, DT_FFProjectileNail)
+
+BEGIN_NETWORK_TABLE(CFFProjectileNail, DT_FFProjectileNail)
+#ifdef CLIENT_DLL
+	RecvPropFloat		( RECVINFO(m_vecVelocity[0]), 0, RecvProxy_LocalVelocityX ),
+	RecvPropFloat		( RECVINFO(m_vecVelocity[1]), 0, RecvProxy_LocalVelocityY ),
+	RecvPropFloat		( RECVINFO(m_vecVelocity[2]), 0, RecvProxy_LocalVelocityZ ),
+#else
+	// Increased range for this because it goes at a mad speed
+	SendPropExclude("DT_BaseGrenade", "m_vecVelocity[0]"),
+	SendPropExclude("DT_BaseGrenade", "m_vecVelocity[1]"),
+	SendPropExclude("DT_BaseGrenade", "m_vecVelocity[2]"),
+	SendPropFloat( SENDINFO_VECTORELEM(m_vecVelocity, 0), 16, SPROP_ROUNDDOWN, -4096.0f, 4096.0f ),
+	SendPropFloat( SENDINFO_VECTORELEM(m_vecVelocity, 1), 16, SPROP_ROUNDDOWN, -4096.0f, 4096.0f ),
+	SendPropFloat( SENDINFO_VECTORELEM(m_vecVelocity, 2), 16, SPROP_ROUNDDOWN, -4096.0f, 4096.0f ),
+#endif
+END_NETWORK_TABLE()
+
 LINK_ENTITY_TO_CLASS(ff_projectile_nail, CFFProjectileNail);
 PRECACHE_WEAPON_REGISTER(ff_projectile_nail);
 
@@ -62,12 +86,12 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_nail);
 	void CFFProjectileNail::Spawn() 
 	{
 		// Setup
-		//SetModel(NAIL_MODEL);
+		SetModel(NAIL_MODEL);
 		SetMoveType(/*MOVETYPE_FLYGRAVITY*/ MOVETYPE_FLY, MOVECOLLIDE_FLY_CUSTOM);
 		SetSize(-Vector(1.0f, 1.0f, 1.0f) * NAIL_BBOX, Vector(1.0f, 1.0f, 1.0f) * NAIL_BBOX);
 		SetSolid(SOLID_BBOX);
 		//SetGravity(0.01f);
-		SetEffects(EF_NODRAW);
+		//SetEffects(EF_NODRAW);
 		m_iDamageType = DMG_BULLET | DMG_NEVERGIB;
 		
 		// Set the correct think & touch for the nail
@@ -75,7 +99,7 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_nail);
 		SetThink(&CFFProjectileNail::BubbleThink);	// |-- Mirv: Account for GCC strictness
 
 		// Next think(ie. how bubbly it'll be) 
-		SetNextThink(gpGlobals->curtime + 0.1f);
+		SetNextThink(gpGlobals->curtime + 0.05f);
 		
 		// Make sure we're updated if we're underwater
 		UpdateWaterState();
@@ -84,6 +108,18 @@ PRECACHE_WEAPON_REGISTER(ff_projectile_nail);
 		m_bNailGrenadeNail = false;
 
 		BaseClass::Spawn();
+
+#ifdef GAME_DLL
+		CSpriteTrail* pTrail = CSpriteTrail::SpriteTrailCreate("sprites/bluelaser1.vmt", GetLocalOrigin(), false);
+		if (pTrail)
+		{
+			pTrail->FollowEntity(this);
+			pTrail->SetTransparency(kRenderTransAdd, 175, 75, 0, 255, kRenderFxNone);
+			pTrail->SetStartWidth(10.0f);
+			pTrail->SetEndWidth(7.5f);
+			pTrail->SetLifeTime(0.05f);
+		}
+#endif
 	}
 
 #endif
@@ -104,21 +140,21 @@ void CFFProjectileNail::Precache()
 //----------------------------------------------------------------------------
 // Purpose: The nail touch function
 //----------------------------------------------------------------------------
-void CFFProjectileNail::NailTouch(CBaseEntity *pOther) 
+void CFFProjectileNail::NailTouch(CBaseEntity* pOther)
 {
 	// The projectile has not hit anything valid so far
-	if (!pOther->IsSolid() || pOther->IsSolidFlagSet(FSOLID_VOLUME_CONTENTS) || !g_pGameRules->ShouldCollide(GetCollisionGroup(), pOther->GetCollisionGroup())) 
+	if (!pOther->IsSolid() || pOther->IsSolidFlagSet(FSOLID_VOLUME_CONTENTS) || !g_pGameRules->ShouldCollide(GetCollisionGroup(), pOther->GetCollisionGroup()))
 		return;
 
-//#ifdef GAME_DLL
-//	NDebugOverlay::EntityBounds(this, 0, 0, 255, 100, 5.0f);
-//#endif
+	//#ifdef GAME_DLL
+	//	NDebugOverlay::EntityBounds(this, 0, 0, 255, 100, 5.0f);
+	//#endif
 
 	trace_t	tr;
 	tr = BaseClass::GetTouchTrace();
 
 	// This entity can take damage, so deal it out
-	if (pOther->m_takedamage != DAMAGE_NO) 
+	if (pOther->m_takedamage != DAMAGE_NO)
 	{
 #ifdef GAME_DLL
 		Vector	vecNormalizedVel = GetAbsVelocity();
@@ -126,7 +162,7 @@ void CFFProjectileNail::NailTouch(CBaseEntity *pOther)
 
 		ClearMultiDamage();
 
-		if (FF_IsAirshot(pOther)) 
+		if (FF_IsAirshot(pOther))
 			m_iDamageType |= DMG_AIRSHOT;
 
 		CTakeDamageInfo	dmgInfo(this, GetOwnerEntity(), m_flDamage, m_iDamageType);
@@ -135,12 +171,12 @@ void CFFProjectileNail::NailTouch(CBaseEntity *pOther)
 
 		if (pOther->IsPlayer())
 		{
-			dmgInfo.ScaleDamageForce( FF_NAIL_PUSHMULTIPLIER );
+			dmgInfo.ScaleDamageForce(FF_NAIL_PUSHMULTIPLIER);
 		}
-		else if( ( pOther->Classify() == CLASS_SENTRYGUN ) && m_bNailGrenadeNail )
+		else if ((pOther->Classify() == CLASS_SENTRYGUN) && m_bNailGrenadeNail)
 		{
 			// Modify the damage +- cvar value
-			dmgInfo.SetDamage( dmgInfo.GetDamage() + NAIL_SGMOD );
+			dmgInfo.SetDamage(dmgInfo.GetDamage() + NAIL_SGMOD);
 		}
 
 		pOther->DispatchTraceAttack(dmgInfo, vecNormalizedVel, &tr);
@@ -149,17 +185,40 @@ void CFFProjectileNail::NailTouch(CBaseEntity *pOther)
 #endif
 
 		// Keep going through the glass.
-		if (pOther->GetCollisionGroup() == COLLISION_GROUP_BREAKABLE_GLASS) 
-			 return;
+		if (pOther->GetCollisionGroup() == COLLISION_GROUP_BREAKABLE_GLASS)
+			return;
 
 		// Play body "thwack" sound
 		EmitSound("Nail.HitBody");
-	}
-
 #ifdef GAME_DLL
-	// Now just remove the nail
-	Remove();
+		Remove();
 #endif
+	}
+	else
+	{
+		if (pOther->GetMoveType() == MOVETYPE_NONE && !(tr.surface.flags & SURF_SKY))
+		{
+			EmitSound("Nail.HitWorld");
+			UTIL_ImpactTrace(&tr, DMG_BULLET);
+
+			SetMoveType(MOVETYPE_NONE);
+			SetAbsVelocity(vec3_origin);
+			SetLocalAngularVelocity(vec3_angle);
+
+			SetTouch(NULL);
+			SetRenderMode(kRenderTransAlpha);
+			SetRenderColorA(255);
+			m_nRenderFX = kRenderFxFadeSlow;
+			SetThink(&CFFProjectileNail::SUB_Remove);
+			SetNextThink(gpGlobals->curtime + 2.0f);
+		}
+		else
+		{
+#ifdef GAME_DLL
+			Remove();
+#endif
+		}
+	}
 }
 
 //----------------------------------------------------------------------------
@@ -176,6 +235,8 @@ void CFFProjectileNail::BubbleThink()
 	SetAbsAngles(angNewAngles);
 
 	SetNextThink(gpGlobals->curtime + 5.0f);
+
+
 
 #ifdef GAME_DLL
 	
@@ -209,7 +270,7 @@ CFFProjectileNail *CFFProjectileNail::CreateNail(const CBaseEntity *pSource, con
 	// Set the speed and the initial transmitted velocity
 	pNail->SetAbsVelocity(vecForward);
 
-	if (!bNotClientSide)
+	/* if (!bNotClientSide)
 	{
 		CEffectData data;
 		data.m_vOrigin = vecOrigin;
@@ -223,7 +284,7 @@ CFFProjectileNail *CFFProjectileNail::CreateNail(const CBaseEntity *pSource, con
 	#endif
 
 		DispatchEffect("Projectile_Nail", data);
-	}
+	} */
 
 #ifdef GAME_DLL
 	pNail->SetupInitialTransmittedVelocity(vecForward);
