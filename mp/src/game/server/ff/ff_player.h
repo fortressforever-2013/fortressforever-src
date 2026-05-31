@@ -351,7 +351,6 @@ public:
 	void Command_DropItems(const CCommand& args = CCommand());
 	void Command_DetPipes(const CCommand& args = CCommand());
 	void Command_Discard(const CCommand& args = CCommand());
-	void Command_DiscardUnneeded(const CCommand& args = CCommand());
 	void Command_DiscardHalfShells(const CCommand& args = CCommand());
 	void Command_DiscardHalfNails(const CCommand& args = CCommand());
 	void Command_DiscardHalfRockets(const CCommand& args = CCommand());
