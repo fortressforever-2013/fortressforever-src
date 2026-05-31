@@ -147,6 +147,15 @@ FF_AUTO_COMMAND( dispensertext, &CFFPlayer::Command_DispenserText, "Set custom t
 FF_AUTO_COMMAND( detpack, &CFFPlayer::Command_BuildDetpack, "Drop a detpack.", FF_CMD_SKILL_COMMAND | FF_CMD_ALIVE | FF_CMD_PREMATCH );
 FF_AUTO_COMMAND( mancannon, &CFFPlayer::Command_BuildManCannon, "Build a man cannon.", FF_CMD_SKILL_COMMAND | FF_CMD_ALIVE | FF_CMD_PREMATCH );
 FF_AUTO_COMMAND( discard, &CFFPlayer::Command_Discard, "Discards unneeded ammo", FF_CMD_ALIVE | FF_CMD_PREMATCH | FF_CMD_CLOAKED );
+FF_AUTO_COMMAND( discardunneeded, &CFFPlayer::Command_DiscardUnneeded, "Discard unneeded ammo", FF_CMD_ALIVE | FF_CMD_PREMATCH | FF_CMD_CLOAKED );
+FF_AUTO_COMMAND( discardhalfshells, &CFFPlayer::Command_DiscardHalfShells, "Discard half the shells", FF_CMD_ALIVE | FF_CMD_PREMATCH | FF_CMD_CLOAKED );
+FF_AUTO_COMMAND( discardhalfnails, &CFFPlayer::Command_DiscardHalfNails, "Discard half the nails", FF_CMD_ALIVE | FF_CMD_PREMATCH | FF_CMD_CLOAKED );
+FF_AUTO_COMMAND( discardhalfrockets, &CFFPlayer::Command_DiscardHalfRockets, "Discard half the rockets", FF_CMD_ALIVE | FF_CMD_PREMATCH | FF_CMD_CLOAKED );
+FF_AUTO_COMMAND( discardhalfcells, &CFFPlayer::Command_DiscardHalfCells, "Discard half the cells", FF_CMD_ALIVE | FF_CMD_PREMATCH | FF_CMD_CLOAKED );
+FF_AUTO_COMMAND( discardallshells, &CFFPlayer::Command_DiscardAllShells, "Discard all the shells", FF_CMD_ALIVE | FF_CMD_PREMATCH | FF_CMD_CLOAKED );
+FF_AUTO_COMMAND( discardallnails, &CFFPlayer::Command_DiscardAllNails, "Discard all the nails", FF_CMD_ALIVE | FF_CMD_PREMATCH | FF_CMD_CLOAKED );
+FF_AUTO_COMMAND( discardallrockets, &CFFPlayer::Command_DiscardAllRockets, "Discard all the rockets", FF_CMD_ALIVE | FF_CMD_PREMATCH | FF_CMD_CLOAKED );
+FF_AUTO_COMMAND( discardallcells, &CFFPlayer::Command_DiscardAllCells, "Discard all the cells", FF_CMD_ALIVE | FF_CMD_PREMATCH | FF_CMD_CLOAKED );
 FF_SHARED_COMMAND( saveme, &CFFPlayer::Command_SaveMe, CC_SaveMe, "Call for medical attention", FF_CMD_ALIVE | FF_CMD_PREMATCH );
 FF_SHARED_COMMAND( engyme, &CFFPlayer::Command_EngyMe, CC_EngyMe, "Call for engineer attention", FF_CMD_ALIVE | FF_CMD_PREMATCH );
 FF_SHARED_COMMAND( ammome, &CFFPlayer::Command_AmmoMe, CC_AmmoMe, "Call for ammo", FF_CMD_ALIVE | FF_CMD_PREMATCH );
