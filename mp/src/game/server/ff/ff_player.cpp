@@ -4003,6 +4003,116 @@ void CFFPlayer::Command_Discard(const CCommand& args)
 	}
 }
 
+static void DiscardBackpack(CFFPlayer* pPlayer,
+	int iShells, int iNails, int iCells, int iRockets)
+{
+	if (!pPlayer)
+		return;
+
+	iShells = min(iShells, pPlayer->GetAmmoCount(AMMO_SHELLS));
+	iNails = min(iNails, pPlayer->GetAmmoCount(AMMO_NAILS));
+	iCells = min(iCells, pPlayer->GetAmmoCount(AMMO_CELLS));
+	iRockets = min(iRockets, pPlayer->GetAmmoCount(AMMO_ROCKETS));
+
+	if (iShells <= 0 && iNails <= 0 && iCells <= 0 && iRockets <= 0)
+		return;
+
+	CFFItemBackpack* pBackpack = (CFFItemBackpack*)CBaseEntity::Create(
+		"ff_item_backpack", pPlayer->GetAbsOrigin(), pPlayer->GetAbsAngles());
+
+	if (!pBackpack)
+		return;
+
+	pBackpack->SetSpawnFlags(SF_NORESPAWN);
+	pBackpack->SetOwnerEntity(pPlayer);
+	pBackpack->m_bIsDeathBag = false;
+
+	if (iShells > 0) pBackpack->SetAmmoCount(GetAmmoDef()->Index(AMMO_SHELLS), iShells);
+	if (iNails > 0) pBackpack->SetAmmoCount(GetAmmoDef()->Index(AMMO_NAILS), iNails);
+	if (iCells > 0) pBackpack->SetAmmoCount(GetAmmoDef()->Index(AMMO_CELLS), iCells);
+	if (iRockets > 0) pBackpack->SetAmmoCount(GetAmmoDef()->Index(AMMO_ROCKETS), iRockets);
+
+	bool bDiscardAllowed = true;
+	CFFLuaSC hContext(0);
+	hContext.Push(pPlayer);
+	hContext.Push(pBackpack);
+	hContext.Push(pBackpack->m_bIsDeathBag);
+	if (_scriptman.RunPredicates_LUA(NULL, &hContext, "player_ondiscard"))
+		bDiscardAllowed = hContext.GetBool();
+
+	if (!bDiscardAllowed)
+	{
+		UTIL_Remove(pBackpack);
+		return;
+	}
+
+	if (iShells > 0) pPlayer->RemoveAmmo(iShells, AMMO_SHELLS);
+	if (iNails > 0) pPlayer->RemoveAmmo(iNails, AMMO_NAILS);
+	if (iCells > 0) pPlayer->RemoveAmmo(iCells, AMMO_CELLS);
+	if (iRockets > 0) pPlayer->RemoveAmmo(iRockets, AMMO_ROCKETS);
+
+	Vector vForward;
+	AngleVectors(pPlayer->EyeAngles(), &vForward);
+	vForward *= 420.0f;
+	if (vForward.z < 1.0f)
+		vForward.z = 1.0f;
+
+	pBackpack->SetAbsVelocity(vForward);
+	pBackpack->SetAbsOrigin(pPlayer->GetAbsOrigin());
+	pPlayer->EmitSound("Item.Toss");
+}
+
+void CFFPlayer::Command_DiscardUnneeded(const CCommand& args)
+{
+	bool bKeepAmmo[MAX_AMMO_TYPES] = { false };
+	for (int i = 0; i < MAX_WEAPON_SLOTS; i++)
+	{
+		if (GetWeapon(i))
+		{
+			int ammoid = GetWeapon(i)->GetPrimaryAmmoType();
+			if (ammoid > -1)
+				bKeepAmmo[ammoid] = true;
+		}
+	}
+	int iShells = bKeepAmmo[GetAmmoDef()->Index(AMMO_SHELLS)] ? 0 : GetAmmoCount(AMMO_SHELLS);
+	int iNails = bKeepAmmo[GetAmmoDef()->Index(AMMO_NAILS)] ? 0 : GetAmmoCount(AMMO_NAILS);
+	int iRockets = bKeepAmmo[GetAmmoDef()->Index(AMMO_ROCKETS)] ? 0 : GetAmmoCount(AMMO_ROCKETS);
+	int iCells = bKeepAmmo[GetAmmoDef()->Index(AMMO_CELLS)] ? 0 : GetAmmoCount(AMMO_CELLS);
+	DiscardBackpack(this, iShells, iNails, iRockets, iCells);
+}
+void CFFPlayer::Command_DiscardHalfShells(const CCommand& args)
+{
+	DiscardBackpack(this, GetAmmoCount(AMMO_SHELLS) / 2, 0, 0, 0);
+}
+void CFFPlayer::Command_DiscardHalfNails(const CCommand& args)
+{
+	DiscardBackpack(this, 0, GetAmmoCount(AMMO_NAILS) / 2, 0, 0);
+}
+void CFFPlayer::Command_DiscardHalfRockets(const CCommand& args)
+{
+	DiscardBackpack(this, 0, 0, 0, GetAmmoCount(AMMO_ROCKETS) / 2);
+}
+void CFFPlayer::Command_DiscardHalfCells(const CCommand& args)
+{
+	DiscardBackpack(this, 0, 0, GetAmmoCount(AMMO_CELLS) / 2, 0);
+}
+void CFFPlayer::Command_DiscardAllShells(const CCommand& args)
+{
+	DiscardBackpack(this, GetAmmoCount(AMMO_SHELLS), 0, 0, 0);
+}
+void CFFPlayer::Command_DiscardAllNails(const CCommand& args)
+{
+	DiscardBackpack(this, 0, GetAmmoCount(AMMO_NAILS), 0, 0);
+}
+void CFFPlayer::Command_DiscardAllRockets(const CCommand& args)
+{
+	DiscardBackpack(this, 0, 0, 0, GetAmmoCount(AMMO_ROCKETS));
+}
+void CFFPlayer::Command_DiscardAllCells(const CCommand& args)
+{
+	DiscardBackpack(this, 0, 0, GetAmmoCount(AMMO_CELLS), 0);
+}
+
 void CFFPlayer::StatusEffectsThink( void )
 {
 	if( m_bGassed )
