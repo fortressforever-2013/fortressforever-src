@@ -117,6 +117,10 @@ ConVar slowfield_glow_size("ffdev_slowfield_glow_size", "0.3", FCVAR_FF_FFDEV_CL
 //ConVar ffdev_slowfield_selfscale("ffdev_slowfield_selfscale", "1", FCVAR_FF_FFDEV_REPLICATED, "When selfignore is 0, modifies the slow amount for the thrower", true, 0.0f, true, 1.0f);
 #define SLOWFIELD_SELFSCALE 1 //ffdev_slowfield_selfscale.GetFloat()
 
+// Armorstrip 
+#define ARMORSTRIP_RATE 0.5f
+#define ARMORSTRIP_AMOUNT 5.0f
+
 #ifdef CLIENT_DLL
 	#define CFFGrenadeSlowfield C_FFGrenadeSlowfield
 	#define CFFGrenadeSlowfieldGlow C_FFGrenadeSlowfieldGlow
@@ -202,6 +206,7 @@ public:
 protected:
 	bool m_bBeamLoopPlaying;
 	float	m_flLastThinkTime;
+	float m_flArmorStrip;
 
 	int m_iSequence;
 	Activity m_Activity;
@@ -301,6 +306,7 @@ void CFFGrenadeSlowfield::UpdateOnRemove()
 		m_Activity = ( Activity )ACT_GAS_IDLE;
 		m_iSequence = SelectWeightedSequence( m_Activity );
 		m_bBeamLoopPlaying = false;
+		m_flArmorStrip = 0.0f;
 		SetSequence( m_iSequence );		
 	}
 
@@ -418,6 +424,9 @@ void CFFGrenadeSlowfield::UpdateOnRemove()
 
 		bool bHitPlayer = false;
 
+		bool bArmorStrip = (gpGlobals->curtime >= m_flArmorStrip);
+		if (bArmorStrip) m_flArmorStrip = gpGlobals->curtime + ARMORSTRIP_RATE;
+
 		for (int i=1; i<=gpGlobals->maxClients; i++)
 		{
 			CFFPlayer *pPlayer = ToFFPlayer( UTIL_PlayerByIndex(i) );
@@ -485,7 +494,10 @@ void CFFGrenadeSlowfield::UpdateOnRemove()
 				else if (pPlayer->GetActiveSlowfield() == this)
 				{
 					pPlayer->SetLaggedMovementValue(flLaggedMovement);
-				}		
+				}
+
+				if (bArmorStrip)
+					pPlayer->m_iArmor = max(0, pPlayer->m_iArmor - ARMORSTRIP_AMOUNT);;
 
 				CFFPlayer *pGrenOwner = ToFFPlayer( this->GetOwnerEntity() );
 
