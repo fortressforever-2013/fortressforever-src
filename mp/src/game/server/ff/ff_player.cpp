@@ -4062,24 +4062,6 @@ static void DiscardBackpack(CFFPlayer* pPlayer,
 	pPlayer->EmitSound("Item.Toss");
 }
 
-void CFFPlayer::Command_DiscardUnneeded(const CCommand& args)
-{
-	bool bKeepAmmo[MAX_AMMO_TYPES] = { false };
-	for (int i = 0; i < MAX_WEAPON_SLOTS; i++)
-	{
-		if (GetWeapon(i))
-		{
-			int ammoid = GetWeapon(i)->GetPrimaryAmmoType();
-			if (ammoid > -1)
-				bKeepAmmo[ammoid] = true;
-		}
-	}
-	int iShells = bKeepAmmo[GetAmmoDef()->Index(AMMO_SHELLS)] ? 0 : GetAmmoCount(AMMO_SHELLS);
-	int iNails = bKeepAmmo[GetAmmoDef()->Index(AMMO_NAILS)] ? 0 : GetAmmoCount(AMMO_NAILS);
-	int iRockets = bKeepAmmo[GetAmmoDef()->Index(AMMO_ROCKETS)] ? 0 : GetAmmoCount(AMMO_ROCKETS);
-	int iCells = bKeepAmmo[GetAmmoDef()->Index(AMMO_CELLS)] ? 0 : GetAmmoCount(AMMO_CELLS);
-	DiscardBackpack(this, iShells, iNails, iRockets, iCells);
-}
 void CFFPlayer::Command_DiscardHalfShells(const CCommand& args)
 {
 	DiscardBackpack(this, GetAmmoCount(AMMO_SHELLS) / 2, 0, 0, 0);
