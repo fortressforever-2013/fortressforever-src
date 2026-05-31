@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose:		Player for FF Game
 //
@@ -351,6 +351,15 @@ public:
 	void Command_DropItems(const CCommand& args = CCommand());
 	void Command_DetPipes(const CCommand& args = CCommand());
 	void Command_Discard(const CCommand& args = CCommand());
+	void Command_DiscardUnneeded(const CCommand& args = CCommand());
+	void Command_DiscardHalfShells(const CCommand& args = CCommand());
+	void Command_DiscardHalfNails(const CCommand& args = CCommand());
+	void Command_DiscardHalfRockets(const CCommand& args = CCommand());
+	void Command_DiscardHalfCells(const CCommand& args = CCommand());
+	void Command_DiscardAllShells(const CCommand& args = CCommand());
+	void Command_DiscardAllNails(const CCommand& args = CCommand());
+	void Command_DiscardAllRockets(const CCommand& args = CCommand());
+	void Command_DiscardAllCells(const CCommand& args = CCommand());
 	void Command_SaveMe(const CCommand& args = CCommand());
 	void Command_EngyMe(const CCommand& args = CCommand());
 	void Command_AmmoMe(const CCommand& args = CCommand());
