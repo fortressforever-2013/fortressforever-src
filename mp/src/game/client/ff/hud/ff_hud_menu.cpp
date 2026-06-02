@@ -375,14 +375,14 @@ ADD_MENU_OPTION(lastdisguise, "#FF_CM_DISGUISELAST", 'J', "disguise last") { ret
 //-----------------------------------------------------------------------------
 // Discard menu options
 //-----------------------------------------------------------------------------
-ADD_MENU_OPTION(discardunneeded, "#FF_CM_DISCUNNEEDED", '_', "discard") { return MENU_SHOW; }
+ADD_MENU_OPTION(discardunneeded, "#FF_DISCARDAMMO", '_', "discard") { return MENU_SHOW; }
 ADD_MENU_OPTION(discardhalfshells, "#FF_CM_DISCHALFSHELLS", '_', "discardhalfshells") { return MENU_SHOW; }
-ADD_MENU_OPTION(discardhalfnails, "#FF_CM_DISCHALFNAILS", '_', "discardhalfnails") { return MENU_SHOW; }
-ADD_MENU_OPTION(discardhalfrockets, "#FF_CM_DISCHALFROCKETS", '_', "discardhalfrockets") { return MENU_SHOW; }
-ADD_MENU_OPTION(discardhalfcells, "#FF_CM_DISCHALFCELLS", '_', "discardhalfcells") { return MENU_SHOW; }
 ADD_MENU_OPTION(discardallshells, "#FF_CM_DISCALLSHELLS", '_', "discardallshells") { return MENU_SHOW; }
+ADD_MENU_OPTION(discardhalfnails, "#FF_CM_DISCHALFNAILS", '_', "discardhalfnails") { return MENU_SHOW; }
 ADD_MENU_OPTION(discardallnails, "#FF_CM_DISCALLNAILS", '_', "discardallnails") { return MENU_SHOW; }
+ADD_MENU_OPTION(discardhalfrockets, "#FF_CM_DISCHALFROCKETS", '_', "discardhalfrockets") { return MENU_SHOW; }
 ADD_MENU_OPTION(discardallrockets, "#FF_CM_DISCALLROCKETS", '_', "discardallrockets") { return MENU_SHOW; }
+ADD_MENU_OPTION(discardhalfcells, "#FF_CM_DISCHALFCELLS", '_', "discardhalfcells") { return MENU_SHOW; }
 ADD_MENU_OPTION(discardallcells, "#FF_CM_DISCALLCELLS", '_', "discardallcells") { return MENU_SHOW; }
 
 //-----------------------------------------------------------------------------
@@ -486,7 +486,7 @@ MenuOption ClassDOptionList[] = { disguisescout, disguisesniper, disguisesoldier
 MenuOption FriendlyDOptionList[] = { disguise_blue_friendly, disguise_red_friendly, disguise_yellow_friendly, disguise_green_friendly };
 MenuOption EnemyDOptionList[] = { disguise_blue_enemy, disguise_red_enemy, disguise_yellow_enemy, disguise_green_enemy };
 MenuOption CallOptionList[] = { need_armor, passflag, calls_defense, negative, need_ammo, onmyway, need_medic, acknowledged, calls_offense, takeflag };
-MenuOption DiscardOptionList[] = { discardunneeded, discardhalfshells, discardhalfnails, discardhalfrockets, discardhalfcells, discardallshells, discardallnails, discardallrockets, discardallcells };
+MenuOption DiscardOptionList[] = { discardunneeded, discardhalfshells, discardallshells, discardhalfnails, discardallnails, discardhalfrockets, discardallrockets, discardhalfcells, discardallcells };
 MenuOption OffenseOptionList[] = { attacking, spottedsentry, spottedpipes, needdetpack };
 MenuOption DefenseOptionList[] = { defending, incoming, spottedspy, needsentry, spotteddetpack };
 
