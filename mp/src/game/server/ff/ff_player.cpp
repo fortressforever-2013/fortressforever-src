@@ -24,6 +24,7 @@
 #include "ff_utils.h"
 #include "ff_grenade_base.h"
 #include "ff_buildableinfo.h"
+#include "ff_buildabledefs.h"
 #include "ff_item_backpack.h"
 
 #include "ff_team.h"			// team info
@@ -6807,6 +6808,14 @@ int CFFPlayer::GiveAmmo(int iCount, int iAmmoIndex, bool bSuppressSound)
 
 	m_iAmmo.Set(iAmmoIndex, m_iAmmo[iAmmoIndex] + iAdd);
 
+#ifdef GAME_DLL
+	if (GetClassSlot() == CLASS_MEDIC 
+		&& iAmmoIndex == GetAmmoDef()->Index(AMMO_CELLS))
+	{
+		SendMedpacksMsg();
+	}
+#endif
+
 	return iAdd;
 }
 
@@ -6966,6 +6975,7 @@ bool CFFPlayer::IsInNoBuild(const CFFBuildableInfo &hBuildInfo)
 {
 	Vector vecOrigin = hBuildInfo.GetBuildOrigin();
 
+#ifdef FF_BUILD_DEBUG_VISUALIZATIONS
 #ifdef _DEBUG
 	if( !engine->IsDedicatedServer() )
 	{
@@ -6973,6 +6983,7 @@ bool CFFPlayer::IsInNoBuild(const CFFBuildableInfo &hBuildInfo)
 		NDebugOverlay::Box( vecOrigin, Vector( -28, -28, -28 ), Vector( 28, 28, 28 ), 0, 255, 0, 100, 5.0f );
 	}
 #endif
+#endif // FF_BUILD_DEBUG_VISUALIZATIONS
 
 	luabridge::LuaRef luatblInfo = luabridge::newTable(_scriptman.GetLuaState());
 	luatblInfo["type"] = m_iWantBuild;

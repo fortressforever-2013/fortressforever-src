@@ -8,7 +8,7 @@
 //
 // REVISIONS
 // ---------
-//	12/28/2005, Mulchman: 
+//	12/28/2005, Mulchman:
 //		First created
 //
 //	05/09/2005, Mulchman:
@@ -31,7 +31,7 @@
 //
 //	03/17/2006, Mulchman:
 //		Removing aim sphere
-// 
+//
 //	05/10/2006, Mulchman:
 //		Cleaned this up A LOT. SG still doesn't factor in radiotagged targets, though.
 
@@ -55,7 +55,7 @@
 	#include "ff_buildableflickerer.h"
 
 	#include "omnibot_interface.h"
-	#include "te_effect_dispatch.h" 
+	#include "te_effect_dispatch.h"
 	#include "smoke_trail.h"
 #endif
 
@@ -71,10 +71,10 @@
 //=============================================================================
 
 // Quick conversions from angles to pitchparamter style
-#define TO_PITCH(x) ((x) > 180 ? (360 - (x)) : ((x) * -1)) 
-#define FROM_PITCH(x) ((x) > 0 ? (360 - (x)) : ((x) * -1)) 
+#define TO_PITCH(x) ((x) > 180 ? (360 - (x)) : ((x) * -1))
+#define FROM_PITCH(x) ((x) > 0 ? (360 - (x)) : ((x) * -1))
 
-#define TO_YAW(x) ((x) < -180 ? ((x) + 360) : ((x) > 180) ? ((x) - 360) : (x)) 
+#define TO_YAW(x) ((x) < -180 ? ((x) + 360) : ((x) > 180) ? ((x) - 360) : (x))
 
 // Debug visualization
 //ConVar	sg_debug( "ffdev_sg_debug", "1", FCVAR_CHEAT );
@@ -106,7 +106,7 @@
 //ConVar ffdev_sg_explosiondamage_enabled("ffdev_sg_explosiondamage_enabled", "1", FCVAR_FF_FFDEV_REPLICATED, "Determines if the SG explosion does damage");
 #define SG_EXPLOSIONDAMAGE_ENABLED true //ffdev_sg_explosiondamage_enabled.GetBool()
 //ConVar sg_explosiondamage_base("ffdev_sg_explosiondamage_base", "51.0", FCVAR_FF_FFDEV_REPLICATED, "Base damage for the SG explosion");
-#define SG_EXPLOSIONDAMAGE_BASE 51.0f //sg_explosiondamage_base.GetFloat() // 51.0f 
+#define SG_EXPLOSIONDAMAGE_BASE 51.0f //sg_explosiondamage_base.GetFloat() // 51.0f
 //ConVar ffdev_sg_explosionradius("ffdev_sg_explosionradius", "128.0", FCVAR_FF_FFDEV_REPLICATED, "SG explosion radius");
 #define SG_EXPLOSIONRADIUS 128.0f //ffdev_sg_explosionradius.GetFloat()
 //ConVar ffdev_sg_bulletpush("ffdev_sg_bulletpush", "7.0", FCVAR_FF_FFDEV_REPLICATED, "SG bullet push force");
@@ -211,7 +211,7 @@ RecvPropInt( RECVINFO( m_iAmmoPercent ) ),
 	RecvPropInt( RECVINFO( m_iMaxShells ) ),
 	RecvPropInt( RECVINFO( m_iMaxRockets ) ),
 #elif GAME_DLL
-	SendPropInt( SENDINFO( m_iAmmoPercent), 8, SPROP_UNSIGNED ), 
+	SendPropInt( SENDINFO( m_iAmmoPercent), 8, SPROP_UNSIGNED ),
 	//SendPropFloat( SENDINFO( m_flRange ) ), //AfterShock: surely the client knows it's range?
 	SendPropInt( SENDINFO( m_iLevel ), 2, SPROP_UNSIGNED ), //AfterShock: max level 3
 	SendPropInt( SENDINFO( m_iShells ), 8, SPROP_UNSIGNED ), //AfterShock: max 150 shells for level 3
@@ -224,10 +224,10 @@ END_NETWORK_TABLE()
 // Datatable
 BEGIN_DATADESC( CFFSentryGun )
 #ifdef GAME_DLL
-	DEFINE_THINKFUNC( OnActiveThink ), 
-	DEFINE_THINKFUNC( OnSearchThink ), 
+	DEFINE_THINKFUNC( OnActiveThink ),
+	DEFINE_THINKFUNC( OnSearchThink ),
 #endif
-END_DATADESC() 
+END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( FF_SentryGun, CFFSentryGun );
 PRECACHE_REGISTER( FF_SentryGun );
@@ -244,7 +244,7 @@ extern const char *g_pszFFGenGibModels[];
 //-----------------------------------------------------------------------------
 // Constructor
 //-----------------------------------------------------------------------------
-CFFSentryGun::CFFSentryGun() 
+CFFSentryGun::CFFSentryGun()
 {
 #ifdef CLIENT_DLL
 	m_iLocalHallucinationIndex = -1;
@@ -269,7 +269,8 @@ CFFSentryGun::CFFSentryGun()
 	m_flShotAccumulator = 0;
 	m_flNextRocket = 0;
 	m_flLastSight = 0;
-	m_iMaxShells = 200; // TODO: Get Number
+	m_iMaxHealth = SG_HEALTH_LEVEL1;
+	m_iMaxShells = 100;
 	m_iMaxRockets = 0;
 	m_iRockets = 0;
 	m_iShellDamage = 15;
@@ -292,14 +293,14 @@ CFFSentryGun::CFFSentryGun()
 //-----------------------------------------------------------------------------
 // Purpose: Destructor
 //-----------------------------------------------------------------------------
-CFFSentryGun::~CFFSentryGun( void ) 
+CFFSentryGun::~CFFSentryGun( void )
 {
 }
 
 #ifdef CLIENT_DLL
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CFFSentryGun::OnDataChanged( DataUpdateType_t updateType )
 {
@@ -313,7 +314,7 @@ void CFFSentryGun::OnDataChanged( DataUpdateType_t updateType )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 bool CFFSentryGun::Upgrade()
 {
@@ -344,10 +345,10 @@ CFFSentryGun *CFFSentryGun::CreateClientSideSentryGun( const Vector& vecOrigin, 
 	pSentryGun->SetCollisionGroup( COLLISION_GROUP_DEBRIS );
 	pSentryGun->SetRenderMode( kRenderTransAlpha );
 	pSentryGun->SetRenderColorA( ( byte )110 );
-	
+
 	if(FFDEV_PULSEBUILDABLE)
 		pSentryGun->m_nRenderFX = g_BuildableRenderFx;
-	
+
 	// Since this is client side only, give it an owner just in case
 	// someone accesses the m_hOwner.Get() and wants to return something
 	// that isn't NULL!
@@ -412,7 +413,7 @@ int CFFSentryGun::DrawModel(int flags)
 }
 #elif GAME_DLL
 
-void CFFSentryGun::UpdateOnRemove( void ) 
+void CFFSentryGun::UpdateOnRemove( void )
 {
 	SetEnemy(NULL);
 	BaseClass::UpdateOnRemove();
@@ -421,7 +422,7 @@ void CFFSentryGun::UpdateOnRemove( void )
 //-----------------------------------------------------------------------------
 // Purpose: Precache
 //-----------------------------------------------------------------------------
-void CFFSentryGun::Precache( void ) 
+void CFFSentryGun::Precache( void )
 {
 	VPROF_BUDGET( "CFFSentryGun::Precache", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
@@ -431,8 +432,8 @@ void CFFSentryGun::Precache( void )
 //-----------------------------------------------------------------------------
 // Purpose: Spawn the entity
 //-----------------------------------------------------------------------------
-void CFFSentryGun::Spawn( void ) 
-{ 
+void CFFSentryGun::Spawn( void )
+{
 	VPROF_BUDGET( "CFFSentryGun::Spawn", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
 	Precache();
@@ -441,8 +442,8 @@ void CFFSentryGun::Spawn( void )
 
 	// set skin
 	CFFPlayer *pOwner = static_cast< CFFPlayer * >( m_hOwner.Get() );
-	if( pOwner ) 
-		m_nSkin = clamp( pOwner->GetTeamNumber() - TEAM_BLUE, 0, 3 );	// |-- Mirv: BUG #0000118: SGs are always red	
+	if( pOwner )
+		m_nSkin = clamp( pOwner->GetTeamNumber() - TEAM_BLUE, 0, 3 );	// |-- Mirv: BUG #0000118: SGs are always red
 
 	SetViewOffset(EyeOffset(ACT_IDLE));
 
@@ -456,11 +457,11 @@ void CFFSentryGun::Spawn( void )
 	m_iAmmoType = GetAmmoDef()->Index( AMMO_SHELLS );
 
 	m_iMuzzleAttachment = LookupAttachment( "barrel01" );
-	m_iEyeAttachment = LookupAttachment( "eyes" );	
+	m_iEyeAttachment = LookupAttachment( "eyes" );
 
 	m_iPitchPoseParameter = LookupPoseParameter( SG_BC_PITCH );
 	m_iYawPoseParameter = LookupPoseParameter( SG_BC_YAW );
-	
+
 	// Set initial direction
 	Vector vecBaseForward, vecBaseRight, vecBaseUp;
 	GetVectors( &vecBaseForward, &vecBaseRight, &vecBaseUp) ;
@@ -479,9 +480,9 @@ void CFFSentryGun::Spawn( void )
 //-----------------------------------------------------------------------------
 // Purpose: Make the object ready to react to the world
 //-----------------------------------------------------------------------------
-void CFFSentryGun::GoLive( void ) 
+void CFFSentryGun::GoLive( void )
 {
-	VPROF_BUDGET( "CFFSentryGun::GoLive", VPROF_BUDGETGROUP_FF_BUILDABLE );	
+	VPROF_BUDGET( "CFFSentryGun::GoLive", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
 	BaseClass::GoLive();
 
@@ -502,13 +503,13 @@ void CFFSentryGun::GoLive( void )
 	SetNextThink( gpGlobals->curtime + random->RandomFloat( 0.1f, 0.3f ) );
 
 	// CFFPlayer *pOwner = static_cast< CFFPlayer * >( m_hOwner.Get() );
-	
+
 	// Bug #0000244: Building L1 sg doesn't take away cells
-	
+
 	// Bug #0001558: exploit to get instant lvl2 SG.
 	// Cells are now taken when build starts and returned if build is cancelled -> Defrag
-	
-	//if( pOwner ) 
+
+	//if( pOwner )
 	//	pOwner->RemoveAmmo( 130, AMMO_CELLS );
 
 	// Create our flickerer
@@ -519,7 +520,7 @@ void CFFSentryGun::GoLive( void )
 		m_pFlickerer = NULL;
 	}
 	else
-	{		
+	{
 		m_pFlickerer->SetBuildable( this );
 		m_pFlickerer->Spawn();
 	}
@@ -541,7 +542,7 @@ void CFFSentryGun::GoLive( void )
 //-----------------------------------------------------------------------------
 // Purpose: Generic think function
 //-----------------------------------------------------------------------------
-void CFFSentryGun::OnObjectThink( void ) 
+void CFFSentryGun::OnObjectThink( void )
 {
 	VPROF_BUDGET( "CFFSentryGun::OnObjectThink", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
@@ -588,7 +589,7 @@ void CFFSentryGun::OnObjectThink( void )
 //-----------------------------------------------------------------------------
 // Purpose: Target doesn't exist or has eluded us, so search for one
 //-----------------------------------------------------------------------------
-void CFFSentryGun::OnSearchThink( void ) 
+void CFFSentryGun::OnSearchThink( void )
 {
 	VPROF_BUDGET( "CFFSentryGun::OnSearchThink", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
@@ -619,7 +620,7 @@ void CFFSentryGun::OnSearchThink( void )
 			//just making sure it's fully spun down!
 			m_flBarrelRotationDelta = 0;
 		}
-	
+
 		// smoothness...good
 		SimpleSpline(m_flBarrelRotationDelta);
 
@@ -633,10 +634,10 @@ void CFFSentryGun::OnSearchThink( void )
 		m_flBarrelRotationDelta = 0;
 	}
 
-	if( GetEnemy() && !GetEnemy()->IsAlive() ) 
+	if( GetEnemy() && !GetEnemy()->IsAlive() )
 		SetEnemy( NULL );
 
-	if( !GetEnemy() ) 
+	if( !GetEnemy() )
 		SetEnemy(HackFindEnemy());
 
 	// hlstriker: Added to make sure sentry doesn't fire at ghost buildables
@@ -654,7 +655,7 @@ void CFFSentryGun::OnSearchThink( void )
 
 		SpinUp();
 
-		if( gpGlobals->curtime > m_flNextActivateSoundTime ) 
+		if( gpGlobals->curtime > m_flNextActivateSoundTime )
 		{
 			//EmitSound("NPC_FloorTurret.Activate");
 			m_flNextActivateSoundTime = gpGlobals->curtime + 3.0;
@@ -667,7 +668,7 @@ void CFFSentryGun::OnSearchThink( void )
 	int da = UTIL_AngleDistance( m_angGoal.y, m_angAiming.y );
 	if( ( da > -1.0f ) && ( da < 1.0f ) )
 	{
-		if( m_angGoal.y < m_angAimBase.y ) 
+		if( m_angGoal.y < m_angAimBase.y )
 			m_angGoal.y = m_angAimBase.y + SG_SCAN_HALFWIDTH;
 		else
 			m_angGoal.y = m_angAimBase.y - SG_SCAN_HALFWIDTH;
@@ -683,20 +684,20 @@ void CFFSentryGun::OnSearchThink( void )
 //-----------------------------------------------------------------------------
 // Purpose: Allows the turret to fire on targets if they're visible
 //-----------------------------------------------------------------------------
-void CFFSentryGun::OnActiveThink( void ) 
+void CFFSentryGun::OnActiveThink( void )
 {
 	VPROF_BUDGET( "CFFSentryGun::OnActiveThink", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
 	OnObjectThink();
 
 	// Update our think time
-	SetNextThink( gpGlobals->curtime + 0.029f ); // slightly less than 1 tick (33 tick), 
+	SetNextThink( gpGlobals->curtime + 0.029f ); // slightly less than 1 tick (33 tick),
 
 	CBaseEntity *enemy = GetEnemy();
 
 	// Jiggles: Hint that tells Soldiers to use nail grens on SGs
 	CFFPlayer *pFFPlayer = ToFFPlayer( enemy );
- 	if( m_bSendNailGrenHint && pFFPlayer && ( pFFPlayer->GetClassSlot() == CLASS_SOLDIER ) )
+	if( m_bSendNailGrenHint && pFFPlayer && ( pFFPlayer->GetClassSlot() == CLASS_SOLDIER ) )
 	{
 		FF_SendHint( pFFPlayer, SOLDIER_SENTRY, 3, PRIORITY_NORMAL, "#FF_HINT_SOLDIER_SENTRY" );
 		m_bSendNailGrenHint = false;
@@ -712,13 +713,13 @@ void CFFSentryGun::OnActiveThink( void )
 	{
 		if (enemy && enemy->IsAlive())
 		{
-			// AfterShock: if we lost track of our target, and they are still alive, 
+			// AfterShock: if we lost track of our target, and they are still alive,
 			// and we're looking the right way, then pause to see if our target comes back
 			Vector vecAiming = GetVecAiming();
 			Vector vecGoal = GetVecGoal();
 			bool bCanFire = vecAiming.Dot( vecGoal ) > DOT_7DEGREE;
 			if ( bCanFire )
-				m_flEndLockTime = gpGlobals->curtime; 
+				m_flEndLockTime = gpGlobals->curtime;
 		}
 
 		SetEnemy( NULL );
@@ -758,8 +759,8 @@ void CFFSentryGun::OnActiveThink( void )
 
 	Vector vecMidEnemy = GetEnemy()->BodyTarget( vecMid, false ); // false: not 'noisey', so no random z added on
 
-	/* AfterShock: Don't hit targets moving fast across our vision. 
-	// Commented for now! Intend to replace with 
+	/* AfterShock: Don't hit targets moving fast across our vision.
+	// Commented for now! Intend to replace with
 	QAngle vecAngles = GetEnemy()->EyeAngles();
 	Vector vecForward;
 	AngleVectors( vecAngles, &vecForward );
@@ -775,7 +776,7 @@ void CFFSentryGun::OnActiveThink( void )
 		debugoverlay->AddLineOverlay(vecMid, vecMidEnemy, 255, 0, 255, false, 0.1f);
 	}*/
 
-	// Actually we're pretty close, and we'll wobble unless we use something a 
+	// Actually we're pretty close, and we'll wobble unless we use something a
 	//bit more static as the source
 	/*if (vecDirToEnemy.LengthSqr() < 10000)
 	{
@@ -829,7 +830,7 @@ void CFFSentryGun::OnActiveThink( void )
 	SetPoseParameter( SG_BC_BARREL_ROTATE, m_flBarrelRotationValue);
 
 	// Are we rotated enough to where we can fire?
-	bool bCanFire = vecAiming.Dot( vecGoal ) > DOT_5DEGREE; 
+	bool bCanFire = vecAiming.Dot( vecGoal ) > DOT_5DEGREE;
 
 	//bool bCanAlmostFire = vecAiming.Dot( vecGoal ) > SG_WARNINGSHOTS_ANGLE;
 
@@ -866,7 +867,7 @@ void CFFSentryGun::OnActiveThink( void )
 		}
 
 		// Fire shells
-		if( ( gpGlobals->curtime > m_flNextShell ) && ( m_iShells > 0 ) ) 
+		if( ( gpGlobals->curtime > m_flNextShell ) && ( m_iShells > 0 ) )
 		{
 			Vector vecOrigin;
 			QAngle vecAngles;
@@ -894,13 +895,13 @@ void CFFSentryGun::OnActiveThink( void )
 			m_flNextShell = gpGlobals->curtime + m_flShellCycleTime;
 
 			bFired = true;
-		}		
-	}	
+		}
+	}
 	/*
 	else if ( bCanAlmostFire )
 	{
 		// Fire warning shots
-		if( ( gpGlobals->curtime > m_flNextShell + SG_WARNINGSHOTS_DELAY ) && ( m_iShells > 0 ) ) 
+		if( ( gpGlobals->curtime > m_flNextShell + SG_WARNINGSHOTS_DELAY ) && ( m_iShells > 0 ) )
 		{
 			Vector vecOrigin;
 			QAngle vecAngles;
@@ -911,14 +912,14 @@ void CFFSentryGun::OnActiveThink( void )
 
 			m_flNextShell = gpGlobals->curtime + m_flShellCycleTime;
 			bFired = true;
-		}	
+		}
 	} */
 
-	if( bFired ) 
+	if( bFired )
 	{
 		// Recalculate ammo percentage, 7 bits for shells + 1 bit for no rockets
 		m_iAmmoPercent = 100.0f * (float) m_iShells / m_iMaxShells;
-		if( m_iMaxRockets && !m_iRockets ) 
+		if( m_iMaxRockets && !m_iRockets )
 			m_iAmmoPercent += 128;
 
 		SendStatsToBot();
@@ -926,21 +927,21 @@ void CFFSentryGun::OnActiveThink( void )
 }
 
 // Decide whether this new target is better than the current one
-CBaseEntity *SG_IsBetterTarget( CBaseEntity *cur, CBaseEntity *latest, float distance ) 
+CBaseEntity *SG_IsBetterTarget( CBaseEntity *cur, CBaseEntity *latest, float distance )
 {
 	static float lastdistance = 0;
 
-	if( !latest ) 
+	if( !latest )
 		return cur;
 
-	if( !cur ) 
+	if( !cur )
 	{
 		lastdistance = distance;
 		return latest;
 	}
 
 	// A player is always preferable to a buildable
-	if( latest->IsPlayer() && !cur->IsPlayer() ) 
+	if( latest->IsPlayer() && !cur->IsPlayer() )
 	{
 		lastdistance = distance;
 		return latest;
@@ -964,7 +965,7 @@ CBaseEntity *SG_IsBetterTarget( CBaseEntity *cur, CBaseEntity *latest, float dis
 	}
 
 	// Go for the nearest
-	if( distance < lastdistance ) 
+	if( distance < lastdistance )
 	{
 		lastdistance = distance;
 		return latest;
@@ -977,14 +978,14 @@ CBaseEntity *SG_IsBetterTarget( CBaseEntity *cur, CBaseEntity *latest, float dis
 // Purpose: The turret doesn't run base AI properly, which is a bad decision.
 //			As a result, it has to manually find enemies.
 //-----------------------------------------------------------------------------
-CBaseEntity *CFFSentryGun::HackFindEnemy( void ) 
+CBaseEntity *CFFSentryGun::HackFindEnemy( void )
 {
 	VPROF_BUDGET( "CFFSentryGun::HackFindEnemy", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
 	// Find our owner
 	CFFPlayer *pOwner = ToFFPlayer( m_hOwner.Get() );
 
-	if( !pOwner ) 
+	if( !pOwner )
 	{
 		Warning( "[SentryGun] Can't find our owner!\n" );
 		return 0;
@@ -997,7 +998,7 @@ CBaseEntity *CFFSentryGun::HackFindEnemy( void )
 	// reset every single time through
 	m_flCloakDistance = 65536.0f;
 
-	for( int i = 1; i <= gpGlobals->maxClients; i++ ) 
+	for( int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
 		CFFPlayer *pPlayer = ToFFPlayer( UTIL_PlayerByIndex(i) );
 		if( !pPlayer )
@@ -1071,7 +1072,7 @@ CBaseEntity *CFFSentryGun::HackFindEnemy( void )
 			if ( !( pDispenser->IsMaliciouslySabotaged() && g_pGameRules->PlayerRelationship( pDispenser->m_hSaboteur, m_hSaboteur ) == GR_TEAMMATE ) )
 				target = SG_IsBetterTarget( target, pDispenser, ( pDispenser->GetAbsOrigin() - vecOrigin ).LengthSqr() );
 		}
-		
+
 		CFFManCannon *pManCannon = pPlayer->GetManCannon();
 		if( IsTargetVisible( pManCannon, SG_RANGE ) && !bIsSentryMaliciouslySabotaged )
 		{
@@ -1080,7 +1081,7 @@ CBaseEntity *CFFSentryGun::HackFindEnemy( void )
 
 		/*
 		// Check a couple more locations to check as technically they could be visible whereas others wouldn't be
-		if( ( FVisible( pPlayer->GetAbsOrigin() ) || FVisible( pPlayer->GetAbsOrigin() ) || FVisible( pPlayer->EyePosition() ) ) && ( vecOrigin.DistTo( pPlayer->GetAbsOrigin() ) <= SG_RANGE ) ) 
+		if( ( FVisible( pPlayer->GetAbsOrigin() ) || FVisible( pPlayer->GetAbsOrigin() ) || FVisible( pPlayer->EyePosition() ) ) && ( vecOrigin.DistTo( pPlayer->GetAbsOrigin() ) <= SG_RANGE ) )
 			target = SG_IsBetterTarget( target, pPlayer, ( pPlayer->GetAbsOrigin() - vecOrigin ).LengthSqr() );
 
 		// Add sentry guns
@@ -1143,7 +1144,7 @@ CBaseEntity *CFFSentryGun::HackFindEnemy( void )
 //-----------------------------------------------------------------------------
 // Purpose: Returns the speed at which the turret can face a target
 //-----------------------------------------------------------------------------
-float CFFSentryGun::MaxYawSpeed( void ) const 
+float CFFSentryGun::MaxYawSpeed( void ) const
 {
 	VPROF_BUDGET( "CFFSentryGun::MaxYawSpeed", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
@@ -1262,7 +1263,7 @@ bool CFFSentryGun::IsTargetVisible( CBaseEntity *pTarget, int iSightDistance )
 
 		return false;
 	}
-	
+
 	// Finally, is that target even in our aim ellipse?
 	return IsTargetInAimingEllipse( vecTarget );
 }
@@ -1289,7 +1290,41 @@ bool CFFSentryGun::IsTargetClassTValid( Class_T cT ) const
 	return ( ( cT == CLASS_PLAYER ) || ( cT == CLASS_SENTRYGUN ) || ( cT == CLASS_DISPENSER ) || ( cT == CLASS_MANCANNON ) );
 }
 
-void CFFSentryGun::Shoot() 
+
+//-----------------------------------------------------------------------------
+// Purpose: Notify the client
+//-----------------------------------------------------------------------------
+void CFFSentryGun::SendSentryLevelMsg(bool bZero)
+{
+	CFFPlayer* pPlayer
+		= ToFFPlayer(m_hOwner.Get());
+
+	ASSERT(pPlayer);
+
+	CSingleUserRecipientFilter user(pPlayer);
+	user.MakeReliable();
+
+	UserMessageBegin(user, "SentryLevelMsg");
+	if (bZero)
+	{
+		WRITE_BYTE(0);
+	}
+	else
+	{
+		WRITE_BYTE(GetLevel());
+		WRITE_BYTE(GetMaxHealth());
+		WRITE_BYTE(GetHealth());
+		WRITE_BYTE(m_iMaxShells);
+		WRITE_BYTE(m_iShells);
+		if (m_iMaxRockets > 0) {
+			WRITE_BYTE(m_iMaxRockets);
+			WRITE_BYTE(m_iRockets);
+		}
+	}
+	MessageEnd();
+}
+
+void CFFSentryGun::Shoot()
 {
 	if (GetShells() <= 0)
 		return;
@@ -1330,18 +1365,18 @@ void CFFSentryGun::SetEnemy(CBaseEntity *hEnemy)
 //-----------------------------------------------------------------------------
 // Purpose: Fire Bullets!
 //-----------------------------------------------------------------------------
-void CFFSentryGun::Shoot( const Vector &vecSrc, const Vector &vecDirToEnemy, bool bStrict ) 
+void CFFSentryGun::Shoot( const Vector &vecSrc, const Vector &vecDirToEnemy, bool bStrict )
 {
 	VPROF_BUDGET( "CFFSentryGun::Shoot", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
 	FireBulletsInfo_t info;
 	Vector vecDir;
 
-	if( m_iShells <= 0 ) 
+	if( m_iShells <= 0 )
 		return;
 
 	// Shoot in direction we're facing or shoot directly at enemy?
-	if( !bStrict && GetEnemy() ) 
+	if( !bStrict && GetEnemy() )
 	{
 		AssertMsg( 0, "Do you really want to hit enemy regardless?" );
 		vecDir = GetEnemy()->GetAbsOrigin() - EyePosition();
@@ -1389,7 +1424,7 @@ void CFFSentryGun::Shoot( const Vector &vecSrc, const Vector &vecDirToEnemy, boo
 			break;
 		}
 	}
-		
+
 
 	// Introduce quite a big spread now if sabotaged
 	// but not if we're in malicious mode
@@ -1433,12 +1468,12 @@ void CFFSentryGun::Shoot( const Vector &vecSrc, const Vector &vecDirToEnemy, boo
 	DispatchEffect(GetLevel() == 1 ? "Tracer" : "AR2Tracer", data2);
 
 	// Change barrel
-	m_bLeftBarrel = !m_bLeftBarrel;	
+	m_bLeftBarrel = !m_bLeftBarrel;
 
 	m_iShells--;
 }
 
-void CFFSentryGun::ShootRocket() 
+void CFFSentryGun::ShootRocket()
 {
 	if (GetRockets() <= 0)
 		return;
@@ -1449,7 +1484,7 @@ void CFFSentryGun::ShootRocket()
 //-----------------------------------------------------------------------------
 // Purpose: Fire Rockets!
 //-----------------------------------------------------------------------------
-void CFFSentryGun::ShootRocket( const Vector &vecSrc, const Vector &vecDirToEnemy, bool bStrict ) 
+void CFFSentryGun::ShootRocket( const Vector &vecSrc, const Vector &vecDirToEnemy, bool bStrict )
 {
 	VPROF_BUDGET( "CFFSentryGun::ShootRocket", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
@@ -1459,7 +1494,7 @@ void CFFSentryGun::ShootRocket( const Vector &vecSrc, const Vector &vecDirToEnem
 	Vector vecDir = vecDirToEnemy;
 
 	// Shoot in direction we're facing or shoot directly at enemy?
-	if( !bStrict && GetEnemy() ) 
+	if( !bStrict && GetEnemy() )
 	{
 		AssertMsg( 0, "Rockets - Do you really want to hit enemy regardless?" );
 		vecDir = GetEnemy()->BodyTarget( vecSrc, false ) - vecSrc;
@@ -1490,7 +1525,7 @@ void CFFSentryGun::ShootRocket( const Vector &vecSrc, const Vector &vecDirToEnem
 //-----------------------------------------------------------------------------
 // Purpose: Bullet muzzle flash
 //-----------------------------------------------------------------------------
-void CFFSentryGun::DoMuzzleFlash( int iAttachment, const Vector& vecOrigin, const QAngle& vecAngles ) 
+void CFFSentryGun::DoMuzzleFlash( int iAttachment, const Vector& vecOrigin, const QAngle& vecAngles )
 {
 	VPROF_BUDGET( "CFFSentryGun::DoMuzzleFlash", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
@@ -1507,7 +1542,7 @@ void CFFSentryGun::DoMuzzleFlash( int iAttachment, const Vector& vecOrigin, cons
 //-----------------------------------------------------------------------------
 // Purpose: Rocket muzzle flash
 //-----------------------------------------------------------------------------
-void CFFSentryGun::DoRocketMuzzleFlash( int iAttachment, const Vector& vecOrigin, const QAngle& vecAngles ) 
+void CFFSentryGun::DoRocketMuzzleFlash( int iAttachment, const Vector& vecOrigin, const QAngle& vecAngles )
 {
 	VPROF_BUDGET( "CFFSentryGun::DoRocketMuzzleFlash", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
@@ -1524,12 +1559,12 @@ void CFFSentryGun::DoRocketMuzzleFlash( int iAttachment, const Vector& vecOrigin
 //-----------------------------------------------------------------------------
 // Purpose: Make a pinging noise so the player knows where we are
 //-----------------------------------------------------------------------------
-void CFFSentryGun::Ping( void ) 
+void CFFSentryGun::Ping( void )
 {
 	VPROF_BUDGET( "CFFSentryGun::Ping", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
 	// See if it's time to ping again
-	if( m_flPingTime > gpGlobals->curtime ) 
+	if( m_flPingTime > gpGlobals->curtime )
 		return;
 
 	// Ping!
@@ -1539,9 +1574,9 @@ void CFFSentryGun::Ping( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
-void CFFSentryGun::SpinUp( void ) 
+void CFFSentryGun::SpinUp( void )
 {
 	VPROF_BUDGET( "CFFSentryGun::SpinUp", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
@@ -1564,9 +1599,9 @@ void CFFSentryGun::SpinUp( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
-void CFFSentryGun::SpinDown( void ) 
+void CFFSentryGun::SpinDown( void )
 {
 	VPROF_BUDGET( "CFFSentryGun::SpinDown", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
@@ -1588,7 +1623,7 @@ void CFFSentryGun::SpinDown( void )
 //-----------------------------------------------------------------------------
 // Purpose: Causes the turret to face its desired angles
 //-----------------------------------------------------------------------------
-bool CFFSentryGun::UpdateFacing( void ) 
+bool CFFSentryGun::UpdateFacing( void )
 {
 	VPROF_BUDGET( "CFFSentryGun::UpdateFacing", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
@@ -1661,7 +1696,7 @@ bool CFFSentryGun::UpdateFacing( void )
 	GetAttachment( (m_iLevel == 3 ? m_iEyeAttachment : m_iMuzzleAttachment), vecMuzzle, angMuzzle );
 
 	// Get orientation pitch at intended orientation
-	Vector dir; 
+	Vector dir;
 	AngleVectors( QAngle( 0, m_angAiming.y, 0 ), &dir );
 
 	Vector cross = CrossProduct( dir, vecBaseUp );
@@ -1673,9 +1708,9 @@ bool CFFSentryGun::UpdateFacing( void )
 	float dst_pitch = TO_PITCH( m_angGoal.x ) - src_pitch;
 
 #ifdef _DEBUG
-	/* VOOGRU: I debug with dedicated server, and I don't want srcds to throw 
+	/* VOOGRU: I debug with dedicated server, and I don't want srcds to throw
 		util.cpp (552) : Assertion Failed: !"UTIL_GetListenServerHost" */
-	//if( SG_DEBUG && !engine->IsDedicatedServer()) 
+	//if( SG_DEBUG && !engine->IsDedicatedServer())
 	//{
 	//	NDebugOverlay::Line(EyePosition(), EyePosition() + dir * 300.0f, 40, 40, 40, false, 0.05f);
 	//	NDebugOverlay::Line(EyePosition(), EyePosition() + vecBaseUp * 300.0f, 110, 110, 110, false, 0.05f);
@@ -1741,12 +1776,16 @@ bool CFFSentryGun::UpdateFacing( void )
 //-----------------------------------------------------------------------------
 // Purpose: Called when the object's health < 0
 //-----------------------------------------------------------------------------
-void CFFSentryGun::Event_Killed( const CTakeDamageInfo &info ) 
+void CFFSentryGun::Event_Killed( const CTakeDamageInfo &info )
 {
 	VPROF_BUDGET( "CFFSentryGun::Event_Killed", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
-	if( m_hOwner.Get() )
-		ClientPrint( ToFFPlayer( m_hOwner.Get() ), HUD_PRINTCENTER, "#FF_SENTRYGUN_DESTROYED" );
+	if (m_hOwner.Get())
+	{
+		ClientPrint(ToFFPlayer(m_hOwner.Get()), HUD_PRINTCENTER, "#FF_SENTRYGUN_DESTROYED");
+		SendSentryLevelMsg(true);
+	}
+
 
 	BaseClass::Event_Killed( info );
 }
@@ -1754,7 +1793,7 @@ void CFFSentryGun::Event_Killed( const CTakeDamageInfo &info )
 //-----------------------------------------------------------------------------
 // Purpose: Gets the position of the eyes
 //-----------------------------------------------------------------------------
-Vector CFFSentryGun::EyePosition( void ) 
+Vector CFFSentryGun::EyePosition( void )
 {
 	VPROF_BUDGET( "CFFSentryGun::EyePosition", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
@@ -1809,12 +1848,12 @@ void CFFSentryGun::SetLevel( int iLevel, bool bEmitSounds/*=true*/ )
 
 	CPASAttenuationFilter sndFilter( this );
 
-	switch( m_iLevel ) 
+	switch( m_iLevel )
 	{
 	case 1:
 		SetModel( FF_SENTRYGUN_MODEL );
 		SetSolid( SOLID_VPHYSICS );
-		
+
 		m_iShells = 20;
 
 		m_iMaxShells = 100;
@@ -1877,7 +1916,7 @@ void CFFSentryGun::SetLevel( int iLevel, bool bEmitSounds/*=true*/ )
 		m_flLockTime = SG_LOCKONTIME_LVL3;
 		//m_flTurnSpeed = 7.0f;
 		m_flTurnSpeed = SG_TURNSPEED;
-		
+
 		m_iEyeAttachment = LookupAttachment( "eyes" );
 		m_iLBarrelAttachment = LookupAttachment( "barrel01" );
 		m_iRBarrelAttachment = LookupAttachment( "barrel02" );
@@ -1898,23 +1937,25 @@ void CFFSentryGun::SetLevel( int iLevel, bool bEmitSounds/*=true*/ )
 //-----------------------------------------------------------------------------
 // Purpose: Upgrade the SG
 //-----------------------------------------------------------------------------
-bool CFFSentryGun::Upgrade() 
+bool CFFSentryGun::Upgrade()
 {
 	VPROF_BUDGET( "CFFSentryGun::Upgrade", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
-	bool bDidUpgrade = false;
-
-	if( m_iLevel < 3 ) 
+	if (m_iLevel >= 3)
 	{
-		bDidUpgrade = true;
-		SetLevel(m_iLevel+1);
-		SendStatsToBot();
+		// Can't upgrade past level 3
+		return false;
 	}
 
-	return bDidUpgrade;
+	SetLevel(m_iLevel+1);
+	SendStatsToBot();
+
+	SendSentryLevelMsg();
+
+	return true;
 }
 
-void CFFSentryGun::Repair( int iCells ) 
+void CFFSentryGun::Repair( int iCells )
 {
 	VPROF_BUDGET( "CFFSentryGun::Repair", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
@@ -1941,14 +1982,14 @@ void CFFSentryGun::RecalculateAmmoPercent()
 {
 	// Recalculate ammo percentage, 7 bits for shells + 1 bit for no rockets
 	m_iAmmoPercent = 100.0f * (float)m_iShells / (float)m_iMaxShells;
-	if( m_iMaxRockets && !m_iRockets ) 
+	if( m_iMaxRockets && !m_iRockets )
 		m_iAmmoPercent += 128;
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Creates the object
 //-----------------------------------------------------------------------------
-CFFSentryGun *CFFSentryGun::Create( const Vector &vecOrigin, const QAngle &vecAngles, CBaseEntity *pentOwner ) 
+CFFSentryGun *CFFSentryGun::Create( const Vector &vecOrigin, const QAngle &vecAngles, CBaseEntity *pentOwner )
 {
 	// Create the object
 	CFFSentryGun *pObject = ( CFFSentryGun * )CBaseEntity::Create( "FF_SentryGun", vecOrigin, vecAngles, NULL );
@@ -1965,7 +2006,7 @@ CFFSentryGun *CFFSentryGun::Create( const Vector &vecOrigin, const QAngle &vecAn
 }
 
 // Player-set aim focus point!
-void CFFSentryGun::SetFocusPoint( Vector &origin ) 
+void CFFSentryGun::SetFocusPoint( Vector &origin )
 {
 	VPROF_BUDGET( "CFFSentryGun::SetFocusPoint", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
@@ -1974,7 +2015,7 @@ void CFFSentryGun::SetFocusPoint( Vector &origin )
 	VectorNormalize( dir );
 
 	VectorAngles( dir, newangle );
-    
+
 	// Shift the goal along by the change in angle
 	m_angGoal.y += newangle.y - m_angAimBase.y;
 
@@ -1983,12 +2024,12 @@ void CFFSentryGun::SetFocusPoint( Vector &origin )
 	// Bug #0000427: Sound needed for Sentrygun aim feature
 	// Play aim sound
 	CPASAttenuationFilter sndFilter( this );
-	EmitSound( sndFilter, entindex(), "Sentry.Aim" );    
+	EmitSound( sndFilter, entindex(), "Sentry.Aim" );
 
 #ifdef _DEBUG
-	/* VOOGRU: I debug with dedicated server, and I don't want srcds to throw 
+	/* VOOGRU: I debug with dedicated server, and I don't want srcds to throw
 		util.cpp (552) : Assertion Failed: !"UTIL_GetListenServerHost" */
-	//if( SG_DEBUG && !engine->IsDedicatedServer()) 
+	//if( SG_DEBUG && !engine->IsDedicatedServer())
 	//	NDebugOverlay::Line( EyePosition(), origin, 255, 0, 255, false, 5.0f );
 #endif
 
@@ -2000,7 +2041,7 @@ void CFFSentryGun::SetFocusPoint( Vector &origin )
 }
 
 // How much damage should be taken from an emp explosion
-int CFFSentryGun::TakeEmp( void ) 
+int CFFSentryGun::TakeEmp( void )
 {
 	VPROF_BUDGET( "CFFSentryGun::TakeEmp", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
@@ -2068,7 +2109,7 @@ void CFFSentryGun::Detonate()
 	VPROF_BUDGET( "CFFSentryGun::Detonate", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
 	// Fire an event.
-	IGameEvent *pEvent = gameeventmanager->CreateEvent("sentry_detonated");						
+	IGameEvent *pEvent = gameeventmanager->CreateEvent("sentry_detonated");
 	if(pEvent)
 	{
 		if (m_hOwner.Get())
@@ -2077,10 +2118,20 @@ void CFFSentryGun::Detonate()
 			pEvent->SetInt("userid", pOwner->GetUserID());
 			pEvent->SetInt("level", GetLevel());
 			gameeventmanager->FireEvent(pEvent, true);
+
+			SendSentryLevelMsg(true);
 		}
 	}
 
 	CFFBuildableObject::Detonate();
+}
+
+
+void CFFSentryGun::RemoveQuietly()
+{
+	SendSentryLevelMsg(true);
+
+	CFFBuildableObject::RemoveQuietly();
 }
 
 //-----------------------------------------------------------------------------
@@ -2095,7 +2146,7 @@ void CFFSentryGun::DoExplosionDamage()
 		float flDamage = SG_EXPLOSIONDAMAGE_BASE * m_iLevel  + (m_iRockets * 1.4f);
 		// COmmented out for testing explosion damage - AfterShock
 		//flDamage = min(280, flDamage);
-		
+
 		if (m_hOwner.Get())
 		{
 			CTakeDamageInfo info(this, m_hOwner, vec3_origin, GetAbsOrigin() + Vector(0, 0, 32.0f), flDamage, DMG_BLAST);
@@ -2113,8 +2164,8 @@ void CFFSentryGun::DoExplosionDamage()
 void CFFSentryGun::SpawnGibs()
 {
 	CFFPlayer *pOwner = static_cast< CFFPlayer * >( m_hOwner.Get() );
-	
-	if( !pOwner ) 
+
+	if( !pOwner )
 		return;
 
 	CEffectData data;
@@ -2134,38 +2185,44 @@ void CFFSentryGun::PhysicsSimulate()
 	BaseClass::PhysicsSimulate();
 
 	// Update the client every 0.2 seconds
-	if (gpGlobals->curtime > m_flLastClientUpdate + 0.2f)
+	if (gpGlobals->curtime < m_flLastClientUpdate + 0.2f)
 	{
-		m_flLastClientUpdate = gpGlobals->curtime;
-
-		CFFPlayer *pPlayer = ToFFPlayer(m_hOwner.Get());
-
-		if (!pPlayer)
-			return;
-
-		int iHealth = (int) (100.0f * GetHealth() / GetMaxHealth());
-		int iAmmo = (int) (100.0f * (float) m_iShells / m_iMaxShells);
-
-		// Last bit of ammo signifies whether the SG needs rockets
-		if (m_iMaxRockets && !m_iRockets) 
-			m_iAmmoPercent += 128;
-
-		// If things haven't changed then do nothing more
-		int iState = iHealth + (iAmmo << 8);
-		if (m_iLastState == iState)
-			return;
-
-		CSingleUserRecipientFilter user(pPlayer);
-		user.MakeReliable();
-
-		UserMessageBegin(user, "SentryMsg");
-		WRITE_BYTE(iHealth);
-		WRITE_BYTE(iAmmo);
-		WRITE_BYTE(GetLevel());
-		MessageEnd();
-
-		m_iLastState = iState;
+		return;
 	}
+
+	m_flLastClientUpdate = gpGlobals->curtime;
+
+	CFFPlayer* pPlayer = ToFFPlayer(m_hOwner.Get());
+
+	if (!pPlayer)
+		return;
+
+	int iHealthPct = (100 * GetHealth()) / GetMaxHealth();
+	int iShellsPct = (100 * m_iShells) / m_iMaxShells;
+	int iRocketsPct = m_iMaxRockets > 0
+		? (100 * m_iRockets) / m_iMaxRockets
+		: 0;
+
+	// If things haven't changed then do nothing more
+	int iState = iHealthPct
+		| (iShellsPct << 8)
+		| (iRocketsPct << 16);
+
+	if (m_iLastState == iState)
+		return;
+
+	CSingleUserRecipientFilter user(pPlayer);
+	user.MakeReliable();
+
+	UserMessageBegin(user, "SentryStatusMsg");
+	WRITE_BYTE(GetHealth());
+	WRITE_BYTE(m_iShells);
+	if (m_iMaxRockets > 0) {
+		WRITE_BYTE(m_iRockets);
+	}
+	MessageEnd();
+
+	m_iLastState = iState;
 }
 
 #endif // CLIENT_DLL : GAME_DLL
@@ -2184,7 +2241,7 @@ void CFFSentryGun::PhysicsSimulate()
 			while (g_pszFFSentryGunGibModelsL1[iGib])
 			{
 				C_Gib *pGib = C_Gib::CreateClientsideGib(g_pszFFSentryGunGibModelsL1[iGib], vecPosition, Vector(random->RandomFloat(-150, 150), random->RandomFloat(-150, 150), random->RandomFloat(100, 400)), RandomAngularImpulse( -90, 90 ), 4.0f);
-		
+
 				if (pGib)
 				{
 					pGib->m_nSkin = nSkin;
@@ -2198,7 +2255,7 @@ void CFFSentryGun::PhysicsSimulate()
 			while (g_pszFFSentryGunGibModelsL2[iGib])
 			{
 				C_Gib *pGib = C_Gib::CreateClientsideGib(g_pszFFSentryGunGibModelsL2[iGib], vecPosition, Vector(random->RandomFloat(-150, 150), random->RandomFloat(-150, 150), random->RandomFloat(100, 500)), RandomAngularImpulse( -90, 90 ), 4.0f);
-		
+
 				if (pGib)
 				{
 					pGib->m_nSkin = nSkin;
@@ -2212,7 +2269,7 @@ void CFFSentryGun::PhysicsSimulate()
 			while (g_pszFFSentryGunGibModelsL3[iGib])
 			{
 				C_Gib *pGib = C_Gib::CreateClientsideGib(g_pszFFSentryGunGibModelsL3[iGib], vecPosition, Vector(random->RandomFloat(-150, 150), random->RandomFloat(-150, 150), random->RandomFloat(100, 600)), RandomAngularImpulse( -90, 90 ), 4.0f);
-		
+
 				if (pGib)
 				{
 					pGib->m_nSkin = nSkin;

@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -15,8 +15,8 @@ void RegisterUserMessages()
 
 	usermessages->Register( "Geiger", 1 );		// geiger info data
 	usermessages->Register( "Train", 1 );		// train control data
-	usermessages->Register( "HudText", -1 );	
-	usermessages->Register( "SayText", -1 );	
+	usermessages->Register( "HudText", -1 );
+	usermessages->Register( "SayText", -1 );
 	usermessages->Register( "SayText2", -1);
 	usermessages->Register( "TextMsg", -1 );
 	usermessages->Register( "HudMsg", -1 );
@@ -38,7 +38,7 @@ void RegisterUserMessages()
 	usermessages->Register( "Damage", -1 );		// for HUD damage indicators
 	usermessages->Register( "RadioText", -1 );		// for HUD damage indicators
 	usermessages->Register( "HintText", -1 );	// Displays hint text display
-	
+
 	usermessages->Register( "ReloadEffect", 2 );			// a player reloading..
 	usermessages->Register( "PlayerAnimEvent", -1 );	// jumping, firing, reload, etc.
 
@@ -74,17 +74,19 @@ void RegisterUserMessages()
 	usermessages->Register( "SentryGun_Destroyed", -1 );
 
 	usermessages->Register("FF_BuildTimer", -1);
-  
+
 	// used to send a status icon
 	usermessages->Register( "StatusIconUpdate", -1 );
 
 	usermessages->Register("FFViewEffect", -1);
 
 	usermessages->Register("DispenserMsg", -1);
-	usermessages->Register("SentryMsg", -1);
+	usermessages->Register("SentryLevelMsg", -1);
+	usermessages->Register("SentryStatusMsg", -1);
 	usermessages->Register("ManCannonMsg", -1);
 	usermessages->Register("DetpackMsg", -1);
 	usermessages->Register("PipeMsg", -1);
+	usermessages->Register("MedpacksMsg", -1);
 
 	// dexter: tell client it can stop any grenade timers
 	usermessages->Register("FFStopGrenTimers", 1);

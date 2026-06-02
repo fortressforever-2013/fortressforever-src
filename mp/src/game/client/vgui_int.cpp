@@ -33,6 +33,7 @@
 #endif
 
 #include "ff_options.h"
+#include "ff_customhudoptions.h"
 #include "ff_gamemodes.h"
 #include "ff_training.h"
 
@@ -227,6 +228,7 @@ void VGui_CreateGlobalPanels(void)
 	ffoptions->Create(uiParent);
 	ffgamemodes->Create(uiParent);
 	fftraining->Create(uiParent);
+	ffcustomhudoptions->Create(uiParent);
 	// <-- Mirv
 
 #ifdef SIXENSE
@@ -257,6 +259,7 @@ void VGui_Shutdown()
 	ffoptions->Destroy();
 	ffgamemodes->Destroy();
 	fftraining->Destroy();
+	ffcustomhudoptions->Destroy();
 	// <-- Mirv
 
 	if (g_pClientMode)

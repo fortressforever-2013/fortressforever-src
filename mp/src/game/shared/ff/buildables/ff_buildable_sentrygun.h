@@ -8,7 +8,7 @@
 //
 // REVISIONS
 // ---------
-//	12/28/2005, Mulchman: 
+//	12/28/2005, Mulchman:
 //		First created
 //
 //	05/09/2005, Mulchman:
@@ -123,7 +123,7 @@ public:
 	CNetworkVar( int, m_iMaxRockets );
 	// <-- shared
 
-#ifdef CLIENT_DLL 
+#ifdef CLIENT_DLL
 	virtual void OnDataChanged( DataUpdateType_t updateType );
 
 	// Creates a client side ONLY sentrygun - used for build slot
@@ -152,8 +152,8 @@ public:
 	void OnActiveThink( void );
 
 	CBaseEntity *HackFindEnemy( void );
-	
-	Vector GetVecAiming() 
+
+	Vector GetVecAiming()
 	{
 		Vector vecAiming;
 		AngleVectors(m_angAiming, &vecAiming);
@@ -182,6 +182,8 @@ private:
 	bool IsTargetVisible( CBaseEntity *pTarget, int iSightDistance );
 	bool IsTargetClassTValid( Class_T cT ) const;
 
+	void SendSentryLevelMsg(bool bZero = false);
+
 public:
 	CBaseEntity *GetEnemy( void	) const { return m_hEnemy; }
 	void SetEnemy( CBaseEntity *hEnemy );
@@ -195,7 +197,7 @@ public:
 protected:
 	void Shoot( const Vector &vecSrc, const Vector &vecDirToEnemy, bool bStrict = false );
 	void ShootRocket( const Vector &vecSrc, const Vector &vecDirToEnemy, bool bStrict = false );
-	void Ping( void );	
+	void Ping( void );
 	void SpinUp( void );
 	void SpinDown( void );
 	bool UpdateFacing( void );
@@ -222,6 +224,7 @@ public:
 	virtual void Sabotage(CFFPlayer *pSaboteur);
 	virtual void MaliciouslySabotage(CFFPlayer *pSaboteur);
 	virtual void Detonate();
+	virtual void RemoveQuietly() override;
 
 	static CFFSentryGun *Create( const Vector &vecOrigin, const QAngle &vecAngles, CBaseEntity *pentOwner = NULL );
 
