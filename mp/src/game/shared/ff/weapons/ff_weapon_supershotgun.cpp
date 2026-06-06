@@ -85,6 +85,8 @@ void CFFWeaponSuperShotgun::Fire()
 	info.m_flDamage = pWeaponInfo.m_flDamage;
 	info.m_iTracerFreq = 0;
 
+	info.m_flDamageForceScale = 16.0f;
+
 	pPlayer->FireBullets(info);
 
 #ifdef GAME_DLL
