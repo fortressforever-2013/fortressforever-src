@@ -1402,6 +1402,16 @@ void CFFSentryGun::Shoot( const Vector &vecSrc, const Vector &vecDirToEnemy, boo
 	}*/
 
 	FireBullets( info );
+		CFFPlayer* pTarget = ToFFPlayer(GetEnemy());
+	if (pTarget && pTarget->IsAlive())
+	{
+		CTakeDamageInfo pushInfo(this, this, (float)m_iShellDamage, DMG_BULLET);
+		Vector vecDir = pTarget->GetAbsOrigin() - MuzzlePosition();
+		VectorNormalize(vecDir);
+		CalculateMeleeDamageForce(&pushInfo, vecDir, pTarget->GetAbsOrigin(), 0.7f);
+		pTarget->ApplyAbsVelocityImpulse(pushInfo.GetDamageForce());
+	}
+
 	EmitSound( "Sentry.Fire" );
 
 	QAngle vecAngles;
