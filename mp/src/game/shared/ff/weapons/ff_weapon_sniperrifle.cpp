@@ -24,7 +24,7 @@ static int g_iBeam, g_iHalo;
 //ConVar sniperrifle_chargetime( "ffdev_sniperrifle_chargetime", "5.0", FCVAR_FF_FFDEV_REPLICATED, "Max charge time on Sniper Rifle" );
 // chargetime in ff_shareddefs.h
 //ConVar sniperrifle_laserdot_scale("ffdev_sniperrifle_laserdot_scale", "0.15", FCVAR_FF_FFDEV_REPLICATED, "Scale of the sniper rifle laser dot");
-#define SNIPERRIFLE_LASERDOT_SCALE 0.15f
+#define SNIPERRIFLE_LASERDOT_SCALE 0.2f
 //ConVar sniperrifle_zoomfov("ffdev_sniperrifle_zoomfov", "25", FCVAR_FF_FFDEV_REPLICATED, "fov of the sniper zoom (+attack2). smaller value = more zoomed in.");
 #define SNIPERRIFLE_ZOOMFOV 25
 
@@ -614,7 +614,7 @@ void CFFWeaponSniperRifle::CheckFire()
 
 			// make sure the player is slow
 #ifdef GAME_DLL
-			pPlayer->AddSpeedEffect(SE_SNIPERRIFLE, 999, .20, SEM_BOOLEAN);
+			pPlayer->AddSpeedEffect(SE_SNIPERRIFLE, 999, .27, SEM_BOOLEAN);
 
 			if (m_hLaserDot.Get()) 
 				m_hLaserDot->m_flStartTime = gpGlobals->curtime;
