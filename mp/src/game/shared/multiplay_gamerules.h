@@ -258,9 +258,9 @@ public:
 
 	// moving to public so we can use changelevel/gotointermission in lua
 	//===============================
-	virtual void GoToIntermission(void);
-	virtual void LoadMapCycleFile(void);
-	void ChangeLevelToMap(const char* pszMap);
+	virtual void GoToIntermission( void );
+	virtual void LoadMapCycleFile( void );
+	void ChangeLevelToMap( const char *pszMap );
 
 	float m_flIntermissionEndTime;
 	//===============================

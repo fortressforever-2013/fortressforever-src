@@ -163,11 +163,7 @@ typedef enum
 
 enum
 {
-#ifdef STAGING_ONLY
-	SERVER_MODIFICATION_ITEM_DURATION_IN_MINUTES = 2
-#else
 	SERVER_MODIFICATION_ITEM_DURATION_IN_MINUTES = 120
-#endif
 };
 
 #define MAX_VOTE_DETAILS_LENGTH 64
@@ -512,8 +508,8 @@ enum {
 	OBS_MODE_FIXED,		// view from a fixed camera position
 	OBS_MODE_IN_EYE,	// follow a player in first person view
 	OBS_MODE_CHASE,		// follow a player in third person view
-	OBS_MODE_ROAMING,	// free roaming
 	OBS_MODE_POI,		// PASSTIME point of interest - game objective, big fight, anything interesting; added in the middle of the enum due to tons of hard-coded "<ROAMING" enum compares
+	OBS_MODE_ROAMING,	// free roaming
 
 	NUM_OBSERVER_MODES,
 };

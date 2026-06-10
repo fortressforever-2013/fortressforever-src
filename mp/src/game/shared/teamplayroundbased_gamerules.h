@@ -207,8 +207,10 @@ public:
 	void SetOvertime( bool bOvertime );
 
 	bool InSetup( void ){ return m_bInSetup; }
-	
-	void		BalanceTeams( bool bRequireSwitcheesToBeDead );
+
+
+	void BalanceTeams( bool bRequireSwitcheesToBeDead );
+
 
 	bool		SwitchedTeamsThisRound( void ) { return m_bSwitchedTeamsThisRound; }
 
@@ -406,14 +408,10 @@ protected:
 	bool		 CheckMaxRounds( bool bAllowEnd = true );
 
 	void		 CheckReadyRestart( void );
-#if defined(TF_CLIENT_DLL) || defined(TF_DLL)
-	bool		 AreLobbyPlayersOnTeamReady( int iTeam );
-	bool		 AreLobbyPlayersConnected( void );
-#endif
 
 	virtual bool CanChangelevelBecauseOfTimeLimit( void ) { return true; }
 	virtual bool CanGoToStalemate( void ) { return true; }
-	
+
 	// State machine handling
 	void State_Enter( gamerules_roundstate_t newState );	// Initialize the new state.
 	void State_Leave();										// Cleanup the previous state.

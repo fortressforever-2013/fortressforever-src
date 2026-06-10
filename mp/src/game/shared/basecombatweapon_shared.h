@@ -269,9 +269,9 @@ public:
 	virtual void			HandleFireOnEmpty();					// Called when they have the attack button down
 																	// but they are out of ammo. The default implementation
 																	// either reloads, switches weapons, or plays an empty sound.
-	// FF
+#ifdef FF
 	virtual void			GetHeatLevel(int _firemode, float& _current, float& _max) { _current = 0.f; _max = 0.f; }
-
+#endif
 	virtual bool			CanPerformSecondaryAttack() const;
 
 	virtual bool			ShouldBlockPrimaryFire() { return false; }
@@ -446,10 +446,10 @@ public:
 	void					DestroyItem( void );
 	virtual void			Kill( void );
 
-	// FF
+#ifdef FF
 	// Just die & get deleted already you stupid weapon
 	virtual void			ForceRemove(void);
-
+#endif
 	virtual int				CapabilitiesGet( void ) { return 0; }
 	virtual	int				ObjectCaps( void );
 

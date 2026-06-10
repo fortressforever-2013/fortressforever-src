@@ -85,7 +85,7 @@ BEGIN_NETWORK_TABLE( CBaseGrenade, DT_BaseGrenade )
 //	SendPropTime( SENDINFO( m_flDetonateTime ) ),
 	SendPropEHandle( SENDINFO( m_hThrower ) ),
 
-	//SendPropVector( SENDINFO( m_vecVelocity ), 0, SPROP_NOSCALE ),
+	//SendPropVector( SENDINFO( m_vecVelocity ), 0, SPROP_NOSCALE ), 
 	// --> Mirv: Gren optimisation
 	//SendPropVector( SENDINFO( m_vecVelocity ), 0, SPROP_NOSCALE ), 
 
@@ -364,7 +364,7 @@ void CBaseGrenade::Detonate( void )
 
 	// No shake if in a no gren area
 #ifdef GAME_DLL
-	if (GetShakeAmplitude() && FFScriptRunPredicates(this, "onexplode", true))
+	if ( GetShakeAmplitude() && FFScriptRunPredicates(this, "onexplode", true))
 	{
 		UTIL_ScreenShake( GetAbsOrigin(), GetShakeAmplitude(), 150.0, 1.0, GetShakeRadius(), SHAKE_START );
 	}
@@ -406,7 +406,7 @@ void CBaseGrenade::ExplodeTouch( CBaseEntity *pOther )
 	if (FF_IsAirshot(pOther))
 		m_iDamageType |= DMG_AIRSHOT;
 
-	Explode(&tr, m_iDamageType);
+	Explode( &tr, m_iDamageType );
 }
 
 
@@ -414,7 +414,7 @@ void CBaseGrenade::DangerSoundThink( void )
 {
 	if (!IsInWorld())
 	{
-		Remove();
+		Remove( );
 		return;
 	}
 

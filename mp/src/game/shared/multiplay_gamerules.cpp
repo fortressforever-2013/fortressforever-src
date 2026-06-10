@@ -1013,17 +1013,17 @@ ConVarRef suitcharger( "sk_suitcharger" );
 			//UTIL_LogPrintf(" killer_weapon_name: %s\n",killer_weapon_name);
 
 			// strip the NPC_* or weapon_* from the inflictor's classname
-			if (Q_strncmp( killer_weapon_name, "weapon_", 7 ) == 0 )
+			if ( Q_strncmp( killer_weapon_name, "weapon_", 7 ) == 0 )
 			{
 				//UTIL_LogPrintf("  begins with weapon_, removing\n");
 				killer_weapon_name += 7;
 			}
-			else if (Q_strncmp( killer_weapon_name, "NPC_", 4 ) == 0 )
+			else if ( Q_strncmp( killer_weapon_name, "NPC_", 4 ) == 0 )
 			{
 				//UTIL_LogPrintf("  begins with NPC_, removing\n");
 				killer_weapon_name += 4;
 			}
-			else if (Q_strncmp( killer_weapon_name, "func_", 5 ) == 0 )
+			else if ( Q_strncmp( killer_weapon_name, "func_", 5 ) == 0 )
 			{
 				//UTIL_LogPrintf("  begins with func_, removing\n");
 				killer_weapon_name += 5;

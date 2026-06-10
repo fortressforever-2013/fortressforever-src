@@ -51,7 +51,7 @@ ConVar mp_facefronttime(
 
 ConVar mp_ik( "mp_ik", "1", FCVAR_REPLICATED | FCVAR_DEVELOPMENTONLY, "Use IK on in-place turns." );
 
-#ifdef CLIENT_DLL
+#ifdef FF_CLIENT_DLL
 extern ConVar cl_jimmyleg_mode;
 #endif
 
@@ -548,7 +548,7 @@ bool CBasePlayerAnimState::CanThePlayerMove()
 void CBasePlayerAnimState::ComputePlaybackRate()
 {
 	VPROF( "CBasePlayerAnimState::ComputePlaybackRate" );
-#ifdef CLIENT_DLL
+#ifdef FF_CLIENT_DLL
 	if (cl_jimmyleg_mode.GetInt() == 2 && m_AnimConfig.m_LegAnimType != LEGANIM_8WAY)
 	{
 		// When using a 9-way blend, playback rate is always 1 and we just scale the pose params

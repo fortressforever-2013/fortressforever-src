@@ -61,14 +61,14 @@ void CPredictedViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAng
 		// Calculate our drift
 		Vector	forward, right, up;
 		AngleVectors( angles, &forward, &right, &up );
-		
+	
 		// Add an entry to the history.
 		m_vLagAngles = angles;
 		m_LagAnglesHistory.NoteChanged( gpGlobals->curtime, cl_wpn_sway_interp.GetFloat(), false );
-		
+	
 		// Interpolate back 100ms.
 		m_LagAnglesHistory.Interpolate( gpGlobals->curtime, cl_wpn_sway_interp.GetFloat() );
-		
+	
 		// Now take the 100ms angle difference and figure out how far the forward vector moved in local space.
 		Vector vLaggedForward;
 		QAngle angleDiff = m_vLagAngles - angles;

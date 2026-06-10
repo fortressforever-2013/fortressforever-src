@@ -285,9 +285,9 @@ void CSprite::ComputeWorldSpaceSurroundingBox( Vector *pVecWorldMins, Vector *pV
 //-----------------------------------------------------------------------------
 void CSprite::SetModel( const char *szModelName )
 {
-	int index = modelinfo->GetModelIndex( szModelName );
-	const model_t *model = modelinfo->GetModel( index );
-	if ( model && modelinfo->GetModelType( model ) != mod_sprite )
+	int index_ = modelinfo->GetModelIndex( szModelName );
+	const model_t *pModel = modelinfo->GetModel( index_ );
+	if ( pModel && modelinfo->GetModelType( pModel ) != mod_sprite )
 	{
 		Msg( "Setting CSprite to non-sprite model %s\n", szModelName?szModelName:"NULL" );
 	}
@@ -326,13 +326,11 @@ void CSprite::SpriteInit( const char *pSpriteName, const Vector &origin )
 
 int CSprite::UpdateTransmitState( void )
 {
-	// --> FF
-#ifdef GAME_DLL
+#ifdef FF_DLL
 	// always transmit if you're an objective
 	if (m_ObjectivePlayerRefs.Count() > 0)
 		return SetTransmitState(FL_EDICT_ALWAYS);
-#endif // GAME_DLL
-	// <-- FF
+#endif // F_DLL
 
 	if ( GetMoveParent() )
 	{

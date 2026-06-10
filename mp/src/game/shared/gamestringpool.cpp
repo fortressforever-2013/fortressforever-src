@@ -81,7 +81,7 @@ public:
 	const char *AllocateWithKey(const char *string, const void* key)
 	{
 		const char * &cached = m_KeyLookupCache[ m_KeyLookupCache.Insert( key, NULL ) ];
-		if (cached == NULL)
+		if ( cached == NULL )
 		{
 			cached = Allocate( string );
 		}
