@@ -24,9 +24,9 @@
 #define NAIL_MODEL "models/projectiles/nail/w_nail.mdl"
 
 //ConVar ffdev_nail_speed("ffdev_nail_speed", "1000.0", FCVAR_FF_FFDEV_REPLICATED , "Nail speed");
-//ConVar ffdev_nail_pushmultiplier("ffdev_nail_pushmultiplier", "0.05", FCVAR_FF_FFDEV_REPLICATED, "Nail pushforce multiplier - was 0.1 for 2.1 release");
+//ConVar ffdev_nail_pushmultiplier("ffdev_nail_pushmultiplier", "0.7", FCVAR_FF_FFDEV_REPLICATED, "Nail pushforce multiplier - was 0.1 for 2.1 release") (SDK2013 calculates it in a different way);
 #define FF_NAIL_PUSHMULTIPLIER 0.7f //ffdev_nail_pushmultiplier.GetFloat()
-#define NAIL_SPEED 2000.0f //ffdev_nail_speed.GetFloat() //2000.0f and then 1000.0f and now 2000.0f again because 1000 is way too slow
+#define NAIL_SPEED 1800.0f //ffdev_nail_speed.GetFloat() //2000.0f and then 1000.0f and now 1800.0f because 1000 is way too slow
 //ConVar ffdev_nail_bbox("ffdev_nail_bbox", "2.0", FCVAR_FF_FFDEV_REPLICATED, "Nail bbox");
 #define NAIL_BBOX 2.0f
 //ConVar ffdev_nail_sgmod( "ffdev_nail_sgmod", "10.0", FCVAR_FF_FFDEV_REPLICATED, "Added to nail damage when hitting a SG so SG's take more damage" );
