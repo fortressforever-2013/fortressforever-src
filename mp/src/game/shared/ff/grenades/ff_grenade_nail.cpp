@@ -74,9 +74,9 @@ class PseudoNail
 	// Purpose: Constructor -- only the position and angle are unique for each nail
 	//-------------------------------------------------------------------------------------------------------
 		PseudoNail( const Vector &vOrigin, const QAngle &vAngles )
+			: m_vecOrigin( vOrigin )
+			, m_vecAngles( vAngles )
 		{
-			m_vecOrigin = vOrigin;
-			m_vecAngles = vAngles;
 		}
 
 	//-------------------------------------------------------------------------------------------------------

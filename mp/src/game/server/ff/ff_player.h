@@ -108,10 +108,10 @@ struct RecentAttackerInfo
 	float timestamp;
 
 	RecentAttackerInfo(CFFPlayer *pPlayer, float dmg, float ts)
+		: hPlayer(pPlayer)
+		, totalDamage(dmg)
+		, timestamp(ts)
 	{
-		hPlayer = pPlayer;
-		totalDamage = dmg;
-		timestamp = ts;
 	}
 
 	/* debugging

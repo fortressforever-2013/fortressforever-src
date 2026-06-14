@@ -113,19 +113,19 @@ class CHudBoxBorder
 {
 public:
 	CHudBoxBorder()
+		: clr()
+		, width(0)
 	{
-		clr = Color();
-		width = 0;
 	}
 	CHudBoxBorder(Color _clr)
+		: clr(_clr)
+		, width(1)
 	{
-		clr = _clr;
-		width = 1;
 	}
 	CHudBoxBorder(Color _clr, int _width)
+		: clr(_clr)
+		, width(_width)
 	{
-		clr = _clr;
-		width = _width;
 	}
 
 public:

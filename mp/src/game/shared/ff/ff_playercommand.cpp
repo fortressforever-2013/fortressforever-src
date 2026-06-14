@@ -25,13 +25,9 @@
 // instance is actually created inside the first FF_AUTOLINK_COMMAND macro on the server
 CPlayerCommands *g_pPlayerCommands = NULL;
 
-CPlayerCommands::CPlayerCommands(void)
-{
-}
+CPlayerCommands::CPlayerCommands(void) = default;
 
-CPlayerCommands::~CPlayerCommands(void)
-{
-}
+CPlayerCommands::~CPlayerCommands(void) = default;
 
 void CPlayerCommands::RegisterCommand(CPlayerCommand *pNewCmd)
 {
@@ -41,7 +37,7 @@ void CPlayerCommands::RegisterCommand(CPlayerCommand *pNewCmd)
 		return;
 	}
 
-	m_mapPlayerCommands.insert(std::make_pair(pNewCmd->m_strCommand, pNewCmd));
+	m_mapPlayerCommands.emplace(pNewCmd->m_strCommand, pNewCmd);
 }
 
 // returns true if command was sent to run on the player's object
@@ -122,11 +118,10 @@ bool CPlayerCommands::ProcessCommand(CBaseEntity *pEntity, const CCommand& args)
 }
 
 CPlayerCommand::CPlayerCommand(std::string strCommand, PLAYERCMD_FUNC_TYPE pfn, unsigned int uiFlags)
+	: m_strCommand(std::move(strCommand))
+	, m_pfn(pfn)
+	, m_uiFlags(uiFlags)
 {
-	m_strCommand = strCommand;
-	m_pfn = pfn;
-	m_uiFlags = uiFlags;
-
 	if(g_pPlayerCommands == NULL)
 		g_pPlayerCommands = new CPlayerCommands;
 
