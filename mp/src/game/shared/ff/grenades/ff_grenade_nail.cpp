@@ -18,6 +18,7 @@
 //========================================================================
 #include "cbase.h"
 #include "ff_grenade_base.h"
+#include "tier0/vprof.h"
 #include "ff_utils.h"
 #include "ff_projectile_nail.h"
 #include "effect_dispatch_data.h"
@@ -301,8 +302,10 @@ void CFFGrenadeNail::Precache()
 	//-----------------------------------------------------------------------------
 	// Purpose: Spin round emitting nails
 	//-----------------------------------------------------------------------------
-	void CFFGrenadeNail::NailEmit() 
+	void CFFGrenadeNail::NailEmit()
 	{
+		VPROF_BUDGET( "CFFGrenadeNail::NailEmit", VPROF_BUDGETGROUP_FF_GRENADE );
+
 		// First we need to trace each nail's bounds to check for a hit, then "move" the nails that didn't hit anything
 		for ( int i=0; i < m_NailsVector.Count(); i++)
 		{

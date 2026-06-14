@@ -430,12 +430,12 @@ CFFBuildableObject::CFFBuildableObject( void )
 	m_iExplosionMagnitude = 50;
 	m_flExplosionMagnitude = 50.0f;
 	m_flExplosionRadius = 3.5f * m_flExplosionMagnitude;
-	m_iExplosionRadius = ( int )m_flExplosionRadius;	
+	m_iExplosionRadius = static_cast<int>(m_flExplosionRadius);	
 	m_flExplosionForce = 100.0f;
 	// TODO: for now - change this later? remember to update in dispenser.cpp as well
 	m_flExplosionDamage = m_flExplosionForce;
 	m_flExplosionDuration = 0.5f;
-	m_iExplosionFireballScale = 1.1f;
+	m_iExplosionFireballScale = static_cast<int>(1.1f); // Should of been a int not float? [APG]RoboCop[CL]
 
 	// Default think time
 	m_flThinkTime = 0.2f;

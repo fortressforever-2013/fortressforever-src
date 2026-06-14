@@ -147,6 +147,7 @@
 #define VPROF_BUDGETGROUP_FF_BUILDABLE				_T( "FF Buildable Objects" )
 #define VPROF_BUDGETGROUP_FF_LUA					_T( "FF Lua" )
 #define VPROF_BUDGETGROUP_FF_MATHACKDETECT			_T( "FF Mathack Detection" )
+#define VPROF_BUDGETGROUP_FF_GRENADE				_T( "FF Grenades" )
 
 #ifdef _X360
 // update flags

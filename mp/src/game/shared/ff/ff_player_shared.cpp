@@ -2345,7 +2345,7 @@ void CFFPlayer::PrimeGrenade1( void )
 	EmitSoundShared("Grenade.Prime");
 
 #ifndef _DEBUG
-	m_iPrimary--;
+	--m_iPrimary;
 #endif
 
 #ifdef CLIENT_DLL
@@ -2430,7 +2430,7 @@ void CFFPlayer::PrimeGrenade2( void )
 	EmitSoundShared("Grenade.Prime");
 
 #ifndef _DEBUG
-	m_iSecondary--;
+	--m_iSecondary;
 #endif
 
 #ifdef CLIENT_DLL
