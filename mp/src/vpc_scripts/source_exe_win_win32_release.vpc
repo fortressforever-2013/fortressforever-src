@@ -184,7 +184,7 @@ $Configuration "Release"
 		$UACExecutionLevel
 
 		// Debugging
-		$GenerateDebugInfo						"Yes (/DEBUG)"
+		$GenerateDebugInfo					"Yes (/DEBUG)"
 		$GenerateProgramDatabaseFile			"$(IntDir)/$(TargetName).pdb"
 		$StripPrivateSymbols
 		$MapExports

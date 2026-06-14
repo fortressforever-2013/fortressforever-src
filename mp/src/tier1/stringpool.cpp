@@ -62,8 +62,8 @@ const char * CStringPool::Allocate( const char *pszValue )
 {
 	char	*pszNew;
 
-	unsigned short i 	= m_Strings.Find(pszValue);
-	bool		   bNew = (i == m_Strings.InvalidIndex());
+	unsigned short i    = m_Strings.Find(pszValue);
+	bool    bNew = (i == m_Strings.InvalidIndex());
 
 	if ( !bNew )
 		return m_Strings[i];

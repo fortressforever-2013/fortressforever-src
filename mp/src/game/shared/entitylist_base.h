@@ -153,6 +153,10 @@ inline IHandleEntity* CBaseEntityList::LookupEntityByNetworkIndex( int edictInde
 		return NULL;
 
 	Assert( edictIndex < NUM_ENT_ENTRIES );
+
+	
+		
+
 	return (IHandleEntity*)m_EntPtrArray[edictIndex].m_pEntity;
 }
 

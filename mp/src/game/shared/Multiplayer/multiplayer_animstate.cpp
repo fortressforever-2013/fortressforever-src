@@ -187,14 +187,24 @@ void CMultiPlayerAnimState::DoAnimationEvent( PlayerAnimEvent_t event, int nData
 				RestartGesture( GESTURE_SLOT_ATTACK_AND_RELOAD, ACT_MP_RELOAD_STAND );
 			}
 
-
-			// Set the modified reload playback rate
+			// Set the modified reload playback rate	
 			float flPlaybackRate = 1.0f;
-			#if defined(TF_CLIENT_DLL) || defined(TF_DLL)
-				CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( GetBasePlayer(), flPlaybackRate, mult_reload_time );
-				CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( GetBasePlayer(), flPlaybackRate, mult_reload_time_hidden );
-				CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( GetBasePlayer(), flPlaybackRate, fast_reload );
-			#endif
+#if defined ( TF_CLIENT_DLL ) || defined ( TF_DLL )
+
+
+
+
+
+					CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( GetBasePlayer(), flPlaybackRate, mult_reload_time );
+					CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( GetBasePlayer(), flPlaybackRate, mult_reload_time_hidden );
+					CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( GetBasePlayer(), flPlaybackRate, fast_reload );
+
+
+
+
+
+
+#endif // TF_CLIENT_DLL || TF_DLL
 			m_aGestureSlots[ GESTURE_SLOT_ATTACK_AND_RELOAD ].m_pAnimLayer->m_flPlaybackRate = flPlaybackRate;
 
 			break;
@@ -218,14 +228,14 @@ void CMultiPlayerAnimState::DoAnimationEvent( PlayerAnimEvent_t event, int nData
 			// Set the modified reload playback rate
 			float flPlaybackRate = 1.0f;
 #if defined ( TF_CLIENT_DLL ) || defined ( TF_DLL )
+
+
+
+
+
 				CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( GetBasePlayer(), flPlaybackRate, mult_reload_time );
 				CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( GetBasePlayer(), flPlaybackRate, mult_reload_time_hidden );
 				CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( GetBasePlayer(), flPlaybackRate, fast_reload );
-
-
-
-
-
 
 
 
@@ -255,11 +265,22 @@ void CMultiPlayerAnimState::DoAnimationEvent( PlayerAnimEvent_t event, int nData
 
 			// Set the modified reload playback rate
 			float flPlaybackRate = 1.0f;
-			#if defined(TF_CLIENT_DLL) || defined(TF_DLL)
+#if defined ( TF_CLIENT_DLL ) || defined ( TF_DLL )
+
+
+
+
+
 				CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( GetBasePlayer(), flPlaybackRate, mult_reload_time );
 				CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( GetBasePlayer(), flPlaybackRate, mult_reload_time_hidden );
 				CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( GetBasePlayer(), flPlaybackRate, fast_reload );
-			#endif
+
+
+
+
+
+
+#endif // TF_CLIENT_DLL || TF_DLL
 			m_aGestureSlots[ GESTURE_SLOT_ATTACK_AND_RELOAD ].m_pAnimLayer->m_flPlaybackRate = flPlaybackRate;
 
 			break;
@@ -1436,13 +1457,6 @@ void CMultiPlayerAnimState::DoMovementTest( CStudioHdr *pStudioHdr, float flX, f
 	GetBasePlayer()->SetPoseParameter( pStudioHdr, m_PoseParameterData.m_iMoveX, flX );
 	GetBasePlayer()->SetPoseParameter( pStudioHdr, m_PoseParameterData.m_iMoveY, flY );
 
-#ifdef STAGING_ONLY
-	float flTestSpeed = GetBasePlayer()->GetSequenceGroundSpeed( m_nMovementSequence );
-	if ( flTestSpeed < 10.0f )
-	{
-		Warning( "%s : %s (X %.0f Y %.0f) missing movement\n", pStudioHdr->pszName(), GetBasePlayer()->GetSequenceName( m_nMovementSequence ), flX, flY );
-	}
-#endif
 
 	/*
 	GetBasePlayer()->SetPoseParameter( pStudioHdr, m_PoseParameterData.m_iMoveX, flX );
@@ -1948,9 +1962,12 @@ void CMultiPlayerAnimState::DebugShowEyeYaw( void )
 	AngleVectors( angles, &vecForward, &vecRight, &vecUp );
 
 	// Draw a red triangle on the ground for the eye yaw.
-	debugoverlay->AddTriangleOverlay( ( vecPos + vecRight * flBaseSize / 2.0f ), 
-		( vecPos - vecRight * flBaseSize / 2.0f ), 
-		( vecPos + vecForward * flHeight, 255, 0, 0, 255, false, 0.01f );
+	
+	
+		debugoverlay->AddTriangleOverlay( ( vecPos + vecRight * flBaseSize / 2.0f ), 
+			( vecPos - vecRight * flBaseSize / 2.0f ), 
+			( vecPos + vecForward * flHeight, 255, 0, 0, 255, false, 0.01f );
+	
 
 #endif
 }
@@ -2031,20 +2048,23 @@ void CMultiPlayerAnimState::DebugShowAnimState( int iStartLine )
 
 	Anim_StateLog( "--------------------------------------------\n\n" );
 
-	// Draw a red triangle on the ground for the eye yaw.
-	float flBaseSize = 10;
-	float flHeight = 80;
-	Vector vBasePos = GetBasePlayer()->GetAbsOrigin() + Vector( 0, 0, 3 );
-	QAngle angles( 0, 0, 0 );
-	angles[YAW] = m_flEyeYaw;
-	Vector vForward, vRight, vUp;
-	AngleVectors( angles, &vForward, &vRight, &vUp );
-	debugoverlay->AddTriangleOverlay( vBasePos+vRight*flBaseSize/2, vBasePos-vRight*flBaseSize/2, vBasePos+vForward*flHeight, 255, 0, 0, 255, false, 0.01 );
+	
+	
+		// Draw a red triangle on the ground for the eye yaw.
+		float flBaseSize = 10;
+		float flHeight = 80;
+		Vector vBasePos = GetBasePlayer()->GetAbsOrigin() + Vector( 0, 0, 3 );
+		QAngle angles( 0, 0, 0 );
+		angles[YAW] = m_flEyeYaw;
+		Vector vForward, vRight, vUp;
+		AngleVectors( angles, &vForward, &vRight, &vUp );
+		debugoverlay->AddTriangleOverlay( vBasePos+vRight*flBaseSize/2, vBasePos-vRight*flBaseSize/2, vBasePos+vForward*flHeight, 255, 0, 0, 255, false, 0.01 );
 
-	// Draw a blue triangle on the ground for the body yaw.
-	angles[YAW] = m_angRender[YAW];
-	AngleVectors( angles, &vForward, &vRight, &vUp );
-	debugoverlay->AddTriangleOverlay( vBasePos+vRight*flBaseSize/2, vBasePos-vRight*flBaseSize/2, vBasePos+vForward*flHeight, 0, 0, 255, 255, false, 0.01 );	
+		// Draw a blue triangle on the ground for the body yaw.
+		angles[YAW] = m_angRender[YAW];
+		AngleVectors( angles, &vForward, &vRight, &vUp );
+		debugoverlay->AddTriangleOverlay( vBasePos+vRight*flBaseSize/2, vBasePos-vRight*flBaseSize/2, vBasePos+vForward*flHeight, 0, 0, 255, 255, false, 0.01 );	
+	
 }
 
 // Debug!

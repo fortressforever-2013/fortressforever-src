@@ -2475,8 +2475,13 @@ void CMapFile::MergeEntities( entity_t *pInstanceEntity, CMapFile *Instance, Vec
 
 		oldValue = Connection->m_Pair->value;
 		strcpy( origValue, oldValue );
+		char chDelim = VMF_IOPARAM_STRING_DELIMITER;
+		if (!strchr(origValue, VMF_IOPARAM_STRING_DELIMITER))
+		{
+			chDelim = ',';
+		}
 
-		char *pos = strchr( origValue, ',' );
+		char *pos = strchr( origValue, chDelim );
 		if ( pos )
 		{	// null terminate the first field
 			*pos = NULL;
@@ -2489,8 +2494,10 @@ void CMapFile::MergeEntities( entity_t *pInstanceEntity, CMapFile *Instance, Vec
 			strcpy( newValue, temp );
 			if ( pos )
 			{
+				char szDelim[ 2 ];
+				sprintf( szDelim, "%c", VMF_IOPARAM_STRING_DELIMITER );
 
-				strcat( newValue, "," );
+				strcat( newValue, szDelim );
 				strcat( newValue, pos + 1 );
 			}
 

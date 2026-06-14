@@ -814,7 +814,7 @@ ConVarRef suitcharger( "sk_suitcharger" );
 			pVictim->GetTeam()->AddDeaths(1);
 		FireTargets( "game_playerdie", pVictim, pVictim, USE_TOGGLE, 0 );
 
-		if (pScorer && pVictim != pScorer)
+		if ( pScorer && pVictim != pScorer )
 		{
 			// if a player dies in a deathmatch game and the killer is a client, award the killer some points
 			pScorer->IncrementFragCount( IPointsForKill( pScorer, pVictim ) );
@@ -843,7 +843,7 @@ ConVarRef suitcharger( "sk_suitcharger" );
 			{
 				pTopAssister->hPlayer->AddFortPoints(25, "#FF_FORTPOINTS_ASSIST");
 				pTopAssister->hPlayer->IncrementAssistsCount(1);
-			}
+			}					
 		}
 	}
 
@@ -1013,17 +1013,17 @@ ConVarRef suitcharger( "sk_suitcharger" );
 			//UTIL_LogPrintf(" killer_weapon_name: %s\n",killer_weapon_name);
 
 			// strip the NPC_* or weapon_* from the inflictor's classname
-			if (Q_strncmp( killer_weapon_name, "weapon_", 7 ) == 0 )
+			if ( Q_strncmp( killer_weapon_name, "weapon_", 7 ) == 0 )
 			{
 				//UTIL_LogPrintf("  begins with weapon_, removing\n");
 				killer_weapon_name += 7;
 			}
-			else if (Q_strncmp( killer_weapon_name, "NPC_", 4 ) == 0 )
+			else if ( Q_strncmp( killer_weapon_name, "NPC_", 4 ) == 0 )
 			{
 				//UTIL_LogPrintf("  begins with NPC_, removing\n");
 				killer_weapon_name += 4;
 			}
-			else if (Q_strncmp( killer_weapon_name, "func_", 5 ) == 0 )
+			else if ( Q_strncmp( killer_weapon_name, "func_", 5 ) == 0 )
 			{
 				//UTIL_LogPrintf("  begins with func_, removing\n");
 				killer_weapon_name += 5;
@@ -1483,7 +1483,7 @@ ConVarRef suitcharger( "sk_suitcharger" );
 			return;
 		}
 
-		// Nope?  Try the root.
+		// Nope?  Try the root.  
 		V_strncpy( pszResult, pszVar, nSizeResult );
 		if ( filesystem->FileExists( pszResult, "GAME" ) )
 		{
@@ -1892,20 +1892,20 @@ ConVarRef suitcharger( "sk_suitcharger" );
 		{
 			if ( FStrEq( pszCommand, "AchievementEarned" ) )
 			{
-				if ( pPlayer->ShouldAnnounceAchievement() )
+				if ( !pPlayer->ShouldAnnounceAchievement() )
+					return;
+
+				int nAchievementID = pKeyValues->GetInt( "achievementID" );
+
+				IGameEvent * event = gameeventmanager->CreateEvent( "achievement_earned" );
+				if ( event )
 				{
-					int nAchievementID = pKeyValues->GetInt( "achievementID" );
-
-					IGameEvent * event = gameeventmanager->CreateEvent( "achievement_earned" );
-					if ( event )
-					{
-						event->SetInt( "player", pPlayer->entindex() );
-						event->SetInt( "achievement", nAchievementID );
-						gameeventmanager->FireEvent( event );
-					}
-
-					pPlayer->OnAchievementEarned( nAchievementID );
+					event->SetInt( "player", pPlayer->entindex() );
+					event->SetInt( "achievement", nAchievementID );
+					gameeventmanager->FireEvent( event );
 				}
+
+				pPlayer->OnAchievementEarned( nAchievementID );
 			}
 		}
 	}

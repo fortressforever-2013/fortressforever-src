@@ -958,7 +958,7 @@ public:
 
 // Classify - returns the type of group (i.e, "houndeye", or "human military" so that NPCs with different classnames
 // still realize that they are teammates. (overridden for NPCs that form groups)
-	virtual Class_T Classify(void) { return CLASS_NONE; }
+	virtual Class_T Classify ( void ) { return CLASS_NONE; }
 	virtual void	DeathNotice ( CBaseEntity *pVictim ) {}// NPC maker children use this to tell the NPC maker that they have died.
 	virtual bool	ShouldAttractAutoAim( CBaseEntity *pAimingEnt ) { return ((GetFlags() & FL_AIMTARGET) != 0); }
 	virtual float	GetAutoAimRadius();
@@ -1030,7 +1030,7 @@ public:
 	bool			IsBSPModel() const;
 	bool			IsCombatCharacter() { return MyCombatCharacterPointer() == NULL ? false : true; }
 	//bool			IsInWorld( void ) const;
-	virtual bool	IsInWorld(void) const;
+	virtual bool	IsInWorld( void ) const;
 	virtual bool	IsCombatItem( void ) const { return false; }
 
 	virtual bool	IsBaseCombatWeapon( void ) const { return false; }
@@ -1841,7 +1841,7 @@ public:
 // Methods shared by client and server
 public:
 	void							SetSize( const Vector &vecMin, const Vector &vecMax ); // UTIL_SetSize( this, mins, maxs );
-	static int						PrecacheModel( const char *name, bool bPreload = true );
+	static int						PrecacheModel( const char *name, bool bPreload = true ); 
 	static bool						PrecacheSound( const char *name );
 	static void						PrefetchSound( const char *name );
 	void							Remove( ); // UTIL_Remove( this );
@@ -2225,6 +2225,8 @@ inline const QAngle& CBaseEntity::GetAbsAngles( void ) const
 	}
 	return m_angAbsRotation;
 }
+
+
 
 //-----------------------------------------------------------------------------
 // Returns the entity-to-world transform
@@ -2727,14 +2729,7 @@ inline void CBaseEntity::FireBullets( int cShots, const Vector &vecSrc,
 #define SetThink( a ) ThinkSet( static_cast <void (CBaseEntity::*)(void)> (a), 0, NULL )
 #define SetContextThink( a, b, context ) ThinkSet( static_cast <void (CBaseEntity::*)(void)> (a), (b), context )
 
-#ifdef _DEBUG
-#define SetMoveDone( a ) \
-	do \
-	{ \
-		m_pfnMoveDone = static_cast <void (CBaseEntity::*)(void)> (a); \
-		FunctionCheck( (void *)*((int *)((char *)this + ( offsetof(CBaseEntity,m_pfnMoveDone)))), "BaseMoveFunc" ); \
-	} while ( 0 )
-#else
+#ifndef _DEBUG
 #define SetMoveDone( a ) \
 		(void)(m_pfnMoveDone = static_cast <void (CBaseEntity::*)(void)> (a))
 #endif

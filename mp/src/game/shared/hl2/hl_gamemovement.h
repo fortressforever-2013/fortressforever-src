@@ -115,8 +115,8 @@ inline void CHL2GameMovement::SetLadder( CFuncLadder *ladder )
 		oldLadder->PlayerGotOff( GetHL2Player() );
 	}
 
-
 	GetHL2Player()->m_HL2Local.m_hLadder.Set( ladder );
+
 }
 
 //-----------------------------------------------------------------------------

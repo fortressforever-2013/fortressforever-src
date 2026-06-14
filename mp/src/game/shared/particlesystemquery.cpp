@@ -87,6 +87,10 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CParticleSystemQuery, IParticleSystemQuery, P
 #endif
 
 static CThreadFastMutex s_LightMutex;
+
+
+
+
 static CThreadFastMutex s_BoneMutex;
 
 //-----------------------------------------------------------------------------

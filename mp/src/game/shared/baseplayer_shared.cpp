@@ -1853,7 +1853,6 @@ float CBasePlayer::GetFOVDistanceAdjustFactor()
 	// If FOV is lower, then we're "zoomed" in and this will give a factor < 1 so apparent LOD distances can be
 	//  shorted accordingly
 	return localFOV / defaultFOV;
-
 }
 
 //-----------------------------------------------------------------------------
@@ -2039,31 +2038,30 @@ bool CBasePlayer::SetFOV( CBaseEntity *pRequester, int FOV, float zoomRate, int 
 //-----------------------------------------------------------------------------
 void CBasePlayer::UpdateUnderwaterState( void )
 {
-	if (GetWaterLevel() < WL_Eyes)
+	if ( GetWaterLevel() < WL_Eyes )
 	{
-		if (IsPlayerUnderwater())
+		if ( IsPlayerUnderwater() )
 		{
-			SetPlayerUnderwater(false);
-
+			SetPlayerUnderwater( false );
 			if(m_iHealth > 0 && IsAlive())
 				RemoveFlag(FL_INWATER);	// Jiggles: Added for swim animations
 		}
 	}
-	else if (GetWaterLevel() < WL_Waist)
+	else if ( GetWaterLevel() < WL_Waist )
 	{
-		if (GetWaterLevel() == 0)
+		if ( GetWaterLevel() == 0 )
 		{
-			if (GetFlags() & FL_INWATER)
+			if ( GetFlags() & FL_INWATER )
 			{
-				if (m_iHealth > 0 && IsAlive())
-					EmitSound("Player.Wade");
+				if ( m_iHealth > 0 && IsAlive() )
+					EmitSound( "Player.Wade" );
 
-				RemoveFlag(FL_INWATER);
+				RemoveFlag( FL_INWATER );
 			}
 			return;
 		}
 	}
-	else if (GetWaterLevel() > WL_Waist)
+	else if ( GetWaterLevel() > WL_Waist )
 	{
 		if (IsPlayerUnderwater() == false)
 		{
@@ -2073,7 +2071,7 @@ void CBasePlayer::UpdateUnderwaterState( void )
 			// Jiggles: Added for swim animations
 			if (!(GetFlags() & FL_INWATER))
 			{
-				AddFlag(FL_INWATER);
+				AddFlag( FL_INWATER );
 			}
 		}
 		// END ADD

@@ -173,12 +173,12 @@ enum
 
 enum CastVote
 {
-	VOTE_OPTION1,  // Use this for Yes
-	VOTE_OPTION2,  // Use this for No
-	VOTE_OPTION3,
-	VOTE_OPTION4,
-	VOTE_OPTION5,
-	VOTE_UNCAST
+	VOTE_OPTION1 = 0,  // Use this for Yes
+	VOTE_OPTION2 = 1,  // Use this for No
+	VOTE_OPTION3 = 2,
+	VOTE_OPTION4 = 3,
+	VOTE_OPTION5 = 4,
+	VOTE_UNCAST  = 5
 };
 
 //===================================================================================================================
@@ -508,8 +508,8 @@ enum {
 	OBS_MODE_FIXED,		// view from a fixed camera position
 	OBS_MODE_IN_EYE,	// follow a player in first person view
 	OBS_MODE_CHASE,		// follow a player in third person view
-	OBS_MODE_ROAMING,	// free roaming
 	OBS_MODE_POI,		// PASSTIME point of interest - game objective, big fight, anything interesting; added in the middle of the enum due to tons of hard-coded "<ROAMING" enum compares
+	OBS_MODE_ROAMING,	// free roaming
 
 	NUM_OBSERVER_MODES,
 };

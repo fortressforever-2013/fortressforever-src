@@ -200,15 +200,18 @@ public:
 	virtual void SetLastCapPointChanged( int iIndex ) { m_iLastCapPointChanged = iIndex; }
 	int			 GetLastCapPointChanged( void ) { return m_iLastCapPointChanged; }
 
-	virtual int GetWinningTeam( void ){ return m_iWinningTeam; }
+	virtual int GetWinningTeam( void )
+	{
+		return m_iWinningTeam; 
+	}
 	int GetWinReason() { return m_iWinReason; }
 
 	bool InOvertime( void ){ return m_bInOvertime; }
 	void SetOvertime( bool bOvertime );
 
 	bool InSetup( void ){ return m_bInSetup; }
-	
-	void		BalanceTeams( bool bRequireSwitcheesToBeDead );
+
+	void BalanceTeams( bool bRequireSwitcheesToBeDead );
 
 	bool		SwitchedTeamsThisRound( void ) { return m_bSwitchedTeamsThisRound; }
 
@@ -413,7 +416,7 @@ protected:
 
 	virtual bool CanChangelevelBecauseOfTimeLimit( void ) { return true; }
 	virtual bool CanGoToStalemate( void ) { return true; }
-	
+
 	// State machine handling
 	void State_Enter( gamerules_roundstate_t newState );	// Initialize the new state.
 	void State_Leave();										// Cleanup the previous state.

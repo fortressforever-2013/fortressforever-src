@@ -69,6 +69,12 @@ URLLabel::~URLLabel()
 //-----------------------------------------------------------------------------
 void URLLabel::SetURL(const char *pszURL)
 {
+	
+	
+		
+		
+	
+
 	int iNewURLSize = strlen(pszURL);
 	if (iNewURLSize > m_iURLSize || !m_pszURL)
 	{

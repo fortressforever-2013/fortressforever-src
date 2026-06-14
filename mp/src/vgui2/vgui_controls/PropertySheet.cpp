@@ -560,6 +560,8 @@ void PropertySheet::SetDraggableTabs( bool state )
 void PropertySheet::SetSmallTabs( bool state )
 {
 	m_bSmallTabs = state;
+	
+		
 	m_tabFont = scheme()->GetIScheme( GetScheme() )->GetFont( m_bSmallTabs ? "DefaultVerySmall" : "Default" );
 	int c = m_PageTabs.Count();
 	for ( int i = 0; i < c ; ++i )
@@ -979,6 +981,7 @@ void PropertySheet::PaintBorder()
 		_activeTab->GetBounds(px, py, pwide, ptall);
 		ptall -= 1;
 	}
+
 
 	// draw the border underneath the buttons, with a break
 	int wide, tall;

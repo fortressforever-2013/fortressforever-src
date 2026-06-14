@@ -355,7 +355,7 @@ bool CTeamplayRules::IsTeamplay( void )
 
 bool CTeamplayRules::FCanTakeDamage( CBaseEntity *pVictim, CBaseEntity *pAttacker, const CTakeDamageInfo &info )
 {
-	if ( pAttacker && PlayerRelationship(pVictim, pAttacker ) == GR_TEAMMATE && !info.IsForceFriendlyFire() )
+	if ( pAttacker && PlayerRelationship( pVictim, pAttacker ) == GR_TEAMMATE && !info.IsForceFriendlyFire() )
 	{
 		// If friendly fire is off and I'm not attacking myself, then
 		// someone else on my team/an ally is attacking me - don't
@@ -367,7 +367,7 @@ bool CTeamplayRules::FCanTakeDamage( CBaseEntity *pVictim, CBaseEntity *pAttacke
 		}
 	}
 
-	return BaseClass::FCanTakeDamage(pVictim, pAttacker, info );
+	return BaseClass::FCanTakeDamage( pVictim, pAttacker, info );
 }
 
 //=========================================================

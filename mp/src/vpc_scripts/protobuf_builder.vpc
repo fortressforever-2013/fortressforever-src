@@ -1,5 +1,5 @@
 
-$MacroRequired	GENERATED_PROTO_DIR
+$MacroRequired GENERATED_PROTO_DIR
 
 $CustomBuildStep "proto"
 {

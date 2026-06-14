@@ -1164,6 +1164,7 @@ bool CBaseGameStats_Driver::AddBaseDataForSend( KeyValues *pKV, StatSendType_t s
 			{
 				const char *currentLanguage = SteamApps()->GetCurrentGameLanguage();
 				pKV->SetString( "Language", currentLanguage ? currentLanguage : "unknown" );
+
 			}
 #endif
 
@@ -1223,7 +1224,8 @@ void CBaseGameStats_Driver::ResetData()
 	pKV->SetUint64( "CPUFeatures1", cpu.m_nFeatures[ 1 ] );
 	pKV->SetUint64( "CPUFeatures2", cpu.m_nFeatures[ 2 ] );
 	pKV->SetInt( "NumCores", cpu.m_nPhysicalProcessors );
-
+	
+	
 	MaterialAdapterInfo_t gpu;
 	materials->GetDisplayAdapterInfo( materials->GetCurrentAdapter(), gpu );
 

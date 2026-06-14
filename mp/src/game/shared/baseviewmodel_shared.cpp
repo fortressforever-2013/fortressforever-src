@@ -27,10 +27,8 @@ extern ConVar in_forceuser;
 #include "iclientmode.h"
 #endif
 
-#ifdef FF
-#ifdef CLIENT_DLL
+#ifdef FF_CLIENT_DLL
 #include "c_ff_player.h"
-#endif
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -424,18 +422,12 @@ void CBaseViewModel::CalcViewModelView( CBasePlayer *owner, const Vector& eyePos
 		{
 			// add weapon-specific bob 
 			pWeapon->AddViewmodelBob( this, vmorigin, vmangles );
-#if defined ( CSTRIKE_DLL )
+
 			CalcViewModelLag( vmorigin, vmangles, vmangoriginal );
-#endif
 		}
 	}
 	// Add model-specific bob even if no weapon associated (for head bob for off hand models)
 	AddViewModelBob( owner, vmorigin, vmangles );
-#if !defined ( CSTRIKE_DLL )
-	// This was causing weapon jitter when rotating in updated CS:S; original Source had this in above InPrediction block  07/14/10
-	// Add lag
-	CalcViewModelLag( vmorigin, vmangles, vmangoriginal );
-#endif
 
 #if defined( CLIENT_DLL )
 	if ( !prediction->InPrediction() )
@@ -488,6 +480,8 @@ void CBaseViewModel::CalcViewModelView( CBasePlayer *owner, const Vector& eyePos
 //-----------------------------------------------------------------------------
 float g_fMaxViewModelLag = 1.5f;
 
+ConVar sv_viewmodel_lag_do_angles( "sv_viewmodel_lag_do_angles", "1", FCVAR_CHEAT | FCVAR_REPLICATED );
+
 void CBaseViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAngle& original_angles )
 {
 	Vector vOriginalOrigin = origin;
@@ -522,25 +516,28 @@ void CBaseViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAngle& o
 		Assert( m_vecLastFacing.IsValid() );
 	}
 
-	Vector right, up;
-	AngleVectors( original_angles, &forward, &right, &up );
-
-	float pitch = original_angles[ PITCH ];
-	if ( pitch > 180.0f )
-		pitch -= 360.0f;
-	else if ( pitch < -180.0f )
-		pitch += 360.0f;
-
-	if ( g_fMaxViewModelLag == 0.0f )
+	if ( sv_viewmodel_lag_do_angles.GetBool() )
 	{
-		origin = vOriginalOrigin;
-		angles = vOriginalAngles;
-	}
+		Vector right, up;
+		AngleVectors( original_angles, &forward, &right, &up );
 
-	//FIXME: These are the old settings that caused too many exposed polys on some models
-	VectorMA( origin, -pitch * 0.035f,	forward,	origin );
-	VectorMA( origin, -pitch * 0.03f,		right,	origin );
-	VectorMA( origin, -pitch * 0.02f,		up,		origin);
+		float pitch = original_angles[ PITCH ];
+		if ( pitch > 180.0f )
+			pitch -= 360.0f;
+		else if ( pitch < -180.0f )
+			pitch += 360.0f;
+
+		if ( g_fMaxViewModelLag == 0.0f )
+		{
+			origin = vOriginalOrigin;
+			angles = vOriginalAngles;
+		}
+
+		//FIXME: These are the old settings that caused too many exposed polys on some models
+		VectorMA( origin, -pitch * 0.035f,	forward,	origin );
+		VectorMA( origin, -pitch * 0.03f,		right,	origin );
+		VectorMA( origin, -pitch * 0.02f,		up,		origin);
+	}
 }
 
 //-----------------------------------------------------------------------------

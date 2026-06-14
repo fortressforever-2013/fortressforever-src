@@ -126,8 +126,8 @@ static void WriteAchievementGlobalState( KeyValues *pKV, bool bPersistToSteamClo
 
         if (pRemoteStorage)
         {
-            uint64 availableBytes = 0;
-			uint64 totalBytes = 0;
+	        uint64 availableBytes = 0;
+            uint64 totalBytes = 0;
             if ( pRemoteStorage->GetQuota( &totalBytes, &availableBytes ) )
             {
                 if ( totalBytes > 0 )
@@ -1107,7 +1107,7 @@ bool CAchievementMgr::CheckAchievementsEnabled()
 #ifndef NO_STEAM
 			// Cheats get turned on automatically if you run with -dev which many people do internally, so allow cheats if developer is turned on and we're not running
 			// on Steam public
-			if ( developer.GetInt() == 0 || !SteamUtils() || (k_EUniversePublic == SteamUtils()->GetConnectedUniverse()) )
+			if ( developer.GetInt() == 0 || !SteamUtils() || ( k_EUniversePublic == SteamUtils()->GetConnectedUniverse() ) )
 			{
 				Msg( "Achievements disabled: cheats turned on in this app session.\n" );
 				return false;

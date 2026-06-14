@@ -111,7 +111,7 @@ bool ActivityList_RegisterSharedActivity( const char *pszActivityName, int iActi
 	// They really only matter when you change the list of code controlled activities.  IDs
 	// for content controlled activities never collide because they are generated.
 
-	// technically order isn't dependent, but it's too damn easy to forget to add new ACT_'s to all three lists.
+	// technically order isn't dependent, but it's too easy to forget to add new ACT_'s to all three lists.
 	static int lastActivityIndex = -1;
 	Assert( iActivityIndex < LAST_SHARED_ACTIVITY && (iActivityIndex == lastActivityIndex + 1 || iActivityIndex == 0) );
 	lastActivityIndex = iActivityIndex;
@@ -431,7 +431,7 @@ void ActivityList_RegisterSharedActivities( void )
 	REGISTER_SHARED_ACTIVITY ( ACT_VM_ATTACH_SILENCER );
 	REGISTER_SHARED_ACTIVITY ( ACT_VM_DETACH_SILENCER );
 
-	// --> Mirv: Activities
+#ifdef FF // --> Mirv: Activities
 //===========================
 // FortressForever Specific Activities
 //===========================
@@ -503,7 +503,7 @@ void ActivityList_RegisterSharedActivities( void )
 	REGISTER_SHARED_ACTIVITY(ACT_VM_FINISHRELOAD_WITH5);
 	REGISTER_SHARED_ACTIVITY(ACT_VM_FINISHRELOAD_WITH6);
 
-	// <-- Mirv: Activities
+#endif // <-- Mirv: Activities
 
 	// TF2 Scout Pack
 	REGISTER_SHARED_ACTIVITY ( ACT_VM_DRAW_SPECIAL );
@@ -1573,13 +1573,6 @@ void ActivityList_RegisterSharedActivities( void )
 
 	// Portal
 	REGISTER_SHARED_ACTIVITY ( ACT_VM_FIZZLE );
-	REGISTER_SHARED_ACTIVITY ( ACT_MP_STAND_IDLE_PORTALGUN );
-	REGISTER_SHARED_ACTIVITY ( ACT_MP_RUN_IDLE_PORTALGUN );
-	REGISTER_SHARED_ACTIVITY ( ACT_MP_CROUCH_IDLE_PORTALGUN );
-	REGISTER_SHARED_ACTIVITY ( ACT_MP_WALK_CROUCH_PORTALGUN );
-	REGISTER_SHARED_ACTIVITY ( ACT_MP_GESTURE_RANGE_ATTACK_PORTALGUN );
-	REGISTER_SHARED_ACTIVITY ( ACT_MP_GESTURE_RELOAD_PORTALGUN );
-	REGISTER_SHARED_ACTIVITY ( ACT_MP_JUMP_PORTALGUN );
 	
 	// Multiplayer
 	REGISTER_SHARED_ACTIVITY ( ACT_MP_STAND_IDLE );	
@@ -2094,7 +2087,6 @@ void ActivityList_RegisterSharedActivities( void )
 	REGISTER_SHARED_ACTIVITY( ACT_MP_PASSTIME_THROW_BEGIN );
 	REGISTER_SHARED_ACTIVITY( ACT_MP_PASSTIME_THROW_MIDDLE );
 	REGISTER_SHARED_ACTIVITY( ACT_MP_PASSTIME_THROW_END );
-	REGISTER_SHARED_ACTIVITY( ACT_MP_PASSTIME_THROW_CANCEL );
 
 	REGISTER_SHARED_ACTIVITY ( ACT_VM_UNUSABLE );
 	REGISTER_SHARED_ACTIVITY ( ACT_VM_UNUSABLE_TO_USABLE );

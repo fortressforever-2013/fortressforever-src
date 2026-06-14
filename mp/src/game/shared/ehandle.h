@@ -49,6 +49,14 @@ public:
 			CHandle( const CBaseHandle &handle );
 			CHandle( T *pVal );
 
+	
+	
+	
+	
+	
+
+	
+
 	// The index should have come from a call to ToInt(). If it hasn't, you're in trouble.
 	static CHandle<T> FromIndex( int index );
 
@@ -65,7 +73,6 @@ public:
 
 	T*		operator->() const;
 };
-
 
 // ----------------------------------------------------------------------- //
 // Inlines.
@@ -97,7 +104,6 @@ CHandle<T>::CHandle( T *pObj )
 	Term();
 	Set( pObj );
 }
-
 
 template<class T>
 inline CHandle<T> CHandle<T>::FromIndex( int index )
@@ -149,7 +155,7 @@ inline bool CHandle<T>::operator!=( T *val ) const
 template<class T>
 void CHandle<T>::Set( const T* pVal )
 {
-	CBaseHandle::Set( reinterpret_cast<const IHandleEntity*>(pVal) );
+	CBaseHandle::Set( reinterpret_cast< const IHandleEntity* >( pVal ) );
 }
 
 template<class T>

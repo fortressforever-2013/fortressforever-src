@@ -53,6 +53,7 @@ public:
 	virtual float GetCollideWithTeammatesDelay() const { return 0.25f; }
 #endif // GAME_DLL
 
+
 	virtual bool IsDestroyable( void ) { return false; }
 	virtual void Destroy( bool bBlinkOut = true, bool bBreakRocket = false ) {}
 	virtual void SetLauncher( CBaseEntity *pLauncher );

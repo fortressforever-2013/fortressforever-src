@@ -245,7 +245,7 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-// Inline methods
+// Inline methods 
 // all of the inline methods are made non-inline in FF 2013
 // and are moved to beam_shared.cpp to avoid LNK2005 hell
 //-----------------------------------------------------------------------------

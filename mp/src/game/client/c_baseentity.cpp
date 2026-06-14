@@ -1723,7 +1723,7 @@ const Vector& C_BaseEntity::GetAbsOrigin( void ) const
 {
 	if (!s_bAbsQueriesValid && sDebugAbsQueriesValid.GetBool())
 		Warning("!s_bAbsQueriesValid: %s\n", const_cast<C_BaseEntity*>(this)->GetClassname());
-	//Assert(s_bAbsQueriesValid);
+	//Assert( s_bAbsQueriesValid );
 
 	const_cast<C_BaseEntity*>(this)->CalcAbsolutePosition();
 	return m_vecAbsOrigin;
@@ -1766,9 +1766,9 @@ void C_BaseEntity::SetNetworkAngles( const QAngle& ang )
 // Purpose: 
 // Input  : index - 
 //-----------------------------------------------------------------------------
-void C_BaseEntity::SetModelIndex( int index )
+void C_BaseEntity::SetModelIndex( int index_ )
 {
-	m_nModelIndex = index;
+	m_nModelIndex = index_;
 	const model_t *pModel = modelinfo->GetModel( m_nModelIndex );
 	SetModelPointer( pModel );
 }
@@ -4933,7 +4933,6 @@ C_BaseEntity *C_BaseEntity::CreatePredictedEntityByName( const char *classname, 
 				return ent;
 			}
 		}
-
 		// Mirv: For predicted rockets...
 		//return NULL;
 	}

@@ -279,7 +279,7 @@ inline bool IsNovintButtonCode( ButtonCode_t code )
 
 inline bool IsJoystickCode( ButtonCode_t code )
 {
-	return ( ( ( code >= JOYSTICK_FIRST ) && ( code <= JOYSTICK_LAST ) ) || IsNovintCode( code ) );
+	return ( (( code >= JOYSTICK_FIRST ) && ( code <= JOYSTICK_LAST )) || IsNovintCode( code ) );
 }
 
 inline bool IsJoystickButtonCode( ButtonCode_t code )

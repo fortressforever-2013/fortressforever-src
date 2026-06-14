@@ -502,6 +502,7 @@ void TextImage::GetTextSize(int &wide, int &tall)
 	int textLen = wcslen(text);
 	for (int i = 0; i < textLen; i++)
 	{
+		
 		wchar_t ch = text[i];
 
 		// handle stupid special characters, these should be removed

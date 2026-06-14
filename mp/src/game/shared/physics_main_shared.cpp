@@ -607,7 +607,7 @@ void CBaseEntity::PhysicsCheckForEntityUntouch( void )
 {
 	//Assert( g_pNextLink == NULL );
 
-	touchlink_t* link, * nextLink;
+	touchlink_t *link, * nextLink;
 
 	touchlink_t *root = ( touchlink_t * )GetDataObject( TOUCHLINK );
 	if ( root )

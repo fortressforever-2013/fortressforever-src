@@ -67,7 +67,7 @@ public:
 		DevMsg( "Size:  %d items\n", strings.Count() );
 	}
 
-	const char *Find(const char *string)
+	const char *Find( const char *string)
 	{
 		UtlHashHandle_t i = m_Strings.Find( string );
 		return i == m_Strings.InvalidHandle() ? NULL : m_Strings[ i ].Get();
@@ -81,7 +81,7 @@ public:
 	const char *AllocateWithKey(const char *string, const void* key)
 	{
 		const char * &cached = m_KeyLookupCache[ m_KeyLookupCache.Insert( key, NULL ) ];
-		if (cached == NULL)
+		if ( cached == NULL )
 		{
 			cached = Allocate( string );
 		}

@@ -59,22 +59,21 @@ ConVar log_verbose_interval( "log_verbose_interval", "3.0", FCVAR_GAMEDLL, "Dete
 //	Vector( 0, 0, 14 )			//VEC_DEAD_VIEWHEIGHT (m_vDeadViewHeight)
 //);													
 static CViewVectors g_DefaultViewVectors(
-	Vector(0, 0, 28),            // m_vView
-
-	Vector(-16, -16, -36),         // m_vHullMin
-	Vector(16, 16, 36),         // m_vHullMax
-
-	Vector(-16, -16, -18),         // m_vDuckHullMin
-	Vector(16, 16, 18),         // m_vDuckHullMax
-	Vector(0, 0, 12),            // m_vDuckView         // |-- Mirv: Changed from 28
-
-	Vector(-10, -10, -10),         // m_vObsHullMin
-	Vector(10, 10, 10),         // m_vObsHullMax
-
-	Vector(0, 0, -2)            // m_vDeadViewHeight
-);
+	Vector( 0, 0, 28 ),			// m_vView
+								
+	Vector(-16, -16, -36 ),		// m_vHullMin
+	Vector( 16,  16,  36 ),		// m_vHullMax
+													
+	Vector(-16, -16, -18 ),		// m_vDuckHullMin
+	Vector( 16,  16,  18 ),		// m_vDuckHullMax
+	Vector( 0, 0, 12 ),			// m_vDuckView		// |-- Mirv: Changed from 28
+													
+	Vector(-10, -10, -10 ),		// m_vObsHullMin
+	Vector( 10,  10,  10 ),		// m_vObsHullMax
+													
+	Vector( 0, 0, -2 )			// m_vDeadViewHeight
+);													
 // <-- Mirv: Changed some of the values
-
 
 // ------------------------------------------------------------------------------------ //
 // CGameRulesProxy implementation.
@@ -859,11 +858,11 @@ bool CGameRules::ShouldCollide( int collisionGroup0, int collisionGroup1 )
 	// Adding so projectiles dont collide with players -GreenMushy
 	if ( collisionGroup1 == COLLISION_GROUP_PROJECTILE )
 	{
-		if (collisionGroup0 == COLLISION_GROUP_DEBRIS ||
+		if ( collisionGroup0 == COLLISION_GROUP_DEBRIS || 
 			collisionGroup0 == COLLISION_GROUP_PLAYER ||
 			collisionGroup0 == COLLISION_GROUP_WEAPON ||
 			collisionGroup0 == COLLISION_GROUP_ROCKET ||
-			collisionGroup0 == COLLISION_GROUP_PROJECTILE)
+			collisionGroup0 == COLLISION_GROUP_PROJECTILE )
 		{
 			return false;
 		}

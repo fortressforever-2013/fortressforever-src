@@ -423,8 +423,9 @@ public:
 				int wide;
 				if (image)
 				{
-					image->GetContentSize(imageWide, tall);
+					image->GetContentSize( imageWide, tall );
 				}
+
 				if (maxWidth >= 0)
 				{
 					wide = maxWidth;
@@ -564,12 +565,15 @@ public:
 					image = GetImageAtIndex(i);
 				}
 
+				
+				
 				int imageWide = 0, tall = 0;
 				int wide;
-				if (image)
+				if ( image )
 				{
-					image->GetContentSize(imageWide, tall);
+					image->GetContentSize( imageWide, tall );
 				}
+
 				if (maxWidth >= 0)
 				{
 					wide = maxWidth;
@@ -931,7 +935,7 @@ void SectionedListPanel::LayoutPanels(int &contentTall)
             }
         }
 
-		// don't draw this section at all if their are no item in it
+		// don't draw this section at all if there are no items in it
 		if (iStart == -1 && !section.m_bAlwaysVisible)
 		{
 			section.m_pHeader->SetVisible(false);
@@ -974,7 +978,7 @@ void SectionedListPanel::LayoutPanels(int &contentTall)
 			{
 				CItemButton *item = m_SortedItems[i]; //items[i];
 				item->SetBounds(x, y, wide, m_iLineSpacing);
-				
+			
 				// setup edit mode
 				if (m_hEditModePanel.Get() && m_iEditModeItemID == item->GetID())
 				{

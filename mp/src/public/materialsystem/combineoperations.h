@@ -14,16 +14,18 @@
 enum ECombineOperation
 {
 	ECO_Multiply = 0,
-	ECO_Add,
-	ECO_Lerp,
+	ECO_Add = 1,
+	ECO_Lerp = 2,
 
-	ECO_Select,
+	ECO_Select = 3,
 
-	ECO_Legacy_Lerp_FirstPass,
-	ECO_Legacy_Lerp_SecondPass,
+	ECO_Legacy_Lerp_FirstPass = 4,	// Must be 4, or shaders need to be updated!
+	ECO_Legacy_Lerp_SecondPass = 5, // Must be 5, or shaders need to be updated!
 
 	ECO_Error,
+
 	ECO_COUNT
+
 };
 
 #endif /* COMBINEOPERATIONS_H */

@@ -209,7 +209,7 @@ public:
 
 	virtual void ModifySentChat( char *pBuf, int iBufSize ) { return; }
 
-	virtual bool ShouldWarnOfAbandonOnQuit() { return false; }
+	virtual bool ShouldConfirmOnDisconnect() { return false; }
 	
 #else
 

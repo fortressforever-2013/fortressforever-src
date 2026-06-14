@@ -749,13 +749,26 @@ void CCollisionProperty::WorldSpaceTriggerBounds( Vector *pVecWorldMins, Vector 
 	if ( ( GetSolidFlags() & FSOLID_USE_TRIGGER_BOUNDS ) == 0 )
 		return;
 
-	// Don't bloat below, we don't want to trigger it with our heads
-	pVecWorldMins->x -= m_triggerBloat;
-	pVecWorldMins->y -= m_triggerBloat;
+	
+	
+		
+		
+		
 
-	pVecWorldMaxs->x += m_triggerBloat;
-	pVecWorldMaxs->y += m_triggerBloat;
-	pVecWorldMaxs->z += (float)m_triggerBloat * 0.5f;
+		
+		
+		
+	
+	
+	
+		// Don't bloat below, we don't want to trigger it with our heads
+		pVecWorldMins->x -= m_triggerBloat;
+		pVecWorldMins->y -= m_triggerBloat;
+
+		pVecWorldMaxs->x += m_triggerBloat;
+		pVecWorldMaxs->y += m_triggerBloat;
+		pVecWorldMaxs->z += (float)m_triggerBloat * 0.5f;
+	
 }
 
 void CCollisionProperty::UseTriggerBounds( bool bEnable, float flBloat )

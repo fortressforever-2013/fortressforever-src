@@ -43,7 +43,7 @@ class SendTable;
 		DECLARE_CLIENTCLASS()
 
 #define DECLARE_NETWORKCLASS_NOBASE()									\
-		DECLARE_CLIENTCLASS_NOBASE()							
+		DECLARE_CLIENTCLASS_NOBASE()
 
 #else
 
@@ -51,7 +51,7 @@ class SendTable;
 		DECLARE_SERVERCLASS()
 
 #define DECLARE_NETWORKCLASS_NOBASE()									\
-		DECLARE_SERVERCLASS_NOBASE()	
+		DECLARE_SERVERCLASS_NOBASE()
 
 #endif
 
@@ -132,9 +132,10 @@ class SendTable;
 #else
 
 	// nothing, only client has a prediction system
-	#define DECLARE_PREDICTABLE()	
-	#define BEGIN_PREDICTION_DATA( className ) 
-	#define END_PREDICTION_DATA() 
+	#define DECLARE_PREDICTABLE()
+	
+	#define BEGIN_PREDICTION_DATA( className )
+	#define END_PREDICTION_DATA()
 
 #endif
 

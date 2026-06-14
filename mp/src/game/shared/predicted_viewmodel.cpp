@@ -48,9 +48,19 @@ CPredictedViewModel::~CPredictedViewModel()
 {
 }
 
+#if defined( HL2_DLL ) || defined( HL2_CLIENT_DLL )
+ConVar sv_wpn_sway_pred_legacy( "sv_wpn_sway_pred_legacy", "0", FCVAR_REPLICATED | FCVAR_CHEAT );
+#else
+ConVar sv_wpn_sway_pred_legacy( "sv_wpn_sway_pred_legacy", "1", FCVAR_REPLICATED | FCVAR_CHEAT );
+#endif
+
 #ifdef CLIENT_DLL
 ConVar cl_wpn_sway_interp( "cl_wpn_sway_interp", "0.1", FCVAR_CLIENTDLL );
-ConVar cl_wpn_sway_scale( "cl_wpn_sway_scale", "1.0", FCVAR_CLIENTDLL|FCVAR_CHEAT );
+	#ifndef FF_CLIENT_DLL
+	ConVar cl_wpn_sway_scale( "cl_wpn_sway_scale", "1.0", FCVAR_CLIENTDLL|FCVAR_CHEAT );
+	#else
+	ConVar cl_wpn_sway_scale("cl_wpn_sway_scale", "1.0", FCVAR_CLIENTDLL );
+	#endif
 #endif
 
 void CPredictedViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAngle& original_angles )
@@ -61,14 +71,14 @@ void CPredictedViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAng
 		// Calculate our drift
 		Vector	forward, right, up;
 		AngleVectors( angles, &forward, &right, &up );
-		
+	
 		// Add an entry to the history.
 		m_vLagAngles = angles;
 		m_LagAnglesHistory.NoteChanged( gpGlobals->curtime, cl_wpn_sway_interp.GetFloat(), false );
-		
+	
 		// Interpolate back 100ms.
 		m_LagAnglesHistory.Interpolate( gpGlobals->curtime, cl_wpn_sway_interp.GetFloat() );
-		
+	
 		// Now take the 100ms angle difference and figure out how far the forward vector moved in local space.
 		Vector vLaggedForward;
 		QAngle angleDiff = m_vLagAngles - angles;
@@ -78,5 +88,6 @@ void CPredictedViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAng
 		// Now offset the origin using that.
 		vForwardDiff *= cl_wpn_sway_scale.GetFloat();
 		origin += forward*vForwardDiff.x + right*-vForwardDiff.y + up*vForwardDiff.z;
-	#endif
+		
+#endif
 }

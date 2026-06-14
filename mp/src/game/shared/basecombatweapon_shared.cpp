@@ -728,6 +728,7 @@ void CBaseCombatWeapon::Drop( const Vector &vecVelocity )
 #endif
 }
 
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Input  : *pPicker - 
@@ -1092,10 +1093,10 @@ int CBaseCombatWeapon::UpdateClientData( CBasePlayer *pPlayer )
 // Purpose: 
 // Input  : index - 
 //-----------------------------------------------------------------------------
-void CBaseCombatWeapon::SetViewModelIndex( int index )
+void CBaseCombatWeapon::SetViewModelIndex( int index_ )
 {
-	Assert( index >= 0 && index < MAX_VIEWMODELS );
-	m_nViewModelIndex = index;
+	Assert( index_ >= 0 && index_ < MAX_VIEWMODELS );
+	m_nViewModelIndex = index_;
 }
 
 //-----------------------------------------------------------------------------
@@ -1179,6 +1180,7 @@ void CBaseCombatWeapon::SetViewModel()
 	CBasePlayer *pOwner = ToBasePlayer( GetOwner() );
 	if ( pOwner == NULL )
 		return;
+
 	CBaseViewModel *vm = pOwner->GetViewModel( m_nViewModelIndex, false );
 	if ( vm == NULL )
 		return;
@@ -1664,6 +1666,9 @@ void CBaseCombatWeapon::ItemPreFrame( void )
 #endif
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 bool CBaseCombatWeapon::CanPerformSecondaryAttack() const
 {
 	return m_flNextSecondaryAttack <= gpGlobals->curtime;
@@ -1693,20 +1698,20 @@ void CBaseCombatWeapon::ItemPostFrame( void )
 	bool bFired = false;
 
 	// Secondary attack has priority
-	if ((pOwner->m_nButtons & IN_ATTACK2) && CanPerformSecondaryAttack() )
+	if ( ( pOwner->m_nButtons & IN_ATTACK2 ) && CanPerformSecondaryAttack() )
 	{
-		if (UsesSecondaryAmmo() && pOwner->GetAmmoCount(m_iSecondaryAmmoType)<=0 )
+		if ( UsesSecondaryAmmo() && pOwner->GetAmmoCount(m_iSecondaryAmmoType) <= 0 )
 		{
 			if (m_flNextEmptySoundTime < gpGlobals->curtime)
 			{
-				WeaponSound(EMPTY);
+				WeaponSound( EMPTY );
 				m_flNextSecondaryAttack = m_flNextEmptySoundTime = gpGlobals->curtime + 0.5;
 			}
 		}
-		else if (pOwner->GetWaterLevel() == 3 && m_bAltFiresUnderwater == false)
+		else if ( pOwner->GetWaterLevel() == 3 && !m_bAltFiresUnderwater )
 		{
 			// This weapon doesn't fire underwater
-			WeaponSound(EMPTY);
+			WeaponSound( EMPTY );
 			m_flNextPrimaryAttack = gpGlobals->curtime + 0.2;
 			return;
 		}
@@ -1729,7 +1734,7 @@ void CBaseCombatWeapon::ItemPostFrame( void )
 			if ( UsesClipsForAmmo2() )
 			{
 				// reload clip2 if empty
-				if (m_iClip2 < 1)
+				if ( m_iClip2 < 1 )
 				{
 					pOwner->RemoveAmmo( 1, m_iSecondaryAmmoType );
 					m_iClip2 = m_iClip2 + 1;
@@ -2404,7 +2409,7 @@ bool CBaseCombatWeapon::SetIdealActivity( Activity ideal )
 	{
 		//Set our activity to the ideal
 		SetActivity( m_IdealActivity );
-		//SetSequence( m_nIdealSequence );
+		//SetSequence( m_nIdealSequence );	
 		// The weapon model sequence need clamping to either idle or firing for now
 		// Need to call ResetSequenceInfo for the muzzleflashes
 		// Melee weapons won't have a fire animation (for now)

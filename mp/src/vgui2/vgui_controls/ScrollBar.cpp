@@ -258,13 +258,13 @@ void ScrollBar::PerformLayout()
 		{
 			if ( m_bNoButtons )
 			{
-				_slider->SetBounds(0, 0, wide, tall + 1);
+				_slider->SetBounds(0, 0, wide, tall + 1 );
 			}
 			else
 			{
-				_slider->SetBounds(0, wide, wide, tall-(wide*2)+1 );
+				_slider->SetBounds(0, wide, wide, tall-(wide*2)+ 1 );
 				_button[0]->SetBounds(0, 0, wide, wide);
-				_button[1]->SetBounds(0,tall-wide ,wide, wide);
+				_button[1]->SetBounds(0,tall-wide , wide, wide);
 			}
 		}
 		else

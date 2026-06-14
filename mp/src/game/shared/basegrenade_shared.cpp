@@ -406,7 +406,7 @@ void CBaseGrenade::ExplodeTouch( CBaseEntity *pOther )
 	if (FF_IsAirshot(pOther))
 		m_iDamageType |= DMG_AIRSHOT;
 
-	Explode(&tr, m_iDamageType);
+	Explode( &tr, m_iDamageType );
 }
 
 
@@ -414,7 +414,7 @@ void CBaseGrenade::DangerSoundThink( void )
 {
 	if (!IsInWorld())
 	{
-		Remove();
+		Remove( );
 		return;
 	}
 

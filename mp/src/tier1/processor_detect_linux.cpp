@@ -45,3 +45,5 @@ bool Check3DNowTechnology(void)
     }
     return false;
 }
+
+#endif

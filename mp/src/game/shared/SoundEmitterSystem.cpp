@@ -1042,7 +1042,7 @@ void S_SoundEmitterSystemFlush( void )
 #if defined( CLIENT_DLL )
 CON_COMMAND_F( cl_soundemitter_flush, "Flushes the sounds.txt system (client only)", /*FCVAR_CHEAT*/ FCVAR_CLIENTDLL ) // not enough args so added FCVAR_CLIENTDLL
 #else
-CON_COMMAND_F( sv_soundemitter_flush, "Flushes the sounds.txt system (server only)", FCVAR_CHEAT)
+CON_COMMAND_F( sv_soundemitter_flush, "Flushes the sounds.txt system (server only)", FCVAR_CHEAT )
 #endif
 {
 	S_SoundEmitterSystemFlush( );
@@ -1176,10 +1176,10 @@ static ConCommand Command_Playgamesound( "playgamesound", Playgamesound_f, "Play
 // Purpose:  Non-static override for doing the general case of CPASAttenuationFilter( this ), and EmitSound( filter, entindex(), etc. );
 // Input  : *soundname - 
 //-----------------------------------------------------------------------------
-void CBaseEntity::EmitSoundShared(const char* soundname, float soundtime /*= 0.0f*/, float* duration /*=NULL*/)
+void CBaseEntity::EmitSoundShared( const char *soundname, float soundtime /*= 0.0f*/, float *duration /*=NULL*/ )
 {
 	//VPROF( "CBaseEntity::EmitSound" );
-	VPROF_BUDGET("CBaseEntity::EmitSound", _T("CBaseEntity::EmitSound"));
+	VPROF_BUDGET( "CBaseEntity::EmitSound", _T( "CBaseEntity::EmitSound" ) );
 
 	CPASAttenuationFilter filter( this, soundname );
 
