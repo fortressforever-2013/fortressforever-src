@@ -1445,7 +1445,7 @@ void CFFSentryGun::Shoot( const Vector &vecSrc, const Vector &vecDirToEnemy, boo
 	// Change barrel
 	m_bLeftBarrel = !m_bLeftBarrel;	
 
-	m_iShells--;
+	--m_iShells;
 }
 
 void CFFSentryGun::ShootRocket() 
@@ -1491,7 +1491,7 @@ void CFFSentryGun::ShootRocket( const Vector &vecSrc, const Vector &vecDirToEnem
 	//DoRocketMuzzleFlash( ( m_bRocketLeftBarrel ? m_iRocketLAttachment : m_iRocketRAttachment ), vecSrc, vecAngles );
 
 	// Rockets weren't being decremented
-	m_iRockets--;
+	--m_iRockets;
 
 	// Flip which barrel to come out of next
 	m_bRocketLeftBarrel = !m_bRocketLeftBarrel;

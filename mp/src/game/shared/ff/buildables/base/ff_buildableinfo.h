@@ -25,7 +25,7 @@ private:
 
 public:
 	CFFBuildableInfo( CFFPlayer *pPlayer, int iBuildObject );
-	~CFFBuildableInfo( void ) {}
+	~CFFBuildableInfo( void ) = default;
 
 	// Returns why you can/can't build
 	BuildInfoResult_t BuildResult( void ) const { return m_BuildResult; }

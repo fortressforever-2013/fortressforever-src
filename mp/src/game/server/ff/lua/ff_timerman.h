@@ -20,7 +20,7 @@ public:
 
 	CFFTimer(const CFFTimer& rhs);
 
-	~CFFTimer() {}
+	~CFFTimer() = default;
 
 public:
 	// updates. call only once per frame. returns true if the timer is

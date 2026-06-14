@@ -47,7 +47,7 @@ public:
 
 	CFFLuaMenu(const CFFLuaMenu& rhs);
 
-	~CFFLuaMenu() {}
+	~CFFLuaMenu() = default;
 
 public:
 	// updates. call only once per frame. returns true if the schedule is
