@@ -12,6 +12,7 @@
 
 #include "cbase.h"
 #include "ff_grenade_base.h"
+#include "tier0/vprof.h"
 #include "ff_utils.h"
 #include "beam_flags.h"
 #include "Sprite.h"
@@ -185,6 +186,8 @@ PRECACHE_WEAPON_REGISTER(ff_grenade_concussion);
 	//-----------------------------------------------------------------------------
 	void CFFGrenadeConcussion::Explode(trace_t *pTrace, int bitsDamageType)
 	{
+		VPROF_BUDGET( "CFFGrenadeConcussion::Explode", VPROF_BUDGETGROUP_FF_GRENADE );
+
 		EmitSoundShared(CONCUSSION_SOUND);
 
 #ifdef GAME_DLL

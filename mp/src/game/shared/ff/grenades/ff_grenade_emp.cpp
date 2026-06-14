@@ -14,6 +14,7 @@
 
 #include "cbase.h"
 #include "ff_grenade_emp.h"
+#include "tier0/vprof.h"
 #include "ff_utils.h"
 #include "engine/IEngineSound.h"
 #include "IEffects.h"
@@ -72,6 +73,8 @@ PRECACHE_WEAPON_REGISTER( ff_grenade_emp );
 	//-----------------------------------------------------------------------------
 	void CFFGrenadeEmp::Explode(trace_t *pTrace, int bitsDamageType)
 	{
+		VPROF_BUDGET( "CFFGrenadeEmp::Explode", VPROF_BUDGETGROUP_FF_GRENADE );
+
 		// Don't explode if in no gren area
 		if( !FFScriptRunPredicates( this, "onexplode", true ) )
 		{

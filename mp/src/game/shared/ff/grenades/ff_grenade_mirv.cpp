@@ -15,6 +15,7 @@
 
 #include "cbase.h"
 #include "ff_grenade_base.h"
+#include "tier0/vprof.h"
 #include "ff_utils.h"
 
 #define MIRVGRENADE_MODEL "models/grenades/mirv/mirv.mdl"
@@ -107,6 +108,8 @@ void CFFGrenadeMirv::GrenadeThink()
 //-----------------------------------------------------------------------------
 void CFFGrenadeMirv::Explode( trace_t *pTrace, int bitsDamageType )
 {
+	VPROF_BUDGET( "CFFGrenadeMirv::Explode", VPROF_BUDGETGROUP_FF_GRENADE );
+
 	BaseClass::Explode( pTrace, bitsDamageType );
 
 	CBaseEntity *pOwner = GetOwnerEntity();
