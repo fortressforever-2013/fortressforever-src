@@ -13,6 +13,8 @@
 #include "mathlib/vmatrix.h"
 #include "toolframework_client.h"
 
+#include <cmath>
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -113,11 +115,11 @@ void CConveyorMaterialProxy::OnBind( void *pC_BaseEntity )
 	}
 
 	float flConveyorSpeed	= pConveyor->GetConveyorSpeed();
-	float flRate			= abs( flConveyorSpeed ) / 128.0;
+	float flRate			= std::abs( flConveyorSpeed ) / 128.0f;
 	float flAngle			= (flConveyorSpeed >= 0) ? 180 : 0;
 
-	float sOffset = gpGlobals->curtime * cos( flAngle * ( M_PI / 180.0f ) ) * flRate;
-	float tOffset = gpGlobals->curtime * sin( flAngle * ( M_PI / 180.0f ) ) * flRate;
+	float sOffset = gpGlobals->curtime * std::cos( flAngle * ( M_PI / 180.0f ) ) * flRate;
+	float tOffset = gpGlobals->curtime * std::sin( flAngle * ( M_PI / 180.0f ) ) * flRate;
 	
 	// make sure that we are positive
 	if( sOffset < 0.0f )

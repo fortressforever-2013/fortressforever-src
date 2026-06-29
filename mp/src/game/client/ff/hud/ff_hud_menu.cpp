@@ -21,6 +21,8 @@
 #include "hudelement.h"
 #include "hud_macros.h"
 
+#include <cmath>
+
 #include "ff_hud_menu.h"
 #include "mathlib/mathlib.h"
 
@@ -709,7 +711,7 @@ void CHudContextMenu::Paint()
 	if (flDistance > 0.0f)
 	{
 		float flHighlightBoundary = scheme()->GetProportionalScaledValue(cm_highlightdistance.GetFloat());
-		float s = fabs(dy) / flDistance;
+		float s = std::fabs(dy) / flDistance;
 		flHighlightBoundary = (1.0f - s) * flHighlightBoundary + s * (flHighlightBoundary * cm_squash.GetFloat());
 
 		// Outside the inside boundary, therefore work out which button to highlight
@@ -884,7 +886,7 @@ void CHudContextMenu::MouseMove(float *x, float *y)
 		return;
 
 	// Need to take squash'ness into account here
-	float s = fabs(flOffsetY) / flDistance;
+	float s = std::fabs(flOffsetY) / flDistance;
 	dist = (1.0f - s) * dist + s * (dist * cm_squash.GetFloat());
 
 	// Make sure we don't go outside the bounds

@@ -5,6 +5,7 @@
 //===========================================================================//
 
 #include "cbase.h"
+#include <cmath>
 #include "view.h"
 #include "iviewrender.h"
 #include "view_shared.h"
@@ -3646,7 +3647,7 @@ static void DrawClippedDepthBox( IClientRenderable *pEnt, float *pClipPlane )
 					vSplitPoints[pPoints[1]][pPoints[0]] =
 						(vPoints[pPoints[1]] * (fDists[pPoints[0]] * fInvTotalDist)) - (vPoints[pPoints[0]] * (fDists[pPoints[1]] * fInvTotalDist));
 				
-				Assert( fabs( vNormal.Dot( vSplitPoints[pPoints[0]][pPoints[1]] ) - fPlaneDist ) < 0.01f );
+				Assert( std::fabs( vNormal.Dot( vSplitPoints[pPoints[0]][pPoints[1]] ) - fPlaneDist ) < 0.01f );
 
 				iLineStates[pPoints[0]][pPoints[1]] = 3;
 				iLineStates[pPoints[1]][pPoints[0]] = 4;
@@ -3659,7 +3660,7 @@ static void DrawClippedDepthBox( IClientRenderable *pEnt, float *pClipPlane )
 					vSplitPoints[pPoints[1]][pPoints[0]] =
 						(vPoints[pPoints[0]] * (fDists[pPoints[1]] * fInvTotalDist)) - (vPoints[pPoints[1]] * (fDists[pPoints[0]] * fInvTotalDist));
 
-				Assert( fabs( vNormal.Dot( vSplitPoints[pPoints[0]][pPoints[1]] ) - fPlaneDist ) < 0.01f );
+				Assert( std::fabs( vNormal.Dot( vSplitPoints[pPoints[0]][pPoints[1]] ) - fPlaneDist ) < 0.01f );
 
 				iLineStates[pPoints[0]][pPoints[1]] = 4;
 				iLineStates[pPoints[1]][pPoints[0]] = 3;
@@ -5707,7 +5708,7 @@ void CBaseWaterView::CalcWaterEyeAdjustments( const VisibleFogVolumeInfo_t &fogI
 	float eyeToWaterZDelta = origin[2] - fogInfo.m_flWaterHeight;
 	float epsilon = r_eyewaterepsilon.GetFloat();
 	waterZAdjust = 0.0f;
-	if( fabs( eyeToWaterZDelta ) < epsilon )
+	if( std::fabs( eyeToWaterZDelta ) < epsilon )
 	{
 		if( eyeToWaterZDelta > 0 )
 		{

@@ -10,6 +10,7 @@
 #pragma once
 #endif
 
+#include <cmath>
 
 template <class T>
 inline T LoopingLerp( float flPercent, T flFrom, T flTo )
@@ -21,7 +22,7 @@ inline T LoopingLerp( float flPercent, T flFrom, T flTo )
 template <>
 inline float LoopingLerp( float flPercent, float flFrom, float flTo )
 {
-	if ( fabs( flTo - flFrom ) >= 0.5f )
+	if ( std::fabs( flTo - flFrom ) >= 0.5f )
 	{
 		if (flFrom < flTo)
 			flFrom += 1.0f;
@@ -122,7 +123,7 @@ inline T LoopingLerp_Hermite( float t, T p0, T p1, T p2  )
 template <>
 inline float LoopingLerp_Hermite( float t, float p0, float p1, float p2 )
 {
-	if ( fabs( p1 - p0 ) > 0.5f )
+	if ( std::fabs( p1 - p0 ) > 0.5f )
 	{
 		if ( p0 < p1 )
 			p0 += 1.0f;
@@ -130,7 +131,7 @@ inline float LoopingLerp_Hermite( float t, float p0, float p1, float p2 )
 			p1 += 1.0f;
 	}
 
-	if ( fabs( p2 - p1 ) > 0.5f )
+	if ( std::fabs( p2 - p1 ) > 0.5f )
 	{
 		if ( p1 < p2 )
 		{
@@ -143,7 +144,7 @@ inline float LoopingLerp_Hermite( float t, float p0, float p1, float p2 )
 			// see if we need to fix up p0
 			// important for vars that are decreasing from p0->p1->p2 where
 			// p1 is fixed up relative to p2, eg p0 = 0.2, p1 = 0.1, p2 = 0.9
-			if ( abs( p1 - p0 ) > 0.5 )
+			if ( std::fabs( p1 - p0 ) > 0.5f )
 			{
 				if ( p0 < p1 )
 					p0 += 1.0f;
@@ -159,7 +160,7 @@ inline float LoopingLerp_Hermite( float t, float p0, float p1, float p2 )
 		
 	float s = Lerp_Hermite( t, p0, p1, p2 );
 
-	s = s - (int)(s);
+	s = s - static_cast<int>(s);
 	if (s < 0.0f)
 	{
 		s = s + 1.0f;

@@ -41,6 +41,8 @@
 #include "inetchannelinfo.h"
 #include "proto_version.h"
 
+#include <cmath>
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -3339,7 +3341,7 @@ void C_BaseEntity::ComputeFxBlend( void )
 	int blend=0;
 	float offset;
 
-	offset = ((int)index) * 363.0;// Use ent index to de-sync these fx
+	offset = index * 363.0f;// Use ent index to de-sync these fx
 
 	switch( m_nRenderFX ) 
 	{
@@ -3352,7 +3354,7 @@ void C_BaseEntity::ComputeFxBlend( void )
 		break;
 	
 	case kRenderFxPulseFastWider:
-		blend = ( 0xff * fabs(sin( gpGlobals->curtime * 12 + offset ) ) );
+		blend = ( 0xff * std::fabs(sin( gpGlobals->curtime * 12 + offset ) ) );
 		break;
 
 	case kRenderFxPulseSlow:

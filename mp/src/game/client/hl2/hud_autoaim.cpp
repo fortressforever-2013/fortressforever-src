@@ -6,6 +6,9 @@
 //
 //=============================================================================//
 #include "cbase.h"
+
+#include <cmath>
+
 #include "hud.h"
 #include "hudelement.h"
 #include "iclientmode.h"
@@ -227,7 +230,7 @@ void CHUDAutoAim::OnThink()
 					float flSpeed = VectorNormalize( vecMove );
 					float flDot = DotProduct( vecLook, vecMove );
 
-					if( flSpeed >= 100 && fabs(flDot) <= 0.707f )
+					if( flSpeed >= 100 && std::fabs(flDot) <= 0.707f )
 					{
 						QAngle viewangles;
 						QAngle targetangles;
@@ -321,7 +324,7 @@ void CHUDAutoAim::OnThink()
 			m_vecPos += vecDir * min(flDistRemaining, (speed * gpGlobals->frametime) );
 
 			// Lerp and Clamp scale
-			float scaleDelta = fabs( goalscale - m_scale );
+			float scaleDelta = std::fabs( goalscale - m_scale );
 			float scaleMove = MIN( AUTOAIM_SCALE_SPEED * gpGlobals->frametime, scaleDelta );
 			if( m_scale < goalscale )
 			{

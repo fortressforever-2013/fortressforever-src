@@ -16,6 +16,8 @@
 #include "fx_line.h"
 #include "materialsystem/imaterialvar.h"
 
+#include <cmath>
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -333,12 +335,12 @@ void DrawSegs( int noise_divisions, float *prgNoise, const model_t* spritemodel,
 	
 	length = VectorLength( delta );
 	float flMaxWidth = MAX(startWidth, endWidth) * 0.5f;
-	div = 1.0 / (segments-1);
+	div = 1.0f / (segments-1);
 
-	if ( length*div < flMaxWidth * 1.414 )
+	if ( length*div < flMaxWidth * 1.414f )
 	{
 		// Here, we have too many segments; we could get overlap... so lets have less segments
-		segments = (int)(length / (flMaxWidth * 1.414)) + 1;
+		segments = (int)(length / (flMaxWidth * 1.414f)) + 1;
 		if ( segments < 2 )
 		{
 			segments = 2;
@@ -350,8 +352,8 @@ void DrawSegs( int noise_divisions, float *prgNoise, const model_t* spritemodel,
 		segments = noise_divisions;
 	}
 
-	div = 1.0 / (segments-1);
-	length *= 0.01;
+	div = 1.0f / (segments-1);
+	length *= 0.01f;
 
 	// UNDONE: Expose texture length scale factor to control "fuzziness"
 
@@ -374,10 +376,10 @@ void DrawSegs( int noise_divisions, float *prgNoise, const model_t* spritemodel,
 		if ( segments < 16 )
 		{
 			segments = 16;
-			div = 1.0 / (segments-1);
+			div = 1.0f / (segments-1);
 		}
 		scale *= 100;
-		length = segments * (1.0/10);
+		length = segments * (1.0f/10);
 	}
 	else
 	{
@@ -393,7 +395,7 @@ void DrawSegs( int noise_divisions, float *prgNoise, const model_t* spritemodel,
 		noiseIndex = 0;
 	}
 
-	brightness = 1.0;
+	brightness = 1.0f;
 	if ( flags & FBEAM_SHADEIN )
 	{
 		brightness = 0;
@@ -427,13 +429,13 @@ void DrawSegs( int noise_divisions, float *prgNoise, const model_t* spritemodel,
 
 		if ( (flags & FBEAM_SHADEIN) && (flags & FBEAM_SHADEOUT) )
 		{
-			if (fraction < 0.5)
+			if (fraction < 0.5f)
 			{
 				brightness = 2*(fraction/fadeFraction);
 			}
 			else
 			{
-				brightness = 2*(1.0 - (fraction/fadeFraction));
+				brightness = 2*(1.0f - (fraction/fadeFraction));
 			}
 		}
 		else if ( flags & FBEAM_SHADEIN )
@@ -442,7 +444,7 @@ void DrawSegs( int noise_divisions, float *prgNoise, const model_t* spritemodel,
 		}
 		else if ( flags & FBEAM_SHADEOUT )
 		{
-			brightness = 1.0 - (fraction/fadeFraction);
+			brightness = 1.0f - (fraction/fadeFraction);
 		}
 
 		// clamps
@@ -461,7 +463,7 @@ void DrawSegs( int noise_divisions, float *prgNoise, const model_t* spritemodel,
 		VectorMA( source, fraction, delta, curSeg.m_vPos );
  
 		// Distort using noise
-		if ( scale != 0 )
+		if ( scale != 0.0f )
 		{
 			factor = prgNoise[noiseIndex>>16] * scale;
 			if ( flags & FBEAM_SINENOISE )
@@ -509,8 +511,8 @@ void CalcSegOrigin( Vector *vecOut, int iPoint, int noise_divisions, float *prgN
 	Assert( segments > 1 );
 
 	float factor;
-	float length = VectorLength( delta ) * 0.01;
-	float div = 1.0 / (segments-1);
+	float length = VectorLength( delta ) * 0.01f;
+	float div = 1.0f / (segments-1);
 
 	// Iterator to resample noise waveform (it needs to be generated in powers of 2)
 	int noiseStep = (int)((float)(noise_divisions-1) * div * 65536.0f);
@@ -527,7 +529,7 @@ void CalcSegOrigin( Vector *vecOut, int iPoint, int noise_divisions, float *prgN
 	VectorMA( source, fraction, delta, *vecOut );
 
 	// Distort using noise
-	if ( scale != 0 )
+	if ( scale != 0.0f )
 	{
 		factor = prgNoise[noiseIndex>>16] * scale;
 		if ( flags & FBEAM_SINENOISE )
@@ -588,7 +590,7 @@ void DrawTeslaSegs( int noise_divisions, float *prgNoise, const model_t* spritem
 	if ( segments > noise_divisions )		// UNDONE: Allow more segments?
 		segments = noise_divisions;
 
-	length = VectorLength( delta ) * 0.01;
+	length = VectorLength( delta ) * 0.01f;
 	div = 1.0 / (segments-1);
 
 	// UNDONE: Expose texture length scale factor to control "fuzziness"
@@ -597,7 +599,7 @@ void DrawTeslaSegs( int noise_divisions, float *prgNoise, const model_t* spritem
 	// UNDONE: Expose this paramter as well(3.5)?  Texture scroll rate along beam
 	vLast = fmod(freq*speed,1);	// Scroll speed 3.5 -- initial texture position, scrolls 3.5/sec (1.0 is entire texture)
 
-	brightness = 1.0;
+	brightness = 1.0f;
 	if ( flags & FBEAM_SHADEIN )
 		brightness = 0;
 
@@ -675,7 +677,7 @@ void DrawTeslaSegs( int noise_divisions, float *prgNoise, const model_t* spritem
 		// Reduce the width by the current number of branches we've had
 		for ( int j = 0; j < iBranches; j++ )
 		{
-			curSeg.m_flWidth *= 0.5;
+			curSeg.m_flWidth *= 0.5f;
 		}
 		
 		curSeg.m_flTexCoord = vLast;
@@ -691,7 +693,7 @@ void DrawTeslaSegs( int noise_divisions, float *prgNoise, const model_t* spritem
 		{
 			// Figure out what the new width would be
 			// Halve the width because the beam is breaking in two, and halve it again because width is doubled above
-			flWidth = curSeg.m_flWidth * 0.25;
+			flWidth = curSeg.m_flWidth * 0.25f;
 			if ( flWidth > 1 )
 			{
 				iBranches++;
@@ -705,7 +707,7 @@ void DrawTeslaSegs( int noise_divisions, float *prgNoise, const model_t* spritem
 				flEndWidth = endWidth;
 				for ( int j = 0; j < iBranches; j++ )
 				{
-					flEndWidth *= 0.5;
+					flEndWidth *= 0.5f;
 				}
 			}
 		}
@@ -849,10 +851,10 @@ void DrawSplineSegs( int noise_divisions, float *prgNoise,
 
 		Vector vDelta;
 		VectorSubtract(pEnd,pStart,vDelta);
-		length = VectorLength( vDelta ) * 0.01;
-		if ( length < 0.5 )	// Don't lose all of the noise/texture on short beams
-			length = 0.5;
-		div = 1.0 / (segments-1);
+		length = VectorLength( vDelta ) * 0.01f;
+		if ( length < 0.5f )	// Don't lose all of the noise/texture on short beams
+			length = 0.5f;
+		div = 1.0f / (segments-1);
 
 		// UNDONE: Expose texture length scale factor to control "fuzziness"
 		vStep = length*div;	// Texture length texels per space pixel
@@ -863,7 +865,7 @@ void DrawSplineSegs( int noise_divisions, float *prgNoise,
 		if ( flags & FBEAM_SINENOISE )
 		{
 			scale = scale * 100;
-			length = segments * (1.0/10);
+			length = segments * (1.0f/10);
 		}
 		else
 			scale = scale * length;
@@ -916,7 +918,7 @@ void DrawSplineSegs( int noise_divisions, float *prgNoise,
 			else if ( flags & FBEAM_SHADEOUT )
 			{
 				float fadeFraction = fadeLength/length;
-				brightness = 1.0 - (fraction/fadeFraction);
+				brightness = 1.0f - (fraction/fadeFraction);
 				if (brightness < 0)
 				{
 					brightness = 0;
@@ -947,8 +949,8 @@ void DrawSplineSegs( int noise_divisions, float *prgNoise,
 				VectorSubtract(CurrentViewOrigin(),seg.m_vPos,vLookDir);
 				VectorNormalize(vLookDir);
 
-				float	dotpr		= fabs(DotProduct(vBeamDir1,vLookDir));
-				static float thresh = 0.85;
+				float	dotpr		= std::fabs(DotProduct(vBeamDir1,vLookDir));
+				static float thresh = 0.85f;
 				if (dotpr > thresh && dotpr > bestDot)
 				{
 					bestDot		  = dotpr;
@@ -961,7 +963,7 @@ void DrawSplineSegs( int noise_divisions, float *prgNoise,
 			// ----------------------
 			// Distort using noise
 			// ----------------------
-			if ( scale != 0 )
+			if ( scale != 0.0f )
 			{
 				factor = prgNoise[noiseIndex>>16] * scale;
 				if ( flags & FBEAM_SINENOISE )
@@ -1016,19 +1018,19 @@ void DrawSplineSegs( int noise_divisions, float *prgNoise,
 				VectorSubtract(CurrentViewOrigin(),pStart,vLookDir);
 				VectorNormalize(vLookDir);
 
-				bestDot		= fabs(DotProduct(vBeamDir1,vLookDir));
-				static float thresh = 0.85;
+				bestDot		= std::fabs(DotProduct(vBeamDir1,vLookDir));
+				static float thresh = 0.85f;
 				if (bestDot > thresh)
 				{
-					fBestFraction = 0.5;
+					fBestFraction = 0.5f;
 					VectorAdd(pStart,pEnd,vHaloPos);
-					VectorScale(vHaloPos,0.5,vHaloPos);
+					VectorScale(vHaloPos,0.5f,vHaloPos);
 				}	
 			}
 			if (fBestFraction > 0)
 			{
 				float	fade	= pow(bestDot,60);
-				if (fade > 1.0) fade = 1.0;
+				if (fade > 1.0f) fade = 1.0f;
 				float haloColor[3];
 				VectorScale( color, fade, haloColor );
 				pRenderContext->Bind(pHaloMaterial);
@@ -1116,10 +1118,10 @@ void DrawDisk( int noise_divisions, float *prgNoise, const model_t* spritemodel,
 	if ( segments > noise_divisions )		// UNDONE: Allow more segments?
 		segments = noise_divisions;
 
-	length = VectorLength( delta ) * 0.01;
-	if ( length < 0.5 )	// Don't lose all of the noise/texture on short beams
-		length = 0.5;
-	div = 1.0 / (segments-1);
+	length = VectorLength( delta ) * 0.01f;
+	if ( length < 0.5f )	// Don't lose all of the noise/texture on short beams
+		length = 0.5f;
+	div = 1.0f / (segments-1);
 
 	// UNDONE: Expose texture length scale factor to control "fuzziness"
 	vStep = length*div;	// Texture length texels per space pixel

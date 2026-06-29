@@ -1,8 +1,8 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
+#include "cbase.h"
 #ifndef _XBOX
 //#include <windows.h>
 #endif
-#include "cbase.h"
 #include "convar.h"
 
 

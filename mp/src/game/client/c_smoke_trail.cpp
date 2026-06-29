@@ -7,6 +7,8 @@
 //===========================================================================//
 #include "cbase.h"
 #include "c_smoke_trail.h"
+
+#include <cmath>
 #include "fx.h"
 #include "engine/ivdebugoverlay.h"
 #include "engine/IEngineSound.h"
@@ -45,7 +47,7 @@ public:
 		pParticle->m_flRollDelta += pParticle->m_flRollDelta * ( timeDelta * -8.0f );
 
 		//Cap the minimum roll
-		if ( fabs( pParticle->m_flRollDelta ) < 0.5f )
+		if ( std::fabs( pParticle->m_flRollDelta ) < 0.5f )
 		{
 			pParticle->m_flRollDelta = ( pParticle->m_flRollDelta > 0.0f ) ? 0.5f : -0.5f;
 		}
@@ -124,7 +126,7 @@ public:
 		pParticle->m_flRollDelta += pParticle->m_flRollDelta * ( timeDelta * -8.0f );
 
 		//Cap the minimum roll
-		if ( fabs( pParticle->m_flRollDelta ) < 0.5f )
+		if ( std::fabs( pParticle->m_flRollDelta ) < 0.5f )
 		{
 			pParticle->m_flRollDelta = ( pParticle->m_flRollDelta > 0.0f ) ? 0.5f : -0.5f;
 		}

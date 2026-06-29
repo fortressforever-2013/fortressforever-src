@@ -15,6 +15,8 @@
 
 #include "dt_utlvector_recv.h"
 
+#include <cmath>
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -184,10 +186,9 @@ void C_BaseAnimatingOverlay::GetRenderBounds( Vector& theMins, Vector& theMaxs )
 
 		int nSequences = pStudioHdr->GetNumSeq();
 
-		int i;
-		for (i = 0; i < m_AnimOverlay.Count(); i++)
+		for (int i = 0; i < m_AnimOverlay.Count(); i++)
 		{
-			if (m_AnimOverlay[i].m_flWeight > 0.0)
+			if (m_AnimOverlay[i].m_flWeight > 0.0f)
 			{
 				if ( m_AnimOverlay[i].m_nSequence >= nSequences )
 				{
@@ -211,8 +212,7 @@ void C_BaseAnimatingOverlay::CheckForLayerChanges( CStudioHdr *hdr, float curren
 	bool bLayersChanged = false;
 	
 	// FIXME: damn, there has to be a better way than this.
-	int i;
-	for (i = 0; i < m_iv_AnimOverlay.Count(); i++)
+	for (int i = 0; i < m_iv_AnimOverlay.Count(); i++)
 	{
 		CDisableRangeChecks disableRangeChecks; 
 
@@ -235,10 +235,10 @@ void C_BaseAnimatingOverlay::CheckForLayerChanges( CStudioHdr *hdr, float curren
 	#if 1 // _DEBUG
 			if (/* Q_stristr( hdr->pszName(), r_sequence_debug.GetString()) != NULL || */ r_sequence_debug.GetInt() == entindex())
 			{
-				DevMsgRT( "(%7.4f : %30s : %5.3f : %4.2f : %1d)\n", t0, hdr->pSeqdesc( pHead->m_nSequence ).pszLabel(),  (float)pHead->m_flCycle,  (float)pHead->m_flWeight, i );
-				DevMsgRT( "(%7.4f : %30s : %5.3f : %4.2f : %1d)\n", t1, hdr->pSeqdesc( pPrev1->m_nSequence ).pszLabel(),  (float)pPrev1->m_flCycle, (float)pPrev1->m_flWeight, i );
+				DevMsgRT( "(%7.4f : %30s : %5.3f : %4.2f : %1d)\n", t0, hdr->pSeqdesc( pHead->m_nSequence ).pszLabel(),  static_cast<float>(pHead->m_flCycle),  static_cast<float>(pHead->m_flWeight), i );
+				DevMsgRT( "(%7.4f : %30s : %5.3f : %4.2f : %1d)\n", t1, hdr->pSeqdesc( pPrev1->m_nSequence ).pszLabel(),  static_cast<float>(pPrev1->m_flCycle), static_cast<float>(pPrev1->m_flWeight), i );
 				if (pPrev2)
-					DevMsgRT( "(%7.4f : %30s : %5.3f : %4.2f : %1d)\n", t2, hdr->pSeqdesc( pPrev2->m_nSequence ).pszLabel(),  (float)pPrev2->m_flCycle,  (float)pPrev2->m_flWeight, i );
+					DevMsgRT( "(%7.4f : %30s : %5.3f : %4.2f : %1d)\n", t2, hdr->pSeqdesc( pPrev2->m_nSequence ).pszLabel(),  static_cast<float>(pPrev2->m_flCycle),  static_cast<float>(pPrev2->m_flWeight), i );
 			}
 	#endif
 
@@ -252,18 +252,18 @@ void C_BaseAnimatingOverlay::CheckForLayerChanges( CStudioHdr *hdr, float curren
 			if (pPrev2)
 			{
 				float num = 0;
-				if ( fabs( t0 - t1 ) > 0.001f )
+				if ( std::fabs( t0 - t1 ) > 0.001f )
 					num = (t2 - t1) / (t0 - t1);
 
 				pPrev2->m_nSequence = pHead->m_nSequence;
 				float flTemp;
 				if (IsSequenceLooping( hdr, pHead->m_nSequence ))
 				{
-					flTemp = LoopingLerp( num, (float)pHead->m_flPrevCycle, (float)pHead->m_flCycle );
+					flTemp = LoopingLerp( num, static_cast<float>(pHead->m_flPrevCycle), static_cast<float>(pHead->m_flCycle) );
 				}
 				else
 				{
-					flTemp = Lerp( num, (float)pHead->m_flPrevCycle, (float)pHead->m_flCycle );
+					flTemp = Lerp( num, static_cast<float>(pHead->m_flPrevCycle), static_cast<float>(pHead->m_flCycle) );
 				}
 				pPrev2->m_flCycle = flTemp;
 				pPrev2->m_flWeight = pHead->m_flWeight;
@@ -280,7 +280,7 @@ void C_BaseAnimatingOverlay::CheckForLayerChanges( CStudioHdr *hdr, float curren
 			m_iv_AnimOverlay[i].Interpolate( currentTime );
 
 			// reset event indexes
-			m_flOverlayPrevEventCycle[i] = pHead->m_flPrevCycle - 0.01;
+			m_flOverlayPrevEventCycle[i] = pHead->m_flPrevCycle - 0.01f;
 		}
 	}
 

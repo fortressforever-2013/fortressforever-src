@@ -21,6 +21,8 @@
 #include "movevars_shared.h"
 #include "clienteffectprecachesystem.h"
 
+#include <cmath>
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -268,7 +270,7 @@ void C_EntityDissolve::BuildTeslaEffect( mstudiobbox_t *pHitBox, const matrix3x4
 //-----------------------------------------------------------------------------
 static inline void SortAbsVectorComponents( const Vector& src, int* pVecIdx )
 {
-	Vector absVec( fabs(src[0]), fabs(src[1]), fabs(src[2]) );
+	Vector absVec( std::fabs(src[0]), std::fabs(src[1]), std::fabs(src[2]) );
 
 	int maxIdx = (absVec[0] > absVec[1]) ? 0 : 1;
 	if (absVec[2] > absVec[maxIdx])
@@ -350,12 +352,12 @@ void C_EntityDissolve::ComputeRenderInfo( mstudiobbox_t *pHitBox, const matrix3x
 	// We project the two longest sides into the vectors perpendicular
 	// to the projection direction, then add in the projection of the perp direction
 	Vector2D size( boxSize[vecIdx[0]], boxSize[vecIdx[1]] );
-	size.x *= fabs( DotProduct( vec[vecIdx[0]], *pXVec ) );
-	size.y *= fabs( DotProduct( vec[vecIdx[1]], *pYVec ) );
+	size.x *= std::fabs( DotProduct( vec[vecIdx[0]], *pXVec ) );
+	size.y *= std::fabs( DotProduct( vec[vecIdx[1]], *pYVec ) );
 
 	// Add the third component into x and y
-	size.x += boxSize[vecIdx[2]] * fabs( DotProduct( vec[vecIdx[2]], *pXVec ) );
-	size.y += boxSize[vecIdx[2]] * fabs( DotProduct( vec[vecIdx[2]], *pYVec ) );
+	size.x += boxSize[vecIdx[2]] * std::fabs( DotProduct( vec[vecIdx[2]], *pXVec ) );
+	size.y += boxSize[vecIdx[2]] * std::fabs( DotProduct( vec[vecIdx[2]], *pYVec ) );
 
 	// Bloat a bit, since the shadow wants to extend outside the model a bit
 	size *= 2.0f;

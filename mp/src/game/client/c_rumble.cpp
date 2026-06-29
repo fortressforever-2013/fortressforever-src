@@ -7,6 +7,9 @@
 //=============================================================================//
 #include "cbase.h"
 #include "c_rumble.h"
+
+#include <cmath>
+
 #include "rumble_shared.h"
 #include "inputsystem/iinputsystem.h"
 
@@ -214,13 +217,13 @@ void GenerateFlatEffect( RumbleWaveform_t *pWaveform, const WaveGenParams_t &par
 //---------------------------------------------------------
 void GenerateSineWaveEffect( RumbleWaveform_t *pWaveform, const WaveGenParams_t &params )
 {
-	float step = (360.0f * (params.cycles * 0.5f) ) / ((float)NUM_WAVE_SAMPLES);
+	float step = (360.0f * (params.cycles * 0.5f) ) / static_cast<float>(NUM_WAVE_SAMPLES);
 	float degrees = 180.0f + step; // 180 to start at 0
 
 	for( int i = 0 ; i < NUM_WAVE_SAMPLES ; i++ )
 	{
 		float radians = DEG2RAD(degrees);
-		float value = fabs( sin(radians) );
+		float value = std::fabs( std::sin(radians) );
 
 		value *= params.amplitudescale;
 
@@ -751,7 +754,7 @@ void CRumbleEffects::UpdateEffects( float curtime )
 	{
 		if( m_flScreenShake < 0.0f )
 		{
-			shakeLeft = fabs( m_flScreenShake );
+			shakeLeft = std::fabs( m_flScreenShake );
 		}
 		else
 		{

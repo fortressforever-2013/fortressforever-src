@@ -6,6 +6,7 @@
 // $NoKeywords: $
 //=============================================================================//
 #include "cbase.h"
+#include <cmath>
 #include "particle_simple3d.h"
 #include "view.h"
 
@@ -58,28 +59,28 @@ void CSimple3DEmitter::SimulateParticles( CParticleSimulateIterator *pIterator )
 			// ---------------------------------------
 			// Decay towards flat
 			// ---------------------------------------
-			if (pParticle->m_flAngSpeed == 0 || trace.fraction != 1.0)
+			if (pParticle->m_flAngSpeed == 0.0f || trace.fraction != 1.0f)
 			{
 				pParticle->m_vAngles.x = anglemod(pParticle->m_vAngles.x);
 				if (pParticle->m_vAngles.x < 180)
 				{
-					if (fabs(pParticle->m_vAngles.x - 90) > 0.5)
+					if (std::fabs(pParticle->m_vAngles.x - 90) > 0.5f)
 					{
-						pParticle->m_vAngles.x = 0.5*pParticle->m_vAngles.x + 46;
+						pParticle->m_vAngles.x = 0.5f*pParticle->m_vAngles.x + 46;
 					}
 				}
 				else
 				{
-					if (fabs(pParticle->m_vAngles.x - 270) > 0.5)
+					if (std::fabs(pParticle->m_vAngles.x - 270) > 0.5f)
 					{
-						pParticle->m_vAngles.x = 0.5*pParticle->m_vAngles.x + 135;
+						pParticle->m_vAngles.x = 0.5f*pParticle->m_vAngles.x + 135;
 					}
 				}
 
 				pParticle->m_vAngles.y = anglemod(pParticle->m_vAngles.y);
-				if (fabs(pParticle->m_vAngles.y) > 0.5)
+				if (std::fabs(pParticle->m_vAngles.y) > 0.5f)
 				{
-					pParticle->m_vAngles.y = 0.5*pParticle->m_vAngles.z;
+					pParticle->m_vAngles.y = 0.5f*pParticle->m_vAngles.z;
 				}
 			}
 		}

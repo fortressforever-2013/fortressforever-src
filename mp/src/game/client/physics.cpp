@@ -6,6 +6,7 @@
 //=============================================================================//
 
 #include "cbase.h"
+#include <cmath>
 #include "vcollide_parse.h"
 #include "filesystem.h"
 #include "engine/IStaticPropMgr.h"
@@ -745,7 +746,7 @@ static int BestAxisMatchingNormal( matrix3x4_t &matrix, const Vector &normal )
 	{
 		Vector tmp;
 		MatrixGetColumn( matrix, i, tmp );
-		float dot = fabs(DotProduct( tmp, normal ));
+		float dot = std::fabs(DotProduct( tmp, normal ));
 		if ( dot > bestDot )
 		{
 			bestDot = dot;

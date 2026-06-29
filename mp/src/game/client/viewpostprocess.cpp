@@ -5,7 +5,7 @@
 //===========================================================================
 
 #include "cbase.h"
-
+#include <cmath>
 #include "materialsystem/imaterialsystem.h"
 #include "materialsystem/itexture.h"
 #include "materialsystem/imaterialvar.h"
@@ -1171,7 +1171,7 @@ static void SetToneMapScale(IMatRenderContext *pRenderContext, float newvalue, f
 		int sample_pt = ARRAYSIZE( s_MovingAverageToneMapScale ) / 2;
 		for( int i = 0;i < ARRAYSIZE( s_MovingAverageToneMapScale );i ++ )
 		{
-			float weight = abs( i - sample_pt ) * ( 1.0 / ( ARRAYSIZE( s_MovingAverageToneMapScale ) / 2 ));
+			float weight = std::fabs( i - sample_pt ) * ( 1.0f / ( ARRAYSIZE( s_MovingAverageToneMapScale ) / 2 ));
 			sumweights += weight;
 			avg += weight * s_MovingAverageToneMapScale[i];
 		}
@@ -2830,7 +2830,7 @@ void DoImageSpaceMotionBlur( const CViewSetup &view, int x, int y, int w, int h 
 			if ( mat_motion_blur_forward_enabled.GetBool() ) // Want forward and falling
 				g_vMotionBlurValues[2] = flViewDotMotion;
 			else // Falling only
-				g_vMotionBlurValues[2] = flViewDotMotion * fabs( vCurrentForwardVec[2] ); // Only want this if we're looking up or down;
+				g_vMotionBlurValues[2] = flViewDotMotion * std::fabs( vCurrentForwardVec[2] ); // Only want this if we're looking up or down;
 
 			//====================================//
 			// Yaw (Compensate for circle strafe) //
@@ -2851,14 +2851,14 @@ void DoImageSpaceMotionBlur( const CViewSetup &view, int x, int y, int w, int h 
 
 			// Use pitch to dampen yaw
 			float flUndampenedYaw = flYawDiffAdjusted / flHorizontalFov;
-			g_vMotionBlurValues[0] = flUndampenedYaw * ( 1.0f - ( fabs( flCurrentPitch ) / 90.0f ) ); // Dampen horizontal yaw blur based on pitch
+			g_vMotionBlurValues[0] = flUndampenedYaw * ( 1.0f - ( std::fabs( flCurrentPitch ) / 90.0f ) ); // Dampen horizontal yaw blur based on pitch
 
 			//engine->Con_NPrintf( 4, "flSideDotMotion: %6.2f   yaw diff: %6.2f  ( %6.2f, %6.2f )", flSideDotMotion, ( s_flPreviousYaw - flCurrentYaw ), flYawDiffOriginal, flYawDiffAdjusted );
 
 			//=======================================//
 			// Pitch (Compensate for forward motion) //
 			//=======================================//
-			float flPitchCompensateMask = 1.0f - ( ( 1.0f - fabs( vCurrentForwardVec[2] ) ) * ( 1.0f - fabs( vCurrentForwardVec[2] ) ) );
+			float flPitchCompensateMask = 1.0f - ( ( 1.0f - std::fabs( vCurrentForwardVec[2] ) ) * ( 1.0f - std::fabs( vCurrentForwardVec[2] ) ) );
 			float flPitchDiffOriginal = s_flPreviousPitch - flCurrentPitch;
 			float flPitchDiffAdjusted = flPitchDiffOriginal;
 
@@ -2881,7 +2881,7 @@ void DoImageSpaceMotionBlur( const CViewSetup &view, int x, int y, int w, int h 
 			// Roll (Enabled when we're looking down and yaw changes) //
 			//========================================================//
 			g_vMotionBlurValues[3] = flUndampenedYaw; // Roll starts out as undampened yaw intensity and is then scaled by pitch
-			g_vMotionBlurValues[3] *= ( fabs( flCurrentPitch ) / 90.0f ) * ( fabs( flCurrentPitch ) / 90.0f ) * ( fabs( flCurrentPitch ) / 90.0f ); // Dampen roll based on pitch^3
+			g_vMotionBlurValues[3] *= ( std::fabs( flCurrentPitch ) / 90.0f ) * ( std::fabs( flCurrentPitch ) / 90.0f ) * ( std::fabs( flCurrentPitch ) / 90.0f ); // Dampen roll based on pitch^3
 
 			//engine->Con_NPrintf( 4, "[2] before scale and bias: %6.2f", g_vMotionBlurValues[2] );
 			//engine->Con_NPrintf( 5, "[3] before scale and bias: %6.2f", g_vMotionBlurValues[3] );
@@ -2895,7 +2895,7 @@ void DoImageSpaceMotionBlur( const CViewSetup &view, int x, int y, int w, int h 
 				g_vMotionBlurValues[2] = 0.0f;
 
 			// Scale and bias values after time adjustment
-			g_vMotionBlurValues[2] = clamp( ( fabs( g_vMotionBlurValues[2] ) - flMotionBlurFallingMin ) / ( flMotionBlurFallingMax - flMotionBlurFallingMin ), 0.0f, 1.0f ) * ( g_vMotionBlurValues[2] >= 0.0f ? 1.0f : -1.0f );
+			g_vMotionBlurValues[2] = clamp( ( std::fabs( g_vMotionBlurValues[2] ) - flMotionBlurFallingMin ) / ( flMotionBlurFallingMax - flMotionBlurFallingMin ), 0.0f, 1.0f ) * ( g_vMotionBlurValues[2] >= 0.0f ? 1.0f : -1.0f );
 			g_vMotionBlurValues[2] /= 30.0f; // To counter-adjust for time adjustment above
 
 			//=================//

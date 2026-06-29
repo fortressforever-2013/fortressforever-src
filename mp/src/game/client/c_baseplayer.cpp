@@ -7,6 +7,9 @@
 //===========================================================================//
 #include "cbase.h"
 #include "c_baseplayer.h"
+
+#include <cmath>
+
 #include "flashlighteffect.h"
 #include "weapon_selection.h"
 #include "history_resource.h"
@@ -97,8 +100,8 @@ static ConVar	cl_smoothtime	(
 	"0.1", 
 	0, 
 	"Smooth client's view after prediction error over this many seconds",
-	true, 0.01,	// min/max is 0.01/2.0
-	true, 2.0
+	true, 0.01f,	// min/max is 0.01/2.0
+	true, 2.0f
 	 );
 
 #ifdef CSTRIKE_DLL
@@ -1027,7 +1030,7 @@ void C_BasePlayer::OnDataChanged( DataUpdateType_t updateType )
 					CHudHistoryResource *pHudHR = GET_HUDELEMENT( CHudHistoryResource );
 					if( pHudHR )
 					{
-						pHudHR->AddToHistory( HISTSLOT_AMMO, i, abs(GetAmmoCount(i) - m_iOldAmmo[i]) );
+						pHudHR->AddToHistory( HISTSLOT_AMMO, i, std::abs(GetAmmoCount(i) - m_iOldAmmo[i]) );
 					}
 				}
 			}
@@ -1679,7 +1682,7 @@ void C_BasePlayer::CalcFreezeCamView( Vector& eyeOrigin, QAngle& eyeAngles, floa
 	{
 		// Look at their chest, not their head
 		Vector maxs = pTarget->GetBaseAnimating() ? VEC_HULL_MAX_SCALED( pTarget->GetBaseAnimating() ) : VEC_HULL_MAX;
-		vecCamTarget.z -= (maxs.z * 0.5);
+		vecCamTarget.z -= (maxs.z * 0.5f);
 	}
 	else
 	{
@@ -1711,7 +1714,7 @@ void C_BasePlayer::CalcFreezeCamView( Vector& eyeOrigin, QAngle& eyeAngles, floa
 		vecCamTarget = vecCamDesired;
 
 		// To stop all close in views looking up at character's chins, move the view up.
-		vecTargetPos.z += fabs(vecCamTarget.z - vecTargetPos.z) * 0.85;
+		vecTargetPos.z += std::fabs(vecCamTarget.z - vecTargetPos.z) * 0.85f;
 		C_BaseEntity::PushEnableAbsRecomputations( false ); // HACK don't recompute positions while doing RayTrace
 		UTIL_TraceHull( vecCamTarget, vecTargetPos, WALL_MIN, WALL_MAX, MASK_SOLID, pTarget, COLLISION_GROUP_NONE, &trace );
 		C_BaseEntity::PopEnableAbsRecomputations();
@@ -1759,7 +1762,7 @@ void C_BasePlayer::CalcInEyeCamView(Vector& eyeOrigin, QAngle& eyeAngles, float&
 
 	fov = GetFOV();	// TODO use tragets FOV
 
-	m_flObserverChaseDistance = 0.0;
+	m_flObserverChaseDistance = 0.0f;
 
 	eyeAngles = target->EyeAngles();
 	eyeOrigin = target->GetAbsOrigin();
@@ -1847,7 +1850,7 @@ void C_BasePlayer::CalcDeathCamView(Vector& eyeOrigin, QAngle& eyeAngles, float&
 	UTIL_TraceHull( origin, eyeOrigin, WALL_MIN, WALL_MAX, MASK_SOLID, this, COLLISION_GROUP_NONE, &trace );
 	C_BaseEntity::PopEnableAbsRecomputations();
 
-	if (trace.fraction < 1.0)
+	if (trace.fraction < 1.0f)
 	{
 		eyeOrigin = trace.endpos;
 		m_flObserverChaseDistance = VectorLength(origin - eyeOrigin);

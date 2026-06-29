@@ -24,6 +24,8 @@
 #include "view.h"
 #include "viewrender.h"
 
+#include <cmath>
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -1667,7 +1669,7 @@ void CClientLeafSystem::CollateRenderablesInLeaf( int leaf, int worldListLeafInd
 				Vector dims;
 				VectorSubtract( absMaxs, absMins, dims );
 
-				float const fDimension = MAX( MAX( fabs(dims.x), fabs(dims.y) ), fabs(dims.z) );
+				float const fDimension = MAX( MAX( std::fabs(dims.x), std::fabs(dims.y) ), std::fabs(dims.z) );
 				group = DetectBucketedRenderGroup( group, fDimension );
 				
 				Assert( group >= RENDER_GROUP_OPAQUE_STATIC_HUGE && group <= RENDER_GROUP_OPAQUE_ENTITY );

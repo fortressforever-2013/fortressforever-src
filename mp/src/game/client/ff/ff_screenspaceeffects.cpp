@@ -12,6 +12,8 @@
 
 #include "cbase.h"
 
+#include <cmath>
+
 #include "KeyValues.h"
 #include "cdll_client_int.h"
 #include "view_scene.h"
@@ -350,7 +352,7 @@ void CMotionBlur::Render(int x, int y, int w, int h)
 		return;
 
 	// Don't do anything here if the frametime is broken
-	if (gpGlobals->frametime == 0)
+	if (gpGlobals->frametime == 0.0f)
 		return;
 
 	CMatRenderContextPtr pMatRenderContext(g_pMaterialSystem);
@@ -364,7 +366,7 @@ void CMotionBlur::Render(int x, int y, int w, int h)
 
 	// Only care about acceleration, not decceleration
 	if (flAcceleration > 0.0f)
- 		g_flAccumulativeAccel += fabs(flAcceleration) * gpGlobals->frametime;
+ 		g_flAccumulativeAccel += std::fabs(flAcceleration) * gpGlobals->frametime;
 
 	// Manage our accumulative acceleration a bit
 	g_flAccumulativeAccel -= gpGlobals->frametime * 2500.0f;

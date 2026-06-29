@@ -37,6 +37,8 @@
 #include "c_basedoor.h"
 #include "c_te_effect_dispatch.h"	// |-- Mirv: Needed for client nail
 
+#include <cmath>
+
 // NOTE: Always include this last!
 #include "tier0/memdbgon.h"
 
@@ -2344,7 +2346,7 @@ void CTempEnts::PlaySound ( C_LocalTempEntity *pTemp, float damp )
 #endif
 	}
 
-	zvel = abs( pTemp->GetVelocity()[2] );
+	zvel = std::abs( pTemp->GetVelocity()[2] );
 		
 	// only play one out of every n
 
@@ -3171,7 +3173,7 @@ void CTempEnts::MuzzleFlash_Shotgun_NPC( ClientEntityHandle_t hEntity, int attac
 
 		float dot = forward.Dot( pTrailParticle->m_vecVelocity );
 
-		dot = (1.0f-fabs(dot)) / spread;
+		dot = (1.0f-std::fabs(dot)) / spread;
 		pTrailParticle->m_vecVelocity *= (random->RandomFloat( 256.0f, 1024.0f ) * (1.0f-dot));
 
 		Color32Init( pTrailParticle->m_color, 255, 242, 191, 255 );

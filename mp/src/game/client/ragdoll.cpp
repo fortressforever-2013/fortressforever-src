@@ -6,6 +6,7 @@
 //===========================================================================//
 
 #include "cbase.h"
+#include <cmath>
 #include "mathlib/vmatrix.h"
 #include "ragdoll_shared.h"
 #include "bone_setup.h"
@@ -271,7 +272,7 @@ void CRagdoll::CheckSettleStationaryRagdoll()
 	for ( int i = 0; i < 3; ++i )
 	{
 		// It's still moving...
-		if ( fabs( delta[ i ] ) > RAGDOLL_SLEEP_TOLERANCE )
+		if ( std::fabs( delta[ i ] ) > RAGDOLL_SLEEP_TOLERANCE )
 		{
 			m_flLastOriginChangeTime = gpGlobals->curtime;
 			// Msg( "%d [%p] Still moving\n", gpGlobals->tickcount, this );

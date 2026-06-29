@@ -9,6 +9,8 @@
 #include "smoke_fog_overlay.h"
 #include "engine/IEngineTrace.h"
 
+#include <cmath>
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -325,10 +327,10 @@ void C_FuncSmokeVolume::Update( float fTimeDelta )
 	// particles wander outside the current bounds sometimes, it'll be linking them into all the leaves repeatedly.
 	const Vector &curOrigin = GetAbsOrigin();
 	const QAngle &curAngles = GetAbsAngles();
-	if ( !VectorsAreEqual( curOrigin, m_vLastOrigin, 0.1 ) || 
-		fabs( curAngles.x - m_vLastAngles.x ) > 0.1 || 
-		fabs( curAngles.y - m_vLastAngles.y ) > 0.1 || 
-		fabs( curAngles.z - m_vLastAngles.z ) > 0.1 ||
+	if ( !VectorsAreEqual( curOrigin, m_vLastOrigin, 0.1f ) || 
+		std::fabs( curAngles.x - m_vLastAngles.x ) > 0.1f || 
+		std::fabs( curAngles.y - m_vLastAngles.y ) > 0.1f || 
+		std::fabs( curAngles.z - m_vLastAngles.z ) > 0.1f ||
 		m_bFirstUpdate )
 	{
 		m_bFirstUpdate = false;

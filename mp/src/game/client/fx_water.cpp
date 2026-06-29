@@ -17,6 +17,8 @@
 #include "fx.h"
 #include "fx_water.h"
 
+#include <cmath>
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -502,7 +504,7 @@ float CSplashParticle::UpdateRoll( SimpleParticle *pParticle, float timeDelta )
 	pParticle->m_flRollDelta += pParticle->m_flRollDelta * ( timeDelta * -4.0f );
 
 	//Cap the minimum roll
-	if ( fabs( pParticle->m_flRollDelta ) < 0.5f )
+	if ( std::fabs( pParticle->m_flRollDelta ) < 0.5f )
 	{
 		pParticle->m_flRollDelta = ( pParticle->m_flRollDelta > 0.0f ) ? 0.5f : -0.5f;
 	}

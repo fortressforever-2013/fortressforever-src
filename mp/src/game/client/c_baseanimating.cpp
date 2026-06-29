@@ -6,6 +6,9 @@
 //===========================================================================//
 #include "cbase.h"
 #include "c_baseanimating.h"
+
+#include <cmath>
+
 #include "c_sprite.h"
 #include "model_types.h"
 #include "bone_setup.h"
@@ -1574,9 +1577,9 @@ void C_BaseAnimating::BuildTransformations( CStudioHdr *hdr, Vector *pos, Quater
 		{
 			QuaternionMatrix( q[i], pos[i], bonematrix );
 
-			Assert( fabs( pos[i].x ) < 100000 );
-			Assert( fabs( pos[i].y ) < 100000 );
-			Assert( fabs( pos[i].z ) < 100000 );
+			Assert( std::fabs( pos[i].x ) < 100000 );
+			Assert( std::fabs( pos[i].y ) < 100000 );
+			Assert( std::fabs( pos[i].z ) < 100000 );
 
 			if ( (hdr->boneFlags( i ) & BONE_ALWAYS_PROCEDURAL) && 
 				 (hdr->pBone( i )->proctype & STUDIO_PROC_JIGGLE) )

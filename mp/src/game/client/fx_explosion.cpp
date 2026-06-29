@@ -21,6 +21,8 @@
 
 #include "utlqueue.h"
 
+#include <cmath>
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -73,7 +75,7 @@ public:
 		pParticle->m_flRollDelta += pParticle->m_flRollDelta * ( timeDelta * -8.0f );
 
 		//Cap the minimum roll
-		if ( fabs( pParticle->m_flRollDelta ) < 0.5f )
+		if ( std::fabs( pParticle->m_flRollDelta ) < 0.5f )
 		{
 			pParticle->m_flRollDelta = ( pParticle->m_flRollDelta > 0.0f ) ? 0.5f : -0.5f;
 		}
@@ -165,7 +167,7 @@ float C_BaseExplosionEffect::ScaleForceByDeviation( Vector &deviant, Vector &sou
 
 	float	dot = source.Dot( deviant );
 	
-	dot = spread * fabs( dot );	
+	dot = spread * std::fabs( dot );	
 
 	if ( force != NULL )
 	{
@@ -935,7 +937,7 @@ public:
 		pParticle->m_flRollDelta += pParticle->m_flRollDelta * ( timeDelta * -8.0f );
 
 		//Cap the minimum roll
-		if ( fabs( pParticle->m_flRollDelta ) < 0.25f )
+		if ( std::fabs( pParticle->m_flRollDelta ) < 0.25f )
 		{
 			pParticle->m_flRollDelta = ( pParticle->m_flRollDelta > 0.0f ) ? 0.25f : -0.25f;
 		}

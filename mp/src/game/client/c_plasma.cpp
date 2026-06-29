@@ -14,6 +14,8 @@
 #include "engine/ivmodelinfo.h"
 #include "view.h"
 
+#include <cmath>
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -254,7 +256,7 @@ void C_Plasma::AddFlames( void )
 	float	dot		= viewDir.Dot( Vector( 0, 0, 1 ) );	//NOTENOTE: Flames always point up
 	float	alpha	= 1.0f;
 
-	dot = fabs( dot );
+	dot = std::fabs( dot );
 
 	if ( dot < FLAME_ALPHA_START )
 	{

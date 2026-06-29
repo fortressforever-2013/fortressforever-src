@@ -7,6 +7,9 @@
 #include "cbase.h"
 #include "input.h"
 #include "c_ff_player.h"
+
+#include <cmath>
+
 #include "ff_weapon_base.h"
 #include "ff_playerclass_parse.h"
 #include "ff_grenade_parse.h" //for parseing ff gren txts
@@ -2375,7 +2378,7 @@ void C_FFPlayer::OnDataChanged(DataUpdateType_t type)
 			CHudHistoryResource* pHudHR = GET_HUDELEMENT(CHudHistoryResource);
 			if (pHudHR)
 			{
-				pHudHR->AddIconToHistory(HISTSLOT_AMMO, -1, NULL, abs(m_iPrimary - m_iOldPrimary), pIcon);
+				pHudHR->AddIconToHistory(HISTSLOT_AMMO, -1, NULL, std::abs(m_iPrimary - m_iOldPrimary), pIcon);
 			}
 		}
 
@@ -2398,7 +2401,7 @@ void C_FFPlayer::OnDataChanged(DataUpdateType_t type)
 			CHudHistoryResource* pHudHR = GET_HUDELEMENT(CHudHistoryResource);
 			if (pHudHR)
 			{
-				pHudHR->AddIconToHistory(HISTSLOT_AMMO, -1, NULL, abs(m_iSecondary - m_iOldSecondary), pIcon);
+				pHudHR->AddIconToHistory(HISTSLOT_AMMO, -1, NULL, std::abs(m_iSecondary - m_iOldSecondary), pIcon);
 			}
 		}
 
@@ -3139,7 +3142,7 @@ float flFOVModifier = 0.0f;
 
 inline float approach(float flInitial, float flDelta, float flTarget)
 {
-	flDelta = fabs(flDelta);
+	flDelta = std::fabs(flDelta);
 	bool bSign = (flInitial < flTarget);
 	flInitial += (bSign ? flDelta : -flDelta);
 	// The sign has changed so we have overshot
@@ -3416,19 +3419,19 @@ void C_FFPlayer::AvoidPlayers(CUserCmd* pCmd)
 	//Msg( "PRECLAMP: forwardmove=%f, sidemove=%f\n", pCmd->forwardmove, pCmd->sidemove );
 
 	float flForwardScale = 1.0f;
-	if (pCmd->forwardmove > fabs(cl_forwardspeed.GetFloat()))
+	if (pCmd->forwardmove > std::fabs(cl_forwardspeed.GetFloat()))
 	{
-		flForwardScale = fabs(cl_forwardspeed.GetFloat()) / pCmd->forwardmove;
+		flForwardScale = std::fabs(cl_forwardspeed.GetFloat()) / pCmd->forwardmove;
 	}
-	else if (pCmd->forwardmove < -fabs(cl_backspeed.GetFloat()))
+	else if (pCmd->forwardmove < -std::fabs(cl_backspeed.GetFloat()))
 	{
-		flForwardScale = fabs(cl_backspeed.GetFloat()) / fabs(pCmd->forwardmove);
+		flForwardScale = std::fabs(cl_backspeed.GetFloat()) / std::fabs(pCmd->forwardmove);
 	}
 
 	float flSideScale = 1.0f;
-	if (fabs(pCmd->sidemove) > fabs(cl_sidespeed.GetFloat()))
+	if (std::fabs(pCmd->sidemove) > std::fabs(cl_sidespeed.GetFloat()))
 	{
-		flSideScale = fabs(cl_sidespeed.GetFloat()) / fabs(pCmd->sidemove);
+		flSideScale = std::fabs(cl_sidespeed.GetFloat()) / std::fabs(pCmd->sidemove);
 	}
 
 	float flScale = min(flForwardScale, flSideScale);

@@ -5,6 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 #include "cbase.h"
+#include <cmath>
 #include "proxyentity.h"
 #include "materialsystem/imaterialvar.h"
 #include "materialsystem/imaterial.h"
@@ -75,7 +76,7 @@ void CLampBeamProxy::OnBind( C_BaseEntity *pEnt )
 	Vector vecLocal = pEnt->GetAbsOrigin() - CurrentViewOrigin();
 	VectorNormalize( vecLocal );
 
-	float fade = 1.0 - fabs( vecLocal.z );
+	float fade = 1.0f - std::fabs( vecLocal.z );
 
 	m_pFadeValue->SetFloatValue( fade );
 }

@@ -5,6 +5,7 @@
 //===========================================================================//
 
 #include "cbase.h"
+#include <cmath>
 #include "view.h"
 #include "iviewrender.h"
 #include "iviewrender_beams.h"
@@ -435,7 +436,7 @@ void CViewRender::DriftPitch(void)
 	// Don't count small mouse motion
 	if (m_PitchDrift.nodrift)
 	{
-		if (fabs(input->GetLastForwardMove()) < cl_forwardspeed.GetFloat())
+		if (std::fabs(input->GetLastForwardMove()) < cl_forwardspeed.GetFloat())
 		{
 			m_PitchDrift.driftmove = 0;
 		}
@@ -741,7 +742,7 @@ void CViewRender::SetUpViews()
 
 	//Adjust the viewmodel's FOV to move with any FOV offsets on the viewer's end
 #ifdef SDK2013CE
-	view.fovViewmodel = fabs(g_pClientMode->GetViewModelFOV() - flFOVOffset);
+	view.fovViewmodel = std::fabs(g_pClientMode->GetViewModelFOV() - flFOVOffset);
 #else
 	view.fovViewmodel = g_pClientMode->GetViewModelFOV() - flFOVOffset;
 #endif

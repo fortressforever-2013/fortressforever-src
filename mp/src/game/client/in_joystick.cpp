@@ -158,7 +158,7 @@ static float ResponseCurve( int curve, float x, int axis, float sensitivity )
 		{
 		// quadratic extreme
 		float extreme = 1.0f;
-		if ( fabs( x ) >= 0.95f )
+		if ( std::fabs( x ) >= 0.95f )
 		{
 			extreme = 1.5f;
 		}
@@ -170,7 +170,7 @@ static float ResponseCurve( int curve, float x, int axis, float sensitivity )
 		{
 			float flScale = sensitivity < 0.0f ? -1.0f : 1.0f;
 
-			sensitivity = clamp( fabs( sensitivity ), 1.0e-8f, 1000.0f );
+			sensitivity = clamp( std::fabs( sensitivity ), 1.0e-8f, 1000.0f );
 
 			float oneOverSens = 1.0f / sensitivity;
 		
@@ -179,7 +179,7 @@ static float ResponseCurve( int curve, float x, int axis, float sensitivity )
 				flScale = -flScale;
 			}
 
-			float retval = clamp( powf( fabs( x ), oneOverSens ), 0.0f, 1.0f );
+			float retval = clamp( powf( std::fabs( x ), oneOverSens ), 0.0f, 1.0f );
 			return retval * flScale;
 		}
 		break;
@@ -187,7 +187,7 @@ static float ResponseCurve( int curve, float x, int axis, float sensitivity )
 		{
 			float out = x;
 
-			if( fabs(out) <= 0.6f )
+			if( std::fabs(out) <= 0.6f )
 			{
 				out *= 0.5f;
 			}
@@ -207,10 +207,10 @@ static float ResponseCurve( int curve, float x, int axis, float sensitivity )
 				// axis convention as the look stick. (sjb)
 				float sign = 1;
 
-				if( x  < 0.0 )
+				if( x  < 0.0f )
 					sign = -1;
 
-				x = fabs(x);
+				x = std::fabs(x);
 
 				if( x <= joy_vehicle_turn_lowend.GetFloat() )
 					x = RemapVal( x, 0.0f, joy_vehicle_turn_lowend.GetFloat(), 0.0f, joy_vehicle_turn_lowmap.GetFloat() );
@@ -242,7 +242,7 @@ float AutoAimDampening( float x, int axis, float dist )
 #ifdef HL2_CLIENT_DLL
 	// Help the user stay on target if the feature is enabled and the user
 	// is not making a gross stick movement.
-	if( joy_autoaimdampen.GetFloat() > 0.0f && fabs(x) < joy_autoaimdampenrange.GetFloat() )
+	if( joy_autoaimdampen.GetFloat() > 0.0f && std::fabs(x) < joy_autoaimdampenrange.GetFloat() )
 	{
 		// Get the HL2 player
 		C_BaseHLPlayer *pLocalPlayer = (C_BaseHLPlayer *)C_BasePlayer::GetLocalPlayer();
@@ -727,11 +727,11 @@ void CInput::JoyStickMove( float frametime, CUserCmd *cmd )
 			// y=ax^b; where a = 300 and b = 1.3
 			// also x values are in increments of 800 (so this is factored out)
 			// then bounds check result to level out excessively high spin rates
-			float fTemp = 300.0 * pow(abs(fAxisValue) / 800.0, 1.3);
-			if (fTemp > 14000.0)
-				fTemp = 14000.0;
+			float fTemp = 300.0f * std::pow(std::fabs(fAxisValue) / 800.0f, 1.3f);
+			if (fTemp > 14000.0f)
+				fTemp = 14000.0f;
 			// restore direction information
-			fAxisValue = (fAxisValue > 0.0) ? fTemp : -fTemp;
+			fAxisValue = (fAxisValue > 0.0f) ? fTemp : -fTemp;
 		}
 
 		unsigned int idx = m_rgAxes[i].AxisMap;

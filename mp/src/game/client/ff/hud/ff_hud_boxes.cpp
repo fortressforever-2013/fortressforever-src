@@ -11,11 +11,12 @@
 //	08/06/2006, Mulchman: 
 //		First created
 
+#include "cbase.h"
+
 #ifdef _WIN32
 #pragma once
 #endif
 
-#include "cbase.h"
 #include "ff_hud_boxes.h"
 
 #include <KeyValues.h>

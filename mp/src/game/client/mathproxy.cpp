@@ -5,6 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 #include "cbase.h"
+#include <cmath>
 #include "sharedInterface.h"
 #include "materialsystem/imaterial.h"
 #include <KeyValues.h>
@@ -823,7 +824,7 @@ public:
 
 void CAbsProxy::OnBind( void *pC_BaseEntity )
 {	
-	SetFloatResult( fabs(m_pSrc1->GetFloatValue( )) );
+	SetFloatResult( std::fabs(m_pSrc1->GetFloatValue( )) );
 
 	if ( ToolsEnabled() )
 	{

@@ -6,6 +6,9 @@
 
 #include "cbase.h"
 #include "basemodel_panel.h"
+
+#include <cmath>
+
 #include "activitylist.h"
 #include "animation.h"
 #include "vgui/IInput.h"
@@ -607,23 +610,23 @@ void CBaseModelPanel::LookAtBounds( const Vector &vecBoundsMin, const Vector &ve
 
 	int w, h;
 	GetSize( w, h );
-	float flW = (float)w;
-	float flH = (float)h;
+	float flW = static_cast<float>(w);
+	float flH = static_cast<float>(h);
 
 	float flFOVx = DEG2RAD( m_BMPResData.m_flFOV * 0.5f );
 	float flFOVy = CalcFovY( ( m_BMPResData.m_flFOV * 0.5f ), flW/flH );
 	flFOVy = DEG2RAD( flFOVy );
 
-	float flTanFOVx = tan( flFOVx );
-	float flTanFOVy = tan( flFOVy );
+	float flTanFOVx = std::tan( flFOVx );
+	float flTanFOVy = std::tan( flFOVy );
 
 	// Find the max value of x, y, or z
 	Vector2D dist[8];
 	float flDist = 0.0f;
 	for ( int iPoint = 0; iPoint < 8; ++iPoint )
 	{
-		float flDistY = fabs( aXFormPoints[iPoint].y / flTanFOVx ) - aXFormPoints[iPoint].x;
-		float flDistZ = fabs( aXFormPoints[iPoint].z / flTanFOVy ) - aXFormPoints[iPoint].x;
+		float flDistY = std::fabs( aXFormPoints[iPoint].y / flTanFOVx ) - aXFormPoints[iPoint].x;
+		float flDistZ = std::fabs( aXFormPoints[iPoint].z / flTanFOVy ) - aXFormPoints[iPoint].x;
 		dist[iPoint].x = flDistY;
 		dist[iPoint].y = flDistZ;
 		float flTestDist = MAX( flDistZ, flDistY );

@@ -9,6 +9,8 @@
 #include "mathlib/vmatrix.h"
 #include "beamdraw.h"
 
+#include <cmath>
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -197,7 +199,7 @@ void C_Hairball::ClientThink()
 	else
 	{
 		// Flip between stopped and starting.
-		if ( fabs( m_flSpinRateX ) > 0.01f )
+		if ( std::fabs( m_flSpinRateX ) > 0.01f )
 		{
 			m_flSpinRateX = m_flSpinRateY = 0;
 
