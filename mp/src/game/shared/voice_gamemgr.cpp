@@ -7,9 +7,9 @@
 
 #include "cbase.h"
 #include "voice_gamemgr.h"
-#include <string.h>
-#include <stdarg.h>
-#include <assert.h>
+#include <cstring>
+#include <cstdarg>
+#include <cassert>
 #include "player.h"
 #include "ivoiceserver.h"
 #include "usermessages.h"

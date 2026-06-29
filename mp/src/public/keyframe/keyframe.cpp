@@ -7,10 +7,10 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <stdio.h>
+#include <cstdio>
 #include <memory.h>
-#include <math.h>
-#include <string.h>
+#include <cmath>
+#include <cstring>
 
 typedef unsigned char byte;
 #pragma warning(disable:4244)

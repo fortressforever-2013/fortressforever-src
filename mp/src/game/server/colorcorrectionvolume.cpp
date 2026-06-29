@@ -4,10 +4,9 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-
-#include <string.h>
-
 #include "cbase.h"
+#include <cstring>
+
 #include "triggers.h"
 
 // memdbgon must be the last include file in a .cpp file!!!

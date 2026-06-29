@@ -13,7 +13,7 @@
 #include "iregistry.h"
 #include "tier0/dbg.h"
 #include "tier1/strtools.h"
-#include <stdio.h>
+#include <cstdio>
 #if defined( _X360 )
 #include "xbox/xbox_win32stubs.h"
 #endif

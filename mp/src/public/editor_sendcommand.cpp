@@ -12,7 +12,7 @@
 #if !defined(_X360) && defined(_WIN32)
 #include <windows.h>
 #endif
-#include <stdio.h>
+#include <cstdio>
 #include "editor_sendcommand.h"
 #include "tier1/strtools.h"
 #include "mathlib/vector.h"

@@ -111,7 +111,7 @@ const char *Omnibot_FixPath(const char *_path)
 #ifndef NOIME
 #define NOIME
 #endif
-#include <stdio.h>
+#include <cstdio>
 #include <windows.h>
 
 //////////////////////////////////////////////////////////////////////////

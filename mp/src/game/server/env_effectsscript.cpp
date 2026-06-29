@@ -9,7 +9,7 @@
 #include "baseanimating.h"
 #include "Sprite.h"
 #include "SpriteTrail.h"
-#include <ctype.h>
+#include <cctype>
 #include "animation.h"
 #include "eventlist.h"
 #include "npcevent.h"
