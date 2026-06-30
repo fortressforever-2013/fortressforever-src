@@ -593,9 +593,15 @@ void CBaseTrigger::StartTouch(CBaseEntity *pOther)
 
 		m_OnStartTouch.FireOutput(pOther, this);
 
-		// Fire the lua output
-		CFFLuaSC hTouch(1, pOther);
-		_scriptman.RunPredicates_LUA(this, &hTouch, "ontouch");
+		// Sanity check in order to prevent crashes when loading RCBot2.
+		// Only run the map's ontouch script for player touchers -
+		// FF's touch predicates call player-only methods (GetId/entindex),
+		// so a non-player toucher such as a projectile yields a null and crashes. [APG]RoboCop[CL]
+		if ( pOther && pOther->IsPlayer() )
+		{
+			CFFLuaSC hTouch(1, pOther);
+			_scriptman.RunPredicates_LUA(this, &hTouch, "ontouch");
+		}
 
 		// Add this trigger to m_hActiveTriggers
 		int iEntIndex = entindex();
