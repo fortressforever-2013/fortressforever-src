@@ -581,8 +581,7 @@ void CBaseTrigger::StartTouch(CBaseEntity *pOther)
 {
 	if (PassesTriggerFilters(pOther) )
 	{
-		EHANDLE hOther;
-		hOther = pOther;
+		EHANDLE hOther = pOther;
 		
 		bool bAdded = false;
 		if ( m_hTouchingEntities.Find( hOther ) == m_hTouchingEntities.InvalidIndex() )
@@ -604,8 +603,7 @@ void CBaseTrigger::StartTouch(CBaseEntity *pOther)
 		}
 
 		// Add this trigger to m_hActiveTriggers
-		int iEntIndex = entindex();
-		if (iEntIndex)
+		if (int iEntIndex = entindex())
 		{
 			// Don't want dups
 			bool bFound = false;
@@ -623,8 +621,7 @@ void CBaseTrigger::StartTouch(CBaseEntity *pOther)
 		if (Classify() == CLASS_TRIGGERSCRIPT)
 		{
 			// Add this trigger to m_hActiveScripts
-			int iEntIndex = entindex();
-			if (iEntIndex)
+			if (int iEntIndex = entindex())
 			{
 				// Don't want dups
 				bool bFound = false;
@@ -639,8 +636,7 @@ void CBaseTrigger::StartTouch(CBaseEntity *pOther)
 			}
 
 			// Change our goal state
-			CFuncFFScript* pScript = dynamic_cast<CFuncFFScript*>(this);
-			if (pScript)
+			if (CFuncFFScript* pScript = dynamic_cast<CFuncFFScript*>(this))
 				pScript->SetActive();
 		}
 
@@ -695,6 +691,7 @@ void CBaseTrigger::EndTouch(CBaseEntity *pOther)
 		int iSize = m_hTouchingEntities.Count();
 		for ( int i = iSize-1; i >= 0; i-- )
 		{
+			// TODO: hOther requires to be refactored. [APG]RoboCop[CL]
 			EHANDLE hOther;
 			hOther = m_hTouchingEntities[i];
 
