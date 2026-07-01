@@ -186,7 +186,8 @@ void C_BaseAnimatingOverlay::GetRenderBounds( Vector& theMins, Vector& theMaxs )
 
 		int nSequences = pStudioHdr->GetNumSeq();
 
-		for (int i = 0; i < m_AnimOverlay.Count(); i++)
+		int i;
+		for (i = 0; i < m_AnimOverlay.Count(); i++)
 		{
 			if (m_AnimOverlay[i].m_flWeight > 0.0f)
 			{
@@ -211,8 +212,9 @@ void C_BaseAnimatingOverlay::CheckForLayerChanges( CStudioHdr *hdr, float curren
 
 	bool bLayersChanged = false;
 	
-	// FIXME: damn, there has to be a better way than this.
-	for (int i = 0; i < m_iv_AnimOverlay.Count(); i++)
+	// FIXME: there has to be a better way than this.
+	int i;
+	for (i = 0; i < m_iv_AnimOverlay.Count(); i++)
 	{
 		CDisableRangeChecks disableRangeChecks; 
 
