@@ -282,6 +282,7 @@ public:
 	
 	bool PlayerHasSkillCommand(const char *szCommand);
 	virtual int OnTakeDamage(const CTakeDamageInfo &inputInfo);
+	void DistanceDamageModifier(CTakeDamageInfo &info);
 
 	// ---> end
 
