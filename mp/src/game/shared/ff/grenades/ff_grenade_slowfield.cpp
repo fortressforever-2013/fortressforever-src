@@ -377,8 +377,9 @@ void CFFGrenadeSlowfield::UpdateOnRemove()
 		}
 
 		// Blow up if we've reached the end of our fuse
-		if (gpGlobals->curtime > m_flDetonateTime) 
+		if (gpGlobals->curtime > m_flDetonateTime)
 		{
+			g_pEffects->EnergySplash(GetAbsOrigin(), Vector(0, 0, 0.0f), true);
 			UTIL_Remove(this);
 			return;
 		}
