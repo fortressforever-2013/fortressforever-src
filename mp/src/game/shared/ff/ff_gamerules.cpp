@@ -1434,7 +1434,7 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 			switch ( pInflictor->Classify() )
 			{
 				case CLASS_IC_ROCKET:
-					flPushClamp = 350.0f;
+					flPushClamp = 200.0f;
 					// lower the push because of the increased damage needed
 					flAdjustedPushForce /= 3;
 					break;
