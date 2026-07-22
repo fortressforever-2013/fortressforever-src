@@ -149,9 +149,9 @@ struct SpyDisguiseWeapon
 #define DECAP_LEFT_LEG		( 1 << 3 )
 #define DECAP_RIGHT_LEG		( 1 << 4 )
 
-#define BHOP_CAP_SOFT 1.7f
-#define BHOP_CAP_MID 1.875f
-#define BHOP_CAP_HARD 2.0f
+#define BHOP_CAP_SOFT 1.875f
+#define BHOP_CAP_MID 2.0f
+#define BHOP_CAP_HARD 2.125f
 #define BHOP_PCFACTOR 0.65f
 #define BHOP_PCFACTOR_MID 0.4f
 
