@@ -176,6 +176,12 @@ extern ConVar mp_friendlyfire_armorstrip;
 //ConVar ffdev_gren_throwspeed( "ffdev_gren_throwspeed", "660", FCVAR_FF_FFDEV_REPLICATED );
 #define GREN_THROWSPEED 660.0f
 
+// The distance is in hammer units, the modifier multiplies the recieved damage
+#define FF_DISTANCEDAMAGEMODIFIER_RAMPUP_DISTANCE	72.0f
+#define FF_DISTANCEDAMAGEMODIFIER_FALLOFF_DISTANCE	1028.0f
+#define FF_DISTANCEDAMAGEMODIFIER_RAMPUP_MODIFIER	1.5f
+#define FF_DISTANCEDAMAGEMODIFIER_FALLOFF_MODIFIER	0.5f
+
 #ifdef _DEBUG
 	// --------------------------------------------------------------------------------
 	// Purpose: To spawn a model for testing - REMOVE (or disable) for release
@@ -4954,7 +4960,7 @@ void CFFPlayer::IncreaseBurnLevel( int iAmount )
 		case CLASS_SCOUT:
 		case CLASS_MEDIC:
 		case CLASS_SPY:
-			flBurnTime *= 0.25; 
+			flBurnTime *= 1.0; // old value is 0.25 for some stupid reason 
 			break;
 	}
 
@@ -5215,6 +5221,43 @@ float CalculateBonusIcBurnDamage(int burnLevel)
 	return IC_BONUSDAMAGE_BURN3;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Distance Damage Modifier
+//-----------------------------------------------------------------------------
+static const char* g_ppszDistanceDamageModifierExcluded[] =
+{
+	"ff_weapon_sniperrifle", "ff_projectile_pl", "ff_projectile_gl", "ff_projectile_rocket",
+	"ff_projectile_incendiaryrocket", "ff_weapon_tranq", "ff_weapon_nailgun", "ff_weapon_supernailgun",
+	"ff_projectile_nail", "ff_projectile_dart", "ff_projectile_rail", "ff_weapon_railgun",
+	"ff_weapon_flamethrower", "ff_weapon_crowbar", "ff_weapon_spanner", "ff_weapon_knife",
+	"ff_weapon_medkit", "ff_grenade_normal", "ff_grenade_laser", "ff_grenade_emp",
+	"ff_grenade_gas", "ff_grenade_mirv", "ff_grenade_mirvlet", "ff_grenade_napalm",
+	"ff_grenade_napalmlet", "FF_Dispenser", "FF_SentryGun",
+};
+
+void CFFPlayer::DistanceDamageModifier(CTakeDamageInfo& info)
+{
+	CBaseEntity* pAttacker = info.GetAttacker();
+	CBaseEntity* pInflictor = info.GetInflictor();
+
+	if (!pAttacker || pAttacker == this || !pAttacker->IsPlayer() || !pInflictor)
+		return;
+
+	for (int i = 0; i < ARRAYSIZE(g_ppszDistanceDamageModifierExcluded); i++)
+	{
+		if (!Q_stricmp(pInflictor->GetClassname(), g_ppszDistanceDamageModifierExcluded[i]))
+			return;
+	}
+
+	float flDist = (pAttacker->GetAbsOrigin() - GetAbsOrigin()).Length();
+
+	if (flDist <= FF_DISTANCEDAMAGEMODIFIER_RAMPUP_DISTANCE)
+		info.SetDamage((float)RoundFloatToInt(info.GetDamage() * FF_DISTANCEDAMAGEMODIFIER_RAMPUP_MODIFIER));
+	else if (flDist > FF_DISTANCEDAMAGEMODIFIER_FALLOFF_DISTANCE)
+		info.SetDamage((float)RoundFloatToInt(info.GetDamage() * FF_DISTANCEDAMAGEMODIFIER_FALLOFF_MODIFIER));
+	// hlieb: Do NOT mess with the logic, its better to have standardized damage values than a value that changes itself every unit
+}
+
 int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 {
 	// have suit diagnose the problem - ie: report damage type
@@ -5332,6 +5375,9 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 	{
 		info.SetDamage(info.GetDamage() * FFDEV_PYRO_IC_SELFDAMAGE_MULTIPLIER);
 	}
+
+	// rampup and falloff
+	DistanceDamageModifier(info);
 
 	// keep track of amount of damage last sustained
 	m_lastDamageAmount = info.GetDamage();
@@ -5903,7 +5949,7 @@ void CFFPlayer::Ignite( bool bNPCOnly, float flSize, bool bCalledByLevelDesigner
 	float flFlameLifetime = FFDEV_PYRO_BURNTIME;
 	if (GetClassSlot() == CLASS_MEDIC)
 	{
-		flFlameLifetime *= 0.5;
+		flFlameLifetime *= 1.0; // old value is 0.5 for some stupid reason
 	}
 
 	Ignite(bNPCOnly, flSize, bCalledByLevelDesigner, flFlameLifetime);
