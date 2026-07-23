@@ -19,7 +19,7 @@
 #include "ff_weapon_assaultcannon.h"
 
 // please keep some values exposed to cvars so non programmers can tweak them, even if the code isn't final
-#define FF_AC_WINDUPTIME	0.5f	// Assault Cannon Wind Up Time
+#define FF_AC_WINDUPTIME	0.75f	// Assault Cannon Wind Up Time
 #define FF_AC_WINDDOWNTIME	2.5f	// Assault Cannon Wind Down Time
 #define FF_AC_OVERHEATDELAY 1.0f	// Assault Cannon Overheat delay
 #define FF_AC_MOVEMENTDELAY 0.1f	// Time the player has to wait after firing the AC before the speed penalty wears off. 
