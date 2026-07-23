@@ -328,7 +328,7 @@ CFFProjectilePipebomb * CFFProjectilePipebomb::CreatePipebomb(const CBaseEntity 
 	}
 
 	// Too many pipes
-	if (i > 8)
+	if (i > 6)
 		pOldestPipe->DetonatePipe();
 	else {
 		// tell the client to increment the count for the hud
