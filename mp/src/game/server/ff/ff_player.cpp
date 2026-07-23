@@ -178,9 +178,13 @@ extern ConVar mp_friendlyfire_armorstrip;
 
 // The distance is in hammer units, the modifier multiplies the recieved damage
 #define FF_DISTANCEDAMAGEMODIFIER_RAMPUP_DISTANCE	72.0f
-#define FF_DISTANCEDAMAGEMODIFIER_FALLOFF_DISTANCE	1028.0f
+#define FF_DISTANCEDAMAGEMODIFIER_FALLOFF_DISTANCE	1024.0f
 #define FF_DISTANCEDAMAGEMODIFIER_RAMPUP_MODIFIER	1.5f
 #define FF_DISTANCEDAMAGEMODIFIER_FALLOFF_MODIFIER	0.5f
+
+#define FF_DISTANCEDAMAGEMODIFIER_AC_FALLOFF_DISTANCE	512.0f
+#define FF_DISTANCEDAMAGEMODIFIER_AC_RAMPUP_MODIFIER	1.09f
+#define FF_DISTANCEDAMAGEMODIFIER_PG_FALLOFF_DISTANCE	2048.0f
 
 #ifdef _DEBUG
 	// --------------------------------------------------------------------------------
@@ -5227,7 +5231,7 @@ float CalculateBonusIcBurnDamage(int burnLevel)
 static const char* g_ppszDistanceDamageModifierExcluded[] =
 {
 	"ff_weapon_sniperrifle", "ff_projectile_pl", "ff_projectile_gl", "ff_projectile_rocket",
-	"ff_projectile_incendiaryrocket", "ff_weapon_tranq", "ff_weapon_nailgun", "ff_weapon_supernailgun",
+	"ff_projectile_incendiaryrocket", "ff_projectile_ic", "ff_weapon_tranq", "ff_weapon_nailgun", "ff_weapon_supernailgun",
 	"ff_projectile_nail", "ff_projectile_dart", "ff_projectile_rail", "ff_weapon_railgun",
 	"ff_weapon_flamethrower", "ff_weapon_crowbar", "ff_weapon_spanner", "ff_weapon_knife",
 	"ff_weapon_medkit", "ff_grenade_normal", "ff_grenade_laser", "ff_grenade_emp",
@@ -5247,6 +5251,19 @@ void CFFPlayer::DistanceDamageModifier(CTakeDamageInfo& info)
 	{
 		if (!Q_stricmp(pInflictor->GetClassname(), g_ppszDistanceDamageModifierExcluded[i]))
 			return;
+	}
+	
+	float flFalloffDistance = FF_DISTANCEDAMAGEMODIFIER_FALLOFF_DISTANCE;
+	float flRampupModifier = FF_DISTANCEDAMAGEMODIFIER_RAMPUP_MODIFIER;
+
+	if (!Q_stricmp(pInflictor->GetClassname(), "ff_weapon_assaultcannon"))
+	{
+		flFalloffDistance = FF_DISTANCEDAMAGEMODIFIER_AC_FALLOFF_DISTANCE;
+		flRampupModifier = FF_DISTANCEDAMAGEMODIFIER_AC_RAMPUP_MODIFIER;
+	}
+	else if (!Q_stricmp(pInflictor->GetClassname(), "ff_weapon_shotgun"))
+	{
+		flFalloffDistance = FF_DISTANCEDAMAGEMODIFIER_PG_FALLOFF_DISTANCE;
 	}
 
 	float flDist = (pAttacker->GetAbsOrigin() - GetAbsOrigin()).Length();
