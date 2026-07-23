@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -138,7 +138,7 @@ public:
 
 	void Increment(void)
 	{
-		m_iPipes = clamp(m_iPipes + 1, 0, 8);
+		m_iPipes = clamp(m_iPipes + 1, 0, 6);
 	}
 
 	// Call this when the player dies
