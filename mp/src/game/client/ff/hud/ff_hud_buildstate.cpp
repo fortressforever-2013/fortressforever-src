@@ -323,7 +323,7 @@ void CHudBuildState::Paint()
 	{
 		surface()->DrawSetTextPos(text2_xpos, text2_ypos);
 
-		V_snwprintf(m_wszPipes, 127, L"%i / %i", m_iNumPipes/*clamp(m_iNumPipes, 0, 8)*/, 8 );
+		V_snwprintf(m_wszPipes, 127, L"%i / %i", m_iNumPipes/*clamp(m_iNumPipes, 0, 8)*/, 6 );
 
 		for (wchar_t *wch = m_wszPipes; *wch != 0; wch++) 
 			surface()->DrawUnicodeChar(*wch);
