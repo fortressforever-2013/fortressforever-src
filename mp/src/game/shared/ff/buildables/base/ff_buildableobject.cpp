@@ -575,6 +575,26 @@ void CFFBuildableObject::GoLive( void )
 	//SetCollisionGroup( COLLISION_GROUP_PLAYER );
 	SetCollisionGroup( COLLISION_GROUP_BUILDABLE );
 
+// Gib people that were inside the buildable in the end of the process of its building so they dont stuck
+#if !defined( CLIENT_DLL )
+	if (Classify() != CLASS_MANCANNON)
+	{
+		Vector vecMins = GetAbsOrigin() + WorldAlignMins();
+		Vector vecMaxs = GetAbsOrigin() + WorldAlignMaxs();
+		CBaseEntity* pList[32];
+		int iCount = UTIL_EntitiesInBox(pList, 32, vecMins, vecMaxs, FL_CLIENT);
+		for (int i = 0; i < iCount; i++)
+		{
+			CFFPlayer* pStuckPlayer = ToFFPlayer(pList[i]);
+			if (pStuckPlayer && pStuckPlayer->IsAlive())
+			{
+				CTakeDamageInfo info(this, this, 450, DMG_DIRECT | DMG_ALWAYSGIB);
+				pStuckPlayer->TakeDamage(info);
+			}
+		}
+	}
+#endif
+
 	// Object is built and can take damage if it is supposed to
 	if( m_bTakesDamage )
 		m_takedamage = DAMAGE_YES;
