@@ -164,7 +164,7 @@ void CFFWeaponKnife::Hit(trace_t &traceHit, Activity nHitActivity)
 				if (FF_IsAirshot(pHitEntity))
 					bitsDamageType |= DMG_AIRSHOT;
 
-				CTakeDamageInfo info(this, pPlayer, 108, bitsDamageType);
+				CTakeDamageInfo info(this, pPlayer, 450, bitsDamageType);
 				info.SetDamageForce(hitDirection * MELEE_IMPACT_FORCE);
 				info.SetDamageCustom(DAMAGETYPE_BACKSTAB);
 
