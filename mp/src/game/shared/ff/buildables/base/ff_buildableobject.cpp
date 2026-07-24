@@ -596,7 +596,7 @@ void CFFBuildableObject::GoLive( void )
 #endif
 
 	// Object is built and can take damage if it is supposed to
-	if (m_bTakesDamage)
+	if ( m_bTakesDamage )
 		m_takedamage = DAMAGE_YES;
 
 	// Make opaque
