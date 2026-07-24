@@ -625,6 +625,7 @@ void CFFGameMovement::WalkMove( void )
 	}
 	mv->m_vecVelocity[2] = 0;
 
+// // Breaks ramp sliding and wallboosting but fixes zigzagging, directly from TF2SDK
 //	float flGroundSpeed2D = mv->m_vecVelocity.Length2D();
 //	if (flGroundSpeed2D > mv->m_flMaxSpeed)
 //	{
