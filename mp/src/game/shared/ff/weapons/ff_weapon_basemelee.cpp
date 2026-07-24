@@ -38,7 +38,7 @@
 #define MELEE_HIT_USESPHERE true	//ffdev_melee_usesphere.GetBool()
 
 //ConVar melee_reach("ffdev_meleereach", "52.0", FCVAR_FF_FFDEV_REPLICATED);
-#define MELEE_REACH 52.0f
+#define MELEE_REACH 72.0f
 
 static const Vector g_meleeMins(-MELEE_HULL_DIM, -MELEE_HULL_DIM, -MELEE_HULL_DIM);
 static const Vector g_meleeMaxs(MELEE_HULL_DIM, MELEE_HULL_DIM, MELEE_HULL_DIM);
