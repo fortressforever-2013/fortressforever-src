@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -88,5 +88,8 @@ void RegisterUserMessages()
 
 	// dexter: tell client it can stop any grenade timers
 	usermessages->Register("FFStopGrenTimers", 1);
+
+	// damage numbers
+	usermessages->Register("DamageNumber", -1);
 }
 
