@@ -1,11 +1,11 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
 // $NoKeywords: $
 //=============================================================================//
 
-//========= Copyright © 1996-2001, Valve LLC, All rights reserved. ============
+//========= Copyright Â© 1996-2001, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -617,6 +617,14 @@ void CFFGameMovement::WalkMove( void )
 		Accelerate( wishdir, wishspeed, sv_accelerate.GetFloat() );
 	}
 	mv->m_vecVelocity[2] = 0;
+
+	float flGroundSpeed2D = mv->m_vecVelocity.Length2D();
+	if (flGroundSpeed2D > mv->m_flMaxSpeed)
+	{
+		float flScale = mv->m_flMaxSpeed / flGroundSpeed2D;
+		mv->m_vecVelocity.x *= flScale;
+		mv->m_vecVelocity.y *= flScale;
+	}
 
 	// Add in any base velocity to the current velocity.
 	VectorAdd (mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
