@@ -1909,13 +1909,12 @@ bool CFFGameRules::ShouldCollide( int collisionGroup0, int collisionGroup1 )
 		return true;
 	}
 
-	// We want buildables that are being built to block players trying to move into them, but pretty much nothing else
-	if ( collisionGroup1 == COLLISION_GROUP_BUILDABLE_BUILDING )
+	// hlieb: buildables in the process of their building are not solid and should NOT be, idk who thought it would be a good idea for engie to be able to bodyblock with nonexistent buildables
+	if ( collisionGroup0 == COLLISION_GROUP_BUILDABLE_BUILDING || collisionGroup1 == COLLISION_GROUP_BUILDABLE_BUILDING )
 	{
-		if ( collisionGroup0 == COLLISION_GROUP_PLAYER || collisionGroup0 == COLLISION_GROUP_PLAYER_MOVEMENT )
-			return true;
-		// Ok this is kinda hacky but we want projectiles, shots, etc to pass through to harm the builder
-		collisionGroup1 = COLLISION_GROUP_DEBRIS;
+		bool bBuildableCollision1 = (collisionGroup0 == COLLISION_GROUP_BUILDABLE_BUILDING || collisionGroup0 == COLLISION_GROUP_BUILDABLE);
+		bool bBuildableCollision2 = (collisionGroup1 == COLLISION_GROUP_BUILDABLE_BUILDING || collisionGroup1 == COLLISION_GROUP_BUILDABLE); // so you cant build inside buildables
+		return (bBuildableCollision1 && bBuildableCollision2);
 	}
 
 	if ( collisionGroup0 > collisionGroup1 )
