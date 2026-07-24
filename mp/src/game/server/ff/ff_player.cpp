@@ -24,6 +24,7 @@
 #include "ff_utils.h"
 #include "ff_grenade_base.h"
 #include "ff_buildableinfo.h"
+#include "ff_buildableobject.h"
 #include "ff_item_backpack.h"
 
 #include "ff_team.h"			// team info
@@ -5399,6 +5400,9 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 	// keep track of amount of damage last sustained
 	m_lastDamageAmount = info.GetDamage();
 
+	float fArmorDamageDealt = 0.0f;
+	bool bTargetHadArmor = false;
+
 	// Armor. 
 	if (!(info.GetDamageType() & (DMG_FALL | DMG_DROWN | DMG_POISON | DMG_RADIATION | DMG_DIRECT)))// armor doesn't protect against fall or drown damage!
 	{
@@ -5407,10 +5411,11 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 
 		float fArmorDamage = fFullDamage * GetArmorAbsorption();
 		float fHealthDamage = fFullDamage - fArmorDamage;
-		float fArmorLeft = (float) m_iArmor;
+		float fArmorLeft = (float)m_iArmor;
+		bTargetHadArmor = fArmorLeft > 0.0f;
 		bool shouldArmorstrip = mp_friendlyfire_armorstrip.GetFloat() > 0
 			&& this != info.GetAttacker() && this != info.GetInflictor()
-			&& g_pGameRules->PlayerRelationship( this, info.GetAttacker() ) == GR_TEAMMATE;
+			&& g_pGameRules->PlayerRelationship(this, info.GetAttacker()) == GR_TEAMMATE;
 
 		if (shouldArmorstrip)
 		{
@@ -5418,7 +5423,7 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 		}
 
 		// if the armor damage is greater than the amount of armor remaining, apply the excess straight to health
-		if(fArmorDamage > fArmorLeft)
+		if (fArmorDamage > fArmorLeft)
 		{
 			fHealthDamage += fArmorDamage - fArmorLeft;
 			fArmorDamage = fArmorLeft;
@@ -5426,7 +5431,7 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 		}
 		else
 		{
-			m_iArmor -= (int) fArmorDamage;
+			m_iArmor -= (int)fArmorDamage;
 		}
 
 		if (shouldArmorstrip)
@@ -5437,7 +5442,49 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 		// Set armor lost for hud "damage" message
 		m_DmgSave = fArmorDamage;
 
+		fArmorDamageDealt = fArmorDamage;
+
 		info.SetDamage(fHealthDamage);
+	}
+
+	// Damage numbers
+	CFFPlayer* pEHPAttacker = ToFFPlayer(info.GetAttacker());
+	if (!pEHPAttacker)
+	{
+		CFFBuildableObject* pAttackerBuildable = dynamic_cast<CFFBuildableObject*>(info.GetAttacker());
+		if (pAttackerBuildable)
+			pEHPAttacker = pAttackerBuildable->GetOwnerPlayer();
+	}
+
+	if (pEHPAttacker && pEHPAttacker != this)
+	{
+		int iEHPDamage = RoundFloatToInt(fArmorDamageDealt + info.GetDamage());
+
+		if (iEHPDamage > 0)
+		{
+			// no WH
+			trace_t losTrace;
+			UTIL_TraceLine(pEHPAttacker->EyePosition(), CollisionProp()->WorldSpaceCenter(), MASK_SOLID_BRUSHONLY, pEHPAttacker, COLLISION_GROUP_NONE, &losTrace);
+
+			if (losTrace.fraction >= 1.0f || losTrace.m_pEnt == this)
+			{
+				bool bWillKillTarget = (GetHealth() - info.GetDamage()) <= 0;
+				int iTargetType = bTargetHadArmor ? 1 : 0;
+
+				if (bWillKillTarget)
+				iTargetType = 0;
+
+				CSingleUserRecipientFilter EHPFilter(pEHPAttacker);
+				UserMessageBegin(EHPFilter, "DamageNumber");
+				WRITE_SHORT(entindex());
+				WRITE_SHORT(iEHPDamage);
+				WRITE_BYTE(iTargetType); // 0 armorless or fragged, 1 armored, 2 buildable from ff_buildableobject.cpp
+				WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().x);
+				WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().y);
+				WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().z);
+				MessageEnd();
+			}
+		}
 	}
 
 	// Don't call up the baseclass, it does all this again
