@@ -575,7 +575,7 @@ void CFFBuildableObject::GoLive( void )
 	//SetCollisionGroup( COLLISION_GROUP_PLAYER );
 	SetCollisionGroup( COLLISION_GROUP_BUILDABLE );
 
-// Gib people that were inside the buildable in the end of the process of its building so they dont stuck
+// Gib people caught inside the buildable after it's deployed to avoid trapping them
 #if !defined( CLIENT_DLL )
 	if (Classify() != CLASS_MANCANNON)
 	{
