@@ -1,11 +1,11 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
 // $NoKeywords: $
 //=============================================================================//
 
-//========= Copyright © 1996-2001, Valve LLC, All rights reserved. ============
+//========= Copyright Â© 1996-2001, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -105,6 +105,13 @@ bool CFFGameMovement::CheckJumpButton(void)
 	if (player->pl.deadflag)
 	{
 		mv->m_nOldButtons |= IN_JUMP ;	// don't jump again until released
+		return false;
+	}
+
+	// so players do not spam mindless jumps as they build
+	if (ffplayer->IsStaticBuilding())
+	{
+		mv->m_nOldButtons |= IN_JUMP;
 		return false;
 	}
 
@@ -617,6 +624,14 @@ void CFFGameMovement::WalkMove( void )
 		Accelerate( wishdir, wishspeed, sv_accelerate.GetFloat() );
 	}
 	mv->m_vecVelocity[2] = 0;
+// // Breaks ramp slides and wallboosts but fixes zigzagging, stright from TF2SDK
+//	float flGroundSpeed2D = mv->m_vecVelocity.Length2D();
+//	if (flGroundSpeed2D > mv->m_flMaxSpeed)
+//	{
+//		float flScale = mv->m_flMaxSpeed / flGroundSpeed2D;
+//		mv->m_vecVelocity.x *= flScale;
+//		mv->m_vecVelocity.y *= flScale;
+//	}
 
 	// Add in any base velocity to the current velocity.
 	VectorAdd (mv->m_vecVelocity, player->GetBaseVelocity(), mv->m_vecVelocity );
