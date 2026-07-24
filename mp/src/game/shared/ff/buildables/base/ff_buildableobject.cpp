@@ -1218,12 +1218,32 @@ int CFFBuildableObject::OnTakeDamage( const CTakeDamageInfo &info )
 	int res = CBaseEntity::OnTakeDamage( adjustedDamage );
 
 	// Send hit indicator to attacker
-	if ( Classify() == CLASS_SENTRYGUN ||  Classify() == CLASS_DISPENSER || Classify() == CLASS_MANCANNON )
+	if (Classify() == CLASS_SENTRYGUN || Classify() == CLASS_DISPENSER || Classify() == CLASS_MANCANNON)
 	{
-		CFFPlayer *pAttacker = ToFFPlayer( adjustedDamage.GetAttacker() );
-		if( pAttacker )
+		CFFPlayer* pAttacker = ToFFPlayer(adjustedDamage.GetAttacker());
+		if (pAttacker)
 		{
 			pAttacker->m_flHitTime = gpGlobals->curtime;
+			int iEHPDamage = RoundFloatToInt(adjustedDamage.GetDamage());
+
+			if (iEHPDamage > 0)
+			{
+				trace_t losTrace;
+				UTIL_TraceLine(pAttacker->EyePosition(), CollisionProp()->WorldSpaceCenter(), MASK_SOLID_BRUSHONLY, pAttacker, COLLISION_GROUP_NONE, &losTrace);
+
+				if (losTrace.fraction >= 1.0f || losTrace.m_pEnt == this)
+				{
+					CSingleUserRecipientFilter EHPFilter(pAttacker);
+					UserMessageBegin(EHPFilter, "DamageNumber");
+					WRITE_SHORT(entindex());
+					WRITE_SHORT(iEHPDamage);
+					WRITE_BYTE(2);
+					WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().x);
+					WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().y);
+					WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().z);
+					MessageEnd();
+				}
+			}
 		}
 	}
 
