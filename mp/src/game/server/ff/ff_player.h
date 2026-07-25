@@ -284,6 +284,9 @@ public:
 	virtual int OnTakeDamage(const CTakeDamageInfo &inputInfo);
 	void DistanceDamageModifier(CTakeDamageInfo &info);
 
+	virtual CBaseEntity* FindNextObserverTarget(bool bReverse);
+	virtual bool IsValidObserverTarget(CBaseEntity* target);
+
 	// ---> end
 
 	// --> Mirv: Damage & force stuff
