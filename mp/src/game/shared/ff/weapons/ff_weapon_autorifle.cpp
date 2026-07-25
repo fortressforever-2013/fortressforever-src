@@ -13,7 +13,7 @@
 
 
 #include "cbase.h"
-#include "ff_weapon_base.h"
+#include "ff_weapon_baseclip.h"
 #include "ff_fx_shared.h"
 
 #ifdef CLIENT_DLL 
@@ -36,10 +36,10 @@
 // CFFWeaponAutoRifle
 //=============================================================================
 
-class CFFWeaponAutoRifle : public CFFWeaponBase
+class CFFWeaponAutoRifle : public CFFWeaponBaseClip
 {
 public:
-	DECLARE_CLASS(CFFWeaponAutoRifle, CFFWeaponBase);
+	DECLARE_CLASS(CFFWeaponAutoRifle, CFFWeaponBaseClip);
 	DECLARE_NETWORKCLASS(); 
 	DECLARE_PREDICTABLE();
 	
@@ -112,8 +112,7 @@ void CFFWeaponAutoRifle::PrimaryAttack()
 	pPlayer->DoAnimationEvent(PLAYERANIMEVENT_FIRE_GUN_PRIMARY);
 
 #ifdef GAME_DLL
-	int nShots = min(GetFFWpnData().m_iCycleDecrement, pPlayer->GetAmmoCount(m_iPrimaryAmmoType));
-	pPlayer->RemoveAmmo(nShots, m_iPrimaryAmmoType);
+	m_iClip1 -= GetFFWpnData().m_iCycleDecrement; // stright from ff_weapon_baseclip.cpp because i dont want to mess with all this
 #endif
 
 	// Fire now
