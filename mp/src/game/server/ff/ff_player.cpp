@@ -132,12 +132,12 @@ int g_iLimbs[CLASS_CIVILIAN + 1][5] = { { 0 } };
 #define FFDEV_INFECT_DAMAGEPERTICK_EXP 0.8f //ffdev_infect_damagepertick_exp.GetFloat()
 //ConVar ffdev_infect_regaindamage("ffdev_infect_regaindamage","10",FCVAR_FF_FFDEV_REPLICATED,"Amount of damage that is not regained after infection wears off");
 #define FFDEV_INFECT_REGAINDAMAGE 10.0f //ffdev_infect_regaindamage.GetFloat()
-//ConVar ffdev_regen_freq("ffdev_regen_freq","3",0,"Frequency (in seconds) a player loses health when a medic");
-#define FFDEV_REGEN_FREQ 3.0f
-//ConVar ffdev_regen_health("ffdev_regen_health","2",0,"Amount of health a player gains while a medic");
-#define FFDEV_REGEN_HEALTH 2
-//ConVar ffdev_regen_armor("ffdev_regen_armor","4",0,"Amount of armor a player gains while a engy");
-#define FFDEV_REGEN_ARMOR 4
+//ConVar ffdev_regen_freq("ffdev_regen_freq","1",0,"Frequency (in seconds) a player loses health when a medic");
+#define FFDEV_REGEN_FREQ 1.0f
+//ConVar ffdev_regen_health("ffdev_regen_health","1",0,"Amount of health a player gains while a medic");
+#define FFDEV_REGEN_HEALTH 1
+//ConVar ffdev_regen_armor("ffdev_regen_armor","1",0,"Amount of armor a player gains while a engy");
+#define FFDEV_REGEN_ARMOR 1
 //ConVar ffdev_overhealth_freq("ffdev_overhealth_freq","3",0,"Frequency (in seconds) a player loses health when health > maxhealth");
 #define FFDEV_OVERHEALTH_FREQ 3.0f
 
