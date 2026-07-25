@@ -5040,6 +5040,7 @@ void CFFPlayer::IncreaseBurnLevel( int iAmount )
 				WRITE_BYTE( FF_STATUSICON_BURNING2 );
 				WRITE_FLOAT( 0.0f );
 			MessageEnd();
+			EmitSound("Player.Scream");
 		}
 		UserMessageBegin(user, "StatusIconUpdate");
 			WRITE_BYTE( FF_STATUSICON_BURNING3 );
