@@ -986,6 +986,68 @@ void CFFPlayer::SetLastSpawn( CBaseEntity *pEntity )
 	if( !pEntity )
 		g_pLastSpawnRandomizer = NULL;
 }
+// "But in 3rd person so you can like rotate around it"
+bool CFFPlayer::IsValidObserverTarget(CBaseEntity* target)
+{
+	if (!target)
+	return false;
+	
+	switch (target->Classify())
+	{
+		case CLASS_SENTRYGUN:
+		case CLASS_DISPENSER:
+		case CLASS_DETPACK:
+		return true;
+		default:
+		return BaseClass::IsValidObserverTarget(target);
+	}
+}
+
+CBaseEntity* CFFPlayer::FindNextObserverTarget(bool bReverse)
+{
+	CUtlVector<CBaseEntity*> targetList;
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBaseEntity* pPlayer = UTIL_PlayerByIndex(i);
+		if (pPlayer)
+		targetList.AddToTail(pPlayer);
+	}
+
+	Class_T searchClasses[] = {CLASS_INFOSCRIPT, CLASS_SENTRYGUN, CLASS_DISPENSER, CLASS_DETPACK}; // no mancannon as its useless to spectate it
+
+	for (int i = 0; i < ARRAYSIZE(searchClasses); i++)
+	{
+		bool bIsInfoScript = (searchClasses[i] == CLASS_INFOSCRIPT);
+		CBaseEntity* pEnt = gEntList.FindEntityByClassT(NULL, searchClasses[i]);
+		while (pEnt)
+		{
+			const char* pszName = bIsInfoScript ? STRING(pEnt->GetEntityName()) : NULL;
+			if (!bIsInfoScript || (pszName && (Q_stristr(pszName, "flag") || Q_stristr(pszName, "ball"))))
+			targetList.AddToTail(pEnt);
+			pEnt = gEntList.FindEntityByClassT(pEnt, searchClasses[i]);
+		}
+	}
+	
+	if (targetList.Count() == 0)
+	return NULL;
+
+	int iCurrentIndex = targetList.Find(m_hObserverTarget.Get());
+	int iDir = bReverse ? -1 : 1;
+	int iStart = (iCurrentIndex == targetList.InvalidIndex()) ? 0 : iCurrentIndex;
+	int iIndex = iStart;
+
+	do
+	{
+		iIndex += iDir;
+		if (iIndex >= targetList.Count())
+		iIndex = 0;
+		else if (iIndex < 0)
+		iIndex = targetList.Count() - 1;
+		if (IsValidObserverTarget(targetList[iIndex]))
+		return targetList[iIndex];
+	} while (iIndex != iStart);
+	return NULL;
+}
 
 CBaseEntity *CFFPlayer::EntSelectSpawnPoint()
 {
