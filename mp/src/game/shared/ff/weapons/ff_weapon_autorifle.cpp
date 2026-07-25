@@ -13,7 +13,7 @@
 
 
 #include "cbase.h"
-#include "ff_weapon_base.h"
+#include "ff_weapon_baseclip.h"
 #include "ff_fx_shared.h"
 
 #ifdef CLIENT_DLL 
@@ -36,10 +36,10 @@
 // CFFWeaponAutoRifle
 //=============================================================================
 
-class CFFWeaponAutoRifle : public CFFWeaponBase
+class CFFWeaponAutoRifle : public CFFWeaponBaseClip
 {
 public:
-	DECLARE_CLASS(CFFWeaponAutoRifle, CFFWeaponBase);
+	DECLARE_CLASS(CFFWeaponAutoRifle, CFFWeaponBaseClip);
 	DECLARE_NETWORKCLASS(); 
 	DECLARE_PREDICTABLE();
 	
