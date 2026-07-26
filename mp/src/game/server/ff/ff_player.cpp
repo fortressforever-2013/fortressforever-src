@@ -5531,16 +5531,19 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 			if (losTrace.fraction >= 1.0f || losTrace.m_pEnt == this)
 			{
 				bool bWillKillTarget = (GetHealth() - info.GetDamage()) <= 0;
+				bool bFriendlyFire = (g_pGameRules->PlayerRelationship(this, pEHPAttacker) == GR_TEAMMATE);
 				int iTargetType = bTargetHadArmor ? 1 : 0;
 
 				if (bWillKillTarget)
 				iTargetType = 0;
+				if (bFriendlyFire)
+				iTargetType = 3;
 
 				CSingleUserRecipientFilter EHPFilter(pEHPAttacker);
 				UserMessageBegin(EHPFilter, "DamageNumber");
 				WRITE_SHORT(entindex());
 				WRITE_SHORT(iEHPDamage);
-				WRITE_BYTE(iTargetType); // 0 armorless or fragged, 1 armored, 2 buildable from ff_buildableobject.cpp
+				WRITE_BYTE(iTargetType); // 0 armorless or fragged, 1 armored, 2 buildable from ff_buildableobject.cpp, 3 friendly fire, 4 healing, 5 repairing
 				WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().x);
 				WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().y);
 				WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().z);
@@ -6289,6 +6292,21 @@ int CFFPlayer::Heal(CFFPlayer *pHealer, float flHealth, bool healToFull)
 	UserMessageBegin( filter, "PlayerAddHealth" );
 		WRITE_SHORT( m_iHealth - iOriginalHP );
 	MessageEnd();
+
+	// Damage numbers but its not really a damage
+	int iHealAmount = m_iHealth - iOriginalHP;
+	if (pHealer && pHealer != this && iHealAmount > 0)
+	{
+		CSingleUserRecipientFilter healFilter(pHealer);
+		UserMessageBegin(healFilter, "DamageNumber");
+		WRITE_SHORT(entindex());
+		WRITE_SHORT(iHealAmount);
+		WRITE_BYTE(4);
+		WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().x);
+		WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().y);
+		WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().z);
+		MessageEnd();
+	}
 
 	// AfterShock - scoring system: Heal x amount of health +.5*health_given (only if last damage from enemy) 
 	// Leaving the 'last damage from enemy' part out until discussion has finished about it.
