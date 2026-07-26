@@ -133,7 +133,7 @@ void CFFWeaponSpanner::Hit(trace_t &traceHit, Activity nHitActivity)
 		if( g_pGameRules->PlayerRelationship( pPlayer, pHitPlayer ) == GR_TEAMMATE )		
 		{
 			// See how much the player needs...
-			int iArmorGiven = min( min( pHitPlayer->NeedsArmor(), 50 ), 5 * pPlayer->GetAmmoCount( AMMO_CELLS ) );
+			int iArmorGiven = min( pHitPlayer->NeedsArmor(), 50 );
 			if( iArmorGiven > 0 )
 			{
 				WeaponSoundLocal( SPECIAL3 );
@@ -142,12 +142,22 @@ void CFFWeaponSpanner::Hit(trace_t &traceHit, Activity nHitActivity)
 				//const int iBeforeArmor = pHitPlayer->GetArmor();
 
 				pHitPlayer->AddArmor( iArmorGiven );
-				pPlayer->RemoveAmmo( iArmorGiven / 5, AMMO_CELLS );
 				// AfterShock - scoring system: Repair x armor +.5*armor_given (only if last damage from enemy) 
 				// Leaving the 'last damage from enemy' part out until discussion has finished about it.
 				pPlayer->AddFortPoints( ( iArmorGiven*0.5 ), "#FF_FORTPOINTS_GIVEARMOR");
 
 				//const int iAfterArmor = pHitPlayer->GetArmor();
+
+				// SPANNER damage numbers that are not really damage
+				CSingleUserRecipientFilter armorHealFilter(pPlayer);
+				UserMessageBegin(armorHealFilter, "DamageNumber");
+				WRITE_SHORT(pHitPlayer->entindex());
+				WRITE_SHORT(iArmorGiven);
+				WRITE_BYTE(5);
+				WRITE_FLOAT(pHitPlayer->CollisionProp()->WorldSpaceCenter().x);
+				WRITE_FLOAT(pHitPlayer->CollisionProp()->WorldSpaceCenter().y);
+				WRITE_FLOAT(pHitPlayer->CollisionProp()->WorldSpaceCenter().z);
+				MessageEnd();
 #endif
 			}
 
@@ -197,6 +207,17 @@ void CFFWeaponSpanner::Hit(trace_t &traceHit, Activity nHitActivity)
 					if ( bFriendly && !bMine )
 						pPlayer->AddFortPoints(iHealthGiven*0.1, "#FF_FORTPOINTS_REPAIRTEAMDISPENSER");
 					pPlayer->RemoveAmmo( iHealthGiven / FF_REPAIRAMOUNTPERCELL_DISPENSER, AMMO_CELLS );
+
+					// Repairing "damage" numbers
+					CSingleUserRecipientFilter dispRepairFilter(pPlayer);
+					UserMessageBegin(dispRepairFilter, "DamageNumber");
+					WRITE_SHORT(pDispenser->entindex());
+					WRITE_SHORT(iHealthGiven);
+					WRITE_BYTE(5);
+					WRITE_FLOAT(pDispenser->CollisionProp()->WorldSpaceCenter().x);
+					WRITE_FLOAT(pDispenser->CollisionProp()->WorldSpaceCenter().y);
+					WRITE_FLOAT(pDispenser->CollisionProp()->WorldSpaceCenter().z);
+					MessageEnd();
 #endif
 				}
 				else
@@ -296,12 +317,28 @@ void CFFWeaponSpanner::Hit(trace_t &traceHit, Activity nHitActivity)
 					if ( cells > 0 ) 
 						pPlayer->AddFortPoints(cells*0.3, "#FF_FORTPOINTS_REPAIRTEAMMATESG");
 
+					int iSentryHealthBefore = pSentryGun->GetHealth();
 					pSentryGun->Repair(cells);
+					int iSentryHealthGiven = pSentryGun->GetHealth() - iSentryHealthBefore;
 					pPlayer->RemoveAmmo(cells, AMMO_CELLS);
 
 					pSentryGun->AddAmmo(shells, rockets);
 					pPlayer->RemoveAmmo(shells, AMMO_SHELLS);
 					pPlayer->RemoveAmmo(rockets, AMMO_ROCKETS);
+
+					// Repairing "damage" numbers.
+					if (iSentryHealthGiven > 0)
+					{
+						CSingleUserRecipientFilter sgRepairFilter(pPlayer);
+						UserMessageBegin(sgRepairFilter, "DamageNumber");
+						WRITE_SHORT(pSentryGun->entindex());
+						WRITE_SHORT(iSentryHealthGiven);
+						WRITE_BYTE(5);
+						WRITE_FLOAT(pSentryGun->CollisionProp()->WorldSpaceCenter().x);
+						WRITE_FLOAT(pSentryGun->CollisionProp()->WorldSpaceCenter().y);
+						WRITE_FLOAT(pSentryGun->CollisionProp()->WorldSpaceCenter().z);
+						MessageEnd();
+					}
 #endif
 				}
 
