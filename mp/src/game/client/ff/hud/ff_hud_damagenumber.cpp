@@ -21,9 +21,15 @@ using namespace vgui;
 #define DAMAGENUMBER_COLOR_ARMOR	Color( 184, 207, 239, 255 )
 #define DAMAGENUMBER_COLOR_NOARMOR	Color( 239, 184, 184, 255 )
 #define DAMAGENUMBER_COLOR_BUILDABLE	Color( 255, 255, 255, 255 )
+#define DAMAGENUMBER_COLOR_FRIENDLYFIRE	Color( 255, 0, 0, 255 )
+#define DAMAGENUMBER_COLOR_HEALING	Color( 0, 255, 0, 255 )
+#define DAMAGENUMBER_COLOR_REPAIRING	Color( 255, 127, 0, 255 )
 #define DAMAGENUMBER_TARGET_NOARMOR	0
 #define DAMAGENUMBER_TARGET_ARMOR	1
 #define DAMAGENUMBER_TARGET_BUILDABLE	2
+#define DAMAGENUMBER_TARGET_FRIENDLYFIRE	3
+#define DAMAGENUMBER_TARGET_HEALING	4
+#define DAMAGENUMBER_TARGET_REPAIRING	5
 
 struct DamageNumberEntry_t
 {
@@ -195,10 +201,16 @@ void CHudDamageNumber::Paint(void)
 		default: textColor = DAMAGENUMBER_COLOR_NOARMOR;	break;
 		case DAMAGENUMBER_TARGET_ARMOR:	textColor = DAMAGENUMBER_COLOR_ARMOR;	break;
 		case DAMAGENUMBER_TARGET_BUILDABLE:	textColor = DAMAGENUMBER_COLOR_BUILDABLE;	break;
+		case DAMAGENUMBER_TARGET_FRIENDLYFIRE:	textColor = DAMAGENUMBER_COLOR_FRIENDLYFIRE;	break;
+		case DAMAGENUMBER_TARGET_HEALING:	textColor = DAMAGENUMBER_COLOR_HEALING;	break;
+		case DAMAGENUMBER_TARGET_REPAIRING:	textColor = DAMAGENUMBER_COLOR_REPAIRING;	break;
 		}
 
 		wchar_t wszDamage[16];
-		V_snwprintf(wszDamage, ARRAYSIZE(wszDamage), L"%d", entry.iAccumulatedDamage); // with the minus it doesnt look clean enough
+		if (entry.iTargetType != DAMAGENUMBER_TARGET_HEALING && entry.iTargetType != DAMAGENUMBER_TARGET_REPAIRING)
+			V_snwprintf(wszDamage, ARRAYSIZE(wszDamage), L"%d", entry.iAccumulatedDamage); // with the minus it doesnt look clean enough
+		else
+			V_snwprintf(wszDamage, ARRAYSIZE(wszDamage), L"+%d", entry.iAccumulatedDamage);
 
 		surface()->DrawSetTextFont(m_hNumberFont);
 		surface()->DrawSetTextColor(textColor.r(), textColor.g(), textColor.b(), (int)flAlpha);
