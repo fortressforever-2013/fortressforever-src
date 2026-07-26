@@ -916,6 +916,7 @@ void CFFPlayer::Precache()
 	PrecacheScriptSound("Item.Toss");
 	PrecacheScriptSound("Player.Pain");
 	PrecacheScriptSound("Player.Flameout");
+	PrecacheScriptSound("Player.Scream");
 	PrecacheScriptSound("medical.saveme");
 	PrecacheScriptSound("maintenance.saveme");
 	PrecacheScriptSound("infected.saveme");
