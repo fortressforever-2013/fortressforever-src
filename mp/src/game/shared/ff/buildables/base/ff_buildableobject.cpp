@@ -1253,11 +1253,19 @@ int CFFBuildableObject::OnTakeDamage( const CTakeDamageInfo &info )
 
 				if (losTrace.fraction >= 1.0f || losTrace.m_pEnt == this)
 				{
+					bool bFriendlyFire = (pAttacker->GetTeamNumber() == GetTeamNumber());
+					bool bWillDestroy = (GetHealth() - adjustedDamage.GetDamage()) <= 0;
+					int iTargetType = 2;
+					if (bFriendlyFire)
+					iTargetType = 3;
+					else if (bWillDestroy)
+					iTargetType = 0;
+
 					CSingleUserRecipientFilter EHPFilter(pAttacker);
 					UserMessageBegin(EHPFilter, "DamageNumber");
 					WRITE_SHORT(entindex());
 					WRITE_SHORT(iEHPDamage);
-					WRITE_BYTE(2);
+					WRITE_BYTE(iTargetType);
 					WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().x);
 					WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().y);
 					WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().z);
