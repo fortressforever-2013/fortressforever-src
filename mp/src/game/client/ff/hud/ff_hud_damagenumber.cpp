@@ -31,6 +31,22 @@ using namespace vgui;
 #define DAMAGENUMBER_TARGET_HEALING	4
 #define DAMAGENUMBER_TARGET_REPAIRING	5
 
+#define SPECIALTEXT_HEADSHOT	1
+#define SPECIALTEXT_LEGSHOT	2
+#define SPECIALTEXT_CONCUSSED	3
+#define SPECIALTEXT_BACKSTAB	4
+#define SPECIALTEXT_OFFSET	24.0f
+#define SPECIALTEXT_FLOAT_SPEED	12.0f
+
+struct SpecialTextEntry_t
+{
+	int		iTargetEntIndex;
+	int		iTextType;
+	int		iTargetType;
+	Vector	vecPosition;
+	float	flSpawnTime;
+};
+
 struct DamageNumberEntry_t
 {
 	int	iTargetEntIndex;
@@ -53,16 +69,19 @@ public:
 	void Reset(void);
 	virtual bool ShouldDraw(void);
 	void MsgFunc_DamageNumber(bf_read& msg);
+	void MsgFunc_SpecialText(bf_read& msg);
 protected:
 	virtual void Paint(void);
 	virtual void ApplySchemeSettings(vgui::IScheme* pScheme);
 private:
 	CUtlVector< DamageNumberEntry_t > m_DamageEntries;
+	CUtlVector< SpecialTextEntry_t > m_SpecialTextEntries;
 	vgui::HFont m_hNumberFont;
 };
 
 DECLARE_HUDELEMENT(CHudDamageNumber);
 DECLARE_HUD_MESSAGE(CHudDamageNumber, DamageNumber);
+DECLARE_HUD_MESSAGE(CHudDamageNumber, SpecialText);
 
 CHudDamageNumber::CHudDamageNumber(const char* pElementName)
 	: CHudElement(pElementName), vgui::Panel(NULL, "HudDamageNumber")
@@ -75,7 +94,9 @@ CHudDamageNumber::CHudDamageNumber(const char* pElementName)
 void CHudDamageNumber::Init(void)
 {
 	HOOK_HUD_MESSAGE(CHudDamageNumber, DamageNumber);
+	HOOK_HUD_MESSAGE(CHudDamageNumber, SpecialText);
 	m_DamageEntries.Purge();
+	m_SpecialTextEntries.Purge();
 }
 
 void CHudDamageNumber::VidInit(void)
@@ -91,6 +112,7 @@ void CHudDamageNumber::VidInit(void)
 void CHudDamageNumber::Reset(void)
 {
 	m_DamageEntries.Purge();
+	m_SpecialTextEntries.Purge();
 }
 
 void CHudDamageNumber::ApplySchemeSettings(vgui::IScheme* pScheme)
@@ -103,8 +125,8 @@ void CHudDamageNumber::ApplySchemeSettings(vgui::IScheme* pScheme)
 bool CHudDamageNumber::ShouldDraw(void)
 {
 	if (!CHudElement::ShouldDraw())
-		return false;
-	return m_DamageEntries.Count() > 0;
+	return false;
+	return m_DamageEntries.Count() > 0 || m_SpecialTextEntries.Count() > 0;
 }
 
 void CHudDamageNumber::MsgFunc_DamageNumber(bf_read& msg)
@@ -120,7 +142,7 @@ void CHudDamageNumber::MsgFunc_DamageNumber(bf_read& msg)
 
 	if (iDamage <= 0)
 
-		return;
+	return;
 
 	float flNow = gpGlobals->curtime;
 	for (int i = 0; i < m_DamageEntries.Count(); i++)
@@ -128,13 +150,13 @@ void CHudDamageNumber::MsgFunc_DamageNumber(bf_read& msg)
 		DamageNumberEntry_t& entry = m_DamageEntries[i];
 
 		if (entry.iTargetEntIndex != iTargetEntIndex)
-			continue;
+		continue;
 
 		if (entry.bFloating)
-			continue;
+		continue;
 
 		if ((flNow - entry.flLastHitTime) > DAMAGENUMBER_ACCUMULATE_TIME)
-			continue;
+		continue;
 
 		entry.iAccumulatedDamage += iDamage;
 		entry.iTargetType = iTargetType;
@@ -154,6 +176,35 @@ void CHudDamageNumber::MsgFunc_DamageNumber(bf_read& msg)
 	newEntry.flFloatStartTime = 0.0f;
 
 	m_DamageEntries.AddToTail(newEntry);
+}
+
+void CHudDamageNumber::MsgFunc_SpecialText(bf_read& msg)
+{
+	int iTargetEntIndex = msg.ReadShort();
+	int iTextType = msg.ReadByte();
+	int iTargetType = msg.ReadByte();
+	Vector vecPosition;
+	vecPosition.x = msg.ReadFloat();
+	vecPosition.y = msg.ReadFloat();
+	vecPosition.z = msg.ReadFloat();
+	for (int i = 0; i < m_SpecialTextEntries.Count(); i++)
+	{
+		if (m_SpecialTextEntries[i].iTargetEntIndex == iTargetEntIndex)
+		{
+			m_SpecialTextEntries[i].iTextType = iTextType;
+			m_SpecialTextEntries[i].iTargetType = iTargetType;
+			m_SpecialTextEntries[i].vecPosition = vecPosition + Vector(0, 0, DAMAGENUMBER_HEIGHT_OFFSET);
+			m_SpecialTextEntries[i].flSpawnTime = gpGlobals->curtime;
+			return;
+		}
+	}
+	SpecialTextEntry_t newEntry;
+	newEntry.iTargetEntIndex = iTargetEntIndex;
+	newEntry.iTextType = iTextType;
+	newEntry.iTargetType = iTargetType;
+	newEntry.vecPosition = vecPosition + Vector(0, 0, DAMAGENUMBER_HEIGHT_OFFSET);
+	newEntry.flSpawnTime = gpGlobals->curtime;
+	m_SpecialTextEntries.AddToTail(newEntry);
 }
 
 void CHudDamageNumber::Paint(void)
@@ -193,7 +244,7 @@ void CHudDamageNumber::Paint(void)
 		int iScreenX, iScreenY;
 
 		if (!GetVectorInScreenSpace(vecDrawPos, iScreenX, iScreenY))
-			continue;
+		continue;
 
 		Color textColor;
 		switch (entry.iTargetType)
@@ -208,9 +259,9 @@ void CHudDamageNumber::Paint(void)
 
 		wchar_t wszDamage[16];
 		if (entry.iTargetType != DAMAGENUMBER_TARGET_HEALING && entry.iTargetType != DAMAGENUMBER_TARGET_REPAIRING)
-			V_snwprintf(wszDamage, ARRAYSIZE(wszDamage), L"%d", entry.iAccumulatedDamage); // with the minus it doesnt look clean enough
+		V_snwprintf(wszDamage, ARRAYSIZE(wszDamage), L"%d", entry.iAccumulatedDamage); // with the minus it doesnt look clean enough
 		else
-			V_snwprintf(wszDamage, ARRAYSIZE(wszDamage), L"+%d", entry.iAccumulatedDamage);
+		V_snwprintf(wszDamage, ARRAYSIZE(wszDamage), L"+%d", entry.iAccumulatedDamage);
 
 		surface()->DrawSetTextFont(m_hNumberFont);
 		surface()->DrawSetTextColor(textColor.r(), textColor.g(), textColor.b(), (int)flAlpha);
@@ -220,5 +271,48 @@ void CHudDamageNumber::Paint(void)
 		surface()->GetTextSize(m_hNumberFont, wszDamage, iTextWide, iTextTall);
 		surface()->DrawSetTextPos(iScreenX - (iTextWide / 2), iScreenY - (iTextTall / 2));
 		surface()->DrawUnicodeString(wszDamage);
+	}
+
+	for (int i = m_SpecialTextEntries.Count() - 1; i >= 0; i--)
+	{
+		SpecialTextEntry_t& label = m_SpecialTextEntries[i];
+		float flElapsed = flNow - label.flSpawnTime;
+		if (flElapsed > DAMAGENUMBER_FLOAT_TIME)
+		{
+			m_SpecialTextEntries.Remove(i);
+			continue;
+		}
+
+		Vector vecLabelPos = label.vecPosition;
+		vecLabelPos.z += flElapsed * SPECIALTEXT_FLOAT_SPEED;
+		float flAlpha = RemapValClamped(flElapsed, 0.0f, DAMAGENUMBER_FLOAT_TIME, 255.0f, 0.0f);
+		int iLabelScreenX, iLabelScreenY;
+		if (!GetVectorInScreenSpace(vecLabelPos, iLabelScreenX, iLabelScreenY))
+		continue;
+		iLabelScreenY -= SPECIALTEXT_OFFSET;
+		Color textColor;
+		switch (label.iTargetType)
+		{
+		default: textColor = DAMAGENUMBER_COLOR_NOARMOR;	break;
+		case DAMAGENUMBER_TARGET_ARMOR:	textColor = DAMAGENUMBER_COLOR_ARMOR;	break;
+		case DAMAGENUMBER_TARGET_BUILDABLE:	textColor = DAMAGENUMBER_COLOR_BUILDABLE;	break;
+		case DAMAGENUMBER_TARGET_FRIENDLYFIRE:	textColor = DAMAGENUMBER_COLOR_FRIENDLYFIRE;	break;
+		case DAMAGENUMBER_TARGET_HEALING:	textColor = DAMAGENUMBER_COLOR_HEALING;	break;
+		case DAMAGENUMBER_TARGET_REPAIRING:	textColor = DAMAGENUMBER_COLOR_REPAIRING;	break;
+		}
+		const wchar_t* pwszLabel = L"";
+		switch (label.iTextType)
+		{
+		case SPECIALTEXT_HEADSHOT:	pwszLabel = L"HEADSHOT!";	break;
+		case SPECIALTEXT_LEGSHOT:	pwszLabel = L"LEGSHOT!";	break;
+		case SPECIALTEXT_CONCUSSED:	pwszLabel = L"CONCUSSED!";	break;
+		case SPECIALTEXT_BACKSTAB:	pwszLabel = L"BACKSTAB!";	break;
+		}
+		surface()->DrawSetTextFont(m_hNumberFont);
+		surface()->DrawSetTextColor(textColor.r(), textColor.g(), textColor.b(), (int)flAlpha);
+		int iLabelWide, iLabelTall;
+		surface()->GetTextSize(m_hNumberFont, pwszLabel, iLabelWide, iLabelTall);
+		surface()->DrawSetTextPos(iLabelScreenX - (iLabelWide / 2), iLabelScreenY - (iLabelTall / 2));
+		surface()->DrawUnicodeString(pwszLabel);
 	}
 }
