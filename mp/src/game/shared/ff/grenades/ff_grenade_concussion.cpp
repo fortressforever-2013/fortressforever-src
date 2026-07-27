@@ -288,6 +288,25 @@ PRECACHE_WEAPON_REGISTER(ff_grenade_concussion);
 					else
 						pPlayer->Concuss( flDuration, flIconDuration, &angDirection, flDistance);
 
+					if (pPlayer != GetOwnerEntity())
+					{
+						CFFPlayer* pConcAttacker = ToFFPlayer(pConcOwner);
+						if (pConcAttacker)
+						{
+							bool bFriendlyFire = (g_pGameRules->PlayerRelationship(pPlayer, pConcAttacker) == GR_TEAMMATE);
+							int iConcTargetType = bFriendlyFire ? 3 : (pPlayer->GetArmor() > 0 ? 1 : 0);
+							CSingleUserRecipientFilter concTextFilter(pConcAttacker);
+							UserMessageBegin(concTextFilter, "SpecialText");
+							WRITE_SHORT(pPlayer->entindex());
+							WRITE_BYTE(3);
+							WRITE_BYTE(iConcTargetType);
+							WRITE_FLOAT(pPlayer->CollisionProp()->WorldSpaceCenter().x);
+							WRITE_FLOAT(pPlayer->CollisionProp()->WorldSpaceCenter().y);
+							WRITE_FLOAT(pPlayer->CollisionProp()->WorldSpaceCenter().z);
+							MessageEnd();
+						}
+					}
+
 					// see if any specs are watching this dude
 					for ( int i = 0; i < spectators.Count(); ++i )
 					{
