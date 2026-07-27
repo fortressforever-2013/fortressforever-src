@@ -168,7 +168,30 @@ void CFFWeaponKnife::Hit(trace_t &traceHit, Activity nHitActivity)
 				info.SetDamageForce(hitDirection * MELEE_IMPACT_FORCE);
 				info.SetDamageCustom(DAMAGETYPE_BACKSTAB);
 
-				pHitEntity->DispatchTraceAttack(info, hitDirection, &traceHit); 
+				{
+					CFFPlayer* pBackstabTarget = ToFFPlayer(pHitEntity);
+					if (pBackstabTarget)
+					{
+						bool bFriendlyFire = (g_pGameRules->PlayerRelationship(pBackstabTarget, pPlayer) == GR_TEAMMATE);
+						bool bWillKillBackstab = (pBackstabTarget->GetHealth() - 450) <= 0;
+						int iBackstabTargetType = pBackstabTarget->GetArmor() > 0 ? 1 : 0;
+						if (bWillKillBackstab)
+						iBackstabTargetType = 0;
+						if (bFriendlyFire)
+						iBackstabTargetType = 3;
+						CSingleUserRecipientFilter backstabTextFilter(pPlayer);
+						UserMessageBegin(backstabTextFilter, "SpecialText");
+						WRITE_SHORT(pBackstabTarget->entindex());
+						WRITE_BYTE(4);
+						WRITE_BYTE(iBackstabTargetType);
+						WRITE_FLOAT(pBackstabTarget->CollisionProp()->WorldSpaceCenter().x);
+						WRITE_FLOAT(pBackstabTarget->CollisionProp()->WorldSpaceCenter().y);
+						WRITE_FLOAT(pBackstabTarget->CollisionProp()->WorldSpaceCenter().z);
+						MessageEnd();
+					}
+				}
+
+				pHitEntity->DispatchTraceAttack(info, hitDirection, &traceHit);
 				ApplyMultiDamage();
 
 				// Is the guy dead? If so then take his clothes because we are cool
