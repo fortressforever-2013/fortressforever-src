@@ -360,6 +360,37 @@ void CFFPlayer::FireBullet(
 #ifdef CLIENT_DLL
 			FF_SendHint( SNIPER_HEADSHOT, 3, PRIORITY_NORMAL, "#FF_HINT_SNIPER_HEADSHOT" );
 #endif
+
+#ifdef GAME_DLL
+			{
+				CFFPlayer* pTarget = ToFFPlayer(tr.m_pEnt);
+				CFFPlayer* pShooterHS = ToFFPlayer(pevAttacker);
+				if (pTarget && pShooterHS)
+				{
+					bool bFriendlyFire = (g_pGameRules->PlayerRelationship(pTarget, pShooterHS) == GR_TEAMMATE);
+					float flArmorDamageHS = flCurrentDamage * pTarget->GetArmorAbsorption();
+					float flHealthDamageHS = flCurrentDamage - flArmorDamageHS;
+					float flArmorLeftHS = (float)pTarget->GetArmor();
+					if (flArmorDamageHS > flArmorLeftHS)
+					flHealthDamageHS += flArmorDamageHS - flArmorLeftHS;
+					bool bWillKillHS = (pTarget->GetHealth() - flHealthDamageHS) <= 0;
+					int iHSTargetType = pTarget->GetArmor() > 0 ? 1 : 0;
+					if (bWillKillHS)
+					iHSTargetType = 0;
+					if (bFriendlyFire)
+					iHSTargetType = 3;
+					CSingleUserRecipientFilter specialTextFilter(pShooterHS);
+					UserMessageBegin(specialTextFilter, "SpecialText");
+					WRITE_SHORT(pTarget->entindex());
+					WRITE_BYTE(1);
+					WRITE_BYTE(iHSTargetType);
+					WRITE_FLOAT(pTarget->CollisionProp()->WorldSpaceCenter().x);
+					WRITE_FLOAT(pTarget->CollisionProp()->WorldSpaceCenter().y);
+					WRITE_FLOAT(pTarget->CollisionProp()->WorldSpaceCenter().z);
+					MessageEnd();
+				}
+			}
+#endif
 		}
 		else if (tr.hitgroup == HITGROUP_LEFTLEG || tr.hitgroup == HITGROUP_RIGHTLEG)
 		{
@@ -367,6 +398,37 @@ void CFFPlayer::FireBullet(
 			flCurrentDamage *= LEGSHOT_MOD;
 #ifdef CLIENT_DLL
 			FF_SendHint( SNIPER_LEGSHOT, 3, PRIORITY_NORMAL, "#FF_HINT_SNIPER_LEGSHOT" );
+#endif
+
+#ifdef GAME_DLL
+			{
+				CFFPlayer* pTarget = ToFFPlayer(tr.m_pEnt);
+				CFFPlayer* pShooterLS = ToFFPlayer(pevAttacker);
+				if (pTarget && pShooterLS)
+				{
+					bool bFriendlyFire = (g_pGameRules->PlayerRelationship(pTarget, pShooterLS) == GR_TEAMMATE);
+					float flArmorDamageLS = flCurrentDamage * pTarget->GetArmorAbsorption();
+					float flHealthDamageLS = flCurrentDamage - flArmorDamageLS;
+					float flArmorLeftLS = (float)pTarget->GetArmor();
+					if (flArmorDamageLS > flArmorLeftLS)
+					flHealthDamageLS += flArmorDamageLS - flArmorLeftLS;
+					bool bWillKillLS = (pTarget->GetHealth() - flHealthDamageLS) <= 0;
+					int iLSTargetType = pTarget->GetArmor() > 0 ? 1 : 0;
+					if (bWillKillLS)
+					iLSTargetType = 0;
+					if (bFriendlyFire)
+					iLSTargetType = 3;
+					CSingleUserRecipientFilter specialTextFilter(pShooterLS);
+					UserMessageBegin(specialTextFilter, "SpecialText");
+					WRITE_SHORT(pTarget->entindex());
+					WRITE_BYTE(2);
+					WRITE_BYTE(iLSTargetType);
+					WRITE_FLOAT(pTarget->CollisionProp()->WorldSpaceCenter().x);
+					WRITE_FLOAT(pTarget->CollisionProp()->WorldSpaceCenter().y);
+					WRITE_FLOAT(pTarget->CollisionProp()->WorldSpaceCenter().z);
+					MessageEnd();
+				}
+			}
 #endif
 
 #ifdef GAME_DLL
