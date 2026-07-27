@@ -91,5 +91,8 @@ void RegisterUserMessages()
 
 	// damage numbers
 	usermessages->Register("DamageNumber", -1);
+
+	// special texts ("HEADSHOT!" and so on)
+	usermessages->Register("SpecialText", -1);
 }
 
