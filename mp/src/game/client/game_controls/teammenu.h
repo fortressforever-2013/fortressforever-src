@@ -1,14 +1,9 @@
-/// =============== Fortress Forever ==============
-/// ======== A modification for Half-Life 2 =======
-///
-/// @file teammenu2.h
-/// @author Gavin "Mirvin_Monkey" Bramhill
-/// @date August 15, 2005
-/// @brief New team selection menu
-///
-/// REVISIONS
-/// ---------
-/// Aug 15, 2005 Mirv: First creation
+//========= Copyright Valve Corporation, All rights reserved. ============//
+//
+// Purpose: 
+//
+// $NoKeywords: $
+//=============================================================================//
 
 #ifndef TEAMMENU_H
 #define TEAMMENU_H
@@ -18,11 +13,9 @@
 
 #include <vgui_controls/Frame.h>
 #include <vgui_controls/Button.h>
-#include <vgui_controls/HTML.h>
-
-#include <igameevents.h>
 
 #include <game/client/iviewport.h>
+
 #include <vgui/KeyCode.h>
 
 class TeamButton;

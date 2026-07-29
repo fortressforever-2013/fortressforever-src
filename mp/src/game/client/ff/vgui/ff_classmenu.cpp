@@ -1,9 +1,14 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
-//
-// Purpose: 
-//
-// $NoKeywords: $
-//=============================================================================//
+/// =============== Fortress Forever ==============
+/// ======== A modification for Half-Life 2 =======
+///
+/// @file classmenu.cpp
+/// @author Gavin "Mirvin_Monkey" Bramhill
+/// @date August 15, 2005
+/// @brief New class selection menu
+///
+/// REVISIONS
+/// ---------
+/// Aug 15, 2005 Mirv: First creation
 
 
 #include "cbase.h"

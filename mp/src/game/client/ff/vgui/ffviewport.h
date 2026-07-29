@@ -13,7 +13,7 @@
 #include "baseviewport.h"
 
 
-//using namespace vgui;
+using namespace vgui;
 
 namespace vgui 
 {
@@ -27,6 +27,8 @@ private:
 	DECLARE_CLASS_SIMPLE( FFViewport, CBaseViewport );
 
 public:
+	FFViewport();
+	~FFViewport();
 
 	IViewPortPanel* CreatePanelByName(const char *szPanelName);
 	void CreateDefaultPanels( void );

@@ -18,9 +18,11 @@
 
 #define CTEXTURESMAX		512			// max number of textures loaded
 #define CBTEXTURENAMEMAX	13			// only load first n chars of name
-
-//#define GAMEMOVEMENT_DUCK_TIME				1000.0f		// ms
-#define GAMEMOVEMENT_DUCK_TIME					400.0f		// |-- Mirv: Inline with TFC value now
+#ifndef FF
+#define GAMEMOVEMENT_DUCK_TIME				1000.0f		// ms
+#else
+#define GAMEMOVEMENT_DUCK_TIME				400.0f		// |-- Mirv: Inline with TFC value now
+#endif
 #define GAMEMOVEMENT_JUMP_TIME				510.0f		// ms approx - based on the 21 unit height jump
 #define GAMEMOVEMENT_JUMP_HEIGHT			21.0f		// units
 #define GAMEMOVEMENT_TIME_TO_UNDUCK			( TIME_TO_UNDUCK * 1000.0f )		// ms
@@ -163,12 +165,15 @@ protected:
 	// Handle movement when in MOVETYPE_LADDER mode.
 	virtual void	FullLadderMove();
 
+	// The basic solid body movement clip that slides along multiple planes
+	
+	
+	virtual int		TryPlayerMove( Vector *pFirstDest=NULL, trace_t *pFirstTrace=NULL );
+#ifdef FF
 	// Movement while building
 	virtual void	FullBuildMove(void);
+#endif
 
-	// The basic solid body movement clip that slides along multiple planes
-	virtual int		TryPlayerMove( Vector *pFirstDest=NULL, trace_t *pFirstTrace=NULL );
-	
 	virtual bool	LadderMove( void );
 	virtual bool	OnLadder( trace_t &trace );
 	virtual float	LadderDistance( void ) const { return 2.0f; }	///< Returns the distance a player can be from a ladder and still attach to it

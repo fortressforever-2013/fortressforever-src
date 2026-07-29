@@ -56,9 +56,6 @@
 #include "replay/ienginereplay.h"
 #endif
 
-#include "mapscreen.h"
-#include "classmenu.h"
-
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -176,7 +173,7 @@ CBaseViewport::CBaseViewport() : vgui::EditablePanel( NULL, "CBaseViewport")
 #endif
 	m_bHasParent = false;
 	m_pActivePanel = NULL;
-	m_LastActivePanelStack.Clear();
+	m_pLastActivePanel = NULL;
 	g_lastPanel = NULL;
 
 	vgui::HScheme scheme = vgui::scheme()->LoadSchemeFromFileEx( enginevgui->GetPanel( PANEL_CLIENTDLL ), "resource/ClientScheme.res", "ClientScheme");
@@ -244,15 +241,8 @@ void CBaseViewport::CreateDefaultPanels( void )
 	AddNewPanel( CreatePanelByName( PANEL_SPECGUI ), "PANEL_SPECGUI" );
 #if !defined( TF_CLIENT_DLL )
 	AddNewPanel( CreatePanelByName( PANEL_SPECMENU ), "PANEL_SPECMENU" );
-	// AddNewPanel( CreatePanelByName( PANEL_NAV_PROGRESS ), "PANEL_NAV_PROGRESS" );
+	AddNewPanel( CreatePanelByName( PANEL_NAV_PROGRESS ), "PANEL_NAV_PROGRESS" );
 #endif // !TF_CLIENT_DLL
-
-#ifdef FF // --> Mirv: FF panels
-	AddNewPanel( CreatePanelByName( PANEL_TEAM ), "PANEL_TEAM" );
-	AddNewPanel( CreatePanelByName( PANEL_CLASS ), "PANEL_CLASS" );
-	AddNewPanel( CreatePanelByName( PANEL_MAP ), "PANEL_MAP" );
-#endif	// <--
-	
 #endif // !_XBOX
 }
 
@@ -307,22 +297,6 @@ IViewPortPanel* CBaseViewport::CreatePanelByName(const char *szPanelName)
 		newpanel = new CNavProgress( this );
 	}
 #endif	// TF_CLIENT_DLL
-
-#ifdef FF // --> Mirv: Pick up new panels
-	else if (Q_strcmp(PANEL_TEAM, szPanelName) == 0)
-	{
-		newpanel = new CTeamMenu(this);
-	}
-	else if (Q_strcmp(PANEL_CLASS, szPanelName) == 0)
-	{
-		newpanel = new CClassMenu(this);
-	}
-	else if (Q_strcmp(PANEL_MAP, szPanelName) == 0)
-	{
-		newpanel = new CMapScreen(this);
-	}
-#endif	// <--
-
 #endif
 
 	if ( Q_strcmp(PANEL_COMMENTARY_MODELVIEWER, szPanelName) == 0 )
@@ -450,13 +424,11 @@ void CBaseViewport::ShowPanel( IViewPortPanel* pPanel, bool state )
 			{
 				// store a pointer to the currently active panel
 				// so we can restore it later
-				m_LastActivePanelStack.Push( m_pActivePanel );
-				m_pActivePanel = pPanel;
-				if ( GetLastActivePanel() )
-					GetLastActivePanel()->ShowPanel(false);
+				m_pLastActivePanel = m_pActivePanel;
+				m_pActivePanel->ShowPanel( false );
 			}
-			else
-				m_pActivePanel = pPanel;
+		
+			m_pActivePanel = pPanel;
 		}
 	}
 	else
@@ -469,9 +441,10 @@ void CBaseViewport::ShowPanel( IViewPortPanel* pPanel, bool state )
 		}
 
 		// restore the previous active panel if it exists
-		if( m_LastActivePanelStack.Count() > 0 )
+		if( m_pLastActivePanel )
 		{
-			m_LastActivePanelStack.Pop(m_pActivePanel);
+			m_pActivePanel = m_pLastActivePanel;
+			m_pLastActivePanel = NULL;
 
 			m_pActivePanel->ShowPanel( true );
 		}
@@ -486,11 +459,6 @@ void CBaseViewport::ShowPanel( IViewPortPanel* pPanel, bool state )
 IViewPortPanel* CBaseViewport::GetActivePanel( void )
 {
 	return m_pActivePanel;
-}
-
-IViewPortPanel* CBaseViewport::GetLastActivePanel( void )
-{
-	return (m_LastActivePanelStack.Count() > 0 ? m_LastActivePanelStack.Top() : NULL);
 }
 
 void CBaseViewport::RemoveAllPanels( void)
@@ -510,7 +478,7 @@ void CBaseViewport::RemoveAllPanels( void)
 #endif
 	m_Panels.Purge();
 	m_pActivePanel = NULL;
-	m_LastActivePanelStack.Clear();
+	m_pLastActivePanel = NULL;
 }
 
 CBaseViewport::~CBaseViewport()
@@ -606,10 +574,11 @@ void CBaseViewport::OnThink()
 	// if they are stored as the last active panel
 	if( m_pActivePanel && !m_pActivePanel->IsVisible() )
 	{
-		if( m_LastActivePanelStack.Count() > 0 )
+		if( m_pLastActivePanel )
 		{
-			m_LastActivePanelStack.Pop( m_pActivePanel );
+			m_pActivePanel = m_pLastActivePanel;
 			ShowPanel( m_pActivePanel, true );
+			m_pLastActivePanel = NULL;
 		}
 		else
 			m_pActivePanel = NULL;

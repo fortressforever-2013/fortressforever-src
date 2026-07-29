@@ -36,7 +36,6 @@ public:
 	virtual IViewPortPanel* CreatePanelByName(const char *szPanelName);
 	virtual IViewPortPanel* FindPanelByName(const char *szPanelName);
 	virtual IViewPortPanel* GetActivePanel( void );
-	virtual IViewPortPanel* GetLastActivePanel( void );
 	virtual void RemoveAllPanels( void);
 
 	virtual void ShowPanel( const char *pName, bool state );
@@ -135,8 +134,6 @@ protected:
 	CBackGroundPanel	*m_pBackGround;
 #endif
 	CUtlVector<IViewPortPanel*> m_Panels;
-
-	CUtlStack<IViewPortPanel*> m_LastActivePanelStack;
 	
 	bool				m_bHasParent; // Used to track if child windows have parents or not.
 	bool				m_bInitialized;
