@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -166,7 +166,7 @@ void CHudCellCount::Paint()
 {
 	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
-	if(pPlayer->GetClassSlot() != CLASS_ENGINEER)
+	if(pPlayer->GetClassSlot() != CLASS_ENGINEER && pPlayer->GetClassSlot() != CLASS_SCOUT)
 		return;
 
 	BaseClass::PaintBackground();
