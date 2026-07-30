@@ -61,6 +61,20 @@ enum SpeedEffectType
 	SE_LUA10,	// a speed effect that lua can set
 };
 
+struct ScoutRadar_s
+{
+	int		m_iInfo;
+	byte	m_bDucking;
+	Vector	m_vecOrigin;
+
+	ScoutRadar_s(int iInfo, byte bDucking, const Vector& vecOrigin)
+	{
+		m_iInfo = iInfo;
+		m_bDucking = bDucking;
+		m_vecOrigin = vecOrigin;
+	}
+};
+
 // BEG: Speed Effect class for handling speed impairing effects (caltrop, legshot, etc)
 #define NUM_SPEED_EFFECTS 48
 struct SpeedEffect
@@ -613,6 +627,8 @@ private:
 	float m_fNextInfectedTickDamage;				// Infection damage to deal the next tick
     float m_flLastOverHealthTick;					// Mulch: last time we took health cause health > maxhealth
 	int m_nNumInfectDamage;
+	float m_fLastCellRegenTick;						// hlieb: cell regeneration for scouts radar
+	float m_fLastMedicCellRegenTick;				// hlieb: cell regeneration for medpacks
 	
 	// A hack flag to put on a player who was infected and tried to
 	// evade dying by infection by changing teams or typing kill. We
@@ -641,6 +657,12 @@ public:
 	// Added by Mulchman - two overrides
 	void LockPlayerInPlace( void );
 	void UnlockPlayer( void );
+
+public:
+	void ScoutRadarThink(void);
+	void Command_Radar(const CCommand& args);
+protected:
+	float m_flLastRadarUpdate;
 
 public:
 
