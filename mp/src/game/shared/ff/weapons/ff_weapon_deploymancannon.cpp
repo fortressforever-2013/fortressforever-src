@@ -172,7 +172,7 @@ void CFFWeaponDeployManCannon::ItemPostFrame()
 //-----------------------------------------------------------------------------
 void CFFWeaponDeployManCannon::ItemHolsterFrame()
 {
-	CFFPlayer *pOwner = ToFFPlayer(GetOwner());
+/*	CFFPlayer *pOwner = ToFFPlayer(GetOwner());
 	if (!pOwner)
 		return;
 
@@ -198,7 +198,7 @@ void CFFWeaponDeployManCannon::ItemHolsterFrame()
 			pPlayer->Command_BuildManCannon();
 #endif
 		}
-	}
+	}*/
 }
 
 
