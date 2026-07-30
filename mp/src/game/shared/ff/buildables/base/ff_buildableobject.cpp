@@ -1172,7 +1172,7 @@ int CFFBuildableObject::OnTakeDamage( const CTakeDamageInfo &info )
 
 	// Sorry trepids, not putting this one check in LUA
 	// Bug #0000333: Buildable Behavior (non build slot) while building
-	if(( adjustedDamage.GetAttacker() == m_hOwner.Get() ) && ( friendlyfire.GetInt() == 0 ))
+	if(( adjustedDamage.GetAttacker() == m_hOwner.Get() ) && (friendlyfire.GetInt() == 0) && (Classify() != CLASS_MANCANNON))
 		return 0;
 
 	// Run through LUA!
