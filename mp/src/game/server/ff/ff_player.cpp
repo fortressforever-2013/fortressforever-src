@@ -95,7 +95,7 @@ int g_iLimbs[CLASS_CIVILIAN + 1][5] = { { 0 } };
 
 // [integer] Max distance a player can be from us to be shown
 //static ConVar radiotag_distance( "ffdev_radiotag_distance", "1024" );
-#define RADIOTAG_DISTANCE 1024
+#define RADIOTAG_DISTANCE 2048
 
 // [float] Time between radio tag updates
 //static ConVar radiotag_duration( "ffdev_radiotag_duration", "0.25" );
@@ -186,6 +186,17 @@ extern ConVar mp_friendlyfire_armorstrip;
 #define FF_DISTANCEDAMAGEMODIFIER_AC_FALLOFF_DISTANCE	512.0f
 #define FF_DISTANCEDAMAGEMODIFIER_AC_RAMPUP_MODIFIER	1.09f
 #define FF_DISTANCEDAMAGEMODIFIER_PG_FALLOFF_DISTANCE	2048.0f
+
+// Radar
+#define RADAR_DISTANCE	2048
+#define RADAR_TIME	0.5
+#define RADAR_MINSPEED	201
+#define RADAR_COST	3
+#define RADAR_REGEN_FREQ	4.0f
+#define RADAR_REGEN_AMOUNT	3
+
+#define MEDKIT_REGEN_FREQ	2.0f
+#define MEDKIT_REGEN_AMOUNT	5
 
 #ifdef _DEBUG
 	// --------------------------------------------------------------------------------
@@ -557,6 +568,8 @@ CFFPlayer::CFFPlayer()
 	m_flRadioTaggedStartTime = 0.0f;
 	m_flRadioTaggedDuration = RADIOTAG_DRAW_DURATION;
 
+	m_flLastRadarUpdate = 0.0f;
+
 	// Grenade Related
 	ResetGrenadeState();
 	m_iPrimary = 0;
@@ -583,6 +596,8 @@ CFFPlayer::CFFPlayer()
 	}
 	m_fLastHealTick = 0.0f;
 	m_fLastInfectedTick = 0.0f;
+	m_fLastCellRegenTick = 0.0f;
+	m_fLastMedicCellRegenTick = 0.0f;
 	m_bInfected = false;
 	m_hInfector = NULL;
 	m_bImmune = false;
@@ -922,6 +937,10 @@ void CFFPlayer::Precache()
 	PrecacheScriptSound("infected.saveme");
 	PrecacheScriptSound("ammo.saveme");
 	PrecacheScriptSound("overpressure.explode");
+	PrecacheScriptSound("radar.single_shot");
+	PrecacheScriptSound("Player.Cloak");
+	PrecacheScriptSound("Player.CloakEnd");
+	PrecacheScriptSound("Player.cough");
 	
 	// Precache gib sound -> Defrag
 	PrecacheScriptSound("Player.Gib");
@@ -1752,6 +1771,8 @@ void CFFPlayer::SetupClassVariables()
 	m_flSpySabotageFinish = 0.0f;
 	m_hSabotaging = NULL;
 	m_bJetpacking = false;
+	m_fLastCellRegenTick = 0.0f;
+	m_fLastMedicCellRegenTick = 0.0f;
 
 	m_Locations.Purge();
 	m_iClientLocation = 0;
@@ -3330,6 +3351,162 @@ void CFFPlayer::Command_DispenserText(const CCommand& args)
 		GetDispenser()->SetText( m_szCustomDispenserText );
 }
 
+// Scouting radar
+void CFFPlayer::ScoutRadarThink(void)
+{
+	if (!IsAlive())
+	return;
+
+	if (gpGlobals->curtime <= (m_flLastRadarUpdate + (float)RADAR_TIME))
+	return;
+
+	if (GetAmmoCount(AMMO_CELLS) < RADAR_COST)
+	{
+		ClientPrint(this, HUD_PRINTCENTER, "#FF_RADARCELLS");
+		return;
+	}
+
+	m_flLastRadarUpdate = gpGlobals->curtime;
+	RemoveAmmo(RADAR_COST, AMMO_CELLS);
+	m_fLastCellRegenTick = gpGlobals->curtime; // cant instaregenerate cells if catched a good timing
+
+	{
+		Vector vecScanOrigin = GetFeetOrigin();
+		CRecipientFilter radarSndFilter;
+		radarSndFilter.MakeReliable();
+		for (int iRecip = 1; iRecip <= gpGlobals->maxClients; iRecip++)
+		{
+			CFFPlayer* pRecipient = ToFFPlayer(UTIL_PlayerByIndex(iRecip));
+			if (!pRecipient)
+			continue;
+			if (pRecipient == this)
+			continue;
+			if (vecScanOrigin.DistTo(pRecipient->GetFeetOrigin()) <= (float)RADAR_DISTANCE)
+			radarSndFilter.AddRecipient(pRecipient);
+		}
+
+		CSoundParameters params;
+		if (GetParametersForSound("radar.single_shot", params, NULL))
+		{
+			EmitSound_t epHalf(params);
+			epHalf.m_flVolume *= 1.0f; // i also experimented with 0.5 but it was too quiet so i suppose 1 is good as it goes away with the distance
+			EmitSound(radarSndFilter, entindex(), epHalf);
+		}
+
+		CSingleUserRecipientFilter scoutSndFilter((CBasePlayer*)this);
+		EmitSound(scoutSndFilter, entindex(), "radar.single_shot");
+	}
+
+	FF_SendHint(this, SCOUT_RADAR, 1, PRIORITY_NORMAL, "#FF_HINT_SCOUT_RADAR");
+
+	CUtlVector< ScoutRadar_s > hRadarInfo;
+	Vector vecOrigin = GetFeetOrigin();
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CFFPlayer* pPlayer = ToFFPlayer(UTIL_PlayerByIndex(i));
+		if (pPlayer && (pPlayer != this))
+		{
+			if (!pPlayer->IsAlive())
+			continue;
+
+			if (pPlayer->IsObserver())
+			continue;
+
+			if (FF_IsPlayerSpec(pPlayer))
+			continue;
+
+			bool bIsSpy = (pPlayer->GetClassSlot() == CLASS_SPY);
+			if (!bIsSpy && pPlayer->GetAbsVelocity().LengthSqr() < (RADAR_MINSPEED * RADAR_MINSPEED)) // cant catch unmoving and shifting players
+			continue;
+
+			Vector vecPlayerOrigin = pPlayer->GetFeetOrigin();
+			float flDist = vecOrigin.DistTo(vecPlayerOrigin);
+			if (flDist <= (float)RADAR_DISTANCE)
+			{
+				int iInfo = pPlayer->GetTeamNumber();
+				iInfo += pPlayer->GetClassSlot() << 4;
+				ScoutRadar_s hInfo(iInfo, (pPlayer->GetFlags() & FL_DUCKING) ? (byte)1 : (byte)0, vecPlayerOrigin);
+				hRadarInfo.AddToTail(hInfo);
+			}
+		}
+	}
+
+	Class_T radarBuildableClasses[] = { CLASS_SENTRYGUN, CLASS_DISPENSER, CLASS_DETPACK, CLASS_MANCANNON }; // buildables have their own inner squares
+	for (int iBuildClass = 0; iBuildClass < ARRAYSIZE(radarBuildableClasses); iBuildClass++)
+	{
+		CBaseEntity* pBuildableEnt = gEntList.FindEntityByClassT(NULL, radarBuildableClasses[iBuildClass]);
+		while (pBuildableEnt)
+		{
+			Vector vecBuildableOrigin = pBuildableEnt->GetAbsOrigin();
+			float flDist = vecOrigin.DistTo(vecBuildableOrigin);
+			if (flDist <= (float)RADAR_DISTANCE)
+			{
+				int iInfo = pBuildableEnt->GetTeamNumber();
+				if (radarBuildableClasses[iBuildClass] == CLASS_DETPACK)
+				iInfo += 12 << 4;
+				ScoutRadar_s hInfo(iInfo, (byte)1, vecBuildableOrigin);
+				hRadarInfo.AddToTail(hInfo);
+			}
+			pBuildableEnt = gEntList.FindEntityByClassT(pBuildableEnt, radarBuildableClasses[iBuildClass]);
+		}
+	}
+
+	CBaseEntity* pFlagEnt = gEntList.FindEntityByClassT(NULL, CLASS_INFOSCRIPT); // radar can catch the flags
+	while (pFlagEnt)
+	{
+		const char* pszFlagName = STRING(pFlagEnt->GetEntityName());
+		if (pszFlagName && (Q_stristr(pszFlagName, "flag") || Q_stristr(pszFlagName, "ball")))
+		{
+			if (pFlagEnt->GetOwnerEntity() != NULL)
+			{
+				pFlagEnt = gEntList.FindEntityByClassT(pFlagEnt, CLASS_INFOSCRIPT);
+				continue;
+			}
+
+			Vector vecFlagOrigin = pFlagEnt->GetAbsOrigin();
+			float flDist = vecOrigin.DistTo(vecFlagOrigin);
+			if (flDist <= (float)RADAR_DISTANCE)
+			{
+				int iFlagTeam = 0;
+				if (Q_stristr(pszFlagName,	"red_flag"))
+				iFlagTeam = FF_TEAM_RED;
+				else if (Q_stristr(pszFlagName,	"blue_flag"))
+				iFlagTeam = FF_TEAM_BLUE;
+				else if (Q_stristr(pszFlagName, "yellow_flag"))
+				iFlagTeam = FF_TEAM_YELLOW;
+				else if (Q_stristr(pszFlagName,	"green_flag"))
+				iFlagTeam = FF_TEAM_GREEN;
+
+				int iInfo = iFlagTeam;
+				iInfo += 11 << 4;
+				ScoutRadar_s hInfo(iInfo, (byte)0, vecFlagOrigin);
+				hRadarInfo.AddToTail(hInfo);
+			}
+		}
+		pFlagEnt = gEntList.FindEntityByClassT(pFlagEnt, CLASS_INFOSCRIPT);
+	}
+
+	int iCount = hRadarInfo.Count();
+	CSingleUserRecipientFilter user((CBasePlayer*)this);
+	user.MakeReliable();
+	UserMessageBegin(user, "RadarUpdate");
+	WRITE_SHORT(iCount);
+	for (int i = 0; i < iCount; i++)
+	{
+		WRITE_WORD(hRadarInfo[i].m_iInfo);
+		WRITE_BYTE(hRadarInfo[i].m_bDucking);
+		WRITE_VEC3COORD(hRadarInfo[i].m_vecOrigin);
+	}
+	MessageEnd();
+}
+
+void CFFPlayer::Command_Radar(const CCommand& args)
+{
+	if (GetClassSlot() != CLASS_SCOUT)
+	return;
+	ScoutRadarThink();
+}
+
 void CFFPlayer::Command_BuildDispenser(const CCommand& args)
 {
 	//m_bCancelledBuild = false;
@@ -4226,7 +4403,7 @@ void CFFPlayer::StatusEffectsThink( void )
 				}
 
 				// Give te medic some cells to generate health packs with...!
-				GiveAmmo(5, AMMO_CELLS, true);
+				//GiveAmmo(5, AMMO_CELLS, true);
 			}
 			else if( GetClassSlot() == CLASS_ENGINEER )
 			{
@@ -4234,6 +4411,22 @@ void CFFPlayer::StatusEffectsThink( void )
 				m_iArmor.GetForModify() = clamp( m_iArmor + FFDEV_REGEN_ARMOR, 0, m_iMaxArmor );
 			}
 		}
+	}
+
+	// Radar regenerates cells
+	if (IsAlive() && (GetClassSlot() == CLASS_SCOUT) &&
+	(gpGlobals->curtime > (m_fLastCellRegenTick + RADAR_REGEN_FREQ)))
+	{
+		m_fLastCellRegenTick = gpGlobals->curtime;
+		GiveAmmo(RADAR_REGEN_AMOUNT, AMMO_CELLS, true);
+	}
+
+	// Medkit regenerates cells
+	if (IsAlive() && (GetClassSlot() == CLASS_MEDIC) &&
+		(gpGlobals->curtime > (m_fLastMedicCellRegenTick + MEDKIT_REGEN_FREQ)))
+	{
+		m_fLastMedicCellRegenTick = gpGlobals->curtime;
+		GiveAmmo(MEDKIT_REGEN_AMOUNT, AMMO_CELLS, true);
 	}
 
 	// Bug #0000485: If you're given beyond 100% health, by a medic, the health doesn't count down back to 100.
@@ -5640,7 +5833,13 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 	DamageEffect(info.GetDamage(),bitsDamage);
 
 	// Emit a pain sound if we take normal damage or are drowning, because that is already handled
-	if (IsAlive() && !(info.GetDamageType() & (DMG_FALL | DMG_DROWN)))
+	bool bIsGasDamage = (info.GetInflictor() && (info.GetInflictor()->Classify() == CLASS_GREN_GAS));
+	if (bIsGasDamage || (info.GetDamageCustom() == DAMAGETYPE_INFECTION))
+	{
+		if (IsAlive())
+		EmitSound("Player.cough");
+	}
+	else if (IsAlive() && !(info.GetDamageType() & (DMG_FALL | DMG_DROWN)))
 		EmitSound("Player.Pain");
 	if (IsAlive() && (info.GetDamageType() & DMG_DROWN))
 		EmitSound("Player.DrownContinue");
