@@ -41,7 +41,7 @@ using namespace vgui;
 
 // [integer] Duration [in seconds] that the radar information
 // is drawn on the screen
-static ConVar radar_duration( "ffdev_radar_duration", "5", FCVAR_CHEAT );
+static ConVar radar_duration( "ffdev_radar_duration", "1", FCVAR_CHEAT );
 
 class CHudRadar : public CHudElement, public vgui::Panel
 {
@@ -193,12 +193,14 @@ void CHudRadar::Paint( void )
 				/*bool bGotTopScreenY =*/ GetVectorInScreenSpace( m_hRadarList[ i ].m_vecOrigin + ( m_hRadarList[ i ].m_bDucked ? Vector( 0, 0, 60 ) : Vector( 0, 0, 80 ) ), iTopScreenX, iTopScreenY );
 
 				Color cColor;
-				SetColorByTeam( m_hRadarList[ i ].m_iTeam, cColor );
+				bool bIsFlagOrBall = (m_hRadarList[i].m_iClass == 11);
+				if (bIsFlagOrBall)
+				cColor = Color(255, 255, 255, 255);
+				else
+				SetColorByTeam(m_hRadarList[i].m_iTeam, cColor);
 
 				// Get distance from us to them
 				float flDist = vecOrigin.DistTo( m_hRadarList[ i ].m_vecOrigin );
-
-				int iIndex = m_hRadarList[ i ].m_iClass - 1;
 
 				// Modify based on FOV
 				flDist *= ( pPlayer->GetFOVDistanceAdjustFactor() );
@@ -208,28 +210,43 @@ void CHudRadar::Paint( void )
 				//int iYTop = ( iScreenY - ( m_iHeightOffset * ( ( m_iTextureTall / 2 ) / flDist ) ) );
 				int iYTop = /*( bGotTopScreenY ?*/ iTopScreenY /*: ( ( iScreenY - ( m_iHeightOffset * ( ( m_iTextureTall / 2 ) / flDist ) ) ) ) )*/;
 				int iYBot = iScreenY + ( m_iWidthOffset * ( ( m_iTextureTall / 2 ) / flDist ) );
-
-				if( flDist <= 300 )
+				if (m_hRadarList[i].m_iClass == 0 || m_hRadarList[i].m_iClass == 12)
 				{
-					surface()->DrawSetTextureFile( g_ClassGlyphs[ iIndex ].m_pTexture->textureId, g_ClassGlyphs[ iIndex ].m_szMaterial, true, false );
-					surface()->DrawSetTexture( g_ClassGlyphs[ iIndex ].m_pTexture->textureId );
-					surface()->DrawSetColor( cColor.r(), cColor.g(), cColor.b(), flAlpha );
-					surface()->DrawTexturedRect( iScreenX - iAdjX, iYTop, iScreenX + iAdjX, iYBot );
-				}
-				else
-				{
-					surface()->DrawSetColor( cColor.r(), cColor.g(), cColor.b(), flAlpha );
-					surface()->DrawOutlinedRect( iScreenX - iAdjX, iYTop, iScreenX + iAdjX, iYBot );
+					iYTop = iYBot - (iAdjX * 2);
 				}
 
-				// Get the current frame we're supposed to draw
-				int iFrame = m_hRadarList[ i ].UpdateFrame();
+				surface()->DrawSetColor(cColor.r(), cColor.g(), cColor.b(), flAlpha);
+				surface()->DrawOutlinedRect(iScreenX - iAdjX, iYTop, iScreenX + iAdjX, iYBot);
 
-				// Draw the radio tower thing
-				surface()->DrawSetTextureFile( g_RadioTowerGlyphs[ iFrame ].m_pTexture->textureId, g_RadioTowerGlyphs[ iFrame ].m_szMaterial, true, false );
-				surface()->DrawSetTexture( g_RadioTowerGlyphs[ iFrame ].m_pTexture->textureId );
-				surface()->DrawSetColor( 255, 255, 255, flAlpha );
-				surface()->DrawTexturedRect( iScreenX, iYTop, iScreenX + iAdjX, iYTop + iAdjX );
+				if (m_hRadarList[i].m_iClass == 0 || m_hRadarList[i].m_iClass == 12)
+				{
+					int iInset = 4;
+					int iMaxInset = ((iAdjX * 2) - 2) / 2;
+					if (iInset > iMaxInset)
+					iInset = iMaxInset;
+					if (iInset > 0)
+					{
+						if (m_hRadarList[i].m_iClass == 12)
+						surface()->DrawSetColor(255, 127, 0, flAlpha);
+						else
+						surface()->DrawSetColor(255, 255, 255, flAlpha);
+						surface()->DrawOutlinedRect(iScreenX - iAdjX + iInset, iYTop + iInset, iScreenX + iAdjX - iInset, iYBot - iInset);
+					}
+				}
+				if (bIsFlagOrBall && m_hRadarList[i].m_iTeam != 0)
+				{
+					int iInset = 4;
+					int iMaxInset = ((iAdjX * 2) - 2) / 2;
+					if (iInset > iMaxInset)
+					iInset = iMaxInset;
+					if (iInset > 0)
+					{
+						Color cFlagTeamColor;
+						SetColorByTeam(m_hRadarList[i].m_iTeam, cFlagTeamColor);
+						surface()->DrawSetColor(cFlagTeamColor.r(), cFlagTeamColor.g(), cFlagTeamColor.b(), flAlpha);
+						surface()->DrawOutlinedRect(iScreenX - iAdjX + iInset, iYTop + iInset, iScreenX + iAdjX - iInset, iYBot - iInset);
+					}
+				}
 			}
 		}
 	}
