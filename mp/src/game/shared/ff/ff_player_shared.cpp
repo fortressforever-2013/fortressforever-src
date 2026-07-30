@@ -776,6 +776,7 @@ void CFFPlayer::ClassSpecificSkill()
 				EmitSound("Item.Toss");
 
 				RemoveAmmo(10, AMMO_CELLS);
+				m_fLastMedicCellRegenTick = gpGlobals->curtime;
 			}
 		}
 		break;
@@ -799,6 +800,10 @@ void CFFPlayer::ClassSpecificSkill()
 			break;
 
 #ifdef CLIENT_DLL
+
+		case CLASS_SCOUT:
+			engine->ClientCmd("radar");
+			break;
 
 		case CLASS_SOLDIER:
 			if( pWeapon && (pWeapon->GetWeaponID() == FF_WEAPON_RPG) )
@@ -1610,6 +1615,12 @@ void CFFPlayer::Cloak( void )
 	{
 		ClientPrint( this, HUD_PRINTCENTER, "#FF_UNCLOAK" );
 
+		EmitSoundShared("Player.CloakEnd");
+		{
+			CSingleUserRecipientFilter selfFilter((CBasePlayer*)this);
+			EmitSound(selfFilter, entindex(), "Player.CloakEnd");
+		}
+
 		// Yeah we're not Cloaked anymore bud
 		m_iCloaked = 0;
 
@@ -1662,6 +1673,12 @@ void CFFPlayer::Cloak( void )
 		// If regular cloak, scream
 		if( !m_bCloakFadeType )
 			EmitSoundShared( "Player.Death" );
+		else
+			EmitSoundShared("Player.Cloak");
+		{
+			CSingleUserRecipientFilter selfFilter((CBasePlayer*)this);
+			EmitSound(selfFilter, entindex(), m_bCloakFadeType ? "Player.Cloak" : "Player.Death");
+		}
 
 		ClientPrint( this, HUD_PRINTCENTER, "#FF_CLOAK" );		
 
