@@ -2147,10 +2147,17 @@ bool CFFGameRules::FCanTakeDamage( CBaseEntity *pVictim, CBaseEntity *pAttacker 
 	// if it's null, then we're operating on a non-buildable (most likely a player), so just use the pVictim pointer instead.
 	if (( pAttacker ) && ( PlayerRelationship( pBuildableOwner ? pBuildableOwner : pVictim, pAttacker ) == GR_TEAMMATE ))
 	{
+		bool bOwnerDestroysOwnMancannon = false;
+#ifdef GAME_DLL
+			// Mancannons are unaffected
+			bOwnerDestroysOwnMancannon = pBuildableVictim
+			&& (pBuildableVictim->Classify() == CLASS_MANCANNON)
+			&& (pBuildableOwner == pAttacker);
+#endif
 		// If friendly fire is off and I'm not attacking myself, then
 		// someone else on my team/an ally is attacking me - don't
 		// take damage
-		if ( !isFriendlyFireOn && pVictim != pAttacker )
+		if ( !isFriendlyFireOn && pVictim != pAttacker && !bOwnerDestroysOwnMancannon )
 			return false;
 	}
 
