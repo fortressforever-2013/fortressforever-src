@@ -126,7 +126,7 @@ Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/)
 			}
 			case FF_TEAM_YELLOW:
 			{
-				clr = hud_newteamcolors.GetBool() ? NEW_TEAM_COLOR_RED : TEAM_COLOR_YELLOW;
+				clr = hud_newteamcolors.GetBool() ? NEW_TEAM_COLOR_YELLOW : TEAM_COLOR_YELLOW;
 				break;
 			}
 			case FF_TEAM_GREEN:
