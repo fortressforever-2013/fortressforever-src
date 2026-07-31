@@ -1510,3 +1510,34 @@ void FF_SendStopGrenTimerMessage(CFFPlayer *target)
 
 #endif
 
+// hlieb: grenade priming dlight color shelter
+int FF_PrimingDLight(const char* pszGrenadeClassName)
+{
+	struct GrenadeColorEntry_t
+	{
+		const char*	m_pszClassName;
+		int	m_iR, m_iG, m_iB;
+	};
+
+	static const GrenadeColorEntry_t s_GrenadeColors[] =
+	{
+		{"ff_grenade_normal",		255, 64,  64},
+		{"ff_grenade_concussion",	255, 255, 210},
+		{"ff_grenade_mirv",			255, 0,  0},
+		{"ff_grenade_laser",		128, 225, 255},
+		{"ff_grenade_emp",			225, 225, 0},
+		{"ff_grenade_napalm",		255, 128, 0},
+		{"ff_grenade_gas",			20,  168, 20},
+		{"ff_grenade_slowfield",	255, 225, 255},
+		{"ff_grenade_flare",		255, 20,  0},
+	};
+
+	for (int i = 0; i < ARRAYSIZE(s_GrenadeColors); i++)
+	{
+		if (!Q_stricmp(pszGrenadeClassName, s_GrenadeColors[i].m_pszClassName))
+		{
+			return (s_GrenadeColors[i].m_iR << 16) | (s_GrenadeColors[i].m_iG << 8) | s_GrenadeColors[i].m_iB;
+		}
+	}
+	return (255 << 16) | (64 << 8) | 64; // unlikely but still
+}
