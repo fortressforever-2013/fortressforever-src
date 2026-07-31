@@ -82,7 +82,7 @@ int GetLocalPlayerIndex( void )
 		return 0;	// game not started yet
 }
 
-// --> FF
+#ifdef FF // --> FF
 int GetLocalPlayerOrObserverTargetIndex(void)
 {
 	C_BasePlayer* player = C_BasePlayer::GetLocalPlayer();
@@ -97,7 +97,7 @@ int GetLocalPlayerOrObserverTargetIndex(void)
 	else
 		return  0;	// game not started yet
 }
-// <-- FF
+#endif // <-- FF
 
 int GetLocalPlayerVisionFilterFlags( bool bWeaponsCheck /*= false */ )
 {

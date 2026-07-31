@@ -19,12 +19,45 @@
 
 #include <vgui_controls/HTML.h>
 
+#include <igameevents.h>
+
+#include "ff_button.h"
 #include <teammenu.h>
+
+//=============================================================================
+// A team button has the following components:
+//		A number (this is the button text itself so that hotkeys work automatically)
+//		The team insignia image
+//		Score
+//		Player count
+//		Avg ping
+//=============================================================================
+class TeamButton : public FFButton
+{
+private:
+	DECLARE_CLASS_SIMPLE(TeamButton, FFButton);
+
+public:
+	TeamButton( vgui::Panel *parent, const char *panelName, const char *text, Panel *pActionSignalTarget, const char *pCmd );
+	//, Panel *pActionSignalTarget = NULL, const char *pCmd = NULL) : BaseClass(parent, panelName, text, pActionSignalTarget, pCmd)
+
+	void ApplySchemeSettings( vgui::IScheme *pScheme );
+	void SetTeamID( int iTeamID );
+	void UpdateTeamIcon( int iTeamID );
+	void OnThink();
+
+private:
+	ImagePanel	*m_pTeamInsignia;
+	Label		*m_pInfoDescriptions;
+	Label		*m_pInfoValues;
+
+	int			m_iTeamID;
+};
 
 //-----------------------------------------------------------------------------
 // Purpose: Displays the team menu
 //-----------------------------------------------------------------------------
-class CFFTeamMenu : public CTeamMenu
+class CFFTeamMenu : public CTeamMenu, public IGameEventListener2
 {
 private:
 	DECLARE_CLASS_SIMPLE( CFFTeamMenu, CTeamMenu );
@@ -37,14 +70,14 @@ public:
 	void Update();
 	void ShowPanel( bool bShow );
 
-	virtual void ApplySchemeSettings(vgui::IScheme *pScheme);
-
-	virtual void FireGameEvent( IGameEvent *event );
-
-	virtual void OnKeyCodePressed(vgui::KeyCode code);
-	virtual void OnKeyCodeReleased(vgui::KeyCode code);
+	virtual void FireGameEvent(IGameEvent *event);
 	
 protected:
+	virtual void ApplySchemeSettings(vgui::IScheme *pScheme);
+	virtual void OnKeyCodePressed(vgui::KeyCode code);
+
+	virtual void OnKeyCodeReleased(vgui::KeyCode code);
+
 	void UpdateMapDescriptionText();
 	void UpdateServerInfo();
 	void UpdateTeamButtons();

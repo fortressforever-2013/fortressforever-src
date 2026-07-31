@@ -12,8 +12,12 @@
 /// NOTE from BreakinBenny: Long before this became tf_teammenu.cpp
 
 #include "cbase.h"
-#include "ff_teammenu.h"
 
+#include <vgui_controls/Label.h>
+#include <vgui_controls/Button.h>
+#include <vgui_controls/ImagePanel.h>
+#include <vgui_controls/RichText.h>
+#include <vgui_controls/HTML.h>
 #include <vgui/IScheme.h>
 #include <vgui/ILocalize.h>
 #include <vgui/ISurface.h>
@@ -21,11 +25,6 @@
 #include <vgui_controls/ImageList.h>
 #include <filesystem.h>
 
-#include <vgui_controls/Label.h>
-#include <vgui_controls/Button.h>
-#include <vgui_controls/ImagePanel.h>
-#include <vgui_controls/RichText.h>
-#include <vgui_controls/HTML.h>
 
 #include "IGameUIFuncs.h" // for key bindings
 #include <igameresources.h>
@@ -36,6 +35,7 @@
 
 #include <networkstringtabledefs.h>
 #include "ff_button.h"
+#include "ff_teammenu.h"
 #include "ff_utils.h"
 #include "c_ff_team.h"
 #include "ienginevgui.h"
@@ -54,6 +54,104 @@ const char *szTeamButtons[] = { "bluebutton", "redbutton", "yellowbutton", "gree
 
 #define TEAM_BUTTON_GAP		20
 
+TeamButton::TeamButton( vgui::Panel *parent, const char *panelName, const char *text, Panel *pActionSignalTarget, const char *pCmd ) : BaseClass(parent, panelName, text, pActionSignalTarget, pCmd)
+{
+	pActionSignalTarget = NULL;
+	pCmd = NULL;
+	m_pTeamInsignia = new ImagePanel(this, "TeamImage");
+	m_pInfoDescriptions = new Label(this, "TeamDescription", (const char *) NULL);
+	m_pInfoValues = new Label(this, "TeamValues", (const char *) NULL);
+
+	m_iTeamID = -1;
+}
+
+void TeamButton::ApplySchemeSettings( vgui::IScheme *pScheme )
+{
+	BaseClass::ApplySchemeSettings(pScheme);
+
+	SetTextInset(10, 7);
+	SetContentAlignment(a_northwest);
+
+	// Line up image
+	int iInsigniaSize = GetTall() * 0.4f;
+
+	m_pTeamInsignia->SetBounds(GetWide() / 2 - iInsigniaSize / 2, GetTall() / 2.5f - iInsigniaSize / 2, iInsigniaSize, iInsigniaSize);
+	m_pTeamInsignia->SetShouldScaleImage(true);
+	m_pTeamInsignia->SetMouseInputEnabled(false);
+
+	// Line up info descriptions
+	m_pInfoDescriptions->SetContentAlignment(a_northwest);
+	m_pInfoDescriptions->SetBounds(GetWide() * 0.1f, GetTall() * 0.6f, GetWide() * 0.4f, GetTall() * 0.4f);
+	m_pInfoDescriptions->SetMouseInputEnabled(false);
+
+	// Line up info values
+	m_pInfoValues->SetContentAlignment(a_northeast);
+	m_pInfoValues->SetBounds(GetWide() * 0.5f, GetTall() * 0.6f, GetWide() * 0.4f, GetTall() * 0.4f);
+	m_pInfoValues->SetMouseInputEnabled(false);
+
+	m_pInfoDescriptions->SetText("#TEAM_STATS");
+	m_pInfoValues->SetText("0\n0\n0");
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Set the team id used by this button for updating itself
+//			Also load the team insignia image.
+//-----------------------------------------------------------------------------
+void TeamButton::SetTeamID(int iTeamID)
+{
+	Assert(iTeamID >= FF_TEAM_BLUE && iTeamID <= FF_TEAM_GREEN);
+	m_iTeamID = iTeamID;
+
+	UpdateTeamIcon(iTeamID);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Update teams' icons
+//-----------------------------------------------------------------------------
+void TeamButton::UpdateTeamIcon(int iTeamID)
+{
+	const char* pszInsignias[] = { "hud_team_blue", "hud_team_red", "hud_team_yellow", "hud_team_green" };
+	C_FFTeam* pFFTeam = GetGlobalFFTeam(iTeamID);
+
+	m_pTeamInsignia->SetShouldScaleImage(true);
+
+	if (pFFTeam)
+		m_pTeamInsignia->SetImage(pFFTeam->GetTeamIcon());
+	else
+		m_pTeamInsignia->SetImage(pszInsignias[iTeamID - FF_TEAM_BLUE]);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Update the various sections of the team button
+//-----------------------------------------------------------------------------
+void TeamButton::OnThink()
+{
+	IGameResources* pGR = GameResources();
+
+	if (pGR == NULL)
+		return;
+
+	int iScore = pGR->GetTeamScore(m_iTeamID);
+	int nPlayers = 0;
+	int iLag = 0;
+
+	for (int iClient = 1; iClient <= gpGlobals->maxClients; iClient++)
+	{
+		if (!pGR->IsConnected(iClient) || pGR->GetTeam(iClient) != m_iTeamID)
+			continue;
+
+		nPlayers++;
+		iLag += pGR->GetPing(iClient);
+	}
+
+	if (nPlayers > 0)
+		iLag /= nPlayers;
+
+	m_pInfoValues->SetText(VarArgs("%d\n%d\n%d", iScore, nPlayers, iLag));
+
+	BaseClass::OnThink();
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Lets us make a test menu
 //-----------------------------------------------------------------------------
@@ -70,124 +168,6 @@ const char *szTeamButtons[] = { "bluebutton", "redbutton", "yellowbutton", "gree
 //		Msg("Couldn't find panel.\n");
 //}
 
-//=============================================================================
-// A team button has the following components:
-//		A number (this is the button text itself so that hotkeys work automatically)
-//		The team insignia image
-//		Score
-//		Player count
-//		Avg ping
-//=============================================================================
-class TeamButton : public FFButton
-{
-public:
-	DECLARE_CLASS_SIMPLE(TeamButton, FFButton);
-
-	TeamButton(Panel *parent, const char *panelName, const char *text, Panel *pActionSignalTarget = NULL, const char *pCmd = NULL) : BaseClass(parent, panelName, text, pActionSignalTarget, pCmd)
-	{
-		m_pTeamInsignia = new ImagePanel(this, "TeamImage");
-		m_pInfoDescriptions = new Label(this, "TeamDescription", (const char *) NULL);
-		m_pInfoValues = new Label(this, "TeamValues", (const char *) NULL);
-
-		m_iTeamID = -1;
-	}
-
-	void ApplySchemeSettings(IScheme *pScheme)
-	{
-		BaseClass::ApplySchemeSettings(pScheme);
-
-
-		SetTextInset(10, 7);
-		SetContentAlignment(a_northwest);
-
-		// Line up image
-		int iInsigniaSize = GetTall() * 0.4f;
-
-		m_pTeamInsignia->SetBounds(GetWide() / 2 - iInsigniaSize / 2, GetTall() / 2.5f - iInsigniaSize / 2, iInsigniaSize, iInsigniaSize);
-		m_pTeamInsignia->SetShouldScaleImage(true);
-		m_pTeamInsignia->SetMouseInputEnabled(false);
-
-		// Line up info descriptions
-		m_pInfoDescriptions->SetContentAlignment(a_northwest);
-		m_pInfoDescriptions->SetBounds(GetWide() * 0.1f, GetTall() * 0.6f, GetWide() * 0.4f, GetTall() * 0.4f);
-		m_pInfoDescriptions->SetMouseInputEnabled(false);
-
-		// Line up info values
-		m_pInfoValues->SetContentAlignment(a_northeast);
-		m_pInfoValues->SetBounds(GetWide() * 0.5f, GetTall() * 0.6f, GetWide() * 0.4f, GetTall() * 0.4f);
-		m_pInfoValues->SetMouseInputEnabled(false);
-
-		m_pInfoDescriptions->SetText("#TEAM_STATS");
-		m_pInfoValues->SetText("0\n0\n0");
-	}
-
-	//-----------------------------------------------------------------------------
-	// Purpose: Set the team id used by this button for updating itself
-	//			Also load the team insignia image.
-	//-----------------------------------------------------------------------------
-	void SetTeamID(int iTeamID)
-	{
-		Assert(iTeamID >= FF_TEAM_BLUE && iTeamID <= FF_TEAM_GREEN);
-		m_iTeamID = iTeamID;
-
-		UpdateTeamIcon(iTeamID);
-	}
-
-	//-----------------------------------------------------------------------------
-	// Purpose: Update teams' icons
-	//-----------------------------------------------------------------------------
-	void UpdateTeamIcon(int iTeamID)
-	{
-		const char* pszInsignias[] = { "hud_team_blue", "hud_team_red", "hud_team_yellow", "hud_team_green" };
-		C_FFTeam* pFFTeam = GetGlobalFFTeam(iTeamID);
-
-		m_pTeamInsignia->SetShouldScaleImage(true);
-
-		if (pFFTeam)
-			m_pTeamInsignia->SetImage(pFFTeam->GetTeamIcon());
-		else
-			m_pTeamInsignia->SetImage(pszInsignias[iTeamID - FF_TEAM_BLUE]);
-	}
-
-	//-----------------------------------------------------------------------------
-	// Purpose: Update the various sections of the team button
-	//-----------------------------------------------------------------------------
-	void OnThink()
-	{
-		IGameResources *pGR = GameResources();
-
-		if (pGR == NULL)
-			return;
-
-		int iScore = pGR->GetTeamScore(m_iTeamID);
-		int nPlayers = 0;
-		int iLag = 0;
-		
-		for (int iClient = 1; iClient <= gpGlobals->maxClients; iClient++)
-		{
-			if (!pGR->IsConnected(iClient) || pGR->GetTeam(iClient) != m_iTeamID)
-				continue;
-
-			nPlayers++;
-			iLag += pGR->GetPing(iClient);
-		}
-
-		if (nPlayers > 0)
-			iLag /= nPlayers;
-
-		m_pInfoValues->SetText(VarArgs("%d\n%d\n%d", iScore, nPlayers, iLag));
-		
-		BaseClass::OnThink();
-	}
-
-private:
-
-	ImagePanel	*m_pTeamInsignia;
-	Label		*m_pInfoDescriptions;
-	Label		*m_pInfoValues;
-
-	int			m_iTeamID;
-};
 
 // Mulch: TODO: make this work for pheeeeeeeesh-y
 CON_COMMAND( hud_reloadteammenu, "hud_reloadteammenu" )
@@ -253,7 +233,7 @@ CFFTeamMenu::CFFTeamMenu(IViewPort *pViewPort) : CTeamMenu( pViewPort )
 	//new Button(this, "screenshot", "screenshot", this, "jpeg");
 	
 	// to get server name
-	gameeventmanager->AddListener(this, "server_spawn", false );
+	//gameeventmanager->AddListener(this, "server_spawn", false );
 
 	LoadControlSettings("Resource/UI/TeamMenu.res");
 	Reset();
