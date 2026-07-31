@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -766,6 +766,8 @@ RecvPropTime(RECVINFO(m_flNextJumpTimeForDouble)),
 RecvPropTime(RECVINFO(m_flLastSpawnTime)),
 RecvPropBool(RECVINFO(m_bClassicViewModelsParity)),
 RecvPropInt(RECVINFO(m_iHandViewModelMode)),
+RecvPropInt(RECVINFO(m_iPrimedGrenadeColor)),
+RecvPropBool(RECVINFO(m_bPrimingVisibleDLight)),
 END_RECV_TABLE()
 
 BEGIN_PREDICTION_DATA(C_FFPlayer)
@@ -2634,6 +2636,24 @@ void C_FFPlayer::ClientThink(void)
 		}
 	}
 
+	if (m_bPrimingVisibleDLight)
+	{
+		// grenade priming dynamic light
+		dlight_t* dl = effects->CL_AllocDlight(entindex());
+		if (dl)
+		{
+			dl->origin = GetFeetOrigin() + Vector(0, 0, 4.0f);
+			int iPacked = m_iPrimedGrenadeColor;
+			dl->color.r = (iPacked >> 16) & 0xFF;
+			dl->color.g = (iPacked >> 8) & 0xFF;
+			dl->color.b = iPacked & 0xFF;
+			dl->color.exponent = 4;
+			dl->radius = 64.0f;
+			dl->die = gpGlobals->curtime + 0.4f;
+			dl->decay = dl->radius / 0.4f;
+			dl->style = 0;
+		}
+	}
 	BaseClass::ClientThink();
 }
 
