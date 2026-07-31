@@ -508,6 +508,8 @@ IMPLEMENT_SERVERCLASS_ST( CFFPlayer, DT_FFPlayer )
 	SendPropTime(SENDINFO(m_flLastSpawnTime)),
 	SendPropBool(SENDINFO(m_bClassicViewModelsParity)),
 	SendPropInt(SENDINFO(m_iHandViewModelMode)),
+	SendPropBool(SENDINFO(m_bPrimingVisibleDLight)),
+	SendPropInt(SENDINFO(m_iPrimedGrenadeColor), 32),
 END_SEND_TABLE( )
 
 LINK_ENTITY_TO_CLASS( ff_ragdoll, CFFRagdoll );
