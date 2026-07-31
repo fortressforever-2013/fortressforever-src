@@ -159,7 +159,12 @@ void CFFWeaponMedkit::Hit(trace_t &traceHit, Activity nHitActivity)
 				// otherwise, if they are bad people, then infect them
 				pTarget->Infect(pPlayer);
 				bool bFriendlyFire = (g_pGameRules->PlayerRelationship(pTarget, pPlayer) == GR_TEAMMATE);
-				int iInfectTargetType = bFriendlyFire ? 3 : (pTarget->GetArmor() > 0 ? 1 : 0);
+				bool bWillKillInfect = !pTarget->IsAlive();
+				int iInfectTargetType = pTarget->GetArmor() > 0 ? 1 : 0;
+				if (bWillKillInfect)
+				iInfectTargetType = 0;
+				if (bFriendlyFire)
+				iInfectTargetType = 3;
 				CSingleUserRecipientFilter infectTextFilter(pPlayer);
 				UserMessageBegin(infectTextFilter, "SpecialText");
 				WRITE_SHORT(pTarget->entindex());
