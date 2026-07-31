@@ -179,6 +179,26 @@ void CFFProjectileDart::DartTouch(CBaseEntity *pOther)
 				if( pPlayer->LuaRunEffect( LUA_EF_TRANQ, GetOwnerEntity(), &flDuration, &flIconDuration, &flSpeed ) )
 				{
 					pPlayer->AddSpeedEffect( SE_TRANQ, flDuration, flSpeed, SEM_BOOLEAN | SEM_HEALABLE, FF_STATUSICON_TRANQUILIZED, flIconDuration );
+					CFFPlayer* pShooterTranq = ToFFPlayer(GetOwnerEntity());
+					if (pShooterTranq)
+					{
+						bool bFriendlyFire = (g_pGameRules->PlayerRelationship(pPlayer, pShooterTranq) == GR_TEAMMATE);
+						bool bWillKillTranq = !pPlayer->IsAlive();
+						int iTranqTargetType = pPlayer->GetArmor() > 0 ? 1 : 0;
+						if (bWillKillTranq)
+						iTranqTargetType = 0;
+						if (bFriendlyFire)
+						iTranqTargetType = 3;
+						CSingleUserRecipientFilter tranqTextFilter(pShooterTranq);
+						UserMessageBegin(tranqTextFilter, "SpecialText");
+						WRITE_SHORT(pPlayer->entindex());
+						WRITE_BYTE(5);
+						WRITE_BYTE(iTranqTargetType);
+						WRITE_FLOAT(pPlayer->CollisionProp()->WorldSpaceCenter().x);
+						WRITE_FLOAT(pPlayer->CollisionProp()->WorldSpaceCenter().y);
+						WRITE_FLOAT(pPlayer->CollisionProp()->WorldSpaceCenter().z);
+						MessageEnd();
+					}
 				}
 
 				// And now.. an effect
