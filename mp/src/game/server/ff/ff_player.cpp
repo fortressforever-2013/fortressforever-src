@@ -5851,6 +5851,36 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 	if( pAttacker && pAttacker != this )
 	{
 		pAttacker->m_flHitTime = gpGlobals->curtime;
+		bool bAirshotTextExcluded = false;
+		CFFWeaponBase* pAttackerWeapon = pAttacker ? pAttacker->GetActiveFFWeapon() : NULL;
+		if (pAttackerWeapon)
+		{
+			int iWeaponID = pAttackerWeapon->GetWeaponID();
+			bAirshotTextExcluded = (iWeaponID == FF_WEAPON_SHOTGUN) || (iWeaponID == FF_WEAPON_SUPERSHOTGUN) || (iWeaponID == FF_WEAPON_ASSAULTCANNON) || (iWeaponID == FF_WEAPON_NAILGUN) || (iWeaponID == FF_WEAPON_SUPERNAILGUN) || (iWeaponID == FF_WEAPON_FLAMETHROWER) || (iWeaponID == FF_WEAPON_AUTORIFLE || (iWeaponID == FF_WEAPON_PIPELAUNCHER));
+		}
+		if ((info.GetDamageType() & DMG_AIRSHOT) && !bAirshotTextExcluded)
+		{
+			bool bFriendlyFire = (g_pGameRules->PlayerRelationship(this, pAttacker) == GR_TEAMMATE);
+			float flArmorDamageAS = info.GetDamage() * GetArmorAbsorption();
+			float flHealthDamageAS = info.GetDamage() - flArmorDamageAS;
+			float flArmorLeftAS = (float)GetArmor();
+			if (flArmorDamageAS > flArmorLeftAS)
+			flHealthDamageAS += flArmorDamageAS - flArmorLeftAS;
+			bool bWillKillAS = (GetHealth() - flHealthDamageAS) <= 0;
+			int iAirshotTargetType = GetArmor() > 0 ? 1 : 0;
+			if (bWillKillAS)
+			iAirshotTargetType = 0;
+			if (bFriendlyFire)
+			iAirshotTargetType = 3;
+			CSingleUserRecipientFilter airshotTextFilter(pAttacker);
+			UserMessageBegin(airshotTextFilter, "AirshotText");
+			WRITE_SHORT(entindex());
+			WRITE_BYTE(iAirshotTargetType);
+			WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().x);
+			WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().y);
+			WRITE_FLOAT(CollisionProp()->WorldSpaceCenter().z);
+			MessageEnd();
+		}
 	}
 
 	// update assist tracking. NOTE: no kill assists for buildables. who cares
