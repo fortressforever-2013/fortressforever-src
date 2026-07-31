@@ -2441,6 +2441,8 @@ void CFFPlayer::PrimeGrenade1( void )
 	// we have a primary grenade type
 	if (strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None" ))
 	{
+		m_iPrimedGrenadeColor = FF_PrimingDLight(pPlayerClassInfo.m_szPrimaryClassName); // Store the color for the nade priming dlight
+		m_bPrimingVisibleDLight = true;
 		// Jiggles: Added lua callback for squeek's training map
 		CFFLuaSC hContext( 1, this );
 		_scriptman.RunPredicates_LUA( NULL, &hContext, "player_onprimegren1" );
@@ -2526,6 +2528,8 @@ void CFFPlayer::PrimeGrenade2( void )
 	// we have a primary grenade type
 	if (strcmp( pPlayerClassInfo.m_szSecondaryClassName, "None" ))
 	{
+		m_iPrimedGrenadeColor = FF_PrimingDLight(pPlayerClassInfo.m_szSecondaryClassName);
+		m_bPrimingVisibleDLight = true;
 		// Jiggles: Added lua callback for squeek's training map
 		CFFLuaSC hContext( 1, this );
 		_scriptman.RunPredicates_LUA( NULL, &hContext, "player_onprimegren2" );
@@ -2562,6 +2566,7 @@ void CFFPlayer::ResetGrenadeState(void)
 	m_bWantToThrowGrenade = false;
 	m_iGrenadeState = FF_GREN_NONE;
 	m_flPrimeTime = 0.0f;
+	m_bPrimingVisibleDLight = false;
 #ifdef CLIENT_DLL
 	m_iUnthrownGrenCount = 0;
 	//m_bLastPrimed = false; // see CFFPlayer::SharedPreThink()
