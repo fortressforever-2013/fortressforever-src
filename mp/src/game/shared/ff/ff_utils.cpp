@@ -1523,7 +1523,7 @@ int FF_PrimingDLight(const char* pszGrenadeClassName)
 	{
 		{"ff_grenade_normal",		255, 64,  64},
 		{"ff_grenade_concussion",	255, 255, 210},
-		{"ff_grenade_mirv",			255, 0,  0},
+		{"ff_grenade_mirv",			128, 0,	32},
 		{"ff_grenade_laser",		128, 225, 255},
 		{"ff_grenade_emp",			225, 225, 0},
 		{"ff_grenade_napalm",		255, 128, 0},
