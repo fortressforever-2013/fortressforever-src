@@ -94,5 +94,8 @@ void RegisterUserMessages()
 
 	// special texts ("HEADSHOT!" and so on)
 	usermessages->Register("SpecialText", -1);
+
+	// airshot special text
+	usermessages->Register("AirshotText", -1);
 }
 
