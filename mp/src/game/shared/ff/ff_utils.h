@@ -130,7 +130,7 @@ bool IsPlayerRadioTagTarget( CFFPlayer *pPlayer, int iTeamDoingTargetting );
 
 void FF_DecalTrace( CBaseEntity *pEntity, float flRadius, const char *pszDecalName );
 
-int FF_PrimingDLight(const char* pszGrenadeClassName);
+int FF_PrimingDLight(const char *pszGrenadeClassName);
 
 #ifdef GAME_DLL
 void FF_LuaHudIcon(CFFPlayer *pPlayer, const char *pszIdentifier, int x, int y, const char *pszImage, int iWidth, int iHeight, int iAlignX = -1, int iAlignY = -1);
