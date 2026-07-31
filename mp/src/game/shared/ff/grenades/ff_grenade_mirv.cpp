@@ -38,8 +38,8 @@
 	//static ConVar mirv_ang_z_min("ffdev_mirv_ang_z_min","0",FCVAR_FF_FFDEV,"Minimum x spawn angle for mirvlets");
 	//static ConVar mirv_ang_z_max("ffdev_mirv_ang_z_max","0",FCVAR_FF_FFDEV,"Maximum x spawn angle for mirvlets");
 	//static ConVar mirvlet_dmg("ffdev_mirvlet_dmg","180.0",FCVAR_FF_FFDEV,"Damage a single mirvlet does");
-	#define MIRVLET_DMG FRAG_GREN_DAMAGE
-	#define MIRV_DMG FRAG_GREN_DAMAGE
+	#define MIRVLET_DMG (FRAG_GREN_DAMAGE - 25.0f)
+	#define MIRV_DMG (FRAG_GREN_DAMAGE + 25.0f)
 	#define MIRV_RADIUS FRAG_GREN_RADIUS
 #endif
 
@@ -53,7 +53,7 @@ public:
 	virtual const char *GetBounceSound() { return "MirvGrenade.Bounce"; }
 	virtual Class_T Classify( void ) { return CLASS_GREN_MIRV; }
 
-	virtual color32 GetColour() { color32 col = { 255, 0, 0, GREN_ALPHA_DEFAULT }; return col; }
+	virtual color32 GetColour() { color32 col = { 128, 0, 32, GREN_ALPHA_DEFAULT }; return col; }
 
 #ifdef CLIENT_DLL
 	CFFGrenadeMirv() {}
