@@ -45,6 +45,8 @@
 //static ConVar sv_trimptriggerspeeddown("sv_trimptriggerspeeddown", "50", FCVAR_REPLICATED | FCVAR_CHEAT);
 #define SV_TRIMPTRIGGERSPEEDDOWN 50.0f
 
+ConVar sv_speedcaps ("sv_speedcaps", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "Enable the speed caps");
+
 // from ff_player_shared.cpp
 //extern ConVar ffdev_overpressure_slide_duration;
 //extern ConVar ffdev_overpressure_slide_friction;
@@ -272,7 +274,7 @@ bool CFFGameMovement::CheckJumpButton(void)
 	float pcfactor = BHOP_PCFACTOR;
 	float speed = FastSqrt(mv->m_vecVelocity[0] * mv->m_vecVelocity[0] + mv->m_vecVelocity[1] * mv->m_vecVelocity[1]);
 
-	if (speed > cap_soft) // apply soft cap
+	if (sv_speedcaps.GetBool() && speed > cap_soft) // apply soft cap
 	{
 		if (speed > cap_mid) // Slow down even more if above mid cap
 			pcfactor = BHOP_PCFACTOR_MID;
@@ -385,7 +387,7 @@ bool CFFGameMovement::CheckJumpButton(void)
 		speed = FastSqrt(mv->m_vecVelocity[0] * mv->m_vecVelocity[0] + mv->m_vecVelocity[1] * mv->m_vecVelocity[1]);
 
 		// apply skim cap
-		if (speed > cap_hard )
+		if (sv_speedcaps.GetBool() && speed > cap_hard)
 		{
 			float applied_cap = BHOP_CAP_HARD * mv->m_flMaxSpeed;; 
 			float multi = applied_cap / speed;
