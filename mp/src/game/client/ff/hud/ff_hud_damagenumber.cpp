@@ -40,6 +40,8 @@ using namespace vgui;
 #define SPECIALTEXT_OFFSET	24.0f
 #define SPECIALTEXT_FLOAT_SPEED	12.0f
 
+ConVar hud_damagenumbers ("hud_damagenumbers", "1", FCVAR_ARCHIVE, "Show floating damage numbers and special text as you hit someone");
+
 struct SpecialTextEntry_t
 {
 	int		iTargetEntIndex;
@@ -142,6 +144,9 @@ bool CHudDamageNumber::ShouldDraw(void)
 {
 	if (!CHudElement::ShouldDraw())
 	return false;
+	if (!hud_damagenumbers.GetBool())
+	return false;
+
 	return m_DamageEntries.Count() > 0 || m_SpecialTextEntries.Count() > 0 || m_AirshotEntries.Count() > 0;
 }
 
