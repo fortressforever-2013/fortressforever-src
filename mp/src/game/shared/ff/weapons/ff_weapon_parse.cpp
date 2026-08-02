@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -56,7 +56,7 @@ void CFFWeaponInfo::Parse( KeyValues *pKeyValuesData, const char *szWeaponName )
 	m_flRange			= pKeyValuesData->GetFloat( "Range", 75.0 );
 
 	m_flRecoilAmount	= pKeyValuesData->GetFloat( "RecoilAmount", 0 );
-	m_flDeployDelay		= pKeyValuesData->GetFloat( "DeployDelay", 0.25f );
+	m_flDeployDelay		= pKeyValuesData->GetFloat( "DeployDelay", 0.4f );
 
 	const char *pAnimEx = pKeyValuesData->GetString( "PlayerAnimationExtension", "mp5" );
 	Q_strncpy( m_szAnimExtension, pAnimEx, sizeof( m_szAnimExtension ) );
