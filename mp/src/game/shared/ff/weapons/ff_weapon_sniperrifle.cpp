@@ -506,6 +506,18 @@ void CFFWeaponSniperRifle::ToggleZoom()
 	// Set the fov cvar (which we ignore on the client) so that the server is up
 	// to date. Not the best way of doing it REALLY
 	engine->ClientCmd(m_bZoomed ? "fov 25\n" : "fov 0\n");
+#else
+	if (m_flNextZoomTime > gpGlobals->curtime)
+	return;
+	m_flNextZoomTime = gpGlobals->curtime + 0.2f;
+	m_bZoomed = !m_bZoomed;
+	CFFPlayer* pPlayer = GetPlayerOwner();
+	if (pPlayer)
+	{
+		CPASAttenuationFilter filter(pPlayer, m_bZoomed ? "SniperRifle.zoom_in" : "SniperRifle.zoom_out");
+		filter.RemoveRecipient(pPlayer);
+		pPlayer->EmitSound(filter, pPlayer->entindex(), m_bZoomed ? "SniperRifle.zoom_in" : "SniperRifle.zoom_out");
+	}
 #endif
 }
 
