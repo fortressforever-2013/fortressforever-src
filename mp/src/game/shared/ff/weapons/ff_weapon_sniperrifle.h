@@ -132,6 +132,8 @@ public:
 
 private:
 	bool m_bZoomed;
+	float m_flZoomTime;
+	float m_flNextZoomTime;
 	CNetworkVar(bool, m_bInFire);
 
 	CFFWeaponSniperRifle(const CFFWeaponSniperRifle &);
@@ -146,8 +148,6 @@ private:
 	CNetworkVar(float, m_flFireStartTime);
 
 #ifdef CLIENT_DLL
-	float m_flZoomTime;
-	float m_flNextZoomTime;
 	int m_iUnchargedShots;		// Counts the number of consecutive uncharged shots (for hint code)
 #endif
 };
