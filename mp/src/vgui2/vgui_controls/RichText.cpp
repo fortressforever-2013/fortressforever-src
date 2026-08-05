@@ -1586,7 +1586,7 @@ void RichText::OnCursorExited()
 //-----------------------------------------------------------------------------
 // Purpose: Handle selection of text by mouse
 //-----------------------------------------------------------------------------
-void RichText::OnCursorMoved(int x, int y)
+void RichText::OnCursorMoved(int ignX, int ignY)
 {
 	if (_mouseSelection)
 	{
@@ -2444,6 +2444,10 @@ int RichText::GetNumLines()
 //-----------------------------------------------------------------------------
 void RichText::SetToFullHeight()
 {
+	// We might not yet have calculated our line breaks yet, which would be bad
+	// since we're about to change our height based on how many lines we use.
+	// Let's make sure they're calculated.
+	RecalculateLineBreaks();
 	PerformLayout();
 	int wide, tall;
 	GetSize(wide, tall);

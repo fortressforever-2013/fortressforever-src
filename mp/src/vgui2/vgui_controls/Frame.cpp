@@ -1243,7 +1243,7 @@ void Frame::PerformLayout()
 
 	_bottomRightGrip->SetBounds(wide - BOTTOMRIGHTSIZE, tall - BOTTOMRIGHTSIZE, BOTTOMRIGHTSIZE, BOTTOMRIGHTSIZE);
 	
-	_captionGrip->SetSize(wide-10,GetCaptionHeight());
+	_captionGrip->SetSize(wide-10, GetCaptionHeight() );
 	
 	_topGrip->MoveToFront();
 	_bottomGrip->MoveToFront();
@@ -1258,7 +1258,7 @@ void Frame::PerformLayout()
 	_menuButton->MoveToFront();
 	_minimizeButton->MoveToFront();
 	_minimizeToSysTrayButton->MoveToFront();
-	_menuButton->SetBounds(5+2, 5+3, GetCaptionHeight()-5, GetCaptionHeight()-5);
+	_menuButton->SetBounds( 5+2, 5+3, GetCaptionHeight()-5, GetCaptionHeight()-5 );
 #endif
 
 	float scale = 1;

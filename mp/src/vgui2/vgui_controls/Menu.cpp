@@ -1287,6 +1287,7 @@ void Menu::OnKeyCodeTyped(KeyCode keycode)
 	{
 	case KEY_ESCAPE:
 	case KEY_XBUTTON_B:
+	case STEAMCONTROLLER_B:
 		{
 			// hide the menu on ESC
 			SetVisible(false);
@@ -1297,6 +1298,7 @@ void Menu::OnKeyCodeTyped(KeyCode keycode)
 	case KEY_UP:
 	case KEY_XBUTTON_UP: 
 	case KEY_XSTICK1_UP:
+	case STEAMCONTROLLER_DPAD_UP:
 		{	
 			MoveAlongMenuItemList(MENU_UP, 0);
 			if ( m_MenuItems.IsValidIndex( m_iCurrentlySelectedItemID ) )
@@ -1312,6 +1314,7 @@ void Menu::OnKeyCodeTyped(KeyCode keycode)
 	case KEY_DOWN:
 	case KEY_XBUTTON_DOWN: 
 	case KEY_XSTICK1_DOWN: 
+	case STEAMCONTROLLER_DPAD_DOWN:
 		{
 			MoveAlongMenuItemList(MENU_DOWN, 0);
 			if ( m_MenuItems.IsValidIndex( m_iCurrentlySelectedItemID ) )
@@ -1328,6 +1331,7 @@ void Menu::OnKeyCodeTyped(KeyCode keycode)
 	case KEY_RIGHT:
 	case KEY_XBUTTON_RIGHT: 
 	case KEY_XSTICK1_RIGHT: 
+	case STEAMCONTROLLER_DPAD_RIGHT:
 		{
 			// make sure a menuItem is currently selected
 			if ( m_MenuItems.IsValidIndex(m_iCurrentlySelectedItemID) )
@@ -1350,6 +1354,7 @@ void Menu::OnKeyCodeTyped(KeyCode keycode)
 	case KEY_LEFT:
 	case KEY_XBUTTON_LEFT: 
 	case KEY_XSTICK1_LEFT: 
+	case STEAMCONTROLLER_DPAD_LEFT:
 		{
 			// if our parent is a menu item then we are a submenu so close us.
 			if (GetParentMenuItem())
@@ -1364,6 +1369,7 @@ void Menu::OnKeyCodeTyped(KeyCode keycode)
 		}
 	case KEY_ENTER:
 	case KEY_XBUTTON_A:
+	case STEAMCONTROLLER_A:
 		{
 			// make sure a menuItem is currently selected
 			if ( m_MenuItems.IsValidIndex(m_iCurrentlySelectedItemID) )

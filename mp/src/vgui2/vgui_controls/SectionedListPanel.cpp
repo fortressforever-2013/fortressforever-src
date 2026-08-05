@@ -90,13 +90,16 @@ void SectionedListPanelHeader::Paint()
 {
 	BaseClass::Paint();
 
-	int x, y, wide, tall;
-	GetBounds(x, y, wide, tall);
+	
+	
+		int x, y, wide, tall;
+		GetBounds(x, y, wide, tall);
 
-	y = (tall - 2);	// draw the line under the panel
+		y = (tall - 2);	// draw the line under the panel
 
-	surface()->DrawSetColor(m_SectionDividerColor);
-	surface()->DrawFilledRect(1, y, GetWide() - 2, y + 1);
+		surface()->DrawSetColor(m_SectionDividerColor);
+		surface()->DrawFilledRect(1, y, GetWide() - 2, y + 1);
+	
 }
 
 void SectionedListPanelHeader::SetColor(Color col)
@@ -375,7 +378,15 @@ public:
 					TextImage *textImage = dynamic_cast<TextImage *>(GetImageAtIndex(i));
 					if (textImage)
 					{
-						textImage->SetText(m_pData->GetString(keyname, ""));
+						
+						
+						
+							
+						
+						
+						
+							textImage->SetText(m_pData->GetString(keyname, ""));
+						
 						textImage->ResizeImageToContentMaxWidth( maxWidth );
 
 						// set the text color based on the selection state - if one of the children of the SectionedListPanel has focus, then 'we have focus' if we're selected
@@ -411,6 +422,7 @@ public:
 							}
 							else
 							{
+								
 								textImage->SetColor(GetFgColor());
 							}
 						}
@@ -419,6 +431,7 @@ public:
 				}
 
 				// set the image position within the label
+				
 				int imageWide = 0, tall = 0;
 				int wide;
 				if (image)
@@ -773,6 +786,7 @@ SectionedListPanel::SectionedListPanel(vgui::Panel *parent, const char *name) : 
 	m_bSortNeeded = false;
 	m_bVerticalScrollbarEnabled = true;
 	m_iLineSpacing = DEFAULT_LINE_SPACING;
+	
 	m_iSectionGap = DEFAULT_SECTION_GAP;
 
 	m_pImageList = NULL;
@@ -1675,6 +1689,7 @@ void SectionedListPanel::OnKeyCodePressed( KeyCode code )
 	if ( nButtonCode == KEY_XBUTTON_DOWN || 
 		 nButtonCode == KEY_XSTICK1_DOWN ||
 		 nButtonCode == KEY_XSTICK2_DOWN ||
+		 nButtonCode == STEAMCONTROLLER_DPAD_DOWN ||
 		 code == KEY_DOWN )
 	{
 		int itemID = GetSelectedItem();
@@ -1688,6 +1703,7 @@ void SectionedListPanel::OnKeyCodePressed( KeyCode code )
 	else if ( nButtonCode == KEY_XBUTTON_UP || 
 			  nButtonCode == KEY_XSTICK1_UP ||
 			  nButtonCode == KEY_XSTICK2_UP ||
+			  nButtonCode == STEAMCONTROLLER_DPAD_UP ||
 			  code == KEY_UP)
 	{
 		int itemID = GetSelectedItem();
@@ -1775,7 +1791,7 @@ void SectionedListPanel::OnKeyCodePressed( KeyCode code )
         ScrollToItem(itemID);
 		return;
     }
-	else if ( code == KEY_ENTER || nButtonCode == KEY_XBUTTON_A )
+	else if ( code == KEY_ENTER || nButtonCode == KEY_XBUTTON_A || nButtonCode == STEAMCONTROLLER_A )
 	{
 		Panel *pSelectedItem = m_hSelectedItem;
 		if ( pSelectedItem )

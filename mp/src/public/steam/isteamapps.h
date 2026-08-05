@@ -111,15 +111,6 @@ public:
 
 	// set current DLC AppID being played (or 0 if none). Allows Steam to track usage of major DLC extensions
 	virtual bool SetDlcContext( AppId_t nAppID ) = 0; 
-
-	// returns total number of known app beta branches (including default "public" branch )
-	virtual int  GetNumBetas( int *pnAvailable, int *pnPrivate ) = 0; //
-
-	// return beta branch details, name, description, current BuildID and state flags (EBetaBranchFlags)
-	virtual bool GetBetaInfo( int iBetaIndex, uint32 *punFlags, uint32 *punBuildID, char *pchBetaName, int cchBetaName, char *pchDescription, int cchDescription ) = 0; // iterate through
-
-	// select this beta branch for this app as active, might need the game to restart so Steam can update to that branch
-	virtual bool SetActiveBeta( const char *pchBetaName ) = 0;
 };
 
 #define STEAMAPPS_INTERFACE_VERSION "STEAMAPPS_INTERFACE_VERSION008"

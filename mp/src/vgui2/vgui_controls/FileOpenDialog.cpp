@@ -583,17 +583,17 @@ void FileOpenDialog::Init( const char *title, KeyValues *pContextKeyValues )
 	int nFileEditLeftSide = ( m_DialogType != FOD_SELECT_DIRECTORY ) ? 84 : 100;
 	int nFileNameWidth = ( m_DialogType != FOD_SELECT_DIRECTORY ) ? 72 : 82;
 
-	m_pFullPathEdit->SetBounds(67, 32, 310, 24);
-	m_pFolderUpButton->SetBounds(362, 32, 24, 24);
-	m_pNewFolderButton->SetBounds(392, 32, 24, 24);
-	m_pOpenInExplorerButton->SetBounds(332, 32, 24, 24);
-	m_pFileList->SetBounds(10, 60, 406, 130);
-	m_pFileNameEdit->SetBounds( nFileEditLeftSide, 194, 238, 24);
-	m_pFileTypeCombo->SetBounds( nFileEditLeftSide, 224, 238, 24);
-	m_pOpenButton->SetBounds(336, 194, 74, 24);
-	m_pCancelButton->SetBounds(336, 224, 74, 24);
-	lookIn->SetBounds(10, 32, 55, 24);
-	fileName->SetBounds(10, 194, nFileNameWidth, 24);
+	m_pFullPathEdit->SetBounds( 67, 32, 310, 24 );
+	m_pFolderUpButton->SetBounds( 362, 32, 24, 24 );
+	m_pNewFolderButton->SetBounds( 392, 32, 24, 24 );
+	m_pOpenInExplorerButton->SetBounds( 332, 32, 24, 24 );
+	m_pFileList->SetBounds( 10, 60, 406, 130 );
+	m_pFileNameEdit->SetBounds( nFileEditLeftSide, 194, 238, 24 );
+	m_pFileTypeCombo->SetBounds( nFileEditLeftSide, 224, 238, 24 );
+	m_pOpenButton->SetBounds( 336, 194, 74, 24 );
+	m_pCancelButton->SetBounds( 336, 224, 74, 24 );
+	lookIn->SetBounds( 10, 32, 55, 24 );
+	fileName->SetBounds( 10, 194, nFileNameWidth, 24 );
 
 	// set autolayout parameters
 	m_pFullPathEdit->SetAutoResize( Panel::PIN_TOPLEFT, Panel::AUTORESIZE_RIGHT, 67, 32, -100, 0 );
@@ -619,7 +619,7 @@ void FileOpenDialog::Init( const char *title, KeyValues *pContextKeyValues )
 	if ( m_DialogType != FOD_SELECT_DIRECTORY )
 	{
 		Label *fileType = new Label(this, "FileTypeLabel", "#FileOpenDialog_File_type");
-		fileType->SetBounds(10, 224, 72, 24);
+		fileType->SetBounds( 10, 224, 72, 24 );
 		fileType->SetPinCorner( Panel::PIN_BOTTOMLEFT, 10, -12 );
 		fileType->SetContentAlignment(Label::a_west);
 		fileType->SetAssociatedControl( m_pFileTypeCombo );

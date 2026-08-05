@@ -3047,6 +3047,7 @@ void Panel::OnKeyCodePressed(KeyCode code)
 	case KEY_XSTICK1_UP:
 	case KEY_XSTICK2_UP:
 	case KEY_UP:
+	case STEAMCONTROLLER_DPAD_UP:
 		if ( ( !vgui_nav_lock.IsValid() || vgui_nav_lock.GetInt() == 0 ) && NavigateUp() )
 		{
 			vgui_nav_lock.SetValue( 1 );
@@ -3058,6 +3059,7 @@ void Panel::OnKeyCodePressed(KeyCode code)
 	case KEY_XSTICK1_DOWN:
 	case KEY_XSTICK2_DOWN:
 	case KEY_DOWN:
+	case STEAMCONTROLLER_DPAD_DOWN:
 		if ( ( !vgui_nav_lock.IsValid() || vgui_nav_lock.GetInt() == 0 ) && NavigateDown() )
 		{
 			vgui_nav_lock.SetValue( 1 );
@@ -3069,6 +3071,7 @@ void Panel::OnKeyCodePressed(KeyCode code)
 	case KEY_XSTICK1_LEFT:
 	case KEY_XSTICK2_LEFT:
 	case KEY_LEFT:
+	case STEAMCONTROLLER_DPAD_LEFT:
 		if ( ( !vgui_nav_lock.IsValid() || vgui_nav_lock.GetInt() == 0 ) && NavigateLeft() )
 		{
 			vgui_nav_lock.SetValue( 1 );
@@ -3080,6 +3083,7 @@ void Panel::OnKeyCodePressed(KeyCode code)
 	case KEY_XSTICK1_RIGHT:
 	case KEY_XSTICK2_RIGHT:
 	case KEY_RIGHT:
+	case STEAMCONTROLLER_DPAD_RIGHT:
 		if ( ( !vgui_nav_lock.IsValid() || vgui_nav_lock.GetInt() == 0 ) && NavigateRight() )
 		{
 			vgui_nav_lock.SetValue( 1 );
@@ -3088,6 +3092,7 @@ void Panel::OnKeyCodePressed(KeyCode code)
 		}
 		break;
 	case KEY_XBUTTON_B:
+	case STEAMCONTROLLER_B:
 		if ( ( !vgui_nav_lock.IsValid() || vgui_nav_lock.GetInt() == 0 ) && NavigateBack() )
 		{
 			vgui_nav_lock.SetValue( 1 );
@@ -3137,11 +3142,17 @@ void Panel::OnKeyCodeTyped(KeyCode keycode)
 		case KEY_XBUTTON_STICK2:
 		case KEY_XBUTTON_LTRIGGER:
 		case KEY_XBUTTON_RTRIGGER:
+		case STEAMCONTROLLER_A:
+		case STEAMCONTROLLER_B:
 
 		case KEY_UP:
 		case KEY_DOWN:
 		case KEY_LEFT:
 		case KEY_RIGHT:
+		case STEAMCONTROLLER_DPAD_UP:
+		case STEAMCONTROLLER_DPAD_DOWN:
+		case STEAMCONTROLLER_DPAD_LEFT:
+		case STEAMCONTROLLER_DPAD_RIGHT:
 			return;
 		}
 
@@ -3507,7 +3518,8 @@ bool Panel::RequestFocusNext(VPANEL panel)
 void Panel::RequestFocus(int direction)
 {
 	// NOTE: This doesn't make any sense if we don't have keyboard input enabled
-	Assert( ( IsX360() || IsConsoleStylePanel() ) || IsKeyBoardInputEnabled() );
+	// NOTE: Well, maybe it does if you have a steam controller...
+	// Assert( ( IsX360() || IsConsoleStylePanel() ) || IsKeyBoardInputEnabled() );
 	//	ivgui()->DPrintf2("RequestFocus(%s, %s)\n", GetName(), GetClassName());
 	OnRequestFocus(GetVPanel(), NULL);
 }

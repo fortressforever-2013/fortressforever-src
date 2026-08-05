@@ -202,7 +202,7 @@ struct SteamUGCDetails_t
 	uint32 m_unVotesDown;											// number of votes down
 	float m_flScore;												// calculated score
 	// collection details
-	uint32 m_unNumChildren;
+	uint32 m_unNumChildren;							
 	uint64 m_ulTotalFilesSize;										// Total size of all files (non-legacy), excluding the preview file
 };
 
@@ -248,10 +248,6 @@ public:
 	// Return the first value matching the pchKey. Note that a key may map to multiple values.  Returns false if there was an error or no matching value was found.
 	STEAM_FLAT_NAME( GetQueryFirstUGCKeyValueTag )
 	virtual bool GetQueryUGCKeyValueTag( UGCQueryHandle_t handle, uint32 index, const char *pchKey, STEAM_OUT_STRING_COUNT(cchValueSize) char *pchValue, uint32 cchValueSize ) = 0;
-
-	// Some items can specify that they have a version that is valid for a range of game versions (Steam branch)
-	virtual uint32 GetNumSupportedGameVersions( UGCQueryHandle_t handle, uint32 index ) = 0;
-	virtual bool GetSupportedGameVersionData( UGCQueryHandle_t handle, uint32 index, uint32 versionIndex, STEAM_OUT_STRING_COUNT( cchGameBranchSize ) char *pchGameBranchMin, STEAM_OUT_STRING_COUNT( cchGameBranchSize ) char *pchGameBranchMax, uint32 cchGameBranchSize ) = 0;
 
 	virtual uint32 GetQueryUGCContentDescriptors( UGCQueryHandle_t handle, uint32 index, EUGCContentDescriptorID *pvecDescriptors, uint32 cMaxEntries ) = 0;
 	

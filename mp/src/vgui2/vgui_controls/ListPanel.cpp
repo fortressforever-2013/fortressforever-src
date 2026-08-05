@@ -2462,6 +2462,7 @@ void ListPanel::OnKeyCodePressed(KeyCode code)
 	case KEY_XBUTTON_UP:
 	case KEY_XSTICK1_UP:
 	case KEY_XSTICK2_UP:
+	case STEAMCONTROLLER_DPAD_UP:
 		if ( nTotalRows > 0 )
 		{
 			nSelectedRow--;
@@ -2473,6 +2474,7 @@ void ListPanel::OnKeyCodePressed(KeyCode code)
 	case KEY_XBUTTON_DOWN:
 	case KEY_XSTICK1_DOWN:
 	case KEY_XSTICK2_DOWN:
+	case STEAMCONTROLLER_DPAD_DOWN:
 		if ( nTotalRows > 0 )
 		{
 			nSelectedRow++;

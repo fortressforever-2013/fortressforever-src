@@ -1094,7 +1094,7 @@ void AnimationController::RunAnimationCommand(vgui::Panel *panel,
 	animateCmd.interpolationFunction = interpolator;
 	animateCmd.interpolationParameter = animParameter;
 	animateCmd.startTime = startDelaySeconds;
-	animateCmd.duration = duration; 
+	animateCmd.duration = duration;	
 
 	// start immediately
 	StartCmd_Animate(panel, 0, animateCmd);
