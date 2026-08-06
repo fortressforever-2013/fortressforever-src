@@ -709,7 +709,7 @@ void Button::SetMouseClickEnabled(MouseCode code,bool state)
 //-----------------------------------------------------------------------------
 bool Button::IsMouseClickEnabled(MouseCode code)
 {
-	if(_mouseClickMask&(1<<(static_cast<int>(code-MOUSE_FIRST))))
+	if ( _mouseClickMask&(1<<(static_cast<int>(code-MOUSE_FIRST) )))
 	{
 		return true;
 	}
@@ -761,8 +761,17 @@ void Button::FireActionSignal()
 			&& !strnicmp(_actionMessage->GetString("command", ""), "url ", strlen("url "))
 			&& strstr(_actionMessage->GetString("command", ""), "://"))
 		{
-			// it's a command to launch a url, run it
-			system()->ShellExecute("open", _actionMessage->GetString("command", "      ") + 4);
+			
+			
+			
+			
+			
+				
+			
+			
+				// it's a command to launch a url, run it
+				system()->ShellExecute("open", _actionMessage->GetString("command", "      ") + 4);
+			
 		}
 		PostActionSignal(_actionMessage->MakeCopy());
 	}
