@@ -194,6 +194,7 @@ private:
 	CNetworkString(m_szGameDescription, 32);
 
 public:
+	void CleanUpMap();
 	void StartGame(bool bAllowReset=true);
 	bool HasGameStarted() { return !( m_flGameStarted < 0 ); }
 	float GetRoundStart( void ) const { return m_flRoundStarted; }

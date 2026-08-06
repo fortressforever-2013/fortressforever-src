@@ -879,7 +879,7 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 
 	if (!Initializer::InitializeAllObjects())
 		return false;
-
+#ifdef FF
 	// --> Mirv: Default value for cl_updaterate up to 33
 	ConVar* cl_updaterate = cvar->FindVar("cl_updaterate");
 	ConVar* cl_cmdrate = cvar->FindVar("cl_cmdrate");
@@ -891,7 +891,7 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 	// r_dynamic->SetValue(0);
 	// <-- Mirv
 	// there are lots of dlight options now, so nevermind -- Jon
-
+#endif
 	if (!ParticleMgr()->Init(MAX_TOTAL_PARTICLES, materials))
 		return false;
 
@@ -958,10 +958,11 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 
 	view->Init();
 	vieweffects->Init();
+#ifdef FF
 	ffvieweffects->Init();	// |-- Mirv
 
 	_discord.Init();
-
+#endif
 	C_BaseTempEntity::PrecacheTempEnts();
 
 	input->Init_All();
@@ -1120,8 +1121,10 @@ void CHLClient::Shutdown( void )
 	DisconnectDataModel();
 	ShutdownFbx();
 #endif
-
+#ifdef FF
 	_discord.Shutdown();
+#endif
+
 	
 	// This call disconnects the VGui libraries which we rely on later in the shutdown path, so don't do it
 //	DisconnectTier3Libraries( );
@@ -1497,14 +1500,14 @@ void CHLClient::LevelInitPreEntity( char const* pMapName )
 	input->LevelInit();
 
 	vieweffects->LevelInit();
-
+#ifdef FF
 	ffvieweffects->LevelInit();	// |-- Mirv
 
 	// --> Mirv: Initialise hud hints & clear effect data
 	HudHintLoad(pMapName);
 	ClearAllowedEffects();
 	// <-- Mirv
-	
+#endif
 	//Tony; loadup per-map manifests.
 	ParseParticleEffectsMap( pMapName, true );
 	
@@ -1574,7 +1577,7 @@ void CHLClient::LevelInitPostEntity( )
 	IGameSystem::LevelInitPostEntityAllSystems();
 	C_PhysPropClientside::RecreateAll();
 	internalCenterPrint->Clear();
-
+#ifdef FF
 	if (!engine->IsHLTV())
 	{
 		// BEG: Added by Mulchman for team menu
@@ -1594,6 +1597,7 @@ void CHLClient::LevelInitPostEntity( )
 		//   pPanel->ShowPanel( true );
 		// <-- Mirv
 	}
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1661,7 +1665,7 @@ void CHLClient::LevelShutdown( void )
 	StopAllRumbleEffects();
 
 	gHUD.LevelShutdown();
-
+#ifdef FF
 	// --> Mirv: Initialise hud hints
 	HudHintSave();
 	// <-- Mirv
@@ -1671,8 +1675,8 @@ void CHLClient::LevelShutdown( void )
 	gViewPortInterface->ShowPanel(PANEL_INFO, false);
 	gViewPortInterface->ShowPanel(PANEL_TEAM, false);
 	gViewPortInterface->ShowPanel(PANEL_CLASS, false);
-	gViewPortInterface->ShowPanel(PANEL_MAP, false);
-
+	//gViewPortInterface->ShowPanel(PANEL_MAP, false);
+#endif
 	internalCenterPrint->Clear();
 
 	messagechars->Clear();
@@ -1688,9 +1692,9 @@ void CHLClient::LevelShutdown( void )
 	ReleaseRenderTargets();
 #endif
 
-	// FF: reset discord state since we're no longer in a map
+#ifdef FF	// FF: reset discord state since we're no longer in a map
 	_discord.Reset();
-
+#endif
 	// string tables are cleared on disconnect from a server, so reset our global pointers to NULL
 	ResetStringTablePointers();
 
@@ -2515,32 +2519,11 @@ void CHLClient::ClientAdjustStartSoundParams( StartSoundParams_t& params )
 	CBaseEntity *pEntity = ClientEntityList().GetEnt( params.soundsource );
 
 	// A player speaking
-	if ( params.entchannel == CHAN_VOICE && GameRules() && pEntity && pEntity->IsPlayer() )
+	if ( ( params.entchannel == CHAN_VOICE ) && pEntity && pEntity->IsPlayer() )
 	{
-		// Use high-pitched voices for other players if the local player has an item that allows them to hear it (Pyro Goggles)
-		if ( !GameRules()->IsLocalPlayer( params.soundsource ) && IsLocalPlayerUsingVisionFilterFlags( TF_VISION_FILTER_PYRO ) )
-		{
-			params.pitch *= 1.3f;
-		}
-		// Halloween voice futzery?
-		else
-		{
-			float flVoicePitchScale = 1.f;
-			CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( pEntity, flVoicePitchScale, voice_pitch_scale );
-
-			int iHalloweenVoiceSpell = 0;
-			CALL_ATTRIB_HOOK_INT_ON_OTHER( pEntity, iHalloweenVoiceSpell, halloween_voice_modulation );
-			if ( iHalloweenVoiceSpell > 0 )
-			{
-				params.pitch *= 0.8f;
-			}
-			else if( flVoicePitchScale != 1.f )
-			{
-				params.pitch *= flVoicePitchScale;
-			}
-		}
+		pEntity->ClientAdjustStartSoundParams( params );
 	}
-#endif
+#endif // TF_CLIENT_DLL
 }
 
 const char* CHLClient::TranslateEffectForVisionFilter( const char *pchEffectType, const char *pchEffectName )
@@ -2586,7 +2569,7 @@ CSteamID GetSteamIDForPlayerIndex( int iPlayerIndex )
 }
 
 #endif
-
+#ifdef FF
 // Wrapper CVAR for an archiveable r_dynamic
 void FF_Dynamic_Callback(IConVar* var, const char* pOldValue, float flOldValue)
 {
@@ -2597,3 +2580,4 @@ void FF_Dynamic_Callback(IConVar* var, const char* pOldValue, float flOldValue)
 }
 
 ConVar r_dynamic_ff("r_dynamic_ff", "1", FCVAR_ARCHIVE, "", FF_Dynamic_Callback);
+#endif

@@ -33,6 +33,8 @@
 #define DEFAULTWEAPON_SPY "knife"
 #define DEFAULTWEAPON_CIVILIAN "umbrella"
 
+#define PANEL_MAP			"map"		// so players can view the map at any time
+
 // extended from shareddefs.h
 #define DMG_AIRSHOT			(DMG_LASTGENERICFLAG<<1)		// damage done by an airshot
 

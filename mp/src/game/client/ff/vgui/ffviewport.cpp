@@ -48,7 +48,10 @@
 #include "ffviewport.h"
 
 #include "vguicenterprint.h"
+#include "ff_shareddefs.h"
 #include "text_message.h"
+#include "ff_classmenu.h"
+#include "mapscreen.h"
 
 
 void FFViewport::ApplySchemeSettings( vgui::IScheme *pScheme )
@@ -60,6 +63,14 @@ void FFViewport::ApplySchemeSettings( vgui::IScheme *pScheme )
 	SetPaintBackgroundEnabled( false );
 }
 
+FFViewport::FFViewport()
+{
+
+}
+
+FFViewport::~FFViewport()
+{
+}
 
 IViewPortPanel* FFViewport::CreatePanelByName(const char *szPanelName)
 {
@@ -70,6 +81,18 @@ IViewPortPanel* FFViewport::CreatePanelByName(const char *szPanelName)
 //	{
 //		newpanel = new CCSMapOverview( this );
 //	}
+	if (Q_strcmp(PANEL_TEAM, szPanelName) == 0)
+	{
+		newpanel = new CFFTeamMenu(this);
+	}
+	else if (Q_strcmp(PANEL_CLASS, szPanelName) == 0)
+	{
+		newpanel = new CFFClassMenu(this);
+	}
+	else if (Q_strcmp(PANEL_MAP, szPanelName) == 0)
+	{
+		newpanel = new CMapScreen(this);
+	}
 
 	// --> Mirv: Pick up new panels
 	if (Q_strcmp(PANEL_TEAM, szPanelName) == 0)
@@ -108,6 +131,9 @@ void FFViewport::CreateDefaultPanels( void )
 	AddNewPanel( CreatePanelByName( PANEL_MAP ), "PANEL_MAP" );
 
 	BaseClass::CreateDefaultPanels();
+	AddNewPanel(CreatePanelByName(PANEL_TEAM), "PANEL_TEAM");
+	AddNewPanel(CreatePanelByName(PANEL_CLASS), "PANEL_CLASS");
+	AddNewPanel(CreatePanelByName(PANEL_MAP), "PANEL_MAP");
 }
 
 int FFViewport::GetDeathMessageStartHeight( void )

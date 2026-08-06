@@ -26,11 +26,10 @@ $Configuration
 
 $Project "Client (FF)"
 {
-	$Folder	"game_controls Header Files"
-	{
-		$File "$SRCDIR\game\client\game_controls\classmenu.h"
-		$File "$SRCDIR\game\client\game_controls\mapscreen.h"
-	}
+	//$Folder	"game_controls Header Files"
+	//{
+	//	$File "$SRCDIR\game\client\game_controls\classmenu.h"
+	//}
 	
 	$Folder "Source Files"
 	{
@@ -41,7 +40,6 @@ $Project "Client (FF)"
 		$Folder "game_controls"
 		{
 			$File "$SRCDIR\game\client\game_controls\classmenu.cpp"
-			$File "$SRCDIR\game\client\game_controls\mapscreen.cpp"
 		}
 	}
 
@@ -174,6 +172,10 @@ $Project "Client (FF)"
 			$File "$SRCDIR\game\client\ff\vgui\ffviewport.h"
 			$File "$SRCDIR\game\client\ff\vgui\ff_button.cpp"
 			$File "$SRCDIR\game\client\ff\vgui\ff_button.h"
+			$File "$SRCDIR\game\client\ff\vgui\ff_classmenu.cpp"
+			$File "$SRCDIR\game\client\ff\vgui\ff_classmenu.h"
+			$File "$SRCDIR\game\client\ff\vgui\ff_clientscoreboard.cpp"
+			$File "$SRCDIR\game\client\ff\vgui\ff_clientscoreboard.h"
 			$File "$SRCDIR\game\client\ff\vgui\ff_frame.h"
 			$File "$SRCDIR\game\client\ff\vgui\ff_gamemodes.cpp"
 			$File "$SRCDIR\game\client\ff\vgui\ff_gamemodes.h"
@@ -187,10 +189,14 @@ $Project "Client (FF)"
 			$File "$SRCDIR\game\client\ff\vgui\ff_modelpanel.h"
 			$File "$SRCDIR\game\client\ff\vgui\ff_panel.cpp"
 			$File "$SRCDIR\game\client\ff\vgui\ff_panel.h"
+			$File "$SRCDIR\game\client\ff\vgui\ff_teammenu.cpp"
+			$File "$SRCDIR\game\client\ff\vgui\ff_teammenu.h"
 			$File "$SRCDIR\game\client\ff\vgui\ff_training.cpp"
 			$File "$SRCDIR\game\client\ff\vgui\ff_training.h"
 			$File "$SRCDIR\game\client\ff\vgui\ff_vgui_timer.cpp"
 			$File "$SRCDIR\game\client\ff\vgui\ff_vgui_timer.h"
+			$File "$SRCDIR\game\client\ff\vgui\mapscreen.cpp"
+			$File "$SRCDIR\game\client\ff\vgui\mapscreen.h"
 			$File "$SRCDIR\game\client\ff\vgui\vgui_rootpanel_ff.cpp"
 			$File "$SRCDIR\game\client\ff\vgui\vgui_rootpanel_ff.h"
 		}

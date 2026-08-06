@@ -16,6 +16,7 @@
 #include <vgui_controls/Button.h>
 #include <vgui_controls/HTML.h>
 
+#include "ff_shareddefs.h"
 #include <game/client/iviewport.h>
 #include <vgui/KeyCode.h>
 
@@ -51,7 +52,6 @@ public:
 	virtual bool IsVisible() { return BaseClass::IsVisible(); }
 	virtual void SetParent(vgui::VPANEL parent) { BaseClass::SetParent(parent); }
 	virtual const char* GetName() { return PANEL_MAP; }
-	virtual bool NeedsUpdate() { return gpGlobals->curtime > m_flNextUpdate; }
 	virtual bool HasInputElements() { return true; }
 
 protected:

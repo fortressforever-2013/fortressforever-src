@@ -1,23 +1,29 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
-//
-// Purpose: 
-//
-// $NoKeywords: $
-//=============================================================================//
+/// =============== Fortress Forever ==============
+/// ======== A modification for Half-Life 2 =======
+///
+/// @file classmenu.h
+/// @author Gavin "Mirvin_Monkey" Bramhill
+/// @date August 15, 2005
+/// @brief New class selection menu
+///
+/// REVISIONS
+/// ---------
+/// Aug 15, 2005 Mirv: First creation
 
-#ifndef CLASSMENU_H
-#define CLASSMENU_H
+#ifndef FF_CLASSMENU_H
+#define FF_CLASSMENU_H
 #ifdef _WIN32
 #pragma once
 #endif
 
+#include <classmenu.h>
 #include <vgui_controls/Frame.h>
 #include <vgui_controls/Button.h>
 #include <vgui_controls/HTML.h>
 #include <utlvector.h>
 #include <vgui/ILocalize.h>
 #include <vgui/KeyCode.h>
-#include <game/client/iviewport.h>
+#include <ff_shareddefs.h>
 
 #include "mouseoverpanelbutton.h"
 
@@ -38,16 +44,15 @@ namespace vgui
 //-----------------------------------------------------------------------------
 // Purpose: Draws the class menu
 //-----------------------------------------------------------------------------
-class CClassMenu : public vgui::Frame, public IViewPortPanel
+class CFFClassMenu : public CClassMenu
 {
 private:
-	DECLARE_CLASS_SIMPLE( CClassMenu, vgui::Frame );
+	DECLARE_CLASS_SIMPLE( CFFClassMenu, CClassMenu );
 
 public:
-	CClassMenu(IViewPort *pViewPort);
-	virtual ~CClassMenu();
+	CFFClassMenu(IViewPort *pViewPort);
+	~CFFClassMenu();
 
-	virtual const char *GetName( void ) { return PANEL_CLASS; }
 	virtual void SetData(KeyValues *data);
 	virtual void Reset();
 	virtual void Update();
@@ -113,4 +118,4 @@ protected:
 };
 
 
-#endif // CLASSMENU_H
+#endif // FFCLASSMENU_H
