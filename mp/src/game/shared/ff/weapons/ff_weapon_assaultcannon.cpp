@@ -31,7 +31,7 @@
 	#define FF_AC_TRACERFREQ_SERVER 8 // ffdev_ac_tracerfreq_server.GetInt()
 #else
 	//ConVar ffdev_ac_tracerfreq_client( "ffdev_ac_tracerfreq_client", "2", FCVAR_FF_FFDEV_REPLICATED, "Tracers display on 1 in X bullets" );
-	#define FF_AC_TRACERFREQ_CLIENT 4 // ffdev_ac_tracerfreq_client.GetInt()
+	#define FF_AC_TRACERFREQ_CLIENT 3 // ffdev_ac_tracerfreq_client.GetInt()
 #endif
 
 //ConVar ffdev_ac_spread_min( "ffdev_ac_spread_min", "0.06", FCVAR_FF_FFDEV_REPLICATED, "The minimum cone of fire spread for the AC" );
@@ -40,13 +40,13 @@
 #define FF_AC_SPREAD_MAX FF_AC_SPREAD_MIN // ffdev_ac_spread_max.GetFloat()
 
 //ConVar ffdev_ac_bullet_damage( "ffdev_ac_bullet_damage", "8.2", FCVAR_FF_FFDEV_REPLICATED, "Damage per bullet" );
-#define FF_AC_BULLET_DAMAGE	4.0f // ffdev_ac_bullet_damage.GetFloat()
+#define FF_AC_BULLET_DAMAGE	8.0f // ffdev_ac_bullet_damage.GetFloat()
 
 //ConVar ffdev_ac_spread_multiplier( "ffdev_ac_spread_multiplier", "2.0", FCVAR_FF_FFDEV_REPLICATED, "Outer cone is X times bigger" );
 #define FF_AC_SPREAD_MULTIPLIER	2.0f // ffdev_ac_spread_multiplier.GetFloat()
 
 //ConVar ac_rof_max( "ffdev_ac_cycletime_max", "0.08", FCVAR_FF_FFDEV_REPLICATED, "Assault Cannon maximum time between shots (min ROF)" );
-#define FF_AC_ROF_MAX 0.1f // ac_rof_max.GetFloat()	// Assault Cannon maximum rate of fire
+#define FF_AC_ROF_MAX 0.05f // ac_rof_max.GetFloat()	// Assault Cannon maximum rate of fire
 //ConVar ac_rof_min( "ffdev_ac_cycletime_min", "0.08", FCVAR_FF_FFDEV_REPLICATED, "Assault Cannon minimum time between shots (max ROF)" );
 #define FF_AC_ROF_MIN FF_AC_ROF_MAX // ac_rof_min.GetFloat()		// Assault Cannon minimum rate of fire
 
