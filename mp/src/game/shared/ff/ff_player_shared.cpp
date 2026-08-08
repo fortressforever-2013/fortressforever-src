@@ -92,6 +92,8 @@ ConVar sv_motd_enable( "sv_motd_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "
 // for release code: need to update ff_hud_overpressure.cpp #define 
 //ConVar ffdev_overpressure_delay( "ffdev_overpressure_delay", "16", FCVAR_FF_FFDEV_REPLICATED );
 #define OVERPRESSURE_DELAY 16
+//ConVar ffdev_overpressure_cell_cost( "ffdev_overpressure_cell_cost", "10", FCVAR_FF_FFDEV_REPLICATED );
+#define OVERPRESSURE_CELL_COST 10
 //ConVar ffdev_overpressure_radius( "ffdev_overpressure_radius", "128", FCVAR_FF_FFDEV_REPLICATED );
 #define OVERPRESSURE_RADIUS 128
 //ConVar ffdev_overpressure_groundpush_multiplier( "ffdev_overpressure_groundpush_multiplier", "1", FCVAR_FF_FFDEV_REPLICATED );
@@ -791,8 +793,16 @@ void CFFPlayer::ClassSpecificSkill()
 			{
 				SwapToWeapon(FF_WEAPON_ASSAULTCANNON);
 			}*/
-			Overpressure();
-			m_flNextClassSpecificSkill = gpGlobals->curtime + OVERPRESSURE_DELAY;
+			if (GetAmmoCount(AMMO_CELLS) >= OVERPRESSURE_CELL_COST)
+			{
+				RemoveAmmo(OVERPRESSURE_CELL_COST, AMMO_CELLS);
+				Overpressure();
+				m_flNextClassSpecificSkill = gpGlobals->curtime + OVERPRESSURE_DELAY;
+			}
+			else
+			{
+				ClientPrint(this, HUD_PRINTCENTER, "#FF_OVERPRESSURECELLS");
+			}
 
 			break;
 
