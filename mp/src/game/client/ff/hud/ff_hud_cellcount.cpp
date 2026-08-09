@@ -166,7 +166,7 @@ void CHudCellCount::Paint()
 {
 	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
-	if(pPlayer->GetClassSlot() != CLASS_SCOUT || pPlayer->GetClassSlot() != CLASS_HWGUY || pPlayer->GetClassSlot() != CLASS_ENGINEER)
+	if(pPlayer->GetClassSlot() != CLASS_ENGINEER && pPlayer->GetClassSlot() != CLASS_SCOUT && pPlayer->GetClassSlot() != CLASS_HWGUY)
 		return;
 
 	BaseClass::PaintBackground();
