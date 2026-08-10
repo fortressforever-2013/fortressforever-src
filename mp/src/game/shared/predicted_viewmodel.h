@@ -50,8 +50,29 @@ private:
 	CInterpolatedVar<QAngle> m_LagAnglesHistory;
 	QAngle m_vLagAngles;
 
-	CPredictedViewModel( const CPredictedViewModel & ); // not defined, not accessible
+	// Bobs
+	void  WalkBob(Vector& origin, const QAngle& angles);
+	float m_flWalkBobScale;
+	float m_flWalkBobPhase;
 
+	void  AirBob(Vector& origin, const QAngle& angles);
+	float m_flAirTime;
+	float m_flAirBobScale;
+	float m_flAirBobPhase;
+	float m_flAirRiseScale;
+	bool  m_bWasAirborneRise;
+
+	void  LandBob(Vector& origin, const QAngle& angles);
+	bool  m_bWasOnGround;
+	float m_flLandBobStartTime;
+
+	void  MedkitSteerBob(QAngle& angles);
+	float m_flMedkitSteerAngle;
+	bool  m_bMedkitNeedForSpeed;
+	void  MedkitSteer(QAngle& angles);
+	float m_flSteerTilt;
+
+	CPredictedViewModel( const CPredictedViewModel & ); // not defined, not accessible
 #endif
 };
 
