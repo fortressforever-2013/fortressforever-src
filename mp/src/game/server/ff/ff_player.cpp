@@ -75,11 +75,11 @@ int g_iLimbs[CLASS_CIVILIAN + 1][5] = { { 0 } };
 #define FFDEV_PYRO_BURNTIME 5.0f //ffdev_pyro_burntime.GetFloat()
 
 //ConVar ffdev_flamesize_burn1("ffdev_flamesize_burn1","0.015", FCVAR_FF_FFDEV_REPLICATED, "flame size multiplier for burn level 1");
-#define FFDEV_FLAMESIZE_BURN1 0.025f //ffdev_flamesize_burn1.GetFloat()
+#define FFDEV_FLAMESIZE_BURN1 0.010f //ffdev_flamesize_burn1.GetFloat()
 //ConVar ffdev_flamesize_burn2("ffdev_flamesize_burn2","0.04", FCVAR_FF_FFDEV_REPLICATED, "flame size multiplier for burn level 2");
-#define FFDEV_FLAMESIZE_BURN2 0.033f //ffdev_flamesize_burn2.GetFloat()
+#define FFDEV_FLAMESIZE_BURN2 0.025f //ffdev_flamesize_burn2.GetFloat()
 //ConVar ffdev_flamesize_burn3("ffdev_flamesize_burn3","0.055", FCVAR_FF_FFDEV_REPLICATED, "flame size multiplier for burn level 3");
-#define FFDEV_FLAMESIZE_BURN3 0.040f //ffdev_flamesize_burn3.GetFloat()
+#define FFDEV_FLAMESIZE_BURN3 0.050f //ffdev_flamesize_burn3.GetFloat()
 
 //ConVar ffdev_ic_bonusdamage_burn1("ffdev_ic_bonusdamage_burn1", "20", FCVAR_REPLICATED | FCVAR_CHEAT);
 #define IC_BONUSDAMAGE_BURN1 20 //ffdev_ic_bonusdamage_burn1.GetFloat()
@@ -89,6 +89,41 @@ int g_iLimbs[CLASS_CIVILIAN + 1][5] = { { 0 } };
 
 //ConVar ffdev_ic_bonusdamage_burn3("ffdev_ic_bonusdamage_burn3", "40", FCVAR_REPLICATED | FCVAR_CHEAT);
 #define IC_BONUSDAMAGE_BURN3 40 //ffdev_ic_bonusdamage_burn3.GetFloat()
+
+//ConVar ffdev_openburnwoundsbonus_burn1("ffdev_openburnwoundsbonus_burn1", "0.10", FCVAR_REPLICATED | FCVAR_CHEAT, "Extra lvl 1 burn incoming damage from all the sources");
+#define FFDEV_OPENBURNWOUNDSBONUS_BURN1 0.10f //ffdev_openburnwoundsbonus_burn1.GetFloat()
+
+//ConVar ffdev_openburnwoundsbonus_burn2("ffdev_openburnwoundsbonus_burn2", "0.20", FCVAR_REPLICATED | FCVAR_CHEAT, "Extra lvl 2 burn incoming damage from all the sources");
+#define FFDEV_OPENBURNWOUNDSBONUS_BURN2 0.20f //ffdev_openburnwoundsbonus_burn2.GetFloat()
+
+//ConVar ffdev_openburnwoundsbonus_burn3("ffdev_openburnwoundsbonus_burn3", "0.30", FCVAR_REPLICATED | FCVAR_CHEAT, "Extra lvl 3 burn incoming damage from all the sources");
+#define FFDEV_OPENBURNWOUNDSBONUS_BURN3 0.30f //ffdev_openburnwoundsbonus_burn3.GetFloat()
+
+static const char* g_ppszOpenBurnWoundsBonusExcluded[] =
+{
+	"ff_weapon_flamethrower", "ff_projectile_ic", "ff_grenade_napalm", "ff_grenade_napalmlet"
+};
+
+float CFFPlayer::OpenBurnWoundsBonus(const CTakeDamageInfo& info)
+{
+	int iBurnLevel = GetBurnLevel();
+	if (iBurnLevel <= 0)
+	return 1.0f;
+	CBaseEntity* pInflictor = info.GetInflictor();
+	if (pInflictor)
+	{
+		for (int i = 0; i < ARRAYSIZE(g_ppszOpenBurnWoundsBonusExcluded); i++)
+		{
+			if (!Q_stricmp(pInflictor->GetClassname(), g_ppszOpenBurnWoundsBonusExcluded[i]))
+			return 1.0f;
+		}
+	}
+	if (iBurnLevel > 200)
+	return 1.0f + FFDEV_OPENBURNWOUNDSBONUS_BURN3;
+	if (iBurnLevel > 100)
+	return 1.0f + FFDEV_OPENBURNWOUNDSBONUS_BURN2;
+	return 1.0f + FFDEV_OPENBURNWOUNDSBONUS_BURN1;
+}
 
 //ConVar ffdev_ic_selfdamagemultiplier("ffdev_ic_selfdamagemultiplier","0.45", FCVAR_FF_FFDEV_REPLICATED, "Self damage multipler for IC jumping");
 #define FFDEV_PYRO_IC_SELFDAMAGE_MULTIPLIER 0.45 //ffdev_ic_selfdamagemultiplier.GetFloat()
@@ -5647,11 +5682,14 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 	//		pAttacker->AddFortPoints(10,true);
 	//}
 
-	// if it's a pyro shooting themself (i.e. the IC) they take less damage
+// if it's a pyro shooting themself (i.e. the IC) they take less damage
 	if ( GetClassSlot() == CLASS_PYRO && info.GetDamageType()&DMG_BURN && (info.GetInflictor() == this || info.GetAttacker() == this))
 	{
 		info.SetDamage(info.GetDamage() * FFDEV_PYRO_IC_SELFDAMAGE_MULTIPLIER);
 	}
+
+	// burned players take extra damage from all the sources except those which already have their own burn-scaled bonus damage
+	info.SetDamage(info.GetDamage() * OpenBurnWoundsBonus(info));
 
 	// rampup and falloff
 	DistanceDamageModifier(info);
@@ -6186,6 +6224,11 @@ void CFFPlayer::OnDamagedByExplosion( const CTakeDamageInfo &info )
 //-----------------------------------------------------------------------------
 bool CFFPlayer::ShouldGib( const CTakeDamageInfo &info )
 {
+	// AC always gibs to look more brutal
+	CFFWeaponBase* pInflictorWeapon = dynamic_cast<CFFWeaponBase*>(info.GetInflictor());
+	if (pInflictorWeapon && pInflictorWeapon->GetWeaponID() == FF_WEAPON_ASSAULTCANNON)
+		return true;
+
 	if (info.GetDamageType() & DMG_BLAST)
 		return (GetHealth() <= -FFDEV_GIBDAMAGE_EXPLOSIONS);
 
