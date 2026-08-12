@@ -297,6 +297,7 @@ public:
 	bool PlayerHasSkillCommand(const char *szCommand);
 	virtual int OnTakeDamage(const CTakeDamageInfo &inputInfo);
 	void DistanceDamageModifier(CTakeDamageInfo &info);
+	float OpenBurnWoundsBonus(const CTakeDamageInfo& info);
 
 	virtual CBaseEntity* FindNextObserverTarget(bool bReverse);
 	virtual bool IsValidObserverTarget(CBaseEntity* target);
