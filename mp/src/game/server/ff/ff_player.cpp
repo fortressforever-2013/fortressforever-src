@@ -6224,11 +6224,18 @@ void CFFPlayer::OnDamagedByExplosion( const CTakeDamageInfo &info )
 //-----------------------------------------------------------------------------
 bool CFFPlayer::ShouldGib( const CTakeDamageInfo &info )
 {
-	// AC always gibs to look more brutal
+	// AC gibs but only at close range
 	CFFWeaponBase* pInflictorWeapon = dynamic_cast<CFFWeaponBase*>(info.GetInflictor());
 	if (pInflictorWeapon && pInflictorWeapon->GetWeaponID() == FF_WEAPON_ASSAULTCANNON)
-		return true;
-
+	{
+		CBaseEntity* pAttacker = info.GetAttacker();
+		if (pAttacker)
+		{
+			float flDistSqr = (GetAbsOrigin() - pAttacker->GetAbsOrigin()).LengthSqr();
+			if (flDistSqr <= (256.0f * 256.0f))
+			return true;
+		}
+	}
 	if (info.GetDamageType() & DMG_BLAST)
 		return (GetHealth() <= -FFDEV_GIBDAMAGE_EXPLOSIONS);
 
