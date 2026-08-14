@@ -11,9 +11,7 @@
 /// Aug 15, 2005 Mirv: First creation
 
 #include "cbase.h"
-#include <cdll_client_int.h>
-
-#include "teammenu.h"
+#include "ff_teammenu.h"
 
 #include <vgui/IScheme.h>
 #include <vgui/ILocalize.h>
@@ -22,11 +20,11 @@
 #include <vgui_controls/ImageList.h>
 #include <filesystem.h>
 
-#include <vgui_controls/RichText.h>
 #include <vgui_controls/Label.h>
 #include <vgui_controls/Button.h>
-#include <vgui_controls/HTML.h>
 #include <vgui_controls/ImagePanel.h>
+#include <vgui_controls/RichText.h>
+#include <vgui_controls/HTML.h>
 
 #include "IGameUIFuncs.h" // for key bindings
 #include <igameresources.h>
@@ -54,22 +52,6 @@ extern IGameUIFuncs *gameuifuncs;
 const char *szTeamButtons[] = { "bluebutton", "redbutton", "yellowbutton", "greenbutton" };
 
 #define TEAM_BUTTON_GAP		20
-
-//-----------------------------------------------------------------------------
-// Purpose: Lets us make a test menu
-//-----------------------------------------------------------------------------
-//CON_COMMAND(teammenu, "Shows the team menu") 
-//{
-//	if (!gViewPortInterface) 
-//		return;
-//	
-//	IViewPortPanel *panel = gViewPortInterface->FindPanelByName(PANEL_TEAM);
-//
-//	 if (panel) 
-//		 gViewPortInterface->ShowPanel(panel, true);
-//	 else
-//		Msg("Couldn't find panel.\n");
-//}
 
 //=============================================================================
 // A team button has the following components:
@@ -198,7 +180,7 @@ CON_COMMAND( hud_reloadteammenu, "hud_reloadteammenu" )
 	if( !pPanel )
 		return;
 
-	CTeamMenu *pTeamMenu = dynamic_cast< CTeamMenu * >( pPanel );
+	CFFTeamMenu *pTeamMenu = dynamic_cast< CFFTeamMenu * >( pPanel );
 	if( !pTeamMenu )
 		return;
 
@@ -212,7 +194,7 @@ CON_COMMAND( hud_reloadteammenu, "hud_reloadteammenu" )
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CTeamMenu::CTeamMenu(IViewPort *pViewPort) : Frame(NULL, PANEL_TEAM )
+CFFTeamMenu::CFFTeamMenu( IViewPort *pViewPort ) : CTeamMenu( pViewPort )
 {
 	// initialize dialog
 	m_pViewPort = pViewPort;
@@ -263,16 +245,16 @@ CTeamMenu::CTeamMenu(IViewPort *pViewPort) : Frame(NULL, PANEL_TEAM )
 //-----------------------------------------------------------------------------
 // Purpose: Destructor
 //-----------------------------------------------------------------------------
-CTeamMenu::~CTeamMenu()
+CFFTeamMenu::~CFFTeamMenu()
 {
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: sets the text color of the map description field
 //-----------------------------------------------------------------------------
-void CTeamMenu::ApplySchemeSettings(IScheme *pScheme)
+void CFFTeamMenu::ApplySchemeSettings( vgui::IScheme *pScheme )
 {
-	BaseClass::ApplySchemeSettings(pScheme);
+	BaseClass::ApplySchemeSettings( pScheme );
 
 	m_pMapDescriptionText->SetBorder(NULL);
 	//m_pServerInfoHost->SetBorder(NULL);
@@ -281,7 +263,7 @@ void CTeamMenu::ApplySchemeSettings(IScheme *pScheme)
 //-----------------------------------------------------------------------------
 // Purpose: Run the client command if needed
 //-----------------------------------------------------------------------------
-void CTeamMenu::OnCommand(const char *command)
+void CFFTeamMenu::OnCommand( const char *command )
 {
 	//DevMsg("[Teammenu] Command: %s\n", command);
 
@@ -325,7 +307,7 @@ void CTeamMenu::OnCommand(const char *command)
 //-----------------------------------------------------------------------------
 // Purpose: Get the server name
 //-----------------------------------------------------------------------------
-void CTeamMenu::FireGameEvent( IGameEvent *event )
+void CFFTeamMenu::FireGameEvent( IGameEvent *event )
 {
 	const char * type = event->GetName();
 
@@ -339,7 +321,7 @@ void CTeamMenu::FireGameEvent( IGameEvent *event )
 //-----------------------------------------------------------------------------
 // Purpose: Give them some key control too
 //-----------------------------------------------------------------------------
-void CTeamMenu::OnKeyCodePressed(KeyCode code) 
+void CFFTeamMenu::OnKeyCodePressed(KeyCode code) 
 {
 	// Show the scoreboard over this if needed
 	if (gameuifuncs->GetButtonCodeForBind("showscores") == code)
@@ -366,7 +348,7 @@ void CTeamMenu::OnKeyCodePressed(KeyCode code)
 	BaseClass::OnKeyCodePressed(code);
 }
 
-void CTeamMenu::OnKeyCodeReleased(KeyCode code)
+void CFFTeamMenu::OnKeyCodeReleased(KeyCode code)
 {
 	// Bug #0000524: Scoreboard gets stuck with the class menu up when you first join
 	// Hide the scoreboard now
@@ -379,7 +361,7 @@ void CTeamMenu::OnKeyCodeReleased(KeyCode code)
 //-----------------------------------------------------------------------------
 // Purpose: shows the team menu
 //-----------------------------------------------------------------------------
-void CTeamMenu::ShowPanel(bool bShow)
+void CFFTeamMenu::ShowPanel(bool bShow)
 {
 	if ( BaseClass::IsVisible() == bShow )
 		return;
@@ -407,18 +389,11 @@ void CTeamMenu::ShowPanel(bool bShow)
 	}
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Don't need anything yet
-//-----------------------------------------------------------------------------
-void CTeamMenu::Reset()
-{
-	Q_strcpy( m_szServerName, "Fortress Forever" );
-}
 
 //-----------------------------------------------------------------------------
 // Purpose: Update the menu with everything
 //-----------------------------------------------------------------------------
-void CTeamMenu::Update()
+void CFFTeamMenu::Update()
 {
 	// TODO: Some of these should only happen once per map
 	UpdateMapDescriptionText();
@@ -429,7 +404,7 @@ void CTeamMenu::Update()
 	m_pMapScreenshotButton->SetZPos( 10 );
 }
 
-void CTeamMenu::UpdateTeamButtons()
+void CFFTeamMenu::UpdateTeamButtons()
 {
 	IGameResources *pGR = GameResources();
 
@@ -535,7 +510,7 @@ void CTeamMenu::UpdateTeamButtons()
 	m_pAutoAssignButton->SetPos(GetWide() / 2 + iTeamButtonGap / 2, iYPos);
 }
 
-void CTeamMenu::UpdateServerInfo()
+void CFFTeamMenu::UpdateServerInfo()
 {
 	//m_pServerInfoText->SetText(pszTitle);
 
@@ -560,7 +535,7 @@ void CTeamMenu::UpdateServerInfo()
 	m_pServerInfoHost->OpenURL(pszMotd, NULL);
 }
 
-void CTeamMenu::UpdateMapDescriptionText()
+void CFFTeamMenu::UpdateMapDescriptionText()
 {
 	char szMapName[MAX_MAP_NAME];
 	Q_FileBase(engine->GetLevelName(), szMapName, sizeof(szMapName));
@@ -615,7 +590,7 @@ void CTeamMenu::UpdateMapDescriptionText()
 }
 
 
-void CTeamMenu::UpdateTeamIcons()
+void CFFTeamMenu::UpdateTeamIcons()
 {
 	for ( int iTeamID = 0; iTeamID < 4; iTeamID++ )
 	{

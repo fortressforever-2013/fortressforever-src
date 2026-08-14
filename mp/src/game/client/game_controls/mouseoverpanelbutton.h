@@ -27,16 +27,17 @@ extern vgui::Button *g_lastButton;
 //
 // must at least inherit from vgui::EditablePanel to support LoadControlSettings
 //-----------------------------------------------------------------------------
-class MouseOverPanelButton : public vgui::Button
+template <class T>
+class MouseOverButton : public vgui::Button
 {
 private:
-	DECLARE_CLASS_SIMPLE( MouseOverPanelButton, vgui::Button );
+	DECLARE_CLASS_SIMPLE( MouseOverButton, vgui::Button );
 	
 public:
-	MouseOverPanelButton(vgui::Panel *parent, const char *panelName, vgui::Panel *templatePanel ) :
-					Button( parent, panelName, "MouseOverPanelButton")
+	MouseOverButton(vgui::Panel *parent, const char *panelName, T *templatePanel ) :
+					Button( parent, panelName, "MouseOverButton")
 	{
-		m_pPanel = new vgui::HTML( parent, NULL );
+		m_pPanel = new T( parent, NULL );
 		m_pPanel ->SetVisible( false );
 
 		// copy size&pos from template panel
@@ -57,7 +58,7 @@ public:
 	virtual void SetPreserveArmedButtons( bool bPreserve ){ m_bPreserveArmedButtons = bPreserve; }
 	virtual void SetUpdateDefaultButtons( bool bUpdate ){ m_bUpdateDefaultButtons = bUpdate; }
 
-	void ShowPage()
+	virtual void ShowPage()
 	{
 		if( m_pPanel )
 		{
@@ -78,23 +79,14 @@ public:
 	const char *GetClassPage( const char *className )
 	{
 		static char classPanel[ _MAX_PATH ];
-
-		// --> Mirv: [HACK] Quick way to get round renaming files for now (V SILLY)
-		char name[128];
-		V_sprintf_safe( name, "%s", GetName() );
-		
-		if( V_strlen(name) > 6 )
-			name[V_strlen(name) - 6] = 0;
-
-		Q_snprintf( classPanel, sizeof( classPanel ), "resource/classes/%s.html", /*className*/ name );
-		// <-- Mirv: [HACK] Quick way to get round renaming files for now (V SILLY)
+		Q_snprintf( classPanel, sizeof( classPanel ), "classes/%s.res", className);
 
 		if ( g_pFullFileSystem->FileExists( classPanel, IsX360() ? "MOD" : "GAME" ) )
 		{
 		}
-		else if (g_pFullFileSystem->FileExists( "resource/classes/default.html", IsX360() ? "MOD" : "GAME" ) )
+		else if (g_pFullFileSystem->FileExists( "classes/default.res", IsX360() ? "MOD" : "GAME" ) )
 		{
-			Q_snprintf ( classPanel, sizeof( classPanel ), "resource/classes/default.html" );
+			Q_snprintf ( classPanel, sizeof( classPanel ), "classes/default.res" );
 		}
 		else
 		{
@@ -117,13 +109,12 @@ public:
 	{
 		BaseClass::ApplySettings( resourceData );
 
-		char szLocalFile[_MAX_PATH];
-
-		g_pFullFileSystem->GetLocalPath(GetClassPage(GetName()), szLocalFile, sizeof(szLocalFile));
-		m_pPanel->OpenURL(szLocalFile, NULL);
+		// name, position etc of button is set, now load matching
+		// resource file for associated info panel:
+		m_pPanel->LoadControlSettings( GetClassPage( GetName() ) );
 	}		
 
-	vgui::HTML *GetClassPanel( void ) { return m_pPanel; }
+	T *GetClassPanel( void ) { return m_pPanel; }
 
 	virtual void OnCursorExited()
 	{
@@ -185,11 +176,11 @@ public:
 
 private:
 
-	vgui::HTML *m_pPanel;
+	T *m_pPanel;
 	bool m_bPreserveArmedButtons;
 	bool m_bUpdateDefaultButtons;
 };
 
-#define MouseOverPanelButton MouseOverPanelButton<vgui::EditablePanel>
+#define MouseOverPanelButton MouseOverButton<vgui::EditablePanel>
 
 #endif // MOUSEOVERPANELBUTTON_H

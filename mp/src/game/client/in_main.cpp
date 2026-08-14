@@ -578,38 +578,6 @@ void IN_MapShotUp(const CCommand& args)
 }
 // END: Jiggles: For display of the Map Screenshot
 
-// BEG: Added by Mulchman for team change & class change
-void IN_ChangeTeam(const CCommand& args)
-{
-	if (gViewPortInterface)
-	{
-		IViewPortPanel* pPanel = gViewPortInterface->FindPanelByName(PANEL_TEAM);
-		if (pPanel)
-			gViewPortInterface->ShowPanel(PANEL_TEAM, true);
-	}
-}
-
-void IN_ChangeClass(const CCommand& args)
-{
-	// --> Mirv: Select team first bud
-	C_BasePlayer* player = C_BasePlayer::GetLocalPlayer();
-
-	if (player && player->GetTeamNumber() < FF_TEAM_BLUE)
-	{
-		IN_ChangeTeam(args);
-		return;
-	}
-	// <-- Mirv: Select team first bud
-
-	if (gViewPortInterface)
-	{
-		IViewPortPanel* pPanel = gViewPortInterface->FindPanelByName(PANEL_CLASS);
-		if (pPanel)
-			gViewPortInterface->ShowPanel(PANEL_CLASS, true);
-	}
-}
-// END: Added by Mulchman for team change & class change
-
 void IN_ServerInfo(const CCommand& args)
 {
 	if (gViewPortInterface)
@@ -1820,11 +1788,6 @@ static ConCommand endtogglegrenade2("-togglegren2", IN_ToggleGrenade2Up);
 static ConCommand startattack3("+attack3", IN_Attack3Down);
 static ConCommand endattack3("-attack3", IN_Attack3Up);
 #ifdef FF
-// BEG: Added by Mulchman for team & class changing
-static ConCommand changeteam("changeteam", IN_ChangeTeam);
-static ConCommand changeclass("changeclass", IN_ChangeClass);
-// END: Added by Mulchman for team & class changing
-
 static ConCommand serverinfo("serverinfo", IN_ServerInfo);
 
 // BEG: Mulch: For medic & engy hud radial style menu

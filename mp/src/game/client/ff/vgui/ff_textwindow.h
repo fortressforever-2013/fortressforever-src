@@ -15,7 +15,10 @@
 #include <vgui_controls/Button.h>
 #include <vgui_controls/HTML.h>
 
+#include <igameevents.h>
+
 #include <game/client/iviewport.h>
+#include <vgui/KeyCode.h>
 #include "shareddefs.h"
 
 namespace vgui
@@ -27,7 +30,7 @@ namespace vgui
 // Purpose: displays the MOTD
 //-----------------------------------------------------------------------------
 
-class CTextWindow : public vgui::Frame, public IViewPortPanel
+class CTextWindow : public vgui::Frame, public IViewPortPanel, public IGameEventListener2
 {
 private:
 	DECLARE_CLASS_SIMPLE( CTextWindow, vgui::Frame );
@@ -43,6 +46,11 @@ public:
 	virtual bool NeedsUpdate( void ) { return false; }
 	virtual bool HasInputElements( void ) { return true; }
 	virtual void ShowPanel( bool bShow );
+	
+	virtual void OnKeyCodePressed(vgui::KeyCode code);
+	virtual void OnKeyCodeReleased(vgui::KeyCode code);
+	
+	virtual void FireGameEvent(IGameEvent *event);
 
 	// both vgui::Frame and IViewPortPanel define these, so explicitly define them here as passthroughs to vgui
 	vgui::VPANEL GetVPanel( void ) { return BaseClass::GetVPanel(); }
@@ -62,8 +70,6 @@ public:
 protected:	
 	// vgui overrides
 	virtual void OnCommand( const char *command );
-
-	void OnKeyCodePressed( vgui::KeyCode code );
 
 	IViewPort	*m_pViewPort;
 	char		m_szTitle[255];

@@ -24,6 +24,10 @@
 
 #include <game/client/iviewport.h>
 
+#include "IGameUIFuncs.h"
+#include "ienginevgui.h"
+#include "ff_button.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -75,6 +79,24 @@ CON_COMMAND( showinfo, "Shows a info panel: <type> <title> <message> [<command n
 // HPE_END
 //=============================================================================
 
+CON_COMMAND( hud_reloadserverinfo, "hud_reloadserverinfo" )
+{
+	IViewPortPanel *pPanel = gViewPortInterface->FindPanelByName( PANEL_INFO );
+
+	if( !pPanel )
+		return;
+
+	CTextWindow *pServerInfo = dynamic_cast< CTextWindow * >( pPanel );
+	if( !pServerInfo )
+		return;
+
+	vgui::HScheme scheme = vgui::scheme()->LoadSchemeFromFileEx( enginevgui->GetPanel( PANEL_CLIENTDLL ), "resource/ClientScheme.res", "HudScheme" );
+
+	pServerInfo->SetScheme( scheme );
+	pServerInfo->SetProportional( true );
+	pServerInfo->LoadControlSettings( "Resource/UI/TextWindow.res" );
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
@@ -104,13 +126,16 @@ CTextWindow::CTextWindow(IViewPort *pViewPort) : Frame(NULL, PANEL_INFO	)
 	m_pTextMessage = new TextEntry( this, "TextMessage" );
 	m_pHTMLMessage = new CMOTDHTML( this,"HTMLMessage" );
 	m_pTitleLabel  = new Label( this, "MessageTitle", "Message Title" );
-	m_pOK		   = new Button(this, "ok", "#PropertyDialog_OK");
+	m_pOK		   = new FFButton(this, "ok", "#PropertyDialog_OK");
 
 	m_pOK->SetCommand("okay");
 	m_pTextMessage->SetMultiline( true );
-	m_nContentType = TYPE_TEXT;
+	m_pTextMessage->SetVerticalScrollbar(true);
+	m_pHTMLMessage->SetScrollbarsEnabled(false);
 
-	Reset();
+	// to get server name
+	gameeventmanager->AddListener(this, "server_spawn", false);
+	m_nContentType = TYPE_TEXT;
 }
 
 //-----------------------------------------------------------------------------
@@ -122,7 +147,7 @@ void CTextWindow::ApplySchemeSettings( IScheme *pScheme )
 
 	LoadControlSettings("Resource/UI/TextWindow.res");
 
-	Update();
+	Reset();
 }
 
 //-----------------------------------------------------------------------------
@@ -148,7 +173,7 @@ void CTextWindow::Reset( void )
 	//=============================================================================
 
 	m_nExitCommand = TEXTWINDOW_CMD_NONE;
-	m_nContentType = TYPE_TEXT;
+	m_nContentType = TYPE_INDEX;
 	m_bShownURL = false;
 	m_bUnloadOnDismissal = false;
 	Update();
@@ -377,17 +402,6 @@ void CTextWindow::OnCommand( const char *command )
 	BaseClass::OnCommand(command);
 }
 
-void CTextWindow::OnKeyCodePressed( vgui::KeyCode code )
-{
-	if ( code == KEY_XBUTTON_A || code == KEY_XBUTTON_B )
-	{
-		OnCommand( "okay" );
-		return;
-	}
-
-	BaseClass::OnKeyCodePressed(code);
-}
-
 void CTextWindow::SetData(KeyValues *data)
 {
 #ifdef SDK2013CE
@@ -422,11 +436,17 @@ void CTextWindow::ShowPanel( bool bShow )
 	{
 		Activate();
 		SetMouseInputEnabled( true );
+		SetKeyBoardInputEnabled(true);
+		SetCloseButtonVisible(false);
+		SetEnabled(true);
+
+		MoveToFront();
 	}
 	else
 	{
 		SetVisible( false );
 		SetMouseInputEnabled( false );
+		SetKeyBoardInputEnabled(false);
 
 		if ( m_bUnloadOnDismissal && m_bShownURL && m_pHTMLMessage )
 		{
@@ -442,4 +462,48 @@ bool CTextWindow::CMOTDHTML::OnStartRequest( const char *url, const char *target
 		return false;
 
 	return BaseClass::OnStartRequest( url, target, pchPostData, bIsRedirect );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Get the server name
+//-----------------------------------------------------------------------------
+void CTextWindow::FireGameEvent( IGameEvent *event )
+{
+	const char * type = event->GetName();
+
+	if ( Q_strcmp(type, "server_spawn") == 0 )
+	{
+		Q_strncpy( m_szTitle, event->GetString("hostname"), 255 );
+	}
+
+	if( IsVisible() )
+		Update();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Give them some key control too
+//-----------------------------------------------------------------------------
+void CTextWindow::OnKeyCodePressed(KeyCode code) 
+{
+	// Show the scoreboard over this if needed
+	if (gameuifuncs->GetButtonCodeForBind("showscores") == code)
+		gViewPortInterface->ShowPanel(PANEL_SCOREBOARD, true);
+
+	// Support hiding the motd by hitting your serverinfo button again
+	// 0001232: Or if the user presses escape, kill the menu
+	if (gameuifuncs->GetButtonCodeForBind("serverinfo") == code ||
+		gameuifuncs->GetButtonCodeForBind("cancelselect") == code)
+		gViewPortInterface->ShowPanel(this, false);
+	
+	BaseClass::OnKeyCodePressed(code);
+}
+
+void CTextWindow::OnKeyCodeReleased(KeyCode code)
+{
+	// Bug #0000524: Scoreboard gets stuck with the class menu up when you first join
+	// Hide the scoreboard now
+	if (gameuifuncs->GetButtonCodeForBind("showscores") == code)
+		gViewPortInterface->ShowPanel(PANEL_SCOREBOARD, false);
+
+	BaseClass::OnKeyCodeReleased(code);
 }

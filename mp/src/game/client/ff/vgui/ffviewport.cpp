@@ -38,17 +38,18 @@
 #include "hud.h"
 #include <voice_status.h>
 
-// FF's dialogs
-#include "classmenu.h"
-#include "mapscreen.h"
-#include "teammenu.h"
-
 // viewport definitions
 #include <baseviewport.h>
 #include "ffviewport.h"
+//#include "ff_teammenu.h"
+#include "teammenu.h"
 
 #include "vguicenterprint.h"
 #include "text_message.h"
+//#include "ff_classmenu.h"
+#include "classmenu.h"
+#include "mapscreen.h"
+#include "c_ff_player.h"
 
 
 void FFViewport::ApplySchemeSettings( vgui::IScheme *pScheme )
@@ -158,3 +159,35 @@ void FFViewport::PostMessageToPanel(const char* pName, KeyValues* pKeyValues)
 
 	PostMessageToPanel(panel, pKeyValues);
 }
+
+// BEG: Added by Mulchman for team change & class change
+CON_COMMAND( changeteam, "Choose a new team" )
+{
+	if ( !gViewPortInterface )
+		return;
+
+	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+
+	if ( pPlayer )
+		gViewPortInterface->ShowPanel( PANEL_TEAM, true );
+}
+
+CON_COMMAND( changeclass, "Choose a new class" )
+{
+	if ( !gViewPortInterface )
+		return;
+
+	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+
+	// --> Mirv: Select team first bud
+	if (pPlayer && pPlayer->GetTeamNumber() < FIRST_GAME_TEAM)
+	{
+		engine->ClientCmd("changeteam");
+		return;
+	}
+	// <-- Mirv: Select team first bud
+
+	gViewPortInterface->ShowPanel( PANEL_CLASS, true );
+}
+// END: Added by Mulchman for team change & class change
+

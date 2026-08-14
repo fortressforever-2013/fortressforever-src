@@ -485,6 +485,9 @@ CBaseViewport::~CBaseViewport()
 {
 	m_bInitialized = false;
 
+	if ( gViewPortInterface == this )
+		gViewPortInterface = NULL;
+
 #ifndef _XBOX
 	if ( !m_bHasParent && m_pBackGround )
 	{

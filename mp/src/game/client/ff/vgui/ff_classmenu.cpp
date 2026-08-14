@@ -313,7 +313,7 @@ CON_COMMAND( hud_reloadclassmenu, "hud_reloadclassmenu" )
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CClassMenu::CClassMenu(IViewPort *pViewPort) : Frame(NULL, PANEL_CLASS)
+CFFClassMenu::CFFClassMenu( IViewPort *pViewPort ) : CClassMenu( pViewPort )
 {
 	m_pViewPort = pViewPort;
 	m_iScoreBoardKey = BUTTON_CODE_INVALID; // this is looked up in Activate()
@@ -397,19 +397,19 @@ CClassMenu::CClassMenu(IViewPort *pViewPort) : Frame(NULL, PANEL_CLASS)
 //-----------------------------------------------------------------------------
 // Purpose: Destructor
 //-----------------------------------------------------------------------------
-CClassMenu::~CClassMenu()
+CFFClassMenu::~CFFClassMenu()
 {
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CClassMenu::Reset()
+void CFFClassMenu::Reset()
 {
 	SetClassInfoVisible(false);
 }
 
-void CClassMenu::SetClassInfoVisible(bool state)
+void CFFClassMenu::SetClassInfoVisible(bool state)
 {
 	if (state == false)
 		m_pModelView->Reset();
@@ -435,7 +435,7 @@ void CClassMenu::SetClassInfoVisible(bool state)
 //-----------------------------------------------------------------------------
 // Purpose: Update the menu with everything
 //-----------------------------------------------------------------------------
-void CClassMenu::Update() 
+void CFFClassMenu::Update() 
 {
 	IGameResources *pGR = GameResources();
 
@@ -485,7 +485,7 @@ void CClassMenu::Update()
 //-----------------------------------------------------------------------------
 // Purpose: Called when the user picks a class
 //-----------------------------------------------------------------------------
-void CClassMenu::OnCommand( const char *command )
+void CFFClassMenu::OnCommand( const char *command )
 {
 	if ( Q_stricmp( command, "cancel" ) )
 	
@@ -499,7 +499,7 @@ void CClassMenu::OnCommand( const char *command )
 //-----------------------------------------------------------------------------
 // Purpose: shows the class menu
 //-----------------------------------------------------------------------------
-void CClassMenu::ShowPanel(bool bShow)
+void CFFClassMenu::ShowPanel(bool bShow)
 {
 	if (BaseClass::IsVisible() == bShow)
 		return;
@@ -529,7 +529,7 @@ void CClassMenu::ShowPanel(bool bShow)
 //-----------------------------------------------------------------------------
 // Purpose: Nothing
 //-----------------------------------------------------------------------------
-void CClassMenu::SetData(KeyValues *data)
+void CFFClassMenu::SetData(KeyValues *data)
 {
 	// do nothing
 }
@@ -537,7 +537,7 @@ void CClassMenu::SetData(KeyValues *data)
 //-----------------------------------------------------------------------------
 // Purpose: Sets the text of a control by name
 //-----------------------------------------------------------------------------
-void CClassMenu::SetLabelText(const char *textEntryName, const char *text)
+void CFFClassMenu::SetLabelText(const char *textEntryName, const char *text)
 {
 	Label *entry = dynamic_cast<Label *>(FindChildByName(textEntryName));
 	if (entry)
@@ -549,7 +549,7 @@ void CClassMenu::SetLabelText(const char *textEntryName, const char *text)
 //-----------------------------------------------------------------------------
 // Purpose: Sets the visibility of a button by name
 //-----------------------------------------------------------------------------
-void CClassMenu::SetVisibleButton(const char *textEntryName, bool state)
+void CFFClassMenu::SetVisibleButton(const char *textEntryName, bool state)
 {
 	Button *entry = dynamic_cast<Button *>(FindChildByName(textEntryName));
 	if (entry)
@@ -558,7 +558,7 @@ void CClassMenu::SetVisibleButton(const char *textEntryName, bool state)
 	}
 }
 
-void CClassMenu::OnKeyCodePressed(KeyCode code)
+void CFFClassMenu::OnKeyCodePressed(KeyCode code)
 {
 	int nDir = 0;
 
@@ -610,7 +610,7 @@ void CClassMenu::OnKeyCodePressed(KeyCode code)
 	BaseClass::OnKeyCodePressed(code);
 }
 
-void CClassMenu::OnKeyCodeReleased(KeyCode code)
+void CFFClassMenu::OnKeyCodeReleased(KeyCode code)
 {
 	// Bug #0000524: Scoreboard gets stuck with the class menu up when you first join
 	// Hide the scoreboard now
@@ -625,7 +625,7 @@ void CClassMenu::OnKeyCodeReleased(KeyCode code)
 //-----------------------------------------------------------------------------
 // Purpose: Update the main display
 //-----------------------------------------------------------------------------
-void CClassMenu::OnMouseOverMessage(KeyValues *data)
+void CFFClassMenu::OnMouseOverMessage(KeyValues *data)
 {
 	Button *pButton = (Button *) data->GetPtr("panel", NULL);
 
@@ -643,7 +643,7 @@ void CClassMenu::OnMouseOverMessage(KeyValues *data)
 //-----------------------------------------------------------------------------
 // Purpose: Load the correct class into the model view
 //-----------------------------------------------------------------------------
-void CClassMenu::UpdateClassInfo(const char *pszClassName)
+void CFFClassMenu::UpdateClassInfo(const char *pszClassName)
 {
 	if (Q_stricmp(pszClassName, "random") == 0)
 	{
