@@ -123,10 +123,6 @@ void CFFWeaponSpanner::Hit(trace_t &traceHit, Activity nHitActivity)
 		if (!pHitPlayer) 
 			return;
 
-#ifdef CLIENT_DLL
-		WeaponSound( SPECIAL1 );
-#endif
-
 		// Can the guy we hit take damage from us? If he can't, he's
 		// on our team or our ally so give him some armor!
 		// Bug #0000521: Engineer's spanner shouldn't inflict damage even with mp_friendlyfire 1
@@ -166,6 +162,10 @@ void CFFWeaponSpanner::Hit(trace_t &traceHit, Activity nHitActivity)
 			// we're just helping peeps get armor over here
 			return;
 		}
+#ifdef CLIENT_DLL
+		else
+			WeaponSound( SPECIAL1 );
+#endif
 	}
 	else
 	{
