@@ -1,9 +1,9 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//==================================//
 //
 // Purpose: Fortress Forever's CPlayerResource
 //
 // $NoKeywords: $
-//=============================================================================//
+//==================================//
 
 #ifndef FF_PLAYER_RESOURCE_H
 #define FF_PLAYER_RESOURCE_H

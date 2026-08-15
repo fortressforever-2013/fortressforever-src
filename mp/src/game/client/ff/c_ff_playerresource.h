@@ -1,9 +1,9 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//==================================//
 //
 // Purpose: FF's C_PlayerResource
 //
 // $NoKeywords: $
-//=============================================================================//
+//==================================//
 
 #ifndef C_FF_PLAYERRESOURCE_H
 #define C_FF_PLAYERRESOURCE_H
