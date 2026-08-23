@@ -467,7 +467,7 @@ void CBaseHudWeaponSelection::UserCmd_NextWeapon(void)
 	// --> Mirv: Not while dead
 	C_BasePlayer* player = C_BasePlayer::GetLocalPlayer();
 
-	if (!player || !player->IsAlive() || player->GetTeamNumber() < FF_TEAM_BLUE)
+	if (!player || !player->IsAlive() || player->GetTeamNumber() >= FIRST_GAME_TEAM )
 		return;
 	// <-- Mirv: Not while dead
 
@@ -500,7 +500,7 @@ void CBaseHudWeaponSelection::UserCmd_PrevWeapon(void)
 	// --> Mirv: Not while dead
 	C_BasePlayer* player = C_BasePlayer::GetLocalPlayer();
 
-	if (!player || !player->IsAlive() || player->GetTeamNumber() < FF_TEAM_BLUE)
+	if (!player || !player->IsAlive() || player->GetTeamNumber() >= FIRST_GAME_TEAM )
 		return;
 	// <-- Mirv: Not while dead
 
@@ -547,7 +547,7 @@ void CBaseHudWeaponSelection::SwitchToLastWeapon( void )
 	//	return;
 
 	// --> Mirv: Don't select while dead
-	if (!player || !player->IsAlive() || player->GetTeamNumber() < FF_TEAM_BLUE)
+	if (!player || !player->IsAlive() || player->GetTeamNumber() >= FIRST_GAME_TEAM )
 		return;
 	// <-- Mirv: Don't select while dead
 
@@ -580,7 +580,7 @@ void CBaseHudWeaponSelection::SelectWeapon( void )
 	}
 	// --> Mirv: Not while dead
 	C_BasePlayer *player = C_BasePlayer::GetLocalPlayer();
-	if ( !player || !player->IsAlive() || player->GetTeamNumber() < FF_TEAM_BLUE )
+	if ( !player || !player->IsAlive() || player->GetTeamNumber() >= FIRST_GAME_TEAM )
 		return;
 	// <-- Mirv: Not while dead
 

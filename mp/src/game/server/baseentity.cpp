@@ -68,6 +68,7 @@
 
 #include "ff_luacontext.h" // FF
 #include "ff_scriptman.h" // FF
+#include "ff_shareddefs.h"
 
 // Lua includes
 extern "C"

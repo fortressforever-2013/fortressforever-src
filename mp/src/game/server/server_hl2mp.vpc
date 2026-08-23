@@ -9,14 +9,14 @@ $Macro GAMENAME 	"hl2mp" [!$SOURCESDK]
 $Macro GAMENAME 	"mod_hl2mp" [$SOURCESDK]
 
 $Include "$SRCDIR\game\server\server_base.vpc"
-$Include "$SRCDIR\game\server\nav_mesh.vpc" [$SOURCESDK]
+$Include "$SRCDIR\game\server\nav_mesh.vpc"
 
 $Configuration
 {
 	$Compiler
 	{
 		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\game\shared\hl2,.\hl2,.\hl2mp,$SRCDIR\game\shared\hl2mp"
-		$PreprocessorDefinitions		"$BASE;HL2MP;HL2_DLL"
+		$PreprocessorDefinitions		"$BASE;HL2MP;HL2_DLL;NEXT_BOT"
 	}
 }
 

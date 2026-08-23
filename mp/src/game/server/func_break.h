@@ -158,6 +158,7 @@ protected:
 	string_t		m_iszBasePropData;	
 	int				m_iInteractions;
 	PerformanceMode_t m_PerformanceMode;
+	int				m_nTeamNumber;
 
 	float			m_explodeRadius;
 

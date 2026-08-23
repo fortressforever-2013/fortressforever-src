@@ -42,6 +42,10 @@
 #include "gamestats.h"
 #include "vehicle_base.h"
 
+#ifdef TF_DLL
+#include "nav_mesh/tf_nav_mesh.h"
+#endif
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -4827,6 +4831,10 @@ void CPropDoorRotating::Spawn()
 	{
 		::V_swap( m_angRotationOpenForward, m_angRotationOpenBack );
 	}
+
+#ifdef TF_DLL
+	TheTFNavMesh()->OnDoorCreated( this );
+#endif
 
 	// Figure out our volumes of movement as this door opens
 	CalculateDoorVolume( GetLocalAngles(), m_angRotationOpenForward, &m_vecForwardBoundsMin, &m_vecForwardBoundsMax );

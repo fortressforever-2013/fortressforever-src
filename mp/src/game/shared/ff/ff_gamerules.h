@@ -162,6 +162,10 @@ public:
 	virtual void	UpdateSpawnPoints();
 	CUtlVector<CBaseEntity*> m_SpawnPoints;
 
+	// for moving the spawn spot around the original spawn spot if other players are inside it
+	virtual Vector GetPlayerSpawnSpotOffset( const CBasePlayer *pPlayer, const Vector vecOrigin, const Vector vecPlayerBoundsMins, const Vector vecPlayerBoundsMaxs );
+	CBaseEntity *GetPlayerSpawnSpot( CBasePlayer *pPlayer );
+
 	virtual bool	IsSpawnPointClear( CBaseEntity *pSpot, CBasePlayer *pPlayer );
 	virtual bool	IsSpawnPointValid( CBaseEntity *pSpot, CBasePlayer *pPlayer );
 	virtual bool	FPlayerCanRespawn( CBasePlayer *pPlayer );

@@ -22,8 +22,8 @@ $Configuration	"Debug"
 {
 	$General
 	{
-		$OutputDirectory		".\Debug_$GAMENAME"			[$WIN32]
-		$IntermediateDirectory	".\Debug_$GAMENAME"			[$WIN32]
+		$OutputDirectory		".\Debug_$GAMENAME" [$WIN32]
+		$IntermediateDirectory	".\Debug_$GAMENAME" [$WIN32]
 
 		$OutputDirectory		".\Debug_$GAMENAME_360"		[$X360]
 		$IntermediateDirectory	".\Debug_$GAMENAME_360"		[$X360]
@@ -34,8 +34,8 @@ $Configuration	"Release"
 {
 	$General
 	{
-		$OutputDirectory		".\Release_$GAMENAME"		[$WIN32]
-		$IntermediateDirectory	".\Release_$GAMENAME"		[$WIN32]
+		$OutputDirectory		".\Release_$GAMENAME" [$WIN32]
+		$IntermediateDirectory	".\Release_$GAMENAME" [$WIN32]
 
 		$OutputDirectory		".\Release_$GAMENAME_360"	[$X360]
 		$IntermediateDirectory	".\Release_$GAMENAME_360"	[$X360]
@@ -46,9 +46,9 @@ $Configuration
 {
 	$General
 	{
-		$OutputDirectory		".\$GAMENAME"		[$OSXALL]
+		$OutputDirectory		".\$GAMENAME" [$OSXALL]
 	}
-	
+
 	$Compiler
 	{
 		$AdditionalIncludeDirectories	"$BASE;.\;$SRCDIR\game\shared;$SRCDIR\utils\common;$SRCDIR\game\shared\econ;$SRCDIR\game\server\NextBot"
@@ -72,11 +72,11 @@ $Project
 	{
 		$File	"gamedll_replay.cpp"
 		$File	"$SRCDIR\common\replay\ireplaysessionrecorder.h"
-		
+
 		$File	"$SRCDIR\game\shared\replay_gamestats_shared.cpp"	[$BUILD_REPLAY]
 		$File	"$SRCDIR\game\shared\replay_gamestats_shared.h"	[$BUILD_REPLAY]
 	}
-	
+
 	$Folder	"Source Files"
 	{
 		$File	"$SRCDIR\game\shared\achievement_saverestore.cpp"

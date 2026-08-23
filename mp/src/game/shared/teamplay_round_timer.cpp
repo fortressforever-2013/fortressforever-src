@@ -1138,17 +1138,23 @@ void CTeamRoundTimer::SetTimeRemaining( int iTimerSeconds )
 		return;
 
 	// make sure we don't go over our max length
-	if ( m_nTimerMaxLength > 0 )
+	iTimerSeconds = m_nTimerMaxLength > 0 ? MIN( iTimerSeconds, m_nTimerMaxLength ) : iTimerSeconds;
+
+	float flTimerSeconds = (float)iTimerSeconds;
+	if ( TeamplayRoundBasedRules()->IsInTournamentMode() && TeamplayRoundBasedRules()->IsInStopWatch() && ObjectiveResource() && !IsStopWatchTimer() && !TeamplayRoundBasedRules()->InSetup() )
 	{
-		if ( iTimerSeconds > m_nTimerMaxLength )
+		// make sure we don't go over our stop watch timer
+		int iStopWatchTimer = ObjectiveResource()->GetStopWatchTimer();
+		CTeamRoundTimer *pStopWatch = dynamic_cast< CTeamRoundTimer* >( UTIL_EntityByIndex( iStopWatchTimer ) );
+		if ( pStopWatch && !pStopWatch->IsWatchingTimeStamps() && TeamplayRoundBasedRules()->StopWatchShouldBeTimedWin() )
 		{
-			
-			
-			iTimerSeconds = m_nTimerMaxLength;
+			float flStopWatchRemainingTime = pStopWatch->GetTimeRemaining();
+			flTimerSeconds = flStopWatchRemainingTime > 0 ? MIN( flTimerSeconds, flStopWatchRemainingTime ) : flTimerSeconds;
+			iTimerSeconds = (int)ceil( flTimerSeconds );
 		}
 	}
 
-	m_flTimeRemaining = (float)iTimerSeconds;
+	m_flTimeRemaining = flTimerSeconds;
 	m_flTimerEndTime = gpGlobals->curtime + m_flTimeRemaining;
 	m_nTimerLength = iTimerSeconds;
 	
@@ -1240,19 +1246,38 @@ void CTeamRoundTimer::AddTimerSeconds( int iSecondsToAdd, int iTeamResponsible /
 		}
 	}
 
+	float flSecondsToAdd = (float)iSecondsToAdd;
+	if ( TeamplayRoundBasedRules()->IsInTournamentMode() && TeamplayRoundBasedRules()->IsInStopWatch() && ObjectiveResource() && !IsStopWatchTimer() && !TeamplayRoundBasedRules()->InSetup() )
+	{
+		int iStopWatchTimer = ObjectiveResource()->GetStopWatchTimer();
+		CTeamRoundTimer *pStopWatch = dynamic_cast< CTeamRoundTimer* >( UTIL_EntityByIndex( iStopWatchTimer ) );
+		if ( pStopWatch && !pStopWatch->IsWatchingTimeStamps() && TeamplayRoundBasedRules()->StopWatchShouldBeTimedWin() )
+		{
+			float flStopWatchRemainingTime = pStopWatch->GetTimeRemaining();
+			float flRemainingTime = GetTimeRemaining();
+			// will adding this many seconds push us over our stop watch timer?
+			if ( flRemainingTime + flSecondsToAdd > flStopWatchRemainingTime )
+			{
+				// adjust to only add up to our stop watch timer
+				flSecondsToAdd = flStopWatchRemainingTime - flRemainingTime;
+				iSecondsToAdd = ( int )ceil( flSecondsToAdd );
+			}
+		}
+	}
+
 	if ( m_bTimerPaused )
 	{
-		m_flTimeRemaining += (float)iSecondsToAdd;
+		m_flTimeRemaining += flSecondsToAdd;
 	}
 	else
 	{
-		m_flTimerEndTime += (float)iSecondsToAdd;
+		m_flTimerEndTime += flSecondsToAdd;
 	}
 
 	m_nTimerLength += iSecondsToAdd;
 	CalculateOutputMessages();
 
-	if ( ( ObjectiveResource() && ObjectiveResource()->GetTimerInHUD() == entindex() ) || ( TeamplayRoundBasedRules()->IsInKothMode() ) )
+	if ( ( ObjectiveResource() && ObjectiveResource()->GetTimerToShowInHUD() == entindex() ) || ( TeamplayRoundBasedRules()->IsInKothMode() ) )
 	{
 		if ( !TeamplayRoundBasedRules()->InStalemate() && !TeamplayRoundBasedRules()->RoundHasBeenWon() && !TeamplayRoundBasedRules()->IsInKothMode() )
 		{
@@ -1373,22 +1398,14 @@ void CTeamRoundTimer::InputAddTeamTime( inputdata_t &input )
 	int			nSeconds = 0;
 
 	// get the team
-#ifdef SDK2013CE
-	p = nexttoken( token, p, ' ', sizeof(token) );
-#else
 	p = nexttoken( token, p, ' ' );
-#endif
 	if ( token[0] )
 	{
 		nTeam = Q_atoi( token );
 	}
 
 	// get the time
-#ifdef SDK2013CE
-	p = nexttoken( token, p, ' ', sizeof(token) );
-#else
 	p = nexttoken( token, p, ' ' );
-#endif
 	if ( token[0] )
 	{
 		nSeconds = Q_atoi( token );

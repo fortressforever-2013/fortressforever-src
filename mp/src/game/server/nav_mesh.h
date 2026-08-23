@@ -198,16 +198,16 @@ public:
 
 	unsigned int operator()( const NavVisPair_t &item ) const
 	{
-		COMPILE_TIME_ASSERT( sizeof(CNavArea *) == 4 );
-		int key[2] = { (int)item.pAreas[0] + item.pAreas[1]->GetID(), (int)item.pAreas[1] + item.pAreas[0]->GetID() };
-		
-		
-			
-		
-		
-		
+		COMPILE_TIME_ASSERT( sizeof(CNavArea *) == sizeof( intp ) );
+		intp key[2] = { (intp) ( (intp)item.pAreas[0] + item.pAreas[1]->GetID() ), (intp)( (intp)item.pAreas[1] + item.pAreas[0]->GetID() ) };
+		if ( sizeof( key ) >= 16 )
+		{
+			return Hash16( key );
+		}
+		else
+		{
 			return Hash8( key );
-		
+		}
 	}
 };
 
@@ -1059,6 +1059,8 @@ public:
 	void SimplifySelectedAreas( void );	// Simplifies the selected set by reducing to 1x1 areas and re-merging them up with loosened tolerances
 
 protected:
+	NavErrorType GetNavDataFromFile( CUtlBuffer &outBuffer, bool *pNavDataFromBSP = NULL );
+
 	virtual void PostCustomAnalysis( void ) { }					// invoked when custom analysis step is complete
 	bool FindActiveNavArea( void );								// Finds the area or ladder the local player is currently pointing at.  Returns true if a surface was hit by the traceline.
 	virtual void RemoveNavArea( CNavArea *area );				// remove an area from the grid

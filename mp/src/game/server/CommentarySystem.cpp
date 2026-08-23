@@ -352,10 +352,10 @@ public:
 		InitCommentary();
 
 		IGameEvent *event = gameeventmanager->CreateEvent( "playing_commentary" );
-		
-		
+		if ( event )
+		{
 			gameeventmanager->FireEventClientSide( event );
-		
+		}
 	}
 
 	CPointCommentaryNode *GetNodeUnderCrosshair()
@@ -884,7 +884,7 @@ bool IsListeningToCommentary( void )
 void CPointCommentaryNode::Spawn( void )
 {
 	// No model specified?
-	const char *szModel = (char *)STRING( GetModelName() );
+	char *szModel = (char *)STRING( GetModelName() );
 	if (!szModel || !*szModel)
 	{
 		szModel = "models/extras/info_speech.mdl";

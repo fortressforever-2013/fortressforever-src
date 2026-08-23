@@ -242,9 +242,23 @@ enum CastVote
 //Since this is decided by the gamerules (and it can be whatever number as long as its less than MAX_PLAYERS).
 #if defined( CSTRIKE_DLL )
 	#define MAX_PLAYERS				65  // Absolute max players supported
+#elif defined( TF_DLL ) || defined ( TF_CLIENT_DLL ) || defined( HL2MP )
+	#define MAX_PLAYERS				101
 #else
 	#define MAX_PLAYERS				33  // Absolute max players supported
 #endif
+
+// Josh: Accounts for code that may index this array by an entindex
+// of player rather than the player index... :s
+#define MAX_PLAYERS_ARRAY_SAFE		( MAX_PLAYERS + 1 )
+
+inline bool IsIndexIntoPlayerArrayValid( int iIndex )
+{
+	if ( iIndex < 0 || iIndex >= MAX_PLAYERS_ARRAY_SAFE )
+		return false;
+		
+	return true;
+}
 
 #define MAX_PLACE_NAME_LENGTH		18
 
@@ -256,26 +270,16 @@ enum CastVote
 #define	TEAM_INVALID			-1
 #define TEAM_UNASSIGNED			0	// not assigned to a team
 #define TEAM_SPECTATOR			1	// spectator team
-
 // Start your team numbers after this
 #define LAST_SHARED_TEAM		TEAM_SPECTATOR
 
 // The first team that's game specific (i.e. not unassigned / spectator)
 #define FIRST_GAME_TEAM			(LAST_SHARED_TEAM+1)
 
-#ifdef FF // BEG: Added by Mulchman
-enum
-{
-	FF_TEAM_BLUE = FIRST_GAME_TEAM,
-	FF_TEAM_RED,
-	FF_TEAM_YELLOW,
-	FF_TEAM_GREEN,
-	TEAM_COUNT	// # of teams there are
-};
-#endif // END: Added by Mulchman
-
 #define MAX_TEAMS				32	// Max number of teams in a game
 #define MAX_TEAM_NAME_LENGTH	32	// Max length of a team's name
+
+#define MAX_TEAMS_ARRAY_SAFE 	MAX_TEAMS
 
 // Weapon m_iState
 #define WEAPON_IS_ONTARGET				0x40
@@ -283,22 +287,6 @@ enum
 #define WEAPON_NOT_CARRIED				0	// Weapon is on the ground
 #define WEAPON_IS_CARRIED_BY_PLAYER		1	// This client is carrying this weapon.
 #define WEAPON_IS_ACTIVE				2	// This client is carrying this weapon and it's the currently held weapon
-
-#ifdef FF // --> Mirv: Class defines
-enum FFClass
-{
-	CLASS_SCOUT = 1,
-	CLASS_SNIPER,
-	CLASS_SOLDIER,
-	CLASS_DEMOMAN,
-	CLASS_MEDIC,
-	CLASS_HWGUY,
-	CLASS_PYRO,
-	CLASS_SPY,
-	CLASS_ENGINEER,
-	CLASS_CIVILIAN
-};
-#endif // <-- Mirv: Class defines
 
 // -----------------------------------------
 // Skill Level

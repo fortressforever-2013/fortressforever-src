@@ -20,6 +20,11 @@
 #include "func_simpleladder.h"
 #endif
 #include "functorutils.h"
+#include "nav_pathfind.h"
+
+#ifdef TF_DLL
+#include "tf/nav_mesh/tf_nav_area.h"
+#endif
 
 #ifdef NEXT_BOT
 #include "NextBot/NavMeshEntities/func_nav_prerequisite.h"

@@ -33,6 +33,29 @@
 #define DEFAULTWEAPON_SPY "knife"
 #define DEFAULTWEAPON_CIVILIAN "umbrella"
 
+enum
+{
+	FF_TEAM_BLUE = FIRST_GAME_TEAM,
+	FF_TEAM_RED,
+	FF_TEAM_YELLOW,
+	FF_TEAM_GREEN,
+	TEAM_COUNT	// # of teams there are
+};
+
+enum FFClass
+{
+	CLASS_SCOUT = 1,
+	CLASS_SNIPER,
+	CLASS_SOLDIER,
+	CLASS_DEMOMAN,
+	CLASS_MEDIC,
+	CLASS_HWGUY,
+	CLASS_PYRO,
+	CLASS_SPY,
+	CLASS_ENGINEER,
+	CLASS_CIVILIAN
+};
+
 // extended from shareddefs.h
 #define DMG_AIRSHOT			(DMG_LASTGENERICFLAG<<1)		// damage done by an airshot
 

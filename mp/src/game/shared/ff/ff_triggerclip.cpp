@@ -13,6 +13,7 @@
 // 03/27/2007:	Mulchman: Initial creation
 
 #include "cbase.h"
+#include "ff_shareddefs.h"
 #include "ff_triggerclip.h"
 
 #ifdef GAME_DLL

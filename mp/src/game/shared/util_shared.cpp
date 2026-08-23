@@ -1530,3 +1530,42 @@ const char* UTIL_GetActiveHolidayString()
 	return NULL;
 #endif
 }
+
+const char *GetCleanMapName( const char *pszUnCleanMapName, char (&pszTmp)[256])
+{
+#if defined( TF_DLL ) || defined( TF_CLIENT_DLL )
+	bool bPrefixMaps = true;
+	const char *pszMapAfterPrefix = StringAfterPrefixCaseSensitive( pszUnCleanMapName, MAP_WORKSHOP_PREFIX_1 );
+	if ( !pszMapAfterPrefix )
+		pszMapAfterPrefix = StringAfterPrefixCaseSensitive( pszUnCleanMapName, MAP_WORKSHOP_PREFIX_2 );
+
+	if ( !pszMapAfterPrefix )
+	{
+		bPrefixMaps = false;
+		pszMapAfterPrefix = StringAfterPrefixCaseSensitive( pszUnCleanMapName, WORKSHOP_PREFIX_1 );
+		if ( !pszMapAfterPrefix )
+			pszMapAfterPrefix = StringAfterPrefixCaseSensitive( pszUnCleanMapName, WORKSHOP_PREFIX_2 );
+	}
+
+	if ( pszMapAfterPrefix )
+	{
+		if ( bPrefixMaps )
+		{
+			V_strcpy_safe( pszTmp, "maps" CORRECT_PATH_SEPARATOR_S );
+			V_strcat_safe( pszTmp, pszMapAfterPrefix );
+		}
+		else
+		{
+			V_strcpy_safe( pszTmp, pszMapAfterPrefix );
+		}
+
+		char *pszUGC = V_strstr( pszTmp, ".ugc" );
+		if ( pszUGC )
+			*pszUGC = '\0';
+
+		return pszTmp;
+	}
+#endif
+
+	return pszUnCleanMapName;
+}

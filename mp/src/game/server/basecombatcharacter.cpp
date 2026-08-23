@@ -39,6 +39,10 @@
 #include "saverestoretypes.h"
 #include "nav_mesh.h"
 
+#ifdef TF_DLL
+#include "nav_mesh/tf_nav_area.h"
+#endif
+
 #ifdef NEXT_BOT
 #include "NextBot/NextBotManager.h"
 #endif
@@ -2172,6 +2176,7 @@ void CBaseCombatCharacter::Weapon_Equip( CBaseCombatWeapon *pWeapon )
 	// Pass the lighting origin over to the weapon if we have one
 	pWeapon->SetLightingOriginRelative( GetLightingOriginRelative() );
 }
+
 
 //-----------------------------------------------------------------------------
 // Purpose:	Leaves weapon, giving only ammo to the character
