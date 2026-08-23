@@ -384,6 +384,13 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 		CFFPlayer *pPlayer = ToFFPlayer( CBaseEntity::Instance( pClient ) );
 		if( pPlayer )
 		{
+		#ifdef GAME_DLL
+			if (pPlayer->IsAlive() && pPlayer->GetTeamNumber() != TEAM_SPECTATOR)
+			{
+				pPlayer->CommitSuicide(true, true);
+			}
+		#endif
+
 			CFFLuaSC func( 1, pPlayer );
 			func.CallFunction( "player_disconnected" );
 
