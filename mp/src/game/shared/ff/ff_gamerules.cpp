@@ -384,13 +384,6 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 		CFFPlayer *pPlayer = ToFFPlayer( CBaseEntity::Instance( pClient ) );
 		if( pPlayer )
 		{
-		#ifdef GAME_DLL
-			if (pPlayer->IsAlive() && pPlayer->GetTeamNumber() != TEAM_SPECTATOR)
-			{
-				pPlayer->CommitSuicide(true, true);
-			}
-		#endif
-
 			CFFLuaSC func( 1, pPlayer );
 			func.CallFunction( "player_disconnected" );
 
@@ -423,6 +416,12 @@ ConVar mp_friendlyfire_armorstrip( "mp_friendlyfire_armorstrip",
 
 				pEntity = gEntList.FindEntityByOwnerAndClassT( pEntity, ( CBaseEntity * )pPlayer, CLASS_INFOSCRIPT );
 			}
+		#ifdef GAME_DLL
+			if (pPlayer->IsAlive() && pPlayer->GetTeamNumber() != TEAM_SPECTATOR)
+			{
+				pPlayer->CommitSuicide(true, true);
+			}
+		#endif
 		}
 
 		// Chain on down, I'm in the chain gang, mang. What? I
