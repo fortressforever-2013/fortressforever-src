@@ -78,6 +78,7 @@ ConVar cl_wpn_sway_interp( "cl_wpn_sway_interp", "0.1", FCVAR_CLIENTDLL );
 	#endif
 	
 	ConVar cl_bob("cl_bob", "1", FCVAR_CLIENTDLL);
+	ConVar cl_wpn_sway_follow("cl_wpn_sway_follow", "1", FCVAR_CLIENTDLL, "Viewmodel sways toward the direction the camera is turning");
 	#endif
 	
 void CPredictedViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAngle& original_angles )
@@ -104,6 +105,9 @@ void CPredictedViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAng
 
 		// Now offset the origin using that.
 		vForwardDiff *= cl_wpn_sway_scale.GetFloat();
+		if (cl_wpn_sway_follow.GetBool())
+		origin -= forward*vForwardDiff.x + right*-vForwardDiff.y + up*vForwardDiff.z;
+		else
 		origin += forward*vForwardDiff.x + right*-vForwardDiff.y + up*vForwardDiff.z;
 
 	// Viewmodel bobs
