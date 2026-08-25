@@ -1055,23 +1055,20 @@ ConVarRef suitcharger( "sk_suitcharger" );
 			//UTIL_LogPrintf(" killer_weapon_name: %s\n",killer_weapon_name);
 #endif
 			// strip the NPC_* or weapon_* from the inflictor's classname
-			if ( Q_strncmp( killer_weapon_name, "weapon_", 7 ) == 0 )
+			if ( strncmp( killer_weapon_name, "weapon_", 7 ) == 0 )
 			{
-				//UTIL_LogPrintf("  begins with weapon_, removing\n");
 				killer_weapon_name += 7;
 			}
-			else if ( Q_strncmp( killer_weapon_name, "NPC_", 4 ) == 0 )
+			else if ( strncmp( killer_weapon_name, "NPC_", 4 ) == 0 )
 			{
-				//UTIL_LogPrintf("  begins with NPC_, removing\n");
 				killer_weapon_name += 4;
 			}
-			else if ( Q_strncmp( killer_weapon_name, "func_", 5 ) == 0 )
+			else if ( strncmp( killer_weapon_name, "func_", 5 ) == 0 )
 			{
-				//UTIL_LogPrintf("  begins with func_, removing\n");
 				killer_weapon_name += 5;
 			}
 			// BEG: Added by Mulchman for ff_ entities
-			else if (Q_strnicmp(killer_weapon_name, "ff_", 3) == 0)
+			else if ( strnicmp(killer_weapon_name, "ff_", 3) == 0 )
 			{
 				//UTIL_LogPrintf( "  begins with ff_, removing\n" );
 				killer_weapon_name += 3;
@@ -1472,7 +1469,7 @@ ConVarRef suitcharger( "sk_suitcharger" );
 		DetermineMapCycleFilename( mapcfile, sizeof(mapcfile), false );
 
 		// Check the time of the mapcycle file and re-populate the list of level names if the file has been modified
-		const int nMapCycleTimeStamp = filesystem->GetPathTime( mapcfile, "GAME" );
+		const int nMapCycleTimeStamp = filesystem->GetPathTime( mapcfile, "MOD" );
 
 		if ( 0 == nMapCycleTimeStamp )
 		{
@@ -1524,12 +1521,30 @@ ConVarRef suitcharger( "sk_suitcharger" );
 			return;
 		}
 
+		
+		
+		
+		
+		
+		
 		char szRecommendedName[ MAX_PATH ];
 		V_sprintf_safe( szRecommendedName, "cfg/%s", pszVar );
+		
+		
+		     
+		
+			
+			
+				
+				
+			
+			
+			
+		
 
 		// First, look for a mapcycle file in the cfg directory, which is preferred
 		V_strncpy( pszResult, szRecommendedName, nSizeResult );
-		if ( filesystem->FileExists( pszResult, "GAME" ) )
+		if ( filesystem->FileExists( pszResult, "MOD" ) )
 		{
 			if ( bForceSpew || V_stricmp( szLastResult, pszResult) )
 			{
@@ -1540,8 +1555,24 @@ ConVarRef suitcharger( "sk_suitcharger" );
 		}
 
 		// Nope?  Try the root.  
+		
+		
+		
+		
+		
+		
+			
+			
+				
+				
+			
+			
+			
+		
+
+
 		V_strncpy( pszResult, pszVar, nSizeResult );
-		if ( filesystem->FileExists( pszResult, "GAME" ) )
+		if ( filesystem->FileExists( pszResult, "MOD" ) )
 		{
 			if ( bForceSpew || V_stricmp( szLastResult, pszResult) )
 			{
@@ -1555,7 +1586,7 @@ ConVarRef suitcharger( "sk_suitcharger" );
 		if ( !V_stricmp( pszVar, "mapcycle.txt" ) )
 		{
 			V_strncpy( pszResult, "cfg/mapcycle_default.txt", nSizeResult );
-			if ( filesystem->FileExists( pszResult, "GAME" ) )
+			if ( filesystem->FileExists( pszResult, "MOD" ) )
 			{
 				if ( bForceSpew || V_stricmp( szLastResult, pszResult) )
 				{
@@ -1583,7 +1614,7 @@ ConVarRef suitcharger( "sk_suitcharger" );
 	void CMultiplayRules::RawLoadMapCycleFileIntoVector( const char *pszMapCycleFile, CUtlVector<char *> &mapList )
 	{
 		CUtlBuffer buf;
-		if ( !filesystem->ReadFile( pszMapCycleFile, "GAME", buf ) )
+		if ( !filesystem->ReadFile( pszMapCycleFile, "MOD", buf ) )
 			return;
 		buf.PutChar( 0 );
 		V_SplitString( (char*)buf.Base(), "\n", mapList );
@@ -1681,7 +1712,7 @@ ConVarRef suitcharger( "sk_suitcharger" );
 
 		FreeMapCycleFileVector( m_MapList );
 
-		const int nMapCycleTimeStamp = filesystem->GetPathTime( mapcfile, "GAME" );
+		const int nMapCycleTimeStamp = filesystem->GetPathTime( mapcfile, "MOD" );
 		m_nMapCycleTimeStamp = nMapCycleTimeStamp;
 
 		// Repopulate map list from mapcycle file
@@ -1706,36 +1737,14 @@ ConVarRef suitcharger( "sk_suitcharger" );
 			// Search for all pop files that are prefixed with the current map name
 			CUtlString sFileList;
 
-			char szBaseName[_MAX_PATH];
-			V_snprintf( szBaseName, sizeof( szBaseName ), "scripts/population/%s*.pop", STRING(gpGlobals->mapname) );
+			CUtlVector< CUtlString > defaultPopFiles;
+			CPopulationManager::FindDefaultPopulationFileShortNames( defaultPopFiles );
 
-			FileFindHandle_t popHandle;
-			const char *pPopFileName = filesystem->FindFirst( szBaseName, &popHandle );
-
-			while ( pPopFileName && pPopFileName[ 0 ] != '\0' )
+			FOR_EACH_VEC( defaultPopFiles, idx )
 			{
-				// Skip it if it's a directory or is the folder info
-				if ( filesystem->FindIsDirectory( popHandle ) )
-				{
-					pPopFileName = filesystem->FindNext( popHandle );
-					continue;
-				}
-
-				const char *pchPopPostfix = StringAfterPrefix( pPopFileName, STRING(gpGlobals->mapname) );
-				if ( pchPopPostfix )
-				{
-					char szShortName[_MAX_PATH];
-					V_strncpy( szShortName, ( ( pchPopPostfix[ 0 ] == '_' ) ? ( pchPopPostfix + 1 ) : "normal" ), sizeof( szShortName ) ); // skip the '_'
-					V_StripExtension( szShortName, szShortName, sizeof( szShortName ) );
-
-					sFileList += szShortName;
-					sFileList += '\n';
-				}
-
-				pPopFileName = filesystem->FindNext( popHandle );
+				sFileList += defaultPopFiles[ idx ];
+				sFileList += "\n";
 			}
-
-			filesystem->FindClose( popHandle );
 
 			if ( sFileList.Length() > 0 )
 			{
@@ -1936,6 +1945,18 @@ ConVarRef suitcharger( "sk_suitcharger" );
 		return BaseClass::ClientCommand( pEdict, args );
 	}
 
+#ifdef TF_DLL
+	#define ACHIEVEMENT_LIST_(id) id
+	#define ACHIEVEMENT_LIST(className, achievementID, achievementName, iPointValue) \
+		ACHIEVEMENT_LIST_(achievementID),
+
+	static const std::unordered_set<int> g_ValidAchiementIdxs = {{
+		#include "achievements_tf_list.inc"
+	}};
+
+	#undef ACHIEVEMENT_LIST
+#endif
+
 	void CMultiplayRules::ClientCommandKeyValues( edict_t *pEntity, KeyValues *pKeyValues )
 	{
 		CBaseMultiplayerPlayer *pPlayer = dynamic_cast< CBaseMultiplayerPlayer * >( CBaseEntity::Instance( pEntity ) );
@@ -1952,6 +1973,18 @@ ConVarRef suitcharger( "sk_suitcharger" );
 					return;
 
 				int nAchievementID = pKeyValues->GetInt( "achievementID" );
+
+#ifdef TF_DLL
+				// Josh:
+				// Bots are using this as a back-channel to communicate on our servers
+				// with invalid achievement indexes.
+				// I did want to use achievementmgr but that isn't available on the server --
+				// nor are the achievement's actually DECLARED (they rely on a bunch of client code)
+				// so we have a list of achievements in achievements_tf_list.inc.
+				// Let's validate the achievement is actually valid before continuing...
+				if ( g_ValidAchiementIdxs.find( nAchievementID ) == g_ValidAchiementIdxs.end() )
+					return;
+#endif
 
 				IGameEvent * event = gameeventmanager->CreateEvent( "achievement_earned" );
 				if ( event )

@@ -377,7 +377,7 @@ void CRopeManager::AddToRenderCache( C_RopeKeyframe *pRope )
 	// If we didn't find one, then allocate the mofo.
 	if ( iRenderCache == nRenderCacheCount )
 	{
-		int iRenderCache = m_aRenderCache.AddToTail();
+		iRenderCache = m_aRenderCache.AddToTail();
 		m_aRenderCache[iRenderCache].m_pSolidMaterial = pRope->GetSolidMaterial();
 		if ( m_aRenderCache[iRenderCache].m_pSolidMaterial )
 		{
@@ -1035,6 +1035,8 @@ void C_RopeKeyframe::CPhysicsDelegate::ApplyConstraints( CSimplePhysics::CNode *
 // C_RopeKeyframe
 // ------------------------------------------------------------------------------------ //
 
+int C_RopeKeyframe::s_nLastRopeIndex = 0;
+
 C_RopeKeyframe::C_RopeKeyframe()
 {
 	m_bEndPointAttachmentPositionsDirty = true;
@@ -1057,6 +1059,8 @@ C_RopeKeyframe::C_RopeKeyframe()
 	m_flCurScroll = m_flScrollSpeed = 0;
 	m_TextureScale = 4;	// 4:1
 	m_flImpulse.Init();
+
+	m_nRopeIndex = s_nLastRopeIndex++;
 
 	g_Ropes.AddToTail( this );
 }
@@ -1704,9 +1708,9 @@ void C_RopeKeyframe::BuildRope( RopeSegData_t *pSegmentData, const Vector &vCurr
 
 		if ( !bQueued && RopeManager()->IsHolidayLightMode() && r_rope_holiday_light_scale.GetFloat() > 0.0f )
 		{
-			
-			
-			data.m_nMaterial = reinterpret_cast< int >( this );
+			// misyl: This used to be janky pointer thing,
+			// now it's some global index thing.
+			data.m_nMaterial = m_nRopeIndex;
 			data.m_nHitBox = ( iNode << 8 );
 			data.m_flScale = r_rope_holiday_light_scale.GetFloat();
 			data.m_vOrigin = pSegmentData->m_Segments[nSegmentCount].m_vPos;
@@ -1932,10 +1936,10 @@ bool C_RopeKeyframe::CalculateEndPointAttachment( C_BaseEntity *pEnt, int iAttac
 			if ( !pModel )
 				return false;
 
-			int iAttachment = pModel->LookupAttachment( "buff_attach" );
+			int iAttachmentBuf = pModel->LookupAttachment( "buff_attach" );
 			if ( pAngles )
-				return pModel->GetAttachment( iAttachment, vPos, *pAngles );
-			return pModel->GetAttachment( iAttachment, vPos );
+				return pModel->GetAttachment( iAttachmentBuf, vPos, *pAngles );
+			return pModel->GetAttachment( iAttachmentBuf, vPos );
 		}
 	}
 

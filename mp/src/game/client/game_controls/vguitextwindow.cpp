@@ -140,9 +140,9 @@ void CTextWindow::Reset( void )
 	// HPE_BEGIN:
 	// [Forrest] Replace strange hard-coded default message with hard-coded error message.
 	//=============================================================================
-	V_strcpy_safe( m_szTitle, "Fortress Forever" );
-	V_strcpy_safe( m_szMessage, "motd" );
-	V_strcpy_safe( m_szMessageFallback, "motd" );
+	V_strcpy_safe( m_szTitle, "Error loading info message." );
+	V_strcpy_safe( m_szMessage, "" );
+	V_strcpy_safe( m_szMessageFallback, "" );
 	//=============================================================================
 	// HPE_END
 	//=============================================================================
@@ -209,10 +209,7 @@ void CTextWindow::ShowIndex( const char *entry )
 		data = (const char *)g_pStringTableInfoPanel->GetStringUserData( index, &length );
 
 	if ( !data || !data[0] )
-	{
-		ShowURL("http://www.fortress-forever.com/defaultmotd/");
-		return; // show default
-	}
+		return; // nothing to show
 
 	// is this a web URL ?
 	if ( !Q_strncmp( data, "http://", 7 ) || !Q_strncmp( data, "https://", 8 ) )

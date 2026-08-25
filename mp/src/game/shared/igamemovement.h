@@ -74,11 +74,14 @@ public:
 
 	void			SetAbsOrigin( const Vector &vec );
 	const Vector	&GetAbsOrigin() const;
-
-public: // YoYo178: changed from private
+#ifndef FF
+private: // YoYo178: changed from private
+#else
+public:
 	Vector			m_vecAbsOrigin;		// edict::origin
 	//friend class CFFGameMovement; // allow CFFGameMovement to access the variable above (m_vecAbsOrigin)
 									// could also make the variable public instead
+#endif
 };
 
 inline const Vector &CMoveData::GetAbsOrigin() const

@@ -1286,7 +1286,7 @@ void CMomentaryRotButton::Lock()
 
 	SetLocalAngularVelocity( vec3_angle );
 	SetMoveDoneTime( -1 );
-	SetMoveDone( NULL );
+	SetMoveDone( nullptr );
 
 	SetNextThink( TICK_NEVER_THINK );
 	SetThink( NULL );
@@ -1531,7 +1531,7 @@ void CMomentaryRotButton::UseMoveDone( void )
 	else
 	{
 		SetThink( NULL );
-		SetMoveDone( NULL );
+		SetMoveDone( nullptr );
 	}
 }
 
@@ -1553,7 +1553,7 @@ void CMomentaryRotButton::ReturnMoveDone( void )
 		UpdateTarget( 0, NULL );
 
 		SetMoveDoneTime( -1 );
-		SetMoveDone( NULL );
+		SetMoveDone( nullptr );
 
 		SetNextThink( TICK_NEVER_THINK );
 		SetThink( NULL );

@@ -264,7 +264,7 @@ void CSpectatorMenu::FireGameEvent( IGameEvent * event )
 {
 	const char *pEventName = event->GetName();
 
- 	if ( Q_strcmp( "spec_target_updated", pEventName ) == 0 )
+	if ( Q_strcmp( "spec_target_updated", pEventName ) == 0 )
 	{
 		IGameResources *gr = GameResources();
 		if ( !gr )
@@ -286,8 +286,8 @@ void CSpectatorMenu::FireGameEvent( IGameEvent * event )
 		{
 			for ( int i=0; i<m_pPlayerList->GetItemCount(); ++i )
 			{
-				KeyValues *kv = m_pPlayerList->GetItemUserData( i );
-				if ( kv && FStrEq( kv->GetString( "player" ), selectedPlayerName ) )
+				KeyValues *pKv = m_pPlayerList->GetItemUserData( i );
+				if ( pKv && FStrEq( pKv->GetString( "player" ), selectedPlayerName ) )
 				{
 					m_pPlayerList->ActivateItemByRow( i );
 					break;
@@ -336,7 +336,7 @@ void CSpectatorMenu::ShowPanel(bool bShow)
 		 // when watching HLTV or Replay with a locked PVS, some elements are disabled
 		 //bIsEnabled = false;
 		bShow = false;
-	 }
+	}
 	
 	m_pLeftButton->SetVisible( bShow );
 	m_pRightButton->SetVisible( bShow );
@@ -379,7 +379,7 @@ void CSpectatorMenu::Update( void )
 		const char * teamname = gr->GetTeamName( gr->GetTeam(iPlayerIndex) );
 		if ( teamname )
 		{	
-			Q_snprintf( localizeTeamName, sizeof( localizeTeamName ), "%s", teamname );
+			Q_snprintf( localizeTeamName, sizeof( localizeTeamName ), "#%s", teamname );
 			team=g_pVGuiLocalize->Find( localizeTeamName );
 
 			if ( !team ) 
@@ -480,7 +480,7 @@ CSpectatorGUI::CSpectatorGUI(IViewPort *pViewPort) : EditablePanel( NULL, PANEL_
 	SetKeyBoardInputEnabled( false );
 
 	m_pTopBar = new Panel( this, "topbar" );
- 	m_pBottomBarBlank = new Panel( this, "bottombarblank" );
+	m_pBottomBarBlank = new Panel( this, "bottombarblank" );
 
 	// m_pBannerImage = new ImagePanel( m_pTopBar, NULL );
 	m_pPlayerLabel = new Label( this, "playerlabel", "" );
@@ -593,6 +593,13 @@ void CSpectatorGUI::OnThink()
 				gViewPortInterface->ShowPanel( PANEL_SCOREBOARD, m_bSpecScoreboard );
 			}
 		}
+
+#ifdef TF_CLIENT_DLL
+		if ( TFGameRules() && TFGameRules()->ShowMatchSummary() )
+		{
+			SetVisible( false );
+		}
+#endif
 	}
 }
 
@@ -744,11 +751,26 @@ void CSpectatorGUI::Update()
 		g_pVGuiLocalize->ConstructString( szExtraInfo,sizeof( szExtraInfo ), g_pVGuiLocalize->Find("#Spec_Map" ),1, wMapName );*/
 
 		g_pVGuiLocalize->ConvertANSIToUnicode( "", szExtraInfo, sizeof(szExtraInfo) );
-		g_pVGuiLocalize->ConvertANSIToUnicode( "", szTitleLabel, sizeof(szTitleLabel) );
+		g_pVGuiLocalize->ConvertANSIToUnicode( "" ,szTitleLabel,sizeof(szTitleLabel));
 	}
 
 	SetLabelText("extrainfo", szExtraInfo );
 	SetLabelText("titlelabel", szTitleLabel );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Gets the res file we should use (depends on if we're in Steam Controller mode)
+//-----------------------------------------------------------------------------
+const char * CSpectatorGUI::GetResFile( void )
+{
+/*	if ( ::input->IsSteamControllerActive() )
+	{
+		return "Resource/UI/Spectator_SC.res";
+	}
+	else
+*/	{
+		return "Resource/UI/Spectator.res";
+	}
 }
 
 //-----------------------------------------------------------------------------

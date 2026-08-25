@@ -100,7 +100,7 @@ CON_COMMAND( hud_reloadserverinfo, "hud_reloadserverinfo" )
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CTextWindow::CTextWindow(IViewPort *pViewPort) : Frame(NULL, PANEL_INFO	)
+CFFTextWindow::CFFTextWindow( IViewPort *pViewPort ) : CTextWindow( pViewPort )
 {
 	// initialize dialog
 	m_pViewPort = pViewPort;
@@ -141,7 +141,7 @@ CTextWindow::CTextWindow(IViewPort *pViewPort) : Frame(NULL, PANEL_INFO	)
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CTextWindow::ApplySchemeSettings( IScheme *pScheme )
+void CFFTextWindow::ApplySchemeSettings( IScheme *pScheme )
 {
 	BaseClass::ApplySchemeSettings( pScheme );
 
@@ -153,13 +153,13 @@ void CTextWindow::ApplySchemeSettings( IScheme *pScheme )
 //-----------------------------------------------------------------------------
 // Purpose: Destructor
 //-----------------------------------------------------------------------------
-CTextWindow::~CTextWindow()
+CFFTextWindow::~CFFTextWindow()
 {
 	// remove temp file again
 	g_pFullFileSystem->RemoveFile( TEMP_HTML_FILE, "DEFAULT_WRITE_PATH" );
 }
 
-void CTextWindow::Reset( void )
+void CFFTextWindow::Reset( void )
 {
 	//=============================================================================
 	// HPE_BEGIN:
@@ -179,14 +179,14 @@ void CTextWindow::Reset( void )
 	Update();
 }
 
-void CTextWindow::ShowText( const char *text )
+void CFFTextWindow::ShowText( const char *text )
 {
 	m_pTextMessage->SetVisible( true );
 	m_pTextMessage->SetText( text );
 	m_pTextMessage->GotoTextStart();
 }
 
-void CTextWindow::ShowURL( const char *URL, bool bAllowUserToDisable )
+void CFFTextWindow::ShowURL( const char *URL, bool bAllowUserToDisable )
 {
 	#ifdef _DEBUG
 		Msg( "CTextWindow::ShowURL( %s )\n", URL );
@@ -220,7 +220,7 @@ void CTextWindow::ShowURL( const char *URL, bool bAllowUserToDisable )
 	m_bShownURL = true;
 }
 
-void CTextWindow::ShowIndex( const char *entry )
+void CFFTextWindow::ShowIndex( const char *entry )
 {
 	const char *data = NULL;
 	int length = 0;
@@ -268,7 +268,7 @@ void CTextWindow::ShowIndex( const char *entry )
 	ShowFile( TEMP_HTML_FILE );
 }
 
-void CTextWindow::ShowFile( const char *filename )
+void CFFTextWindow::ShowFile( const char *filename )
 {
 	if  ( Q_stristr( filename, ".htm" ) || Q_stristr( filename, ".html" ) )
 	{
@@ -303,7 +303,7 @@ void CTextWindow::ShowFile( const char *filename )
 	}
 }
 
-void CTextWindow::Update( void )
+void CFFTextWindow::Update( void )
 {
 	SetTitle( m_szTitle, false );
 
@@ -339,11 +339,11 @@ void CTextWindow::Update( void )
 	}
 	else
 	{
-		DevMsg("CTextWindow::Update: unknown content type %i\n", m_nContentType );
+		DevMsg("CFFTextWindow::Update: unknown content type %i\n", m_nContentType );
 	}
 }
 
-void CTextWindow::OnCommand( const char *command )
+void CFFTextWindow::OnCommand( const char *command )
 {
 	if (!Q_strcmp(command, "okay"))
 	{
@@ -402,7 +402,7 @@ void CTextWindow::OnCommand( const char *command )
 	BaseClass::OnCommand(command);
 }
 
-void CTextWindow::SetData(KeyValues *data)
+void CFFTextWindow::SetData(KeyValues *data)
 {
 #ifdef SDK2013CE
 	SetData( data->GetInt( "type" ), data->GetString( "title" ), data->GetString( "message" ), data->GetString( "msg_fallback" ), data->GetInt( "command" ), data->GetBool( "unload" ) );
@@ -411,7 +411,7 @@ void CTextWindow::SetData(KeyValues *data)
 #endif
 }
 
-void CTextWindow::SetData( int type, const char *title, const char *message, const char *message_fallback, int command, bool bUnload )
+void CFFTextWindow::SetData( int type, const char *title, const char *message, const char *message_fallback, int command, bool bUnload )
 {
 	Q_strncpy(  m_szTitle, title, sizeof( m_szTitle ) );
 	Q_strncpy(  m_szMessage, message, sizeof( m_szMessage ) );
@@ -425,7 +425,7 @@ void CTextWindow::SetData( int type, const char *title, const char *message, con
 	Update();
 }
 
-void CTextWindow::ShowPanel( bool bShow )
+void CFFTextWindow::ShowPanel( bool bShow )
 {
 	if ( BaseClass::IsVisible() == bShow )
 		return;
@@ -456,7 +456,7 @@ void CTextWindow::ShowPanel( bool bShow )
 	}
 }
 
-bool CTextWindow::CMOTDHTML::OnStartRequest( const char *url, const char *target, const char *pchPostData, bool bIsRedirect )
+bool CFFTextWindow::CMOTDHTML::OnStartRequest( const char *url, const char *target, const char *pchPostData, bool bIsRedirect )
 {
 	if ( Q_strstr( url, "steam://" ) )
 		return false;
@@ -467,7 +467,7 @@ bool CTextWindow::CMOTDHTML::OnStartRequest( const char *url, const char *target
 //-----------------------------------------------------------------------------
 // Purpose: Get the server name
 //-----------------------------------------------------------------------------
-void CTextWindow::FireGameEvent( IGameEvent *event )
+void CFFTextWindow::FireGameEvent( IGameEvent *event )
 {
 	const char * type = event->GetName();
 
@@ -483,7 +483,7 @@ void CTextWindow::FireGameEvent( IGameEvent *event )
 //-----------------------------------------------------------------------------
 // Purpose: Give them some key control too
 //-----------------------------------------------------------------------------
-void CTextWindow::OnKeyCodePressed(KeyCode code) 
+void CFFTextWindow::OnKeyCodePressed(KeyCode code) 
 {
 	// Show the scoreboard over this if needed
 	if (gameuifuncs->GetButtonCodeForBind("showscores") == code)
@@ -498,7 +498,7 @@ void CTextWindow::OnKeyCodePressed(KeyCode code)
 	BaseClass::OnKeyCodePressed(code);
 }
 
-void CTextWindow::OnKeyCodeReleased(KeyCode code)
+void CFFTextWindow::OnKeyCodeReleased(KeyCode code)
 {
 	// Bug #0000524: Scoreboard gets stuck with the class menu up when you first join
 	// Hide the scoreboard now

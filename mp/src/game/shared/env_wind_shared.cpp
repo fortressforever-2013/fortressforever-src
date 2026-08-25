@@ -290,5 +290,12 @@ void GetWindspeedAtTime( float flTime, Vector &vecVelocity )
 {
 	// For now, ignore history and time.. fix later when we use wind to affect
 	// client-side prediction
-	VectorCopy( s_vecWindVelocity, vecVelocity );
+	
+	
+		
+	
+	
+	
+		VectorCopy( s_vecWindVelocity, vecVelocity );
+	
 }

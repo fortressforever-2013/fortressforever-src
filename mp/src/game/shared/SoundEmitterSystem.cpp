@@ -538,8 +538,8 @@ public:
 		TraceEmitSound( "EmitSound:  '%s' emitted as '%s' (ent %i)\n",
 			ep.m_pSoundName, params.soundname, entindex );
 
-
-#ifndef FF	// Don't caption modulations to the sound
+#ifndef FF
+		// Don't caption modulations to the sound
 		if ( !( ep.m_nFlags & ( SND_CHANGE_PITCH | SND_CHANGE_VOL ) ) )
 #else
 		if ( !( ep.m_nFlags & ( SND_CHANGE_PITCH | SND_CHANGE_VOL | SND_CHANGE_CHAN ) ) )

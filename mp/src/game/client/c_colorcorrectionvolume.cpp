@@ -105,7 +105,7 @@ void C_ColorCorrectionVolume::ClientThink()
 #ifdef SDK2013CE
 	g_pColorCorrectionMgr->SetColorCorrectionWeight(m_CCHandle, m_Weight * 0.675f);
 #else
-	g_pColorCorrectionMgr->SetColorCorrectionWeight(m_CCHandle, m_Weight);
+	g_pColorCorrectionMgr->SetColorCorrectionWeight( m_CCHandle, m_Weight );
 #endif
 }
 

@@ -40,6 +40,7 @@ public:
 	DECLARE_NETWORKCLASS();
 
 	CBaseProjectile();
+	virtual ~CBaseProjectile();
 
 	virtual void Spawn();
 
@@ -53,6 +54,10 @@ public:
 	virtual float GetCollideWithTeammatesDelay() const { return 0.25f; }
 #endif // GAME_DLL
 
+#ifdef TF_DLL
+	void RecordEnemyPlayerHit( const CBaseEntity* pHitPlayer, bool bDirect );
+	virtual bool IsBaseProjectile( void ) const OVERRIDE { return true; }	
+#endif // TF_DLL
 
 	virtual bool IsDestroyable( void ) { return false; }
 	virtual void Destroy( bool bBlinkOut = true, bool bBreakRocket = false ) {}
@@ -75,6 +80,11 @@ private:
 #endif // GAME_DLL
 
 	CNetworkHandle( CBaseEntity, m_hOriginalLauncher );
+
+#ifdef TF_DLL
+	CUtlVector< int > m_vecEntsHit;
+	CUtlVector< int > m_vecEntsDirectHit;
+#endif
 };
 
 #endif // BASEPROJECTILE_H

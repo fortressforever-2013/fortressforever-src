@@ -556,7 +556,7 @@ void C_EntityDissolve::ClientThink( void )
 		// because when the server says to destroy it, the client won't be able to find it.
 		// ClientEntityList().RemoveEntity( GetClientHandle() );
 
-		partition->Remove( PARTITION_CLIENT_SOLID_EDICTS | PARTITION_CLIENT_RESPONSIVE_EDICTS | PARTITION_CLIENT_NON_STATIC_EDICTS, CollisionProp()->GetPartitionHandle() );
+		::partition->Remove( PARTITION_CLIENT_SOLID_EDICTS | PARTITION_CLIENT_RESPONSIVE_EDICTS | PARTITION_CLIENT_NON_STATIC_EDICTS, CollisionProp()->GetPartitionHandle() );
 
 		RemoveFromLeafSystem();
 

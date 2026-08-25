@@ -437,13 +437,13 @@ bool CVoteController::CreateVote( int iEntIndex, const char *pszTypeString, cons
 	{
 		CBaseIssue *pCurrentIssue = m_potentialIssues[issueIndex];
 		if ( !pCurrentIssue )
-			return false;
+			{ return false; }
 
 		if ( FStrEq( pszTypeString, pCurrentIssue->GetTypeString() ) )
 		{
 			vote_create_failed_t nErrorCode = VOTE_FAILED_GENERIC;
 			int nTime = 0;
-			if ( pCurrentIssue->CanCallVote( iEntIndex, pszDetailString, nErrorCode, nTime ) )
+			if ( pCurrentIssue->RequestCallVote( iEntIndex, pszDetailString, nErrorCode, nTime ) )
 			{
 				// Establish a bunch of data on this particular issue
 				pCurrentIssue->SetIssueDetails( pszDetailString );
@@ -1118,7 +1118,7 @@ bool CBaseIssue::CanTeamCallVote( int iTeam ) const
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
-bool CBaseIssue::CanCallVote( int iEntIndex, const char *pszDetails, vote_create_failed_t &nFailCode, int &nTime )
+bool CBaseIssue::RequestCallVote( int iEntIndex, const char *pszDetails, vote_create_failed_t &nFailCode, int &nTime )
 {
 	// Automated server vote - don't bother testing against it
 	if ( !BRecordVoteFailureEventForEntity( iEntIndex ) )

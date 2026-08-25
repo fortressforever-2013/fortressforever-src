@@ -444,8 +444,7 @@ void *CFlexSceneFileManager::FindSceneFile( IHasLocalToGlobalFlexSettings *insta
 	Q_FixSlashes( szFilename );
 
 	// See if it's already loaded
-	int i;
-	for ( i = 0; i < m_FileList.Count(); i++ )
+	for ( int i = 0; i < m_FileList.Count(); i++ )
 	{
 		CFlexSceneFile *file = m_FileList[ i ];
 		if ( file && !Q_stricmp( file->filename, szFilename ) )
@@ -1636,15 +1635,15 @@ bool C_BaseFlex::CheckSceneEventCompletion( CSceneEventInfo *info, float current
 	return true;
 }
 
-void C_BaseFlex::SetFlexWeight( LocalFlexController_t index, float value )
+void C_BaseFlex::SetFlexWeight( LocalFlexController_t index_, float value )
 {
-	if (index >= 0 && index < GetNumFlexControllers())
+	if ( index_ >= 0 && index_ < GetNumFlexControllers())
 	{
 		CStudioHdr *pstudiohdr = GetModelPtr( );
 		if (! pstudiohdr)
 			return;
 
-		mstudioflexcontroller_t *pflexcontroller = pstudiohdr->pFlexcontroller( index );
+		mstudioflexcontroller_t *pflexcontroller = pstudiohdr->pFlexcontroller( index_ );
 
 		if (pflexcontroller->max != pflexcontroller->min)
 		{
@@ -1652,26 +1651,26 @@ void C_BaseFlex::SetFlexWeight( LocalFlexController_t index, float value )
 			value = clamp( value, 0.0f, 1.0f );
 		}
 
-		m_flexWeight[ index ] = value;
+		m_flexWeight[index_] = value;
 	}
 }
 
-float C_BaseFlex::GetFlexWeight( LocalFlexController_t index )
+float C_BaseFlex::GetFlexWeight( LocalFlexController_t index_ )
 {
-	if (index >= 0 && index < GetNumFlexControllers())
+	if ( index_ >= 0 && index_ < GetNumFlexControllers())
 	{
 		CStudioHdr *pstudiohdr = GetModelPtr( );
 		if (! pstudiohdr)
 			return 0;
 
-		mstudioflexcontroller_t *pflexcontroller = pstudiohdr->pFlexcontroller( index );
+		mstudioflexcontroller_t *pflexcontroller = pstudiohdr->pFlexcontroller( index_ );
 
 		if (pflexcontroller->max != pflexcontroller->min)
 		{
-			return m_flexWeight[index] * (pflexcontroller->max - pflexcontroller->min) + pflexcontroller->min;
+			return m_flexWeight[index_] * (pflexcontroller->max - pflexcontroller->min) + pflexcontroller->min;
 		}
 				
-		return m_flexWeight[index];
+		return m_flexWeight[index_];
 	}
 	return 0.0;
 }
@@ -1839,8 +1838,8 @@ int C_BaseFlex::FlexControllerLocalToGlobal( const flexsettinghdr_t *pSettinghdr
 	FS_LocalToGlobal_t& result = m_LocalToGlobal[ idx ];
 	// Validate lookup
 	Assert( result.m_nCount != 0 && key < result.m_nCount );
-	int index = result.m_Mapping[ key ];
-	return index;
+	int iMap = result.m_Mapping[ key ];
+	return iMap;
 }
 
 //-----------------------------------------------------------------------------
@@ -1883,11 +1882,11 @@ void C_BaseFlex::AddFlexSetting( const char *expr, float scale,
 	{
 		// Translate to local flex controller
 		// this is translating from the settings's local index to the models local index
-		int index = FlexControllerLocalToGlobal( pSettinghdr, pWeights->key );
+		int iFlex = FlexControllerLocalToGlobal( pSettinghdr, pWeights->key );
 
 		// blend scaled weighting in to total (post networking g_flexweight!!!!)
 		float s = clamp( scale * pWeights->influence, 0.0f, 1.0f );
-		g_flexweight[index] = g_flexweight[index] * (1.0f - s) + pWeights->weight * s;
+		g_flexweight[iFlex] = g_flexweight[iFlex] * (1.0f - s) + pWeights->weight * s;
 	}
 }
 

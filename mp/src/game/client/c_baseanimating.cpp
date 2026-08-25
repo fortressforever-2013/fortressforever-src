@@ -59,6 +59,7 @@
 #ifdef TF_CLIENT_DLL
 #include "c_tf_player.h"
 #include "c_baseobject.h"
+#include "tf_gamerules.h"
 #endif
 
 #include "ff_mathackman.h"
@@ -645,7 +646,7 @@ void C_ClientRagdoll::Release( void )
 
 	if ( CollisionProp()->GetPartitionHandle() != PARTITION_INVALID_HANDLE )
 	{
-		partition->Remove( PARTITION_CLIENT_SOLID_EDICTS | PARTITION_CLIENT_RESPONSIVE_EDICTS | PARTITION_CLIENT_NON_STATIC_EDICTS, CollisionProp()->GetPartitionHandle() );
+		::partition->Remove( PARTITION_CLIENT_SOLID_EDICTS | PARTITION_CLIENT_RESPONSIVE_EDICTS | PARTITION_CLIENT_NON_STATIC_EDICTS, CollisionProp()->GetPartitionHandle() );
 	}
 	RemoveFromLeafSystem();
 
@@ -1315,6 +1316,10 @@ void C_BaseAnimating::InitModelEffects( void )
 //-----------------------------------------------------------------------------
 void C_BaseAnimating::DelayedInitModelEffects( void )
 {
+	
+	
+		
+
 	m_bInitModelEffects = false;
 
 	// Parse the keyvalues and see if they want to make ropes on this model.
@@ -1372,15 +1377,18 @@ void C_BaseAnimating::DelayedInitModelEffects( void )
 					{
 						// Halloween Spell Effect Check
 						int iHalloweenSpell = 0;
-						// if the owner is a Sentry, Check its owner
-						CBaseObject *pSentry = dynamic_cast<CBaseObject*>( GetOwnerEntity() );
-						if ( pSentry )
+						if ( TF_IsHolidayActive( kHoliday_HalloweenOrFullMoon ) )
 						{
-							CALL_ATTRIB_HOOK_INT_ON_OTHER( pSentry->GetOwner(), iHalloweenSpell, halloween_pumpkin_explosions );
-						}
-						else
-						{
-							CALL_ATTRIB_HOOK_INT_ON_OTHER( GetOwnerEntity(), iHalloweenSpell, halloween_pumpkin_explosions );
+							// if the owner is a Sentry, Check its owner
+							if ( GetOwnerEntity() && GetOwnerEntity()->IsBaseObject() )
+							{
+								CBaseObject *pSentry = assert_cast< CBaseObject* >( GetOwnerEntity() );
+								CALL_ATTRIB_HOOK_INT_ON_OTHER( pSentry->GetOwner(), iHalloweenSpell, halloween_pumpkin_explosions );
+							}
+							else
+							{
+								CALL_ATTRIB_HOOK_INT_ON_OTHER( GetOwnerEntity(), iHalloweenSpell, halloween_pumpkin_explosions );
+							}
 						}
 
 						if ( iHalloweenSpell > 0 )
@@ -1388,7 +1396,7 @@ void C_BaseAnimating::DelayedInitModelEffects( void )
 							pszParticleEffect = "halloween_rockettrail";
 						}
 					}
-					#endif
+#endif // TF_CLIENT_DLL
 					// Spawn the particle effect
 					ParticleProp()->Create( pszParticleEffect, (ParticleAttachment_t)iAttachType, iAttachment );
 				}
@@ -2472,8 +2480,8 @@ void C_BaseAnimating::CalculateIKLocks( float currentTime )
 	// In TF, we might be attaching a player's view to a walking model that's using IK. If we are, it can
 	// get in here during the view setup code, and it's not normally supposed to be able to access the spatial
 	// partition that early in the rendering loop. So we allow access right here for that special case.
-	SpatialPartitionListMask_t curSuppressed = partition->GetSuppressedLists();
-	partition->SuppressLists( PARTITION_ALL_CLIENT_EDICTS, false );
+	SpatialPartitionListMask_t curSuppressed = ::partition->GetSuppressedLists();
+	::partition->SuppressLists( PARTITION_ALL_CLIENT_EDICTS, false );
 	CBaseEntity::PushEnableAbsRecomputations( false );
 
 	Ray_t ray;
@@ -2693,18 +2701,18 @@ void C_BaseAnimating::CalculateIKLocks( float currentTime )
 #endif
 
 	CBaseEntity::PopEnableAbsRecomputations();
-	partition->SuppressLists( curSuppressed, true );
+	::partition->SuppressLists( curSuppressed, true );
 }
 
-bool C_BaseAnimating::GetPoseParameterRange( int index, float &minValue, float &maxValue )
+bool C_BaseAnimating::GetPoseParameterRange( int index_, float &minValue, float &maxValue )
 {
 	CStudioHdr *pStudioHdr = GetModelPtr();
 
 	if (pStudioHdr)
 	{
-		if (index >= 0 && index < pStudioHdr->GetNumPoseParameters())
+		if ( index_ >= 0 && index_ < pStudioHdr->GetNumPoseParameters())
 		{
-			const mstudioposeparamdesc_t &pose = pStudioHdr->pPoseParameter( index );
+			const mstudioposeparamdesc_t &pose = pStudioHdr->pPoseParameter( index_ );
 			minValue = pose.start;
 			maxValue = pose.end;
 			return true;
@@ -2727,9 +2735,9 @@ void C_BaseAnimating::ControlMouth( CStudioHdr *pstudiohdr )
 	if ( !pstudiohdr )
 		  return;
 
-	int index = LookupPoseParameter( pstudiohdr, LIPSYNC_POSEPARAM_NAME );
+	int index_ = LookupPoseParameter( pstudiohdr, LIPSYNC_POSEPARAM_NAME );
 
-	if ( index != -1 )
+	if ( index_ != -1 )
 	{
 		float value = GetMouth()->mouthopen / 64.0;
 
@@ -2739,15 +2747,15 @@ void C_BaseAnimating::ControlMouth( CStudioHdr *pstudiohdr )
 			 value = 1.0;
 
 		float start, end;
-		GetPoseParameterRange( index, start, end );
+		GetPoseParameterRange( index_, start, end );
 
 		value = (1.0 - value) * start + value * end;
 
 		//Adrian - Set the pose parameter value. 
 		//It has to be called "mouth".
-		SetPoseParameter( pstudiohdr, index, value ); 
+		SetPoseParameter( pstudiohdr, index_, value );
 		// Reset interpolation here since the client is controlling this rather than the server...
-		m_iv_flPoseParameter.SetHistoryValuesForItem( index, raw );
+		m_iv_flPoseParameter.SetHistoryValuesForItem( index_, raw );
 	}
 }
 
@@ -2759,7 +2767,11 @@ CMouthInfo *C_BaseAnimating::GetMouth( void )
 #ifdef DEBUG_BONE_SETUP_THREADING
 ConVar cl_warn_thread_contested_bone_setup("cl_warn_thread_contested_bone_setup", "0" );
 #endif
-ConVar cl_threaded_bone_setup("cl_threaded_bone_setup", "0", 0, "Enable parallel processing of C_BaseAnimating::SetupBones()" );
+
+
+
+ConVar cl_threaded_bone_setup("cl_threaded_bone_setup", "0", 0,
+                              "Enable parallel processing of C_BaseAnimating::SetupBones()" );
 
 //-----------------------------------------------------------------------------
 // Purpose: Do the default sequence blending rules as done in HL1
@@ -2786,7 +2798,7 @@ static bool g_bDoThreadedBoneSetup;
 
 void C_BaseAnimating::InitBoneSetupThreadPool()
 {
-}				 
+}
 
 void C_BaseAnimating::ShutdownBoneSetupThreadPool()
 {
@@ -3352,6 +3364,38 @@ void C_BaseAnimating::DoInternalDrawModel( ClientModelRenderInfo_t *pInfo, DrawM
 	}
 }
 
+#ifdef TF_CLIENT_DLL
+// Move this elsewhere if we ever need it again.
+class MaterialOverrideRestore
+{
+public:
+	MaterialOverrideRestore() 
+	: m_bRestore( false )
+	, m_pOverrideMaterial( NULL )
+	, m_nOverrideType( OVERRIDE_NORMAL )
+	{ }
+
+	~MaterialOverrideRestore()
+	{
+		if ( m_bRestore )
+		{
+			modelrender->ForcedMaterialOverride( m_pOverrideMaterial, m_nOverrideType );
+		}
+	}
+
+	void RestoreOverride( IMaterial* pRestoreOverride, OverrideType_t overType )
+	{
+		m_bRestore = true;
+		m_pOverrideMaterial = pRestoreOverride;
+		m_nOverrideType = overType;
+	}
+
+private:
+	bool m_bRestore;
+	IMaterial* m_pOverrideMaterial;
+	OverrideType_t m_nOverrideType;
+};
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: Draws the object
@@ -3360,6 +3404,57 @@ void C_BaseAnimating::DoInternalDrawModel( ClientModelRenderInfo_t *pInfo, DrawM
 int C_BaseAnimating::InternalDrawModel( int flags )
 {
 	VPROF( "C_BaseAnimating::InternalDrawModel" );
+
+#ifdef TF_CLIENT_DLL
+	MaterialOverrideRestore overrideRestore;
+	// TODO: We should listen for TF_COND_TAUNTING changing and then just do this then, 
+	// rather than every frame.
+	bool bIgnoreOverride = false;
+
+	C_TFPlayer *pOwner = ToTFPlayer( GetOwnerEntity() );
+	if ( pOwner )
+	{
+		CTFPlayerInventory *pInv = pOwner->Inventory();
+		if ( pInv )
+		{
+			if ( pOwner->m_Shared.InCond( TF_COND_TAUNTING ) )
+			{
+				int iClass = pOwner->GetPlayerClass()->GetClassIndex();
+				CEconItemView *pMiscItemView = pInv->GetItemInLoadout( iClass, pOwner->GetActiveTauntSlot() );
+				if ( pMiscItemView && pMiscItemView->IsValid() )
+				{
+					if ( pMiscItemView->GetStaticData()->GetTauntData() )
+					{
+						bIgnoreOverride = pMiscItemView->GetStaticData()->GetTauntData()->GetProp( iClass ) != NULL;
+					}
+				}
+			}
+		}
+	}
+
+	if ( !bIgnoreOverride )
+	{
+		// If there is some other material override, it's probably the client asking for us to render invuln or the 
+		// spy cloaking. Those are way more important than ours, so do them instead.
+		IMaterial* pOverrideMaterial = NULL;
+		OverrideType_t nDontcare = OVERRIDE_NORMAL;
+		modelrender->GetMaterialOverride( &pOverrideMaterial, &nDontcare );
+
+		bIgnoreOverride = ( pOverrideMaterial != NULL );
+	}
+
+	IMaterial* pOverrideMaterial = GetEconWeaponMaterialOverride( GetTeamNumber() );
+
+	bool bUseOverride = !bIgnoreOverride && pOverrideMaterial != NULL;
+	if ( bUseOverride && ( flags & STUDIO_RENDER ) )
+	{
+		// Set us up to restore properly on exit
+		overrideRestore.RestoreOverride( NULL, OVERRIDE_NORMAL );
+
+		modelrender->ForcedMaterialOverride( pOverrideMaterial );
+		flags |= STUDIO_NO_OVERRIDE_FOR_ATTACH; // Don't apply override materials to attachments. 
+	}
+#endif
 
 	if ( !GetModel() )
 		return 0;
@@ -3922,7 +4017,7 @@ void C_BaseAnimating::FireEvent( const Vector& origin, const QAngle& angles, int
 			iAttachType = GetAttachTypeFromString( token );
 			if ( iAttachType == -1 )
 			{
-				Warning("Invalid attach type specified for particle effect anim event. Trying to spawn effect '%s' with attach type of '%s'\n", szParticleEffect, token );
+				Warning( "Invalid attach type specified for particle effect anim event. Trying to spawn effect '%s' with attach type of '%s'\n", szParticleEffect, token );
 				return;
 			}
 
@@ -3934,7 +4029,8 @@ void C_BaseAnimating::FireEvent( const Vector& origin, const QAngle& angles, int
 		#endif
 			if ( token[0] )
 			{
-				iAttachment = atoi(token);
+				
+				iAttachment = atoi( token );
 
 				// See if we can find any attachment points matching the name
 				if ( token[0] != '0' && iAttachment == 0 )
@@ -4108,20 +4204,20 @@ void C_BaseAnimating::FireEvent( const Vector& origin, const QAngle& angles, int
 
 	case AE_CL_ENABLE_BODYGROUP:
 		{
-			int index = FindBodygroupByName( options );
-			if ( index >= 0 )
+			int index_ = FindBodygroupByName( options );
+			if ( index_ >= 0 )
 			{
-				SetBodygroup( index, 1 );
+				SetBodygroup( index_, 1 );
 			}
 		}
 		break;
 
 	case AE_CL_DISABLE_BODYGROUP:
 		{
-			int index = FindBodygroupByName( options );
-			if ( index >= 0 )
+			int index_ = FindBodygroupByName( options );
+			if ( index_ >= 0 )
 			{
-				SetBodygroup( index, 0 );
+				SetBodygroup( index_, 0 );
 			}
 		}
 		break;
@@ -4150,10 +4246,10 @@ void C_BaseAnimating::FireEvent( const Vector& origin, const QAngle& angles, int
 		#endif
 			value = token[0] ? atoi( token ) : 0;
 
-			int index = FindBodygroupByName( szBodygroupName );
-			if ( index >= 0 )
+			int index_ = FindBodygroupByName( szBodygroupName );
+			if ( index_ >= 0 )
 			{
-				SetBodygroup( index, value );
+				SetBodygroup( index_, value );
 			}
 		}
 		break;
@@ -4796,8 +4892,8 @@ C_BaseAnimating *C_BaseAnimating::CreateRagdollCopy()
 
 	TermRopes();
 
-	const model_t *model = GetModel();
-	const char *pModelName = modelinfo->GetModelName( model );
+	const model_t *pModel = GetModel();
+	const char *pModelName = modelinfo->GetModelName( pModel );
 
 	if ( pRagdoll->InitializeAsClientEntity( pModelName, RENDER_GROUP_OPAQUE_ENTITY ) == false )
 	{
@@ -5246,6 +5342,10 @@ float C_BaseAnimating::GetSequenceCycleRate( CStudioHdr *pStudioHdr, int iSequen
 	if ( !pStudioHdr )
 		return 0.0f;
 
+	
+	
+		
+	
 	return Studio_CPS( pStudioHdr, pStudioHdr->pSeqdesc(iSequence), iSequence, m_flPoseParameter );
 }
 
@@ -5770,7 +5870,10 @@ void C_BaseAnimating::DrawClientHitboxes( float duration /*= 0.0f*/, bool monoco
 			b = ( int ) ( 255.0f * hullcolor[j][2] );
 		}
 
-		debugoverlay->AddBoxOverlay( position, pbox->bbmin, pbox->bbmax, angles, r, g, b, 0 ,duration );
+		if ( debugoverlay )
+		{
+			debugoverlay->AddBoxOverlay( position, pbox->bbmin, pbox->bbmax, angles, r, g, b, 0 ,duration );
+		}
 	}
 }
 

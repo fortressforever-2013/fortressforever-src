@@ -87,6 +87,9 @@ static CTempEnts g_TempEnts;
 ITempEnts *tempents = ( ITempEnts * )&g_TempEnts;
 #endif
 
+
+
+
 C_LocalTempEntity::C_LocalTempEntity()
 {
 #ifdef _DEBUG

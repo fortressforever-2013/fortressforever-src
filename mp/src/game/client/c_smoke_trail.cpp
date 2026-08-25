@@ -412,12 +412,12 @@ void C_SmokeTrail::CleanupToolRecordingState( KeyValues *msg )
 	{
 		int nId = m_pSmokeEmitter->AllocateToolParticleEffectId();
 
-		KeyValues *msg = new KeyValues( "OldParticleSystem_Create" );
-		msg->SetString( "name", "C_SmokeTrail" );
-		msg->SetInt( "id", nId );
-		msg->SetFloat( "time", gpGlobals->curtime );
+		KeyValues *oldmsg = new KeyValues( "OldParticleSystem_Create" );
+		oldmsg->SetString( "name", "C_SmokeTrail" );
+		oldmsg->SetInt( "id", nId );
+		oldmsg->SetFloat( "time", gpGlobals->curtime );
 
-		KeyValues *pRandomEmitter = msg->FindKey( "DmeRandomEmitter", true );
+		KeyValues *pRandomEmitter = oldmsg->FindKey( "DmeRandomEmitter", true );
 		pRandomEmitter->SetInt( "count", m_SpawnRate );	// particles per second, when duration is < 0
 		pRandomEmitter->SetFloat( "duration", -1 );
 		pRandomEmitter->SetInt( "active", bEmitterActive );
@@ -503,18 +503,18 @@ void C_SmokeTrail::CleanupToolRecordingState( KeyValues *msg )
 		pEmitter2->SetString( "material", "particle/particle_noisesphere" );
 		pEmitterParent2->AddSubKey( pEmitter2 );
 
-		ToolFramework_PostToolMessage( HTOOLHANDLE_INVALID, msg );
-		msg->deleteThis();
+		ToolFramework_PostToolMessage( HTOOLHANDLE_INVALID, oldmsg );
+		oldmsg->deleteThis();
 	}
 	else 
 	{
-		KeyValues *msg = new KeyValues( "OldParticleSystem_ActivateEmitter" );
-		msg->SetInt( "id", m_pSmokeEmitter->GetToolParticleEffectId() );
-		msg->SetInt( "emitter", 0 );
-		msg->SetInt( "active", bEmitterActive );
-		msg->SetFloat( "time", gpGlobals->curtime );
-		ToolFramework_PostToolMessage( HTOOLHANDLE_INVALID, msg );
-		msg->deleteThis();
+		KeyValues *oldmsg = new KeyValues( "OldParticleSystem_ActivateEmitter" );
+		oldmsg->SetInt( "id", m_pSmokeEmitter->GetToolParticleEffectId() );
+		oldmsg->SetInt( "emitter", 0 );
+		oldmsg->SetInt( "active", bEmitterActive );
+		oldmsg->SetFloat( "time", gpGlobals->curtime );
+		ToolFramework_PostToolMessage( HTOOLHANDLE_INVALID, oldmsg );
+		oldmsg->deleteThis();
 	}
 }
 
@@ -1934,12 +1934,12 @@ void C_DustTrail::CleanupToolRecordingState( KeyValues *msg )
 	{
 		int nId = m_pDustEmitter->AllocateToolParticleEffectId();
 
-		KeyValues *msg = new KeyValues( "OldParticleSystem_Create" );
-		msg->SetString( "name", "C_DustTrail" );
-		msg->SetInt( "id", nId );
-		msg->SetFloat( "time", gpGlobals->curtime );
+		KeyValues *oldmsg = new KeyValues( "OldParticleSystem_Create" );
+		oldmsg->SetString( "name", "C_DustTrail" );
+		oldmsg->SetInt( "id", nId );
+		oldmsg->SetFloat( "time", gpGlobals->curtime );
 
-		KeyValues *pEmitter = msg->FindKey( "DmeSpriteEmitter", true );
+		KeyValues *pEmitter = oldmsg->FindKey( "DmeSpriteEmitter", true );
 		pEmitter->SetString( "material", "particle/smokesprites_0001" );
 		pEmitter->SetInt( "count", m_SpawnRate );	// particles per second, when duration is < 0
 		pEmitter->SetFloat( "duration", -1 ); // FIXME
@@ -2013,17 +2013,17 @@ void C_DustTrail::CleanupToolRecordingState( KeyValues *msg )
 		pUpdaters->FindKey( "DmeColorUpdater", true );
 		pUpdaters->FindKey( "DmeSizeUpdater", true );
 
-		ToolFramework_PostToolMessage( HTOOLHANDLE_INVALID, msg );
-		msg->deleteThis();
+		ToolFramework_PostToolMessage( HTOOLHANDLE_INVALID, oldmsg );
+		oldmsg->deleteThis();
 	}
 	else 
 	{
-		KeyValues *msg = new KeyValues( "OldParticleSystem_ActivateEmitter" );
-		msg->SetInt( "id", m_pDustEmitter->GetToolParticleEffectId() );
-		msg->SetInt( "emitter", 0 );
-		msg->SetInt( "active", bEmitterActive );
-		msg->SetFloat( "time", gpGlobals->curtime );
-		ToolFramework_PostToolMessage( HTOOLHANDLE_INVALID, msg );
-		msg->deleteThis();
+		KeyValues *oldmsg = new KeyValues( "OldParticleSystem_ActivateEmitter" );
+		oldmsg->SetInt( "id", m_pDustEmitter->GetToolParticleEffectId() );
+		oldmsg->SetInt( "emitter", 0 );
+		oldmsg->SetInt( "active", bEmitterActive );
+		oldmsg->SetFloat( "time", gpGlobals->curtime );
+		ToolFramework_PostToolMessage( HTOOLHANDLE_INVALID, oldmsg );
+		oldmsg->deleteThis();
 	}
 }

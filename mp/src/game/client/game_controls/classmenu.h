@@ -71,7 +71,7 @@ protected:
 	ButtonCode_t m_iScoreBoardKey;
 	int			m_iTeam;
 	vgui::EditablePanel *m_pPanel;
-	
+
 	CUtlVector< MouseOverPanelButton * > m_mouseoverButtons;
 };
 

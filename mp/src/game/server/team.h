@@ -99,8 +99,9 @@ public:
 	CNetworkVar(int, m_iDeaths);	// Mulch: send deaths to client
 	CNetworkVar(float, m_flScoreTime); // Mulch: time when this team last scored
 	CNetworkVar( int, m_iRoundsWon );
-	//int		m_iDeaths;
-
+#ifndef FF
+	int		m_iDeaths;
+#endif
 	// Spawnpoints
 	int		m_iLastSpawn;		// Index of the last spawnpoint used
 

@@ -23,6 +23,7 @@
 
 #ifdef TF_DLL
 #include "tf_gamerules.h"
+#include "tf/nav_mesh/tf_nav_mesh.h"
 #endif // TF_DLL
 #ifdef FF
 #include "ff_scriptman.h"
@@ -354,6 +355,8 @@ void CBaseDoor::Spawn()
 		// Never block doors in TF2 - to prevent various exploits.
 		m_bIgnoreNonPlayerEntsOnBlock = true;
 	}
+
+	TheTFNavMesh()->OnDoorCreated( this );
 #else
 	m_bIgnoreNonPlayerEntsOnBlock = false;
 #endif // TF_DLL
@@ -893,8 +896,7 @@ void CBaseDoor::InputLock( inputdata_t &inputdata )
 // Purpose: Opens the door if it is not already open.
 //-----------------------------------------------------------------------------
 void CBaseDoor::InputOpen( inputdata_t &inputdata )
-{
-	// jon: if already open and being told to open, stay open...
+{	// jon: if already open and being told to open, stay open...
 	if (/*m_toggle_state != TS_AT_TOP && */m_toggle_state != TS_GOING_UP )
 	{	
 		// I'm locked, can't open
@@ -981,7 +983,6 @@ int CBaseDoor::DoorActivate( )
 		// door should open
 		// play door unlock sounds
 		PlayLockSounds(this, &m_ls, FALSE, FALSE);
-
 		// jon: if already open and being told to open, stay open...
 		if ( /*m_toggle_state != TS_AT_TOP &&*/ m_toggle_state != TS_GOING_UP )
 		{

@@ -1161,7 +1161,7 @@ void CFuncTrain::Stop( void )
 		}
 
 		//Do not teleport to our final move destination
-		SetMoveDone( NULL );
+		SetMoveDone( nullptr );
 		SetMoveDoneTime( -1 );
 	}
 }
@@ -2378,7 +2378,7 @@ void CFuncTrackTrain::Next( void )
 		SetThink( &CFuncTrackTrain::Next );
 		SetMoveDoneTime( 0.5 );
 		SetNextThink( gpGlobals->curtime );
-		SetMoveDone( NULL );
+		SetMoveDone( nullptr );
 	}
 	else
 	{
@@ -3216,7 +3216,7 @@ void CFuncTrackChange::HitBottom( void )
 //		UpdateTrain();
 		m_train->SetTrack( m_trackBottom );
 	}
-	SetMoveDone( NULL );
+	SetMoveDone( nullptr );
 	SetMoveDoneTime( -1 );
 
 	UpdateAutoTargets( m_toggle_state );
@@ -3238,7 +3238,7 @@ void CFuncTrackChange::HitTop( void )
 	}
 	
 	// Don't let the plat go back down
-	SetMoveDone( NULL );
+	SetMoveDone( nullptr );
 	SetMoveDoneTime( -1 );
 	UpdateAutoTargets( m_toggle_state );
 	EnableUse();

@@ -2077,6 +2077,7 @@ void CBasePlayer::UpdateUnderwaterState( void )
 				RemoveFlag(FL_INWATER);	// Jiggles: Added for swim animations
 		}
 	}
+
 	else if ( GetWaterLevel() < WL_Waist )
 	{
 		if ( GetWaterLevel() == 0 )

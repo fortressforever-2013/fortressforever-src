@@ -30,7 +30,7 @@ public:
 	virtual void		OnVoteStarted( void ) {}					// Called as soon as the vote starts
 	virtual bool		IsEnabled( void ) { return false; }			// Query the issue to see if it's enabled
 	virtual bool		CanTeamCallVote( int iTeam ) const;			// Can someone on the given team call this vote?
-	virtual bool		CanCallVote( int nEntIndex, const char *pszDetails, vote_create_failed_t &nFailCode, int &nTime ); // Can this guy hold a vote on this issue?
+	virtual bool		RequestCallVote( int nEntIndex, const char *pszDetails, vote_create_failed_t &nFailCode, int &nTime ); // Can this guy hold a vote on this issue?
 	virtual bool		IsTeamRestrictedVote( void );				// Restrict access and visibility of this vote to a specific team?
 	virtual const char *GetDisplayString( void ) = 0;				// The string that will be passed to the client for display
 	virtual void		ExecuteCommand( void ) = 0;					// Where the magic happens.  Do your thing.

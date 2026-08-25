@@ -2288,6 +2288,13 @@ void EffectsPrecache( void *pUser )
 		CBaseEntity::PrecacheScriptSound( "HudChat.Message" );
 		CBaseEntity::PrecacheScriptSound( "HudChat.TeamMessage" );
 	}
+
+#ifdef TF_DLL
+	// For tempfx.
+	CBaseEntity::PrecacheModel( "models/weapons/shells/shell_cigarrette.mdl" );
+	CBaseEntity::PrecacheModel( "models/player/gibs/soldiergib007.mdl" );
+	CBaseEntity::PrecacheModel( "models/player/gibs/soldiergib008.mdl" );
+#endif
 }
 
 PRECACHE_REGISTER_FN( EffectsPrecache );

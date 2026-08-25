@@ -38,6 +38,13 @@ inline IHandleEntity* CBaseHandle::Get() const
 
 // -------------------------------------------------------------------------------------------------- //
 // CHandle.
+//
+// Only safe to use in cases where you can statically verify that T* can safely be reinterpret-casted
+// to IHandleEntity*; that is, that it's derived from IHandleEntity and IHandleEntity is the
+// first base class.
+//
+// Unfortunately some classes are forward-declared and the compiler can't determine at compile time
+// how to static_cast<> them to IHandleEntity.
 // -------------------------------------------------------------------------------------------------- //
 template< class T >
 class CHandle : public CBaseHandle
@@ -49,16 +56,39 @@ public:
 	/*implicit*/ CHandle( T *pVal );
 	/*implicit*/ CHandle( const CBaseHandle &handle );
 
-	
-	
-	
-	
-	
+	// NOTE: The following two constructor functions are not type-safe, and can allow creating a
+	// CHandle<T> that doesn't actually point to an object of type T.
+	//
+	// It is your responsibility to ensure that the target of the handle actually points to the
+	// correct type of object before calling these functions.
 
 	
 
 	// The index should have come from a call to ToInt(). If it hasn't, you're in trouble.
 	static CHandle<T> FromIndex( int index );
+
+	// h.ChangedFrom(p) is similar but not the same as h != p.
+	// There is one case where they are different:
+	//     h = someEntity;
+	//     UTIL_Remove(someEntity);
+	//     (wait for deletions to happen, usually at end of frame)
+	// h is now a stale pointer to a deleted entity; h.Get() returns nullptr.
+	//
+	// In this case
+	//    h != nullptr           -> false
+	//    h.ChangedFrom(nullptr) -> true
+	//
+	// This is useful when you want to use a handle as a cache of some observed object, and need to tell
+	// when your target has changed.  Using == fails if the target gets destroyed in the same frame that
+	// your target is changed to null (which is actually pretty common!)
+	//
+	// In this case you can use this pattern:
+	//    T* target = GetTargetedThing(); // might return null
+	//    if( m_target.ChangedFrom( target ) )
+	//    {
+	//        m_target = target;
+	//        // update stuff related to m_target
+	//    }
 
 	T*		Get() const;
 	void	Set( const T* pVal );
@@ -153,7 +183,13 @@ inline bool CHandle<T>::operator!=( T *val ) const
 template<class T>
 void CHandle<T>::Set( const T* pVal )
 {
-	CBaseHandle::Set( reinterpret_cast< const IHandleEntity* >( pVal ) );
+	
+	
+	
+	
+
+	
+	CBaseHandle::Set( reinterpret_cast<const IHandleEntity*>( pVal ) );
 }
 
 template<class T>

@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#ifndef VGUITEXTWINDOW_H
-#define VGUITEXTWINDOW_H
+#ifndef FFTEXTWINDOW_H
+#define FFTEXTWINDOW_H
 #ifdef _WIN32
 #pragma once
 #endif
@@ -30,14 +30,14 @@ namespace vgui
 // Purpose: displays the MOTD
 //-----------------------------------------------------------------------------
 
-class CTextWindow : public vgui::Frame, public IViewPortPanel, public IGameEventListener2
+class CFFTextWindow : public CTextWindow, public IGameEventListener2
 {
 private:
-	DECLARE_CLASS_SIMPLE( CTextWindow, vgui::Frame );
+	DECLARE_CLASS_SIMPLE( CFFTextWindow, CTextWindow );
 
 public:
-	CTextWindow(IViewPort *pViewPort);
-	virtual ~CTextWindow();
+	CFFTextWindow( IViewPort *pViewPort );
+	virtual ~CFFTextWindow();
 
 	virtual const char *GetName( void ) { return PANEL_INFO; }
 	virtual void SetData(KeyValues *data);

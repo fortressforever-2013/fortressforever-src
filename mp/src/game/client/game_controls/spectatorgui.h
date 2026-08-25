@@ -69,7 +69,7 @@ public:
 
 	virtual Color GetBlackBarColor( void ) { return BLACK_BAR_COLOR; }
 
-	virtual const char *GetResFile( void ) { return "Resource/UI/Spectator.res"; }
+	virtual const char *GetResFile( void );
 	
 protected:
 

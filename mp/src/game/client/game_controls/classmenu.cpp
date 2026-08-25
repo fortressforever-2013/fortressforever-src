@@ -136,7 +136,7 @@ void CClassMenu::Reset()
 	for ( int i = 0 ; i < GetChildCount() ; ++i )
 	{
 		// Hide the subpanel for the MouseOverPanelButtons
-		MouseOverPanelButton* pPanel = dynamic_cast<MouseOverPanelButton*>(GetChild(i));
+		MouseOverPanelButton *pPanel = dynamic_cast<MouseOverPanelButton *>( GetChild( i ) );
 
 		if ( pPanel )
 		{
@@ -146,7 +146,7 @@ void CClassMenu::Reset()
 
 	// Turn the first button back on again (so we have a default description shown)
 	Assert( m_mouseoverButtons.Count() );
-	for (int i = 0; i<m_mouseoverButtons.Count(); ++i)
+	for ( int i=0; i<m_mouseoverButtons.Count(); ++i )
 	{
 		if ( i == 0 )
 		{
@@ -157,7 +157,6 @@ void CClassMenu::Reset()
 			m_mouseoverButtons[i]->HidePage();	// Hide the rest
 		}
 	}
-	
 }
 
 //-----------------------------------------------------------------------------
@@ -197,7 +196,7 @@ void CClassMenu::ShowPanel(bool bShow)
 		SetMouseInputEnabled( true );
 
 		// load a default class page
-		for (int i = 0; i<m_mouseoverButtons.Count(); ++i)
+		for ( int i=0; i<m_mouseoverButtons.Count(); ++i )
 		{
 			if ( i == 0 )
 			{
@@ -297,7 +296,7 @@ void CClassMenu::OnKeyCodePressed(KeyCode code)
 		if ( nNewArmed != -1 )
 		{
 			// Handled!
-			if (nNewArmed < m_mouseoverButtons.Count())
+			if ( nNewArmed < m_mouseoverButtons.Count() )
 			{
 				m_mouseoverButtons[ nNewArmed ]->OnCursorEntered();
 			}

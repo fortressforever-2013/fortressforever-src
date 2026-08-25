@@ -3049,15 +3049,15 @@ void CBasePlayer::Duck( )
 		}
 	}
 }
-
+#ifndef FF
 //
 // ID's player as such.
 //
-//Class_T  CBasePlayer::Classify ( void )
-//{
-//	return CLASS_PLAYER;
-//}
-
+Class_T  CBasePlayer::Classify ( void )
+{
+	return CLASS_PLAYER;
+}
+#endif
 
 void CBasePlayer::ResetFragCount()
 {
@@ -3355,6 +3355,9 @@ void CBasePlayer::AdjustPlayerTimeBase( int simulation_ticks )
 	}
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 void CBasePlayer::RunNullCommand( void )
 {
 	CUserCmd cmd;	// NULL command
@@ -3589,7 +3592,7 @@ void CBasePlayer::PhysicsSimulate( void )
 	// FIXME:  Should this occur after simulation of children so
 	//  that they are in the timespace of the player?
 	gpGlobals->curtime		= savetime;
-	gpGlobals->frametime	= saveframetime;	
+	gpGlobals->frametime	= saveframetime;
 
 	// Since this isn't called for bots.. call it here?
 	if (m_pPhysicsController && IsBot())
@@ -6730,7 +6733,7 @@ bool CBasePlayer::ClientCommand( const CCommand &args )
 		{
 			// set new spectator mode, don't allow OBS_MODE_NONE
 			if ( !SetObserverMode( mode ) )
-				ClientPrint( this, HUD_PRINTCONSOLE, "#Spectator_Mode_Unkown");
+				ClientPrint( this, HUD_PRINTCONSOLE, "#Spectator_Mode_Unknown");
 			else
 				engine->ClientCommand( edict(), "cl_spec_mode %d", mode );
 		}
@@ -7835,7 +7838,7 @@ void CBasePlayer::PlayWearableAnimsForPlaybackEvent( wearableanimplayback_t iPla
 // Purpose: Put the player in the specified team
 //-----------------------------------------------------------------------------
 
-void CBasePlayer::ChangeTeam( int iTeamNum, bool bAutoTeam, bool bSilent)
+void CBasePlayer::ChangeTeam( int iTeamNum, bool bAutoTeam, bool bSilent, bool bAutoBalance /*= false*/ )
 {
 	if ( !GetGlobalTeam( iTeamNum ) )
 	{
