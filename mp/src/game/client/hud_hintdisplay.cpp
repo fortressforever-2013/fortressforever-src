@@ -788,5 +788,4 @@ void CHudHintKeyDisplay::MsgFunc_KeyHintText( bf_read &msg )
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "KeyHintMessageHide" ); 
 	}
 }
-
 #endif

@@ -68,9 +68,9 @@ public:
 	}
 	virtual void Trigger()
 	{
-		CTFGenericConfirmDialog *pDialog = ShowConfirmDialog( "#GameUI_Vote_Notification_Title", 
-															  "#GameUI_Vote_Notification_Text", 
-															  "#GameUI_Vote_Notification_View", 
+		CTFGenericConfirmDialog *pDialog = ShowConfirmDialog( "#GameUI_Vote_Notification_Title",
+															  "#GameUI_Vote_Notification_Text",
+															  "#GameUI_Vote_Notification_View",
 															  "#cancel", &ConfirmShowVoteSetup );
 		pDialog->SetContext( this );
 		pDialog->AddStringToken( "initiator", m_wszPlayerName );
@@ -185,6 +185,14 @@ void VoteBarPanel::FireGameEvent( IGameEvent *event )
 	}
 }
 
+#ifdef TF_CLIENT_DLL
+static const char* s_pszBotIcons[SCOREBOARD_PING_ICONS] =
+{
+	"../hud/scoreboard_ping_bot_red",
+	"../hud/scoreboard_ping_bot_blue",
+};
+#endif // TF_CLIENT_DLL
+
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
@@ -198,6 +206,11 @@ CVoteSetupDialog::CVoteSetupDialog( vgui::Panel *parent ) : BaseClass( parent, "
 	m_pCallVoteButton = new Button( this, "CallVoteButton", "CallVote", this, "CallVote" );
 	m_pComboBox = new ComboBox( this, "ComboBox", 5, false );
 	m_pImageList = NULL;
+
+#ifdef TF_CLIENT_DLL
+	Q_memset( m_iImageClass, 0, sizeof( m_iImageClass ) );
+	Q_memset( m_iImageTeamBot, 0, sizeof( m_iImageTeamBot ) );
+#endif // TF_CLIENT_DLL
 
 #ifdef TF_CLIENT_DLL
 	vgui::HScheme scheme = vgui::scheme()->LoadSchemeFromFileEx( enginevgui->GetPanel( PANEL_CLIENTDLL ), "resource/ClientScheme.res", "ClientScheme");
@@ -241,6 +254,18 @@ void CVoteSetupDialog::ApplySchemeSettings( vgui::IScheme *pScheme )
 	}
 
 	m_pImageList = new ImageList( false );
+
+#ifdef TF_CLIENT_DLL
+	for ( int i = 1 ; i < SCOREBOARD_CLASS_ICONS ; i++ )
+	{
+		m_iImageClass[i] = m_pImageList->AddImage( scheme()->GetImage( g_pszClassIcons[i], true ) );
+	}
+
+	for ( int i = 0; i < 2; i++ )
+	{
+		m_iImageTeamBot[i] = m_pImageList->AddImage( scheme()->GetImage( s_pszBotIcons[i], true ) );
+	}
+#endif // TF_CLIENT_DLL
 }
 
 //-----------------------------------------------------------------------------
@@ -282,6 +307,15 @@ void CVoteSetupDialog::ApplySettings(KeyValues *inResourceData)
 	{
 		m_hHeaderFont = pScheme->GetFont( pszFont, true );
 	}
+
+#ifdef TF_CLIENT_DLL
+	m_hPlayerNameFont = INVALID_FONT;
+	pszFont = inResourceData->GetString( "player_font", NULL );
+	if ( pszFont && pszFont[0] )
+	{
+		m_hPlayerNameFont = pScheme->GetFont( pszFont, true );
+	}
+#endif // TF_CLIENT_DLL
 
 	const char *pszColor = inResourceData->GetString( "issue_fgcolor", "Label.TextColor" );
 	m_IssueFGColor = pScheme->GetColor( pszColor, Color( 255, 255, 255, 255 ) );
@@ -445,10 +479,22 @@ void CVoteSetupDialog::Activate()
 	m_pVoteParameterList->SetSectionFgColor( 0, Color( 255, 255, 255, 255 ) );
 	m_pVoteParameterList->SetBgColor( Color( 0, 0, 0, 0 ) );
 	m_pVoteParameterList->SetBorder( NULL );
+#ifdef TF_CLIENT_DLL
+	int nAvatarSize = QuickPropScale( 16 );
+	int nSpacerSize = QuickPropScale( 5 );
+	m_pVoteParameterList->AddColumnToSection( 0, "Avatar", "", SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_RIGHT, nAvatarSize );
+	m_pVoteParameterList->AddColumnToSection( 0, "", "", 0, nSpacerSize );	// Spacer
+	int iRealWidth = m_iParameterWidth - ( nAvatarSize + nSpacerSize + nAvatarSize );
+	m_pVoteParameterList->AddColumnToSection( 0, "Name", "#TF_Vote_Column_Name", 0, iRealWidth * 0.75 );
+	m_pVoteParameterList->AddColumnToSection( 0, "Properties", "#TF_Vote_Column_Properties", SectionedListPanel::COLUMN_CENTER, iRealWidth * 0.2 );
+	m_pVoteParameterList->AddColumnToSection( 0, "Score", "", 0, iRealWidth * 0.05 );
+	m_pVoteParameterList->AddColumnToSection( 0, "Class", "", SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_RIGHT, nAvatarSize );
+#else // !TF_CLIENT_DLL
 	m_pVoteParameterList->AddColumnToSection( 0, "Avatar", "", SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_RIGHT, 55 );
 	m_pVoteParameterList->AddColumnToSection( 0, "", "", 0, 10 );	// Spacer
 	m_pVoteParameterList->AddColumnToSection( 0, "Name", "#TF_Vote_Column_Name", 0, m_iParameterWidth * 0.6 );
 	m_pVoteParameterList->AddColumnToSection( 0, "Properties", "#TF_Vote_Column_Properties", SectionedListPanel::COLUMN_CENTER, m_iParameterWidth * 0.3 );
+#endif // !TF_CLIENT_DLL
 
 	if ( m_hHeaderFont != INVALID_FONT )
 	{
@@ -457,6 +503,10 @@ void CVoteSetupDialog::Activate()
 		m_pVoteParameterList->SetFontSection( 1, m_hHeaderFont );
 		m_pVoteParameterList->SetSectionFgColor( 1, m_HeaderFGColor );
 	}
+
+#ifdef TF_CLIENT_DLL
+	m_hRowFont = m_pVoteSetupList->GetRowFont();
+#endif // TF_CLIENT_DLL
 
 	InitializeIssueList();
 }
@@ -794,6 +844,11 @@ void CVoteSetupDialog::RefreshIssueParameters()
 			{
 				for ( int index = 0; index < m_pVoteParameterList->GetItemCount(); index++ )
 				{
+#ifdef TF_CLIENT_DLL
+					if ( m_hPlayerNameFont != INVALID_FONT )
+						m_pVoteParameterList->SetItemFont( index, m_hPlayerNameFont );
+#endif // TF_CLIENT_DLL
+
 					KeyValues *pKeyValues = m_pVoteParameterList->GetItemData( index );
 					if ( !pKeyValues )
 						continue;
@@ -815,6 +870,7 @@ void CVoteSetupDialog::RefreshIssueParameters()
 					}
 					else
 					{
+						
 						pKeyValues->SetString( "Properties", "" );
 					}
 

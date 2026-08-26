@@ -235,8 +235,8 @@ inline void CParticleEffectBinding::StartDrawMaterialParticles(
 	// Setup the ParticleDraw and bind the material.
 	if( bWireframe )
 	{
-		IMaterial *pMaterial = m_pParticleMgr->m_pMaterialSystem->FindMaterial( "debug/debugparticlewireframe", TEXTURE_GROUP_OTHER );
-		pRenderContext->Bind( pMaterial, NULL );
+		IMaterial *pMaterialWire = m_pParticleMgr->m_pMaterialSystem->FindMaterial( "debug/debugparticlewireframe", TEXTURE_GROUP_OTHER );
+		pRenderContext->Bind( pMaterialWire, NULL );
 	}
 	else
 	{
@@ -470,8 +470,11 @@ int CParticleEffectBinding::DrawModel( int flags )
 		
 			if ( bDraw )
 			{
-				debugoverlay->AddBoxOverlay( center, mins, maxs, QAngle( 0, 0, 0 ), r, g, b, 16, 0 );
-				debugoverlay->AddTextOverlayRGB( center, 0, 0, r, g, b, 64, "%s:(%d)", m_pSim->GetEffectName(), m_nActiveParticles );
+				if ( debugoverlay )
+				{
+					debugoverlay->AddBoxOverlay( center, mins, maxs, QAngle( 0, 0, 0 ), r, g, b, 16, 0 );
+					debugoverlay->AddTextOverlayRGB( center, 0, 0, r, g, b, 64, "%s:(%d)", m_pSim->GetEffectName(), m_nActiveParticles );
+				}
 			}
 		}
 	}
@@ -1585,7 +1588,7 @@ static void ProcessPSystem( ParticleSimListEntry_t& pSimListEntry )
 
 
 int CParticleMgr::ComputeParticleDefScreenArea( int nInfoCount, RetireInfo_t *pInfo, float *pTotalArea, CParticleSystemDefinition* pDef, 
-	const CViewSetup& view, const VMatrix &worldToPixels, float flFocalDist )
+	const CViewSetup& viewParticle, const VMatrix &worldToPixels, float flFocalDist )
 {
 	int nCollection = 0;
 	float flCullCost = pDef->GetCullFillCost();
@@ -1594,7 +1597,7 @@ int CParticleMgr::ComputeParticleDefScreenArea( int nInfoCount, RetireInfo_t *pI
 	*pTotalArea = 0.0f;
 
 #ifdef DBGFLAG_ASSERT
-	float flMaxPixels = view.width * view.height;
+	float flMaxPixels = viewParticle.width * viewParticle.height;
 #endif
 
 	CParticleCollection *pCollection = pDef->FirstCollection();
@@ -1616,16 +1619,16 @@ int CParticleMgr::ComputeParticleDefScreenArea( int nInfoCount, RetireInfo_t *pI
 		vecCenter = pCollection->GetControlPointAtCurrentTime( pDef->GetCullControlPoint() );
 
 		Vector3DMultiplyPositionProjective( worldToPixels, vecCenter, vecScreenCenter );
-		float lSqr = vecCenter.DistToSqr( view.origin );
+		float lSqr = vecCenter.DistToSqr( viewParticle.origin );
 
 		float flProjRadius = ( lSqr > flCullRadiusSqr ) ? 0.5f * flFocalDist * flCullRadius / sqrt( lSqr - flCullRadiusSqr ) : 1.0f;
-		flProjRadius *= view.width;
+		flProjRadius *= viewParticle.width;
 
-		float flMinX = MAX( view.x, vecScreenCenter.x - flProjRadius );
-		float flMaxX = MIN( view.x + view.width, vecScreenCenter.x + flProjRadius );
+		float flMinX = MAX( viewParticle.x, vecScreenCenter.x - flProjRadius );
+		float flMaxX = MIN( viewParticle.x + viewParticle.width, vecScreenCenter.x + flProjRadius );
 
-		float flMinY = MAX( view.y, vecScreenCenter.y - flProjRadius );
-		float flMaxY = MIN( view.y + view.height, vecScreenCenter.y + flProjRadius );
+		float flMinY = MAX( viewParticle.y, vecScreenCenter.y - flProjRadius );
+		float flMaxY = MIN( viewParticle.y + viewParticle.height, vecScreenCenter.y + flProjRadius );
 
 		float flArea = ( flMaxX - flMinX ) * ( flMaxY - flMinY );
 		Assert( flArea <= flMaxPixels );

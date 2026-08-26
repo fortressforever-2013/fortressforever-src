@@ -1300,6 +1300,18 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 			et.m_pSoundName = event->GetString( "sound" );
 			et.m_nFlags = event->GetInt( "additional_flags" );
 
+#ifdef TF_CLIENT_DLL
+			int iPlayerIndex = event->GetInt( "player" );
+			if ( iPlayerIndex > 0 )
+			{
+				CTFPlayer *pTFPlayer = ToTFPlayer( UTIL_PlayerByIndex( iPlayerIndex ) );
+				if ( pTFPlayer )
+				{
+					pTFPlayer->ClientAdjustStartSoundParams( et );
+				}
+			}
+#endif // TF_CLIENT_DLL
+
 			CLocalPlayerFilter filter;
 			C_BaseEntity::EmitSound( filter, SOUND_FROM_LOCAL_PLAYER, et );
 		}
@@ -1406,7 +1418,7 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 			if ( pszLocString )
 			{
 				wchar_t wszItemFound[256];
-				V_snwprintf( wszItemFound, ARRAYSIZE( wszItemFound ), L"%ls", g_pVGuiLocalize->Find( pszLocString ) );
+				_snwprintf( wszItemFound, ARRAYSIZE( wszItemFound ), L"%ls", g_pVGuiLocalize->Find( pszLocString ) );
 
 				wchar_t *colorMarker = wcsstr( wszItemFound, L"::" );
 				const CEconItemRarityDefinition* pItemRarity = GetItemSchema()->GetRarityDefinition( pItemDefinition->GetRarity() );
@@ -1434,73 +1446,57 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 				}
 
 				// TODO: Update the localization strings to only have two format parameters since that's all we need.
-				wchar_t wszLocalizedString[256];
-				g_pVGuiLocalize->ConstructString( 
-					wszLocalizedString, 
-					sizeof( wszLocalizedString ), 
-					LOCCHAR( "%s1" ),
-					1, 
-					CEconItemLocalizedFullNameGenerator( GLocalizationProvider(), pItemDefinition, iItemQuality ).GetFullName()
+				locchar_t wszLocalizedString[256];
+
+				locchar_t szItemname[64] = LOCCHAR( "" );
+				locchar_t szRarity[64] = LOCCHAR( "" );
+				locchar_t szWear[64] = LOCCHAR( "" );
+				locchar_t szStrange[64] = LOCCHAR( "" );
+				locchar_t szUnusual[64] = LOCCHAR( "" );
+
+				loc_scpy_safe(
+					szItemname, 
+					CConstructLocalizedString(g_pVGuiLocalize->Find("TFUI_InvTooltip_ItemFound_Itemname"), 
+					CEconItemLocalizedFullNameGenerator(GLocalizationProvider(), pItemDefinition, iItemQuality).GetFullName() )
 				);
 
+				/*g_pVGuiLocalize->ConstructString_safe( 
+					szItemname, 
+					LOCCHAR( "%s1 " ),
+					1, 
+					CEconItemLocalizedFullNameGenerator( GLocalizationProvider(), pItemDefinition, iItemQuality ).GetFullName()
+				);*/
+
 				locchar_t tempName[MAX_ITEM_NAME_LENGTH];
+				// If items have rarity
 				if ( pItemRarity )
 				{
-					// grade and Wear
-					loc_scpy_safe( tempName, wszLocalizedString );
-
-					const locchar_t *loc_WearText = LOCCHAR("");
-					const char *pszTooltipText = "TFUI_InvTooltip_Rarity";
-
+					// Weapon Wear
 					if ( !IsWearableSlot( pItemDefinition->GetDefaultLoadoutSlot() ) )
 					{
-						loc_WearText = g_pVGuiLocalize->Find( GetWearLocalizationString( flWear ) );
-					}
-					else
-					{
-						pszTooltipText = "TFUI_InvTooltip_RarityNoWear";
+						loc_scpy_safe(szWear, CConstructLocalizedString( g_pVGuiLocalize->Find("TFUI_InvTooltip_ItemFound_Wear"), g_pVGuiLocalize->Find(GetWearLocalizationString(flWear) ) ) );
 					}
 
-					g_pVGuiLocalize->ConstructString( wszLocalizedString,
-						ARRAYSIZE( wszLocalizedString ) * sizeof( locchar_t ),
-						g_pVGuiLocalize->Find( pszTooltipText ),
-						3,
-						g_pVGuiLocalize->Find( pItemRarity->GetLocKey() ),
-						tempName,
-						loc_WearText
-					);
-
-					if ( bIsUnusual )
-					{
-						loc_scpy_safe( tempName, wszLocalizedString );
-
-						g_pVGuiLocalize->ConstructString( wszLocalizedString,
-							ARRAYSIZE( wszLocalizedString ) * sizeof( locchar_t ),
-							LOCCHAR( "%s1 %s2" ),
-							2,
-							g_pVGuiLocalize->Find( "rarity4" ),
-							tempName 
-						);
-					}
-
-					if ( bIsStrange )
-					{
-						loc_scpy_safe( tempName, wszLocalizedString );
-
-						g_pVGuiLocalize->ConstructString( wszLocalizedString,
-							ARRAYSIZE( wszLocalizedString ) * sizeof( locchar_t ),
-							LOCCHAR( "%s1 %s2" ),
-							2,
-							g_pVGuiLocalize->Find( "strange" ),
-							tempName
-						);
-					}
+					// Rarity / grade
+					loc_scpy_safe(szRarity, CConstructLocalizedString(g_pVGuiLocalize->Find("TFUI_InvTooltip_ItemFound_Rarity"), g_pVGuiLocalize->Find(pItemRarity->GetLocKey() ) ) );
 				}
-				
+
+				if ( bIsUnusual )
+				{
+					loc_scpy_safe(szUnusual, CConstructLocalizedString(g_pVGuiLocalize->Find("TFUI_InvTooltip_ItemFound_Unusual"), g_pVGuiLocalize->Find("rarity4")));
+				}
+
+				if ( bIsStrange )
+				{
+					loc_scpy_safe(szStrange, CConstructLocalizedString(g_pVGuiLocalize->Find("TFUI_InvTooltip_ItemFound_Strange"), g_pVGuiLocalize->Find("strange")));
+				}
+
+				// // Strange Unusual Item Grade 		
+				loc_scpy_safe( wszLocalizedString, CConstructLocalizedString( g_pVGuiLocalize->Find( "TFUI_InvTooltip_ItemFound" ), szStrange, szUnusual, szItemname, szRarity, szWear ) );
+
 				loc_scpy_safe( tempName, wszLocalizedString );
-				g_pVGuiLocalize->ConstructString(
+				g_pVGuiLocalize->ConstructString_safe(
 					wszLocalizedString,
-					sizeof( wszLocalizedString ),
 					wszItemFound,
 					3,
 					wszPlayerName, tempName, L"" );

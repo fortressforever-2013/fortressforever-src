@@ -1178,10 +1178,10 @@ void CLCD::DumpPlayer()
 
 	Msg( "(localplayer)\n\n" );
 
-	
+	{
 		CDescribeData helper( player );
 		helper.DumpDescription( player->GetPredDescMap() );
-	
+	}
 
 	Msg( "(localteam)\n\n" );
 

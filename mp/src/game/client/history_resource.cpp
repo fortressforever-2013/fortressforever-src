@@ -24,9 +24,9 @@ using namespace vgui;
 
 extern ConVar hud_drawhistory_time;
 
-DECLARE_HUDELEMENT(CHudHistoryResource);
-DECLARE_HUD_MESSAGE(CHudHistoryResource, ItemPickup);
-DECLARE_HUD_MESSAGE(CHudHistoryResource, AmmoDenied);
+DECLARE_HUDELEMENT( CHudHistoryResource );
+DECLARE_HUD_MESSAGE( CHudHistoryResource, ItemPickup );
+DECLARE_HUD_MESSAGE( CHudHistoryResource, AmmoDenied );
 
 //-----------------------------------------------------------------------------
 // Purpose: Constructor

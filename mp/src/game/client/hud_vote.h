@@ -118,10 +118,19 @@ private:
 	char			m_szCurrentMap[MAX_MAP_NAME];
 
 	vgui::HFont		m_hHeaderFont;
+#ifdef TF_CLIENT_DLL
+	vgui::HFont		m_hPlayerNameFont;
+	vgui::HFont		m_hRowFont;
+#endif // TF_CLIENT_DLL
 	Color			m_HeaderFGColor;
 	vgui::HFont		m_hIssueFont;
 	Color			m_IssueFGColor;
 	Color			m_IssueFGColorDisabled;
+
+#ifdef TF_CLIENT_DLL
+	int				m_iImageClass[SCOREBOARD_CLASS_ICONS];
+	int				m_iImageTeamBot[2];
+#endif // TF_CLIENT_DLL
 };
 
 
@@ -162,11 +171,8 @@ private:
 	CVoteSetupDialog	*m_pVoteSetupDialog;
 
 	CUtlVector< VoteIssue_t > m_VoteSetupIssues;
+
 	CUtlStringList		m_VoteSetupMapCycle;
-	
-#ifdef TF_CLIENT_DLL
-	CUtlStringList		m_VoteSetupPopFiles;
-#endif
 
 	CUtlStringList		m_VoteSetupChoices;
 

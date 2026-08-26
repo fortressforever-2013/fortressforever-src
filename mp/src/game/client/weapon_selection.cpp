@@ -21,8 +21,8 @@
 
 #define HISTORY_DRAW_TIME	"5"
 
-ConVar hud_drawhistory_time("hud_drawhistory_time", HISTORY_DRAW_TIME, FCVAR_ARCHIVE);
-ConVar hud_fastswitch("hud_fastswitch", "1", FCVAR_ARCHIVE, "0 = none | 1 = keyboard & mouse | 2 = keyboard only (old HL/TFC style)");
+ConVar hud_drawhistory_time( "hud_drawhistory_time", HISTORY_DRAW_TIME, FCVAR_ARCHIVE );
+ConVar hud_fastswitch( "hud_fastswitch", "1", FCVAR_ARCHIVE, "0 = none | 1 = keyboard & mouse | 2 = keyboard only (old HL/TFC style)");
 ConVar hud_weaponselect("hud_weaponselect", "1", FCVAR_ARCHIVE, "Briefly shows the weapon select menu whenever switching weapons when hud_fastswitch is enabled");
 
 //-----------------------------------------------------------------------------
@@ -142,7 +142,7 @@ void CBaseHudWeaponSelection::VidInit(void)
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CBaseHudWeaponSelection::OnThink(void)
+void CBaseHudWeaponSelection::OnThink( void )
 {
 #ifndef FF	// Don't allow weapon selection if we're frozen in place
 	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
@@ -418,6 +418,11 @@ bool CBaseHudWeaponSelection::HandleHudMenuInput( int iSlot )
 //-----------------------------------------------------------------------------
 bool CBaseHudWeaponSelection::IsHudMenuPreventingWeaponSelection()
 {
+	// Don't allow weapon selection if we're frozen in place
+	C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
+	if ( pPlayer->GetFlags() & FL_FROZEN || pPlayer->IsPlayerDead() )
+		return true;
+
 	return IsHudMenuTakingInput();
 }
 

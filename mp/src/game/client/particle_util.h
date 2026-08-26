@@ -422,7 +422,7 @@ inline void RenderParticle_ColorSizeAngles(
 
 // If you can find a MAX_VIEW_DISTANCE or something, maybe use that instead of 65536.
 inline float GetAlphaDistanceFade(
-	const Vector& pos,
+	const Vector &pos,
 	const float fadeNearMin = 0,
 	const float fadeNearMax = 0,
 	const float fadeFarMin = 65536,
