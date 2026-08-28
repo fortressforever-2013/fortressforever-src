@@ -34,7 +34,7 @@
 
 #include "ff_options.h"
 #include "ff_gamemodes.h"
-#include "ff_training.h"
+//#include "ff_training.h"
 
 using namespace vgui;
 
@@ -226,7 +226,7 @@ void VGui_CreateGlobalPanels( void )
 	// --> Mirv: Create extra gameui panels
 	ffoptions->Create(uiParent);
 	ffgamemodes->Create(uiParent);
-	fftraining->Create(uiParent);
+	//fftraining->Create(uiParent);
 	// <-- Mirv
 
 #ifdef SIXENSE
@@ -256,7 +256,7 @@ void VGui_Shutdown()
 	// --> Mirv: Destroy extra gameui panels
 	ffoptions->Destroy();
 	ffgamemodes->Destroy();
-	fftraining->Destroy();
+	//fftraining->Destroy();
 	// <-- Mirv
 
 	if ( g_pClientMode )

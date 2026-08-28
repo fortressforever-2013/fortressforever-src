@@ -63,13 +63,13 @@ void CFFTrainingPanel::OnButtonCommand(KeyValues *data)
 		Close();
 		return;
 	}
-
+	/*
 	engine->ClientCmd("sv_lan 1\n");
 	engine->ClientCmd("mp_timelimit 0\n");
 	engine->ClientCmd("sv_cheats 0\n");
 	engine->ClientCmd("progress_enable 1\n");
 	engine->ClientCmd("map ff_training\n");
-
+	*/
 	Close();
 }
 
