@@ -78,7 +78,7 @@ ConVar cl_wpn_sway_interp( "cl_wpn_sway_interp", "0.1", FCVAR_CLIENTDLL );
 	#endif
 	
 	ConVar cl_bob("cl_bob", "1", FCVAR_CLIENTDLL);
-	ConVar cl_wpn_sway_follow("cl_wpn_sway_follow", "1", FCVAR_CLIENTDLL, "Viewmodel sways toward the direction the camera is turning");
+	ConVar cl_wpn_sway_follow("cl_wpn_sway_follow", "1", FCVAR_ARCHIVE|FCVAR_CLIENTDLL, "Viewmodel sways toward the direction the camera is turning");
 	#endif
 	
 void CPredictedViewModel::CalcViewModelLag( Vector& origin, QAngle& angles, QAngle& original_angles )
