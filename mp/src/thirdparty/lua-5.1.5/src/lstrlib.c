@@ -91,14 +91,21 @@ static int str_upper (lua_State *L) {
 }
 
 static int str_rep (lua_State *L) {
-  size_t l;
-  luaL_Buffer b;
+  size_t l, lsep;
   const char *s = luaL_checklstring(L, 1, &l);
   int n = luaL_checkint(L, 2);
-  luaL_buffinit(L, &b);
-  while (n-- > 0)
-    luaL_addlstring(&b, s, l);
-  luaL_pushresult(&b);
+  const char *sep = luaL_optlstring(L, 3, "", &lsep);
+  if (n <= 0) lua_pushliteral(L, "");
+  else {
+    luaL_Buffer b;
+    luaL_buffinit(L, &b);
+    while(n-- > 1) { /* first n-1 copies (followed by separator) */
+      luaL_addlstring(&b, s, l);
+      luaL_addlstring(&b, sep, lsep);
+    }
+    luaL_addlstring(&b, s, l); /* last copy (not followed by separator) */
+    luaL_pushresult(&b);
+  }
   return 1;
 }
 
@@ -229,6 +236,7 @@ static int match_class (int c, int cl) {
     case 'a' : res = isalpha(c); break;
     case 'c' : res = iscntrl(c); break;
     case 'd' : res = isdigit(c); break;
+    case 'g' : res = isgraph(c); break;
     case 'l' : res = islower(c); break;
     case 'p' : res = ispunct(c); break;
     case 's' : res = isspace(c); break;
@@ -824,6 +832,37 @@ static int str_format (lua_State *L) {
 }
 
 
+static int str_replace(lua_State *L) {
+    size_t l1, l2, l3;
+    const char *src = luaL_checklstring(L, 1, &l1);
+    const char *p = luaL_checklstring(L, 2, &l2);
+    const char *p2 = luaL_checklstring(L, 3, &l3);
+    const char *s2;
+    int n = 0;
+    int init = 0;
+
+    luaL_Buffer b;
+    luaL_buffinit(L, &b);
+
+    while (1) {
+        s2 = lmemfind(src+init, l1-init, p, l2);
+        if (s2) {
+            luaL_addlstring(&b, src+init, s2-(src+init));
+            luaL_addlstring(&b, p2, l3);
+            init = init + (s2-(src+init)) + l2;
+            n++;
+        } else {
+            luaL_addlstring(&b, src+init, l1-init);
+            break;
+        }
+    }
+
+    luaL_pushresult(&b);
+    lua_pushnumber(L, (lua_Number)n);  /* number of substitutions */
+    return 2;
+}
+
+
 static const luaL_Reg strlib[] = {
   {"byte", str_byte},
   {"char", str_char},
@@ -837,6 +876,7 @@ static const luaL_Reg strlib[] = {
   {"lower", str_lower},
   {"match", str_match},
   {"rep", str_rep},
+  {"replace", str_replace},
   {"reverse", str_reverse},
   {"sub", str_sub},
   {"upper", str_upper},
