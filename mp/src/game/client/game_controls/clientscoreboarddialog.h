@@ -82,18 +82,10 @@ private:
 
 protected:
 // column widths at 640
-	enum { 
-		AVATAR_WIDTH		= 14, // unfinished avatar implementation
-		NAME_WIDTH = 140, 
-		CLASS_WIDTH			= 60, 
-		FORTPOINTS_WIDTH	= 60, 
-		SCORE_WIDTH = 35,
-		DEATH_WIDTH = 35,
-		ASSIST_WIDTH		= 35,
-		PING_WIDTH = 30, 
-		VOICE_WIDTH = 30,
-		CHANNEL_WIDTH		= 0, 
-		FRIENDS_WIDTH = 0 };
+	enum { NAME_WIDTH = 140, SCORE_WIDTH = 35, DEATH_WIDTH = 35, PING_WIDTH = 30, VOICE_WIDTH = 30, FRIENDS_WIDTH = 0,
+		AVATAR_WIDTH = 14, // unfinished avatar implementation
+		CLASS_WIDTH = 60, FORTPOINTS_WIDTH = 60, ASSIST_WIDTH = 35,
+		CHANNEL_WIDTH = 0 };
 	// total = 439
 
 public:
@@ -139,6 +131,7 @@ protected:
 	// functions to override
 	virtual bool GetPlayerScoreInfo(int playerIndex, KeyValues *outPlayerInfo);
 	virtual void InitScoreboardSections();
+	virtual void UpdateTeamInfo();
 	virtual void UpdatePlayerInfo();
 
 	virtual void OnThink();
@@ -202,7 +195,7 @@ private:
 	ButtonCode_t m_nJumpKey;
 
 	// methods
-	void FillScoreBoard(void);
+	void FillScoreBoard();
 	bool NeedToSortTeams(void) const;
 	int  FindSectionByTeam(int iTeam) const;
 

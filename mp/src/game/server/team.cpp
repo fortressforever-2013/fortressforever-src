@@ -114,7 +114,7 @@ int CTeam::UpdateTransmitState()
 //-----------------------------------------------------------------------------
 // Visibility/scanners
 //-----------------------------------------------------------------------------
-bool CTeam::ShouldTransmitToPlayer( CBasePlayer* pRecipient, CBaseEntity* pEntity )
+bool CTeam::ShouldTransmitToPlayer( CBasePlayer* pRecipient, CBaseEntity* pEntity ) const
 {
 	// Always transmit the observer target to players
 	if ( pRecipient && pRecipient->IsObserver() && pRecipient->GetObserverTarget() == pEntity )
@@ -151,7 +151,7 @@ int CTeam::GetTeamNumber( void ) const
 //-----------------------------------------------------------------------------
 // Purpose: Get the team's name
 //-----------------------------------------------------------------------------
-const char *CTeam::GetName( void )
+const char *CTeam::GetName( void ) const
 {
 	return m_szTeamname;
 }
@@ -274,7 +274,7 @@ void CTeam::RemovePlayer( CBasePlayer *pPlayer )
 //-----------------------------------------------------------------------------
 // Purpose: Return the number of players in this team.
 //-----------------------------------------------------------------------------
-int CTeam::GetNumPlayers( void )
+int CTeam::GetNumPlayers( void ) const
 {
 	return m_aPlayers.Size();
 }
@@ -282,7 +282,7 @@ int CTeam::GetNumPlayers( void )
 //-----------------------------------------------------------------------------
 // Purpose: Get a specific player
 //-----------------------------------------------------------------------------
-CBasePlayer *CTeam::GetPlayer( int iIndex )
+CBasePlayer *CTeam::GetPlayer( int iIndex ) const
 {
 	Assert( iIndex >= 0 && iIndex < m_aPlayers.Size() );
 	return m_aPlayers[ iIndex ];
@@ -308,7 +308,7 @@ void CTeam::SetScore( int iScore )
 //-----------------------------------------------------------------------------
 // Purpose: Get this team's score
 //-----------------------------------------------------------------------------
-int CTeam::GetScore( void )
+int CTeam::GetScore( void ) const
 {
 	return m_iScore;
 }
@@ -402,7 +402,7 @@ void CTeam::AwardAchievement( int iAchievement )
 	MessageEnd();
 }
 
-int CTeam::GetAliveMembers( void )
+int CTeam::GetAliveMembers( void ) const
 {
 	int iAlive = 0;
 

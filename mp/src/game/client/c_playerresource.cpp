@@ -69,17 +69,15 @@ C_PlayerResource::C_PlayerResource()
 	memset( m_iPing, 0, sizeof( m_iPing ) );
 //	memset( m_iPacketloss, 0, sizeof( m_iPacketloss ) );
 	memset( m_iScore, 0, sizeof( m_iScore ) );
-	memset( m_iFortPoints, 0, sizeof(m_iFortPoints) );
 	memset( m_iDeaths, 0, sizeof( m_iDeaths ) );
 	memset( m_bConnected, 0, sizeof( m_bConnected ) );
 	memset( m_iTeam, 0, sizeof( m_iTeam ) );
 	memset( m_bAlive, 0, sizeof( m_bAlive ) );
 	memset( m_iHealth, 0, sizeof( m_iHealth ) );
+	memset( m_iFortPoints, 0, sizeof(m_iFortPoints) );
 	memset( m_iArmor, 0, sizeof(m_iArmor) );
 	memset( m_iClass, 0, sizeof(m_iClass) );	// |-- Mirv: Current class
-
 	memset( m_iChannel, 0, sizeof(m_iChannel) ); // |-- Mirv: Channel information
-
 	memset( m_iAssists, 0, sizeof(m_iAssists) );
 
 	m_szUnconnectedName = 0;
@@ -122,8 +120,11 @@ void C_PlayerResource::UpdatePlayerName( int slot )
 		Error( "UpdatePlayerName with bogus slot %d\n", slot );
 		return;
 	}
-	if (!m_szUnconnectedName )
+
+	if ( !m_szUnconnectedName )
+	{
 		m_szUnconnectedName = AllocPooledString( PLAYER_UNCONNECTED_NAME );
+	}
 	
 	player_info_t sPlayerInfo;
 	if ( IsConnected( slot ) && engine->GetPlayerInfo( slot, &sPlayerInfo ) )
@@ -132,7 +133,10 @@ void C_PlayerResource::UpdatePlayerName( int slot )
 	}
 	else 
 	{
-		m_szName[slot] = m_szUnconnectedName;
+		
+		
+			m_szName[slot] = m_szUnconnectedName;
+		
 	}
 }
 
@@ -191,9 +195,9 @@ int C_PlayerResource::GetTeam(int iIndex )
 	}
 }
 
-const char * C_PlayerResource::GetTeamName(int index)
+const char * C_PlayerResource::GetTeamName(int index_)
 {
-	C_Team *team = GetGlobalTeam( index );
+	C_Team *team = GetGlobalTeam( index_ );
 
 	if ( !team )
 		return "Unknown";
@@ -201,14 +205,119 @@ const char * C_PlayerResource::GetTeamName(int index)
 	return team->Get_Name();
 }
 
-int C_PlayerResource::GetTeamScore(int index)
+int C_PlayerResource::GetTeamScore(int index_ )
 {
-	C_Team *team = GetGlobalTeam( index );
+	C_Team *team = GetGlobalTeam( index_ );
 
 	if ( !team )
 		return 0;
 
 	return team->Get_Score();
+}
+
+int C_PlayerResource::GetFrags(int index_ )
+{
+	//return 666;
+	// BEG: Added by Mulchman
+	if (!IsConnected(index))
+		return 0;
+
+	return m_iScore[index];
+	// END: Added by Mulchman
+}
+
+bool C_PlayerResource::IsLocalPlayer(int index_ )
+{
+	C_BasePlayer *pPlayer =	C_BasePlayer::GetLocalPlayer();
+
+	if ( !pPlayer )
+		return false;
+
+	return (index_ == pPlayer->entindex() );
+}
+
+
+bool C_PlayerResource::IsHLTV(int index_ )
+{
+	if ( !IsConnected( index_ ) )
+		return false;
+
+	player_info_t sPlayerInfo;
+	
+	if ( engine->GetPlayerInfo( index_, &sPlayerInfo ) )
+	{
+		return sPlayerInfo.ishltv;
+	}
+	
+	return false;
+}
+
+bool C_PlayerResource::IsReplay(int index_ )
+{
+#if defined( REPLAY_ENABLED )
+	if ( !IsConnected( index_ ) )
+		return false;
+
+	player_info_t sPlayerInfo;
+
+	if ( engine->GetPlayerInfo( index_, &sPlayerInfo ) )
+	{
+		return sPlayerInfo.isreplay;
+	}
+#endif
+
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+bool C_PlayerResource::IsFakePlayer( int iIndex )
+{
+	if ( !IsConnected( iIndex ) )
+		return false;
+
+	// Yuck, make sure it's up to date
+	player_info_t sPlayerInfo;
+	if ( engine->GetPlayerInfo( iIndex, &sPlayerInfo ) )
+	{
+		return sPlayerInfo.fakeplayer;
+	}
+	
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+int	C_PlayerResource::GetPing( int iIndex )
+{
+	if ( !IsConnected( iIndex ) )
+		return 0;
+
+	return m_iPing[iIndex];
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+/*-----------------------------------------------------------------------------
+int	C_PlayerResource::GetPacketloss( int iIndex )
+{
+	if ( !IsConnected( iIndex ) && !IsPreservedData( iIndex ) )
+		return 0;
+
+	return m_iPacketloss[iIndex];
+}*/
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+int	C_PlayerResource::GetPlayerScore( int iIndex )
+{
+	if ( !IsConnected( iIndex ) )
+		return 0;
+
+	return m_iScore[iIndex];
 }
 
 int C_PlayerResource::GetTeamFortPoints(int index)
@@ -263,111 +372,6 @@ int C_PlayerResource::GetTeamLimits(int index)
 }
 // <-- Mirv: So menus can show correct limits
 
-int C_PlayerResource::GetFrags(int index )
-{
-	//return 666;
-	// BEG: Added by Mulchman
-	if (!IsConnected(index))
-		return 0;
-
-	return m_iScore[index];
-	// END: Added by Mulchman
-}
-
-bool C_PlayerResource::IsLocalPlayer(int index)
-{
-	C_BasePlayer *pPlayer =	C_BasePlayer::GetLocalPlayer();
-
-	if ( !pPlayer )
-		return false;
-
-	return ( index == pPlayer->entindex() );
-}
-
-
-bool C_PlayerResource::IsHLTV(int index)
-{
-	if ( !IsConnected( index ) )
-		return false;
-
-	player_info_t sPlayerInfo;
-	
-	if ( engine->GetPlayerInfo( index, &sPlayerInfo ) )
-	{
-		return sPlayerInfo.ishltv;
-	}
-	
-	return false;
-}
-
-bool C_PlayerResource::IsReplay(int index)
-{
-#if defined( REPLAY_ENABLED )
-	if ( !IsConnected( index ) )
-		return false;
-
-	player_info_t sPlayerInfo;
-
-	if ( engine->GetPlayerInfo( index, &sPlayerInfo ) )
-	{
-		return sPlayerInfo.isreplay;
-	}
-#endif
-
-	return false;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-bool C_PlayerResource::IsFakePlayer( int iIndex )
-{
-	if ( !IsConnected( iIndex ) )
-		return false;
-
-	// Yuck, make sure it's up to date
-	player_info_t sPlayerInfo;
-	if ( engine->GetPlayerInfo( iIndex, &sPlayerInfo ) )
-	{
-		return sPlayerInfo.fakeplayer;
-	}
-	
-	return false;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-int	C_PlayerResource::GetPing( int iIndex )
-{
-	if ( !IsConnected( iIndex ) )
-		return 0;
-
-	return m_iPing[iIndex];
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-/*-----------------------------------------------------------------------------
-int	C_PlayerResource::GetPacketloss( int iIndex )
-{
-	if ( !IsConnected( iIndex ) )
-		return 0;
-
-	return m_iPacketloss[iIndex];
-}*/
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-int	C_PlayerResource::GetPlayerScore( int iIndex )
-{
-	if ( !IsConnected( iIndex ) )
-		return 0;
-
-	return m_iScore[iIndex];
-}
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -378,6 +382,7 @@ int	C_PlayerResource::GetFortPoints(int iIndex)
 
 	return m_iFortPoints[iIndex];
 }
+
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -422,9 +427,9 @@ int	C_PlayerResource::GetClass(int iIndex)
 }
 // <-- Mirv: Get the player's class
 
-const Color &C_PlayerResource::GetTeamColor(int index )
+const Color &C_PlayerResource::GetTeamColor(int index_ )
 {
-	if ( index < 0 || index >= MAX_TEAMS )
+	if ( index_ < 0 || index_ >= MAX_TEAMS )
 	{
 		Assert( false );
 		static Color blah;
@@ -432,7 +437,7 @@ const Color &C_PlayerResource::GetTeamColor(int index )
 	}
 	else
 	{
-		return m_Colors[index];
+		return m_Colors[index_];
 	}
 }
 
@@ -446,6 +451,7 @@ bool C_PlayerResource::IsConnected( int iIndex )
 	else
 		return m_bConnected[iIndex];
 }
+
 
 // --> Mirv: Channel info
 //-----------------------------------------------------------------------------

@@ -134,7 +134,7 @@ CClientScoreBoardDialog::CClientScoreBoardDialog(IViewPort *pViewPort) : Frame( 
 	m_iPlayerIndexSymbol = KeyValuesSystem()->GetSymbolForString("playerIndex");
 	m_nCloseKey = BUTTON_CODE_INVALID;
 
-	memset(s_VoiceImage, 0x0, sizeof(s_VoiceImage));
+	memset(s_VoiceImage, 0x0, sizeof( s_VoiceImage ));
 	//memset( s_ChannelImage, 0x0, sizeof( s_ChannelImage ) ); // |-- Mirv: Voice channels
 	TrackerImage = 0;
 	m_pViewPort = pViewPort;
@@ -319,15 +319,15 @@ void CClientScoreBoardDialog::ApplySchemeSettings( IScheme *pScheme )
 //-----------------------------------------------------------------------------
 void CClientScoreBoardDialog::PostApplySchemeSettings( vgui::IScheme *pScheme )
 {
-	// --> Mirv: Image resizing made things a mess
+#ifndef FF	// --> Mirv: Image resizing made things a mess
 	// resize the images to our resolution
-	/*for (int i = 0; i < m_pImageList->GetImageCount(); i++)
+	for (int i = 0; i < m_pImageList->GetImageCount(); i++ )
 	{
 		int wide, tall;
 		m_pImageList->GetImage(i)->GetSize(wide, tall);
 		m_pImageList->GetImage(i)->SetSize(scheme()->GetProportionalScaledValueEx( GetScheme(),wide), scheme()->GetProportionalScaledValueEx( GetScheme(),tall));
-	}*/
-	// <-- Mirv: Image resizing made things a mess
+	}
+#endif	// <-- Mirv: Image resizing made things a mess
 
 	m_pPlayerList->SetImageList( m_pImageList, false );
 	m_pPlayerList->SetVisible( true );
@@ -336,7 +336,7 @@ void CClientScoreBoardDialog::PostApplySchemeSettings( vgui::IScheme *pScheme )
 	m_pPlayerList->SetBorder(NULL);
 
 	// light up scoreboard a bit
-	SetBgColor( Color( 0,0,0,0 ) );
+	SetBgColor( Color( 0,0,0,0) );
 	SetPaintBackgroundEnabled(true);
 	SetBorder(NULL);
 }
@@ -449,30 +449,43 @@ bool CClientScoreBoardDialog::NeedsUpdate( void )
 void CClientScoreBoardDialog::Update( void )
 {
 	// Update the scoreboard
+	
+	
 	FillScoreBoard();
-
+#ifndef FF
 	// grow the scoreboard to fit all the players
-	/*int wide, tall;
+	int wide, tall;
 	m_pPlayerList->GetContentSize(wide, tall);
 	tall += GetAdditionalHeight();
 	wide = GetWide();
-	if (m_iDesiredHeight < tall)
-	{
-		SetSize(wide, tall);
-		m_pPlayerList->SetSize(wide, tall);
-	}
-	else
-	{
-		SetSize(wide, m_iDesiredHeight);
-		m_pPlayerList->SetSize(wide, m_iDesiredHeight);
-	}*/
 
+	
+	
+		if ( m_iDesiredHeight < tall )
+		{
+			SetSize( wide, tall );
+			m_pPlayerList->SetSize( wide, tall );
+		}
+		else
+		{
+			SetSize( wide, m_iDesiredHeight );
+			m_pPlayerList->SetSize( wide, m_iDesiredHeight );
+		}
+#endif
 	m_pMapName->SetText( GetFormattedMapName() );
 
 	MoveToCenterOfScreen();
 
 	// update every second
 	m_fNextUpdateTime = gpGlobals->curtime + 1.0f; 
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Sort all the teams
+//-----------------------------------------------------------------------------
+void CClientScoreBoardDialog::UpdateTeamInfo()
+{
+// TODO: work out a sorting algorithm for team display for TF2
 }
 
 //-----------------------------------------------------------------------------
@@ -494,16 +507,15 @@ int CClientScoreBoardDialog::FindSectionByTeam(int iTeam) const
 //-----------------------------------------------------------------------------
 void CClientScoreBoardDialog::UpdatePlayerInfo()
 {
-	IGameResources *pGR = GameResources();
-	if( !pGR )
-		return;
-
+	
 	int selectedRow = -1;
 
 	// walk all the players and make sure they're in the scoreboard
 	for ( int i = 1; i <= gpGlobals->maxClients; ++i )
 	{
-		if ( pGR->IsConnected( i ) )
+		IGameResources *gr = GameResources();
+
+		if ( gr && gr->IsConnected( i ) )
 		{
 			// add the player to the list
 			KeyValues *playerData = new KeyValues("data");
@@ -517,31 +529,32 @@ void CClientScoreBoardDialog::UpdatePlayerInfo()
 
 			playerData->SetString("name", newName);
 
-			int iItemID = FindItemIDForPlayerIndex( i );
-			int iPlayerTeam = pGR->GetTeam(i);
-			int iSectionId = FindSectionByTeam(iPlayerTeam);
+			int itemID = FindItemIDForPlayerIndex( i );
+			int iPlayerTeam = gr->GetTeam( i );
+			int sectionID = FindSectionByTeam( iPlayerTeam );
 			
-			if ( pGR->IsLocalPlayer( i ) )
-				selectedRow = iItemID;
-
-			if (iItemID == -1)
+			if ( gr->IsLocalPlayer( i ) )
+			{
+				selectedRow = itemID;
+			}
+			if (itemID == -1)
 			{
 				// add a new row
-				iItemID = m_pPlayerList->AddItem( iSectionId, playerData );
+				itemID = m_pPlayerList->AddItem( sectionID, playerData );
 			}
 			else
 			{
 				// modify the current row
-				m_pPlayerList->ModifyItem( iItemID, iSectionId, playerData );
+				m_pPlayerList->ModifyItem( itemID, sectionID, playerData );
 			}
 
-			Color cCol = pGR->GetTeamColor( iPlayerTeam );
+			Color cCol = gr->GetTeamColor( iPlayerTeam );
 
 			// Set the row color based on players team
-			if( pGR->IsLocalPlayer( i ) )
-				m_pPlayerList->SetItemFgColor( iItemID, Color( cCol.r() * 0.6f, cCol.g() * 0.6f, cCol.b() * 0.6f, cCol.a() * 0.9/*local_row_alpha.GetFloat()*/ ), true );
+			if( gr->IsLocalPlayer( i ) )
+				m_pPlayerList->SetItemFgColor( itemID, Color( cCol.r() * 0.6f, cCol.g() * 0.6f, cCol.b() * 0.6f, cCol.a() * 0.9/*local_row_alpha.GetFloat()*/ ), true );
 			else
-				m_pPlayerList->SetItemFgColor( iItemID, Color( cCol.r() * 0.6f, cCol.g() * 0.6f, cCol.b() * 0.6f, cCol.a() * 0.55/*row_alpha.GetFloat()*/ ) );
+				m_pPlayerList->SetItemFgColor( itemID, Color( cCol.r() * 0.6f, cCol.g() * 0.6f, cCol.b() * 0.6f, cCol.a() * 0.55/*row_alpha.GetFloat()*/ ) );
 
 
 			playerData->deleteThis();
@@ -549,15 +562,18 @@ void CClientScoreBoardDialog::UpdatePlayerInfo()
 		else
 		{
 			// remove the player
-			int iItemID = FindItemIDForPlayerIndex( i );
-
-			if (iItemID != -1)
-				m_pPlayerList->RemoveItem(iItemID);
+			int itemID = FindItemIDForPlayerIndex( i );
+			if (itemID != -1)
+			{
+				m_pPlayerList->RemoveItem(itemID);
+			}
 		}
 	}
 
 	if ( selectedRow != -1 )
+	{
 		m_pPlayerList->SetSelectedItem(selectedRow);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -565,13 +581,11 @@ void CClientScoreBoardDialog::UpdatePlayerInfo()
 //-----------------------------------------------------------------------------
 void CClientScoreBoardDialog::AddHeader()
 {
-	// We can get called back into here when teams
-	// get sorted so that's why part is commented
-	// out as the team values are already set by
-	// the sort (or by the initial creation of the
-	// scoreboard)
+	// We can get called back into here when teams get sorted so that's why
+	// part is commented out as the team values are already set by the sort
+	// (or by the initial creation of the scoreboard)
 
-	int iSection = 0;	
+	int iSection = 0;
 	m_hSections[ iSection ].m_iTeam = AddSection( TYPE_BLANK, iSection );		// 0
 
 	iSection++;
@@ -633,10 +647,11 @@ int CClientScoreBoardDialog::AddSection(int iType, int iSection)
 			m_pPlayerList->AddSection( iSection, "", StaticPlayerSortFunc_Score );
 			//m_pPlayerList->SetSectionAlwaysVisible( iSection );
 
-			if (ShowAvatars())
-			{
-				m_pPlayerList->AddColumnToSection(iSection, "avatar", "", SectionedListPanel::COLUMN_IMAGE, scheme()->GetProportionalScaledValue( AVATAR_WIDTH ));
-			}
+
+		if (ShowAvatars())
+		{
+			m_pPlayerList->AddColumnToSection(iSection, "avatar", "", SectionedListPanel::COLUMN_IMAGE, scheme()->GetProportionalScaledValue( AVATAR_WIDTH ));
+		}
 
 			m_pPlayerList->AddColumnToSection( iSection, "name", "#FF_Team", 0, scheme()->GetProportionalScaledValue( NAME_WIDTH ) );
 			m_pPlayerList->AddColumnToSection( iSection, "class", "", 0, scheme()->GetProportionalScaledValue( CLASS_WIDTH ) );	// |-- Mirv: Current class
@@ -834,8 +849,9 @@ bool CClientScoreBoardDialog::StaticPlayerSortFunc_Name( vgui::SectionedListPane
 //-----------------------------------------------------------------------------
 bool CClientScoreBoardDialog::GetPlayerScoreInfo(int playerIndex, KeyValues *kv)
 {
-	IGameResources *pGR = GameResources();
-	if( !pGR )
+	IGameResources *gr = GameResources();
+
+	if (!gr )
 		return false;
 
 	bool bFriendly = false;
@@ -855,21 +871,21 @@ bool CClientScoreBoardDialog::GetPlayerScoreInfo(int playerIndex, KeyValues *kv)
 	// and the client who was viewing the scoreboard might see old (inaccurate)
 	// data and draw stuff the class identifier wrong. Crosshair info needs
 	// to be revisited for this reason too!
-	if( pGR->IsConnected( playerIndex ) )
-		iPlayerTeam = pGR->GetTeam( playerIndex );
+	if( gr->IsConnected( playerIndex ) )
+		iPlayerTeam = gr->GetTeam( playerIndex );
 
 	// Check if an ally
 	bFriendly = FFGameRules()->IsTeam1AlliedToTeam2( iLocalPlayerTeam, iPlayerTeam );
 
-	kv->SetInt( "deaths", pGR->GetDeaths( playerIndex ) );
-	kv->SetInt( "fortpoints", pGR->GetFortPoints( playerIndex ) );
-	kv->SetInt( "score", pGR->GetFrags( playerIndex ) );
-	kv->SetInt( "ping", pGR->GetPing( playerIndex ) ) ;
-	kv->SetString( "name", pGR->GetPlayerName( playerIndex ) );
-	kv->SetInt( "assists", pGR->GetAssists( playerIndex ) );
+	kv->SetInt( "deaths", gr->GetDeaths( playerIndex ) );
+	kv->SetInt( "fortpoints", gr->GetFortPoints( playerIndex ) );
+	kv->SetInt( "score", gr->GetFrags( playerIndex ) );
+	kv->SetInt( "ping", gr->GetPing( playerIndex ) ) ;
+	kv->SetString( "name", gr->GetPlayerName( playerIndex ) );
+	kv->SetInt( "assists", gr->GetAssists( playerIndex ) );
 
 	if( bFriendly )
-		kv->SetString( "class", szClassName[ pGR->GetClass( playerIndex ) ] ); 	// |-- Mirv: Current class
+		kv->SetString( "class", szClassName[ gr->GetClass( playerIndex ) ] ); 	// |-- Mirv: Current class
 	else
 		kv->SetString( "class", "" );
 
@@ -881,7 +897,7 @@ bool CClientScoreBoardDialog::GetPlayerScoreInfo(int playerIndex, KeyValues *kv)
 	if( bFriendly )
 	{
 		kv->SetInt( "voice", s_VoiceImage[ GetClientVoiceMgr()->GetSpeakerStatus( playerIndex ) ] + ( g_fBlockedStatus[ playerIndex ] ? 1 : 0 ) );	
-		//kv->SetInt( "channel", s_ChannelImage[ pGR->GetChannel( playerIndex ) ] + 1 );
+		//kv->SetInt( "channel", s_ChannelImage[ gr->GetChannel( playerIndex ) ] + 1 );
 	}
 	else
 	{
@@ -919,6 +935,7 @@ void CClientScoreBoardDialog::UpdatePlayerAvatar( int playerIndex, KeyValues *kv
 				{
 					CAvatarImage *pImage = new CAvatarImage();
 					pImage->SetAvatarSteamID( steamIDForPlayer );
+					
 					pImage->SetAvatarSize( 16, 18 );	// Deliberately non scaling
 					iImageIndex = m_pImageList->AddImage( pImage );
 

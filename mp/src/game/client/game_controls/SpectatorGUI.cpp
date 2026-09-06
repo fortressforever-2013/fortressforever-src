@@ -224,7 +224,7 @@ void CSpectatorMenu::OnTextChanged(KeyValues *data)
 
 	vgui::ComboBox *box = dynamic_cast<vgui::ComboBox *>( panel );
 
-	/*if ( box == m_pConfigSettings) // don't change the text in the config setting combo
+	/*if( box == m_pConfigSettings) // don't change the text in the config setting combo
 	{
 		m_pConfigSettings->SetText("#Spec_Options");
 	}
@@ -264,7 +264,7 @@ void CSpectatorMenu::FireGameEvent( IGameEvent * event )
 {
 	const char *pEventName = event->GetName();
 
-	if ( Q_strcmp( "spec_target_updated", pEventName ) == 0 )
+ 	if ( Q_strcmp( "spec_target_updated", pEventName ) == 0 )
 	{
 		IGameResources *gr = GameResources();
 		if ( !gr )
@@ -480,7 +480,7 @@ CSpectatorGUI::CSpectatorGUI(IViewPort *pViewPort) : EditablePanel( NULL, PANEL_
 	SetKeyBoardInputEnabled( false );
 
 	m_pTopBar = new Panel( this, "topbar" );
-	m_pBottomBarBlank = new Panel( this, "bottombarblank" );
+ 	m_pBottomBarBlank = new Panel( this, "bottombarblank" );
 
 	// m_pBannerImage = new ImagePanel( m_pTopBar, NULL );
 	m_pPlayerLabel = new Label( this, "playerlabel", "" );
@@ -678,12 +678,44 @@ bool CSpectatorGUI::ShouldShowPlayerLabel( int specmode )
 void CSpectatorGUI::Update()
 {
 	int wide, tall;
+	int bx, by, bwide, btall;
 
 	GetHudSize(wide, tall);
+	m_pTopBar->GetBounds( bx, by, bwide, btall );
 
 	IGameResources *gr = GameResources();
 	int specmode = GetSpectatorMode();
 	int playernum = GetSpectatorTarget();
+
+	IViewPortPanel *overview = gViewPortInterface->FindPanelByName( PANEL_OVERVIEW );
+
+	if ( overview && overview->IsVisible() )
+	{
+		int mx, my, mwide, mtall;
+
+		VPANEL p = overview->GetVPanel();
+		vgui::ipanel()->GetPos( p, mx, my );
+		vgui::ipanel()->GetSize( p, mwide, mtall );
+				
+		if ( my < btall )
+		{
+			// reduce to bar 
+			m_pTopBar->SetSize( wide - (mx + mwide), btall );
+			m_pTopBar->SetPos( (mx + mwide), 0 );
+		}
+		else
+		{
+			// full top bar
+			m_pTopBar->SetSize( wide , btall );
+			m_pTopBar->SetPos( 0, 0 );
+		}
+	}
+	else
+	{
+		// full top bar
+		m_pTopBar->SetSize( wide , btall ); // change width, keep height
+		m_pTopBar->SetPos( 0, 0 );
+	}
 
 	m_pPlayerLabel->SetVisible( ShouldShowPlayerLabel(specmode) );
 
@@ -742,14 +774,14 @@ void CSpectatorGUI::Update()
 	{
 		// hide top bar
 		m_pTopBar->SetVisible(false);
-
+#ifndef FF
 		// otherwise show map name
-		/*Q_FileBase( engine->GetLevelName(), tempstr, sizeof(tempstr) );
+		Q_FileBase( engine->GetLevelName(), tempstr, sizeof(tempstr) );
 
 		wchar_t wMapName[64];
 		g_pVGuiLocalize->ConvertANSIToUnicode(tempstr,wMapName,sizeof(wMapName));
 		g_pVGuiLocalize->ConstructString( szExtraInfo,sizeof( szExtraInfo ), g_pVGuiLocalize->Find("#Spec_Map" ),1, wMapName );*/
-
+#endif
 		g_pVGuiLocalize->ConvertANSIToUnicode( "", szExtraInfo, sizeof(szExtraInfo) );
 		g_pVGuiLocalize->ConvertANSIToUnicode( "" ,szTitleLabel,sizeof(szTitleLabel));
 	}

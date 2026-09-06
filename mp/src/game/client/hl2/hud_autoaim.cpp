@@ -358,7 +358,7 @@ void CHUDAutoAim::OnThink()
 			{
 				m_alpha = AUTOAIM_MAX_ALPHA;
 			}
-#endif
+#endif // 0
 		}
 		break;
 
