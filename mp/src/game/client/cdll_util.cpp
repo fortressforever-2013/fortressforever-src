@@ -680,7 +680,7 @@ IterationRetval_t CFlaggedEntitiesEnum::EnumElement( IHandleEntity *pHandleEntit
 int UTIL_EntitiesInBox( C_BaseEntity **pList, int listMax, const Vector &mins, const Vector &maxs, int flagMask, int partitionMask )
 {
 	CFlaggedEntitiesEnum boxEnum( pList, listMax, flagMask );
-	partition->EnumerateElementsInBox( partitionMask, mins, maxs, false, &boxEnum );
+	::partition->EnumerateElementsInBox( partitionMask, mins, maxs, false, &boxEnum );
 	
 	return boxEnum.GetCount();
 
@@ -698,7 +698,7 @@ int UTIL_EntitiesInBox( C_BaseEntity **pList, int listMax, const Vector &mins, c
 int UTIL_EntitiesInSphere( C_BaseEntity **pList, int listMax, const Vector &center, float radius, int flagMask, int partitionMask )
 {
 	CFlaggedEntitiesEnum sphereEnum( pList, listMax, flagMask );
-	partition->EnumerateElementsInSphere( partitionMask, center, radius, false, &sphereEnum );
+	::partition->EnumerateElementsInSphere( partitionMask, center, radius, false, &sphereEnum );
 
 	return sphereEnum.GetCount();
 
@@ -715,7 +715,7 @@ int UTIL_EntitiesInSphere( C_BaseEntity **pList, int listMax, const Vector &cent
 int UTIL_EntitiesAlongRay( C_BaseEntity **pList, int listMax, const Ray_t &ray, int flagMask, int partitionMask )
 {
 	CFlaggedEntitiesEnum rayEnum( pList, listMax, flagMask );
-	partition->EnumerateElementsAlongRay( partitionMask, ray, false, &rayEnum );
+	::partition->EnumerateElementsAlongRay( partitionMask, ray, false, &rayEnum );
 
 	return rayEnum.GetCount();
 }

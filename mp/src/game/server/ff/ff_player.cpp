@@ -1,15 +1,16 @@
-//========= Copyright 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Valve Corporation, All rights reserved. ============//
 // TODO: Can the copyright above be updated?
-// Purpose:	HL1/TFC-based player class for Fortress Forever.
+// Purpose:		HL1/TFC-based player class for Fortress Forever.
+//
 // $NoKeywords: $
-//=============================================================================//
+//=============================================================================
 
 #include "cbase.h"
 #include "ff_player.h"
+#include "ff_gamerules.h"
 #include "ff_entity_system.h"	// Entity system
 #include "ff_scriptman.h"
 #include "ff_luacontext.h"
-#include "ff_gamerules.h"
 #include "ff_weapon_base.h"
 #include "ff_weapon_baseclip.h"
 #include "predicted_viewmodel.h"
@@ -1667,9 +1668,6 @@ void CFFPlayer::Spawn( void )
 
 	SetupClassVariables();
 	
-	// equip the HEV suit
-	EquipSuit();
-
 	// Set on ground
 	AddFlag(FL_ONGROUND);
 

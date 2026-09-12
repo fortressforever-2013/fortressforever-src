@@ -875,13 +875,11 @@ void CBasePlayer::DeathSound( const CTakeDamageInfo &info )
 		EmitSound( "Player.Death" );
 	}
 
-#ifndef FF	// --> Mirv: Don't play suit sound'
 	// play one of the suit death alarms
 	if ( IsSuitEquipped() )
 	{
 		UTIL_EmitGroupnameSuit(edict(), "HEV_DEAD");
 	}
-#endif	// <-- Mirv: Don't play suit sound
 }
 
 // override takehealth

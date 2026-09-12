@@ -639,7 +639,164 @@ void DisplayBoneSetupEnts()
 //IBaseClientDLL *clientdll = &gHLClient;
 //
 //EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CHLClient, IBaseClientDLL, CLIENT_DLL_INTERFACE_VERSION, gHLClient );
+#ifndef FF
+//-----------------------------------------------------------------------------
+// Purpose: engine to client .dll interface
+//-----------------------------------------------------------------------------
+class CHLClient : public IBaseClientDLL
+{
+public:
+	CHLClient();
 
+	virtual int						Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physicsFactory, CGlobalVarsBase *pGlobals );
+
+	virtual void					PostInit();
+	virtual void					Shutdown( void );
+
+	virtual bool					ReplayInit( CreateInterfaceFn fnReplayFactory );
+	virtual bool					ReplayPostInit();
+
+	virtual void					LevelInitPreEntity( const char *pMapName );
+	virtual void					LevelInitPostEntity();
+	virtual void					LevelShutdown( void );
+
+	virtual ClientClass				*GetAllClasses( void );
+
+	virtual int						HudVidInit( void );
+	virtual void					HudProcessInput( bool bActive );
+	virtual void					HudUpdate( bool bActive );
+	virtual void					HudReset( void );
+	virtual void					HudText( const char * message );
+
+	// Mouse Input Interfaces
+	virtual void					IN_ActivateMouse( void );
+	virtual void					IN_DeactivateMouse( void );
+	virtual void					IN_Accumulate( void );
+	virtual void					IN_ClearStates( void );
+	virtual bool					IN_IsKeyDown( const char *name, bool& isdown );
+	virtual void					IN_OnMouseWheeled( int nDelta );
+	// Raw signal
+	virtual int						IN_KeyEvent( int eventcode, ButtonCode_t keynum, const char *pszCurrentBinding );
+	virtual void					IN_SetSampleTime( float frametime );
+	// Create movement command
+	virtual void					CreateMove ( int sequence_number, float input_sample_frametime, bool active );
+	virtual void					ExtraMouseSample( float frametime, bool active );
+	virtual bool					WriteUsercmdDeltaToBuffer( bf_write *buf, int from, int to, bool isnewcommand );	
+	virtual void					EncodeUserCmdToBuffer( bf_write& buf, int slot );
+	virtual void					DecodeUserCmdFromBuffer( bf_read& buf, int slot );
+
+
+	virtual void					View_Render( vrect_t *rect );
+	virtual void					RenderView( const CViewSetup &view, int nClearFlags, int whatToDraw );
+	virtual void					View_Fade( ScreenFade_t *pSF );
+	
+	virtual void					SetCrosshairAngle( const QAngle& angle );
+
+	virtual void					InitSprite( CEngineSprite *pSprite, const char *loadname );
+	virtual void					ShutdownSprite( CEngineSprite *pSprite );
+
+	virtual int						GetSpriteSize( void ) const;
+
+	virtual void					VoiceStatus( int entindex, qboolean bTalking );
+
+	virtual void					InstallStringTableCallback( const char *tableName );
+
+	virtual void					FrameStageNotify( ClientFrameStage_t curStage );
+
+	virtual bool					DispatchUserMessage( int msg_type, bf_read &msg_data );
+
+	// Save/restore system hooks
+	virtual CSaveRestoreData  *SaveInit( int size );
+	virtual void			SaveWriteFields( CSaveRestoreData *, const char *, void *, datamap_t *, typedescription_t *, int );
+	virtual void			SaveReadFields( CSaveRestoreData *, const char *, void *, datamap_t *, typedescription_t *, int );
+	virtual void			PreSave( CSaveRestoreData * );
+	virtual void			Save( CSaveRestoreData * );
+	virtual void			WriteSaveHeaders( CSaveRestoreData * );
+	virtual void			ReadRestoreHeaders( CSaveRestoreData * );
+	virtual void			Restore( CSaveRestoreData *, bool );
+	virtual void			DispatchOnRestore();
+	virtual void			WriteSaveGameScreenshot( const char *pFilename );
+
+	// Given a list of "S(wavname) S(wavname2)" tokens, look up the localized text and emit
+	//  the appropriate close caption if running with closecaption = 1
+	virtual void			EmitSentenceCloseCaption( char const *tokenstream );
+	virtual void			EmitCloseCaption( char const *captionname, float duration );
+
+	virtual CStandardRecvProxies* GetStandardRecvProxies();
+
+	virtual bool			CanRecordDemo( char *errorMsg, int length ) const;
+
+	virtual void			OnDemoRecordStart( char const* pDemoBaseName );
+	virtual void			OnDemoRecordStop();
+	virtual void			OnDemoPlaybackStart( char const* pDemoBaseName );
+	virtual void			OnDemoPlaybackStop();
+
+	virtual bool			ShouldDrawDropdownConsole();
+
+	// Get client screen dimensions
+	virtual int				GetScreenWidth();
+	virtual int				GetScreenHeight();
+
+	// save game screenshot writing
+	virtual void			WriteSaveGameScreenshotOfSize( const char *pFilename, int width, int height, bool bCreatePowerOf2Padded/*=false*/, bool bWriteVTF/*=false*/ );
+
+	// Gets the location of the player viewpoint
+	virtual bool			GetPlayerView( CViewSetup &playerView );
+
+	// Matchmaking
+	virtual void			SetupGameProperties( CUtlVector< XUSER_CONTEXT > &contexts, CUtlVector< XUSER_PROPERTY > &properties );
+	virtual uint			GetPresenceID( const char *pIDName );
+	virtual const char		*GetPropertyIdString( const uint id );
+	virtual void			GetPropertyDisplayString( uint id, uint value, char *pOutput, int nBytes );
+	virtual void			StartStatsReporting( HANDLE handle, bool bArbitrated );
+
+	virtual void			InvalidateMdlCache();
+
+	virtual void			ReloadFilesInList( IFileList *pFilesToReload );
+
+	// Let the client handle UI toggle - if this function returns false, the UI will toggle, otherwise it will not.
+	virtual bool			HandleUiToggle();
+
+	// Allow the console to be shown?
+	virtual bool			ShouldAllowConsole();
+
+	// Get renamed recv tables
+	virtual CRenamedRecvTableInfo	*GetRenamedRecvTableInfos();
+
+	// Get the mouthinfo for the sound being played inside UI panels
+	virtual CMouthInfo		*GetClientUIMouthInfo();
+
+	// Notify the client that a file has been received from the game server
+	virtual void			FileReceived( const char * fileName, unsigned int transferID );
+
+	virtual const char* TranslateEffectForVisionFilter( const char *pchEffectType, const char *pchEffectName );
+	
+	virtual void			ClientAdjustStartSoundParams( struct StartSoundParams_t& params );
+	
+	// Returns true if the disconnect command has been handled by the client
+	virtual bool DisconnectAttempt( void );
+public:
+	void PrecacheMaterial( const char *pMaterialName );
+
+	virtual bool IsConnectedUserInfoChangeAllowed( IConVar *pCvar );
+
+	virtual bool BHaveChatSuspensionInCurrentMatch();
+
+	virtual void DisplayVoiceUnavailableMessage();
+
+private:
+	void UncacheAllMaterials( );
+	void ResetStringTablePointers();
+
+	CUtlVector< IMaterial * > m_CachedMaterials;
+};
+
+
+CHLClient gHLClient;
+IBaseClientDLL *clientdll = &gHLClient;
+
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CHLClient, IBaseClientDLL, CLIENT_DLL_INTERFACE_VERSION, gHLClient );
+#endif
 
 //-----------------------------------------------------------------------------
 // Precaches a material
@@ -793,7 +950,7 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 		return false;
 	if ( (networkstringtable = (INetworkStringTableContainer *)appSystemFactory(INTERFACENAME_NETWORKSTRINGTABLECLIENT,NULL)) == NULL )
 		return false;
-	if ( (partition = (ISpatialPartition *)appSystemFactory(INTERFACEVERSION_SPATIALPARTITION, NULL)) == NULL )
+	if ( (::partition = (ISpatialPartition *)appSystemFactory(INTERFACEVERSION_SPATIALPARTITION, NULL)) == NULL )
 		return false;
 	if ( (shadowmgr = (IShadowMgr *)appSystemFactory(ENGINE_SHADOWMGR_INTERFACE_VERSION, NULL)) == NULL )
 		return false;
@@ -843,7 +1000,7 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 #endif
 
 	// it's ok if this is NULL. That just means the sourcevr.dll wasn't found
-	
+	if ( CommandLine()->CheckParm( "-vr" ) )
 		g_pSourceVR = (ISourceVirtualReality *)appSystemFactory(SOURCE_VIRTUAL_REALITY_INTERFACE_VERSION, NULL);
 
 	factorylist_t factories;
@@ -1708,10 +1865,10 @@ void CHLClient::LevelShutdown( void )
 //-----------------------------------------------------------------------------
 void CHLClient::SetCrosshairAngle( const QAngle& angle )
 {
-	CHudCrosshair *crosshair = GET_HUDELEMENT( CHudCrosshair );
-	if ( crosshair )
+	CHudCrosshair *pCrosshair = GET_HUDELEMENT( CHudCrosshair );
+	if ( pCrosshair )
 	{
-		crosshair->SetCrosshairAngle( angle );
+		pCrosshair->SetCrosshairAngle( angle );
 	}
 }
 
@@ -2068,7 +2225,7 @@ void OnRenderStart()
 	g_pPortalRender->UpdatePortalPixelVisibility(); //updating this one or two lines before querying again just isn't cutting it. Update as soon as it's cheap to do so.
 #endif
 
-	partition->SuppressLists( PARTITION_ALL_CLIENT_EDICTS, true );
+	::partition->SuppressLists( PARTITION_ALL_CLIENT_EDICTS, true );
 	C_BaseEntity::SetAbsQueriesValid( false );
 
 	Rope_ResetCounters();
@@ -2112,7 +2269,7 @@ void OnRenderStart()
 	// This will place all entities in the correct position in world space and in the KD-tree
 	C_BaseAnimating::UpdateClientSideAnimations();
 
-	partition->SuppressLists( PARTITION_ALL_CLIENT_EDICTS, false );
+	::partition->SuppressLists( PARTITION_ALL_CLIENT_EDICTS, false );
 
 	// Process OnDataChanged events.
 	ProcessOnDataChangedEvents();
@@ -2225,7 +2382,7 @@ void CHLClient::FrameStageNotify( ClientFrameStage_t curStage )
 			C_BaseEntity::EnableAbsRecomputations( false );
 			C_BaseEntity::SetAbsQueriesValid( false );
 			Interpolation_SetLastPacketTimeStamp( engine->GetLastTimeStamp() );
-			partition->SuppressLists( PARTITION_ALL_CLIENT_EDICTS, true );
+			::partition->SuppressLists( PARTITION_ALL_CLIENT_EDICTS, true );
 
 			PREDICTION_STARTTRACKVALUE( "netupdate" );
 		}
@@ -2237,7 +2394,7 @@ void CHLClient::FrameStageNotify( ClientFrameStage_t curStage )
 			// reenable abs recomputation since now all entities have been updated
 			C_BaseEntity::EnableAbsRecomputations( true );
 			C_BaseEntity::SetAbsQueriesValid( true );
-			partition->SuppressLists( PARTITION_ALL_CLIENT_EDICTS, false );
+			::partition->SuppressLists( PARTITION_ALL_CLIENT_EDICTS, false );
 
 			PREDICTION_ENDTRACKVALUE();
 		}
@@ -2515,32 +2672,11 @@ void CHLClient::ClientAdjustStartSoundParams( StartSoundParams_t& params )
 	CBaseEntity *pEntity = ClientEntityList().GetEnt( params.soundsource );
 
 	// A player speaking
-	if ( params.entchannel == CHAN_VOICE && GameRules() && pEntity && pEntity->IsPlayer() )
+	if ( ( params.entchannel == CHAN_VOICE ) && pEntity && pEntity->IsPlayer() )
 	{
-		// Use high-pitched voices for other players if the local player has an item that allows them to hear it (Pyro Goggles)
-		if ( !GameRules()->IsLocalPlayer( params.soundsource ) && IsLocalPlayerUsingVisionFilterFlags( TF_VISION_FILTER_PYRO ) )
-		{
-			params.pitch *= 1.3f;
-		}
-		// Halloween voice futzery?
-		else
-		{
-			float flVoicePitchScale = 1.f;
-			CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( pEntity, flVoicePitchScale, voice_pitch_scale );
-
-			int iHalloweenVoiceSpell = 0;
-			CALL_ATTRIB_HOOK_INT_ON_OTHER( pEntity, iHalloweenVoiceSpell, halloween_voice_modulation );
-			if ( iHalloweenVoiceSpell > 0 )
-			{
-				params.pitch *= 0.8f;
-			}
-			else if( flVoicePitchScale != 1.f )
-			{
-				params.pitch *= flVoicePitchScale;
-			}
-		}
+		pEntity->ClientAdjustStartSoundParams( params );
 	}
-#endif
+#endif // TF_CLIENT_DLL
 }
 
 const char* CHLClient::TranslateEffectForVisionFilter( const char *pchEffectType, const char *pchEffectName )

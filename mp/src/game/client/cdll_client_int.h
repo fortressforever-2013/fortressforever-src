@@ -125,7 +125,7 @@ extern AchievementsAndStatsInterface* g_pAchievementsAndStatsInterface;
 // Set to true between LevelInit and LevelShutdown.
 extern bool	g_bLevelInitialized;
 extern bool g_bTextMode;
-
+#ifdef FF
 // Kyle says: this is here to obsfucate our accessing of the g_bTextMode variable and for no other purpose.
 //			  See the mess of TF_ANTI_IDLEBOT_VERIFICATION code. If that code doesn't exist anymore, this
 //			  probably also doesn't need to exist anymore.
@@ -280,7 +280,7 @@ private:
 
 	CUtlVector< IMaterial* > m_CachedMaterials;
 };
-
+#endif
 // Returns true if a new OnDataChanged event is registered for this frame.
 bool AddDataChangeEvent( IClientNetworkable *ent, DataUpdateType_t updateType, int *pStoredEvent );
 
