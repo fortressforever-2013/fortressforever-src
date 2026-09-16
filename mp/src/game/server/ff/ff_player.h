@@ -378,6 +378,7 @@ public:
 	void Command_OnMyWay(const CCommand& args = CCommand());
 	void Command_Defending(const CCommand& args = CCommand());
 	void Command_Incoming(const CCommand& args = CCommand());
+	void Command_NeedSpy(const CCommand& args = CCommand());
 	void Command_SpottedSpy(const CCommand& args = CCommand());
 	void Command_NeedSentry(const CCommand& args = CCommand());
 	void Command_SpottedDetpack(const CCommand& args = CCommand());

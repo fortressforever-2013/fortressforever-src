@@ -160,6 +160,7 @@ FF_SHARED_COMMAND( passflag, &CFFPlayer::Command_PassFlag, CC_PassFlag, "Ask som
 FF_SHARED_COMMAND( takeflag, &CFFPlayer::Command_TakeFlag, CC_TakeFlag, "Ask someone to take your flag", FF_CMD_NOFLAGS );
 FF_SHARED_COMMAND( offense, &CFFPlayer::Command_Attacking, CC_Attacking, "Inform your team you are on offense", FF_CMD_NOFLAGS );
 FF_SHARED_COMMAND( offensesentry, &CFFPlayer::Command_SpottedSentry, CC_SpottedSentry, "Warn about a sentry's position", FF_CMD_NOFLAGS );
+FF_SHARED_COMMAND( offenseneedspy, &CFFPlayer::Command_NeedSpy, CC_NeedSpy, "Request a Spy", FF_CMD_NOFLAGS );
 FF_SHARED_COMMAND( offensespotpipes, &CFFPlayer::Command_SpottedPipes, CC_SpottedPipes, "Warn about pipe traps", FF_CMD_NOFLAGS );
 FF_SHARED_COMMAND( offensedetpack, &CFFPlayer::Command_NeedDetpack, CC_NeedDetpack, "Request a detpack", FF_CMD_NOFLAGS);
 FF_SHARED_COMMAND( onmyway, &CFFPlayer::Command_OnMyWay, CC_OnMyWay, "Notify that you are coming to help", FF_CMD_NOFLAGS );

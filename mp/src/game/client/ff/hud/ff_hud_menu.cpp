@@ -466,6 +466,7 @@ ADD_MENU_BRANCH(calls_defense, "#FF_CM_CALLDEFENSE", 'H', "defense", &DefVoiceMe
 // Offense/Defense voice stuff
 //-----------------------------------------------------------------------------
 ADD_MENU_OPTION(attacking, "#FF_CM_ATTACKING", '#', "") { return MENU_SHOW; }
+ADD_MENU_OPTION(needspy, "#FF_CM_NEEDSPY", '*', "needspy") { return MENU_SHOW; }
 ADD_MENU_OPTION(spottedsentry, "#FF_CM_SPOTSENTRY", 'H', "sentry") { return MENU_SHOW; }
 ADD_MENU_OPTION(spottedpipes, "#FF_CM_SPOTPIPES", '$', "spotpipes") { return MENU_SHOW; }
 ADD_MENU_OPTION(needdetpack, "#FF_CM_NEEDDETPACK", 'C', "detpack") { return MENU_SHOW; }
@@ -487,7 +488,7 @@ MenuOption FriendlyDOptionList[] = { disguise_blue_friendly, disguise_red_friend
 MenuOption EnemyDOptionList[] = { disguise_blue_enemy, disguise_red_enemy, disguise_yellow_enemy, disguise_green_enemy };
 MenuOption CallOptionList[] = { need_armor, passflag, calls_defense, negative, need_ammo, onmyway, need_medic, acknowledged, calls_offense, takeflag };
 MenuOption DiscardOptionList[] = { discardunneeded, discardhalfshells, discardallshells, discardhalfnails, discardallnails, discardhalfrockets, discardallrockets, discardhalfcells, discardallcells };
-MenuOption OffenseOptionList[] = { attacking, spottedsentry, spottedpipes, needdetpack };
+MenuOption OffenseOptionList[] = { attacking, spottedsentry, needspy, spottedpipes, needdetpack };
 MenuOption DefenseOptionList[] = { defending, incoming, spottedspy, needsentry, spotteddetpack };
 
 //-----------------------------------------------------------------------------

@@ -154,7 +154,7 @@ void C_PlayerResource::ClientThink()
 {
 	BaseClass::ClientThink();
 
-	for ( int i = 1; i <= gpGlobals->maxClients; ++i )
+	for ( int i = 1; i <= MAX_PLAYERS; ++i )
 	{
 		UpdatePlayerName( i );
 	}
@@ -478,16 +478,6 @@ int C_PlayerResource::GetChannel(int iIndex)
 		return m_iChannel[iIndex];
 }
 // <-- Mirv: Channel info
-
-#ifdef CLIENT_DLL
-bool Client_IsIntermission()
-{
-	C_PlayerResource* pr = dynamic_cast <C_PlayerResource*> (GameResources());
-	if (!pr)
-		return false;
-	return pr->m_bIsIntermission;
-}
-#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: 

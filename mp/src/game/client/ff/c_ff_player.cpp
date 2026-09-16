@@ -557,6 +557,18 @@ bool CC_SpottedPipes(const CCommand& args)
 	pLocalPlayer->Command_SpottedPipes(args);
 	return true;
 }
+
+bool CC_NeedSpy(const CCommand& args)
+{
+	if (!engine->IsConnected() || !engine->IsInGame())
+		return false;
+	C_FFPlayer* pLocalPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if (!pLocalPlayer)
+		return false;
+
+	pLocalPlayer->Command_NeedSpy(args);
+	return true;
+}
 bool CC_SpottedSpy(const CCommand& args)
 {
 	if (!engine->IsConnected() || !engine->IsInGame())

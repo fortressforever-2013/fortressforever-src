@@ -73,7 +73,7 @@ public:
 private:
 	CTSListWithFreeList<CBaseHandle> m_DirtyEntities;
 	CThreadSpinRWLock	 m_partitionMutex;
-	uint32			 m_partitionWriteId;
+	ThreadId_t			 m_partitionWriteId;
 	CThreadLocalInt<>	 m_readLockCount;
 };
 
@@ -268,6 +268,7 @@ void CDirtySpatialPartitionEntityList::OnPostQuery( SpatialPartitionListMask_t l
 		DEFINE_FIELD( m_nSurroundType, FIELD_CHARACTER ),
 		DEFINE_FIELD( m_flRadius, FIELD_FLOAT ),
 		DEFINE_FIELD( m_triggerBloat, FIELD_CHARACTER ),
+		DEFINE_FIELD( m_bUniformTriggerBloat, FIELD_BOOLEAN ),
 		DEFINE_FIELD( m_vecSpecifiedSurroundingMinsPreScaled, FIELD_VECTOR ),
 		DEFINE_FIELD( m_vecSpecifiedSurroundingMaxsPreScaled, FIELD_VECTOR ),
 		DEFINE_FIELD( m_vecSpecifiedSurroundingMins, FIELD_VECTOR ),
@@ -293,6 +294,7 @@ BEGIN_PREDICTION_DATA_NO_BASE( CCollisionProperty )
 	DEFINE_PRED_FIELD( m_nSolidType, FIELD_CHARACTER, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_usSolidFlags, FIELD_SHORT, FTYPEDESC_INSENDTABLE ),
 	DEFINE_PRED_FIELD( m_triggerBloat, FIELD_CHARACTER, FTYPEDESC_INSENDTABLE ),
+	DEFINE_PRED_FIELD( m_bUniformTriggerBloat, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
 
 END_PREDICTION_DATA()
 
@@ -373,6 +375,7 @@ BEGIN_NETWORK_TABLE_NOBASE( CCollisionProperty, DT_CollisionProperty )
 	RecvPropInt( RECVINFO( m_usSolidFlags ),	0, RecvProxy_SolidFlags ),
 	RecvPropInt( RECVINFO(m_nSurroundType), 0, RecvProxy_IntDirtySurround ),
 	RecvPropInt( RECVINFO(m_triggerBloat), 0, RecvProxy_IntDirtySurround ), 
+	RecvPropBool( RECVINFO(m_bUniformTriggerBloat) ),
 	RecvPropVector( RECVINFO(m_vecSpecifiedSurroundingMinsPreScaled), 0, RecvProxy_VectorDirtySurround ),
 	RecvPropVector( RECVINFO(m_vecSpecifiedSurroundingMaxsPreScaled), 0, RecvProxy_VectorDirtySurround ),
 	RecvPropVector( RECVINFO(m_vecSpecifiedSurroundingMins), 0, RecvProxy_VectorDirtySurround ),
@@ -386,6 +389,7 @@ BEGIN_NETWORK_TABLE_NOBASE( CCollisionProperty, DT_CollisionProperty )
 	SendPropInt( SENDINFO( m_usSolidFlags ),	FSOLID_MAX_BITS, SPROP_UNSIGNED, SendProxy_SolidFlags ),
 	SendPropInt( SENDINFO( m_nSurroundType ), SURROUNDING_TYPE_BIT_COUNT, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO(m_triggerBloat), 0, SPROP_UNSIGNED),
+	SendPropBool( SENDINFO(m_bUniformTriggerBloat) ),
 	SendPropVector( SENDINFO(m_vecSpecifiedSurroundingMinsPreScaled), 0, SPROP_NOSCALE),
 	SendPropVector( SENDINFO(m_vecSpecifiedSurroundingMaxsPreScaled), 0, SPROP_NOSCALE),
 	SendPropVector( SENDINFO(m_vecSpecifiedSurroundingMins), 0, SPROP_NOSCALE),
@@ -422,6 +426,7 @@ void CCollisionProperty::Init( CBaseEntity *pEntity )
 	m_vecMaxs.GetForModify().Init();
 	m_flRadius = 0.0f;
 	m_triggerBloat = 0;
+	m_bUniformTriggerBloat = false;
 	m_usSolidFlags = 0;
 	m_nSolidType = SOLID_NONE;
 
@@ -749,18 +754,18 @@ void CCollisionProperty::WorldSpaceTriggerBounds( Vector *pVecWorldMins, Vector 
 	if ( ( GetSolidFlags() & FSOLID_USE_TRIGGER_BOUNDS ) == 0 )
 		return;
 
-	
-	
-		
-		
-		
+	if ( m_bUniformTriggerBloat )
+	{
+		pVecWorldMins->x -= m_triggerBloat;
+		pVecWorldMins->y -= m_triggerBloat;
+		pVecWorldMins->z -= m_triggerBloat;
 
-		
-		
-		
-	
-	
-	
+		pVecWorldMaxs->x += m_triggerBloat;
+		pVecWorldMaxs->y += m_triggerBloat;
+		pVecWorldMaxs->z += m_triggerBloat;
+	}
+	else
+	{
 		// Don't bloat below, we don't want to trigger it with our heads
 		pVecWorldMins->x -= m_triggerBloat;
 		pVecWorldMins->y -= m_triggerBloat;
@@ -768,13 +773,14 @@ void CCollisionProperty::WorldSpaceTriggerBounds( Vector *pVecWorldMins, Vector 
 		pVecWorldMaxs->x += m_triggerBloat;
 		pVecWorldMaxs->y += m_triggerBloat;
 		pVecWorldMaxs->z += (float)m_triggerBloat * 0.5f;
-	
+	}
 }
 
-void CCollisionProperty::UseTriggerBounds( bool bEnable, float flBloat )
+void CCollisionProperty::UseTriggerBounds( bool bEnable, float flBloat, bool bUniformBloat )
 {
 	Assert( flBloat <= 127.0f );
 	m_triggerBloat = (char )flBloat;
+	m_bUniformTriggerBloat = bUniformBloat;
 	if ( bEnable )
 	{
 		AddSolidFlags( FSOLID_USE_TRIGGER_BOUNDS );

@@ -82,6 +82,7 @@ bool CC_NeedDetpack(const CCommand& args = CCommand());
 bool CC_Defending(const CCommand& args = CCommand());
 bool CC_Incoming(const CCommand& args = CCommand());
 bool CC_SpottedSpy(const CCommand& args = CCommand());
+bool CC_NeedSpy(const CCommand& args = CCommand());
 bool CC_NeedSentry(const CCommand& args = CCommand());
 bool CC_SpottedDetpack(const CCommand& args = CCommand());
 
@@ -579,6 +580,7 @@ public:
 	void Command_Defending(const CCommand& args = CCommand());
 	void Command_Incoming(const CCommand& args = CCommand());
 	void Command_SpottedSpy(const CCommand& args = CCommand());
+	void Command_NeedSpy(const CCommand& args = CCommand());
 	void Command_NeedSentry(const CCommand& args = CCommand());
 	void Command_SpottedDetpack(const CCommand& args = CCommand());
 

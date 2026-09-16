@@ -18,6 +18,7 @@
 C_FF_PlayerResource *g_FF_PR;
 
 IMPLEMENT_CLIENTCLASS_DT( C_FF_PlayerResource, DT_FFPlayerResource, CFFPlayerResource )
+	RecvPropArray3(RECVINFO_ARRAY(m_iScore), RecvPropInt(RECVINFO(m_iScore[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iFortPoints), RecvPropInt( RECVINFO(m_iFortPoints[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iArmor), RecvPropInt(RECVINFO(m_iArmor[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iClass), RecvPropInt(RECVINFO(m_iClass[0]))), // |-- Mirv: Current class
@@ -61,7 +62,7 @@ C_FF_PlayerResource::~C_FF_PlayerResource()
 
 int C_FF_PlayerResource::GetTeamFortPoints(int index)
 {
-	C_FFTeam *team = GetGlobalTeam(index);
+	C_FFTeam *team = GetGlobalFFTeam(index);
 
 	if (!team)
 		return 0;
@@ -71,7 +72,7 @@ int C_FF_PlayerResource::GetTeamFortPoints(int index)
 
 float C_FF_PlayerResource::GetTeamScoreTime(int index)
 {
-	C_FFTeam *pTeam = GetGlobalTeam(index);
+	C_FFTeam *pTeam = GetGlobalFFTeam(index);
 
 	if (!pTeam)
 		return 0.0f;
@@ -81,7 +82,7 @@ float C_FF_PlayerResource::GetTeamScoreTime(int index)
 
 int C_FF_PlayerResource::GetTeamDeaths(int index)
 {
-	C_FFTeam *team = GetGlobalTeam(index);
+	C_FFTeam *team = GetGlobalFFTeam(index);
 
 	if (!team)
 		return 0;
@@ -92,7 +93,7 @@ int C_FF_PlayerResource::GetTeamDeaths(int index)
 // --> Mirv: So menus can show correct limits
 int C_FF_PlayerResource::GetTeamClassLimits(int index, int classindex)
 {
-	C_FFTeam *team = (C_FFTeam*)GetGlobalTeam(index);
+	C_FFTeam *team = GetGlobalFFTeam(index);
 
 	if (!team)
 		return 0;
@@ -102,7 +103,7 @@ int C_FF_PlayerResource::GetTeamClassLimits(int index, int classindex)
 
 int C_FF_PlayerResource::GetTeamLimits(int index)
 {
-	C_FFTeam *team = (C_FFTeam*)GetGlobalTeam(index);
+	C_FFTeam *team = GetGlobalFFTeam(index);
 
 	if (!team)
 		return -1;
@@ -110,7 +111,7 @@ int C_FF_PlayerResource::GetTeamLimits(int index)
 	return team->Get_Teams();
 }
 // <-- Mirv: So menus can show correct limits
-
+/*
 int C_FF_PlayerResource::GetFrags(int index )
 {
 	//return 666;
@@ -121,7 +122,7 @@ int C_FF_PlayerResource::GetFrags(int index )
 	return m_iScore[index];
 	// END: Added by Mulchman
 }
-
+*/
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -176,6 +177,7 @@ bool Client_IsIntermission()
 	C_FF_PlayerResource *pr = dynamic_cast <C_FF_PlayerResource*> (GameResources());
 	if (!pr)
 		return false;
+
 	return pr->m_bIsIntermission;
 }
 #endif

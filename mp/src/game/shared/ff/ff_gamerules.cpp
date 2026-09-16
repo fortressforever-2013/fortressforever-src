@@ -17,12 +17,15 @@
 	#define CFFTeam C_FFTeam
 	#include "c_ff_team.h"
 	#include "c_ff_player.h"
+	#include "c_ff_playerresource.h"
 
 #else
+	#include "player_resource.h"
 	#include "voice_gamemgr.h"
 	#include "ff_team.h"
 	#include "ff_player.h"
 	#include "ff_playercommand.h"
+	#include "ff_player_resource.h"
 	#include "ff_info_script.h"
 	#include "ff_entity_system.h"
 	#include "ff_scriptman.h"
@@ -449,11 +452,13 @@ void CFFGameRules::LevelShutdown( void )
 //-----------------------------------------------------------------------------
 void CFFGameRules::CreateStandardEntities()
 {
+	g_pPlayerResource = (CPlayerResource*)CBaseEntity::Create( "ff_player_manager", vec3_origin, vec3_angle );
+
 	CFFGameRulesProxy *pFFGameRulesProxy = (CFFGameRulesProxy*)CBaseEntity::Create( "ff_gamerules", vec3_origin, vec3_angle );
 	if (pFFGameRulesProxy)
 		pFFGameRulesProxy->AddEFlags( EFL_KEEP_ON_RECREATE_ENTITIES );
 
-	BaseClass::CreateStandardEntities();
+	//BaseClass::CreateStandardEntities();
 }
 
 //-----------------------------------------------------------------------------

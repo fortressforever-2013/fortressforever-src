@@ -2308,6 +2308,17 @@ void CFFPlayer::Command_SpottedPipes(const CCommand& args)
 #endif
 	}
 }
+
+void CFFPlayer::Command_NeedSpy(const CCommand& args)
+{
+	if (m_flSaveMeTime < gpGlobals->curtime)
+	{
+		m_flSaveMeTime = gpGlobals->curtime + 2;
+#ifdef CLIENT_DLL
+		engine->ClientCmd("say_team #FF_CM_NEEDSPY");
+#endif
+	}
+}
 void CFFPlayer::Command_SpottedSpy(const CCommand& args)
 {
 	if (m_flSaveMeTime < gpGlobals->curtime)

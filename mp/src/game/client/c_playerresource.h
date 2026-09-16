@@ -10,9 +10,8 @@
 #ifdef _WIN32
 #pragma once
 #endif
-#ifndef FF
+
 #include "shareddefs.h"
-#endif
 #include "const.h"
 #include "c_baseentity.h"
 #include <igameresources.h>
