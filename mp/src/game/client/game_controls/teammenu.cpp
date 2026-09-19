@@ -86,6 +86,9 @@ CTeamMenu::CTeamMenu(IViewPort *pViewPort) : Frame(NULL, PANEL_TEAM )
 	SetTitleBarVisible( false );
 	SetProportional(true);
 
+	m_pCancelButton = new Button( this, "CancelButton", "#FF_MENU_CANCEL" );
+	m_pSpectateButton = new Button( this, "SpectateButton", "#FF_MENU_SPECTATOR" );
+
 	// info window about this map
 	m_pMapInfo = new RichText( this, "MapInfo" );
 
@@ -178,6 +181,15 @@ void CTeamMenu::Update()
 	SetLabelText( "mapname", mapname );
 
 	LoadMapPage( mapname );
+
+	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if ( pPlayer )
+	{
+		if ( m_pCancelButton )
+			m_pCancelButton->SetVisible( pPlayer->GetTeamNumber() != TEAM_UNASSIGNED );
+		if ( m_pSpectateButton )
+			m_pSpectateButton->SetVisible( mp_allowspectators.GetBool() );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -331,8 +343,6 @@ void CTeamMenu::OnCommand( const char *command )
 	
 	// Display the class panel now
 	gViewPortInterface->ShowPanel( PANEL_CLASS, true );
-
-	BaseClass::OnCommand( command );
 }
 
 /*

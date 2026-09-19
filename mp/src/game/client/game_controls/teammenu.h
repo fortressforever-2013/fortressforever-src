@@ -34,6 +34,8 @@ class CTeamMenu : public vgui::Frame, public IViewPortPanel
 {
 private:
 	DECLARE_CLASS_SIMPLE( CTeamMenu, vgui::Frame );
+	vgui::Button *m_pCancelButton;
+	vgui::Button *m_pSpectateButton;
 
 public:
 	CTeamMenu(IViewPort *pViewPort);

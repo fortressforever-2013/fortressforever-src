@@ -43,7 +43,7 @@ class SendTable;
 		DECLARE_CLIENTCLASS()
 
 #define DECLARE_NETWORKCLASS_NOBASE()									\
-		DECLARE_CLIENTCLASS_NOBASE()							
+		DECLARE_CLIENTCLASS_NOBASE()
 
 #else
 
@@ -51,18 +51,18 @@ class SendTable;
 		DECLARE_SERVERCLASS()
 
 #define DECLARE_NETWORKCLASS_NOBASE()									\
-		DECLARE_SERVERCLASS_NOBASE()	
+		DECLARE_SERVERCLASS_NOBASE()
 
 #endif
 
 #if defined( CLIENT_DLL )
 
 #ifndef NO_ENTITY_PREDICTION
-#define DECLARE_PREDICTABLE()											\
+#define DECLARE_PREDICTABLE()						\
 	public:																\
 		static typedescription_t m_PredDesc[];							\
 		static datamap_t m_PredMap;										\
-		virtual datamap_t *GetPredDescMap( void );						\
+		virtual datamap_t *GetPredDescMap( void );		\
 		template <typename T> friend datamap_t *PredMapInit(T *)
 #else
 #define DECLARE_PREDICTABLE()	template <typename T> friend datamap_t *PredMapInit(T *)
@@ -132,9 +132,9 @@ class SendTable;
 #else
 
 	// nothing, only client has a prediction system
-	#define DECLARE_PREDICTABLE()	
-	#define BEGIN_PREDICTION_DATA( className ) 
-	#define END_PREDICTION_DATA() 
+	#define DECLARE_PREDICTABLE()
+	#define BEGIN_PREDICTION_DATA( className )
+	#define END_PREDICTION_DATA()
 
 #endif
 

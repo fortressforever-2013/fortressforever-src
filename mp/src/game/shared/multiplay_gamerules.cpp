@@ -41,6 +41,10 @@
 	#include "usermessages.h"
 	#include "tier0/icommandline.h"
 
+#ifdef NEXT_BOT
+	#include "NextBotManager.h"
+#endif
+
 #ifdef FF
 	#include "ff_player.h"
 
@@ -55,8 +59,15 @@
 	#include "ff_luacontext.h"
 	#include "ff_scriptman.h"
 #endif
-#ifdef NEXT_BOT
-	#include "NextBotManager.h"
+
+#ifdef TF_DLL
+	#include <unordered_set>
+	#include "hl2orange.spa.h"
+#endif
+
+// TODO Why did we add this to the base class guys.
+#if defined ( TF_DLL ) || defined ( TF_CLIENT_DLL )
+	#include "player_vs_environment/tf_population_manager.h"
 #endif
 
 #endif
@@ -1086,11 +1097,10 @@ ConVarRef suitcharger( "sk_suitcharger" );
 			event->SetInt("userid", pVictim->GetUserID() );
 			event->SetInt("attacker", killer_ID );
 			event->SetInt("customkill", info.GetDamageCustom() );
-			//event->SetInt("priority", 7 );	// HLTV event priority, not transmitted
+			event->SetInt("priority", 10 );	// HLTV event priority, not transmitted
 			event->SetString("weapon", killer_weapon_name);
 			event->SetInt("killedsglevel", iKilledSGLevel);
 			event->SetInt("killersglevel", iKillerSGLevel);
-			event->SetInt("priority", 10);
 
 			// #0001568: Falling into pitt damage shows electrocution icon, instead of falling damage icon
 			// Added damagetype field to the player_death message.  This field records the type of damage dealt by a trigger_hurt
@@ -1099,7 +1109,7 @@ ConVarRef suitcharger( "sk_suitcharger" );
 			// send the damage type
 			event->SetInt("damagetype", info.GetDamageType());
 
-			// make sure to always send somethign here, otherwise client will get default 0 which is world
+			// make sure to always send something here, otherwise client will get default 0 which is world
 			event->SetInt("killassister", -1);
 			// send assist info if any
 			CFFPlayer* pFFPlayer = ToFFPlayer(pVictim);

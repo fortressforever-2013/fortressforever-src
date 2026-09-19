@@ -174,11 +174,10 @@ int C_FF_PlayerResource::GetChannel(int iIndex)
 #ifdef CLIENT_DLL
 bool Client_IsIntermission()
 {
-	C_FF_PlayerResource *pr = dynamic_cast <C_FF_PlayerResource*> (GameResources());
-	if (!pr)
+	if ( !g_FF_PR )
 		return false;
 
-	return pr->m_bIsIntermission;
+	return g_FF_PR->m_bIsIntermission;
 }
 #endif
 

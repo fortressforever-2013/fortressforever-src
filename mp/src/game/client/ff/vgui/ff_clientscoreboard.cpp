@@ -29,7 +29,6 @@
 #include <FFSectionedListPanel.h>
 
 #include <game/client/iviewport.h>
-#include <igameresources.h>
 #include "c_ff_playerresource.h"
 
 #include "vgui_avatarimage.h"
@@ -850,7 +849,7 @@ bool CClientScoreBoardDialog::StaticPlayerSortFunc_Name( vgui::SectionedListPane
 //-----------------------------------------------------------------------------
 bool CClientScoreBoardDialog::GetPlayerScoreInfo(int playerIndex, KeyValues *kv)
 {
-	IGameResources *gr = GameResources();
+	C_FF_PlayerResource *gr = g_FF_PR;
 
 	if (!gr )
 		return false;
@@ -1134,10 +1133,8 @@ void CClientScoreBoardDialog::OnItemSelected(KeyValues *data)
 	int iRowId = data->GetInt("itemID");
 	int playerIndex = FindPlayerIndexForItemID(iRowId);
 
-	IGameResources *pGR = GameResources();
-
 	// Don't change local player info
-	if (pGR && pGR->IsLocalPlayer(playerIndex))
+	if (g_FF_PR && g_FF_PR->IsLocalPlayer(playerIndex))
 		return;
 
 	// No valid player selected, do nothing!

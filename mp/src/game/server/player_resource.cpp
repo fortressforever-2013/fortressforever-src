@@ -87,6 +87,20 @@ void CPlayerResource::Spawn( void )
 	m_nUpdateCounter = 0;
 }
 
+void CPlayerResource::Init( int iIndex )
+{
+	m_iPing.Set( iIndex, 0 );
+	m_iScore.Set( iIndex, 0 );
+	m_iDeaths.Set( iIndex, 0 );
+	m_bConnected.Set( iIndex, 0 );
+	m_iTeam.Set( iIndex, 0 );
+	m_bAlive.Set( iIndex, 0 );
+	m_iHealth.Set( iIndex, 0 );
+	m_iAccountID.Set( iIndex, 0 );
+	m_bValid.Set( iIndex, 0 );
+	m_iUserID.Set( iIndex, 0 );
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: The Player resource is always transmitted to clients
 //-----------------------------------------------------------------------------
@@ -160,5 +174,69 @@ void CPlayerResource::UpdatePlayerData( void )
 		{
 			m_bConnected.Set( i, 0 );
 		}
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CPlayerResource::UpdateConnectedPlayer( int iIndex, CBasePlayer *pPlayer )
+{
+	m_iScore.Set( iIndex, pPlayer->FragCount() );
+	m_iDeaths.Set( iIndex, pPlayer->DeathCount() );
+	m_bConnected.Set( iIndex, 1 );
+	m_iTeam.Set( iIndex, pPlayer->GetTeamNumber() );
+	m_bAlive.Set( iIndex, pPlayer->IsAlive()?1:0 );
+	m_iHealth.Set( iIndex, MAX( 0, pPlayer->GetHealth() ) );
+	m_bValid.Set( iIndex, 1 );
+
+	// Don't update ping / packetloss every time
+
+	if ( !(m_nUpdateCounter%20) )
+	{
+		// update ping all 20 think ticks = (20*0.1=2seconds)
+		int ping, packetloss;
+		UTIL_GetPlayerConnectionInfo( iIndex, ping, packetloss );
+				
+		// calc avg for scoreboard so it's not so jittery
+		ping = 0.8f * m_iPing.Get( iIndex ) + 0.2f * ping;
+				
+		m_iPing.Set( iIndex, ping );
+		// m_iPacketloss.Set( iSlot, packetloss );
+	}
+
+	CSteamID steamID;
+	pPlayer->GetSteamID( &steamID );
+	m_iAccountID.Set( iIndex, steamID.GetAccountID() );
+	m_iUserID.Set( iIndex, pPlayer->GetUserID() );
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CPlayerResource::UpdateDisconnectedPlayer( int iIndex )
+{
+	m_bConnected.Set( iIndex, 0 );
+	m_iAccountID.Set( iIndex, 0 );
+	m_bValid.Set( iIndex, 0 );
+	m_iUserID.Set( iIndex, 0 );
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+int CPlayerResource::GetTeam( int iIndex )
+{
+	if ( iIndex < 1 || iIndex > MAX_PLAYERS )
+	{
+		Assert( false );
+		return 0;
+	}
+	else
+	{
+		return m_iTeam[iIndex];
 	}
 }

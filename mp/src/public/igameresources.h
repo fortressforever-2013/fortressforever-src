@@ -21,7 +21,6 @@ public:
 	virtual const char		*GetTeamName( int index ) = 0;
 	virtual int				GetTeamScore( int index ) = 0;
 	virtual const Color&	GetTeamColor( int index ) = 0;
-	virtual int				GetTeamFortPoints(int index) = 0;
 	virtual float			GetTeamScoreTime(int index) = 0;
 	virtual int				GetTeamDeaths(int index) = 0;
 
@@ -46,7 +45,6 @@ public:
 	// --> Mirv: Extra's needed for menus
 	virtual int		GetClass(int index) = 0;
 	virtual int		GetChannel(int index) = 0;
-	virtual int		GetTeamClassLimits(int index, int classindex) = 0;
 	virtual int		GetTeamLimits(int index) = 0;
 	// <-- Mirv: Extra's needed for menus
 };

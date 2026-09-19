@@ -31,7 +31,7 @@
 #include "ammodef.h"
 
 #ifdef CLIENT_DLL
-	#include <igameresources.h>
+	#include "c_ff_playerresource.h"
 #else
 #ifdef _DEBUG
 	#include "debugoverlay_shared.h"
@@ -423,16 +423,15 @@ int FF_NumPlayersOnTeam( int iTeam )
 	int iCount = -1;
 
 	// Get at the game resources
-	IGameResources *pGR = GameResources();
-	if( pGR )
+	if( g_FF_PR )
 	{
 		iCount = 0;
 
 		for( int i = 1; i < gpGlobals->maxClients; i++ )
 		{
-			if( pGR->IsConnected( i ) )
+			if( g_FF_PR->IsConnected( i ) )
 			{
-				if( pGR->GetTeam( i ) == iTeam )
+				if( g_FF_PR->GetTeam( i ) == iTeam )
 					iCount++;
 			}
 		}
@@ -1020,9 +1019,7 @@ void UTIL_GetTeamNumbers(char nTeamNumbers[4])
 #ifdef CLIENT_DLL
 	// If there's no game resources (a weird thing indeed) then we'll
 	// be returning with a zero'd out array which is okay with me.
-	IGameResources *pGR = GameResources();
-	
-	if (pGR == NULL)
+	if (g_FF_PR == NULL)
 		return;
 #endif
 
@@ -1038,10 +1035,10 @@ void UTIL_GetTeamNumbers(char nTeamNumbers[4])
 		
 		int iTeamIndex = pPlayer->GetTeamNumber() - FF_TEAM_BLUE;
 #else
-		if (!pGR->IsConnected(iClient))
+		if (!g_FF_PR->IsConnected(iClient))
 			continue;
 
-		int iTeamIndex = pGR->GetTeam(iClient) - FF_TEAM_BLUE;
+		int iTeamIndex = g_FF_PR->GetTeam(iClient) - FF_TEAM_BLUE;
 #endif
 
 		// Finally add this team if it is valid
@@ -1063,9 +1060,7 @@ void UTIL_GetTeamLimits(char nTeamLimits[4])
 #ifdef CLIENT_DLL
 	// If there's no game resources (a weird thing indeed) then we'll
 	// be returning with a zero'd out array which is okay with me.
-	IGameResources *pGR = GameResources();
-
-	if (pGR == NULL)
+	if (g_FF_PR == NULL)
 		return;
 #endif
 
@@ -1086,7 +1081,7 @@ void UTIL_GetTeamLimits(char nTeamLimits[4])
 
 		nTeamLimits[iTeamIndex] = pTeam->GetTeamLimits();
 #else
-		nTeamLimits[iTeamIndex] = pGR->GetTeamLimits(iTeamID);
+		nTeamLimits[iTeamIndex] = g_FF_PR->GetTeamLimits(iTeamID);
 #endif
 	}
 }
@@ -1156,9 +1151,7 @@ void UTIL_GetClassNumbers(int iTeam, char nClassNumbers[10])
 #ifdef CLIENT_DLL
 	// If there's no game resources (a weird thing indeed) then we'll
 	// be returning with a zero'd out array which is okay with me.
-	IGameResources *pGR = GameResources();
-
-	if (pGR == NULL)
+	if (g_FF_PR == NULL)
 		return;
 #endif
 
@@ -1174,10 +1167,10 @@ void UTIL_GetClassNumbers(int iTeam, char nClassNumbers[10])
 
 		int iClassIndex = pPlayer->GetClassSlot() - CLASS_SCOUT;
 #else
-		if (!pGR->IsConnected(iClient) || pGR->GetTeam(iClient) != iTeam)
+		if (!g_FF_PR->IsConnected(iClient) || g_FF_PR->GetTeam(iClient) != iTeam)
 			continue;
 
-		int iClassIndex = pGR->GetClass(iClient) - CLASS_SCOUT;
+		int iClassIndex = g_FF_PR->GetClass(iClient) - CLASS_SCOUT;
 #endif
 
 		// Finally add this Class if it is valid
@@ -1199,9 +1192,7 @@ void UTIL_GetClassLimits(int iTeamID, char nClassLimits[10])
 #ifdef CLIENT_DLL
 	// If there's no game resources (a weird thing indeed) then we'll
 	// be returning with a zero'd out array which is okay with me.
-	IGameResources *pGR = GameResources();
-
-	if (pGR == NULL)
+	if ( !g_FF_PR )
 		return;
 #endif
 
@@ -1222,7 +1213,7 @@ void UTIL_GetClassLimits(int iTeamID, char nClassLimits[10])
 
 		nClassLimits[iClassIndex] = pTeam->GetClassLimit(iClassID);
 #else
-		nClassLimits[iClassIndex] = pGR->GetTeamClassLimits(iTeamID, iClassID);
+		nClassLimits[iClassIndex] = g_FF_PR->GetTeamClassLimits(iTeamID, iClassID);
 #endif
 	}
 }

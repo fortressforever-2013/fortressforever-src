@@ -36,7 +36,7 @@
 #include <vgui/ILocalize.h>
 
 #include "ff_hud_chat.h"
-#include <igameresources.h>
+#include "c_ff_playerresource.h"
 #include <prediction.h>
 
 using namespace vgui;
@@ -90,9 +90,7 @@ CON_COMMAND(qdispenser, "qdispenser")
 
 int CheckDisguiseClass( int iClass )
 {
-	IGameResources *pGr = GameResources();
-
-	if( !g_pHudContextMenu || !pGr )
+	if( !g_pHudContextMenu || !g_FF_PR )
 		return MENU_DIM;
 
 	Assert(g_pHudContextMenu->GetLayerNumber() == 2);
@@ -125,7 +123,7 @@ int CheckDisguiseClass( int iClass )
 		// something else!
 
 		for( int i = FF_TEAM_BLUE; ( i <= FF_TEAM_GREEN ) && ( iDisguiseTeam == TEAM_UNASSIGNED ); i++ )
-			if( ( pGr->GetTeamLimits( i ) != -1 ) && ( i != iTeam ) )
+			if( ( g_FF_PR->GetTeamLimits( i ) != -1 ) && ( i != iTeam ) )
 				iDisguiseTeam = i;
 	}
 	else if( !Q_strcmp( pszTeam, "red " ) )
@@ -142,7 +140,7 @@ int CheckDisguiseClass( int iClass )
 		return MENU_DIM;
 
 	// Check the class limit for the disguise team
-	if( pGr->GetTeamClassLimits( iDisguiseTeam, iClass ) == -1 )
+	if( g_FF_PR->GetTeamClassLimits( iDisguiseTeam, iClass ) == -1 )
 		return MENU_DIM;
 
 	return MENU_SHOW;
@@ -150,9 +148,7 @@ int CheckDisguiseClass( int iClass )
 
 int CheckLastDisguise()
 {
-	IGameResources *pGr = GameResources();
-
-	if( !g_pHudContextMenu || !pGr )
+	if( !g_pHudContextMenu || !g_FF_PR )
 		return MENU_DIM;
 
 	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();

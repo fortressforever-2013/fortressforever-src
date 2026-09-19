@@ -654,12 +654,14 @@ CPredictionCopy::difftype_t CPredictionCopy::CompareInt( int *outvalue, const in
 	if ( !m_bErrorCheck )
 		return DIFFERS;
 
+
 	if ( CanCheck() )
 	{
 		for ( int i = 0; i < count; i++ )
 		{
 			if ( outvalue[ i ] == invalue[ i ] )
 				continue;
+
 
 			ReportFieldsDiffer( "int differs (net %i pred %i) diff(%i)\n", invalue[i], outvalue[i], outvalue[i] - invalue[i] );
 			return DIFFERS;
@@ -727,6 +729,7 @@ CPredictionCopy::difftype_t CPredictionCopy::CompareFloat( float *outvalue, cons
 		{
 			if ( outvalue[ i ] == invalue[ i ] )
 				continue;
+
 
 			if ( usetolerance &&
 				( fabs( outvalue[ i ] - invalue[ i ] ) <= tolerance ) )

@@ -457,8 +457,6 @@ void CFFGameRules::CreateStandardEntities()
 	CFFGameRulesProxy *pFFGameRulesProxy = (CFFGameRulesProxy*)CBaseEntity::Create( "ff_gamerules", vec3_origin, vec3_angle );
 	if (pFFGameRulesProxy)
 		pFFGameRulesProxy->AddEFlags( EFL_KEEP_ON_RECREATE_ENTITIES );
-
-	//BaseClass::CreateStandardEntities();
 }
 
 //-----------------------------------------------------------------------------

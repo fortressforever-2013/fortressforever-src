@@ -58,8 +58,6 @@ C_PlayerResource *g_PR;
 
 IGameResources * GameResources( void ) { return g_PR; }
 
-extern ConVar hud_newteamcolors;
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -91,12 +89,6 @@ C_PlayerResource::C_PlayerResource()
 	m_Colors[TEAM_COMBINE] = COLOR_BLUE;
 	m_Colors[TEAM_REBELS] = COLOR_RED;
 	m_Colors[TEAM_UNASSIGNED] = COLOR_YELLOW;
-#elif FF
-	m_Colors[TEAM_SPECTATOR] = TEAM_COLOR_SPECTATOR;
-	m_Colors[FF_TEAM_BLUE] = TEAM_COLOR_BLUE;
-	m_Colors[FF_TEAM_RED] = TEAM_COLOR_RED;
-	m_Colors[FF_TEAM_YELLOW] = TEAM_COLOR_YELLOW;
-	m_Colors[FF_TEAM_GREEN] = TEAM_COLOR_GREEN;
 #endif
 
 	g_PR = this;
@@ -126,11 +118,7 @@ void C_PlayerResource::UpdatePlayerName( int slot )
 		Error( "UpdatePlayerName with bogus slot %d\n", slot );
 		return;
 	}
-#ifdef HL2MP
-	m_Colors[TEAM_COMBINE] = COLOR_BLUE;
-	m_Colors[TEAM_REBELS] = COLOR_RED;
-	m_Colors[TEAM_UNASSIGNED] = COLOR_YELLOW;
-#endif
+
 	if ( !m_szUnconnectedName )
 	{
 		m_szUnconnectedName = AllocPooledString( PLAYER_UNCONNECTED_NAME );

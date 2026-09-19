@@ -27,7 +27,7 @@
 #include <vgui_controls/HTML.h>
 
 #include "IGameUIFuncs.h" // for key bindings
-#include <igameresources.h>
+#include "c_ff_playerresource.h"
 #include <game/client/iviewport.h>
 #include <stdlib.h> // MAX_PATH define
 #include <stdio.h>
@@ -121,8 +121,8 @@ public:
 	//-----------------------------------------------------------------------------
 	void UpdateTeamIcon(int iTeamID)
 	{
-		const char* pszInsignias[] = { "hud_team_blue", "hud_team_red", "hud_team_yellow", "hud_team_green" };
-		C_FFTeam* pFFTeam = GetGlobalFFTeam(iTeamID);
+		const char *pszInsignias[] = { "hud_team_blue", "hud_team_red", "hud_team_yellow", "hud_team_green" };
+		C_FFTeam *pFFTeam = GetGlobalFFTeam(iTeamID);
 
 		m_pTeamInsignia->SetShouldScaleImage(true);
 
@@ -137,9 +137,7 @@ public:
 	//-----------------------------------------------------------------------------
 	void OnThink()
 	{
-		IGameResources *pGR = GameResources();
-
-		if (pGR == NULL)
+		if ( g_FF_PR == NULL )
 			return;
 
 		int iScore = pGR->GetTeamScore(m_iTeamID);
@@ -148,11 +146,11 @@ public:
 		
 		for (int iClient = 1; iClient <= gpGlobals->maxClients; iClient++)
 		{
-			if (!pGR->IsConnected(iClient) || pGR->GetTeam(iClient) != m_iTeamID)
+			if (!g_FF_PR->IsConnected(iClient) || g_FF_PR->GetTeam(iClient) != m_iTeamID)
 				continue;
 
 			nPlayers++;
-			iLag += pGR->GetPing(iClient);
+			iLag += g_FF_PR->GetPing(iClient);
 		}
 
 		if (nPlayers > 0)
@@ -299,9 +297,9 @@ void CFFTeamMenu::OnCommand( const char *command )
 		return;
 
 	// Display the class panel now
-	gViewPortInterface->ShowPanel(PANEL_CLASS, true);
+	gViewPortInterface->ShowPanel( PANEL_CLASS, true );
 
-	BaseClass::OnCommand(command);
+	BaseClass::OnCommand( command );
 }
 
 //-----------------------------------------------------------------------------
@@ -309,7 +307,7 @@ void CFFTeamMenu::OnCommand( const char *command )
 //-----------------------------------------------------------------------------
 void CFFTeamMenu::FireGameEvent( IGameEvent *event )
 {
-	const char * type = event->GetName();
+	const char *type = event->GetName();
 
 	if ( !Q_strcmp(type, "server_spawn") )
 		Q_strncpy( m_szServerName, event->GetString("hostname"), 255 );
@@ -406,9 +404,7 @@ void CFFTeamMenu::Update()
 
 void CFFTeamMenu::UpdateTeamButtons()
 {
-	IGameResources *pGR = GameResources();
-
-	if (pGR == NULL)
+	if ( g_FF_PR == NULL )
 		return;
 
 	char nTeamSpaces[4];
@@ -441,7 +437,7 @@ void CFFTeamMenu::UpdateTeamButtons()
 		wchar_t wchTeamNumber = iTeamIndex + '1';
 
 		// Set the team name
-		wchar_t *wszTeamName = g_pVGuiLocalize->Find( pGR->GetTeamName( iTeamID ) );
+		wchar_t *wszTeamName = g_pVGuiLocalize->Find( g_FF_PR->GetTeamName( iTeamID ) );
 		wchar_t	wszName[ 256 ];
 
 		if (wszTeamName)
