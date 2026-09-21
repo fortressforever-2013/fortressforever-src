@@ -18,6 +18,9 @@
 
 #include "lauxlib.h"
 #include "lualib.h"
+#ifndef COCO_DISABLE
+#include "lcoco.h"
+#endif
 
 
 
@@ -158,6 +161,15 @@ static int luaB_setfenv (lua_State *L) {
 }
 
 
+static int luaB_rawlen (lua_State *L) {
+  int t = lua_type(L, 1);
+  luaL_argcheck(L, t == LUA_TTABLE || t == LUA_TSTRING, 1,
+                   "table or string expected");
+  lua_pushinteger(L, lua_objlen(L, 1));
+  return 1;
+}
+
+
 static int luaB_rawequal (lua_State *L) {
   luaL_checkany(L, 1);
   luaL_checkany(L, 2);
@@ -223,6 +235,21 @@ static int luaB_type (lua_State *L) {
 }
 
 
+static int pairsmeta (lua_State *L, const char *method, int iszero) {
+  if (!luaL_getmetafield(L, 1, method)) {  /* no metamethod? */
+    luaL_checktype(L, 1, LUA_TTABLE);  /* argument must be a table */
+    lua_pushvalue(L, lua_upvalueindex(1));  /* will return generator, */
+    lua_pushvalue(L, 1);  /* state, */
+    if (iszero) lua_pushinteger(L, 0);  /* and initial value */
+    else lua_pushnil(L);
+  }
+  else {
+    lua_pushvalue(L, 1);  /* argument 'self' to metamethod */
+    lua_call(L, 1, 3);  /* get 3 values from metamethod */
+  }
+  return 3;
+}
+
 static int luaB_next (lua_State *L) {
   luaL_checktype(L, 1, LUA_TTABLE);
   lua_settop(L, 2);  /* create a 2nd argument if there isn't one */
@@ -236,11 +263,7 @@ static int luaB_next (lua_State *L) {
 
 
 static int luaB_pairs (lua_State *L) {
-  luaL_checktype(L, 1, LUA_TTABLE);
-  lua_pushvalue(L, lua_upvalueindex(1));  /* return generator, */
-  lua_pushvalue(L, 1);  /* state, */
-  lua_pushnil(L);  /* and initial value */
-  return 3;
+  return pairsmeta(L, "__pairs", 0);
 }
 
 
@@ -255,11 +278,7 @@ static int ipairsaux (lua_State *L) {
 
 
 static int luaB_ipairs (lua_State *L) {
-  luaL_checktype(L, 1, LUA_TTABLE);
-  lua_pushvalue(L, lua_upvalueindex(1));  /* return generator, */
-  lua_pushvalue(L, 1);  /* state, */
-  lua_pushinteger(L, 0);  /* and initial value */
-  return 3;
+  return pairsmeta(L, "__ipairs", 1);
 }
 
 
@@ -466,6 +485,7 @@ static const luaL_Reg base_funcs[] = {
   {"next", luaB_next},
   {"pcall", luaB_pcall},
   {"print", luaB_print},
+  {"rawlen", luaB_rawlen},
   {"rawequal", luaB_rawequal},
   {"rawget", luaB_rawget},
   {"rawset", luaB_rawset},
@@ -532,7 +552,6 @@ static int auxresume (lua_State *L, lua_State *co, int narg) {
     return -1;  /* error flag */
   }
   lua_xmove(L, co, narg);
-  lua_setlevel(L, co);
   status = lua_resume(co, narg);
   if (status == 0 || status == LUA_YIELD) {
     int nres = lua_gettop(co);
@@ -581,10 +600,27 @@ static int luaB_auxwrap (lua_State *L) {
 }
 
 
+#ifndef COCO_DISABLE
+static int luaB_cstacksize (lua_State *L)
+{
+  lua_pushinteger(L, luaCOCO_cstacksize(luaL_optint(L, 1, -1)));
+  return 1;
+}
+#endif
+
+
 static int luaB_cocreate (lua_State *L) {
+#ifdef COCO_DISABLE
   lua_State *NL = lua_newthread(L);
   luaL_argcheck(L, lua_isfunction(L, 1) && !lua_iscfunction(L, 1), 1,
     "Lua function expected");
+#else
+  int cstacksize = luaL_optint(L, 2, 0);
+  lua_State *NL = lua_newcthread(L, cstacksize);
+  luaL_argcheck(L, lua_isfunction(L, 1) &&
+                   (cstacksize >= 0 ? 1 : !lua_iscfunction(L, 1)),
+                1, "Lua function expected");
+#endif
   lua_pushvalue(L, 1);  /* move function to top */
   lua_xmove(L, NL, 1);  /* move function from L to NL */
   return 1;
@@ -617,6 +653,9 @@ static const luaL_Reg co_funcs[] = {
   {"status", luaB_costatus},
   {"wrap", luaB_cowrap},
   {"yield", luaB_yield},
+#ifndef COCO_DISABLE
+  {"cstacksize", luaB_cstacksize},
+#endif
   {NULL, NULL}
 };
 
@@ -656,6 +695,10 @@ static void base_open (lua_State *L) {
 LUALIB_API int luaopen_base (lua_State *L) {
   base_open(L);
   luaL_register(L, LUA_COLIBNAME, co_funcs);
+#ifndef COCO_DISABLE
+  lua_pushboolean(L, 1); 
+  lua_setfield(L, -2, "coco");
+#endif
   return 2;
 }
 
