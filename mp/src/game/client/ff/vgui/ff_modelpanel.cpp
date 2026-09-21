@@ -25,7 +25,7 @@
 
 #include "ff_utils.h"
 
-#include <igameresources.h>
+#include "c_ff_playerresource.h"
 
 extern IFileSystem **pFilesystem;
 
@@ -273,12 +273,8 @@ void PlayerModelPanel::SetClass(const char *pszClassname)
 	SetWeaponModel(pWeaponInfo->szWorldModel);
 	SetAnimations("idle_lower", VarArgs("idle_upper_%s", pWeaponInfo->m_szAnimExtension));
 
-	IGameResources *pGR = GameResources();
-
-	if (pGR)
-	{
-		m_hModel->m_nSkin = pGR->GetTeam(pLocalPlayer->entindex()) - FF_TEAM_BLUE;
-	}
+	if ( g_FF_PR )
+		m_hModel->m_nSkin = g_FF_PR->GetTeam( pLocalPlayer->entindex() ) - FF_TEAM_BLUE;
 }
 
 //-----------------------------------------------------------------------------

@@ -67,6 +67,13 @@ typedef uint64 VertexFormat_t;
 
 // NOTE NOTE NOTE!!!!  If you up this, grep for "NEW_INTERFACE" to see if there is anything
 // waiting to be enabled during an interface revision.
+
+
+
+
+
+
+
 #define MATERIAL_SYSTEM_INTERFACE_VERSION "VMaterialSystem080"
 
 #ifdef POSIX

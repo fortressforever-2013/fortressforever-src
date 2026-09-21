@@ -3,7 +3,7 @@
 #include "cbase.h"
 #include "ff_discordman.h"
 
-#include "igameresources.h"
+#include "c_ff_playerresource.h"
 #include "c_ff_team.h"
 #include "ff_gamerules.h"
 
@@ -152,9 +152,7 @@ void CFFDiscordManager::LevelInit(const char* mapname)
 
 void CFFDiscordManager::UpdateGameData()
 {
-	IGameResources* pGR = GameResources();
-
-	if (!pGR)
+	if ( !g_FF_PR )
 		return;
 
 	DiscordRichPresence discordPresence;
@@ -192,7 +190,7 @@ void CFFDiscordManager::UpdateGameData()
 	// by summing all teams' player counts
 	// but that wouldn't count spectators or unassigned so..
 	for (int i = 1; i < maxPlayers; i++)
-		if (pGR->IsConnected(i))
+		if ( g_FF_PR->IsConnected( i ) )
 			curPlayers++;
 
 	// step by step conversion to avoid a dangling pointer

@@ -11,8 +11,8 @@
 #include "vguicenterprint.h"
 #include "vgui/ILocalize.h"
 #include "c_team.h"
-#include "c_playerresource.h"
 #include "c_ff_player.h"
+#include "c_ff_playerresource.h"
 #include "ff_gamerules.h"
 #include "ihudlcd.h"
 #include "voice_status.h"
@@ -65,12 +65,10 @@ Color GetClientColor(int clientIndex)
 	}
 	else
 	{
-		IGameResources* gr = GameResources();
-
-		if (!gr)
+		if ( !g_FF_PR )
 			return GetDefaultChatColor();
 
-		return gr->GetTeamColor(gr->GetTeam(clientIndex));
+		return g_FF_PR->GetTeamColor(g_FF_PR->GetTeam(clientIndex));
 	}
 }
 
@@ -86,15 +84,13 @@ Color GetCustomClientColor(int iPlayerIndex, int iTeamIndex/* = -1*/)
 		int iTeam;
 		Color clr;
 
-		IGameResources* gr = GameResources();
-
-		if (!gr)
+		if ( !g_FF_PR )
 			return GetDefaultChatColor();
 
 		if (iTeamIndex >= 0) // prefer team index over player index
 			iTeam = iTeamIndex;
 		else if(iPlayerIndex > 0)
-			iTeam = gr->GetTeam(iPlayerIndex);
+			iTeam = g_FF_PR->GetTeam(iPlayerIndex);
 		else
 		{
 			DevWarning("Unknown values passed to GetCustomClientColor!\n");

@@ -276,8 +276,8 @@ protected:
 	};
 
 	// Cache used to remove redundant calls to GetPointContents().
-	int m_CachedGetPointContents[ MAX_PLAYERS ][ MAX_PC_CACHE_SLOTS ];
-	Vector m_CachedGetPointContentsPoint[ MAX_PLAYERS ][ MAX_PC_CACHE_SLOTS ];	
+	int m_CachedGetPointContents[ MAX_PLAYERS_ARRAY_SAFE ][ MAX_PC_CACHE_SLOTS ];
+	Vector m_CachedGetPointContentsPoint[ MAX_PLAYERS_ARRAY_SAFE ][ MAX_PC_CACHE_SLOTS ];	
 
 	Vector			m_vecProximityMins;		// Used to be globals in sv_user.cpp.
 	Vector			m_vecProximityMaxs;
@@ -287,7 +287,7 @@ protected:
 //private:
 	int				m_iSpeedCropped;
 
-	float			m_flStuckCheckTime[MAX_PLAYERS+1][2]; // Last time we did a full test
+	float			m_flStuckCheckTime[MAX_PLAYERS_ARRAY_SAFE][2]; // Last time we did a full test
 
 	// special function for teleport-with-duck for episodic
 #ifdef HL2_EPISODIC

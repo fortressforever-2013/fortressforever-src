@@ -23,7 +23,6 @@
 #include "ff_panel.h"
 #include "c_ff_player.h"
 #include "ff_utils.h"
-#include "c_playerresource.h"
 
 #include <vgui/ILocalize.h>
 

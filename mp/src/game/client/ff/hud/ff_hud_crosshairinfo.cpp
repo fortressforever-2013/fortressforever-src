@@ -29,7 +29,7 @@ using namespace vgui;
 //#include "debugoverlay_shared.h"
 
 //#include "c_ff_player.h"
-#include <igameresources.h>
+#include "c_ff_playerresource.h"
 #include "c_ff_team.h"
 #include "ff_gamerules.h"
 #include "ff_utils.h"
@@ -225,8 +225,7 @@ void CHudCrosshairInfo::OnTick( void )
 			if( pHitPlayer )
 			{
 				// Get at the game resources
-				IGameResources *pGR = GameResources();
-				if( !pGR )
+				if( !g_FF_PR )
 				{
 					Warning( "[Crosshair Info] Failed to get game resources!\n" );
 					return;
@@ -245,7 +244,7 @@ void CHudCrosshairInfo::OnTick( void )
 				char szClass[ MAX_PLAYER_NAME_LENGTH ];
 					
 				// Get their real name now (deal w/ non teammate/ally spies later)
-				Q_strcpy( szName, pGR->GetPlayerName( pHitPlayer->index ) );
+				Q_strcpy( szName, g_FF_PR->GetPlayerName( pHitPlayer->index ) );
 
 				if( bBuildable )
 				{
@@ -265,7 +264,7 @@ void CHudCrosshairInfo::OnTick( void )
 				else
 				{
 					// Get the players' class always
-					Q_strcpy( szClass, Class_IntToResourceString( pGR->GetClass( pHitPlayer->index ) ) );
+					Q_strcpy( szClass, Class_IntToResourceString( g_FF_PR->GetClass( pHitPlayer->index ) ) );
 				}
 
 				// Default
@@ -402,17 +401,17 @@ void CHudCrosshairInfo::OnTick( void )
 										if( i == pHitPlayer->index )
 											continue;
 
-										if( pGR->IsConnected( i ) )
+										if( g_FF_PR->IsConnected( i ) )
 										{
 											// If the guy's on the team we're disguised as...
-											if( pGR->GetTeam( i ) == m_iTeam )
+											if( g_FF_PR->GetTeam( i ) == m_iTeam )
 											{
 												// Store off the player index since we found
 												// someone on the team we're disguised as
 												iPlayers[ iCount++ ] = i;
 
 												// If the guy's playing as the class we're disguised as...
-												if( pGR->GetClass( i ) == m_iClass )
+												if( g_FF_PR->GetClass( i ) == m_iClass )
 												{
 													// Store off the player index since we found
 													// someone with the same class 
@@ -433,7 +432,7 @@ void CHudCrosshairInfo::OnTick( void )
 									{			
 										// So we got an array of indexes to players of whom we can steal
 										// their name, so randomly steal one
-										Q_strcpy( szName, pGR->GetPlayerName( iPlayersWithSameClass[ random->RandomInt( 0, iSameClassCount - 1 ) ] ) );
+										Q_strcpy( szName, g_FF_PR->GetPlayerName( iPlayersWithSameClass[ random->RandomInt( 0, iSameClassCount - 1 ) ] ) );
 										bDone = true;
 									}
 	
@@ -444,7 +443,7 @@ void CHudCrosshairInfo::OnTick( void )
 									{
 										// So we got an array of indexes to players of whom we can steal
 										// their name, so randomly steal one
-										Q_strcpy( szName, pGR->GetPlayerName( iPlayers[ random->RandomInt( 0, iCount - 1 ) ] ) );
+										Q_strcpy( szName, g_FF_PR->GetPlayerName( iPlayers[ random->RandomInt( 0, iCount - 1 ) ] ) );
 									}
 
 									// Store off the spies name, class & team in case we ID him again

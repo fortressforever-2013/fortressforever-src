@@ -50,6 +50,10 @@
 #include "sourcevr/isourcevirtualreality.h"
 #include "client_virtualreality.h"
 
+#ifdef TF_CLIENT_DLL
+#include "tf_gamerules.h"
+#endif
+
 #if defined USES_ECON_ITEMS
 #include "econ_wearable.h"
 #endif
@@ -938,6 +942,16 @@ void C_BasePlayer::PostDataUpdate( DataUpdateType_t updateType )
 			CalculateVisionUsingCurrentFlags();
 			m_nLocalPlayerVisionFlags = nCurrentLocalPlayerVisionFlags;
 		}
+
+		
+		
+#ifdef TF_CLIENT_DLL
+			CTFPlayer *pTFPlayer = ToTFPlayer( this );
+			if ( pTFPlayer )
+				pTFPlayer->FlushAllPlayerVisibilityState();
+#endif
+			
+		
 	}
 
 	// If we are updated while paused, allow the player origin to be snapped by the
@@ -1943,6 +1957,19 @@ void C_BasePlayer::ThirdPersonSwitch( bool bThirdperson )
 	{
 		return false;
 	}
+
+	
+	
+		
+	
+
+#ifdef TF_CLIENT_DLL
+	if ( TFGameRules() && TFGameRules()->IsCompetitiveMode() && TFGameRules()->PlayersAreOnMatchSummaryStage() )
+	{
+		return false;
+	}
+#endif
+
 	int ObserverMode = pLocalPlayer->GetObserverMode();
 	if ( ( ObserverMode == OBS_MODE_NONE ) || ( ObserverMode == OBS_MODE_IN_EYE ) )
 	{

@@ -22,9 +22,9 @@
 
 #include "ff_panel.h"
 #include "c_ff_player.h"
+#include "c_ff_playerresource.h"
 #include "c_ff_team.h"
 #include "ff_utils.h"
-#include "c_playerresource.h"
 
 #include <vgui/ILocalize.h>
 
@@ -109,8 +109,7 @@ void CHudTeamScores::Paint()
 	if ( !pPlayer ) 
 		return; 
 
-	IGameResources *pGR = GameResources();
-	if( !pGR )
+	if( !g_FF_PR )
 		return;
 	
 	if(!hud_teamscores.GetBool())
@@ -124,7 +123,7 @@ void CHudTeamScores::Paint()
 	{
 		SetColorByTeam( iTeam, cColor );		
 		surface()->DrawSetTextColor( cColor.r(), cColor.g(), cColor.b(), 255 );
-		PaintNumbersRightAligned(m_hTeamScoreBlueFont, TeamScoreBlue_xpos, TeamScoreBlue_ypos, pGR->GetTeamScore( iTeam ), 5 );
+		PaintNumbersRightAligned(m_hTeamScoreBlueFont, TeamScoreBlue_xpos, TeamScoreBlue_ypos, g_FF_PR->GetTeamScore( iTeam ), 5 );
 	}
 
 	iTeam = FF_TEAM_RED;
@@ -133,7 +132,7 @@ void CHudTeamScores::Paint()
 	{
 		SetColorByTeam( iTeam, cColor );		
 		surface()->DrawSetTextColor( cColor.r(), cColor.g(), cColor.b(), 255 );
-		PaintNumbers(m_hTeamScoreRedFont, TeamScoreRed_xpos, TeamScoreRed_ypos, pGR->GetTeamScore( iTeam ) );
+		PaintNumbers(m_hTeamScoreRedFont, TeamScoreRed_xpos, TeamScoreRed_ypos, g_FF_PR->GetTeamScore( iTeam ) );
 	}
 
 	iTeam = FF_TEAM_YELLOW;
@@ -142,7 +141,7 @@ void CHudTeamScores::Paint()
 	{
 		SetColorByTeam( iTeam, cColor );		
 		surface()->DrawSetTextColor( cColor.r(), cColor.g(), cColor.b(), 255 );
-		PaintNumbersRightAligned(m_hTeamScoreYellowFont, TeamScoreYellow_xpos, TeamScoreYellow_ypos, pGR->GetTeamScore( iTeam ), 5 );
+		PaintNumbersRightAligned(m_hTeamScoreYellowFont, TeamScoreYellow_xpos, TeamScoreYellow_ypos, g_FF_PR->GetTeamScore( iTeam ), 5 );
 	}
 
 	iTeam = FF_TEAM_GREEN;
@@ -151,7 +150,7 @@ void CHudTeamScores::Paint()
 	{
 		SetColorByTeam( iTeam, cColor );		
 		surface()->DrawSetTextColor( cColor.r(), cColor.g(), cColor.b(), 255 );
-		PaintNumbers(m_hTeamScoreGreenFont, TeamScoreGreen_xpos, TeamScoreGreen_ypos, pGR->GetTeamScore( iTeam ) );
+		PaintNumbers(m_hTeamScoreGreenFont, TeamScoreGreen_xpos, TeamScoreGreen_ypos, g_FF_PR->GetTeamScore( iTeam ) );
 	}
 }
 

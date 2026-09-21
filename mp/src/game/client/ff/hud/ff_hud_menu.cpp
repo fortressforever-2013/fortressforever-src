@@ -329,16 +329,15 @@ enum AvailableAs_t { ENEMY, FRIENDLY };
 
 int TeamAvailableForDisguise(int iTeam, AvailableAs_t as)
 {
-	IGameResources *pGr = GameResources();
 	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
 
-	if (!pGr || !pPlayer)
+	if ( !g_FF_PR || !pPlayer )
 		return MENU_DIM;
 
 	if (!pPlayer->IsDisguisable())
 		return MENU_DIM;
 
-	if (pGr->GetTeamLimits(iTeam) < 0)
+	if ( g_FF_PR->GetTeamLimits(iTeam) < 0 )
 		return MENU_DIM;
 
 	bool bAllied = FFGameRules()->IsTeam1AlliedToTeam2(pPlayer->GetTeamNumber(), iTeam);

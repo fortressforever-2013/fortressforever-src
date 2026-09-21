@@ -103,6 +103,12 @@ unsigned int CLZMA::Uncompress( unsigned char *pInput, unsigned char *pOutput )
 		return 0;
 	}
 
+	
+	
+		
+		
+	
+
 	return outProcessed;
 }
 
@@ -227,6 +233,14 @@ bool CLZMAStream::Read( unsigned char *pInput, unsigned int nMaxInputBytes,
 		}
 		return false;
 	}
+
+	
+	
+	
+	
+		
+		
+	
 
 	nCompressedBytesRead += inSize;
 	nOutputBytesWritten += outSize;

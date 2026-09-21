@@ -2447,7 +2447,7 @@ void CGameMovement::FullNoClipMove( float factor, float maxacceleration )
 		float control = (spd < maxspeed/4.0) ? maxspeed/4.0 : spd;
 #ifndef FF		
 		float friction = sv_friction.GetFloat() * player->m_surfaceFriction;
-#else		
+#else
 		float friction = sv_friction.GetFloat() * /*player->m_surfaceFriction*/ 1.0f;	// |-- Mirv: More TFC Feeling (tm) friction
 #endif				
 		// Add the amount to the drop amount.
@@ -2888,7 +2888,8 @@ int CGameMovement::TryPlayerMove( Vector *pFirstDest, trace_t *pFirstTrace )
 				}
 				else
 				{
-					ClipVelocity( original_velocity, planes[i], new_velocity, 1.0 + sv_bounce.GetFloat() * (1 - /*player->m_surfaceFriction*/ 1.0f) );
+					ClipVelocity( original_velocity, planes[i], new_velocity,
+					              1.0 + sv_bounce.GetFloat() * (1 - /*player->m_surfaceFriction*/ 1.0f) );
 					// |-- Mirv: More TFC Feeling (tm) friction
 				}
 			}
@@ -3319,6 +3320,7 @@ int CGameMovement::ClipVelocity( Vector& in, Vector& normal, Vector& out, float 
 	
 
 	// Determine how far along plane to slide based on incoming direction.
+	
 	backoff = DotProduct (in, normal) * overbounce;
 
 	for (i=0 ; i<3 ; i++)
@@ -3334,6 +3336,7 @@ int CGameMovement::ClipVelocity( Vector& in, Vector& normal, Vector& out, float 
 		out -= ( normal * adjust );
 //		Msg( "Adjustment = %lf\n", adjust );
 	}
+
 
 	// Return blocking flags.
 	return blocked;
@@ -3596,6 +3599,8 @@ int CGameMovement::CheckStuck( void )
 	idx = player->IsServer() ? 0 : 1;
 
 	fTime = engine->Time();
+	
+	
 	// Too soon?
 	if ( m_flStuckCheckTime[ player->entindex() ][ idx ] >=  fTime - CHECKSTUCK_MINTIME )
 	{
@@ -3647,6 +3652,7 @@ int CGameMovement::GetPointContentsCached( const Vector &point, int slot )
 		Assert( slot >= 0 && slot < MAX_PC_CACHE_SLOTS );
 
 		int idx = player->entindex() - 1;
+		
 
 		if ( m_CachedGetPointContents[ idx ][ slot ] == -9999 || point.DistToSqr( m_CachedGetPointContentsPoint[ idx ][ slot ] ) > 1 )
 		{
@@ -4658,6 +4664,9 @@ void CGameMovement::Duck( void )
 	HandleDuckingSpeedCrop();
 
 	// If the player is holding down the duck button, the player is in duck transition, ducking, or duck-jumping.
+	
+
+	
 	if ( ( mv->m_nButtons & IN_DUCK ) || (player->m_Local.m_bDucking) || (player->GetFlags() & FL_DUCKING))
 	{
 		// DUCK
@@ -4775,7 +4784,20 @@ void CGameMovement::PlayerMove( void )
 		}
 	}
 
-	CategorizePosition();
+	
+	
+		
+		
+	
+		CategorizePosition();
+	
+	
+	
+		
+		
+			
+		
+	
 
 	// Store off the starting water level
 	m_nOldWaterLevel = player->GetWaterLevel();

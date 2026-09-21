@@ -765,3 +765,4 @@ const CUtlString &CUtlString::GetEmptyString()
 
 	return s_emptyString;
 }
+

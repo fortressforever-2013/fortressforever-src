@@ -2764,13 +2764,18 @@ CMouthInfo *C_BaseAnimating::GetMouth( void )
 	return &m_mouth;
 }
 
+// Enable by default in staging and debug builds
+#if !defined( DEBUG_BONE_SETUP_THREADING ) && ( defined( _DEBUG ) || defined( STAGING_ONLY ) )
+	#define DEBUG_BONE_SETUP_THREADING
+#endif
+
 #ifdef DEBUG_BONE_SETUP_THREADING
 ConVar cl_warn_thread_contested_bone_setup("cl_warn_thread_contested_bone_setup", "0" );
 #endif
 
-
-
-ConVar cl_threaded_bone_setup("cl_threaded_bone_setup", "0", 0,
+// Marked this developmentonly because it currently crashes, and users are enabling it and complaining because of
+// course.  Once this actually works it should just be FCVAR_INTERNAL_USE.
+ConVar cl_threaded_bone_setup("cl_threaded_bone_setup", "0", FCVAR_DEVELOPMENTONLY | FCVAR_INTERNAL_USE,
                               "Enable parallel processing of C_BaseAnimating::SetupBones()" );
 
 //-----------------------------------------------------------------------------
@@ -4014,6 +4019,7 @@ void C_BaseAnimating::FireEvent( const Vector& origin, const QAngle& angles, int
 			p = nexttoken(token, p, ' ');
 		#endif
 
+			
 			iAttachType = GetAttachTypeFromString( token );
 			if ( iAttachType == -1 )
 			{
@@ -4048,6 +4054,7 @@ void C_BaseAnimating::FireEvent( const Vector& origin, const QAngle& angles, int
 			ParticleProp()->Create( szParticleEffect, (ParticleAttachment_t)iAttachType, iAttachment );
 		}
 		break;
+
 
 	case AE_CL_PLAYSOUND:
 		{

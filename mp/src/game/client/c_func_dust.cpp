@@ -231,9 +231,9 @@ void C_Func_Dust::AttemptSpawnNewParticle()
 				pParticle->m_flDieTime = random->RandomFloat( m_LifetimeMin, m_LifetimeMax );
 
 				if( m_DustFlags & DUSTFLAGS_SCALEMOTES )
-					pParticle->m_flSize = random->RandomFloat(m_flSizeMin / 10000.0f, m_flSizeMax / 10000.0f);
+					pParticle->m_flSize = random->RandomFloat( m_flSizeMin/10000.0f, m_flSizeMax/10000.0f );
 				else
-					pParticle->m_flSize = random->RandomFloat(m_flSizeMin, m_flSizeMax);
+					pParticle->m_flSize = random->RandomFloat( m_flSizeMin, m_flSizeMax );
 			
 				pParticle->m_Color = m_Color;
 			}

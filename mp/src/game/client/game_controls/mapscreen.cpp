@@ -28,7 +28,6 @@
 #include <game/client/iviewport.h>
 
 #include "IGameUIFuncs.h"
-#include <igameresources.h>
 
 #include "ff_utils.h"
 

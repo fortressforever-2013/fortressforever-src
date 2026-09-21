@@ -43,7 +43,7 @@ extern IGameUIFuncs *gameuifuncs; // for key binding details
 #include <convar.h>
 #include "ienginevgui.h"
 #include "IGameUIFuncs.h"
-#include <igameresources.h>
+#include "c_ff_playerresource.h"
 
 #include <vgui_controls/RichText.h>
 #include <vgui_controls/ProgressBar.h>
@@ -437,9 +437,7 @@ void CFFClassMenu::SetClassInfoVisible(bool state)
 //-----------------------------------------------------------------------------
 void CFFClassMenu::Update() 
 {
-	IGameResources *pGR = GameResources();
-
-	if (!pGR) 
+	if ( !g_FF_PR ) 
 		return;
 
 	C_BasePlayer *pLocalPlayer = C_BasePlayer::GetLocalPlayer();
@@ -477,7 +475,7 @@ void CFFClassMenu::Update()
 	m_pRandomButton->SetVisible((nOptions > 1));
 
 	// Cancel only visible if they already have a class
-	m_pCancelButton->SetVisible((pGR->GetClass(pLocalPlayer->entindex()) != 0));
+	m_pCancelButton->SetVisible( ( g_ff_PR->GetClass( pLocalPlayer->entindex() ) != 0 ) );
 
 	m_flNextUpdate = gpGlobals->curtime + 0.2f;
 }
