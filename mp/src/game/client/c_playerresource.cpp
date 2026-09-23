@@ -31,7 +31,6 @@ IMPLEMENT_CLIENTCLASS_DT_NOBASE(C_PlayerResource, DT_PlayerResource, CPlayerReso
 	RecvPropArray3( RECVINFO_ARRAY(m_iHealth), RecvPropInt( RECVINFO(m_iHealth[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iArmor), RecvPropInt(RECVINFO(m_iArmor[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iClass), RecvPropInt(RECVINFO(m_iClass[0]))), // |-- Mirv: Current class
-	RecvPropArray3( RECVINFO_ARRAY(m_iChannel), RecvPropInt(RECVINFO(m_iChannel[0]))), // |-- Mirv: Channel information
 	RecvPropArray3( RECVINFO_ARRAY(m_iAssists), RecvPropInt(RECVINFO(m_iAssists[0]))),
 	RecvPropBool( RECVINFO(m_bIsIntermission)),
 END_RECV_TABLE()
@@ -49,7 +48,6 @@ BEGIN_PREDICTION_DATA( C_PlayerResource )
 	DEFINE_PRED_ARRAY( m_iHealth, FIELD_INTEGER, MAX_PLAYERS_ARRAY_SAFE, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_iArmor, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE),
 	DEFINE_PRED_ARRAY( m_iClass, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE),
-	DEFINE_PRED_ARRAY( m_iChannel, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE),
 	DEFINE_PRED_ARRAY( m_iAssists, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE),
 
 END_PREDICTION_DATA()	
@@ -75,7 +73,6 @@ C_PlayerResource::C_PlayerResource()
 	memset( m_iFortPoints, 0, sizeof(m_iFortPoints) );
 	memset( m_iArmor, 0, sizeof(m_iArmor) );
 	memset( m_iClass, 0, sizeof(m_iClass) );	// |-- Mirv: Current class
-	memset( m_iChannel, 0, sizeof(m_iChannel) ); // |-- Mirv: Channel information
 	memset( m_iAssists, 0, sizeof(m_iAssists) );
 
 	m_szUnconnectedName = 0;
@@ -358,16 +355,6 @@ int C_PlayerResource::GetTeamClassLimits(int index, int classindex)
 
 	return team->Get_Classes(classindex);
 }
-
-int C_PlayerResource::GetTeamLimits(int index)
-{
-	C_FFTeam* team = (C_FFTeam*)GetGlobalTeam(index);
-
-	if (!team)
-		return -1;
-
-	return team->Get_Teams();
-}
 // <-- Mirv: So menus can show correct limits
 
 //-----------------------------------------------------------------------------
@@ -449,23 +436,6 @@ bool C_PlayerResource::IsConnected( int iIndex )
 	else
 		return m_bConnected[iIndex];
 }
-
-
-// --> Mirv: Channel info
-//-----------------------------------------------------------------------------
-// Purpose: Return the voice channel that this player is using
-//-----------------------------------------------------------------------------
-int C_PlayerResource::GetChannel(int iIndex)
-{
-	if (iIndex < 1 || iIndex > MAX_PLAYERS)
-	{
-		Assert(0);
-		return 0;
-	}
-	else
-		return m_iChannel[iIndex];
-}
-// <-- Mirv: Channel info
 
 //-----------------------------------------------------------------------------
 // Purpose: 

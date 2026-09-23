@@ -44,8 +44,6 @@ public:
 
 	// --> Mirv: Extra's needed for menus
 	virtual int		GetClass(int index) = 0;
-	virtual int		GetChannel(int index) = 0;
-	virtual int		GetTeamLimits(int index) = 0;
 	// <-- Mirv: Extra's needed for menus
 };
 

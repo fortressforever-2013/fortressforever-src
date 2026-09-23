@@ -48,7 +48,6 @@ protected:
 	CNetworkArray( int, m_iArmor, MAX_PLAYERS + 1 );
 	CNetworkArray( int, m_iClass, MAX_PLAYERS + 1 );	// |-- Mirv: Class info
 
-	CNetworkArray( int, m_iChannel, MAX_PLAYERS + 1 );	// |-- Mirv: Channel info
 	CNetworkArray( int, m_iAssists, MAX_PLAYERS + 1 );
 	CNetworkVar( bool, m_bIsIntermission );
 		

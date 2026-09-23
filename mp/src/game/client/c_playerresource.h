@@ -61,9 +61,7 @@ public : // IGameResources interface
 
 	// --> Mirv: Extra's needed for menus
 	virtual int		GetClass(int index);
-	virtual int		GetChannel(int index);
 	virtual int		GetTeamClassLimits(int index, int classindex);
-	virtual int		GetTeamLimits(int index);
 	// <-- Mirv: Extra's needed for menus
 
 	virtual void ClientThink();
@@ -86,7 +84,6 @@ protected:
 	int		m_iArmor[MAX_PLAYERS + 1];
 	Color	m_Colors[MAX_TEAMS];
 	int		m_iClass[MAX_PLAYERS + 1];	// |-- Mirv: Current class
-	int		m_iChannel[MAX_PLAYERS + 1];	// |-- Mirv: For voice channels
 	int		m_iAssists[MAX_PLAYERS + 1];
 	string_t m_szUnconnectedName;
 

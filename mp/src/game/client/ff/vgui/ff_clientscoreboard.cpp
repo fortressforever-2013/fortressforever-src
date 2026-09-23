@@ -897,7 +897,7 @@ bool CClientScoreBoardDialog::GetPlayerScoreInfo(int playerIndex, KeyValues *kv)
 	if( bFriendly )
 	{
 		kv->SetInt( "voice", s_VoiceImage[ GetClientVoiceMgr()->GetSpeakerStatus( playerIndex ) ] + ( g_fBlockedStatus[ playerIndex ] ? 1 : 0 ) );	
-		//kv->SetInt( "channel", s_ChannelImage[ gr->GetChannel( playerIndex ) ] + 1 );
+		//kv->SetInt( "channel", s_ChannelImage[ g_FF_PR->GetChannel( playerIndex ) ] + 1 );
 	}
 	else
 	{
