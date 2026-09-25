@@ -44,12 +44,6 @@ protected:
 	CNetworkArray( uint32, m_iAccountID, MAX_PLAYERS_ARRAY_SAFE );
 	CNetworkArray( int, m_bValid, MAX_PLAYERS_ARRAY_SAFE );
 	CNetworkArray( int, m_iUserID, MAX_PLAYERS_ARRAY_SAFE );
-	CNetworkArray( int, m_iFortPoints, MAX_PLAYERS + 1 );
-	CNetworkArray( int, m_iArmor, MAX_PLAYERS + 1 );
-	CNetworkArray( int, m_iClass, MAX_PLAYERS + 1 );	// |-- Mirv: Class info
-
-	CNetworkArray( int, m_iAssists, MAX_PLAYERS + 1 );
-	CNetworkVar( bool, m_bIsIntermission );
 		
 	int	m_nUpdateCounter;
 };

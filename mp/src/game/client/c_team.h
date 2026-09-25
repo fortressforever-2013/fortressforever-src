@@ -35,8 +35,6 @@ public:
 	virtual int		Get_Score( void );
 	virtual int		Get_Deaths( void );
 	virtual int		Get_Ping( void );
-	virtual int		Get_FortPoints(void);
-	virtual float	Get_ScoreTime(void);
 
 	// Player Handling
 	virtual int		Get_Number_Players( void );
@@ -66,7 +64,6 @@ public:
 	char	m_szTeamname[ MAX_TEAM_NAME_LENGTH ];
 	int		m_iScore;
 	// Bug #0000529: Total death column doesn't work
-	float	m_flScoreTime; // Mulch: time this team last scored
 	int		m_iRoundsWon;
 
 	// Data for the scoreboard
@@ -74,7 +71,6 @@ public:
 	int		m_iPing;
 	int		m_iPacketloss;
 	int		m_iTeamNum;
-	int		m_iFortPoints;
 };
 
 

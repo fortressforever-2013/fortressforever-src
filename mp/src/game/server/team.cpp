@@ -40,11 +40,6 @@ int SendProxyArrayLength_PlayerArray( const void *pStruct, int objectID )
 IMPLEMENT_SERVERCLASS_ST_NOBASE(CTeam, DT_Team)
 	SendPropInt( SENDINFO(m_iTeamNum), 5 ),
 	SendPropInt( SENDINFO(m_iScore), 0 ),
-	SendPropInt(SENDINFO(m_iFortPoints), 0),
-	// Bug #0000529: Total death column doesn't work
-	SendPropInt(SENDINFO(m_iDeaths), 0), // Mulch: send deaths to client
-	SendPropFloat(SENDINFO(m_flScoreTime)), // Mulch: time team last scored
-
 	SendPropInt( SENDINFO(m_iRoundsWon), 8 ),
 	SendPropString( SENDINFO( m_szTeamname ) ),
 
@@ -132,9 +127,6 @@ void CTeam::Init( const char *pName, int iNumber )
 	InitializePlayers();
 
 	m_iScore = 0;
-	m_iFortPoints = 0;
-	m_iDeaths = 0;
-	m_flScoreTime = 0.0f;
 
 	Q_strncpy( m_szTeamname.GetForModify(), pName, MAX_TEAM_NAME_LENGTH );
 	m_iTeamNum = iNumber;
@@ -156,13 +148,6 @@ const char *CTeam::GetName( void ) const
 	return m_szTeamname;
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Set the team's name
-//-----------------------------------------------------------------------------
-void CTeam::SetName(const char* pszName)
-{
-	Q_strncpy(m_szTeamname.GetForModify(), pszName, MAX_TEAM_NAME_LENGTH);
-}
 
 //-----------------------------------------------------------------------------
 // Purpose: Update the player's client data
@@ -296,13 +281,11 @@ CBasePlayer *CTeam::GetPlayer( int iIndex ) const
 void CTeam::AddScore( int iScore )
 {
 	m_iScore += iScore;
-	m_flScoreTime = gpGlobals->curtime;
 }
 
 void CTeam::SetScore( int iScore )
 {
 	m_iScore = iScore;
-	m_flScoreTime = gpGlobals->curtime;
 }
 
 //-----------------------------------------------------------------------------
@@ -311,63 +294,6 @@ void CTeam::SetScore( int iScore )
 int CTeam::GetScore( void ) const
 {
 	return m_iScore;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Add / Remove score for this team
-//-----------------------------------------------------------------------------
-void CTeam::AddFortPoints(int iFortPoints)
-{
-	m_iFortPoints += iFortPoints;
-	//m_flScoreTime = gpGlobals->curtime;
-}
-
-void CTeam::SetFortPoints(int iFortPoints)
-{
-	m_iFortPoints = iFortPoints;
-	//m_flScoreTime = gpGlobals->curtime;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Get this team's score
-//-----------------------------------------------------------------------------
-int CTeam::GetFortPoints(void)
-{
-	return m_iFortPoints;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Get the time this team last scored
-//-----------------------------------------------------------------------------
-float CTeam::GetScoreTime(void)
-{
-	return m_flScoreTime;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Add / Remove deaths for this team
-// Bug #0000529: Total death column doesn't work
-//-----------------------------------------------------------------------------
-void CTeam::AddDeaths(int iScore)
-{
-	m_iDeaths += iScore;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Get this team's deaths
-// Bug #0000529: Total death column doesn't work
-//-----------------------------------------------------------------------------
-int CTeam::GetDeaths(void)
-{
-	return m_iDeaths;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Set the team's deaths
-//-----------------------------------------------------------------------------
-void CTeam::SetDeaths(int iDeaths)
-{
-	m_iDeaths = iDeaths;
 }
 
 //-----------------------------------------------------------------------------

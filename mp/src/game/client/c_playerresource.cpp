@@ -6,10 +6,8 @@
 //=============================================================================//
 #include "cbase.h"
 #include "c_playerresource.h"
-#include "c_ff_team.h"
+#include "c_team.h"
 #include "gamestringpool.h"
-
-#include "ff_shareddefs.h"
 
 #ifdef HL2MP
 #include "hl2mp_gamerules.h"
@@ -23,16 +21,14 @@ const float PLAYER_RESOURCE_THINK_INTERVAL = 0.2f;
 IMPLEMENT_CLIENTCLASS_DT_NOBASE(C_PlayerResource, DT_PlayerResource, CPlayerResource)
 	RecvPropArray3( RECVINFO_ARRAY(m_iPing), RecvPropInt( RECVINFO(m_iPing[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iScore), RecvPropInt( RECVINFO(m_iScore[0]))),
-	RecvPropArray3( RECVINFO_ARRAY(m_iFortPoints), RecvPropInt( RECVINFO(m_iFortPoints[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iDeaths), RecvPropInt( RECVINFO(m_iDeaths[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_bConnected), RecvPropInt( RECVINFO(m_bConnected[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iTeam), RecvPropInt( RECVINFO(m_iTeam[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_bAlive), RecvPropInt( RECVINFO(m_bAlive[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iHealth), RecvPropInt( RECVINFO(m_iHealth[0]))),
-	RecvPropArray3( RECVINFO_ARRAY(m_iArmor), RecvPropInt(RECVINFO(m_iArmor[0]))),
-	RecvPropArray3( RECVINFO_ARRAY(m_iClass), RecvPropInt(RECVINFO(m_iClass[0]))), // |-- Mirv: Current class
-	RecvPropArray3( RECVINFO_ARRAY(m_iAssists), RecvPropInt(RECVINFO(m_iAssists[0]))),
-	RecvPropBool( RECVINFO(m_bIsIntermission)),
+	
+	
+	
 END_RECV_TABLE()
 
 BEGIN_PREDICTION_DATA( C_PlayerResource )
@@ -40,15 +36,14 @@ BEGIN_PREDICTION_DATA( C_PlayerResource )
 	DEFINE_PRED_ARRAY( m_szName, FIELD_STRING, MAX_PLAYERS_ARRAY_SAFE, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_iPing, FIELD_INTEGER, MAX_PLAYERS_ARRAY_SAFE, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_iScore, FIELD_INTEGER, MAX_PLAYERS_ARRAY_SAFE, FTYPEDESC_PRIVATE ),
-	DEFINE_PRED_ARRAY( m_iFortPoints, FIELD_INTEGER, MAX_PLAYERS+1, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_iDeaths, FIELD_INTEGER, MAX_PLAYERS_ARRAY_SAFE, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_bConnected, FIELD_BOOLEAN, MAX_PLAYERS_ARRAY_SAFE, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_iTeam, FIELD_INTEGER, MAX_PLAYERS_ARRAY_SAFE, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_bAlive, FIELD_BOOLEAN, MAX_PLAYERS_ARRAY_SAFE, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_iHealth, FIELD_INTEGER, MAX_PLAYERS_ARRAY_SAFE, FTYPEDESC_PRIVATE ),
-	DEFINE_PRED_ARRAY( m_iArmor, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE),
-	DEFINE_PRED_ARRAY( m_iClass, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE),
-	DEFINE_PRED_ARRAY( m_iAssists, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE),
+	
+	
+	
 
 END_PREDICTION_DATA()	
 
@@ -70,11 +65,9 @@ C_PlayerResource::C_PlayerResource()
 	memset( m_iTeam, 0, sizeof( m_iTeam ) );
 	memset( m_bAlive, 0, sizeof( m_bAlive ) );
 	memset( m_iHealth, 0, sizeof( m_iHealth ) );
-	memset( m_iFortPoints, 0, sizeof(m_iFortPoints) );
-	memset( m_iArmor, 0, sizeof(m_iArmor) );
-	memset( m_iClass, 0, sizeof(m_iClass) );	// |-- Mirv: Current class
-	memset( m_iAssists, 0, sizeof(m_iAssists) );
-
+	
+	
+	
 	m_szUnconnectedName = 0;
 	
 	for ( int i=0; i<MAX_TEAMS; i++ )
@@ -212,13 +205,7 @@ int C_PlayerResource::GetTeamScore(int index_ )
 
 int C_PlayerResource::GetFrags(int index_ )
 {
-	//return 666;
-	// BEG: Added by Mulchman
-	if (!IsConnected(index))
-		return 0;
-
-	return m_iScore[index];
-	// END: Added by Mulchman
+	return 666;
 }
 
 bool C_PlayerResource::IsLocalPlayer(int index_ )
@@ -315,60 +302,6 @@ int	C_PlayerResource::GetPlayerScore( int iIndex )
 	return m_iScore[iIndex];
 }
 
-int C_PlayerResource::GetTeamFortPoints(int index)
-{
-	C_Team* team = GetGlobalTeam(index);
-
-	if (!team)
-		return 0;
-
-	return team->Get_FortPoints();
-}
-
-float C_PlayerResource::GetTeamScoreTime(int index)
-{
-	C_Team* pTeam = GetGlobalTeam(index);
-
-	if (!pTeam)
-		return 0.0f;
-
-	return pTeam->Get_ScoreTime();
-}
-
-int C_PlayerResource::GetTeamDeaths(int index)
-{
-	C_Team* team = GetGlobalTeam(index);
-
-	if (!team)
-		return 0;
-
-	return team->Get_Deaths();
-}
-
-// --> Mirv: So menus can show correct limits
-int C_PlayerResource::GetTeamClassLimits(int index, int classindex)
-{
-	C_FFTeam* team = (C_FFTeam*)GetGlobalTeam(index);
-
-	if (!team)
-		return 0;
-
-	return team->Get_Classes(classindex);
-}
-// <-- Mirv: So menus can show correct limits
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-int	C_PlayerResource::GetFortPoints(int iIndex)
-{
-	if (!IsConnected(iIndex))
-		return 0;
-
-	return m_iFortPoints[iIndex];
-}
-
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -390,27 +323,6 @@ int	C_PlayerResource::GetHealth( int iIndex )
 
 	return m_iHealth[iIndex];
 }
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-int	C_PlayerResource::GetArmor(int iIndex)
-{
-	if (!IsConnected(iIndex))
-		return 0;
-
-	return m_iArmor[iIndex];
-}
-
-// --> Mirv: Get the player's class
-int	C_PlayerResource::GetClass(int iIndex)
-{
-	if (!IsConnected(iIndex))
-		return 0;
-
-	return m_iClass[iIndex];
-}
-// <-- Mirv: Get the player's class
 
 const Color &C_PlayerResource::GetTeamColor(int index_ )
 {
@@ -440,10 +352,3 @@ bool C_PlayerResource::IsConnected( int iIndex )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-int	C_PlayerResource::GetAssists(int iIndex)
-{
-	if (!IsConnected(iIndex))
-		return 0;
-
-	return m_iAssists[iIndex];
-}

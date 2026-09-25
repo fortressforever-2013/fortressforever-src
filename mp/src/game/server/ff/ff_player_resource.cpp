@@ -93,6 +93,7 @@ void CFFPlayerResource::Spawn( void )
 	BaseClass::Spawn();
 	for ( int i=0; i < MAX_PLAYERS+1; i++ )
 	{
+		m_iScore.Set( i, 0 );
 		m_iFortPoints.Set(i, 0);
 		m_iClass.Set(i, 0);	// |-- Mirv: Current class
 

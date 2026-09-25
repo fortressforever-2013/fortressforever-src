@@ -28,7 +28,8 @@ class CFFTeam : public CTeam
 public:
 
 	// Initialization
-	virtual void Init( const char *pName, int iNumber );
+	void	Init( const char *pName, int iNumber );
+	void	SetName( const char *pszName );
 
 	// --> Mirv: Team classes available and allies
 	//int m_iAllies;
@@ -38,6 +39,10 @@ public:
 	int m_iClassesMap[12];					// this is just the map limits
 
 	CNetworkVar( int, m_iMaxPlayers );
+	CNetworkVar(int, m_iFortPoints);
+	// Bug #0000529: Total death column doesn't work
+	CNetworkVar(int, m_iDeaths);	// Mulch: send deaths to client
+	CNetworkVar(float, m_flScoreTime); // Mulch: time when this team last scored
 
 	CNetworkString( m_szTeamIcon, 128 );
 
@@ -52,6 +57,18 @@ public:
 	void SetTeamLimits( int );
 	int GetTeamLimits( void );
 
+	float	GetScoreTime(void);
+	void	AddFortPoints(int iFortPoints);
+	void	SetFortPoints(int iFortPoints);
+	int	GetFortPoints(void);
+	// Bug #0000529: Total death column doesn't work
+	void	AddDeaths(int iScore);	// Mulch
+	int	GetDeaths(void);	// Mulch
+	void	SetDeaths(int iDeaths);
+	
+	void AddScore( int iScore );
+	void SetScore( int iScore );
+	
 	void SetAllies( int );
 	void SetEasyAllies( int );
 	void ClearAllies();

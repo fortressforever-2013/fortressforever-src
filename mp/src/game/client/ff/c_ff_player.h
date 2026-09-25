@@ -173,6 +173,8 @@ public:
 	static C_FFPlayer* GetLocalFFPlayerOrObserverTarget();
 	static C_FFPlayer* GetLocalFFPlayerOrAnyObserverTarget();
 
+	Class_T	Classify(void) { return CLASS_PLAYER; }
+
 	virtual void UpdateClientSideAnimation();
 	virtual void PostDataUpdate(DataUpdateType_t updateType);
 	virtual void OnPreDataChanged(DataUpdateType_t updateType);
@@ -327,6 +329,12 @@ public:
 	// --> mulch
 	int GetHealthPercentage(void) const;
 	int GetArmorPercentage(void) const;
+
+	// Added by Mulch for testing
+	int		GetMaxHealth() const { return m_iMaxHealth; }
+	int		GetArmor() const { return m_iArmor; }
+	int		GetMaxArmor() const { return m_iMaxArmor; }
+	// Added by Mulch for testing
 
 	// This is so when we ID a disguised spy we use the same
 	// player name until that spy disguises as something else

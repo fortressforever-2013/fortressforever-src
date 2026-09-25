@@ -687,6 +687,14 @@ RecvPropBool(RECVINFO(m_fRandomPC)),
 RecvPropInt(RECVINFO(m_iSkiState)),
 // ---> end
 
+// Added by Mulchman
+RecvPropInt(RECVINFO(m_iMaxHealth)),
+RecvPropInt(RECVINFO(m_iArmor)),
+RecvPropInt(RECVINFO(m_iMaxArmor)),
+// Added by Mulchman
+
+RecvPropArray3(RECVINFO_ARRAY(m_iAmmo), RecvPropInt(RECVINFO(m_iAmmo[0]))),
+
 RecvPropInt(RECVINFO(m_iLastSpyDisguise)),
 
 // Beg: Added by L0ki - Grenade related

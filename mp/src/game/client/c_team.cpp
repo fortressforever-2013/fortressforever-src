@@ -32,10 +32,6 @@ void RecvProxyArrayLength_PlayerArray( void *pStruct, int objectID, int currentA
 IMPLEMENT_CLIENTCLASS_DT_NOBASE(C_Team, DT_Team, CTeam)
 	RecvPropInt( RECVINFO(m_iTeamNum)),
 	RecvPropInt( RECVINFO(m_iScore)),
-	RecvPropInt(RECVINFO(m_iFortPoints)),
-	// Bug #0000529: Total death column doesn't work
-	RecvPropInt(RECVINFO(m_iDeaths)),	// Mulch: receive team deaths from server
-	RecvPropFloat(RECVINFO(m_flScoreTime)), // Mulch: time this team last scored
 	RecvPropInt( RECVINFO(m_iRoundsWon) ),
 	RecvPropString( RECVINFO(m_szTeamname)),
 	
@@ -56,8 +52,6 @@ BEGIN_PREDICTION_DATA( C_Team )
 	DEFINE_PRED_FIELD( m_iPing, FIELD_INTEGER, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_FIELD( m_iPacketloss, FIELD_INTEGER, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_FIELD( m_iTeamNum, FIELD_INTEGER, FTYPEDESC_PRIVATE ),
-	DEFINE_PRED_FIELD( m_iFortPoints, FIELD_INTEGER, FTYPEDESC_PRIVATE ),
-	DEFINE_PRED_FIELD( m_flScoreTime, FIELD_TIME, FTYPEDESC_PRIVATE ),
 END_PREDICTION_DATA();
 
 // Global list of client side team entities
@@ -78,8 +72,6 @@ C_Team::C_Team()
 	m_iDeaths = 0;
 	m_iPing = 0;
 	m_iPacketloss = 0;
-	m_iFortPoints = 0;
-	m_flScoreTime = 0.0f;
 
 	// Add myself to the global list of team entities
 	g_Teams.AddToTail( this );
@@ -144,22 +136,6 @@ int C_Team::Get_Score( void )
 int C_Team::Get_Deaths( void )
 {
 	return m_iDeaths;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-int C_Team::Get_FortPoints(void)
-{
-	return m_iFortPoints;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-float C_Team::Get_ScoreTime(void)
-{
-	return m_flScoreTime;
 }
 
 //-----------------------------------------------------------------------------

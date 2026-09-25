@@ -29,7 +29,6 @@
 #include <FFSectionedListPanel.h>
 
 #include <game/client/iviewport.h>
-#include <igameresources.h>
 #include "c_ff_playerresource.h"
 
 #include "vgui_avatarimage.h"
@@ -879,14 +878,14 @@ bool CClientScoreBoardDialog::GetPlayerScoreInfo(int playerIndex, KeyValues *kv)
 	bFriendly = FFGameRules()->IsTeam1AlliedToTeam2( iLocalPlayerTeam, iPlayerTeam );
 
 	kv->SetInt( "deaths", gr->GetDeaths( playerIndex ) );
-	kv->SetInt( "fortpoints", gr->GetFortPoints( playerIndex ) );
-	kv->SetInt( "score", gr->GetFrags( playerIndex ) );
+	kv->SetInt( "fortpoints", g_FF_PR->GetFortPoints( playerIndex ) );
+	kv->SetInt( "score", g_FF_PR->GetFrags( playerIndex ) );
 	kv->SetInt( "ping", gr->GetPing( playerIndex ) ) ;
 	kv->SetString( "name", gr->GetPlayerName( playerIndex ) );
-	kv->SetInt( "assists", gr->GetAssists( playerIndex ) );
+	kv->SetInt( "assists", g_FF_PR->GetAssists( playerIndex ) );
 
 	if( bFriendly )
-		kv->SetString( "class", szClassName[ gr->GetClass( playerIndex ) ] ); 	// |-- Mirv: Current class
+		kv->SetString( "class", szClassName[ g_FF_PR->GetClass( playerIndex ) ] ); 	// |-- Mirv: Current class
 	else
 		kv->SetString( "class", "" );
 

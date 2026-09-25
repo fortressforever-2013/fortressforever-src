@@ -15,6 +15,10 @@
 // Datatable
 IMPLEMENT_SERVERCLASS_ST(CFFTeam, DT_FFTeam)
 	// --> Mirv: Some limits that the client needs to know about for the menu
+	SendPropInt(SENDINFO(m_iFortPoints), 0),
+	// Bug #0000529: Total death column doesn't work
+	SendPropInt(SENDINFO(m_iDeaths), 0), // Mulch: send deaths to client
+	SendPropFloat(SENDINFO(m_flScoreTime)), // Mulch: time team last scored
 	SendPropInt( SENDINFO( m_iAllies ) ), //AfterShock: this has a flag for each team
 	SendPropInt( SENDINFO( m_iMaxPlayers ) ),
 	SendPropBool( SENDINFO( m_bFFA ) ),
@@ -51,6 +55,9 @@ void CFFTeam::Init( const char *pName, int iNumber )
 	BaseClass::Init( pName, iNumber );
 
 	// --> Mirv: Some default settings
+	m_iFortPoints = 0;
+	m_iDeaths = 0;
+	m_flScoreTime = 0.0f;
 	memset( &m_iClasses, -1, sizeof( m_iClasses ) );	// Jiggles: All classes start as "disallowed" so players can't pick
 														//			a disallowed class in the time it takes to update the client menu
 	memset( m_szTeamIcon.GetForModify(), 0, sizeof( m_szTeamIcon ) );
@@ -68,6 +75,84 @@ void CFFTeam::Init( const char *pName, int iNumber )
 	// Only detect changes every half-second.
 	NetworkProp()->SetUpdateInterval( 0.75f );
 }
+
+//-----------------------------------------------------------------------------
+// Purpose: Set the team's name
+//-----------------------------------------------------------------------------
+void CFFTeam::SetName( const char *pszName )
+{
+	Q_strncpy(m_szTeamname.GetForModify(), pszName, MAX_TEAM_NAME_LENGTH);
+}
+
+void CFFTeam::AddScore( int iScore )
+{
+	BaseClass::AddScore( iScore );
+	m_flScoreTime = gpGlobals->curtime;
+}
+
+void CFFTeam::SetScore( int iScore )
+{
+	BaseClass::SetScore( iScore );
+	m_flScoreTime = gpGlobals->curtime;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Add / Remove score for this team
+//-----------------------------------------------------------------------------
+void CFFTeam::AddFortPoints(int iFortPoints)
+{
+	m_iFortPoints += iFortPoints;
+	//m_flScoreTime = gpGlobals->curtime;
+}
+
+void CFFTeam::SetFortPoints(int iFortPoints)
+{
+	m_iFortPoints = iFortPoints;
+	//m_flScoreTime = gpGlobals->curtime;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Get this team's score
+//-----------------------------------------------------------------------------
+int CFFTeam::GetFortPoints(void)
+{
+	return m_iFortPoints;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Get the time this team last scored
+//-----------------------------------------------------------------------------
+float CFFTeam::GetScoreTime(void)
+{
+	return m_flScoreTime;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Add / Remove deaths for this team
+// Bug #0000529: Total death column doesn't work
+//-----------------------------------------------------------------------------
+void CFFTeam::AddDeaths(int iScore)
+{
+	m_iDeaths += iScore;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Get this team's deaths
+// Bug #0000529: Total death column doesn't work
+//-----------------------------------------------------------------------------
+int CFFTeam::GetDeaths(void)
+{
+	return m_iDeaths;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Set the team's deaths
+//-----------------------------------------------------------------------------
+void CFFTeam::SetDeaths(int iDeaths)
+{
+	m_iDeaths = iDeaths;
+}
+
 
 // --> Mirv: Some allies and avail classes functions
 void CFFTeam::SetAllies( int allies )

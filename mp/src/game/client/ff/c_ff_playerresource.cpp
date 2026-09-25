@@ -18,7 +18,7 @@
 C_FF_PlayerResource *g_FF_PR;
 
 IMPLEMENT_CLIENTCLASS_DT( C_FF_PlayerResource, DT_FFPlayerResource, CFFPlayerResource )
-	RecvPropArray3(RECVINFO_ARRAY(m_iScore), RecvPropInt(RECVINFO(m_iScore[0]))),
+	RecvPropArray3( RECVINFO_ARRAY(m_iScore), RecvPropInt(RECVINFO(m_iScore[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iFortPoints), RecvPropInt( RECVINFO(m_iFortPoints[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iArmor), RecvPropInt(RECVINFO(m_iArmor[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iClass), RecvPropInt(RECVINFO(m_iClass[0]))), // |-- Mirv: Current class
@@ -27,6 +27,13 @@ IMPLEMENT_CLIENTCLASS_DT( C_FF_PlayerResource, DT_FFPlayerResource, CFFPlayerRes
 	RecvPropBool( RECVINFO(m_bIsIntermission)),
 END_RECV_TABLE()
 
+BEGIN_PREDICTION_DATA( C_FF_PlayerResource )
+	DEFINE_PRED_ARRAY( m_iFortPoints, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE ),
+	DEFINE_PRED_ARRAY( m_iArmor, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE),
+	DEFINE_PRED_ARRAY( m_iAssists, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE),
+	DEFINE_PRED_ARRAY( m_iClass, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE ),
+END_PREDICTION_DATA()
+
 extern ConVar hud_newteamcolors;
 
 //-----------------------------------------------------------------------------
@@ -34,6 +41,7 @@ extern ConVar hud_newteamcolors;
 //-----------------------------------------------------------------------------
 C_FF_PlayerResource::C_FF_PlayerResource()
 {
+	memset( m_szName, 0, sizeof(m_szName) );
 	memset( m_iFortPoints, 0, sizeof(m_iFortPoints) );
 	memset( m_iArmor, 0, sizeof(m_iArmor) );
 	memset( m_iClass, 0, sizeof(m_iClass) );	// |-- Mirv: Current class
@@ -111,7 +119,7 @@ int C_FF_PlayerResource::GetTeamLimits(int index)
 	return team->Get_Teams();
 }
 // <-- Mirv: So menus can show correct limits
-/*
+
 int C_FF_PlayerResource::GetFrags(int index )
 {
 	//return 666;
@@ -122,7 +130,7 @@ int C_FF_PlayerResource::GetFrags(int index )
 	return m_iScore[index];
 	// END: Added by Mulchman
 }
-*/
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
