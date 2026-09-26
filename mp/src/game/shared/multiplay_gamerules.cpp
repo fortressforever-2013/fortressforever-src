@@ -376,7 +376,7 @@ bool CMultiplayRules::Init()
 // HPE_BEGIN:
 // [menglish] CS doesn't have the suitcharger either
 //=============================================================================
-#if !defined( CSTRIKE_DLL ) || !defined( FF_DLL )
+#if !defined( CSTRIKE_DLL ) || !defined( FF )
 ConVarRef suitcharger( "sk_suitcharger" );
 		suitcharger.SetValue( 30 );
  #endif

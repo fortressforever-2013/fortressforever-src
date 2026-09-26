@@ -83,16 +83,11 @@ void cc_cl_interp_all_changed( IConVar *pConVar, const char *pOldString, float f
 
 static ConVar  cl_extrapolate( "cl_extrapolate", "1", FCVAR_CHEAT, "Enable/disable extrapolation if interpolation history runs out." );
 
-// can't add FCVAR_CHEAT flag to this because
-// it's defined in engine without the FCVAR_CHEAT
-// flag
-static ConVar cl_interpolate("cl_interpolate", "1.0f", FCVAR_USERINFO | FCVAR_DEVELOPMENTONLY);
-
 //static ConVar  cl_interp	 ( "cl_interp", "0.1", FCVAR_USERINFO | FCVAR_DEMO, "Interpolate object positions starting this many seconds in past", true, 0.01, true, 1.0, cc_cl_interp_changed );  
 
 static ConVar  cl_interp_npcs( "cl_interp_npcs", "0.0", FCVAR_USERINFO, "Interpolate NPC positions starting this many seconds in past (or cl_interp, if greater)" );  
 static ConVar  cl_interp_all( "cl_interp_all", "0", 0, "Disable interpolation list optimizations.", 0, 0, 0, 0, cc_cl_interp_all_changed );
-ConVar  r_drawmodeldecals( "r_drawmodeldecals", "1" );
+ConVar  r_drawmodeldecals( "r_drawmodeldecals", "1", FCVAR_ALLOWED_IN_COMPETITIVE );
 extern ConVar	cl_showerror;
 int C_BaseEntity::m_nPredictionRandomSeed = -1;
 C_BasePlayer *C_BaseEntity::m_pPredictionPlayer = NULL;
@@ -469,6 +464,7 @@ BEGIN_RECV_TABLE_NOBASE(C_BaseEntity, DT_BaseEntity)
 	RecvPropInt(RECVINFO(m_clrRender)),
 	RecvPropInt(RECVINFO(m_iTeamNum)),
 	RecvPropInt(RECVINFO(m_CollisionGroup)),
+	RecvPropFloat(RECVINFO(m_flGravity)),
 	RecvPropFloat(RECVINFO(m_flElasticity)),
 	RecvPropFloat(RECVINFO(m_flShadowCastDistance)),
 	RecvPropEHandle( RECVINFO(m_hOwnerEntity) ),
@@ -552,7 +548,7 @@ BEGIN_PREDICTION_DATA_NO_BASE( C_BaseEntity )
 //	DEFINE_FIELD( m_flLastMessageTime, FIELD_FLOAT ),
 	DEFINE_FIELD( m_vecBaseVelocity, FIELD_VECTOR ),
 	DEFINE_FIELD( m_iEFlags, FIELD_INTEGER ),
-	DEFINE_FIELD( m_flGravity, FIELD_FLOAT ),
+	DEFINE_PRED_FIELD( m_flGravity, FIELD_FLOAT, FTYPEDESC_INSENDTABLE | FTYPEDESC_NOERRORCHECK ),
 //	DEFINE_FIELD( m_ModelInstance, FIELD_SHORT ),
 	DEFINE_FIELD( m_flProxyRandomValue, FIELD_FLOAT ),
 
@@ -1102,6 +1098,7 @@ bool C_BaseEntity::Init( int entnum, int iSerialNum )
 	Assert( entnum >= 0 && entnum < NUM_ENT_ENTRIES );
 
 	index = entnum;
+
 
 	cl_entitylist->AddNetworkableEntity( GetIClientUnknown(), entnum, iSerialNum );
 
@@ -1742,7 +1739,6 @@ const QAngle& C_BaseEntity::GetAbsAngles( void ) const
 	if (!s_bAbsQueriesValid && sDebugAbsQueriesValid.GetBool())
 		Warning("!s_bAbsQueriesValid: %s\n", const_cast<C_BaseEntity*>(this)->GetClassname());
 	//Assert( s_bAbsQueriesValid );
-
 	const_cast<C_BaseEntity*>(this)->CalcAbsolutePosition();
 	return m_angAbsRotation;
 }
@@ -2647,6 +2643,7 @@ void C_BaseEntity::PostDataUpdate( DataUpdateType_t updateType )
 	{
 		UpdateVisibility();
 	}
+
 }
 
 //-----------------------------------------------------------------------------
@@ -3204,6 +3201,9 @@ void C_BaseEntity::Simulate()
 {
 	AddEntity();	// Legacy support. Once-per-frame stuff should go in Simulate().
 }
+
+// Defined in engine
+static ConVar cl_interpolate( "cl_interpolate", "1.0f", FCVAR_USERINFO | FCVAR_DEVELOPMENTONLY );
 
 // (static function)
 void C_BaseEntity::InterpolateServerEntities()
@@ -3882,7 +3882,7 @@ void C_BaseEntity::operator delete( void *pMem )
 //========================================================================================
 // TEAM HANDLING
 //========================================================================================
-C_Team *C_BaseEntity::GetTeam( void )
+C_Team *C_BaseEntity::GetTeam( void ) const
 {
 	return GetGlobalTeam( m_iTeamNum );
 }
@@ -3907,7 +3907,7 @@ int	C_BaseEntity::GetRenderTeamNumber( void )
 //-----------------------------------------------------------------------------
 // Purpose: Returns true if these entities are both in at least one team together
 //-----------------------------------------------------------------------------
-bool C_BaseEntity::InSameTeam( C_BaseEntity *pEntity )
+bool C_BaseEntity::InSameTeam( const C_BaseEntity *pEntity ) const
 {
 	if ( !pEntity )
 		return false;
@@ -6366,13 +6366,13 @@ bool C_BaseEntity::ValidateEntityAttachedToPlayer( bool &bShouldRetry )
 		return true;
 
 	// Some wearables parent to the view model
-	C_BasePlayer *pPlayer = ToBasePlayer( pParent );
-	if ( pPlayer && pPlayer->GetViewModel() == this )
+	C_TFPlayer *pPlayer = ToTFPlayer( pParent );
+	if ( pPlayer )
 	{
-		
-			
+		if ( pPlayer->GetViewModel() == this )
+			return true;
 
-		
+		if ( pPlayer->HasItem() && ( pPlayer->GetItem()->GetItemID() == TF_ITEM_CAPTURE_FLAG ) && ( pPlayer->GetItem() == this ) )
 			return true;
 	}
 

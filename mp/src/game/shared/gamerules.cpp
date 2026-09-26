@@ -671,6 +671,7 @@ CGameRules::~CGameRules()
 	g_pGameRules = NULL;
 }
 
+
 bool CGameRules::SwitchToNextBestWeapon( CBaseCombatCharacter *pPlayer, CBaseCombatWeapon *pCurrentWeapon )
 {
 	return false;

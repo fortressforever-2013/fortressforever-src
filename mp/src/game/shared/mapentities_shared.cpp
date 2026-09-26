@@ -176,6 +176,7 @@ skipwhite:
 	{
 		newToken[len] = c;
 		len++;
+
 		newToken[len] = 0;
 		return data+1;
 	}
@@ -195,6 +196,7 @@ skipwhite:
 			len--;
 			newToken[len] = 0;
 		}
+
 
 	} while (c>32);
 	

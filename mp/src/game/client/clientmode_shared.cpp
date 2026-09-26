@@ -263,6 +263,7 @@ static void __MsgFunc_VGUIMenu( bf_read &msg )
 		{
 			gHUD.SetScreenShotTime( gpGlobals->curtime + 1.0 ); // take a screenshot in 1 second
 		}
+
 	}
 
 	// is the server trying to show an MOTD panel? Check that it's allowed right now.

@@ -1070,8 +1070,8 @@ void CBasePlayerAnimState::DebugShowAnimState( int iStartLine )
 			m_angRender[YAW], g_flLastBodyYaw, g_flLastBodyPitch, m_vLastMovePose.x, m_vLastMovePose.y );
 	}
 
-	
-	
+	if ( debugoverlay)
+	{
 		// Draw a red triangle on the ground for the eye yaw.
 		float flBaseSize = 10;
 		float flHeight = 80;
@@ -1086,7 +1086,7 @@ void CBasePlayerAnimState::DebugShowAnimState( int iStartLine )
 		angles[YAW] = m_angRender[YAW];
 		AngleVectors( angles, &vForward, &vRight, &vUp );
 		debugoverlay->AddTriangleOverlay( vBasePos+vRight*flBaseSize/2, vBasePos-vRight*flBaseSize/2, vBasePos+vForward*flHeight, 0, 0, 255, 255, false, 0.01 );
-	
+	}
 }
 
 // -----------------------------------------------------------------------------

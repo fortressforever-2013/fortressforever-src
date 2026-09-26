@@ -822,7 +822,7 @@ void CMP3Player::RemoveTempSounds()
 	FileFindHandle_t fh;
 
 	char path[ 512 ];
-	Q_strncpy( path, "sound/_mp3/*.mp3", sizeof( path ) ); // */
+	Q_strncpy( path, "sound/_mp3/*.mp3", sizeof( path ) );
 
 	char const *fn = g_pFullFileSystem->FindFirstEx( path, "MOD", &fh );
 	if ( fn )

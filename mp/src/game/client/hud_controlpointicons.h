@@ -130,7 +130,7 @@ public:
 		if (GetImage())
 		{
 			surface()->DrawSetColor(255, 255, 255, 255);
-			int iYPos = RemapValClamped( flElapsedTime, 0, STARTCAPANIM_SWOOP_LENGTH, 0, GetTall() );
+			int iYPos =  RemapValClamped( flElapsedTime, 0, STARTCAPANIM_SWOOP_LENGTH, 0, GetTall() );
 			GetImage()->SetPos( 0, iYPos );
 			GetImage()->Paint();
 		}

@@ -1648,7 +1648,7 @@ void CBaseEntity::FireBullets( const FireBulletsInfo_t &info )
 	int			nAmmoFlags	= pAmmoDef->Flags(info.m_iAmmoType);
 #ifdef FF
 	float		flDmg = (info.m_iShots ? info.m_flDamage / info.m_iShots : info.m_flDamage);	// |-- Mirv: Split damage up into shots
-#endif	
+#endif
 	bool bDoServerEffects = true;
 
 #if defined( HL2MP ) && defined( GAME_DLL )

@@ -1392,7 +1392,6 @@ void CBaseEntity::StopSound( int iEntIndex, int iChannel, const char *pSample )
 	g_SoundEmitterSystem.StopSound( iEntIndex, iChannel, pSample );
 }
 
-
 // Jon: so we can stop sounds in a specific channel that's different from what the script defines
 void CBaseEntity::StopSoundInChannel(const char* soundname, HSOUNDSCRIPTHANDLE& handle, const int channel)
 {
@@ -1518,6 +1517,7 @@ HSOUNDSCRIPTHANDLE CBaseEntity::PrecacheScriptSound( const char *soundname )
 	return soundemitterbase->GetSoundIndex( soundname );
 #endif
 }
+
 
 void CBaseEntity::PrefetchScriptSound( const char *soundname )
 {
