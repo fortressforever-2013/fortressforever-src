@@ -6,6 +6,8 @@
 // $NoKeywords: $
 //=============================================================================//
 
+//#ifdef PLATFORM_64BITS
+
 #define cpuid(in,a,b,c,d)												\
 	asm("pushl %%ebx\n\t" "cpuid\n\t" "movl %%ebx,%%esi\n\t" "pop %%ebx": "=a" (a), "=S" (b), "=c" (c), "=d" (d) : "a" (in));
 
@@ -46,4 +48,4 @@ bool Check3DNowTechnology(void)
     return false;
 }
 
-#endif
+//#endif
