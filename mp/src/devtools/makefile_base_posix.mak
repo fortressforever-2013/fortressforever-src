@@ -35,7 +35,7 @@ ifeq ($(CFG), release)
 	#  There also was no speed difference running at 1280x1024. May 2012, mikesart.
 	#  tonyp: The size increase was likely caused by -finline-functions and -fipa-cp-clone getting switched on with -O3.
 	# -fno-omit-frame-pointer: need this for stack traces with perf.
-	OptimizerLevel_CompilerSpecific = -O2 -fno-strict-aliasing -ffast-math -fno-omit-frame-pointer -ftree-vectorize
+	OptimizerLevel_CompilerSpecific = -O2 -fno-strict-aliasing -fno-omit-frame-pointer -ftree-vectorize
 	ifeq ($(CLANG_BUILD),1)
 		# These aren't supported wit Clang 3.5. Need to remove when we update that.
 		OptimizerLevel_CompilerSpecific += -fpredictive-commoning -funswitch-loops
@@ -62,7 +62,7 @@ ifeq ($(CLANG_BUILD),1)
 	CXXFLAGS = $(BASE_CFLAGS) -std=gnu++17 -Wno-c++11-narrowing -Wno-dangling-else $(ENV_CXXFLAGS)
 else
         # !!! ABI COMPAT: -fabi-compat-version=2 is needed to generate the proper symbols for linking
-	CXXFLAGS = $(BASE_CFLAGS) -std=gnu++17 -fpermissive -fabi-compat-version=2 $(ENV_CXXFLAGS)
+	CXXFLAGS = $(BASE_CFLAGS) -std=gnu++17 -fabi-compat-version=2 $(ENV_CXXFLAGS)
         # Diagnostics coloring
 	CXXFLAGS += -fdiagnostics-color=always
 endif
