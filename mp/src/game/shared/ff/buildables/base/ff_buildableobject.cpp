@@ -1167,8 +1167,14 @@ int CFFBuildableObject::OnTakeDamage( const CTakeDamageInfo &info )
 
 	// Sentry gun seems to take about 110% of damage, going to assume its the same
 	// for all others for now -mirv
+	// hlieb: thats stupid, make buildables take normal damage without making any hidden properties, changing from 1.1 to 1.0
 	CTakeDamageInfo adjustedDamage = info;
-	adjustedDamage.SetDamage( adjustedDamage.GetDamage() * 1.1f );
+	adjustedDamage.SetDamage( adjustedDamage.GetDamage() * 1.0f );
+
+	// Sniper Rifle nerf
+	CFFWeaponBase *pInflictorWeapon = dynamic_cast<CFFWeaponBase*>(adjustedDamage.GetInflictor());
+	if (pInflictorWeapon && pInflictorWeapon->GetWeaponID() == FF_WEAPON_SNIPERRIFLE)
+	adjustedDamage.SetDamage(adjustedDamage.GetDamage() * 0.5f);
 
 	// Sorry trepids, not putting this one check in LUA
 	// Bug #0000333: Buildable Behavior (non build slot) while building
