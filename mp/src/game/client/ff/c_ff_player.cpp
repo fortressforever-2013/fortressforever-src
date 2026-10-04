@@ -141,6 +141,8 @@ ConVar cl_rampslidefx_spark_length("cl_rampslidefx_spark_length", "1", FCVAR_ARC
 ConVar cl_rampslidefx_dust_size("cl_rampslidefx_dust_size", "4", FCVAR_ARCHIVE, "The number of dust particles spawned");
 ConVar cl_rampslidefx_debug("cl_rampslidefx_alwayson", "0", FCVAR_CLIENTDLL | FCVAR_CHEAT, "If 1, spawns ramspliding particles regardless of whether or not player are actually rampsliding");
 
+ConVar cl_autodisguise("cl_autodisguise", "0", FCVAR_USERINFO | FCVAR_ARCHIVE, "Automatic disguise as a random class");
+
 ConVar r_selfshadows("r_selfshadows", "0", FCVAR_CLIENTDLL, "Toggles player & player carried objects' shadows", true, 0, true, 1);
 static ConVar cl_classautokill("cl_classautokill", "0", FCVAR_USERINFO | FCVAR_ARCHIVE, "Change class instantly");
 
@@ -167,6 +169,9 @@ extern void HudContextForceClose();
 // this needs to match the value from ff_player.cpp!!
 #define GREN_THROW_DELAY 0.5f
 #define GREN_TIMER 3.81f
+
+#define CLOAK_GUARANTEED_SECOND 1.5f
+#define CLOAK_GUARANTEED_BEYOND 768.0f
 
 // #0000331: impulse 81 not working (weapon_cubemap)
 #include "../c_weapon__stubs.h"
@@ -1163,6 +1168,10 @@ C_FFPlayer::C_FFPlayer() :
 
 	m_iSpawnInterpCounter = 0;
 
+	m_bWasCloaked = false;
+
+	m_flCloakSecond = -1.0f;
+
 	// BEG: Added by Mulchman
 	m_iSpyDisguise = 0; // start w/ no disguise
 	m_iLastSpyDisguise = 0; // start w/ no disguise
@@ -2028,6 +2037,20 @@ void C_FFPlayer::DrawPlayerIcons()
 	}
 }
 
+bool C_FFPlayer::GuaranteedCloaked() const
+{
+	if (!IsCloaked())
+		return false;
+
+	if (gpGlobals->curtime < m_flCloakSecond + CLOAK_GUARANTEED_SECOND)
+		return true;
+
+	if ((GetAbsOrigin() - MainViewOrigin()).LengthSqr() > CLOAK_GUARANTEED_BEYOND * CLOAK_GUARANTEED_BEYOND)
+		return true;
+
+		return GetLocalVelocity().Length() < 1.0f;
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -2053,7 +2076,10 @@ int C_FFPlayer::DrawModel(int flags)
 	else
 	{
 		// don't draw if cloaked and basically not moving
-		if (GetLocalVelocity().Length() < 1.0f)
+		//if (GetLocalVelocity().Length() < 1.0f)
+		//	return 1;
+
+		if (GuaranteedCloaked())
 			return 1;
 
 		FindOverrideMaterial(FF_CLOAK_MATERIAL, FF_CLOAK_TEXTURE_GROUP);
@@ -2362,6 +2388,10 @@ void C_FFPlayer::OnDataChanged(DataUpdateType_t type)
 		m_pImmunityEmitter2 = NULL;
 		m_pJetpackEmitter = NULL;
 	}
+
+	if (IsCloaked() && !m_bWasCloaked && type != DATA_UPDATE_CREATED)
+		m_flCloakSecond = gpGlobals->curtime;
+		m_bWasCloaked = IsCloaked();
 
 	if (IsLocalPlayer())
 	{
