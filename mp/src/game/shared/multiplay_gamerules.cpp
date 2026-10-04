@@ -371,21 +371,20 @@ bool CMultiplayRules::Init()
 		BaseClass::RefreshSkillData( forceUpdate );
 
 	// override some values for multiplay.
-#ifndef FF_DLL
+
 		// suitcharger
 #ifndef TF_DLL
 //=============================================================================
 // HPE_BEGIN:
 // [menglish] CS doesn't have the suitcharger either
 //=============================================================================
-#ifndef CSTRIKE_DLL
+#if !defined( CSTRIKE_DLL ) || !defined( FF )
 ConVarRef suitcharger( "sk_suitcharger" );
 		suitcharger.SetValue( 30 );
  #endif
 //=============================================================================
 // HPE_END
 //=============================================================================
-#endif
 #endif
 	}
 

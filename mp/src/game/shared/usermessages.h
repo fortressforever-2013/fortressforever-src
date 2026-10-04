@@ -62,4 +62,5 @@ private:
 
 extern CUserMessages *usermessages;
 
+
 #endif // USERMESSAGES_H

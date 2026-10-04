@@ -685,6 +685,7 @@ CBasePlayer::~CBasePlayer( )
 //-----------------------------------------------------------------------------
 void CBasePlayer::UpdateOnRemove( void )
 {
+
 	VPhysicsDestroyObject();
 
 	// Remove him from his current team

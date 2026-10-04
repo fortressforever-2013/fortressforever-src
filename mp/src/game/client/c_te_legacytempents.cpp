@@ -67,7 +67,7 @@ CLIENTEFFECT_REGISTER_END()
 #endif
 
 //Whether or not to eject brass from weapons
-ConVar cl_ejectbrass("cl_ejectbrass", "1", FCVAR_ARCHIVE);
+ConVar cl_ejectbrass( "cl_ejectbrass", "1", FCVAR_ARCHIVE );
 
 ConVar cl_disablemuzzleflashes("cl_disablemuzzleflashes", "0", FCVAR_ARCHIVE);
 
@@ -2547,12 +2547,12 @@ void CTempEnts::LevelInit()
 #endif
 
 #if defined( CSTRIKE_DLL )
-	m_pCS_9MMShell		= (model_t *)engine->LoadModel( "models/shells/shell_9mm.mdl" );
-	m_pCS_57Shell		= (model_t *)engine->LoadModel( "models/shells/shell_57.mdl" );
-	m_pCS_12GaugeShell	= (model_t *)engine->LoadModel( "models/shells/shell_12gauge.mdl" );
-	m_pCS_556Shell		= (model_t *)engine->LoadModel( "models/shells/shell_556.mdl" );
-	m_pCS_762NATOShell	= (model_t *)engine->LoadModel( "models/shells/shell_762nato.mdl" );
-	m_pCS_338MAGShell	= (model_t *)engine->LoadModel( "models/shells/shell_338mag.mdl" );
+	m_pCS_9MMShell		= (model_t *)engine->LoadModel( "models/Shells/shell_9mm.mdl" );
+	m_pCS_57Shell		= (model_t *)engine->LoadModel( "models/Shells/shell_57.mdl" );
+	m_pCS_12GaugeShell	= (model_t *)engine->LoadModel( "models/Shells/shell_12gauge.mdl" );
+	m_pCS_556Shell		= (model_t *)engine->LoadModel( "models/Shells/shell_556.mdl" );
+	m_pCS_762NATOShell	= (model_t *)engine->LoadModel( "models/Shells/shell_762nato.mdl" );
+	m_pCS_338MAGShell	= (model_t *)engine->LoadModel( "models/Shells/shell_338mag.mdl" );
 #endif
 	// --> Mirv: Load FF models
 #if defined (FF_CLIENT_DLL)
@@ -3035,14 +3035,14 @@ void CTempEnts::MuzzleFlash_Shotgun_Player( ClientEntityHandle_t hEntity, int at
 	SimpleParticle *pParticle;
 	Vector forward(1, 0, 0), offset; //NOTENOTE: All coords are in local space
 
-	float flScale = random->RandomFloat(1.45f, 1.7f);
+	float flScale = random->RandomFloat( 1.45f, 1.7f );
 
 	pSimple->SetDrawBeforeViewModel(true);
 
 	// Flash
 	for ( int i = 1; i < 6; i++ )
 	{
-		offset = (forward * (i * 8.0f * flScale));
+		offset = (forward * (i*8.0f*flScale));
 
 		pParticle = (SimpleParticle *) pSimple->AddParticle( sizeof( SimpleParticle ), m_Material_MuzzleFlash_Player[random->RandomInt(0,3)], offset );
 			
@@ -3087,7 +3087,6 @@ void CTempEnts::MuzzleFlash_Shotgun_NPC( ClientEntityHandle_t hEntity, int attac
 	QAngle	angles;
 
 	Vector	forward;
-	int		i;
 
 	// Setup the origin.
 	Vector	origin;
@@ -3154,7 +3153,7 @@ void CTempEnts::MuzzleFlash_Shotgun_NPC( ClientEntityHandle_t hEntity, int attac
 
 	int	numEmbers = random->RandomInt( 4, 8 );
 
-	for ( i = 0; i < numEmbers; i++ )
+	for ( int i = 0; i < numEmbers; i++ )
 	{
 		pTrailParticle = (TrailParticle *) pTrails->AddParticle( sizeof( TrailParticle ), g_Mat_SMG_Muzzleflash[0], origin );
 			
@@ -3478,7 +3477,7 @@ void CTempEnts::CSEjectBrass( const Vector &vecPosition, const QAngle &angVeloci
 	const model_t *pModel = NULL;
 	int hitsound = TE_BOUNCE_SHELL;
 
-#if defined ( CSTRIKE_DLL )
+#if defined ( CSTRIKE_DLL ) || defined ( SDK_DLL )
 
 	switch( shellType )
 	{
@@ -3531,7 +3530,6 @@ void CTempEnts::CSEjectBrass( const Vector &vecPosition, const QAngle &angVeloci
 		pModel = m_pFF_40MMShell;
 		break;
 	}
-
 #endif
 
 	if ( pModel == NULL )

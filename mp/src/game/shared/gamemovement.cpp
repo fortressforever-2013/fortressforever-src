@@ -4739,6 +4739,7 @@ void CGameMovement::Duck( void )
 	}
 }
 
+
 #ifdef FF
 //-----------------------------------------------------------------------------
 // Purpose: Movement while building in Fortress Forever

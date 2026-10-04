@@ -344,10 +344,10 @@ void C_BaseExplosionEffect::CreateCore( void )
 					pParticle->m_vecVelocity *= m_flScale;
 				// <-- Mirv
 				#if __EXPLOSION_DEBUG
-				
-				
+				if ( debugoverlay )
+				{
 					debugoverlay->AddLineOverlay( m_vecOrigin, m_vecOrigin + pParticle->m_vecVelocity, 255, 0, 0, false, 3 );
-				
+				}
 				#endif
 
 				int nColor = random->RandomInt( luminosity*0.5f, luminosity );
@@ -409,10 +409,10 @@ void C_BaseExplosionEffect::CreateCore( void )
 					pParticle->m_vecVelocity *= m_flScale;
 				// <-- Mirv
 				#if __EXPLOSION_DEBUG
-				
-				
+				if ( debugoverlay )
+				{
 					debugoverlay->AddLineOverlay( m_vecOrigin, m_vecOrigin + pParticle->m_vecVelocity, 255, 0, 0, false, 3 );
-				
+				}
 				#endif
 
 				int nColor = random->RandomInt( luminosity*0.5f, luminosity );

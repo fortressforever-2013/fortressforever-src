@@ -92,7 +92,7 @@ bool GetHWMExpressionFileName( const char *pFilename, char *pHWMFilename )
 
 	// Find the hardware morph scene name and pass that along as well.
 	char szExpression[MAX_PATH];
-	V_strcpy( szExpression, pFilename );
+	V_strcpy_safe( szExpression, pFilename );
 
 	char szExpressionHWM[MAX_PATH];
 	szExpressionHWM[0] = '\0';
@@ -431,13 +431,13 @@ void *CFlexSceneFileManager::FindSceneFile( IHasLocalToGlobalFlexSettings *insta
 {
 	char szFilename[MAX_PATH];
 	Assert( V_strlen( filename ) < MAX_PATH );
-	V_strcpy( szFilename, filename );
+	V_strcpy_safe( szFilename, filename );
 	
 #if defined( TF_CLIENT_DLL )	
 	char szHWMFilename[MAX_PATH];
 	if ( GetHWMExpressionFileName( szFilename, szHWMFilename ) )
 	{
-		V_strcpy( szFilename, szHWMFilename );
+		V_strcpy_safe( szFilename, szHWMFilename );
 	}
 #endif
 

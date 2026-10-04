@@ -362,6 +362,7 @@ void CParticleProperty::StopParticlesInvolving( CBaseEntity *pEntity )
 //-----------------------------------------------------------------------------
 void CParticleProperty::StopParticlesNamed( const char *pszEffectName, bool bForceRemoveInstantly /* =false */,  bool bInverse /*= false*/ )
 {
+
 	CParticleSystemDefinition *pDef = g_pParticleSystemMgr->FindParticleSystem( pszEffectName );
 	AssertMsg1(pDef, "Could not find particle definition %s", pszEffectName );
 	if (!pDef)

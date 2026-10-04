@@ -1367,3 +1367,4 @@ bool UTIL_HasLoadedAnyMap()
 
 	return g_pFullFileSystem->FileExists( szFilename, "MOD" );
 }
+
