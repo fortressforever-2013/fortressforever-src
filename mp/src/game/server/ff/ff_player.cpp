@@ -7756,20 +7756,29 @@ void CFFPlayer::SpySabotageThink()
 	m_flNextSpySabotageThink = gpGlobals->curtime + 0.2f;
 
 	// We have to be under a particular speed to sabotage
-	if (GetAbsVelocity().LengthSqr() > 100 * 100)
+	if (GetAbsVelocity().LengthSqr() > 200 * 200)
 	{
 		SpyStopSabotaging();
 		return;
 	}
 
 	// Traceline to see what we are looking at
-	Vector vecForward;
+	/*Vector vecForward;
 	AngleVectors(EyeAngles(), &vecForward);
 
 	trace_t tr;
 	UTIL_TraceLine(EyePosition(), EyePosition() + vecForward * 100.0f, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr);
 
-	CFFBuildableObject *pBuildable = FF_ToBuildableObject (tr.m_pEnt);
+	CFFBuildableObject *pBuildable = FF_ToBuildableObject (tr.m_pEnt); */
+
+	CFFBuildableObject* pBuildable = NULL;
+	for (CBaseEntity* pEnt = gEntList.FindEntityInSphere(NULL, GetAbsOrigin(), 100.0f); pEnt; pEnt = gEntList.FindEntityInSphere(pEnt, GetAbsOrigin(), 100.0f))
+	{
+		pBuildable = FF_ToBuildableObject(pEnt);
+		if( pBuildable && pBuildable->CanSabotage() && pBuildable->GetTeamNumber() != GetTeamNumber() && FFGameRules()->IsTeam1AlliedToTeam2 (pBuildable->GetTeamNumber(), GetDisguisedTeam() ) == GR_TEAMMATE )
+			break;
+		pBuildable = NULL;
+	}
 
 	// Our sabotage status has changed
 	if (pBuildable != m_hSabotaging)
