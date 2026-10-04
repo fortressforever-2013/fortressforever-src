@@ -2239,6 +2239,9 @@ bool CFFGameRules::FCanTakeDamage( CBaseEntity *pVictim, CBaseEntity *pAttacker 
 		// regardless of FF settings. otherwise only damage if FF setting is on for team
 		if ( pBuildableVictim->IsSabotaged() ) 
 		{
+			if( pAttacker == pBuildableVictim->m_hSaboteur.Get() )
+				return true;
+
 			bool attackerIsSabTeammate = FFGameRules()->IsTeam1AlliedToTeam2( 
 				pAttacker->GetTeamNumber(), 
 				pBuildableVictim->m_iSaboteurTeamNumber ) == GR_TEAMMATE;
