@@ -19,10 +19,6 @@
 
 IMPLEMENT_CLIENTCLASS_DT(C_FFTeam, DT_FFTeam, CFFTeam)
 	// --> Mirv: Some limits that the client needs to know about for the menu
-	RecvPropInt(RECVINFO(m_iFortPoints)),
-	// Bug #0000529: Total death column doesn't work
-	RecvPropInt(RECVINFO(m_iDeaths)),	// Mulch: receive team deaths from server
-	RecvPropFloat(RECVINFO(m_flScoreTime)), // Mulch: time this team last scored
 	RecvPropInt( RECVINFO( m_iAllies ) ),
 	RecvPropInt( RECVINFO( m_iMaxPlayers ) ),
 	RecvPropBool( RECVINFO( m_bFFA ) ),
@@ -32,10 +28,6 @@ IMPLEMENT_CLIENTCLASS_DT(C_FFTeam, DT_FFTeam, CFFTeam)
 	RecvPropString( RECVINFO( m_szTeamIcon ) ),
 END_RECV_TABLE()
 
-BEGIN_PREDICTION_DATA( C_FFTeam )
-	DEFINE_PRED_FIELD( m_iFortPoints, FIELD_INTEGER, FTYPEDESC_PRIVATE ),
-END_PREDICTION_DATA();
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -43,9 +35,6 @@ C_FFTeam::C_FFTeam() : C_Team()
 {
 	memset( &m_iClasses, 0, sizeof(m_iClasses) );	// |-- Mirv: Classes
 	memset( m_szTeamIcon, 0, sizeof( m_szTeamIcon ) );
-
-	m_iFortPoints = 0;
-	m_flScoreTime = 0.0f;
 }
 
 //-----------------------------------------------------------------------------
@@ -94,22 +83,6 @@ int C_FFTeam::GetAlliedTeams( int (&iAlliedTeams)[TEAM_COUNT] )
 char* C_FFTeam::GetTeamIcon( void )
 {
 	return m_szTeamIcon;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-float C_FFTeam::Get_ScoreTime(void)
-{
-	return m_flScoreTime;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-int C_FFTeam::Get_FortPoints(void)
-{
-	return m_iFortPoints;
 }
 
 //-----------------------------------------------------------------------------

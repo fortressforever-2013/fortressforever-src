@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
-// Purpose: Client-side team manager class
+// Purpose: Client side CTFTeam class
 //
 // $NoKeywords: $
 //=============================================================================//
@@ -19,13 +19,12 @@ class C_BaseObject;
 class CBaseTechnology;
 
 //-----------------------------------------------------------------------------
-// Purpose: FF's Team manager
+// Purpose: TF's Team manager
 //-----------------------------------------------------------------------------
 class C_FFTeam : public C_Team
 {
 	DECLARE_CLASS( C_FFTeam, C_Team );
 	DECLARE_CLIENTCLASS();
-	DECLARE_PREDICTABLE();
 
 public:
 
@@ -36,13 +35,8 @@ public:
 
 	// --> Mirv: Menus need to know limits
 	virtual int		Get_Classes( int );
-	int			Get_FortPoints( void );
-	float		Get_ScoreTime( void );
 	virtual int		Get_Teams( void );
 	virtual int		GetAllies( void );
-
-	float	m_flScoreTime; // Mulch: time this team last scored
-	int		m_iFortPoints;
 
 	bool IsFFA() { return m_bFFA; };
 	void SetFFA( bool bFFA ) { m_bFFA = bFFA; };

@@ -44,7 +44,6 @@
 void AddSubKeyNamed( KeyValues *pKeys, const char *pszName );
 #endif
 
-#include "c_ff_playerresource.h"
 #include "c_ff_team.h"
 #include "ff_gamerules.h"
 #include "ff_utils.h"
@@ -392,7 +391,7 @@ void CSpectatorMenu::Update( void )
 			wchar_t classText[ 64 ], *pwszClass;
 			char localizeClassName[64];
 
-			const char *classname = Class_IntToResourceString( g_FF_PR->GetClass( iPlayerIndex ) );
+			const char *classname = Class_IntToResourceString( gr->GetClass( iPlayerIndex ) );
 
 			Q_snprintf( localizeClassName, sizeof( localizeClassName ), "%s", classname );
 			pwszClass = g_pVGuiLocalize->Find( localizeClassName );
@@ -734,7 +733,7 @@ void CSpectatorGUI::Update()
 
 		g_pVGuiLocalize->ConvertANSIToUnicode( UTIL_SafeName(gr->GetPlayerName( playernum )), playerName, sizeof( playerName ) );
 		int iHealth = gr->GetHealth( playernum );
-		int iArmor = g_FF_PR->GetArmor( playernum );
+		int iArmor = gr->GetArmor( playernum );
 		if ( iHealth > 0  && gr->IsAlive(playernum) )
 		{
 			_snwprintf( health, ARRAYSIZE( health ), L"%i", iHealth );

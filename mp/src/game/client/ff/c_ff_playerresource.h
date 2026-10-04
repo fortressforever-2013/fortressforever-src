@@ -19,7 +19,6 @@ class C_FF_PlayerResource : public C_PlayerResource
 	DECLARE_CLASS( C_FF_PlayerResource, C_PlayerResource );
 public:
 	DECLARE_CLIENTCLASS();
-	DECLARE_PREDICTABLE();
 
 	C_FF_PlayerResource();
 	virtual ~C_FF_PlayerResource();
@@ -31,7 +30,6 @@ public:
 
 	// Player data
 	int		GetFortPoints(int index);
-	int		GetFrags(int index);
 	int		GetArmor(int index);
 	int		GetAssists(int index);
 
@@ -42,7 +40,7 @@ public:
 	int		GetTeamLimits(int index);
 	// <-- Mirv: Extra's needed for menus
 
-	bool	m_bIsIntermission = false;
+	bool		m_bIsIntermission = false;
 
 protected:
 	int		m_iFortPoints[MAX_PLAYERS + 1];	//BreakinBenny: This will be MAX_PLAYERS_ARRAY_SAFE in TF2 SDK

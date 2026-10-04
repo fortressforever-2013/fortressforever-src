@@ -295,7 +295,7 @@ CFFGameRules::CFFGameRules()
 	for ( int i = 0; i < ARRAYSIZE( sTeamNames ); i++ )
 	{
 		// Use our team class with allies + class limits
-		CTeam *pTeam = static_cast<CTeam*>( CreateEntityByName( "ff_team_manager" ) );
+		CFFTeam *pTeam = static_cast<CFFTeam*>(CreateEntityByName( "ff_team_manager" ));
 		pTeam->Init( sTeamNames[i], i );
 
 		g_Teams.AddToTail( pTeam );
@@ -684,7 +684,7 @@ void CFFGameRules::ResetUsingCriteria( bool *pbFlags, int iTeam, CFFPlayer *pFFP
 		// after we've killed/spawned players.
 		for( int i = 0; i < GetNumberOfTeams(); i++ )
 		{
-			CFFTeam *pTeam = GetGlobalFFTeam( i );
+			CTeam *pTeam = GetGlobalTeam( i );
 
 			if( !pTeam )
 				continue;

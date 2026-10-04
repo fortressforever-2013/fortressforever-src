@@ -329,6 +329,8 @@ CMultiplayRules::CMultiplayRules()
 		}
 	}
 
+	m_flIntermissionEndTime = 0.f;
+
 	nextlevel.SetValue( "" );
 	LoadMapCycleFile();
 
@@ -369,20 +371,21 @@ bool CMultiplayRules::Init()
 		BaseClass::RefreshSkillData( forceUpdate );
 
 	// override some values for multiplay.
-
+#ifndef FF_DLL
 		// suitcharger
 #ifndef TF_DLL
 //=============================================================================
 // HPE_BEGIN:
 // [menglish] CS doesn't have the suitcharger either
 //=============================================================================
-#if !defined( CSTRIKE_DLL ) || !defined( FF_DLL )
+#ifndef CSTRIKE_DLL
 ConVarRef suitcharger( "sk_suitcharger" );
 		suitcharger.SetValue( 30 );
  #endif
 //=============================================================================
 // HPE_END
 //=============================================================================
+#endif
 #endif
 	}
 
@@ -838,9 +841,9 @@ ConVarRef suitcharger( "sk_suitcharger" );
 		else if ( pScorer )
 #else
 		// Bug #0000529: Total death column doesn't work
-/*		if (pVictim->GetTeam())
+		if (pVictim->GetTeam())
 			pVictim->GetTeam()->AddDeaths(1);
-*/		FireTargets( "game_playerdie", pVictim, pVictim, USE_TOGGLE, 0 );
+		FireTargets( "game_playerdie", pVictim, pVictim, USE_TOGGLE, 0 );
 
 		if ( pScorer && pVictim != pScorer )
 #endif
