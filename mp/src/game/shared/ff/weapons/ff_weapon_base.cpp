@@ -526,7 +526,10 @@ int CFFWeaponBase::DrawModel( int flags )
 		else
 		{
 			// don't draw if cloaked and basically not moving
-			if ( pPlayer->GetLocalVelocity().Length() < 1.0f )
+			//if ( pPlayer->GetLocalVelocity().Length() < 1.0f )
+			//	return 1;
+
+			if (pPlayer->GuaranteedCloaked())
 				return 1;
 
 			FindOverrideMaterial(FF_CLOAK_MATERIAL, FF_CLOAK_TEXTURE_GROUP);

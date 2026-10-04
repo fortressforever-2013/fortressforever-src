@@ -624,6 +624,8 @@ CFFPlayer::CFFPlayer()
 
 	m_flNextJumpTimeForDouble = 0;
 
+	m_flNextAutoDisguise = 0.0f;
+
 	m_flSpeedModifier = 1.0f;
 	m_flSpeedModifierOld = 1.0f;
 	m_flSpeedModifierChangeTime = 0;
@@ -870,6 +872,8 @@ void CFFPlayer::PreThink(void)
 		// Disguising
 		if (m_iNewSpyDisguise && gpGlobals->curtime > m_flFinishDisguise)
 			FinishDisguise();
+
+		AutoDisguise();
 
 		// Sabotage!!
 		SpySabotageThink();
@@ -6870,6 +6874,21 @@ void CFFPlayer::Command_Disguise(const CCommand& args)
 	SetDisguise(iTeam, iClass);
 
 	ClientPrint( this, HUD_PRINTTALK, "#FF_SPY_DISGUISING" );
+}
+
+void CFFPlayer::AutoDisguise()
+{
+	if ( !IsAlive() || IsDisguised() || m_iNewSpyDisguise != 0 || !GetDisguisable() || gpGlobals->curtime < m_flNextAutoDisguise )
+		return;
+
+	m_flNextAutoDisguise = gpGlobals->curtime + 1.0f;
+
+	if (atoi(engine->GetClientConVarValue(entindex(), "cl_autodisguise")) == 0)
+		return;
+
+	CCommand args;
+	args.Tokenize( UTIL_VarArgs("disguise enemy %d", RandomInt(1, 9)) );
+	Command_Disguise(args);
 }
 
 // Server only

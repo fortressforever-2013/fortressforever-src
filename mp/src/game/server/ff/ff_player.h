@@ -1000,6 +1000,8 @@ private:
 	int GetNewDisguisedTeam( void ) const;
 	int m_iNewSpyDisguise;
 	float m_flFinishDisguise;
+	float m_flNextAutoDisguise;
+	void AutoDisguise();
 
 public:
 	void FinishDisguise();

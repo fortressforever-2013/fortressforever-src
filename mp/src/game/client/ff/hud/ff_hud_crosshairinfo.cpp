@@ -34,8 +34,9 @@ using namespace vgui;
 #include "ff_gamerules.h"
 #include "ff_utils.h"
 #include "ff_shareddefs.h"
+#include "ff_playerclass_parse.h"
 
-static ConVar hud_centerid( "hud_centerid", "0", FCVAR_ARCHIVE );
+static ConVar hud_centerid( "hud_centerid", "1", FCVAR_ARCHIVE );
 #define CROSSHAIRTYPE_NORMAL 0
 #define CROSSHAIRTYPE_DISPENSER 1
 #define CROSSHAIRTYPE_SENTRYGUN 2
@@ -288,7 +289,7 @@ void CHudCrosshairInfo::OnTick( void )
 						C_FFBuildableObject *pBuildable = (C_FFBuildableObject *)tr.m_pEnt;
 
 						//Get Buildable health percent here no matter what class
-						iHealth = pBuildable->GetHealthPercent();
+						iHealth = pBuildable->GetHealth();
 							
 						if( pBuildable->Classify() == CLASS_DISPENSER )
 						{
@@ -323,8 +324,8 @@ void CHudCrosshairInfo::OnTick( void )
 				}
 				else
 				{						
-					iHealth = pHitPlayer->GetHealthPercentage();
-					iArmor = pHitPlayer->GetArmorPercentage();
+					iHealth = pHitPlayer->GetHealth();
+					iArmor = pHitPlayer->GetArmor();
 				}
 
 				if( FFGameRules()->PlayerRelationship( pPlayer, pHitPlayer ) != GR_TEAMMATE )
@@ -362,16 +363,24 @@ void CHudCrosshairInfo::OnTick( void )
 								// health/armor
 								if( m_iTeam == pPlayer->GetTeamNumber() )
 								{
-									iHealth = pHitPlayer->GetHealthPercentage();
-									iArmor = pHitPlayer->GetArmorPercentage();
+									iHealth = pHitPlayer->GetHealth();
+									iArmor = pHitPlayer->GetArmor();
 								}
 
 								// Or, if this spy is disguised as an ally of our team we
 								// need to show his health/armor
 								if( FFGameRules()->IsTeam1AlliedToTeam2( pPlayer->GetTeamNumber(), m_iTeam ) == GR_TEAMMATE )
 								{
-									iHealth = pHitPlayer->GetHealthPercentage();
-									iArmor = pHitPlayer->GetArmorPercentage();
+									iHealth = pHitPlayer->GetHealth();
+									iArmor = pHitPlayer->GetArmor();
+
+									PLAYERCLASS_FILE_INFO_HANDLE hClassInfo;
+									if ( ReadPlayerClassDataFromFileForSlot(filesystem, Class_IntToString(m_iClass), &hClassInfo, g_pGameRules->GetEncryptionKey()) )
+									{
+										const CFFPlayerClassInfo*pClassInfo = GetFilePlayerClassInfoFromHandle(hClassInfo);
+										iHealth = pHitPlayer->GetHealthPercentage()*pClassInfo->m_iHealth/100;
+										iArmor = pHitPlayer->GetArmorPercentage()*pClassInfo->m_iMaxArmour/100;
+									}
 								}
 
 								// TODO: Could be bugs with this spy tracking thing in that
@@ -487,7 +496,7 @@ void CHudCrosshairInfo::OnTick( void )
 				if (CROSSHAIRTYPE == CROSSHAIRTYPE_DISPENSER)
 				{
 					char szHealth[ 5 ], szArmor[ 5 ], szRockets[ 5 ], szShells[ 5 ], szCells[ 5 ], szNails[ 5 ];
-					Q_snprintf( szHealth, 5, "%i%%", iHealth );
+					Q_snprintf( szHealth, 5, "%i", iHealth );
 					Q_snprintf( szArmor, 5, "%i", iArmor );
 					Q_snprintf( szRockets, 5, "%i", iRockets );
 					Q_snprintf( szShells, 5, "%i", iShells );
@@ -511,11 +520,11 @@ void CHudCrosshairInfo::OnTick( void )
 				else if (CROSSHAIRTYPE == CROSSHAIRTYPE_SENTRYGUN)
 				{
 					char szHealth[ 5 ], szRockets[ 5 ], szShells[ 5 ], szLevel[ 5 ], szArmor[ 5 ];
-					Q_snprintf( szHealth, 5, "%i%%", iHealth );
+					Q_snprintf( szHealth, 5, "%i", iHealth );
 					Q_snprintf( szLevel, 5, "%i", iLevel );
-					Q_snprintf( szRockets, 5, "%i%%", iRockets );
-					Q_snprintf( szShells, 5, "%i%%", iShells );
-					Q_snprintf( szArmor, 5, "%i%%", iArmor );
+					Q_snprintf( szRockets, 5, "%i", iRockets );
+					Q_snprintf( szShells, 5, "%i", iShells );
+					Q_snprintf( szArmor, 5, "%i", iArmor );
 
 					
 					wchar_t wszHealth[ 10 ], wszRockets[ 10 ], wszShells[ 10 ], wszLevel[ 10 ], wszArmor[ 10 ];
@@ -550,7 +559,7 @@ void CHudCrosshairInfo::OnTick( void )
 				else if( CROSSHAIRTYPE == CROSSHAIRTYPE_MANCANNON )
 				{
 					char szHealth[ 5 ];
-					Q_snprintf( szHealth, 5, "%i%%", iHealth );
+					Q_snprintf( szHealth, 5, "%i", iHealth );
 					
 					wchar_t wszHealth[ 10 ];
 					g_pVGuiLocalize->ConvertANSIToUnicode( szHealth, wszHealth, sizeof( wszHealth ) );
@@ -564,20 +573,20 @@ void CHudCrosshairInfo::OnTick( void )
 				else if( ( iHealth != -1 ) && ( iArmor != -1 ) )
 				{
 					char szHealth[ 5 ], szArmor[ 5 ];
-					Q_snprintf( szHealth, 5, "%i%%", iHealth );
-					Q_snprintf( szArmor, 5, "%i%%", iArmor );
+					Q_snprintf( szHealth, 5, "%i", iHealth );
+					Q_snprintf( szArmor, 5, "%i", iArmor );
 					
 					wchar_t wszHealth[ 10 ], wszArmor[ 10 ];
 
                        g_pVGuiLocalize->ConvertANSIToUnicode( szHealth, wszHealth, sizeof( wszHealth ) );
 					g_pVGuiLocalize->ConvertANSIToUnicode( szArmor, wszArmor, sizeof( wszArmor ) );
 
-					V_snwprintf( m_pText, 255, L"(%ls) %ls - H: %ls, A: %ls", wszClass, wszName, wszHealth, wszArmor );
+					V_snwprintf( m_pText, 255, L"(%ls) %ls - HP: %ls, AP: %ls", wszClass, wszName, wszHealth, wszArmor );
 				}
 				else if ( iHealth != -1 )
 				{
 					char szHealth[ 5 ];
-					Q_snprintf( szHealth, 5, "%i%%", iHealth );
+					Q_snprintf( szHealth, 5, "%i", iHealth );
 					
 					wchar_t wszHealth[ 10 ];
 
