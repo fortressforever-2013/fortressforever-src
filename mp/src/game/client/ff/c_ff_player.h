@@ -599,9 +599,12 @@ public:
 	CHudGrenade2Timer *m_pGrenade2Timer;
 
 	bool IsCloaked(void) const { return m_iCloaked != 0; }
+	bool GuaranteedCloaked(void) const;
 private:
 	void Cloak(void);
 	unsigned int m_iCloaked;
+	bool m_bWasCloaked;
+	float m_flCloakSecond;
 	float m_flNextCloak;
 
 public:
