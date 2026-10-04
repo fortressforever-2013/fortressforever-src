@@ -2141,7 +2141,6 @@ bool C_BaseAnimating::CalcAttachments()
 	return SetupBones( NULL, -1, BONE_USED_BY_ATTACHMENT, gpGlobals->curtime );
 }
 
-
 //-----------------------------------------------------------------------------
 // Purpose: Returns the world location and world angles of an attachment
 // Input  : attachment name
@@ -3241,7 +3240,6 @@ int C_BaseAnimating::DrawModel( int flags )
 			extraFlags |= STUDIO_GENERATE_STATS;
 		}
 
-
 		// Necessary for lighting blending
 		CreateModelInstance();
 
@@ -3588,7 +3586,7 @@ void C_BaseAnimating::ProcessMuzzleFlashEvent()
 			QAngle dummyAngles;
 			GetAttachment( 1, vAttachment, dummyAngles );
 
-			// Make an elight
+			//// Make an elight
 			//dlight_t *el = effects->CL_AllocElight( LIGHT_INDEX_MUZZLEFLASH + index );
 			//el->origin = vAttachment;
 			//el->radius = random->RandomInt( 32, 64 ); 

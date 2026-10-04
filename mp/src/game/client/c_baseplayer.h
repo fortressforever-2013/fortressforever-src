@@ -401,7 +401,7 @@ public:
 	// Wearables
 	virtual void			UpdateWearables();
 	C_EconWearable			*GetWearable( int i ) { return m_hMyWearables[i]; }
-	int						GetNumWearables( void ) const { return m_hMyWearables.Count(); }
+	int						GetNumWearables( void ) { return m_hMyWearables.Count(); }
 #endif
 
 	bool					HasFiredWeapon( void ) { return m_bFiredWeapon; }
@@ -415,7 +415,6 @@ protected:
 
 public:
 	int m_StuckLast;
-
 	
 	// Data for only the local player
 	CNetworkVarEmbedded( CPlayerLocalData, m_Local );

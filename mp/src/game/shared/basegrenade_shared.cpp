@@ -555,6 +555,7 @@ void CBaseGrenade ::TumbleThink( void )
 		return;
 	}
 
+
 	if (!IsInWorld())
 	{
 		Remove( );

@@ -24,9 +24,6 @@ class CBaseEntity;
 class CTakeDamageInfo
 {
 public:
-
-
-
 	DECLARE_CLASS_NOBASE( CTakeDamageInfo );
 
 					CTakeDamageInfo();
@@ -139,7 +136,6 @@ protected:
 	bool			m_bForceFriendlyFire;	// Ideally this would be a dmg type, but we can't add more
 
 	float			m_flDamageForForce;
-
 
 	DECLARE_SIMPLE_DATADESC();
 };

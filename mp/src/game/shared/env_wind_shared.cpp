@@ -180,7 +180,6 @@ float CEnvWindShared::WindThink( float flTime )
 
 	ComputeWindVariation( flTime );
 
-
 	while (true)
 	{
 		// First, simulate up to the next switch time...

@@ -53,19 +53,15 @@
 #include "clientmode_shared.h"
 #include "sourcevr/isourcevirtualreality.h"
 #include "client_virtualreality.h"
-#ifdef TF_CLIENT_DLL
-#include "tf/c_tf_player.h"
-#endif
-#ifdef FF_CLIENT_DLL
+
 #include "ff_vieweffects.h"
-#endif
 
 #ifdef PORTAL
 //#include "C_Portal_Player.h"
 #include "portal_render_targets.h"
 #include "PortalRender.h"
 #endif
-#if defined( HL2_CLIENT_DLL ) || defined( CSTRIKE_DLL ) || defined( TF_CLIENT_DLL )
+#if defined( HL2_CLIENT_DLL ) || defined( CSTRIKE_DLL )
 #define USE_MONITORS
 #endif
 #include "rendertexture.h"
@@ -155,7 +151,7 @@ static ConVar r_debugcheapwater( "r_debugcheapwater", "0", FCVAR_CHEAT );
 #ifndef _X360
 static ConVar r_waterforceexpensive( "r_waterforceexpensive", "0", FCVAR_ARCHIVE );
 #endif
-static ConVar r_waterforcereflectentities( "r_waterforcereflectentities", "0", FCVAR_ALLOWED_IN_COMPETITIVE );
+static ConVar r_waterforcereflectentities( "r_waterforcereflectentities", "0" );
 static ConVar r_WaterDrawRefraction( "r_WaterDrawRefraction", "1", FCVAR_ARCHIVE, "Enable water refraction" );
 static ConVar r_WaterDrawReflection( "r_WaterDrawReflection", "1", FCVAR_ARCHIVE, "Enable water reflection" );
 static ConVar r_ForceWaterLeaf( "r_ForceWaterLeaf", "1", 0, "Enable for optimization to water - considers view in leaf under water for purposes of culling" );
@@ -1228,7 +1224,6 @@ void CViewRender::PerformScreenOverlay( int x, int y, int w, int h )
 			render->ViewDrawFade( color, m_ScreenOverlayMaterial );
 		}
 	}
-
 }
 
 void CViewRender::DrawUnderwaterOverlay( void )
@@ -1704,7 +1699,7 @@ static float GetSkyboxFogStart( void )
 
 	if( fog_override.GetInt() )
 	{
-		if ( fog_startskybox.GetFloat() == -1.0f )
+		if( fog_startskybox.GetFloat() == -1.0f )
 		{
 			return local->m_skybox3d.fog.start;
 		}
@@ -1730,7 +1725,7 @@ static float GetSkyboxFogEnd( void )
 
 	if( fog_override.GetInt() )
 	{
-		if ( fog_endskybox.GetFloat() == -1.0f )
+		if( fog_endskybox.GetFloat() == -1.0f )
 		{
 			return local->m_skybox3d.fog.end;
 		}
@@ -1771,7 +1766,6 @@ static float GetSkyboxFogMaxDensity()
 	else
 		return local->m_skybox3d.fog.maxdensity;
 }
-
 
 
 void CViewRender::DisableFog( void )
@@ -3167,42 +3161,17 @@ void CViewRender::DrawMonitors( const CViewSetup &cameraView )
 
 	C_BasePlayer *player = C_BasePlayer::GetLocalPlayer();
 	
-
-#ifdef TF_CLIENT_DLL
-	CTFPlayer* pLocalTFPlayer = CTFPlayer::GetLocalTFPlayer();
-
-	bool bNeedToToggleForceDraw = !( pLocalTFPlayer && pLocalTFPlayer->m_Local.m_bForceLocalPlayerDraw );
-	bool bNeedToToggleForceDrawBack = false;
-#endif
-
 	int cameraNum;
 	for ( cameraNum = 0; pCameraEnt != NULL; pCameraEnt = pCameraEnt->m_pNext )
 	{
 		if ( !pCameraEnt->IsActive() || pCameraEnt->IsDormant() )
 			continue;
 
-#ifdef TF_CLIENT_DLL
-		if ( bNeedToToggleForceDraw && pLocalTFPlayer )
-		{
-			pLocalTFPlayer->ForceTempForceDraw( true );
-
-			bNeedToToggleForceDrawBack = true;
-			bNeedToToggleForceDraw = false;
-		}
-#endif
-
 		if ( !DrawOneMonitor( pCameraTarget, cameraNum, pCameraEnt, cameraView, player, 0, 0, width, height ) )
 			continue;
 
 		++cameraNum;
 	}
-
-#ifdef TF_CLIENT_DLL
-	if ( bNeedToToggleForceDrawBack && pLocalTFPlayer )
-	{
-		pLocalTFPlayer->ForceTempForceDraw( false );
-	}
-#endif
 
 	if ( IsX360() && cameraNum > 0 )
 	{

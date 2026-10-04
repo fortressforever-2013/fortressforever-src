@@ -40,7 +40,6 @@ public:
 
 		return BaseClass::ShouldPredict();
 	}
-
 #endif
 
 private:

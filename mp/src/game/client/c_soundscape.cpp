@@ -361,7 +361,6 @@ bool C_SoundscapeSystem::Init()
 			Warning( "C_SoundscapeSystem::Init:  Manifest '%s' with bogus file type '%s', expecting 'file'\n", 
 				SOUNDSCAPE_MANIFEST_FILE, sub->GetName() );
 		}
-
 	}
 	else
 	{

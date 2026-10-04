@@ -44,7 +44,7 @@ public:
 		}
 	}
 
-	virtual bool BeginPlayback( const char *pFilename );
+	bool BeginPlayback( const char *pFilename );
 
 	void SetBlackBackground( bool bBlack ){ m_bBlackBackground = bBlack; }
 

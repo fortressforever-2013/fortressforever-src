@@ -22,11 +22,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-
-
-
 static ConVar cl_playerspraydisable( "cl_playerspraydisable", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Disable player sprays." );
-
 
 #ifndef _XBOX
 CLIENTEFFECT_REGISTER_BEGIN( PrecachePlayerDecal )

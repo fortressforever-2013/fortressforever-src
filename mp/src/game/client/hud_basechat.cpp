@@ -895,7 +895,6 @@ void CBaseHudChat::MsgFunc_SayText2( bf_read &msg )
 			iFilter = CHAT_FILTER_PUBLICCHAT;
 		}
 
-
 		// print raw chat text
 		ChatPrintf( client, iFilter, "%s", ansiString );
 
@@ -1820,18 +1819,6 @@ void CBaseHudChat::LevelInit( const char *newmap )
 {
 	Clear();
 
-	//=============================================================================
-	// HPE_BEGIN:
-	// [pfreese] initialize new chat filters to defaults. We do this because
-	// unused filter bits are zero, and we might want them on for new filters that
-	// are added.
-	//
-	// Also, we have to do this here instead of somewhere more sensible like the 
-	// c'tor or Init() method, because cvars are currently loaded twice: once
-	// during initialization from the local file, and later (after HUD elements
-	// have been construction and initialized) from Steam Cloud remote storage.
-	//=============================================================================
-
 	switch ( cl_chatfilter_version.GetInt() )
 	{
 	case 0:
@@ -1841,15 +1828,11 @@ void CBaseHudChat::LevelInit( const char *newmap )
 		break;
 	}
 
-	if ( cl_chatfilter_version.GetInt() != kChatFilterVersion )
+	if (cl_chatfilter_version.GetInt() != kChatFilterVersion )
 	{
 		cl_chatfilters.SetValue( m_iFilterFlags );
 		cl_chatfilter_version.SetValue( kChatFilterVersion );
 	}
-
-	//=============================================================================
-	// HPE_END
-	//=============================================================================
 }
 
 void CBaseHudChat::LevelShutdown( void )

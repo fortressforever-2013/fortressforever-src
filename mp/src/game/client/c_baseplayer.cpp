@@ -212,8 +212,6 @@ BEGIN_RECV_TABLE_NOBASE( CPlayerLocalData, DT_Local )
 	RecvPropInt( RECVINFO( m_audio.soundscapeIndex ) ),
 	RecvPropInt( RECVINFO( m_audio.localBits ) ),
 	RecvPropEHandle( RECVINFO( m_audio.ent ) ),
-
-	
 END_RECV_TABLE()
 
 // -------------------------------------------------------------------------------- //
@@ -428,7 +426,6 @@ LINK_ENTITY_TO_CLASS( player, C_BasePlayer );
 C_BasePlayer::C_BasePlayer() : m_iv_vecViewOffset( "C_BasePlayer::m_iv_vecViewOffset" )
 {
 	AddVar( &m_vecViewOffset, &m_iv_vecViewOffset, LATCH_SIMULATION_VAR );
-
 	
 #ifdef _DEBUG																
 	m_vecLadderNormal.Init();
@@ -506,7 +503,6 @@ void C_BasePlayer::Spawn( void )
 	m_bWasFreezeFraming = false;
 
 	m_bFiredWeapon = false;
-
 }
 
 //-----------------------------------------------------------------------------
@@ -837,7 +833,6 @@ void C_BasePlayer::PostDataUpdate( DataUpdateType_t updateType )
 		{
 			Assert( s_pLocalPlayer == NULL );
 			s_pLocalPlayer = this;
-
 
 			// Reset our sound mixed in case we were in a freeze cam when we
 			// changed level, which would cause the snd_soundmixer to be left modified.

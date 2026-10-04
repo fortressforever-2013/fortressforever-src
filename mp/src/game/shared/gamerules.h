@@ -123,7 +123,6 @@ public:
 	CGameRules(void);
 	virtual ~CGameRules( void );
 
-
 	// Damage Queries - these need to be implemented by the various subclasses (single-player, multi-player, etc).
 	// The queries represent queries against damage types and properties.
 	virtual bool	Damage_IsTimeBased( int iDmgType ) = 0;			// Damage types that are time-based.
@@ -431,12 +430,9 @@ public:
 	virtual bool IsHolidayActive( /*EHoliday*/ int eHoliday ) const { return false; }
 
 	virtual bool IsManualMapChangeOkay( const char **pszReason ){ return true; }
-
-
 #ifdef GAME_DLL
 	virtual bool IsOfficialMap() { return false; }
 #endif
-
 
 #ifndef CLIENT_DLL
 private:

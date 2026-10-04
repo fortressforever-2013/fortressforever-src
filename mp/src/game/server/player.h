@@ -317,7 +317,6 @@ public:
 	// Forces processing of usercmds (e.g., even if game is paused, etc.)
 	void					ForceSimulation();
 
-
 	virtual unsigned int	PhysicsSolidMaskForEntity( void ) const;
 
 	virtual void			PreThink( void );
@@ -385,7 +384,6 @@ public:
 	void					ViewPunchReset( float tolerance = 0 );
 	void					ShowViewModel( bool bShow );
 	void					ShowCrosshair( bool bShow );
-
 
 	// View model prediction setup
 	void					CalcView( Vector &eyeOrigin, QAngle &eyeAngles, float &zNear, float &zFar, float &fov );
@@ -469,8 +467,6 @@ public:
 
 	bool					HandleVoteCommands( const CCommand &args );
 
-
-	
 	// Observer functions
 	virtual bool			StartObserverMode(int mode); // true, if successful
 	virtual void			StopObserverMode( void );	// stop spectator mode
@@ -551,6 +547,7 @@ public:
 	CBaseEntity				*DoubleCheckUseNPC( CBaseEntity *pNPC, const Vector &vecSrc, const Vector &vecDir );
 
 	CBasePlayer*			MyCharacterPointer(void) { return this; }
+
 
 	// physics interactions
 	// mass/size limit set to zero for none
@@ -1229,8 +1226,6 @@ public:
 	virtual bool HasHaptics(){return m_bhasHaptics;}
 	// NVNT sets weather a user should receive haptic device messages.
 	virtual void SetHaptics(bool has) { m_bhasHaptics = has;}
-
-
 private:
 	// NVNT member variable holding if this user is using a haptic device.
 	bool m_bhasHaptics;

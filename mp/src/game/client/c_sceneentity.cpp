@@ -90,6 +90,60 @@ bool UseHWMorphVCDs()
 }
 
 //-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool C_SceneEntity::GetHWMorphSceneFileName( const char *pFilename, char *pHWMFilename )
+{
+	// Are we even using hardware morph?
+	if ( !UseHWMorphVCDs() )
+		return false;
+
+	// Multi-player only!
+	if ( !m_bMultiplayer )
+		return false;
+
+	// Do we have a valid filename?
+	if ( !( pFilename && pFilename[0] ) )
+		return false;
+
+	// Check to see if we already have an player/hwm/* filename.
+	if ( ( V_strstr( pFilename, "/high" ) != NULL ) || ( V_strstr( pFilename, "\\high" ) != NULL ) )
+	{
+		V_strcpy( pHWMFilename, pFilename );
+		return true;
+	}
+
+	// Find the hardware morph scene name and pass that along as well.
+	char szScene[MAX_PATH];
+	V_strcpy( szScene, pFilename );
+
+	char szSceneHWM[MAX_PATH];
+	szSceneHWM[0] = '\0';
+
+	char *pszToken = strtok( szScene, "/\\" );
+	while ( pszToken != NULL )
+	{
+		if ( !V_stricmp( pszToken, "low" ) )
+		{
+			V_strcat( szSceneHWM, "high", sizeof( szSceneHWM ) );
+		}
+		else
+		{
+			V_strcat( szSceneHWM, pszToken, sizeof( szSceneHWM ) );
+		}
+
+		pszToken = strtok( NULL, "/\\" );
+		if ( pszToken != NULL )
+		{
+			V_strcat( szSceneHWM, "\\", sizeof( szSceneHWM ) );
+		}
+	}
+
+	V_strcpy( pHWMFilename, szSceneHWM );
+	return true;
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
 void C_SceneEntity::ResetActorFlexesForScene()
@@ -150,14 +204,14 @@ void C_SceneEntity::SetupClientOnlyScene( const char *pszFilename, C_BaseFlex *p
 	m_hOwner = pOwner;
 	m_bClientOnly = true;
 
-	char szFilename[MAX_PATH];
-	Assert( V_strlen( pszFilename ) < MAX_PATH );
-	V_strcpy_safe( szFilename, pszFilename );
+	char szFilename[128];
+	Assert( V_strlen( pszFilename ) < 128 );
+	V_strcpy( szFilename, pszFilename );
 
-	char szSceneHWM[ MAX_PATH ];
+	char szSceneHWM[128];
 	if ( GetHWMorphSceneFileName( szFilename, szSceneHWM ) )
 	{
-		V_strcpy_safe( szFilename, szSceneHWM );
+		V_strcpy( szFilename, szSceneHWM );
 	}
 
 	Assert(  szFilename[ 0 ] );
@@ -266,7 +320,7 @@ void C_SceneEntity::PostDataUpdate( DataUpdateType_t updateType )
 	if ( str )
 	{
 		Assert( V_strlen( str ) < MAX_PATH );
-		V_strcpy_safe( szFilename, str );
+		V_strcpy( szFilename, str );
 	}
 	else
 	{
@@ -276,7 +330,7 @@ void C_SceneEntity::PostDataUpdate( DataUpdateType_t updateType )
 	char szSceneHWM[MAX_PATH];
 	if ( GetHWMorphSceneFileName( szFilename, szSceneHWM ) )
 	{
-		V_strcpy_safe( szFilename, szSceneHWM );
+		V_strcpy( szFilename, szSceneHWM );
 	}
 
 	if ( updateType == DATA_UPDATE_CREATED )

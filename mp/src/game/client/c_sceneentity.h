@@ -81,8 +81,8 @@ private:
 	void					SetCurrentTime( float t, bool forceClientSync );
 
 
-	template <size_t maxLenInChars>
-	bool					GetHWMorphSceneFileName( const char *pFilename, OUT_Z_ARRAY char (&hwmFilename)[maxLenInChars] ) const;
+	
+	bool					GetHWMorphSceneFileName( const char *pFilename, char *pHWMFilename );
 
 private:
 
@@ -116,66 +116,6 @@ private:
 
 	CUtlVector< QueuedEvents_t > m_QueuedEvents;
 };
-
-//-----------------------------------------------------------------------------
-// Purpose:
-//-----------------------------------------------------------------------------
-template <size_t maxLenInChars>
-bool C_SceneEntity::GetHWMorphSceneFileName( const char *pFilename, OUT_Z_ARRAY char( &hwmFilename )[ maxLenInChars ] ) const
-{
-	extern bool UseHWMorphVCDs();
-
-	// Make sure it's all zeros.
-	V_memset( hwmFilename, 0, sizeof( hwmFilename ) );
-
-	// Are we even using hardware morph?
-	if ( !UseHWMorphVCDs() )
-		return false;
-
-	// Multi-player only!
-	if ( !m_bMultiplayer )
-		return false;
-
-	// Do we have a valid filename?
-	if ( !( pFilename && pFilename[ 0 ] ) )
-		return false;
-
-	// Check to see if we already have an player/hwm/* filename.
-	if ( ( V_strstr( pFilename, "/high" ) != NULL ) || ( V_strstr( pFilename, "\\high" ) != NULL ) )
-	{
-		V_strcpy_safe( hwmFilename, pFilename );
-		return true;
-	}
-
-	// Find the hardware morph scene name and pass that along as well.
-	char szScene[ MAX_PATH ];
-	V_strcpy_safe( szScene, pFilename );
-
-	char szSceneHWM[ MAX_PATH ];
-	szSceneHWM[ 0 ] = '\0';
-
-	char *pszToken = strtok( szScene, "/\\" );
-	while ( pszToken != NULL )
-	{
-		if ( !V_stricmp( pszToken, "low" ) )
-		{
-			V_strcat_safe( szSceneHWM, "high", sizeof( szSceneHWM ) );
-		}
-		else
-		{
-			V_strcat_safe( szSceneHWM, pszToken, sizeof( szSceneHWM ) );
-		}
-
-		pszToken = strtok( NULL, "/\\" );
-		if ( pszToken != NULL )
-		{
-			V_strcat_safe( szSceneHWM, "\\", sizeof( szSceneHWM ) );
-		}
-	}
-
-	V_strcpy_safe( hwmFilename, szSceneHWM );
-	return true;
-}
 
 //-----------------------------------------------------------------------------
 // Binary compiled VCDs get their strings from a pool

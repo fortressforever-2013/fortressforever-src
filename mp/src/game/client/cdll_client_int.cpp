@@ -472,7 +472,6 @@ public:
 	{
 		return UTIL_GetActiveHolidayString();
 	}
-
 };
 
 EXPOSE_SINGLE_INTERFACE( CGameClientExports, IGameClientExports, GAMECLIENTEXPORTS_INTERFACE_VERSION );

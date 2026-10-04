@@ -166,12 +166,9 @@ public:
 	CNetworkVar( float, m_flGustDuration );	// max time between gusts
 
 	CNetworkVar( int, m_iGustDirChange );	// max number of degrees wind dir changes on gusts.
-
 	int m_iszGustSound;		// name of the wind sound to play for gusts.
 	int m_iWindDir;			// wind direction (yaw)
 	float m_flWindSpeed;	// the wind speed
-
-
 
 	CNetworkVar( int, m_iInitialWindDir );
 	CNetworkVar( float, m_flInitialWindSpeed );
@@ -198,7 +195,6 @@ private:
 
 	// Updates the wind sound
 	void UpdateWindSound( float flTotalWindSpeed );
-
 
 	float	m_flVariationTime;
 	float	m_flSimTime;		// What's the time I last simulated up to?

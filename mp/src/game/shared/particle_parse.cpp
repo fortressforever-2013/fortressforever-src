@@ -23,7 +23,6 @@
 
 #define PARTICLES_MANIFEST_FILE				"particles/particles_manifest.txt"
 
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -187,7 +186,6 @@ void ParseParticleEffectsMap( const char *pMapName, bool bLoadSheets, IFileList 
 		DevMsg( "Successfully loaded particle effects manifest '%s' for map '%s'\n", szMapManifestFilename, pMapName );
 		for ( KeyValues *sub = manifest->GetFirstSubKey(); sub != NULL; sub = sub->GetNextKey() )
 		{
-
 			if ( !Q_stricmp( sub->GetName(), "file" ) )
 			{
 				// Ensure the particles are in the particles directory
