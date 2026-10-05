@@ -128,7 +128,7 @@ static const char *g_MapEntityFilterKeepList[] =
 	"ambient_generic",
 	"ff_gamerules",
 	"ff_team_manager",
-	"player_manager",
+	"ff_player_manager",
 	"env_soundscape",
 	"env_soundscape_proxy",
 	"env_soundscape_triggerable",
