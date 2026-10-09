@@ -852,7 +852,7 @@ bool CClientScoreBoardDialog::GetPlayerScoreInfo(int playerIndex, KeyValues *kv)
 {
 	IGameResources *gr = GameResources();
 
-	if (!gr )
+	if (!gr && !g_FF_PR )
 		return false;
 
 	bool bFriendly = false;
@@ -880,7 +880,7 @@ bool CClientScoreBoardDialog::GetPlayerScoreInfo(int playerIndex, KeyValues *kv)
 
 	kv->SetInt( "deaths", gr->GetDeaths( playerIndex ) );
 	kv->SetInt( "fortpoints", gr->GetFortPoints( playerIndex ) );
-	kv->SetInt( "score", gr->GetFrags( playerIndex ) );
+	kv->SetInt( "score", g_FF_PR->GetFrags( playerIndex ) );
 	kv->SetInt( "ping", gr->GetPing( playerIndex ) ) ;
 	kv->SetString( "name", gr->GetPlayerName( playerIndex ) );
 	kv->SetInt( "assists", gr->GetAssists( playerIndex ) );

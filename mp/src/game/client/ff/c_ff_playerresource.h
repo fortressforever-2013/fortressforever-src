@@ -30,6 +30,7 @@ public:
 
 	// Player data
 	int		GetFortPoints(int index);
+	int		GetFrags(int index);
 	int		GetArmor(int index);
 	int		GetAssists(int index);
 

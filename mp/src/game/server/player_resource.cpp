@@ -25,7 +25,10 @@ IMPLEMENT_SERVERCLASS_ST_NOBASE(CPlayerResource, DT_PlayerResource)
 	SendPropArray3( SENDINFO_ARRAY3(m_iTeam), SendPropInt( SENDINFO_ARRAY(m_iTeam), 4 ) ),
 	SendPropArray3( SENDINFO_ARRAY3(m_bAlive), SendPropInt( SENDINFO_ARRAY(m_bAlive), 1, SPROP_UNSIGNED ) ),
 	SendPropArray3( SENDINFO_ARRAY3(m_iHealth), SendPropInt( SENDINFO_ARRAY(m_iHealth), -1, SPROP_VARINT | SPROP_UNSIGNED ) ),
-	SendPropArray3(SENDINFO_ARRAY3(m_iFortPoints), SendPropInt(SENDINFO_ARRAY(m_iFortPoints), 20)),	// |- Shock: Upped transmission bits from 15->20 (needs to be big!)
+/*	SendPropArray3( SENDINFO_ARRAY3(m_iAccountID), SendPropInt( SENDINFO_ARRAY(m_iAccountID), 32, SPROP_UNSIGNED ) ),
+	SendPropArray3( SENDINFO_ARRAY3(m_bValid), SendPropInt( SENDINFO_ARRAY(m_bValid), 1, SPROP_UNSIGNED ) ),
+	SendPropArray3( SENDINFO_ARRAY3( m_iUserID ), SendPropInt( SENDINFO_ARRAY( m_iUserID ) ) ),
+*/	SendPropArray3(SENDINFO_ARRAY3(m_iFortPoints), SendPropInt(SENDINFO_ARRAY(m_iFortPoints), 20)),	// |- Shock: Upped transmission bits from 15->20 (needs to be big!)
 	SendPropArray3(SENDINFO_ARRAY3(m_iArmor), SendPropInt(SENDINFO_ARRAY(m_iArmor), 9, SPROP_UNSIGNED)),
 	SendPropArray3(SENDINFO_ARRAY3(m_iClass), SendPropInt(SENDINFO_ARRAY(m_iClass), 5)),	// |-- Mirv: Current class
 
@@ -130,7 +133,7 @@ void CPlayerResource::UpdatePlayerData( void )
 	for ( int i = 1; i <= MAX_PLAYERS; i++ )
 	{
 		//CBasePlayer *pPlayer = (CBasePlayer*)UTIL_PlayerByIndex( i );
-		CFFPlayer *pPlayer = ( CFFPlayer* )UTIL_PlayerByIndex( i );	// |-- Mirv: Use our class instead
+		CFFPlayer *pPlayer = ( CFFPlayer*)UTIL_PlayerByIndex( i );	// |-- Mirv: Use our class instead
 		
 		if ( pPlayer && pPlayer->IsConnected() )
 		{

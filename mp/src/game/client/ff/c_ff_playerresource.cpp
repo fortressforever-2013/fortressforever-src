@@ -111,10 +111,9 @@ int C_FF_PlayerResource::GetTeamLimits(int index)
 	return team->Get_Teams();
 }
 // <-- Mirv: So menus can show correct limits
-/*
+
 int C_FF_PlayerResource::GetFrags(int index )
 {
-	//return 666;
 	// BEG: Added by Mulchman
 	if (!IsConnected(index))
 		return 0;
@@ -122,7 +121,7 @@ int C_FF_PlayerResource::GetFrags(int index )
 	return m_iScore[index];
 	// END: Added by Mulchman
 }
-*/
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
