@@ -20,17 +20,21 @@ public:
 
 	CFFPlayerResource();
 
-	virtual void ResourceThink( void );
-	virtual void UpdatePlayerData( void );
-	virtual void Spawn( void );
+	void ResourceThink( void );
+	void Init( int iIndex );
+	void UpdatePlayerData( void );
+	void Spawn( void );
 
 protected:
-	CNetworkArray( int, m_iFortPoints, MAX_PLAYERS + 1 );
-	CNetworkArray( int, m_iArmor, MAX_PLAYERS + 1 );
-	CNetworkArray( int, m_iClass, MAX_PLAYERS + 1 );	// |-- Mirv: Class info
+	void UpdateConnectedPlayer( int iIndex, CBasePlayer *pPlayer );
+	void UpdateDisconnectedPlayer( int iIndex );
 
-	CNetworkArray( int, m_iChannel, MAX_PLAYERS + 1 );	// |-- Mirv: Channel info
-	CNetworkArray( int, m_iAssists, MAX_PLAYERS + 1 );
+	CNetworkArray( int, m_iFortPoints, MAX_PLAYERS_ARRAY_SAFE );
+	CNetworkArray( int, m_iArmor, MAX_PLAYERS_ARRAY_SAFE );
+	CNetworkArray( int, m_iClass, MAX_PLAYERS_ARRAY_SAFE );	// |-- Mirv: Class info
+
+	CNetworkArray( int, m_iChannel, MAX_PLAYERS_ARRAY_SAFE );	// |-- Mirv: Channel info
+	CNetworkArray( int, m_iAssists, MAX_PLAYERS_ARRAY_SAFE );
 	CNetworkVar( bool, m_bIsIntermission );
 };
 

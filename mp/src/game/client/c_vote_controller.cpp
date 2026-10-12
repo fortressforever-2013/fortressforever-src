@@ -17,12 +17,14 @@
 
 IMPLEMENT_CLIENTCLASS_DT( C_VoteController, DT_VoteController, CVoteController )
 	RecvPropInt( RECVINFO( m_iActiveIssueIndex ), 0, C_VoteController::RecvProxy_VoteType ),
+	RecvPropInt( RECVINFO( m_nVoteIdx ) ),
 	RecvPropInt( RECVINFO( m_iOnlyTeamToVote ) ),
 	RecvPropArray3( RECVINFO_ARRAY( m_nVoteOptionCount ), RecvPropInt( RECVINFO( m_nVoteOptionCount[0] ), 0, C_VoteController::RecvProxy_VoteOption ) ),
 	RecvPropInt( RECVINFO( m_nPotentialVotes ) ),
 	RecvPropBool( RECVINFO( m_bIsYesNoVote ) )
 END_RECV_TABLE()
 
+ConVar sv_vote_holder_may_vote_no( "sv_vote_holder_may_vote_no", "0", FCVAR_REPLICATED, "1 = Vote caller is not forced to vote yes on yes/no votes." );
 
 //-----------------------------------------------------------------------------
 // Purpose:
@@ -80,6 +82,7 @@ C_VoteController::~C_VoteController()
 //-----------------------------------------------------------------------------
 void C_VoteController::ResetData()
 {
+	m_nVoteIdx = -1;
 	m_iActiveIssueIndex = INVALID_ISSUE;
 	m_iOnlyTeamToVote = TEAM_UNASSIGNED;
 	for( int i = 0; i < MAX_VOTE_OPTIONS; i++ )
@@ -132,6 +135,7 @@ void C_VoteController::ClientThink()
 
 					event->SetInt( szVoteOption, m_nVoteOptionCount[i] );
 				}
+				event->SetInt( "voteidx", m_nVoteIdx );
 				event->SetInt( "potentialVotes", m_nPotentialVotes );
 				gameeventmanager->FireEventClientSide( event );
 			}
@@ -153,6 +157,9 @@ void C_VoteController::FireGameEvent( IGameEvent *event )
 	{
 		const char *eventName = event->GetName();
 		if ( !eventName )
+			return;
+
+		if ( m_nVoteIdx != event->GetInt( "voteidx" ) )
 			return;
 
 		C_BasePlayer *pLocalPlayer = C_BasePlayer::GetLocalPlayer();

@@ -67,11 +67,11 @@ public : // IGameResources interface
 	virtual void ClientThink();
 	virtual	void	OnDataChanged(DataUpdateType_t updateType);
 
-/*	virtual int		GetUserID( int index );
+	virtual int		GetUserID( int index );
 
 	uint32 GetAccountID( int iIndex );
 	bool IsValid( int iIndex );
-*/
+
 protected:
 	void	UpdatePlayerName( int slot );
 
@@ -86,17 +86,17 @@ protected:
 	bool	m_bAlive[MAX_PLAYERS_ARRAY_SAFE];
 	int		m_iHealth[MAX_PLAYERS_ARRAY_SAFE];
 	Color	m_Colors[MAX_TEAMS];
-/*	uint32	m_iAccountID[MAX_PLAYERS_ARRAY_SAFE];
+	uint32	m_iAccountID[MAX_PLAYERS_ARRAY_SAFE];
 	bool	m_bValid[MAX_PLAYERS_ARRAY_SAFE];
 	int		m_iUserID[MAX_PLAYERS_ARRAY_SAFE];
-*/	int		m_iFortPoints[MAX_PLAYERS + 1];
-	int		m_iArmor[MAX_PLAYERS + 1];
-	int		m_iClass[MAX_PLAYERS + 1];	// |-- Mirv: Current class
-	int		m_iAssists[MAX_PLAYERS + 1];
+	int		m_iFortPoints[MAX_PLAYERS_ARRAY_SAFE];
+	int		m_iArmor[MAX_PLAYERS_ARRAY_SAFE];
+	int		m_iClass[MAX_PLAYERS_ARRAY_SAFE];	// |-- Mirv: Current class
+	int		m_iAssists[MAX_PLAYERS_ARRAY_SAFE];
 	string_t m_szUnconnectedName;
 
 public:
-	bool	m_bIsIntermission;
+	bool	m_bIsIntermission = false;
 };
 
 extern C_PlayerResource *g_PR;

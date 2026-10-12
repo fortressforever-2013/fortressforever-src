@@ -28,10 +28,10 @@ IMPLEMENT_CLIENTCLASS_DT_NOBASE(C_PlayerResource, DT_PlayerResource, CPlayerReso
 	RecvPropArray3( RECVINFO_ARRAY(m_iTeam), RecvPropInt( RECVINFO(m_iTeam[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_bAlive), RecvPropInt( RECVINFO(m_bAlive[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iHealth), RecvPropInt( RECVINFO(m_iHealth[0]))),
-/*	RecvPropArray3( RECVINFO_ARRAY(m_iAccountID), RecvPropInt( RECVINFO(m_iAccountID[0]))),
+	RecvPropArray3( RECVINFO_ARRAY(m_iAccountID), RecvPropInt( RECVINFO(m_iAccountID[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_bValid), RecvPropInt( RECVINFO(m_bValid[0]))),
 	RecvPropArray3( RECVINFO_ARRAY( m_iUserID ), RecvPropInt( RECVINFO( m_iUserID[0] ) ) ),
-*/	RecvPropArray3( RECVINFO_ARRAY(m_iFortPoints), RecvPropInt( RECVINFO(m_iFortPoints[0]))),
+	RecvPropArray3( RECVINFO_ARRAY(m_iFortPoints), RecvPropInt( RECVINFO(m_iFortPoints[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iArmor), RecvPropInt(RECVINFO(m_iArmor[0]))),
 	RecvPropArray3( RECVINFO_ARRAY(m_iClass), RecvPropInt(RECVINFO(m_iClass[0]))), // |-- Mirv: Current class
 	RecvPropArray3( RECVINFO_ARRAY(m_iAssists), RecvPropInt(RECVINFO(m_iAssists[0]))),
@@ -48,10 +48,10 @@ BEGIN_PREDICTION_DATA( C_PlayerResource )
 	DEFINE_PRED_ARRAY( m_iTeam, FIELD_INTEGER, MAX_PLAYERS_ARRAY_SAFE, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_bAlive, FIELD_BOOLEAN, MAX_PLAYERS_ARRAY_SAFE, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_iHealth, FIELD_INTEGER, MAX_PLAYERS_ARRAY_SAFE, FTYPEDESC_PRIVATE ),
-/*	DEFINE_PRED_ARRAY( m_iAccountID, FIELD_INTEGER, MAX_PLAYERS_ARRAY_SAFE, FTYPEDESC_PRIVATE ),
+	DEFINE_PRED_ARRAY( m_iAccountID, FIELD_INTEGER, MAX_PLAYERS_ARRAY_SAFE, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_bValid, FIELD_BOOLEAN, MAX_PLAYERS_ARRAY_SAFE, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_iUserID, FIELD_INTEGER, MAX_PLAYERS_ARRAY_SAFE, FTYPEDESC_PRIVATE ),
-*/	DEFINE_PRED_ARRAY( m_iFortPoints, FIELD_INTEGER, MAX_PLAYERS+1, FTYPEDESC_PRIVATE ),
+	DEFINE_PRED_ARRAY( m_iFortPoints, FIELD_INTEGER, MAX_PLAYERS+1, FTYPEDESC_PRIVATE ),
 	DEFINE_PRED_ARRAY( m_iArmor, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE),
 	DEFINE_PRED_ARRAY( m_iClass, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE),
 	DEFINE_PRED_ARRAY( m_iAssists, FIELD_INTEGER, MAX_PLAYERS + 1, FTYPEDESC_PRIVATE),
@@ -74,10 +74,10 @@ C_PlayerResource::C_PlayerResource()
 	memset( m_iTeam, 0, sizeof( m_iTeam ) );
 	memset( m_bAlive, 0, sizeof( m_bAlive ) );
 	memset( m_iHealth, 0, sizeof( m_iHealth ) );
-/*	memset( m_iAccountID, 0, sizeof( m_iAccountID ) );
+	memset( m_iAccountID, 0, sizeof( m_iAccountID ) );
 	memset( m_bValid, 0, sizeof( m_bValid ) );
 	memset( m_iUserID, 0, sizeof( m_iUserID ) );
-*/	memset( m_szName, 0, sizeof(m_szName) );
+	memset( m_szName, 0, sizeof(m_szName) );
 	memset( m_iFortPoints, 0, sizeof(m_iFortPoints) );
 	memset( m_iArmor, 0, sizeof(m_iArmor) );
 	memset( m_iClass, 0, sizeof(m_iClass) );	// |-- Mirv: Current class
@@ -135,10 +135,10 @@ void C_PlayerResource::UpdatePlayerName( int slot )
 	}
 	else 
 	{
-		
-		
+		if ( !IsValid( slot ) )
+		{
 			m_szName[slot] = m_szUnconnectedName;
-		
+		}
 	}
 }
 
@@ -165,7 +165,7 @@ const char *C_PlayerResource::GetPlayerName( int iIndex )
 		return PLAYER_ERROR_NAME;
 	}
 	
-	if ( !IsConnected( iIndex ) )
+	if ( !IsConnected( iIndex ) && !IsValid( iIndex ) )
 		return PLAYER_UNCONNECTED_NAME;
 
 	// X360TBD: Network - figure out why the name isn't set
@@ -235,7 +235,7 @@ bool C_PlayerResource::IsLocalPlayer(int index_ )
 
 bool C_PlayerResource::IsHLTV(int index_ )
 {
-	if ( !IsConnected( index_ ) )
+	if ( !IsConnected( index_ ) && !IsValid( index_ ) )
 		return false;
 
 	player_info_t sPlayerInfo;
@@ -251,7 +251,7 @@ bool C_PlayerResource::IsHLTV(int index_ )
 bool C_PlayerResource::IsReplay(int index_ )
 {
 #if defined( REPLAY_ENABLED )
-	if ( !IsConnected( index_ ) )
+	if ( !IsConnected( index_ ) && !IsValid( index_ ) )
 		return false;
 
 	player_info_t sPlayerInfo;
@@ -270,7 +270,7 @@ bool C_PlayerResource::IsReplay(int index_ )
 //-----------------------------------------------------------------------------
 bool C_PlayerResource::IsFakePlayer( int iIndex )
 {
-	if ( !IsConnected( iIndex ) )
+	if ( !IsConnected( iIndex ) && !IsValid( iIndex ) )
 		return false;
 
 	// Yuck, make sure it's up to date
@@ -288,7 +288,7 @@ bool C_PlayerResource::IsFakePlayer( int iIndex )
 //-----------------------------------------------------------------------------
 int	C_PlayerResource::GetPing( int iIndex )
 {
-	if ( !IsConnected( iIndex ) )
+	if ( !IsConnected( iIndex ) && !IsValid( iIndex ) )
 		return 0;
 
 	return m_iPing[iIndex];
@@ -310,7 +310,7 @@ int	C_PlayerResource::GetPacketloss( int iIndex )
 //-----------------------------------------------------------------------------
 int	C_PlayerResource::GetPlayerScore( int iIndex )
 {
-	if ( !IsConnected( iIndex ) )
+	if ( !IsConnected( iIndex ) && !IsValid( iIndex ) )
 		return 0;
 
 	return m_iScore[iIndex];
@@ -363,7 +363,7 @@ int C_PlayerResource::GetTeamClassLimits(int index, int classindex)
 //-----------------------------------------------------------------------------
 int	C_PlayerResource::GetFortPoints(int iIndex)
 {
-	if (!IsConnected(iIndex))
+	if ( !IsConnected(iIndex) && !IsValid( iIndex ) )
 		return 0;
 
 	return m_iFortPoints[iIndex];
@@ -375,7 +375,7 @@ int	C_PlayerResource::GetFortPoints(int iIndex)
 //-----------------------------------------------------------------------------
 int	C_PlayerResource::GetDeaths( int iIndex )
 {
-	if ( !IsConnected( iIndex ) )
+	if ( !IsConnected( iIndex ) && !IsValid( iIndex ) )
 		return 0;
 
 	return m_iDeaths[iIndex];
@@ -386,7 +386,7 @@ int	C_PlayerResource::GetDeaths( int iIndex )
 //-----------------------------------------------------------------------------
 int	C_PlayerResource::GetHealth( int iIndex )
 {
-	if ( !IsConnected( iIndex ) )
+	if ( !IsConnected( iIndex ) && !IsValid( iIndex ) )
 		return 0;
 
 	return m_iHealth[iIndex];
@@ -397,7 +397,7 @@ int	C_PlayerResource::GetHealth( int iIndex )
 //-----------------------------------------------------------------------------
 int	C_PlayerResource::GetArmor(int iIndex)
 {
-	if (!IsConnected(iIndex))
+	if ( !IsConnected( iIndex ) && !IsValid( iIndex ) )
 		return 0;
 
 	return m_iArmor[iIndex];
@@ -406,7 +406,7 @@ int	C_PlayerResource::GetArmor(int iIndex)
 // --> Mirv: Get the player's class
 int	C_PlayerResource::GetClass(int iIndex)
 {
-	if (!IsConnected(iIndex))
+	if ( !IsConnected( iIndex ) && !IsValid( iIndex ) )
 		return 0;
 
 	return m_iClass[iIndex];
@@ -441,7 +441,7 @@ bool C_PlayerResource::IsConnected( int iIndex )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-/*uint32 C_PlayerResource::GetAccountID( int iIndex )
+uint32 C_PlayerResource::GetAccountID( int iIndex )
 {
 	if ( ( iIndex < 0 ) || ( iIndex >= ARRAYSIZE( m_iAccountID ) ) )
 		return 0;
@@ -475,11 +475,11 @@ int C_PlayerResource::GetUserID( int iIndex )
 		return 0;
 
 	return m_iUserID[iIndex];
-}*/
+}
 
 int	C_PlayerResource::GetAssists(int iIndex)
 {
-	if (!IsConnected(iIndex))
+	if ( !IsConnected( iIndex ) && !IsValid( iIndex ) )
 		return 0;
 
 	return m_iAssists[iIndex];

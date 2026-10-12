@@ -112,13 +112,13 @@ int C_FF_PlayerResource::GetTeamLimits(int index)
 }
 // <-- Mirv: So menus can show correct limits
 
-int C_FF_PlayerResource::GetFrags(int index )
+int C_FF_PlayerResource::GetFrags(int iIndex )
 {
 	// BEG: Added by Mulchman
-	if (!IsConnected(index))
+	if ( !IsConnected( iIndex ) && !IsValid( iIndex ) )
 		return 0;
 
-	return m_iScore[index];
+	return m_iScore[iIndex];
 	// END: Added by Mulchman
 }
 
@@ -127,7 +127,7 @@ int C_FF_PlayerResource::GetFrags(int index )
 //-----------------------------------------------------------------------------
 int C_FF_PlayerResource::GetFortPoints(int iIndex)
 {
-	if (!IsConnected(iIndex))
+	if (!IsConnected( iIndex ) && !IsValid( iIndex ) )
 		return 0;
 
 	return m_iFortPoints[iIndex];
@@ -138,7 +138,7 @@ int C_FF_PlayerResource::GetFortPoints(int iIndex)
 //-----------------------------------------------------------------------------
 int C_FF_PlayerResource::GetArmor(int iIndex)
 {
-	if (!IsConnected(iIndex))
+	if ( !IsConnected( iIndex ) && !IsValid( iIndex ) )
 		return 0;
 
 	return m_iArmor[iIndex];
@@ -147,7 +147,7 @@ int C_FF_PlayerResource::GetArmor(int iIndex)
 // --> Mirv: Get the player's class
 int C_FF_PlayerResource::GetClass(int iIndex)
 {
-	if (!IsConnected(iIndex))
+	if ( !IsConnected( iIndex ) && !IsValid( iIndex ) )
 		return 0;
 
 	return m_iClass[iIndex];
@@ -185,7 +185,7 @@ bool Client_IsIntermission()
 //-----------------------------------------------------------------------------
 int C_FF_PlayerResource::GetAssists(int iIndex)
 {
-	if (!IsConnected(iIndex))
+	if ( !IsConnected( iIndex ) && !IsValid( iIndex ) )
 		return 0;
 
 	return m_iAssists[iIndex];

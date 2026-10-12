@@ -44,11 +44,11 @@ public:
 	bool		m_bIsIntermission = false;
 
 protected:
-	int		m_iFortPoints[MAX_PLAYERS + 1];	//BreakinBenny: This will be MAX_PLAYERS_ARRAY_SAFE in TF2 SDK
-	int		m_iArmor[MAX_PLAYERS + 1];
-	int		m_iClass[MAX_PLAYERS + 1];	// |-- Mirv: Current class
-	int		m_iChannel[MAX_PLAYERS + 1];	// |-- Mirv: For voice channels
-	int		m_iAssists[MAX_PLAYERS + 1];
+	int		m_iFortPoints[MAX_PLAYERS_ARRAY_SAFE];	//BreakinBenny: This will be MAX_PLAYERS_ARRAY_SAFE in TF2 SDK
+	int		m_iArmor[MAX_PLAYERS_ARRAY_SAFE];
+	int		m_iClass[MAX_PLAYERS_ARRAY_SAFE];	// |-- Mirv: Current class
+	int		m_iChannel[MAX_PLAYERS_ARRAY_SAFE];	// |-- Mirv: For voice channels
+	int		m_iAssists[MAX_PLAYERS_ARRAY_SAFE];
 };
 
 extern C_FF_PlayerResource *g_FF_PR;
