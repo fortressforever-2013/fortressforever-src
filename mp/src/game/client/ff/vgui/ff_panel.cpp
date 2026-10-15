@@ -26,6 +26,8 @@
 
 ConVar cl_teamcolourhud( "cl_teamcolourhud", "1", FCVAR_ARCHIVE );
 
+extern ConVar cl_teamcolourhud;
+
 extern C_PlayerResource *g_PR;
 
 namespace vgui
@@ -78,6 +80,7 @@ namespace vgui
 			else
 				m_pHudBackground->DrawSelf(0, 0, wide, tall, m_HudBackgroundColour);
 		}
+
 		if (m_pHudForeground)
 			m_pHudForeground->DrawSelf(0, 0, wide, tall, m_HudForegroundColour);
 

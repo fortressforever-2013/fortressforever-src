@@ -19,7 +19,7 @@ extern IFileSystem **pFilesystem;
 #include <vgui_controls/Button.h>
 */
 
-// memdbgon must be the last include file in a .cpp file!!! 
+// memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 //-----------------------------------------------------------------------------
@@ -34,7 +34,7 @@ CFFMiscOptions::CFFMiscOptions(Panel *parent, char const *panelName, const char 
 
 //-----------------------------------------------------------------------------
 // Purpose: Apply the player's changes
-//			
+//
 //-----------------------------------------------------------------------------
 void CFFMiscOptions::Apply()
 {
@@ -57,7 +57,6 @@ void CFFMiscOptions::Apply()
 		if (!pCvar)
 			continue;
 
-		// This is a bad show old chap
 		if (CheckButton *cb = dynamic_cast <CheckButton *> (pChild))
 		{
 			pCvar->SetValue(cb->IsSelected());
@@ -66,7 +65,7 @@ void CFFMiscOptions::Apply()
 		{
 			// Only replace the cvar with this option if it is not a custom one
 			const char *pszValue = cb->GetActiveItemUserData()->GetString("value");
-			if (Q_strncmp(pszValue, "custom", 6) != 0)
+			if (Q_strcmp(pszValue, "custom") != 0)
 				pCvar->SetValue(pszValue);
 		}
 		else if (CFFInputSlider *slider = dynamic_cast <CFFInputSlider *> (pChild))
@@ -215,7 +214,7 @@ void CFFMiscOptions::Load()
 
 			if (!slider)
 				continue;
-			
+
 			int minval = kvOption->GetInt("minval");
 			int maxval = kvOption->GetInt("maxval");
 
@@ -254,7 +253,6 @@ void CFFMiscOptions::Load()
 		if (!pCvar)
 			continue;
 
-		// This is a bad show old chap
 		if (CheckButton *cb = dynamic_cast <CheckButton *> (pChild))
 		{
 			cb->SetSelected(pCvar->GetBool());
@@ -262,6 +260,8 @@ void CFFMiscOptions::Load()
 		else if (ComboBox *cb = dynamic_cast <ComboBox *> (pChild))
 		{
 			int option = GetComboBoxOption(cb, pCvar->GetString());
+			char szCustomCaption[128];
+			g_pVGuiLocalize->ConvertUnicodeToANSI(g_pVGuiLocalize->Find("#GameUI_Custom"), szCustomCaption, sizeof(szCustomCaption));
 
 			// Option doesn't exist, so add a "custom field"
 			if (option == -1)
@@ -273,7 +273,7 @@ void CFFMiscOptions::Load()
 				{
 					KeyValues *kvItem = new KeyValues("kvItem");
 					kvItem->SetString("value", "custom");
-					cb->AddItem("custom", kvItem);
+					cb->AddItem(szCustomCaption, kvItem);
 					kvItem->deleteThis();
 				}
 
@@ -322,5 +322,6 @@ int CFFMiscOptions::GetComboBoxOption(ComboBox *cb, const char *value, const cha
 			return i;
 		}
 	}
+
 	return -1;
 }
