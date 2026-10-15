@@ -13,7 +13,6 @@
 
 #define TICK_INTERVAL			(gpGlobals->interval_per_tick)
 
-
 #define TIME_TO_TICKS( dt )		( (int)( 0.5f + (float)(dt) / TICK_INTERVAL ) )
 #define TICKS_TO_TIME( t )		( TICK_INTERVAL *( t ) )
 #define ROUND_TO_TICKS( t )		( TICK_INTERVAL * TIME_TO_TICKS( t ) )
@@ -214,11 +213,21 @@ enum CastVote
 #elif defined( FF_DLL ) || defined( FF_CLIENT_DLL ) // --> FF
 #define HIDEHUD_SPECTATING			( 1<<12 )	// Hide while spectating
 #define HIDEHUD_UNASSIGNED			( 1<<13 )	// Hide while the local player has not chosen a class or team
-#define HIDEHUD_BITCOUNT		14
+#define HIDEHUD_NOTSCOUT			( 1<<14 )	// Hide when not a scout
+#define HIDEHUD_NOTSNIPER			( 1<<15 )	// Hide when not a sniper
+#define HIDEHUD_NOTSOLDIER			( 1<<16 )	// Hide when not a soldier
+#define HIDEHUD_NOTDEMOMAN			( 1<<17 )	// Hide when not a demoman
+#define HIDEHUD_NOTMEDIC			( 1<<18 )	// Hide when not a medic
+#define HIDEHUD_NOTHWGUY			( 1<<19 )	// Hide when not a HWguy
+#define HIDEHUD_NOTPYRO				( 1<<20 )	// Hide when not a pryo
+#define HIDEHUD_NOTSPY				( 1<<21 )	// Hide when not a spy
+#define HIDEHUD_NOTENGINEER			( 1<<22 )	// Hide when not a engineer
+#define HIDEHUD_NOTCIVILIAN			( 1<<23 )	// Hide when not a civilian
+#define HIDEHUD_ALWAYS				( 1<<24 )	// HIDEHUD_ALL didnt seem to work?!
+#define HIDEHUD_BITCOUNT			25
 #else // <-- FF
 #define HIDEHUD_BITCOUNT			12
 #endif
-
 
 //===================================================================================================================
 // suit usage bits
@@ -227,7 +236,6 @@ enum CastVote
 #define bits_SUIT_DEVICE_BREATHER	0x00000004
 
 #define MAX_SUIT_DEVICES			3
-
 
 //===================================================================================================================
 // Player Defines
@@ -295,7 +303,6 @@ inline bool IsIndexIntoPlayerArrayValid( int iIndex )
 #define SKILL_MEDIUM	2
 #define SKILL_HARD		3
 
-
 // Weapon flags
 // -----------------------------------------
 //	Flags - NOTE: KEEP g_ItemFlags IN WEAPON_PARSE.CPP UPDATED WITH THESE
@@ -309,7 +316,6 @@ inline bool IsIndexIntoPlayerArrayValid( int iIndex )
 #define ITEM_FLAG_NOAMMOPICKUPS		(1<<6)	// Don't draw ammo pickup sprites/sounds when ammo is received
 #define ITEM_FLAG_NOITEMPICKUP		(1<<7)	// Don't draw weapon pickup when this weapon is picked up by the player
 // NOTE: KEEP g_ItemFlags IN WEAPON_PARSE.CPP UPDATED WITH THESE
-
 
 // Humans only have left and right hands, though we might have aliens with more
 //  than two, sigh
@@ -425,7 +431,6 @@ enum PLAYER_ANIM
 #endif
 #endif
 #define DAMAGE_FOR_FALL_SPEED		100.0f / ( PLAYER_FATAL_FALL_SPEED - PLAYER_MAX_SAFE_FALL_SPEED ) // damage per unit per second.
-
 
 #define AUTOAIM_2DEGREES  0.0348994967025
 #define AUTOAIM_5DEGREES  0.08715574274766
@@ -623,7 +628,6 @@ enum
 	FX_WATER_IN_SLIME = 0x1,
 };
 
-
 // Shared think context stuff
 #define	MAX_CONTEXT_LENGTH		32
 #define NO_THINK_CONTEXT	-1
@@ -722,7 +726,6 @@ enum FireBulletsFlags_t
 	FIRE_BULLETS_ALLOW_WATER_SURFACE_IMPACTS = 0x4,	// If the shot hits water surface, still call DoImpactEffect
 	FIRE_BULLETS_TEMPORARY_DANGER_SOUND = 0x8,		// Danger sounds added from this impact can be stomped immediately if another is queued
 };
-
 
 struct FireBulletsInfo_t
 {
