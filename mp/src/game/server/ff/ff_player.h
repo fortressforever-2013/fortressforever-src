@@ -39,8 +39,6 @@ class CFFGrenadeBase;
 
 #define FF_BUILD_DISP_STRING_LEN	256
 
-#define CELLS_PER_MEDPACK 10
-
 // Speed effect type
 enum SpeedEffectType
 {
@@ -275,12 +273,6 @@ public:
 	// END: Added by Mulchman for armor stuff
 
 	void	SetLastSpawn( CBaseEntity *pEntity );
-
-private:
-	// ----------------------
-	// Messages
-	// ----------------------
-	void SendMedpacksMsg();
 
 public:
 	// Networked the random player class var -> Defrag

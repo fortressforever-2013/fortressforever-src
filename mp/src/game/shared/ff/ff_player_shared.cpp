@@ -231,22 +231,6 @@ bool CFFPlayer::FFAnim_CanMove()
 	return true;
 }
 
-#ifdef GAME_DLL
-void CFFPlayer::SendMedpacksMsg()
-{
-	CSingleUserRecipientFilter user(this);
-	user.MakeReliable();
-
-	int iMaxMedpacks = m_iMaxAmmo[GetAmmoDef()->Index(AMMO_CELLS)] / CELLS_PER_MEDPACK;
-	int iMedpackCount = GetAmmoCount(AMMO_CELLS) / CELLS_PER_MEDPACK;
-
-	UserMessageBegin(user, "MedpacksMsg");
-	WRITE_BYTE(iMaxMedpacks);
-	WRITE_BYTE(iMedpackCount);
-	MessageEnd();
-}
-#endif
-
 //ConVar sniperrifle_basedamage( "ffdev_sniperrifle_basedamage", "45", FCVAR_FF_FFDEV_REPLICATED, "Base Damage for Sniper Rifle" );
 #define	SR_BASE_DAMAGE 25.0f // sniperrifle_basedamage.GetFloat()
 
@@ -793,9 +777,8 @@ void CFFPlayer::ClassSpecificSkill()
 				// Play a sound
 				EmitSound("Item.Toss");
 
-				RemoveAmmo(CELLS_PER_MEDPACK, AMMO_CELLS);
+				RemoveAmmo(10, AMMO_CELLS);
 				m_fLastMedicCellRegenTick = gpGlobals->curtime;
-				SendMedpacksMsg();
 			}
 		}
 		break;
