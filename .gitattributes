@@ -60,3 +60,6 @@ mod_*_english.txt binary
 .gitattributes export-ignore
 .gitignore export-ignore
 .github export-ignore
+
+# Source SDK 2013 translation files
+resource/*.txt diff=src_utf16
