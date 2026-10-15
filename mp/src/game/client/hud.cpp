@@ -31,6 +31,8 @@
 // --> FF
 #include "c_ff_player.h"
 #include "ff_utils.h"
+#include "ff_quantitypanel.h"
+#include "ienginevgui.h"
 // <-- FF
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -179,7 +181,6 @@ CHudTexture* FindHudTextureInDict(CUtlDict< CHudTexture*, int >& list, const cha
 // Globally-used fonts
 vgui::HFont g_hFontTrebuchet24 = vgui::INVALID_FONT;
 
-
 //=======================================================================================================================
 // Hud Element Visibility handling
 //=======================================================================================================================
@@ -190,8 +191,6 @@ typedef struct hudelement_hidden_s
 } hudelement_hidden_t;
 
 ConVar hidehud( "hidehud", "0", FCVAR_CHEAT );
-
-
 
 CHudTexture::CHudTexture()
 {
@@ -243,7 +242,6 @@ CHudTexture::~CHudTexture()
 		textureId = -1;
 	}
 }
-
 
 //=======================================================================================================================
 //  CHudElement
@@ -307,6 +305,13 @@ void CHudElement::SetHiddenBits( int iBits )
 //-----------------------------------------------------------------------------
 bool CHudElement::ShouldDraw( void )
 {
+	if (!engine->IsInGame() || enginevgui->IsGameUIVisible())
+	{
+		vgui::FFQuantityPanel* pQuantityPanel = dynamic_cast<vgui::FFQuantityPanel*>(this);
+		if (pQuantityPanel && pQuantityPanel->IsInPreviewMode())
+			return (m_iHiddenBits & HIDEHUD_ALWAYS) == 0;
+	}
+
 	bool bShouldDraw = ( !gHUD.IsHidden( m_iHiddenBits ) );
 
 	if ( bShouldDraw )
@@ -537,7 +542,6 @@ void CHud::Shutdown( void )
 	m_HudList.Purge();
 	m_bHudTexturesLoaded = false;
 }
-
 
 //-----------------------------------------------------------------------------
 // Purpose: LevelInit's called whenever a new level is starting
@@ -1011,6 +1015,9 @@ bool CHud::IsHidden( int iHudFlags )
 		return true;
 
 	// --> FF
+	if (iHudFlags & HIDEHUD_ALWAYS)
+		return true;
+
 	if ((iHudFlags & HIDEHUD_SPECTATING) && (pPlayer->IsObserver()))
 		return true;
 
@@ -1019,6 +1026,54 @@ bool CHud::IsHidden( int iHudFlags )
 
 	if ((iHudFlags & HIDEHUD_UNASSIGNED) && ((!FF_HasPlayerPickedClass(pFFPlayer) && !FF_IsPlayerSpec(pFFPlayer)) || pPlayer->GetTeamNumber() <= TEAM_UNASSIGNED))
 		return true;
+
+	if (pFFPlayer)
+	{
+		// Define the ClassFlag struct inline
+		struct ClassFlag {
+			int classType;  // The class type (e.g., CLASS_SCOUT)
+			int flag;       // The corresponding hide flag (e.g., HIDEHUD_NOTSCOUT)
+		};
+
+		// Define the class types and their corresponding hide flags
+		static const ClassFlag classFlags[] = {
+			{CLASS_SCOUT, HIDEHUD_NOTSCOUT},
+			{CLASS_SNIPER, HIDEHUD_NOTSNIPER},
+			{CLASS_SOLDIER, HIDEHUD_NOTSOLDIER},
+			{CLASS_DEMOMAN, HIDEHUD_NOTDEMOMAN},
+			{CLASS_MEDIC, HIDEHUD_NOTMEDIC},
+			{CLASS_HWGUY, HIDEHUD_NOTHWGUY},
+			{CLASS_PYRO, HIDEHUD_NOTPYRO},
+			{CLASS_SPY, HIDEHUD_NOTSPY},
+			{CLASS_ENGINEER, HIDEHUD_NOTENGINEER},
+			{CLASS_CIVILIAN, HIDEHUD_NOTCIVILIAN}
+		};
+
+		// Calculate the number of elements in classFlags[] only once
+		const int numClasses = sizeof(classFlags) / sizeof(classFlags[0]);
+
+		// Dynamically construct the hideFlagsMask from the classFlags[] array
+		int hideFlagsMask = 0;
+		for (int i = 0; i < numClasses; ++i) {
+			hideFlagsMask |= classFlags[i].flag;  // Combine the flags with bitwise OR
+		}
+
+		// Check if any hide flags are set
+		if (iHudFlags & hideFlagsMask)
+		{
+			const int classSlot = pFFPlayer->GetClassSlot();
+
+			// Loop through classFlags to check the specific class flag
+			for (int i = 0; i < numClasses; ++i)
+			{
+				if (classFlags[i].classType == classSlot
+					&& !(iHudFlags & classFlags[i].flag))
+				{
+					return true; // The corresponding hide flag isn't set, so we return true
+				}
+			}
+		}
+	}
 
 	// use the spectating target for any checks from here on out
 	pFFPlayer = C_FFPlayer::GetLocalFFPlayerOrAnyObserverTarget();

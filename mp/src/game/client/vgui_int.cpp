@@ -33,6 +33,7 @@
 #endif
 
 #include "ff_options.h"
+#include "ff_customhudoptions.h"
 #include "ff_gamemodes.h"
 //#include "ff_training.h"
 
@@ -162,7 +163,6 @@ static void VGui_OneTimeInit()
 
 	vgui::Panel::AddPropertyConverter( "CHudTextureHandle", &textureHandleConverter );
 
-
     g_pMaterialSystem->AddModeChangeCallBack( &VGui_VideoMode_AdjustForModeChange );
 }
 
@@ -227,6 +227,7 @@ void VGui_CreateGlobalPanels( void )
 	ffoptions->Create(uiParent);
 	ffgamemodes->Create(uiParent);
 	//fftraining->Create(uiParent);
+	ffcustomhudoptions->Create(uiParent);
 	// <-- Mirv
 
 #ifdef SIXENSE
@@ -257,6 +258,7 @@ void VGui_Shutdown()
 	ffoptions->Destroy();
 	ffgamemodes->Destroy();
 	//fftraining->Destroy();
+	ffcustomhudoptions->Destroy();
 	// <-- Mirv
 
 	if ( g_pClientMode )

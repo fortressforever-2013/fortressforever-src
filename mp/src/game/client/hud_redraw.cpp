@@ -16,6 +16,10 @@
 #include "hud_crosshair.h"
 #include <vgui/ISurface.h>
 
+#ifdef FF_CLIENT_DLL
+#include "ff_quantitypanel.h"
+#endif
+
 #if defined( REPLAY_ENABLED )
 #include "replay/ienginereplay.h"
 #endif
@@ -67,6 +71,14 @@ void CHud::Think(void)
 
 		// If it's a vgui panel, hide/show as appropriate
 		vgui::Panel *pPanel = dynamic_cast<vgui::Panel*>(m_HudList[i]);
+#ifdef FF_CLIENT_DLL
+		FFQuantityPanel* pQuantityPanel = dynamic_cast<FFQuantityPanel*>(pPanel);
+		if (pQuantityPanel)
+		{
+			pQuantityPanel->UpdateHudVisibility(visible);
+		}
+		else
+#endif
 		if ( pPanel && pPanel->IsVisible() != visible )
 		{
 			pPanel->SetVisible( visible );
@@ -206,5 +218,4 @@ void CHud::DrawIconProgressBar( int x, int y, CHudTexture *icon, CHudTexture *ic
 			clr );
 	}
 }
-
 
