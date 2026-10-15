@@ -80,14 +80,33 @@ namespace vgui
 		//-----------------------------------------------------------------------------
 		// Purpose: Link this slider in with an input box
 		//-----------------------------------------------------------------------------
-		CFFInputSlider(Panel* parent, char const* panelName, char const* inputName)
+		CFFInputSlider(Panel* parent, char const* panelName, char const* inputName, Panel* pActionSignalTarget = NULL)
 			: BaseClass(parent, panelName)
 		{
 			m_pInputBox = new CLinkedTextEntry(parent, inputName, this);
 			m_pInputBox->SetAllowNumericInputOnly(true);
 			m_pInputBox->AddActionSignalTarget(this);
 
-			AddActionSignalTarget(parent);
+			if (pActionSignalTarget)
+			{
+				AddActionSignalTarget(pActionSignalTarget);
+			}
+			else
+			{
+				AddActionSignalTarget(parent);
+			}
+		}
+
+		void AddActionSignalTarget(Panel* messageTarget) override
+		{
+			m_pInputBox->AddActionSignalTarget(messageTarget);
+			BaseClass::AddActionSignalTarget(messageTarget);
+		}
+
+		void RemoveActionSignalTarget(Panel* oldTarget) override
+		{
+			m_pInputBox->RemoveActionSignalTarget(oldTarget);
+			BaseClass::RemoveActionSignalTarget(oldTarget);
 		}
 
 		//-----------------------------------------------------------------------------
