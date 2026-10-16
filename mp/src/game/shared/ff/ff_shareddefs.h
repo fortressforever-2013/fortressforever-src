@@ -22,6 +22,9 @@
 #define FF_PLAYER_VIEW_OFFSET	Vector( 0, 0, 53.5 )
 #define EXTRA_LOCAL_ORIGIN_ACCURACY
 
+// Maximum deployed pipebombs per player.
+#define FF_MAX_PIPEBOMBS 6
+
 #define DEFAULTWEAPON_SCOUT "shotgun"
 #define DEFAULTWEAPON_SNIPER "sniperrifle"
 #define DEFAULTWEAPON_SOLDIER "rpg"
