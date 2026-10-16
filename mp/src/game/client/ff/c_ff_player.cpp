@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -990,11 +990,11 @@ void C_FFRagdoll::CreateFFRagdoll( void )
 				Warning( "[C_FFRagdoll :: CreateRagdoll] Missing sequence walk_lower!\n" );
 
 				// Mulch: to start knowing what asserts are popping up for when testing stuff
-				// AssertMsg( false, "missing sequence walk_lower" ); 
-				//Assert( false );	// missing walk_lower?				
+				// AssertMsg( false, "missing sequence walk_lower" );
+				//Assert( false );	// missing walk_lower?
 				iSeq = 0;
 			}
-			
+
 			SetSequence( iSeq );	// walk_lower, basic pose
 			SetCycle( 0.0 );
 
@@ -1022,7 +1022,7 @@ void C_FFRagdoll::CreateFFRagdoll( void )
 		SetAbsVelocity( m_vecRagdollVelocity );
 
 		Interp_Reset( GetVarMapping() );
-		
+
 	}
 
 	SetModelIndex( m_nModelIndex );
@@ -1349,8 +1349,8 @@ C_FFPlayer::~C_FFPlayer()
 
 	ReleaseFlashlight();
 
-	// TODO: This would probably be better solved by adding some safety to the jetpack particle effect 
-	// (probably related to the particle effect setting its OwnerEntity as the player), but this fixes 
+	// TODO: This would probably be better solved by adding some safety to the jetpack particle effect
+	// (probably related to the particle effect setting its OwnerEntity as the player), but this fixes
 	// the crash when a jetpacking player disconnects so it's good enough for now
 	if (!!m_pJetpackEmitter)
 	{
@@ -1361,7 +1361,7 @@ C_FFPlayer::~C_FFPlayer()
 
 C_FFPlayer* C_FFPlayer::GetLocalFFPlayer()
 {
-	// Assert thrown from here sometimes, validate 
+	// Assert thrown from here sometimes, validate
 	// C_BasePlayer::GetLocalPlayer() first
 	if (C_BasePlayer::GetLocalPlayer())
 		return ToFFPlayer(C_BasePlayer::GetLocalPlayer());
@@ -1423,7 +1423,7 @@ void C_FFPlayer::MapDisguisedWeaponSlot(int classDisguisedAs, int spyWeaponSlot,
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void C_FFPlayer::PreThink(void)
 {
@@ -1449,7 +1449,7 @@ void C_FFPlayer::PreThink(void)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void C_FFPlayer::PostThink(void)
 {
@@ -1700,7 +1700,7 @@ void C_FFPlayer::Spawn(void)
 
 	// Stop any looping sounds - this too hack-ish?
 	// Mirv: Might be better to ensure this happens only for local player, all players
-	// will have this function called when they are first created and this might 
+	// will have this function called when they are first created and this might
 	// therefore stop sounds at 'random' times
 	//if (IsLocalPlayer())
 	//{
@@ -1711,7 +1711,7 @@ void C_FFPlayer::Spawn(void)
 	// #0001382: Random player class mode should show "you spawned as..." upon each spawn -> Defrag
 	if (m_fRandomPC)
 	{
-		// Add a better message later (localised spawn message along the lines of "You spawned as <class>"		
+		// Add a better message later (localised spawn message along the lines of "You spawned as <class>"
 		ClientPrintMsg(this, HUD_PRINTCENTER, Class_IntToResourceString(GetClassSlot()));
 	}
 
@@ -2058,7 +2058,7 @@ bool C_FFPlayer::GuaranteedCloaked() const
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 int C_FFPlayer::DrawModel(int flags)
 {
@@ -2068,7 +2068,7 @@ int C_FFPlayer::DrawModel(int flags)
 		DrawPlayerIcons();
 
 		// 1386: a better fix for spies being completely invisible while cloaked
-		// RENDER_GROUP_TRANSLUCENT_ENTITY turns on the STUDIO_TRANSPARENCY flag for the model and adds it 
+		// RENDER_GROUP_TRANSLUCENT_ENTITY turns on the STUDIO_TRANSPARENCY flag for the model and adds it
 		// to the translucent renderables list, but not to the opaque renderables list as well.
 		// RENDER_GROUP_TWOPASS adds the model to both renderables lists, so we need to return if not cloaked
 		if (!IsCloaked())
@@ -2101,7 +2101,7 @@ int C_FFPlayer::DrawModel(int flags)
 		{
 			int nSkin = entindex() + pLocalPlayer->m_iHallucinationIndex;
 
-			// It doesn't really matter if this is actually odd or even, 
+			// It doesn't really matter if this is actually odd or even,
 			// we just need to differentiate between half of them
 			if (nSkin & 1)
 			{
@@ -2159,7 +2159,7 @@ float MidAngle(float target, float value, float amount)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 const QAngle& C_FFPlayer::EyeAngles()
 {
@@ -2211,7 +2211,7 @@ const QAngle& C_FFPlayer::EyeAngles()
 ConVar cl_ragdoll_deathview("cl_ragdoll_deathview", "0", FCVAR_ARCHIVE, "When you die with a ragdoll, you'll see what it sees.");
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void C_FFPlayer::CalcView(Vector& eyeOrigin, QAngle& eyeAngles, float& zNear, float& zFar, float& fov)
 {
@@ -2279,7 +2279,7 @@ void C_FFPlayer::CalcView(Vector& eyeOrigin, QAngle& eyeAngles, float& zNear, fl
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void C_FFPlayer::CalcViewModelView(const Vector& eyeOrigin, const QAngle& eyeAngles)
 {
@@ -2306,7 +2306,7 @@ void C_FFPlayer::CalcViewModelView(const Vector& eyeOrigin, const QAngle& eyeAng
 // <-- Mirv: Conc angles
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 const QAngle& C_FFPlayer::GetRenderAngles(void)
 {
@@ -2321,7 +2321,7 @@ const QAngle& C_FFPlayer::GetRenderAngles(void)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void C_FFPlayer::UpdateClientSideAnimation()
 {
@@ -2341,7 +2341,7 @@ void C_FFPlayer::UpdateClientSideAnimation()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void C_FFPlayer::PostDataUpdate(DataUpdateType_t updateType)
 {
@@ -2368,7 +2368,7 @@ void C_FFPlayer::PostDataUpdate(DataUpdateType_t updateType)
 
 //-----------------------------------------------------------------------------
 // Purpose: Store original ammo data to see what has changed
-// Input  : bnewentity - 
+// Input  : bnewentity -
 //-----------------------------------------------------------------------------
 void C_FFPlayer::OnPreDataChanged(DataUpdateType_t updateType)
 {
@@ -2379,7 +2379,7 @@ void C_FFPlayer::OnPreDataChanged(DataUpdateType_t updateType)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void C_FFPlayer::OnDataChanged(DataUpdateType_t type)
 {
@@ -2488,7 +2488,7 @@ void C_FFPlayer::OnDataChanged(DataUpdateType_t type)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void C_FFPlayer::ClientThink(void)
 {
@@ -2654,7 +2654,7 @@ void C_FFPlayer::ClientThink(void)
 		}
 		// TODO: Is StopSound expensive?
 		// Should this only be called if we know the sound is playing?
-		// 
+		//
 		// Yeah it seems to spam the console when sv_soundemitter_trace is set to 1
 		// so we should only call it when actually needed
 
@@ -2706,7 +2706,7 @@ void C_FFPlayer::ClientThink(void)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void C_FFPlayer::Simulate()
 {
@@ -2740,7 +2740,7 @@ void C_FFPlayer::Simulate()
 			flTotalAngle += m_angConced.x;
 
 			// We need to make sure we're not looking down further than 90 as this
-			// makes the viewmodel glitchy. Therefore remove any excess from the 
+			// makes the viewmodel glitchy. Therefore remove any excess from the
 			// conced angles.
 			// We have to do this here rather than on the viewmodel because the
 			// viewmodel also has to be locked so that you can't see below it which
@@ -2759,7 +2759,7 @@ void C_FFPlayer::Simulate()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void C_FFPlayer::DoAnimationEvent(PlayerAnimEvent_t event)
 {
@@ -2819,7 +2819,7 @@ ShadowType_t C_FFPlayer::ShadowCastType(void)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 bool C_FFPlayer::ShouldDraw(void)
 {
@@ -3163,7 +3163,7 @@ void C_FFPlayer::UpdateFlashlight()
 			m_pFlashlight->TurnOn();
 		}
 
-		// get the unperturbed eye angles, then alter them using the conc effect. 
+		// get the unperturbed eye angles, then alter them using the conc effect.
 		QAngle angUnperturbedEye = EyeAngles();
 		QAngle angFinal = angUnperturbedEye;
 

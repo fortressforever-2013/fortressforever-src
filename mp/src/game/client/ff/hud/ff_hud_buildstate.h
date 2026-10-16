@@ -6,8 +6,8 @@
 	file base:	ff_hud_buildstate
 	file ext:	h
 	author:		Gavin "Mirvin_Monkey" Bramhill
-	
-	purpose:	
+
+	purpose:
 *********************************************************************/
 #include "cbase.h"
 
