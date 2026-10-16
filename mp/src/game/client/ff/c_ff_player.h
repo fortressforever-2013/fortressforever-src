@@ -139,7 +139,7 @@ public:
 
 	void Increment(void)
 	{
-		m_iPipes = clamp(m_iPipes + 1, 0, 6);
+		m_iPipes = clamp(m_iPipes + 1, 0, FF_MAX_PIPEBOMBS);
 	}
 
 	// Call this when the player dies
