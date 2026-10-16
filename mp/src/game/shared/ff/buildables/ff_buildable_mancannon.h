@@ -8,7 +8,7 @@
 //
 // REVISIONS
 // ---------
-// 12/6/2007, Mulchman: 
+// 12/6/2007, Mulchman:
 //		First created
 //		Added man cannon stuff
 
@@ -45,7 +45,7 @@ public:
 	virtual int DrawModel(int flags);
 
 	// Creates a client side ONLY man cannon - used for the build slot
-	static CFFManCannon *CreateClientSideManCannon( const Vector& vecOrigin, const QAngle& vecAngles );	
+	static CFFManCannon *CreateClientSideManCannon( const Vector& vecOrigin, const QAngle& vecAngles );
 
 	float m_flLastDamage;
 #else
@@ -54,7 +54,7 @@ public:
 
 	void OnObjectTouch( CBaseEntity *pOther );
 	void OnJumpPadThink( void );
-	
+
 	// These are for updating the user
 	virtual void	PhysicsSimulate();
 	float			m_flLastClientUpdate;

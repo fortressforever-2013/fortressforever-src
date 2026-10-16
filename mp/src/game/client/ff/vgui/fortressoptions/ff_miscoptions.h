@@ -28,7 +28,7 @@ public:
 	CFFMiscOptions(Panel *parent, char const *panelName, const char *pszSourceFile);
 
 	//-----------------------------------------------------------------------------
-	// Purpose: Apply the changes	
+	// Purpose: Apply the changes
 	//-----------------------------------------------------------------------------
 	void Apply();
 
