@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -89,7 +89,7 @@ ConVar sv_motd_enable( "sv_motd_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "
 #define OVERPRESSURE_PUSH_HORIZONTAL 350.0f
 //ConVar ffdev_overpressure_push_vertical( "ffdev_overpressure_push_vertical", "350", FCVAR_FF_FFDEV_REPLICATED );
 #define OVERPRESSURE_PUSH_VERTICAL 350.0f
-// for release code: need to update ff_hud_overpressure.cpp #define 
+// for release code: need to update ff_hud_overpressure.cpp #define
 //ConVar ffdev_overpressure_delay( "ffdev_overpressure_delay", "16", FCVAR_FF_FFDEV_REPLICATED );
 #define OVERPRESSURE_DELAY 16
 //ConVar ffdev_overpressure_cell_cost( "ffdev_overpressure_cell_cost", "10", FCVAR_FF_FFDEV_REPLICATED );
@@ -163,7 +163,7 @@ ConVar sv_motd_enable( "sv_motd_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "
 
 //ConVar ffdev_sniperrifle_legshot_minslowdownspeed( "ffdev_sniperrifle_legshot_minslowdownspeed", "0.7", FCVAR_FF_FFDEV_REPLICATED, "Player speed when hit with a minimum charge sniper rifle shot (0.7 would mean player speed at 70% after being legshot)" );
 //ConVar ffdev_sniperrifle_legshot_chargedivider( "ffdev_sniperrifle_legshot_chargedivider", "3", FCVAR_FF_FFDEV_REPLICATED, "1/number = extra slowdown when hit with max charge legshot. e.g. if '3.0' then 33% extra slowdown @ max charge" );
-			
+
 // Time in seconds you have to wait until you can cloak again
 //ConVar ffdev_spy_nextcloak( "ffdev_spy_nextcloak", "5", FCVAR_FF_FFDEV_REPLICATED, "Time in seconds you have to wait until you can cloak again" );
 #define SPY_NEXTCLOAK 5.0f
@@ -267,7 +267,7 @@ void CFFPlayer::FireBullet(
 	if (!pevAttacker)
 		pevAttacker = this;  // the default attacker is ourselves
 
-	// add the spray 
+	// add the spray
 	/*
 	Vector vecDir = vecDirShooting +
 		x * vecSpread * vecRight +
@@ -275,7 +275,7 @@ void CFFPlayer::FireBullet(
 		*/
 
 	Vector vecDir = vecDirShooting;
-	VectorNormalize( vecDir );	
+	VectorNormalize( vecDir );
 
 	Vector vecEnd = vecSrc + ( vecDir * flMaxRange ); // max bullet range is 10000 units
 
@@ -338,7 +338,7 @@ void CFFPlayer::FireBullet(
 		// what was the old code?  seriously...
 		float flChargePercentage = ( flSniperRifleCharge / FF_SNIPER_MAXCHARGE);
 		flCurrentDamage = SR_BASE_DAMAGE + ( flChargePercentage * (SR_BASE_DAMAGE_MAX - SR_BASE_DAMAGE) );
-		
+
 		/*float fOldDamage = flBaseDamage * flSniperRifleCharge;
 		if (fOldDamage < flBaseDamage)
 			fOldDamage = flBaseDamage;
@@ -453,7 +453,7 @@ void CFFPlayer::FireBullet(
 			// AfterShock: this should be like 0.7f - 7 / (7 * 2)
 			// so like if divider is high, less slowdown,  divider low = more slowdown
 			//float flSpeed = ffdev_sniperrifle_legshot_minslowdownspeed.GetFloat() - flSniperRifleCharge / ( FF_SNIPER_MAXCHARGE * ffdev_sniperrifle_legshot_chargedivider.GetFloat() );
-			
+
 			// max legshot slowdown is reached in 2 seconds (ish) - since you can fire off 2 quick legshots to achieve same result.
 			float flSpeed = 0.7f - flSniperRifleCharge / FF_SNIPER_MAXCHARGE ;
 			if( player->LuaRunEffect( LUA_EF_LEGSHOT, pShooter, &flDuration, &flIconDuration, &flSpeed ) )
@@ -464,7 +464,7 @@ void CFFPlayer::FireBullet(
 				}
 			}
 #endif
-		}			
+		}
 	}
 	// --> Mirv: Locational damage
 
@@ -479,7 +479,7 @@ void CFFPlayer::FireBullet(
 	{
 		// See if the bullet ended up underwater + started out of the water
 		if (enginetrace->GetPointContents(tr.endpos) & (CONTENTS_WATER|CONTENTS_SLIME))
-		{	
+		{
 			trace_t waterTrace;
 			UTIL_TraceLine(vecSrc, tr.endpos, (MASK_SHOT|CONTENTS_WATER|CONTENTS_SLIME), this, COLLISION_GROUP_NONE, &waterTrace);
 
@@ -666,7 +666,7 @@ void CFFPlayer::PlayFallSound(Vector &vecOrigin, surfacedata_t *psurface, float 
 	m_flFallTime = gpGlobals->curtime + 0.4f;
 
 #ifdef CLIENT_DLL
-	
+
 	if ( GetClassSlot() == 8 )
 		FF_SendHint( SPY_SPLAT, 3, PRIORITY_NORMAL, "#FF_HINT_SPY_SPLAT" );
 #endif
@@ -677,7 +677,7 @@ void CFFPlayer::PlayFallSound(Vector &vecOrigin, surfacedata_t *psurface, float 
 void CFFPlayer::PlayStepSound(Vector &vecOrigin, surfacedata_t *psurface, float fvol, bool force)
 {
 	// Remember last time idled
-	m_flIdleTime = gpGlobals->curtime;	
+	m_flIdleTime = gpGlobals->curtime;
 
 	switch( GetClassSlot() )
 	{
@@ -740,7 +740,7 @@ void CFFPlayer::ClassSpecificSkill()
 		return;
 
 #ifdef CLIENT_DLL
-	CFFWeaponBase *pWeapon = GetActiveFFWeapon();		
+	CFFWeaponBase *pWeapon = GetActiveFFWeapon();
 #endif
 
 	switch (GetClassSlot())
@@ -785,13 +785,13 @@ void CFFPlayer::ClassSpecificSkill()
 		}
 		break;
 #endif
-		
+
 		case CLASS_HWGUY:
 			/*if( pWeapon && (pWeapon->GetWeaponID() == FF_WEAPON_ASSAULTCANNON) )
 			{
 				SwapToWeapon(FF_WEAPON_SUPERSHOTGUN);
 			}
-			else 
+			else
 			{
 				SwapToWeapon(FF_WEAPON_ASSAULTCANNON);
 			}*/
@@ -822,7 +822,7 @@ void CFFPlayer::ClassSpecificSkill()
 			{
 				SwapToWeapon(FF_WEAPON_SUPERSHOTGUN);
 			}
-			else 
+			else
 			{
 				SwapToWeapon(FF_WEAPON_RPG);
 			}
@@ -834,7 +834,7 @@ void CFFPlayer::ClassSpecificSkill()
 			if( IsAlive()  )
 			{
 				HudContextShow(true);
-			}			
+			}
 			break;
 
 #endif
@@ -903,7 +903,7 @@ Vector CFFPlayer::GetFeetOrigin( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 int CFFPlayer::GetHealthPercentage( void ) const
 {
@@ -912,7 +912,7 @@ int CFFPlayer::GetHealthPercentage( void ) const
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 int CFFPlayer::GetArmorPercentage( void ) const
 {
@@ -977,7 +977,7 @@ CFFManCannon *CFFPlayer::GetManCannon( void ) const
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 CFFBuildableObject *CFFPlayer::GetBuildable( int iBuildable ) const
 {
@@ -996,7 +996,7 @@ CFFBuildableObject *CFFPlayer::GetBuildable( int iBuildable ) const
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 bool CFFPlayer::IsDisguised( void ) const
 {
@@ -1004,18 +1004,18 @@ bool CFFPlayer::IsDisguised( void ) const
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 int CFFPlayer::GetDisguisedTeam( void ) const
 {
-	if( IsDisguised() )	
+	if( IsDisguised() )
 		return ( m_iSpyDisguise & 0x0000000F );
 
 	return TEAM_UNASSIGNED;
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 int CFFPlayer::GetDisguisedClass( void ) const
 {
@@ -1026,7 +1026,7 @@ int CFFPlayer::GetDisguisedClass( void ) const
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 bool CFFPlayer::HasLastDisguise( void ) const
 {
@@ -1034,18 +1034,18 @@ bool CFFPlayer::HasLastDisguise( void ) const
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 int CFFPlayer::GetLastDisguisedTeam( void ) const
 {
-	if( HasLastDisguise() )	
+	if( HasLastDisguise() )
 		return ( m_iLastSpyDisguise & 0x0000000F );
 
 	return TEAM_UNASSIGNED;
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 int CFFPlayer::GetLastDisguisedClass( void ) const
 {
@@ -1056,7 +1056,7 @@ int CFFPlayer::GetLastDisguisedClass( void ) const
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 float CFFPlayer::GetMovementSpeed( void ) const
 {
@@ -1279,7 +1279,7 @@ void CFFPlayer::FireBullets(const FireBulletsInfo_t &info)
 				if (bStartedInWater || !bHitWater || (info.m_nFlags & FIRE_BULLETS_ALLOW_WATER_SURFACE_IMPACTS))
 				{
 					// Only draw impact effects when you do a tracer, or this weapon doesnt have tracers
-					// this helps cut down the effect message spam for the AC - AfterShock 
+					// this helps cut down the effect message spam for the AC - AfterShock
 					if ((info.m_iTracerFreq == 0) || (tracerCount % FF_AC_IMPACTFREQ ) == 0)
 					{
 						if (bDoServerEffects)
@@ -1322,7 +1322,7 @@ void CFFPlayer::FireBullets(const FireBulletsInfo_t &info)
 						else
 							bDoImpacts = true;
 					}// end if tracers
-				} 
+				}
 				else
 				{
 					// We may not impact, but we DO need to affect ragdolls on the client
@@ -1337,7 +1337,7 @@ void CFFPlayer::FireBullets(const FireBulletsInfo_t &info)
 #ifdef GAME_DLL
 				// Make sure if the player is holding this, he drops it
 				if (nAmmoFlags & AMMO_FORCE_DROP_IF_CARRIED)
-					Pickup_ForcePlayerToDropThisObject(tr.m_pEnt);		
+					Pickup_ForcePlayerToDropThisObject(tr.m_pEnt);
 #endif
 			}
 		}
@@ -1395,7 +1395,7 @@ void CFFPlayer::FireBullets(const FireBulletsInfo_t &info)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 bool CFFPlayer::HandleShotImpactingWater(const FireBulletsInfo_t &info, const Vector &vecEnd, ITraceFilter *pTraceFilter, Vector *pVecTracerDest)
 {
@@ -1478,7 +1478,7 @@ void CFFPlayer::Command_SpyCloak(const CCommand& args)
 
 #ifdef GAME_DLL
 	SpyCloakFadeIn();
-#endif	
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1525,14 +1525,14 @@ void CFFPlayer::Command_SpySmartCloak(const CCommand& args)
 	// Jon: adding in minimum allowed speed cvar
 	if( GetLocalVelocity().Length() > SPY_SCLOAK_MINSTARTVELOCITY )
 	{
-#ifdef GAME_DLL	
+#ifdef GAME_DLL
 		// normal cloak
 		m_bCloakFadeType = false;
 #endif
 	}
 	else
 	{
-#ifdef GAME_DLL	
+#ifdef GAME_DLL
 		// Silent cloak
 		m_bCloakFadeType = true;
 #endif
@@ -1595,7 +1595,7 @@ void CFFPlayer::Command_SpySilentCloak(const CCommand& args)
 		return;
 	}
 
-#ifdef GAME_DLL	
+#ifdef GAME_DLL
 	// Silent cloak
 	m_bCloakFadeType = true;
 #endif
@@ -1612,7 +1612,7 @@ void CFFPlayer::Command_SpySilentCloak(const CCommand& args)
 //-----------------------------------------------------------------------------
 void CFFPlayer::Cloak( void )
 {
-#ifdef CLIENT_DLL 
+#ifdef CLIENT_DLL
 #else
 	// Already Cloaked so remove all effects
 	if( IsCloaked() )
@@ -1655,7 +1655,7 @@ void CFFPlayer::Cloak( void )
 				pRagdoll->SetThink( &CBaseEntity::SUB_Remove );
 				pRagdoll->SetNextThink( gpGlobals->curtime );
 			}
-		}		
+		}
 
 		// Fire an event.
 		IGameEvent *pEvent = gameeventmanager->CreateEvent( "uncloaked" );
@@ -1684,7 +1684,7 @@ void CFFPlayer::Cloak( void )
 			EmitSound(selfFilter, entindex(), m_bCloakFadeType ? "Player.Cloak" : "Player.Death");
 		}
 
-		ClientPrint( this, HUD_PRINTCENTER, "#FF_CLOAK" );		
+		ClientPrint( this, HUD_PRINTCENTER, "#FF_CLOAK" );
 
 		m_flCloakTime = gpGlobals->curtime;
 
@@ -1697,7 +1697,7 @@ void CFFPlayer::Cloak( void )
 		//	GetActiveWeapon()->Holster( NULL );
 
 		// Remove any decals on us
-		RemoveAllDecals();		
+		RemoveAllDecals();
 
 		// If regular cloak, create ragdoll
 		if( !m_bCloakFadeType )
@@ -1711,7 +1711,7 @@ void CFFPlayer::Cloak( void )
 				pRagdoll->m_vecRagdollVelocity = 100.0f * GetLocalVelocity();
 				pRagdoll->SetThink( NULL );
 			}
-		}		
+		}
 
 		CFFLuaSC hOwnerCloak( 1, this );
 		// Find any items that we are in control of and let them know we Cloaked
@@ -1726,7 +1726,7 @@ void CFFPlayer::Cloak( void )
 		}
 
 		// Fire an event.
-		IGameEvent *pEvent = gameeventmanager->CreateEvent( "cloaked" );						
+		IGameEvent *pEvent = gameeventmanager->CreateEvent( "cloaked" );
 		if( pEvent )
 		{
 			pEvent->SetInt( "userid", this->GetUserID() );
@@ -1753,7 +1753,7 @@ void CFFPlayer::Overpressure( void )
 
 	CEffectData data;
 	data.m_vOrigin = GetAbsOrigin();
-	
+
 	DispatchEffect(OVERPRESSURE_EFFECT, data);
 
 	// Play a sound
@@ -1776,7 +1776,7 @@ void CFFPlayer::Overpressure( void )
 
 		if( !pPlayer->IsAlive() || pPlayer->IsObserver() )
 			continue;
-		
+
 		// People who are building shouldn't be pushed around by anything
 		if (pPlayer->IsStaticBuilding())
 			continue;
@@ -2009,7 +2009,7 @@ void CFFPlayer::SharedPreThink( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CFFPlayer::JetpackRechargeThink( void )
 {
@@ -2567,7 +2567,7 @@ void CFFPlayer::PrimeGrenade2( void )
 		// Jiggles: Let's try it this way to avoid the above string compares
 		switch( GetClassSlot() )
 		{
-			case CLASS_SOLDIER: 
+			case CLASS_SOLDIER:
 				FF_SendHint( this, SOLDIER_LASERGREN, 1, PRIORITY_NORMAL, "#FF_HINT_SOLDIER_LASERGREN" );
 				break;
 			case CLASS_HWGUY:

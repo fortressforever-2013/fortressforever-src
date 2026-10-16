@@ -245,7 +245,7 @@ extern ConVar mp_friendlyfire_armorstrip;
 	{
 	public:
 		DECLARE_CLASS( CFFModelTemp, CBaseAnimating );
-		
+
 		CFFModelTemp( void ) { m_hModel = NULL; }
 		~CFFModelTemp( void ) {}
 
@@ -280,7 +280,7 @@ extern ConVar mp_friendlyfire_armorstrip;
 				return;
 
 			Vector vecOrigin, vecForward, vecRight;
-			
+
 			// Get some info from the player...
 			vecOrigin = pPlayer->GetAbsOrigin();
 			pPlayer->EyeVectors( &vecForward, &vecRight );
@@ -291,7 +291,7 @@ extern ConVar mp_friendlyfire_armorstrip;
 			VectorNormalize( vecForward );
 
 			vecOrigin += ( vecForward * atof( args.Arg(2) ) );
-			
+
 			QAngle vecAngles;
 			VectorAngles( vecForward, vecAngles );
 
@@ -376,7 +376,7 @@ void TE_PlayerAnimEvent( CBasePlayer *pPlayer, PlayerAnimEvent_t event )
 
 	// Mirv: Don't send animation event to self
 	filter.RemoveRecipient(pPlayer);
-	
+
 	g_TEPlayerAnimEvent.m_hPlayer = pPlayer;
 	g_TEPlayerAnimEvent.m_iEvent = event;
 	g_TEPlayerAnimEvent.Create( filter, 0 );
@@ -396,7 +396,7 @@ public:
 LINK_ENTITY_TO_CLASS( info_ff_teamspawn , CFFTeamSpawn );
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 static void *SendProxy_NonLocal(const SendProp *pProp, const void *pStruct, const void *pVarData, CSendProxyRecipients *pRecipients, int objectID)
 {
@@ -444,11 +444,11 @@ BEGIN_SEND_TABLE_NOBASE( CFFPlayer, DT_FFLocalPlayerExclusive )
 	SendPropBool( SENDINFO( m_bBuilding ) ),
 	SendPropInt( SENDINFO( m_iCurBuild ), 3, SPROP_UNSIGNED ),
 
-	// random player class 
+	// random player class
 	SendPropBool( SENDINFO ( m_fRandomPC ) ),
 
 	SendPropInt(SENDINFO(m_iSkiState)),
-	
+
 	SendPropInt( SENDINFO( m_iLastSpyDisguise ), 8, SPROP_UNSIGNED ),   // AfterShock: this only uses the last 2 hex digits, bits 1-4 for team, 5-8 for class
 
 	// Grenade Related
@@ -491,13 +491,13 @@ END_SEND_TABLE()
 
 IMPLEMENT_SERVERCLASS_ST( CFFPlayer, DT_FFPlayer )
 	SendPropExclude( "DT_BaseAnimating", "m_flPoseParameter" ),
-	SendPropExclude( "DT_BaseAnimating", "m_flPlaybackRate" ),	
+	SendPropExclude( "DT_BaseAnimating", "m_flPlaybackRate" ),
 	SendPropExclude( "DT_BaseAnimating", "m_nSequence" ),
 	SendPropExclude( "DT_BaseEntity", "m_angRotation" ),
 	SendPropExclude( "DT_BaseAnimatingOverlay", "overlay_vars" ),
-	
+
 	// playeranimstate and clientside animation takes care of these on the client
-	SendPropExclude( "DT_ServerAnimationData" , "m_flCycle" ),	
+	SendPropExclude( "DT_ServerAnimationData" , "m_flCycle" ),
 	SendPropExclude( "DT_AnimTimeMustBeFirst" , "m_flAnimTime" ),
 
 #ifdef EXTRA_LOCAL_ORIGIN_ACCURACY
@@ -512,7 +512,7 @@ IMPLEMENT_SERVERCLASS_ST( CFFPlayer, DT_FFPlayer )
 #ifdef EXTRA_LOCAL_ORIGIN_ACCURACY
 	SendPropDataTable("fforigin", 0, &REFERENCE_SEND_TABLE(DT_NonLocalOrigin), SendProxy_NonLocal),
 #endif
-	
+
 	// Data that only gets sent to the player as well as observers of the player
 	SendPropDataTable( "ffplayerobserverdata", 0, &REFERENCE_SEND_TABLE(DT_FFPlayerObserver), SendProxy_OnlyToObservers ),
 
@@ -524,7 +524,7 @@ IMPLEMENT_SERVERCLASS_ST( CFFPlayer, DT_FFPlayer )
 	SendPropInt( SENDINFO( m_iSpyDisguise ), 8, SPROP_UNSIGNED ),   // AfterShock: this only uses the last 2 hex digits, bits 1-4 for team, 5-8 for class
 
 	SendPropInt(SENDINFO(m_iSpawnInterpCounter), 4),
-	
+
 	SendPropFloat(SENDINFO(m_flConcTime)),
 
 	SendPropBool( SENDINFO( m_bSaveMe ) ),
@@ -652,7 +652,7 @@ CFFPlayer::CFFPlayer()
 	m_iActiveSabotages = 0;
 	m_iSabotagedSentries = 0;
 	m_iSabotagedDispensers = 0;
-	
+
 	m_iLastSpyDisguise = 0;
 
 	// Map guide stuff
@@ -665,10 +665,10 @@ CFFPlayer::CFFPlayer()
 
 	m_flConcTime = 0;		// Not concussed on creation
 	m_bConcussed = false;
-	
+
 	m_flTrueAimTime	= 0.0f;
 	m_flHitTime	= 0.0f;
-	
+
 	m_bTranqed = false;
 
 	m_iClassStatus = 0;		// No class sorted yet
@@ -717,7 +717,7 @@ CFFPlayer::~CFFPlayer()
 }
 
 // --------------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 // --------------------------------------------------------------------------------
 void CFFPlayer::UpdateOnRemove( void )
 {
@@ -764,8 +764,8 @@ void CFFPlayer::PreThink(void)
 
 	// Update networked current-speed-var for spy cloak mat proxy (sent to all players! :X)
 	//Vector vecCloakVelocity = GetLocalVelocity();
-	//m_flCloakSpeed = FastSqrt( ( vecCloakVelocity.x * vecCloakVelocity.x ) + 
-	//	( vecCloakVelocity.y * vecCloakVelocity.y ) + 
+	//m_flCloakSpeed = FastSqrt( ( vecCloakVelocity.x * vecCloakVelocity.x ) +
+	//	( vecCloakVelocity.y * vecCloakVelocity.y ) +
 	//	( ( vecCloakVelocity.z * ffdev_spy_cloakzvel.GetFloat() ) * ( vecCloakVelocity.z * ffdev_spy_cloakzvel.GetFloat() ) ) );
 
 	// Has our radio tag expired?
@@ -796,16 +796,16 @@ void CFFPlayer::PreThink(void)
 	FindRadioTaggedPlayers();
 
 	// Riding a vehicle?
-	if( IsInAVehicle() )	
+	if( IsInAVehicle() )
 	{
 		// make sure we update the client, check for timed damage and update suit even if we are in a vehicle
-		UpdateClientData();		
+		UpdateClientData();
 		CheckTimeBasedDamage();
 
 		// Allow the suit to recharge when in the vehicle.
 		CheckSuitUpdate();
-		
-		WaterMove();	
+
+		WaterMove();
 		return;
 	}
 
@@ -831,7 +831,7 @@ void CFFPlayer::PreThink(void)
 			PostBuildGenericThink();
 	}
 
-	StatusEffectsThink();	
+	StatusEffectsThink();
 
 	// Do some spy stuff
 	if (GetClassSlot() == CLASS_SPY)
@@ -843,8 +843,8 @@ void CFFPlayer::PreThink(void)
 
 		// Jiggles: Nope, let's try it this way instead
 		Vector vecCloakVelocity = GetLocalVelocity();
-		float flSpeed = FastSqrt( ( vecCloakVelocity.x * vecCloakVelocity.x ) + 
-		  ( vecCloakVelocity.y * vecCloakVelocity.y ) + 
+		float flSpeed = FastSqrt( ( vecCloakVelocity.x * vecCloakVelocity.x ) +
+		  ( vecCloakVelocity.y * vecCloakVelocity.y ) +
 		  ( ( vecCloakVelocity.z * FFDEV_SPY_CLOAKZVEL ) * ( vecCloakVelocity.z * FFDEV_SPY_CLOAKZVEL ) ) );
 
 		// If going faster than spies walk speed, reset
@@ -854,7 +854,7 @@ void CFFPlayer::PreThink(void)
 			// and are still within the ffdev_spy_speedenforcewait period
 
 			bool bUncloak = false;
-			
+
 			// When this is false it's a regular cloak that got us cloaked
 			if( !m_bCloakFadeType )
 			{
@@ -933,11 +933,11 @@ void CFFPlayer::Precache()
 	// #0000331: impulse 81 not working (weapon_cubemap)
 	PrecacheModel("models/shadertest/envballs.mdl");
 
-	const char *szClassNames[] = { 
-		"scout", "sniper", "soldier", 
-		"demoman", "medic", "hwguy", 
-		"pyro", "spy", "engineer", 
-		"civilian" 
+	const char *szClassNames[] = {
+		"scout", "sniper", "soldier",
+		"demoman", "medic", "hwguy",
+		"pyro", "spy", "engineer",
+		"civilian"
 	};
 
 	for( const char *szClassname : szClassNames )
@@ -952,7 +952,7 @@ void CFFPlayer::Precache()
 				{
 					PrecacheModel( pClassInfo->m_szModel );
 				}
-				
+
 				if( pClassInfo->m_szArmModel && pClassInfo->m_szArmModel[0] )
 				{
 					PrecacheModel( pClassInfo->m_szArmModel );
@@ -986,7 +986,7 @@ void CFFPlayer::Precache()
 	PrecacheScriptSound("Player.Cloak");
 	PrecacheScriptSound("Player.CloakEnd");
 	PrecacheScriptSound("Player.cough");
-	
+
 	// Precache gib sound -> Defrag
 	PrecacheScriptSound("Player.Gib");
 
@@ -1001,7 +1001,7 @@ void CFFPlayer::Precache()
 	PrecacheScriptSound( "HL2Player.FlashLightOn" );
 	PrecacheScriptSound( "HL2Player.FlashLightOff" );
 	PrecacheModel( "sprites/glow01.vmt" );
-	
+
 	// Class specific things!
 	for (int i = CLASS_SCOUT; i <= CLASS_CIVILIAN; i++)
 	{
@@ -1056,7 +1056,7 @@ bool CFFPlayer::IsValidObserverTarget(CBaseEntity* target)
 {
 	if (!target)
 	return false;
-	
+
 	switch (target->Classify())
 	{
 		case CLASS_SENTRYGUN:
@@ -1092,7 +1092,7 @@ CBaseEntity* CFFPlayer::FindNextObserverTarget(bool bReverse)
 			pEnt = gEntList.FindEntityByClassT(pEnt, searchClasses[i]);
 		}
 	}
-	
+
 	if (targetList.Count() == 0)
 	return NULL;
 
@@ -1136,7 +1136,7 @@ CBaseEntity *CFFPlayer::EntSelectSpawnPoint()
 	CBaseEntity *pFirstSpot = pSpot;
 	pGibSpot = pFirstSpot;
 
-	do 
+	do
 	{
 		if ( pSpot )
 		{
@@ -1154,7 +1154,7 @@ CBaseEntity *CFFPlayer::EntSelectSpawnPoint()
 						//DevMsg("[entsys] Skipping spawn for player %s at %s because it fails the check\n", GetPlayerName(), STRING( pSpot->GetEntityName() ) );
 						pSpot = gEntList.FindEntityByClassname( pSpot, "info_ff_teamspawn" );
 						continue;
-					}					
+					}
 				}
 			}
 			pGibSpot = pSpot;
@@ -1195,7 +1195,7 @@ CBaseEntity *CFFPlayer::EntSelectSpawnPoint()
 						// We were doing damage to dead players before
 						if( ent->IsAlive() && ( ent->edict() != player ) )
 							ent->TakeDamage( CTakeDamageInfo( GetContainingEntity(INDEXENT(0)), GetContainingEntity(INDEXENT(0)), 300, DMG_GENERIC ) );
-					}					
+					}
 				}
 			}
 
@@ -1205,7 +1205,7 @@ CBaseEntity *CFFPlayer::EntSelectSpawnPoint()
 	// as a last resort, try to find an info_player_start
 	//DevMsg("Spawning at info_player_start\n");
 	pSpot = gEntList.FindEntityByClassT( NULL, CLASS_TEAMSPAWN );
-	if ( pSpot ) 
+	if ( pSpot )
 		goto ReturnSpot;
 
 ReturnSpot:
@@ -1323,7 +1323,7 @@ ReturnSpot:
 	CBaseEntity *pFirstSpot = pSpot;
 	pGibSpot = pFirstSpot;
 
-	do 
+	do
 	{
 		if( pSpot )
 		{
@@ -1354,7 +1354,7 @@ ReturnSpot:
 
 		// Increment pSpot
 		pSpot = gEntList.FindEntityByClassT( pSpot, CLASS_TEAMSPAWN );
-	} 
+	}
 	while( pSpot != pFirstSpot ); // loop if we're not back to the start
 */
 	// <-- Jon: new spawn method
@@ -1403,7 +1403,7 @@ ReturnSpot:
 
 	// As a last resort, try to find an info_player_start
 	pSpot = gEntList.FindEntityByClassname( NULL, "info_player_start");
-	if( pSpot ) 
+	if( pSpot )
 		goto ReturnSpot;
 
 ReturnSpot:
@@ -1459,7 +1459,7 @@ void CFFPlayer::PreForceSpawn( void )
 		CFFProjectilePipebomb::DestroyAllPipes(this, true);
 
 		// Release control of sabotaged structures
-		SpySabotageRelease();		
+		SpySabotageRelease();
 
 		// Holster the current weapon
 		if( GetActiveFFWeapon() )
@@ -1526,7 +1526,7 @@ void CFFPlayer::Spawn( void )
 	m_flJetpackCooldown = 0.0f;
 	m_bJetpackDepleted = false;
 	m_hActiveSlowfield	= NULL;
-	
+
 	m_flSpeedModifierOld		= 1.0f;
 	m_flSpeedModifierChangeTime	= 0;
 
@@ -1559,7 +1559,7 @@ void CFFPlayer::Spawn( void )
 
 	// Get rid of any fire
 	Extinguish();
-	
+
 	//AfterShock - flaginfo on spawn (connect doesnt work)
 	CFFLuaSC hFlagInfo;
 	hFlagInfo.Push(this);
@@ -1584,19 +1584,19 @@ void CFFPlayer::Spawn( void )
 	{
 		// Set stuff we need to make sure the spec cam doesn't vibrate due to prediction errors
 		// The way it now works is that when you switch teams, the player's view will move to the
-		// intermission / mapguide / map origin rather than staying put.  As a result, we need to 
+		// intermission / mapguide / map origin rather than staying put.  As a result, we need to
 		// stop any glitching caused by switching between being a regular player and a pseudo-spectator.
 
 		m_iHealth = 1;
-		m_lifeState = LIFE_DEAD; 
+		m_lifeState = LIFE_DEAD;
 		pl.deadflag = true;
 
-		//m_afPhysicsFlags |= PFLAG_OBSERVER; 
+		//m_afPhysicsFlags |= PFLAG_OBSERVER;
 
 		SetGroundEntity( (CBaseEntity *)NULL );
 		RemoveFlag( FL_DUCKING );
 		//SetSolidFlags( FSOLID_NOT_SOLID );
-		
+
 		// This is the biggie!
 		SetMoveType( MOVETYPE_NONE );
 
@@ -1630,7 +1630,7 @@ void CFFPlayer::Spawn( void )
 		if(pWeapon)
 		{
 			int id = pWeapon->GetWeaponID();
-			
+
 			// its a buildable herfaderf
 			if( id >= FF_WEAPON_DEPLOYDISPENSER && id <= FF_WEAPON_DEPLOYMANCANNON )
 			{
@@ -1676,7 +1676,7 @@ void CFFPlayer::Spawn( void )
 	RemoveSolidFlags( FSOLID_NOT_SOLID );
 
 	SetupClassVariables();
-	
+
 	// Set on ground
 	AddFlag(FL_ONGROUND);
 
@@ -1766,7 +1766,7 @@ void CFFPlayer::Spawn( void )
 	m_pLastWeapon = NULL;
 
 	//////////////////////////////////////////////////////////////////////////
-	
+
 	// Make sure we don't go running around during the intermission
 	// AfterShock - Commented out to try to prevent mapload respawn frozen
 	/*
@@ -1845,7 +1845,7 @@ void CFFPlayer::SetupClassVariables()
 	// <-- Mirv: Various things to do on spawn
 
 	// Makes life simpler later to store this in an array
-	// TODO Use an array in playerclassparse instead	
+	// TODO Use an array in playerclassparse instead
 	m_iMaxAmmo[GetAmmoDef()->Index(AMMO_CELLS)] = pPlayerClassInfo.m_iMaxCells;
 	m_iMaxAmmo[GetAmmoDef()->Index(AMMO_NAILS)] = pPlayerClassInfo.m_iMaxNails;
 	m_iMaxAmmo[GetAmmoDef()->Index(AMMO_SHELLS)] = pPlayerClassInfo.m_iMaxShells;
@@ -1887,7 +1887,7 @@ void CFFPlayer::InitialSpawn( void )
 	m_iClientLocation = 0;
 
 	SetObjectiveEntity(NULL);
-	
+
 	// Reset to 0
 	m_vecInfoIntermission.Init();
 
@@ -1978,7 +1978,7 @@ void CFFPlayer::Command_SpySilentCloak( const CCommand& args )
 		}
 
 		// Fire an event.
-		IGameEvent *pEvent = gameeventmanager->CreateEvent("uncloaked");						
+		IGameEvent *pEvent = gameeventmanager->CreateEvent("uncloaked");
 		if(pEvent)
 		{
 			pEvent->SetInt("userid", this->GetUserID());
@@ -2003,7 +2003,7 @@ void CFFPlayer::Command_SpySilentCloak( const CCommand& args )
 
 		// Make a few things to the ragdoll, such as stopping it from travelling any
 		// further and don't allow it to fade out. Actually this velocity change
-		// won't work because the client will use the velocity of its local 
+		// won't work because the client will use the velocity of its local
 		// representation of this player. Dang.
 		pRagdoll->m_vecRagdollVelocity = Vector(0, 0, 0);
 		pRagdoll->SetThink(NULL);
@@ -2029,7 +2029,7 @@ void CFFPlayer::Command_SpySilentCloak( const CCommand& args )
 		}
 
 		// Fire an event.
-		IGameEvent *pEvent = gameeventmanager->CreateEvent("cloaked");						
+		IGameEvent *pEvent = gameeventmanager->CreateEvent("cloaked");
 		if(pEvent)
 		{
 			pEvent->SetInt("userid", this->GetUserID());
@@ -2046,7 +2046,7 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 
 	if( m_bEngyMe )
 		m_bEngyMe = false;
-	
+
 	if( m_bAmmoMe )
 		m_bAmmoMe = false;
 
@@ -2055,7 +2055,7 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 
 	if( m_bTranqed )
 		m_bTranqed = false;
-	
+
 	if( m_bSliding )
 		m_bSliding = false;
 
@@ -2100,7 +2100,7 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 			//case CLASS_GREN_CALTROP:
 				FF_SendHint( this, GLOBAL_GRENDEATH, 3, PRIORITY_NORMAL, "#FF_HINT_GLOBAL_GRENDEATH" );
 				break;
-		}    
+		}
 	}
 
 	// Drop any grenades
@@ -2109,9 +2109,9 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 		ThrowGrenade(GREN_TIMER - (gpGlobals->curtime - m_flPrimeTime), 0.0f);
 		ResetGrenadeState();
 	}
-	
+
 	/* Legshot scoring code - unfinished (ignore)
-	if(( IsSpeedEffectSet( SE_LEGSHOT ); ) && (g_pGameRules->PlayerRelationship(this, pKiller) != GR_TEAMMATE)) 
+	if(( IsSpeedEffectSet( SE_LEGSHOT ); ) && (g_pGameRules->PlayerRelationship(this, pKiller) != GR_TEAMMATE))
 	{
 		if( m_pWhoTaggedMe != NULL )
 		{
@@ -2189,7 +2189,7 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 	// If the tag is still active, award a point
 	// to the person who tagged us
 	// (So long as you havent been TKed - AfterShock)
-	if(( m_bRadioTagged ) && (g_pGameRules->PlayerRelationship(this, pKiller) != GR_TEAMMATE)) 
+	if(( m_bRadioTagged ) && (g_pGameRules->PlayerRelationship(this, pKiller) != GR_TEAMMATE))
 	{
 		if( m_pWhoTaggedMe != NULL )
 		{
@@ -2270,7 +2270,7 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 		pBackpack->SetAmmoCount( GetAmmoDef()->Index( AMMO_CELLS ), 30 );
 
 		pBackpack->m_bIsDeathBag = true;
-		
+
 		// allow discards by default
 		bool bDiscardAllowed = true;
 
@@ -2360,7 +2360,7 @@ void CFFPlayer::CreateRagdollEntity(const CTakeDamageInfo *info)
 
 	//get flame entity of the player
 	CEntityFlame *pPlayerFlame = dynamic_cast< CEntityFlame * >( GetEffectEntity() );
-	
+
 	//if the player has flames
 	if( pPlayerFlame )
 	{
@@ -2384,7 +2384,7 @@ void CFFPlayer::CreateRagdollEntity(const CTakeDamageInfo *info)
 	// not everything that gets here has an info
 	// when we change class we dont have an inflictor either
 	pRagdoll->m_vecRagdollVelocity = GetAbsVelocity();
-	if ( info ) 
+	if ( info )
 	{
 		pRagdoll->m_vecForce = info->GetDamageForce();
 	}
@@ -2561,7 +2561,7 @@ void CFFPlayer::RemoveLocation( int entindex )
 			m_Locations.Remove(i);
 
 	//Update location if we have too.
-	if(m_Locations.Count() > 0 
+	if(m_Locations.Count() > 0
 		&& m_iClientLocation != m_Locations[0].entindex)
 	{
 		CSingleUserRecipientFilter filter( this );
@@ -2758,10 +2758,10 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 
 		// #0001554: Random player class doesn't work unless you've already spawned as a 'normal' class -> Defrag
 		// Moved KillAndRemoveItems() outside the if( fInstantSwitch ) as this was causing the player to be unable to spawn
-		// unless either A: autokill was on B: the player had already played a different class 
+		// unless either A: autokill was on B: the player had already played a different class
 
 		// Edited again because it was killing you instantly even if autokill was off and you chose random PC
-		bool bAlive = IsAlive();			
+		bool bAlive = IsAlive();
 
 		// This one handles spectators joining a new team
 		if( ! bAlive )
@@ -2778,7 +2778,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
             KillAndRemoveItems();
 			return;
 		}
-		
+
 		if( fInstantSwitch )
 		{
 			// if we're changing class twice in 5 seconds, then add a respawn delay as if they typed kill in console
@@ -2801,7 +2801,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 		return;
 	}
 	else
-		m_fRandomPC = false;	
+		m_fRandomPC = false;
 
 	int iClass = Class_StringToInt( szNewClassName );
 
@@ -2850,7 +2850,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 		ClientPrint( this, HUD_PRINTNOTIFY, "#FF_ERROR_CLASS_OCCUPIED" );
 		return;
 	}
-	
+
 	// check if Lua wants to allow it
 	CFFLuaSC hPlayerSwitchClass;
 	hPlayerSwitchClass.Push(this);
@@ -2873,7 +2873,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 	if (fInstantSwitch || GetClassSlot() == 0)
 	{
 		bool bAlive = IsAlive();
-		
+
 		// if we're changing class twice in 5 seconds, then add a respawn delay as if they typed kill in console
 		if (gpGlobals->curtime - m_flLastClassSwitch <= CHANGECLASS_GRACEPERIOD)
 		{
@@ -2890,7 +2890,7 @@ void CFFPlayer::ChangeClass(const char *szNewClassName)
 			CFFLuaSC hPlayerKilled;
 			hPlayerKilled.Push(this);
 			_scriptman.RunPredicates_LUA( NULL, &hPlayerKilled, "player_killed" );
-		}		
+		}
 
 		// Should call ActivateClass right afterwards too, since otherwise they might
 		// miss out on getting their class because somebody else took it during the 5sec
@@ -3035,7 +3035,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	}
 	//////////////////////////////////////////////////////////////////////////
 
-	// Bug #0000700: people with infection should give medic kill if they suicide	
+	// Bug #0000700: people with infection should give medic kill if they suicide
 	if( IsInfected() && GetInfector() )
 		SetSpecialInfectedDeath();
 
@@ -3051,7 +3051,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	// set their class to unassigned, so that they don't spawn
 	// immediately when changing teams
 	//ReadPlayerClassDataFromFileForSlot( filesystem, "unassigned", &m_hPlayerClassFileInfo, GetEncryptionKey() );
-	
+
 	SetClassForClient(0);
 
 	RemoveItems();
@@ -3069,7 +3069,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 		hPlayerKilled.Push(this);
 		_scriptman.RunPredicates_LUA( NULL, &hPlayerKilled, "player_killed" );
 	}
-	
+
 	// drop my damage contributions on any assists right away
 	RemoveMeFromKillAssists();
 
@@ -3081,7 +3081,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	{
 		StopObserverMode();
 	}
-	
+
 	// Make sure they don't think they're meant to be spawning as a new class
 	m_iNextClass = 0;
 
@@ -3105,7 +3105,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 		ChangeTeam( iTeam );
 
 		// Fix - Make sure they don't think they're meant to be spawning as a new class
-		m_iNextClass = 0;	
+		m_iNextClass = 0;
 	}
 	else
 	{
@@ -3115,7 +3115,7 @@ void CFFPlayer::Command_Team(const CCommand& args)
 		Spawn();
 
 		// Fix - Make sure they don't think they're meant to be spawning as a new class
-		m_iNextClass = 0;	
+		m_iNextClass = 0;
 	}
 
 	ChangeTeam( iTeam );*/
@@ -3174,8 +3174,8 @@ void CFFPlayer::RemoveProjectiles( void )
 		{
 			pTemp = gEntList.FindEntityByOwner( pEnt, this );
 			UTIL_Remove(pEnt);
-			pEnt = pTemp;			
-		}	// End changes by Defrag		
+			pEnt = pTemp;
+		}	// End changes by Defrag
 		else
 		{
 			pEnt = gEntList.FindEntityByOwner(pEnt, this);
@@ -3212,7 +3212,7 @@ void CFFPlayer::RemoveBackpacks( void )
 void CFFPlayer::RemoveItems( void )
 {
 	// Remove buildables
-	RemoveBuildables();	
+	RemoveBuildables();
 
 	// Remove any projectiles (grenades, nails, etc)
 	RemoveProjectiles();
@@ -3287,7 +3287,7 @@ void CFFPlayer::FindRadioTaggedPlayers( void )
 
 	// If we're the only ones we don't care
 	if( iMaxClients < 2 )
-		return;	
+		return;
 
 	// My origin
 	Vector vecOrigin = GetFeetOrigin();
@@ -3296,9 +3296,9 @@ void CFFPlayer::FindRadioTaggedPlayers( void )
 	for( int i = 1; i <= iMaxClients; i++ )
 	{
 		CFFPlayer *pPlayer = ToFFPlayer( UTIL_PlayerByIndex( i ) );
-		
+
 		if( !pPlayer )
-			continue;		
+			continue;
 
 		// Skip if not a player
 		if( !pPlayer->IsPlayer() )
@@ -3354,7 +3354,7 @@ void CFFPlayer::Command_DispenserText(const CCommand& args)
 
 	// Build a string based off of the input
 	// Just store the string until we build
-	// a dispenser then tell the dispenser 
+	// a dispenser then tell the dispenser
 	// the text
 
 	// Clear out whatever was in there
@@ -3561,7 +3561,7 @@ void CFFPlayer::Command_BuildDispenser(const CCommand& args)
 }
 
 void CFFPlayer::Command_BuildSentryGun(const CCommand& args)
-{	
+{
 	//m_bCancelledBuild = false;
 	m_iWantBuild = FF_BUILD_SENTRYGUN;
 	PreBuildGenericThink();
@@ -3725,7 +3725,7 @@ void CFFPlayer::PreBuildGenericThink( void )
 				case FF_BUILD_DETPACK: ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_DETPACK_NOTENOUGHAMMO" ); break;
 				case FF_BUILD_MANCANNON: ClientPrint( this, HUD_PRINTCENTER, "#FF_BUILDERROR_MANCANNON_NOTENOUGHAMMO" ); break;
 			}
-			
+
 			// Re-initialize
 			m_iCurBuild = FF_BUILD_NONE;
 			m_iWantBuild = FF_BUILD_NONE;
@@ -3753,18 +3753,18 @@ void CFFPlayer::PreBuildGenericThink( void )
 		if( hBuildInfo.BuildResult() == BUILD_ALLOWED )
 		{
 			// BUILD! - Create the actual item finally
-			m_iCurBuild = m_iWantBuild;	
+			m_iCurBuild = m_iWantBuild;
 			m_bStaticBuilding = true;
 
 			switch( m_iCurBuild )
 			{
 				case FF_BUILD_DISPENSER:
-				{					
+				{
 					FF_SendHint( this, ENGY_BUILDDISP, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_BUILDDISP" );
 
 					// Changed to building straight on ground (Bug #0000191: Engy "imagines" SG placement, then lifts SG, then back to imagined position.)
 					CFFDispenser *pDispenser = CFFDispenser::Create( hBuildInfo.GetBuildOrigin(), hBuildInfo.GetBuildAngles(), this );
-					
+
 					// Set custom text
 					pDispenser->SetText( m_szCustomDispenserText );
 
@@ -3781,17 +3781,17 @@ void CFFPlayer::PreBuildGenericThink( void )
 					m_flBuildTime = gpGlobals->curtime + 2.0f;
 
 					// Bug #0001558: exploit to get instant lvl2 SG
-					// Moved code to remove cells from CFFDispenser::GoLive() to here.  
+					// Moved code to remove cells from CFFDispenser::GoLive() to here.
 					// Leaving the remove armour code in that function as you can't fiddle with armour vals via this exploit -> Defrag
 					RemoveAmmo( FF_BUILDCOST_DISPENSER, AMMO_CELLS );
-					
+
 					//m_bStaticBuilding = false; // AfterShock - Uncomment this for testing drop-and-run SGs / Dispensers! (also need SG_BUILDTIME raising)
 				}
 				break;
 
 				case FF_BUILD_SENTRYGUN:
 				{
-					// Jiggles: Start hint code	
+					// Jiggles: Start hint code
 					// Event: Player starts building SG
 					FF_SendHint( this, ENGY_BUILDSG, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_BUILDSG" );
 
@@ -3811,12 +3811,12 @@ void CFFPlayer::PreBuildGenericThink( void )
 									FF_SendHint( player, GLOBAL_DEFENDSG, 3, PRIORITY_NORMAL, "#FF_HINT_GLOBAL_DEFENDSG" );  // Go protect that dude!
 							}
 						}
-					}			
+					}
 					// End hint code
 
 					// Changed to building straight on ground (Bug #0000191: Engy "imagines" SG placement, then lifts SG, then back to imagined position.)
 					CFFSentryGun *pSentryGun = CFFSentryGun::Create( hBuildInfo.GetBuildOrigin(), hBuildInfo.GetBuildAngles(), this );
-				
+
 					pSentryGun->SetLocation(g_pGameRules->GetChatLocation(true, this));
 
 					// Mirv: Store future ground location + orientation
@@ -3872,10 +3872,10 @@ void CFFPlayer::PreBuildGenericThink( void )
 				}
 				break;
 			}
-			
+
 			if ( m_bStaticBuilding == true )
 			{
-				LockPlayerInPlace(); 
+				LockPlayerInPlace();
 				m_hActiveWeapon = GetActiveFFWeapon();
 				if( m_hActiveWeapon )
 					m_hActiveWeapon->Holster( NULL );
@@ -3983,8 +3983,8 @@ void CFFPlayer::PostBuildGenericThink( void )
 					{
 						pEvent->SetInt( "userid", GetUserID() );
 						gameeventmanager->FireEvent( pEvent, true );
-					}	
-					
+					}
+
 					FF_SendHint( this, ENGY_BUILTDISP, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_BUILTDISP" );
 
 
@@ -4005,14 +4005,14 @@ void CFFPlayer::PostBuildGenericThink( void )
 						pEvent->SetInt( "userid", GetUserID() );
 						gameeventmanager->FireEvent( pEvent, true );
 					}
-					
+
 					FF_SendHint( this, ENGY_BUILTSG, 3, PRIORITY_NORMAL, "#FF_HINT_ENGY_BUILTSG" );
 
 				}
 			}
 			break;
 
-			case FF_BUILD_DETPACK: 
+			case FF_BUILD_DETPACK:
 			{
 				if( GetDetpack() )
 				{
@@ -4053,7 +4053,7 @@ void CFFPlayer::PostBuildGenericThink( void )
 			// Unlock the player
 			UnlockPlayer();
 
-			// Reset stuff		
+			// Reset stuff
 			m_iCurBuild = FF_BUILD_NONE;
 			m_iWantBuild = FF_BUILD_NONE;
 			m_bBuilding = false;
@@ -4079,7 +4079,7 @@ void CFFPlayer::PostBuildGenericThink( void )
 		}
 		else
 		{
-			// Reset stuff		
+			// Reset stuff
 			m_iCurBuild = FF_BUILD_NONE;
 			m_iWantBuild = FF_BUILD_NONE;
 			m_bBuilding = false;
@@ -4090,7 +4090,7 @@ void CFFPlayer::PostBuildGenericThink( void )
 	}
 	else
 	{
-		// TODO: Something bad happened - Called the post think 
+		// TODO: Something bad happened - Called the post think
 		// and we weren't building - wtf happened!?
 		// NOTE: Cancelling a build stops the PostBuildGenericThink
 		// from _EVER_ being called
@@ -4104,7 +4104,7 @@ void CFFPlayer::PostBuildGenericThink( void )
 	FlagInfo
 */
 void CFFPlayer::Command_FlagInfo(const CCommand& args)
-{	
+{
 	CFFLuaSC hFlagInfo( 1, this );
 	_scriptman.RunPredicates_LUA(NULL, &hFlagInfo, "flaginfo");
 }
@@ -4113,7 +4113,7 @@ void CFFPlayer::Command_FlagInfo(const CCommand& args)
 	DropItems
 */
 void CFFPlayer::Command_DropItems(const CCommand& args)
-{	
+{
 	CFFLuaSC hDropItemCmd( 1, this );
 	//entsys.RunPredicates(NULL, this, "dropitems");
 	CFFInfoScript *pEnt = (CFFInfoScript*)gEntList.FindEntityByClassT( NULL, CLASS_INFOSCRIPT );
@@ -4133,7 +4133,7 @@ void CFFPlayer::Command_DropItems(const CCommand& args)
 }
 
 void CFFPlayer::Command_DetPipes(const CCommand& args)
-{	
+{
 	m_bQueueDetonation = true;
 }
 
@@ -4143,14 +4143,14 @@ void CFFPlayer::Command_DetPipes(const CCommand& args)
 
 // 2007/08/20
 // Tidied up this function, fixed cells bug and also renamed a few variables to make things clearer.
-// Removed ubiquitous i counters for more descriptive names.  Old variable name for "bKeepAmmo" was "iDiscardable" which was 
+// Removed ubiquitous i counters for more descriptive names.  Old variable name for "bKeepAmmo" was "iDiscardable" which was
 // ... backwards (since we only discarded it if iDiscardable evaluated to false).  Made my head hurt a bit! |---> Defrag
 
 void CFFPlayer::Command_Discard(const CCommand& args)
 {
 	CFFItemBackpack *pBackpack = NULL;
 
-	// if any of these are flagged as true, then we have a weapon that uses this ammo type and thus retain it (no discard allowed).  
+	// if any of these are flagged as true, then we have a weapon that uses this ammo type and thus retain it (no discard allowed).
 	bool bKeepAmmo[MAX_AMMO_TYPES] = { false };
 
 	int iShells = 0;
@@ -4171,7 +4171,7 @@ void CFFPlayer::Command_Discard(const CCommand& args)
 				if (ammoid > -1)
 				{
 					// We need this ammo.  Keep it.
-					bKeepAmmo[ammoid] = 1;					
+					bKeepAmmo[ammoid] = 1;
 				}
 			}
 		}
@@ -4433,7 +4433,7 @@ void CFFPlayer::StatusEffectsThink( void )
 	{
 		if( ( ( GetClassSlot() == CLASS_MEDIC ) || ( GetClassSlot() == CLASS_ENGINEER ) ) &&
 			( gpGlobals->curtime > ( m_fLastHealTick + FFDEV_REGEN_FREQ ) ) )
-		{		
+		{
 			m_fLastHealTick = gpGlobals->curtime;
 
 			if( GetClassSlot() == CLASS_MEDIC )
@@ -4441,9 +4441,9 @@ void CFFPlayer::StatusEffectsThink( void )
 				// add the regen health
 				// Don't call CFFPlayer::TakeHealth as it will clear status effects
 				// Bug #0000528: Medics can self-cure being caltropped/tranq'ed
-				if( BaseClass::TakeHealth( FFDEV_REGEN_HEALTH, DMG_GENERIC ) )			
+				if( BaseClass::TakeHealth( FFDEV_REGEN_HEALTH, DMG_GENERIC ) )
 				//if( TakeHealth( ffdev_regen_health.GetInt(), DMG_GENERIC ) )
-				{				
+				{
 					// make a sound if we did
 					//EmitSound( "medkit.hit" );
 				}
@@ -4497,12 +4497,12 @@ void CFFPlayer::StatusEffectsThink( void )
 		if( m_hInfector )
 		{
 			CFFPlayer *pInfector = ToFFPlayer( m_hInfector );
-			
+
 			// dexter - reworked this a lil and removed the assert
 			//AssertMsg( pInfector, "[Infect] pInfector == NULL\n" );
 			if( pInfector )
-			{				
-				// Medic changed teams / switched class				
+			{
+				// Medic changed teams / switched class
 				if( pInfector->GetTeamNumber() != m_iInfectedTeam || !pInfector->GetClassSlot() || pInfector->GetClassSlot() != CLASS_MEDIC )
 				{
 					//DevMsg("Removing infection from %s because infector %s changed class or team\n", this->m_szNetname, pInfector->m_szNetname);
@@ -4536,7 +4536,7 @@ void CFFPlayer::StatusEffectsThink( void )
 			UserMessageBegin( user, "FFViewEffect" );
 				WRITE_BYTE( FF_VIEWEFFECT_INFECTED );
 				WRITE_FLOAT( 0.0f );
-			MessageEnd(); 
+			MessageEnd();
 		}
 
 		// If we're still infected, cause damage
@@ -4545,7 +4545,7 @@ void CFFPlayer::StatusEffectsThink( void )
 			CFFPlayer *pInfector = ToFFPlayer( m_hInfector );
 
 			// When you change this be sure to change the StopSound above ^^ for bug
-			
+
 			EmitSound( "Player.DrownContinue" );	// |-- Mirv: [TODO] Change to something more suitable
 			m_fLastInfectedTick = gpGlobals->curtime;
 			m_iInfectTick++;
@@ -4572,7 +4572,7 @@ void CFFPlayer::StatusEffectsThink( void )
 			UserMessageBegin(user, "StatusIconUpdate");
 				WRITE_BYTE(FF_STATUSICON_INFECTION);
 				WRITE_FLOAT(2.0f);
-			MessageEnd(); 
+			MessageEnd();
 
 			/*
 			// Bug #0000504: No infection visible effect
@@ -4585,7 +4585,7 @@ void CFFPlayer::StatusEffectsThink( void )
 			CEffectData data2;
 			data2.m_vOrigin = EyePosition() - Vector( 0, 0, 16.0f );
 			data2.m_vStart = GetAbsVelocity();
-			data2.m_flScale = 1.0f;			
+			data2.m_flScale = 1.0f;
 			DispatchEffect( "FF_InfectionEffect", data2 );
 			*/
 
@@ -4680,7 +4680,7 @@ void CFFPlayer::LuaAddEffect( int iEffect, float flEffectDuration, float flIconD
 			{
 			}
 			break;
-			
+
 			case LUA_EF_LEGSHOT: AddSpeedEffect( SE_LEGSHOT, flEffectDuration, flSpeed, SEM_BOOLEAN, FF_STATUSICON_LEGINJURY, flIconDuration, true ); break;
 			case LUA_EF_TRANQ:
 			{
@@ -4884,7 +4884,7 @@ void CFFPlayer::RemoveSpeedEffect(SpeedEffectType type, bool bLuaAdded)
 				{
 					bRemoved = true;
 					RemoveSpeedEffectByIndex( i );
-				}				
+				}
 			}
 			// Effect not added by lua so remove anyway
 			else
@@ -4913,7 +4913,7 @@ void CFFPlayer::RemoveSpeedEffectByIndex( int iSpeedEffectIndex )
 	{
 		// Turn it off
 		m_vSpeedEffects[ iSpeedEffectIndex ].active = false;
-		
+
 		// Set any player vars
 		switch( m_vSpeedEffects[ iSpeedEffectIndex ].type )
 		{
@@ -4987,9 +4987,9 @@ int CFFPlayer::ClearSpeedEffects(int mod)
 					// was fucking up the loop. Same goes for the else case below.
 					// Fixed now.
 
-					iCount++;					
+					iCount++;
 					RemoveSpeedEffectByIndex( i );
-				}				
+				}
 			}
 		}
 	}
@@ -5027,11 +5027,11 @@ void CFFPlayer::RecalculateSpeed( void )
 
 			if( m_vSpeedEffects[i].type == SE_ASSAULTCANNON )
 				bAssaultCannonIncluded = true;
-		}		
+		}
 	}
-	
+
 	// No amount of effects should let you go below 40% speed unless you're firing the AC
-	if( bAssaultCannonIncluded ) 
+	if( bAssaultCannonIncluded )
 	{
 		// May as well clamp this at 0 for safety; dunno if it'll ever happen
 		// With changed sv_accelerate needed to be changed to this value
@@ -5044,7 +5044,7 @@ void CFFPlayer::RecalculateSpeed( void )
 		// Doesnt work this way anymore
 		if( flSpeed < 0.0f )
 			flSpeed = 0.0f;
-	}	
+	}
 
 	// If speed has gotten slower then delay the max speed change on the server.
 	// This way the client can predict in time that the speed has changed, and warping
@@ -5174,7 +5174,7 @@ bool CFFPlayer::Infect( CFFPlayer *pInfector )
 	else if ( !IsInfected() ) // they aren't infected, but they are immune
 		FF_SendHint( pInfector, MEDIC_NOINFECT, 3, PRIORITY_NORMAL, "#FF_HINT_MEDIC_NOINFECT" );
 
-	return false;	
+	return false;
 }
 
 bool CFFPlayer::Cure( CFFPlayer *pCurer )
@@ -5206,7 +5206,7 @@ bool CFFPlayer::Cure( CFFPlayer *pCurer )
 		{
 			AddHealth( m_nNumInfectDamage - FFDEV_INFECT_REGAINDAMAGE ) ;
 		}
-		
+
 		//Reset the infect damamge counter
 		m_nNumInfectDamage = 0;
 
@@ -5260,21 +5260,21 @@ void CFFPlayer::IncreaseBurnLevel( int iAmount )
 
 	CSingleUserRecipientFilter user( (CBasePlayer *)this );
 	user.MakeReliable();
-	
-	float flBurnTime = FFDEV_PYRO_BURNTIME; 
+
+	float flBurnTime = FFDEV_PYRO_BURNTIME;
 	switch (GetClassSlot())
 	{
 		case CLASS_SCOUT:
 		case CLASS_MEDIC:
 		case CLASS_SPY:
-			flBurnTime *= 1.0; // old value is 0.25 for some stupid reason 
+			flBurnTime *= 1.0; // old value is 0.25 for some stupid reason
 			break;
 	}
 
 	// Tell the player they're on fire - status icons, sounds and flames
 	if (m_iBurnLevel > 200)
 	{
-		if (iOldBurnlevel <= 200) 
+		if (iOldBurnlevel <= 200)
 		{
 			UserMessageBegin(user, "StatusIconUpdate");
 				WRITE_BYTE( FF_STATUSICON_BURNING2 );
@@ -5291,7 +5291,7 @@ void CFFPlayer::IncreaseBurnLevel( int iAmount )
 	}
 	else if (m_iBurnLevel > 100)
 	{
-		if (iOldBurnlevel <= 100) 
+		if (iOldBurnlevel <= 100)
 		{
 			UserMessageBegin(user, "StatusIconUpdate");
 				WRITE_BYTE( FF_STATUSICON_BURNING1 );
@@ -5369,7 +5369,7 @@ void CFFPlayer::GrenadeThink(void)
 			m_bEngyGrenWarned = true;
 			EmitSound( EMP_SOUND );
 		}
-	}	
+	}
 
 	if(m_bWantToThrowGrenade && gpGlobals->curtime - m_flPrimeTime >= GREN_THROW_DELAY)
 	{
@@ -5399,7 +5399,7 @@ void CFFPlayer::ThrowGrenade(float fTimer, float flSpeed)
 	switch (m_iGrenadeState)
 	{
 		case FF_GREN_PRIMEONE:
-			
+
 			// They don't actually have a primary grenade
 			if (!Q_strcmp( pPlayerClassInfo.m_szPrimaryClassName, "None" ))
 				return;
@@ -5415,7 +5415,7 @@ void CFFPlayer::ThrowGrenade(float fTimer, float flSpeed)
 				return;
 
 			// Make the grenade
-			pGrenade = (CFFGrenadeBase *) CreateEntityByName(pPlayerClassInfo.m_szSecondaryClassName);			
+			pGrenade = (CFFGrenadeBase *) CreateEntityByName(pPlayerClassInfo.m_szSecondaryClassName);
 			break;
 	}
 
@@ -5501,10 +5501,10 @@ void CFFPlayer::PackDeadPlayerItems( void )
 
 // Taken from player.cpp
 static float DamageForce( const Vector &size, float damage )
-{ 
+{
 	float force = damage * ((32 * 32 * 72.0) / (size.x * size.y * size.z)) * 5;
 
-	if ( force > 1000.0) 
+	if ( force > 1000.0)
 	{
 		force = 1000.0;
 	}
@@ -5556,7 +5556,7 @@ void CFFPlayer::DistanceDamageModifier(CTakeDamageInfo& info)
 		if (!Q_stricmp(pInflictor->GetClassname(), g_ppszDistanceDamageModifierExcluded[i]))
 			return;
 	}
-	
+
 	float flFalloffDistance = FF_DISTANCEDAMAGEMODIFIER_FALLOFF_DISTANCE;
 	float flRampupModifier = FF_DISTANCEDAMAGEMODIFIER_RAMPUP_MODIFIER;
 
@@ -5601,7 +5601,7 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 	if ( GetFlags() & FL_GODMODE )
 		return 0;
 
-	if ( m_debugOverlays & OVERLAY_BUDDHA_MODE ) 
+	if ( m_debugOverlays & OVERLAY_BUDDHA_MODE )
 	{
 		if ((m_iHealth - info.GetDamage()) <= 0)
 		{
@@ -5618,7 +5618,7 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 	if ( !IsAlive() )
 		return 0;
 
-	// call script: player_ondamage(player, damageinfo)	
+	// call script: player_ondamage(player, damageinfo)
 	CFFLuaSC func;
 	func.Push(this);
 	func.PushRef(info);
@@ -5653,7 +5653,7 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 				// This could be editted later to give points for a renewed tag
 				if (!IsRadioTagged())
 					pAttacker->AddFortPoints(10,"#FF_FORTPOINTS_RADIOTAG");
-			}			
+			}
 		}
 
 		CFFProjectileBase *pProjectile = dynamic_cast<CFFProjectileBase *>( inputInfo.GetInflictor() );
@@ -5677,14 +5677,14 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 			}
 		}
 	}
-	
-	//// tag the player if hit by radio tag ammo 
+
+	//// tag the player if hit by radio tag ammo
 	//if( inputInfo.GetAmmoType() == m_iRadioTaggedAmmoIndex )
 	//{
 	//	//CFFSentryGun *pSentryGun = FF_ToSentrygun( pObject );
 	//	CFFPlayer *pAttacker = ToFFPlayer( info.GetAttacker() );
 	//	SetRadioTagged( pAttacker, gpGlobals->curtime, radiotag_draw_duration.GetInt() );
-	//	
+	//
 	//	// AfterShock - Scoring system: 10 points for a radiotag (if not already tagged)
 	//	// This could be editted later to give points for a renewed tag
 	//	if ((!IsRadioTagged()) && (pAttacker))
@@ -5709,7 +5709,7 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 	float fArmorDamageDealt = 0.0f;
 	bool bTargetHadArmor = false;
 
-	// Armor. 
+	// Armor.
 	if (!(info.GetDamageType() & (DMG_FALL | DMG_DROWN | DMG_POISON | DMG_RADIATION | DMG_DIRECT)))// armor doesn't protect against fall or drown damage!
 	{
 		//float flNew = info.GetDamage() * flRatio;
@@ -5812,9 +5812,9 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 	// get damage that they took
 	// get their current velocity vector and horizontal speed
 	// get their class max run speed
-	// get the maxdamage cvar 
+	// get the maxdamage cvar
 	// if their horizontal speed is less than max run speed then skipfunction
-	
+
 	if( inputInfo.GetInflictor() )
 	{
 		float damageForFullSlow;
@@ -5834,11 +5834,11 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 		float flMaxSpeed = MaxSpeed();
 
 		// dont slow on team damage or self damage, else we couldnt rocket jump or boost!
-		if ( !( g_pGameRules->PlayerRelationship( this, ToFFPlayer( info.GetAttacker() ) ) == GR_TEAMMATE ) ) 
+		if ( !( g_pGameRules->PlayerRelationship( this, ToFFPlayer( info.GetAttacker() ) ) == GR_TEAMMATE ) )
 		{
 			if (flHorizontalSpeed > flMaxSpeed)
 			{
-				// excess speed is the speed over the maxrunspeed 
+				// excess speed is the speed over the maxrunspeed
 				// e.g. hit for 50 dmg, maxdmg is 100, speed is 1000, maxrun is 300
 				// so we want 50/100 = 0.5 * 1000-300 = 350, take that away from current speed = 650 speed after shot
 				float fLateral;
@@ -5853,7 +5853,7 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 					fLateral = flHorizontalSpeed - ((flHorizontalSpeed - flMaxSpeed) * (m_lastDamageAmount / damageForFullSlow));
 					fLateral = fLateral / flHorizontalSpeed;
 				}
-				SetAbsVelocity(Vector(vecVelocity.x * fLateral, vecVelocity.y * fLateral, vecVelocity.z));					
+				SetAbsVelocity(Vector(vecVelocity.x * fLateral, vecVelocity.y * fLateral, vecVelocity.z));
 			}
 		}
 	}
@@ -5866,7 +5866,7 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 		m_DmgOrigin = info.GetInflictor()->GetAbsOrigin();
 
 	// Set health lost for hud "damage" message
-	m_DmgTake += (int)info.GetDamage();	
+	m_DmgTake += (int)info.GetDamage();
 
 	// reset damage time countdown for each type of time based damage player just sustained
 
@@ -5892,7 +5892,7 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 		EmitSound("Player.Pain");
 	if (IsAlive() && (info.GetDamageType() & DMG_DROWN))
 		EmitSound("Player.DrownContinue");
-	
+
 	// Send hit indicator to attacker
 	CFFPlayer *pAttacker = ToFFPlayer( info.GetAttacker() );
 	if( pAttacker && pAttacker != this )
@@ -5933,7 +5933,7 @@ int CFFPlayer::OnTakeDamage(const CTakeDamageInfo &inputInfo)
 	// update assist tracking. NOTE: no kill assists for buildables. who cares
 	// NOTE: change this to the copy, info to use effectively armor scaled dmg values
 	AddRecentAttacker( inputInfo );
-	
+
 	m_bitsDamageType |= bitsDamage; // Save this so we can report it to the client
 	m_bitsHUDDamage = -1;  // make sure the damage bits get resent
 
@@ -5950,7 +5950,7 @@ void CFFPlayer::SetUnRadioTagged( void )
 	m_bRadioTaggedFromLUA = false;
 	m_pWhoTaggedMe = NULL;
 	m_flRadioTaggedStartTime = 0.0f;
-	m_flRadioTaggedDuration = 0.0f;	
+	m_flRadioTaggedDuration = 0.0f;
 
 	// Send status icon
 	CSingleUserRecipientFilter user( ( CBasePlayer * )this );
@@ -6060,7 +6060,7 @@ int CFFPlayer::OnTakeDamage_Alive(const CTakeDamageInfo &info)
 
 	if (!attacker)
 		return 0;
-	
+
 	// Jiggles: Hint Code
 	//			Event: Pyro takes damage from enemy Hwguy
 	if ( m_bACDamageHint )
@@ -6108,12 +6108,12 @@ int CFFPlayer::OnTakeDamage_Alive(const CTakeDamageInfo &info)
 	return 1;
 }
 
-int CFFPlayer::ObjectCaps( void ) 
-{ 
+int CFFPlayer::ObjectCaps( void )
+{
 	int iCaps = BaseClass::ObjectCaps();
 	if(IsBot())
 		 iCaps |= FCAP_IMPULSE_USE;
-	return iCaps; 
+	return iCaps;
 }
 
 //-----------------------------------------------------------------------------
@@ -6201,7 +6201,7 @@ void CFFPlayer::CreateLimbs(int iLimbs)
 
 				// Don't associate with a player, this is a quick fix to the ragdoll
 				// limbs trying to snatch a player model instance.
-				pRagdoll->m_hPlayer = NULL;	
+				pRagdoll->m_hPlayer = NULL;
 				pRagdoll->m_vecRagdollOrigin = vecPosition;
 				pRagdoll->m_vecRagdollVelocity = GetAbsVelocity();
 				pRagdoll->m_nModelIndex = g_iLimbs[GetClassSlot()][i];
@@ -6283,9 +6283,9 @@ bool CFFPlayer::Event_Gibbed(const CTakeDamageInfo &info)
 // Purpose: get this game's encryption key for decoding weapon kv files
 // Output : virtual const unsigned char
 //-----------------------------------------------------------------------------
-const unsigned char *CFFPlayer::GetEncryptionKey( void ) 
-{ 
-	return g_pGameRules->GetEncryptionKey(); 
+const unsigned char *CFFPlayer::GetEncryptionKey( void )
+{
+	return g_pGameRules->GetEncryptionKey();
 }
 
 //----------------------------------------------------------------------------
@@ -6342,8 +6342,8 @@ void CFFPlayer::Concuss(float flDuration, float flIconDuration, const QAngle *vi
 	UserMessageBegin( user, "StatusIconUpdate" );
 		WRITE_BYTE( FF_STATUSICON_CONCUSSION );
 		WRITE_FLOAT( flIconDuration );
-	MessageEnd();		
-	
+	MessageEnd();
+
 
 	if (viewjerk)
 	{
@@ -6442,7 +6442,7 @@ void CFFPlayer::Gas( float flDuration, float flIconDuration, CFFPlayer *pGasser)
 	*/
 
 	m_bGassed = true;
-	m_hGasser = pGasser; 
+	m_hGasser = pGasser;
 
 	if(m_flNextGas < gpGlobals->curtime)
 		m_flNextGas = gpGlobals->curtime;
@@ -6604,7 +6604,7 @@ int CFFPlayer::Heal(CFFPlayer *pHealer, float flHealth, bool healToFull)
 		MessageEnd();
 	}
 
-	// AfterShock - scoring system: Heal x amount of health +.5*health_given (only if last damage from enemy) 
+	// AfterShock - scoring system: Heal x amount of health +.5*health_given (only if last damage from enemy)
 	// Leaving the 'last damage from enemy' part out until discussion has finished about it.
 	pHealer->AddFortPoints( ( (m_iHealth - iOriginalHP) * 0.5 ), "#FF_FORTPOINTS_GIVEHEALTH");
 
@@ -6703,7 +6703,7 @@ bool CFFPlayer::TakeNamedItem(const char* pszName)
 			m_hMyWeapons[i]->Delete( );
 			m_hMyWeapons.Set( i, NULL );
 
-			IGameEvent *pEvent = gameeventmanager->CreateEvent("player_removeitem");						
+			IGameEvent *pEvent = gameeventmanager->CreateEvent("player_removeitem");
 			if(pEvent)
 			{
 				pEvent->SetInt("userid", GetUserID());
@@ -6720,7 +6720,7 @@ void CFFPlayer::Command_Disguise(const CCommand& args)
 {
 	int iTeam = 0, iClass = 0;
 
-	if (!GetDisguisable()) 
+	if (!GetDisguisable())
 	{
 		ClientPrint(this, HUD_PRINTTALK, "#FF_SPY_NODISGUISENOW");
 		return;
@@ -6812,14 +6812,14 @@ void CFFPlayer::Command_Disguise(const CCommand& args)
 					iTeam = FF_TEAM_GREEN;
 			}
 		}
-		
+
 		// Now for the class. Allow numbers 1-9 and strings like "soldier".
 		// Not allowing single characters representing the first letter of the class.
 		if( ( strlen( szClass ) == 1 ) && ( szClass[ 0 ] >= '1' ) && ( szClass[ 0 ] <= '9' ) )
 			iClass = atoi( szClass );
 		else
 			iClass = Class_StringToInt( szClass );
-		
+
 	}
 	// else if the format is "disguise command"
 	else if (args.ArgC() == 2)
@@ -6983,7 +6983,7 @@ void CFFPlayer::FinishDisguise()
 	m_iSpyDisguising = 0;
 
 	// Fire an event.
-	IGameEvent *pEvent = gameeventmanager->CreateEvent("disguised");						
+	IGameEvent *pEvent = gameeventmanager->CreateEvent("disguised");
 	if(pEvent)
 	{
 		pEvent->SetInt("userid", this->GetUserID());
@@ -7009,7 +7009,7 @@ void CFFPlayer::SetDisguise(int iTeam, int iClass, bool bInstant /* = false */)
 	m_iLastSpyDisguise = m_iNewSpyDisguise;
 
 	m_iSpyDisguising++;	// Jiggles: For the client HUD disguise progress bar
-	
+
 	// TODO: Time logic
 	if (bInstant)
 	{
@@ -7209,7 +7209,7 @@ int CFFPlayer::GetAmmoInClip( const char *_name )
 {
 	if (Weapon_OwnsThisType(_name, 0))
 	{
-		for (int i=0;i<MAX_WEAPONS;i++) 
+		for (int i=0;i<MAX_WEAPONS;i++)
 		{
 			if ( m_hMyWeapons[i].Get() && FClassnameIs(m_hMyWeapons[i], _name) )
 			{
@@ -7235,7 +7235,7 @@ bool CFFPlayer::SetAmmoInClip( const char *_name, int iAmount )
 {
 	if (Weapon_OwnsThisType(_name, 0))
 	{
-		for (int i=0;i<MAX_WEAPONS;i++) 
+		for (int i=0;i<MAX_WEAPONS;i++)
 		{
 			if ( m_hMyWeapons[i].Get() && FClassnameIs(m_hMyWeapons[i], _name) )
 			{
@@ -7346,7 +7346,7 @@ void CFFPlayer::MoveTowardsMapGuide()
 		// The extra wait time is clipped when deciding the position.
 		if (m_hNextMapGuide)
 			m_flNextMapGuideTime = gpGlobals->curtime + m_hLastMapGuide->m_flTime + m_hLastMapGuide->m_flWait;
-		
+
 		// We reached the end
 		else
 		{
@@ -7372,7 +7372,7 @@ void CFFPlayer::MoveTowardsMapGuide()
 		Vector vecNewPos;
 
 		float t = clamp((m_flNextMapGuideTime - gpGlobals->curtime) / m_hLastMapGuide->m_flTime, 0, 1.0f);
-		
+
 		// UNDONE: Only do the spline on the eyeangles
 		//t = SimpleSpline(t);
 
@@ -7501,7 +7501,7 @@ void CFFPlayer::Touch(CBaseEntity *pOther)
 			ClientPrint(this, HUD_PRINTTALK, "#FF_SPY_REVEALEDSPY");
 			FF_SendHint( ffplayer, SPY_LOSEDISGUISE, -1, PRIORITY_NORMAL, "#FF_HINT_SPY_LOSEDISGUISE" );
 
-			// This the correct func for logs? 
+			// This the correct func for logs?
 			// No, it's not :P - AfterShock
 			//UTIL_LogPrintf("%s just exposed an enemy spy!\n", STRING(ffplayer->pl.netname));
 
@@ -7509,7 +7509,7 @@ void CFFPlayer::Touch(CBaseEntity *pOther)
 			pEvent = gameeventmanager->CreateEvent( "disguise_lost" );
 			if( pEvent )
 			{
-				pEvent->SetInt( "attackerid", GetUserID() ); // this player just touched and undisguised enemy spy 
+				pEvent->SetInt( "attackerid", GetUserID() ); // this player just touched and undisguised enemy spy
 				pEvent->SetInt( "userid", ffplayer->GetUserID() ); // enemy spy is the victim
 				pEvent->SetInt( "priority", 10 );
 				gameeventmanager->FireEvent( pEvent );
@@ -7541,7 +7541,7 @@ void CFFPlayer::Touch(CBaseEntity *pOther)
 				pEvent = gameeventmanager->CreateEvent( "cloak_lost" );
 				if( pEvent )
 				{
-					pEvent->SetInt( "attackerid", GetUserID() ); // this player just touched and undisguised enemy spy 
+					pEvent->SetInt( "attackerid", GetUserID() ); // this player just touched and undisguised enemy spy
 					pEvent->SetInt( "userid", ffplayer->GetUserID() ); // enemy spy is the victim
 					pEvent->SetInt( "priority", 10 );
 					gameeventmanager->FireEvent( pEvent );
@@ -7577,7 +7577,7 @@ void CFFPlayer::InstaSwitch(int iClassNum)
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CFFPlayer::SpyCloakFadeIn( bool bInstant )
 {
@@ -7625,8 +7625,8 @@ void CFFPlayer::SpyCloakFadeIn( bool bInstant )
 	// Find out when we'll finish the cloak fade
 	m_flCloakFadeStart = gpGlobals->curtime;
 	m_flCloakFadeFinish = bInstant ? gpGlobals->curtime : gpGlobals->curtime + ( m_bCloakFadeType ? FFDEV_SPY_SCLOAKFADESPEED : FFDEV_SPY_CLOAKFADESPEED );
-		
-	// Hint Code	
+
+	// Hint Code
 	// Event: Player successfully cloaks for the first time
 	FF_SendHint( this, SPY_GAINCLOAK, 1, PRIORITY_NORMAL, "#FF_HINT_SPY_GAINCLOAK" );
 
@@ -7652,11 +7652,11 @@ void CFFPlayer::SpyCloakFadeIn( bool bInstant )
 
 		// Need to do stuff in fade think
 		m_bCloakFadeCloaking = true;
-	}	
+	}
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CFFPlayer::SpyCloakFadeOut( bool bInstant )
 {
@@ -7671,7 +7671,7 @@ void CFFPlayer::SpyCloakFadeOut( bool bInstant )
 
 	// Change render mode so we can start fading out
 	//SetRenderMode( ( RenderMode_t )kRenderTransTexture );
-	SetRenderColorA( 255 );	
+	SetRenderColorA( 255 );
 
 	// Cloaking
 	m_iCloakFadeCloaking = 1;
@@ -7681,7 +7681,7 @@ void CFFPlayer::SpyCloakFadeOut( bool bInstant )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CFFPlayer::SpyCloakFadeThink( void )
 {
@@ -7691,8 +7691,8 @@ void CFFPlayer::SpyCloakFadeThink( void )
 		if( flFadeTimeLeft <= 0.0f )
 		{
 			// Done fading, set the new skin
-			m_bCloakFadeCloaking = false;			
-			
+			m_bCloakFadeCloaking = false;
+
 			switch( m_iCloakFadeCloaking )
 			{
 				case 2:
@@ -7799,7 +7799,7 @@ void CFFPlayer::SpySabotageThink()
 		// If it's not a valid thing to sabotage
 		if ( pBuildable == NULL || !pBuildable->CanSabotage() || pBuildable->GetTeamNumber() == GetTeamNumber() || FFGameRules()->IsTeam1AlliedToTeam2( pBuildable->GetTeamNumber(), GetDisguisedTeam() ) != GR_TEAMMATE )
 		{
-			// Not something we can sabotage, stop 
+			// Not something we can sabotage, stop
 			SpyStopSabotaging();
 			return;
 		}
@@ -7842,16 +7842,16 @@ void CFFPlayer::SpySabotageThink()
 				CFFPlayer *pOwner = NULL;
 				if( m_hSabotaging )
 					pOwner = ToFFPlayer( m_hSabotaging->m_hOwner.Get() );
-					
+
 				if( pOwner )
-				{					
+				{
 					pEvent->SetInt("userid", pOwner->GetUserID());
 					pEvent->SetInt("saboteur", GetUserID());
 
 					// caes: fire the sentry/dispenser sabotaged events
 					gameeventmanager->FireEvent( pEvent );
 					// caes
-				}				
+				}
 			}
 
 			m_hSabotaging->Sabotage(this);
@@ -7988,34 +7988,34 @@ void CFFPlayer::ReduceArmorClass()
 }
 */
 //-----------------------------------------------------------------------------
-// Purpose: Find all sentry guns that have been sabotaged by this player and 
+// Purpose: Find all sentry guns that have been sabotaged by this player and
 //			turn them on the enemy.
 //-----------------------------------------------------------------------------
 void CFFPlayer::Command_SabotageSentry(const CCommand& args)
 {
-	CFFSentryGun *pSentry = NULL; 
+	CFFSentryGun *pSentry = NULL;
 
 	ClientPrint(this, HUD_PRINTCONSOLE, "> Send spike... ... ... ... ... ...Spike sent.\n");
 
-	while ((pSentry = (CFFSentryGun *) gEntList.FindEntityByClassT(pSentry, CLASS_SENTRYGUN)) != NULL) 
+	while ((pSentry = (CFFSentryGun *) gEntList.FindEntityByClassT(pSentry, CLASS_SENTRYGUN)) != NULL)
 	{
-		if (pSentry->IsSabotaged() && pSentry->m_hSaboteur == this) 
+		if (pSentry->IsSabotaged() && pSentry->m_hSaboteur == this)
 			pSentry->MaliciouslySabotage(this);
 	}
 	m_iActiveSabotages &= ~2;
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Find all dispensers that have been sabotaged by this player and 
+// Purpose: Find all dispensers that have been sabotaged by this player and
 //			detonate them
 //-----------------------------------------------------------------------------
 void CFFPlayer::Command_SabotageDispenser(const CCommand& args)
 {
-	CFFDispenser *pDispenser = NULL; 
+	CFFDispenser *pDispenser = NULL;
 
-	while ((pDispenser = (CFFDispenser *) gEntList.FindEntityByClassT(pDispenser, CLASS_DISPENSER)) != NULL)  
+	while ((pDispenser = (CFFDispenser *) gEntList.FindEntityByClassT(pDispenser, CLASS_DISPENSER)) != NULL)
 	{
-		if (pDispenser->IsSabotaged() && pDispenser->m_hSaboteur == this) 
+		if (pDispenser->IsSabotaged() && pDispenser->m_hSaboteur == this)
 			pDispenser->MaliciouslySabotage(this);
 	}
 	m_iActiveSabotages &= ~1;
@@ -8032,7 +8032,7 @@ void CFFPlayer::SpySabotageRelease()
 	// Release any dispensers
 	while( pDispenser != NULL )
 	{
-		if (pDispenser->m_hSaboteur == this) 
+		if (pDispenser->m_hSaboteur == this)
 		{
 			pDispenser->RemoveSaboteur(true);
 		}
@@ -8047,7 +8047,7 @@ void CFFPlayer::SpySabotageRelease()
 	{
 		// Jiggles: Don't remove the Saboteur if he's already triggered Malicious Sabotage mode!
 		//          The SG will die after the "shooting teammates" period ends anyway.
-		if ( (pSentry->m_hSaboteur == this) && !pSentry->m_bMaliciouslySabotaged ) 
+		if ( (pSentry->m_hSaboteur == this) && !pSentry->m_bMaliciouslySabotaged )
 		{
 			pSentry->RemoveSaboteur(true);
 		}
@@ -8063,7 +8063,7 @@ void CFFPlayer::SpySabotageRelease()
 //			jumping more consistent
 //-----------------------------------------------------------------------------
 Vector CFFPlayer::BodyTarget(const Vector &posSrc, bool bNoisy)
-{ 
+{
 	if (IsInAVehicle())
 	{
 		return GetVehicle()->GetVehicleEnt()->BodyTarget(posSrc, bNoisy);
@@ -8075,12 +8075,12 @@ Vector CFFPlayer::BodyTarget(const Vector &posSrc, bool bNoisy)
 	}
 	else
 	{
-		return GetAbsOrigin(); //return EyePosition(); 
+		return GetAbsOrigin(); //return EyePosition();
 	}
 };
 
 //-----------------------------------------------------------------------------
-// Purpose: Run "effects" and "speed effects" through here first before giving 
+// Purpose: Run "effects" and "speed effects" through here first before giving
 //			the player the actual effect.
 // Input  :	iEffect - the effect
 // Input  : szEffectSuffix - the effect suffix, like "conc", or "gas", etc. It
@@ -8095,7 +8095,7 @@ bool CFFPlayer::LuaRunEffect( int iEffect, CBaseEntity *pEffector, float *pflDur
 		return false;
 
 	float flDuration = 0.0f, flIconDuration = 0.0f, flSpeed = 0.0f;
-	
+
 	if( pflDuration )
 		flDuration = *pflDuration;
 	if( pflIconDuration )
@@ -8358,38 +8358,38 @@ void CFFPlayer::UpdateCamera( bool bUnassigned )
 	Vector position( 0, 0, 0 );
 	QAngle angles( 0, 0, 0 );
 
-	// Unassigned logic.  Should start the mapguide if there's multiple points.  If there's only one, use its angles.  
+	// Unassigned logic.  Should start the mapguide if there's multiple points.  If there's only one, use its angles.
 	// Failing that, use the intermission.  If that fails, then set default stuff.
 	if( bUnassigned )
 	{
 		// Start a new map overview guide
 		if (!m_hNextMapGuide)
 			m_hLastMapGuide = m_hNextMapGuide = FindMapGuide(MAKE_STRING("overview"));
-		
+
 		// m_hNextMapGuide = FindMapGuide(m_hLastMapGuide->m_iNextMapguide);
 
 		// Check if mapguide was found & whether there is more than one
 		if( m_hNextMapGuide )
 		{
 			CFFMapGuide *pNextOne = FindMapGuide( m_hNextMapGuide->m_iNextMapguide );
-			
+
 			// If there's no next one, then sod it!  Just use the overview mapguide's position & angles and chill.
 			if( ! pNextOne )
 			{
-				CFFMapGuide *pCurrent = dynamic_cast< CFFMapGuide* >( m_hNextMapGuide.Get() );	
-				
+				CFFMapGuide *pCurrent = dynamic_cast< CFFMapGuide* >( m_hNextMapGuide.Get() );
+
 				if( pCurrent )
 				{
 					// use the angles
 					SnapEyeAngles( pCurrent->GetAbsAngles() );
 					SetAbsOrigin( pCurrent->GetAbsOrigin() );
-					
+
 					m_vecInfoIntermission = pCurrent->GetAbsAngles();
-				}		
+				}
 
 				// Don't use mapguides any more (since there's only one = static view).
 				m_hLastMapGuide = m_hNextMapGuide = NULL;
-			}	
+			}
 			else
 			{
 				// we're ready to rock.  Mapguide shall proceed as ordered, guv'nor!
@@ -8397,18 +8397,18 @@ void CFFPlayer::UpdateCamera( bool bUnassigned )
 			}
 		}
 		else	// no mapguide found -- put the player at the intermission spot
-		{			
+		{
 			// this function will return a decent fallback value so just use what it sets regardless of whether it succeeds
 			UTIL_GetIntermissionData( &position, &angles );
-			SetAbsOrigin( position );				
+			SetAbsOrigin( position );
 			SnapEyeAngles( angles );
 
 			// Send this to client so the client will actually look at what we want it to!
 			m_vecInfoIntermission = angles;
 		}
-			
+
 	}	// END if( unassigned )
-	
+
 	else	// this is the regular logic that is used most often
 	{
 		// If intermission data was found, use it.
@@ -8425,16 +8425,16 @@ void CFFPlayer::UpdateCamera( bool bUnassigned )
 			CFFMapGuide *pMapGuide = FindMapGuide(MAKE_STRING("overview"));
 
 			if( pMapGuide )
-			{				
+			{
 				SnapEyeAngles( pMapGuide->GetAbsAngles() );
 				SetAbsOrigin( pMapGuide->GetAbsOrigin() );
 			}
-			else	// no mapguide found; just use the default position & angles 
+			else	// no mapguide found; just use the default position & angles
 			{
 				SetAbsOrigin( position );
 				SnapEyeAngles( angles );
 			}
-		}				
+		}
 	}
 }
 
@@ -8442,7 +8442,7 @@ void CFFPlayer::UpdateCamera( bool bUnassigned )
 void CFFPlayer::AddRecentAttacker( const CTakeDamageInfo &dmgInfo )
 {
 	// make sure to get the effective scorer incase dmg is from
-	// a buildable - det, sg, dispenser, probably nades etc	
+	// a buildable - det, sg, dispenser, probably nades etc
 	CFFPlayer *pAttacker = ToFFPlayer( FFGameRules()->GetDeathScorer( dmgInfo.GetAttacker(), dmgInfo.GetInflictor() ) );
 
 	// dont track our own client in recent attacks, otherwise we would show up as an assist when the world kills us & suicides
@@ -8510,7 +8510,7 @@ RecentAttackerInfo* CFFPlayer::GetTopKillAssister( CBasePlayer* killerToIgnore )
 		}
 
 		if ( !ret || m_recentAttackers[i].totalDamage > ret->totalDamage )
-		{	
+		{
 			ret = &m_recentAttackers[i];
 			// consider in case of exact tie, take newest timestamp attacker here
 		}
@@ -8519,10 +8519,10 @@ RecentAttackerInfo* CFFPlayer::GetTopKillAssister( CBasePlayer* killerToIgnore )
 	return ret;
 }
 
-void CFFPlayer::RemoveMeFromKillAssists( ) 
+void CFFPlayer::RemoveMeFromKillAssists( )
 {
-	// im disconnecting or switching teams or something, so 
-	// remove my contributions from assists. we can revisit this 
+	// im disconnecting or switching teams or something, so
+	// remove my contributions from assists. we can revisit this
 	// if its too aggressive for eg, team switch and then having assist come through friendly fire
 
 	// if coming from spec or whatever, dont do anything because we couldnt have possibly damaged anything
@@ -8547,14 +8547,14 @@ void CFFPlayer::RemoveMeFromKillAssists( )
 		{
 			if ( pFFPlayer->m_recentAttackers[i].hPlayer == this )
 			{
-				// remove right away. this would screw up indexing for future loops, but 
+				// remove right away. this would screw up indexing for future loops, but
 				// in reality we should only be in this list once for each player
 				pFFPlayer->m_recentAttackers.Remove( i );
 				break;
 			}
 		}
 	}
-}	
+}
 
 float CFFPlayer::GetJetpackFuelPercent()
 {

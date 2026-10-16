@@ -118,7 +118,7 @@ struct RecentAttackerInfo
 	}
 
 	/* debugging
-	~RecentAttackerInfo( ) 
+	~RecentAttackerInfo( )
 	{
 		//
 	}*/
@@ -140,7 +140,7 @@ public:
 	// In case the client has the player entity, we transmit the player index.
 	// In case the client doesn't have it, we transmit the player's model index, origin, and angles
 	// so they can create a ragdoll in the right place.
-	CNetworkHandle( CBaseEntity, m_hPlayer );	// networked entity handle 
+	CNetworkHandle( CBaseEntity, m_hPlayer );	// networked entity handle
 	CNetworkVector( m_vecRagdollVelocity );
 	CNetworkVector( m_vecRagdollOrigin );
 
@@ -179,7 +179,7 @@ public:
 	virtual void Spawn();
 	virtual void InitialSpawn();
 	virtual void Precache();
-	
+
 	virtual void Event_Killed(const CTakeDamageInfo &info);
 	virtual bool Event_Gibbed(const CTakeDamageInfo &info);
 	virtual bool BecomeRagdollOnClient(const Vector &force);
@@ -187,7 +187,7 @@ public:
 
 	virtual void LeaveVehicle( const Vector &vecExitPoint, const QAngle &vecExitAngles );
 	virtual void UpdateOnRemove( void );
-	
+
 	// returns the name of the active weapons. returns null if there
 	// there is no active weapon
 	const char* GetActiveWeaponName() const;
@@ -201,7 +201,7 @@ public:
 	CNetworkVar( int, m_iShotsFired );	// number of shots fired recently
 
 	// Tracks our ragdoll entity.
-	CNetworkHandle( CBaseEntity, m_hRagdoll );	// networked entity handle 
+	CNetworkHandle( CBaseEntity, m_hRagdoll );	// networked entity handle
 
 // In shared code.
 public:
@@ -211,10 +211,10 @@ public:
 	virtual CFFPlayer* FFAnim_GetPlayer();
 	virtual char const *DamageDecal( int bitsDamageType, int gameMaterial );
 
-	void FireBullet( 
-		Vector vecSrc, 
-		const QAngle &shootAngles, 
-		float vecSpread, 
+	void FireBullet(
+		Vector vecSrc,
+		const QAngle &shootAngles,
+		float vecSpread,
 		float flDamage,		// |-- Mirv: Float
 		int iBulletType,
 		CBaseEntity *pevAttacker,
@@ -291,7 +291,7 @@ public:
 	void RemoveProjectiles( void );	// greandes & projectiles
 	void RemoveBackpacks( void );	// Remove player thrown backpacks
 	void KillAndRemoveItems( void );
-	
+
 	bool PlayerHasSkillCommand(const char *szCommand);
 	virtual int OnTakeDamage(const CTakeDamageInfo &inputInfo);
 	void DistanceDamageModifier(CTakeDamageInfo &info);
@@ -399,7 +399,7 @@ protected:
 	CNetworkHandle( CFFSentryGun, m_hSentryGun );
 	CNetworkHandle( CFFDetpack, m_hDetpack );
 	CNetworkHandle( CFFManCannon, m_hManCannon );
-	
+
 	// Used for seeing if a player is currently
 	// trying to build a detpack, dispenser, or sentry gun
 	CNetworkVar( bool, m_bStaticBuilding );
@@ -421,7 +421,7 @@ protected:
 public:
 	bool AnyActiveDispenserSabotages() const { return (m_iActiveSabotages & 1); }
 	bool AnyActiveSentrySabotages() const { return ((m_iActiveSabotages & 2) != 0); }
-	
+
 	bool IsBuilding( void ) const;
 	bool IsStaticBuilding( void ) const;
 	int GetCurrentBuild( void ) const;
@@ -454,16 +454,16 @@ public:
 	void SetLocation(int entindex, const char *szNewLocation, int iNewLocationTeam);
 	void RemoveLocation( int entindex );
 	const char *GetLocation( void ) const
-	{ 
+	{
 		if(m_Locations.Count() > 0)
 			return m_Locations[0].locationname;
 		else
 			return m_szLastLocation;
 	}
 	int GetLocationTeam( void ) const
-	{ 
+	{
 		if(m_Locations.Count() > 0)
-			return m_Locations[0].team; 
+			return m_Locations[0].team;
 		else
 			return m_iLastLocationTeam;
 	}
@@ -485,7 +485,7 @@ public:
 
 private:
 	float m_fl_LuaSet_PlayerRespawnDelay;
-	
+
 	// time of the last class switch
 	float m_flLastClassSwitch;
 
@@ -503,8 +503,8 @@ public:
 
 	bool IsGrenade1Primed( void );
 	bool IsGrenade2Primed( void );
-	bool IsGrenadePrimed( void );	
-private:	
+	bool IsGrenadePrimed( void );
+private:
 	void GrenadeThink(void);
 	void ThrowGrenade(float fTimer, float speed = 630.0f);		// |-- Mirv: So we can drop grens
 	void ResetGrenadeState(void);
@@ -537,14 +537,14 @@ public:
 	void LuaAddEffect( int iEffect, float flEffectDuration = 0.0f, float flIconDuration = 0.0f, float flSpeed = 0.0f );
 	bool LuaIsEffectActive( int iEffect );
 	void LuaRemoveEffect( int iEffect );
-	void LuaFreezePlayer(bool _freeze) 
+	void LuaFreezePlayer(bool _freeze)
 	{
 		if(_freeze)
-			AddFlag( FL_FROZEN ); 
+			AddFlag( FL_FROZEN );
 		else
 			RemoveFlag( FL_FROZEN );
 	}
-	bool LuaIsPlayerFrozen() 
+	bool LuaIsPlayerFrozen()
 	{
 		return !!( GetFlags() & FL_FROZEN );
 	}
@@ -557,7 +557,7 @@ public:
 	}
 
 	void ReloadClips( void );
- 
+
 	void AddSpeedEffect(SpeedEffectType type, float duration, float speed, int mod = 0, int iIcon = -1, float flIconDuration = -1, bool bLuaAdded = false);
 	bool IsSpeedEffectSet( SpeedEffectType type );
 	void RemoveSpeedEffect(SpeedEffectType type, bool bLuaAdded = false);
@@ -597,12 +597,12 @@ public:
 protected:
 	CNetworkVar( bool, m_bIsRampsliding );
 
-public:	
+public:
 	bool IsInfected( void ) const		{ return m_bInfected; }
 	bool IsImmune( void ) const			{ return m_bImmune; }
 	CBaseEntity *GetInfector( void )	{ return ( m_hInfector == NULL ) ? NULL : ( CBaseEntity * )m_hInfector; }
 	int GetInfectorTeam( void ) const	{ return IsInfected() ? m_iInfectedTeam : TEAM_UNASSIGNED; }
-	
+
 	bool GetSpecialInfectedDeath( void ) const { return m_bSpecialInfectedDeath; }
 	void SetSpecialInfectedDeath( void ) { m_bSpecialInfectedDeath = true; }
 
@@ -631,13 +631,13 @@ private:
 	int m_nNumInfectDamage;
 	float m_fLastCellRegenTick;						// hlieb: cell regeneration for scouts radar
 	float m_fLastMedicCellRegenTick;				// hlieb: cell regeneration for medpacks
-	
+
 	// A hack flag to put on a player who was infected and tried to
 	// evade dying by infection by changing teams or typing kill. We
 	// note this so we can acredit the guy who infected him when we
 	// get to gamerules. If we didn't have to note this properly in
 	// a hud death msg (and logs) it'd be a lot easier.
-	bool m_bSpecialInfectedDeath; 
+	bool m_bSpecialInfectedDeath;
 
 private:
 
@@ -685,7 +685,7 @@ protected:
 	CNetworkHandle( CFFRadioTagData, m_hRadioTagData );
 
 	// This is here so that when someone tags us w/ a radiotag and
-	// we die while tagged by that person, we can award that player 
+	// we die while tagged by that person, we can award that player
 	// their extra point
 	EHANDLE	m_pWhoTaggedMe;
 
@@ -707,7 +707,7 @@ public:
 	{
 		SetDisguise(iTeam, iClass);
 	}
-	
+
 protected:
 	// Added by Mulchman - here temporarily I guess
 	// client has to send the text to the server
@@ -750,7 +750,7 @@ private:
 	float m_flCloakTime;
 	// Time until player can cloak again
 	float m_flNextCloak;
-	
+
 	// Shared stuffs:
 public:
 	void Command_SpyCloak(const CCommand& args = CCommand());
@@ -758,7 +758,7 @@ public:
 	void Command_SpySmartCloak(const CCommand& args = CCommand());
 	bool IsCloaked( void ) const { return m_iCloaked != 0; }
 private:
-	void Cloak( void );	
+	void Cloak( void );
 	CNetworkVar( unsigned int, m_iCloaked );
 public:
 	void Overpressure( void );
@@ -774,7 +774,7 @@ public:
 
 	void SharedPreThink( void );
 
-public:	
+public:
 	// Will uncloak you (w/o going the Command_ route)
 	void Uncloak( bool bInstant = false )
 	{
@@ -782,7 +782,7 @@ public:
 		{
 			SpyCloakFadeIn( bInstant );
 			Cloak();
-		}	
+		}
 	}
 
 	// Stuffs Lua can interface with
@@ -799,7 +799,7 @@ public:
 		// and we're already cloaked, uncloak immediately!
 		if( IsCloaked() && !bCloakable )
 			Uncloak( true );
-	}	
+	}
 private:
 	CNetworkVar( bool, m_bCloakable );
 	// END: Spy cloak stuff
@@ -833,7 +833,7 @@ public:
 	CNetworkVar( float, m_flConcTime );
 	void UnConcuss( void );
 	void Concuss(float flDuration, float flIconDuration, const QAngle *viewjerk = NULL, float flDistance = 0.0f);
-	
+
 	CNetworkVar( float, m_flTrueAimTime );
 	CNetworkVar( float, m_flHitTime );
 
@@ -861,7 +861,7 @@ public:
 
 	void SetFlameSpritesLifetime(float flLifeTime, float flFlameSize = 1.0f);
 
-	virtual bool TakeNamedItem(const char* szName);	
+	virtual bool TakeNamedItem(const char* szName);
 
 private:
 	char m_pCurrentLuaMenu[128];
@@ -897,7 +897,7 @@ protected:
 	float m_flPipebombShotTime;
 
 public:
-	void SetDisguisable( bool bDisguisable ) 
+	void SetDisguisable( bool bDisguisable )
 	{
 		if( !bDisguisable )
 		{
@@ -910,7 +910,7 @@ public:
 private:
 	CNetworkVar( bool, m_bDisguisable );
 
-public:	
+public:
 	int GetDisguisedClass( void ) const;
 	int GetDisguisedTeam( void ) const;
 	bool IsDisguised( void ) const;
@@ -943,7 +943,7 @@ protected:
 	CNetworkVar( bool, m_bEngyMe );
 	// 0001339: Share m_flSaveMeTime with the medic call.
 	// **********************************
-	
+
 	// **********************************
 	// AmmoMe stuffs
 public:
@@ -952,7 +952,7 @@ protected:
 	CNetworkVar( bool, m_bAmmoMe );
 	// 0001339: Share m_flSaveMeTime with the medic call.
 	// **********************************
-	
+
 	// **********************************
 	// Concussion stuffs
 public:
@@ -1015,12 +1015,12 @@ public:
 	// <-- Mirv: Various things
 
 	// Mirv: In TFC the AbsOrigin is midway up the model. We need to take this into
-	// account for various things. 
+	// account for various things.
 	Vector GetFeetOrigin( void );
 
 	virtual void Touch(CBaseEntity *pOther);
 	void	InstaSwitch(int iClassNum);
-	
+
 	void	SetupClassVariables();
 
 	virtual void FireBullets(const FireBulletsInfo_t &info);
