@@ -12,7 +12,6 @@
 
 
 #include "cbase.h"
-#include "ff_shareddefs.h"
 #include "ff_projectile_pipebomb.h"
 
 #ifdef GAME_DLL
@@ -329,7 +328,7 @@ CFFProjectilePipebomb * CFFProjectilePipebomb::CreatePipebomb(const CBaseEntity 
 	}
 
 	// Too many pipes
-	if (i > FF_MAX_PIPEBOMBS)
+	if (i > 6)
 		pOldestPipe->DetonatePipe();
 	else {
 		// tell the client to increment the count for the hud
