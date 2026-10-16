@@ -2762,10 +2762,8 @@ inline void CBaseEntity::FireBullets( int cShots, const Vector &vecSrc,
 #define SetThink( a ) ThinkSet( static_cast <void (CBaseEntity::*)(void)> (a), 0, NULL )
 #define SetContextThink( a, b, context ) ThinkSet( static_cast <void (CBaseEntity::*)(void)> (a), (b), context )
 
-#ifndef _DEBUG
 #define SetMoveDone( a ) \
 		(void)(m_pfnMoveDone = static_cast <void (CBaseEntity::*)(void)> (a))
-#endif
 
 
 inline bool FClassnameIs(CBaseEntity *pEntity, const char *szClassname)
