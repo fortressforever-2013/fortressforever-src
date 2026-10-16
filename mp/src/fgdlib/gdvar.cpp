@@ -55,6 +55,7 @@ static TypeMap_t TypeMap[] =
 	{ ivAngleNegativePitch,	"angle_negative_pitch",	STRING },
 	{ ivInstanceVariable,	"instance_variable",	STRING },
 	{ ivInstanceParm,		"instance_parm",		STRING },
+	{ ivBoolean,			"boolean",			STRING },
 };
 
 
