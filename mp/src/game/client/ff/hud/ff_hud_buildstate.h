@@ -64,17 +64,14 @@ private:
 	CHudTexture *m_pHudSentryLevel2;
 	CHudTexture *m_pHudSentryLevel3;
 	CHudTexture *m_pHudDispenser;
-	CHudTexture *m_pHudDetpack;
 
 	// Lines of information
 	wchar_t m_wszDispenser[128];
 	wchar_t m_wszSentry[128];
-	wchar_t m_wszDetpack[128];
 	wchar_t m_wszCloak[128];
 
 	bool m_bDrawDispenser;
 	bool m_bDrawSentry;
-	bool m_bDrawDetpack;
 	bool m_bDrawCloak;
 
 	int m_iHealthPerc, m_iAmmoPerc;
@@ -85,7 +82,6 @@ private:
 
 	void MsgFunc_DispenserMsg(bf_read &msg);
 	void MsgFunc_SentryMsg(bf_read &msg);
-	void MsgFunc_DetpackMsg(bf_read &msg);
 
 public:
 	CHudBuildState(const char *pElementName);
@@ -102,4 +98,3 @@ public:
 DECLARE_HUDELEMENT(CHudBuildState);
 DECLARE_HUD_MESSAGE(CHudBuildState, DispenserMsg);
 DECLARE_HUD_MESSAGE(CHudBuildState, SentryMsg);
-DECLARE_HUD_MESSAGE(CHudBuildState, DetpackMsg);

@@ -897,6 +897,7 @@ void CFFPlayer::PreThink(void)
 
 BEGIN_DATADESC(CFFPlayer)
 	DEFINE_THINKFUNC(UpdateHudStatusManCannonAvailability),
+	DEFINE_THINKFUNC(UpdateHudStatusDetpackAvailability),
 END_DATADESC()
 
 void CFFPlayer::QueueHudStatusManCannonAvailabilityUpdate()
@@ -911,6 +912,7 @@ void CFFPlayer::NetworkStateChanged_m_iAmmo()
 {
 	BaseClass::NetworkStateChanged_m_iAmmo();
 	QueueHudStatusManCannonAvailabilityUpdate();
+	QueueHudStatusDetpackAvailabilityUpdate();
 }
 
 void CFFPlayer::NetworkStateChanged_m_iAmmo(void* pVar)
@@ -919,6 +921,10 @@ void CFFPlayer::NetworkStateChanged_m_iAmmo(void* pVar)
 	const int iManCannonAmmoIndex = GetAmmoDef()->Index(AMMO_MANCANNON);
 	if (pVar == &m_iAmmo[iManCannonAmmoIndex])
 		QueueHudStatusManCannonAvailabilityUpdate();
+
+	const int iDetpackAmmoIndex = GetAmmoDef()->Index(AMMO_DETPACK);
+	if (pVar == &m_iAmmo[iDetpackAmmoIndex])
+		QueueHudStatusDetpackAvailabilityUpdate();
 }
 
 void CFFPlayer::UpdateHudStatusManCannonAvailability()
@@ -940,6 +946,35 @@ void CFFPlayer::UpdateHudStatusManCannonAvailability()
 	MessageEnd();
 
 	m_hudStatusManCannonAvailability.Remember(bCanHave, bHas);
+}
+
+void CFFPlayer::QueueHudStatusDetpackAvailabilityUpdate()
+{
+	// Ammo change notifications run before the new value is stored. Queue one
+	// update for the next tick, coalescing multiple writes in the same frame.
+	SetContextThink(&CFFPlayer::UpdateHudStatusDetpackAvailability,
+		gpGlobals->curtime + gpGlobals->interval_per_tick, "HudStatusDetpackAvailability");
+}
+
+void CFFPlayer::UpdateHudStatusDetpackAvailability()
+{
+	SetNextThink(TICK_NEVER_THINK, "HudStatusDetpackAvailability");
+
+	const bool bCanHave = GetClassSlot() != CLASS_NONE && GetMaxDetpack() > 0;
+	const bool bHas = GetAmmoCount(AMMO_DETPACK) > 0;
+	const bool bStateUnchanged
+		= m_hudStatusDetpackAvailability.IsUnchanged(bCanHave, bHas);
+	if (bStateUnchanged)
+		return;
+
+	CSingleUserRecipientFilter user(this);
+	user.MakeReliable();
+	UserMessageBegin(user, "DetpackAvailabilityMsg");
+		WRITE_BYTE(bCanHave);
+		WRITE_BYTE(bHas);
+	MessageEnd();
+
+	m_hudStatusDetpackAvailability.Remember(bCanHave, bHas);
 }
 
 void CFFPlayer::PostThink()
@@ -1553,7 +1588,9 @@ void CFFPlayer::Spawn( void )
 {
 	// Resend availability after spawning, even if its values are unchanged.
 	m_hudStatusManCannonAvailability.Invalidate();
+	m_hudStatusDetpackAvailability.Invalidate();
 	QueueHudStatusManCannonAvailabilityUpdate();
+	QueueHudStatusDetpackAvailabilityUpdate();
 
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!
 	//  Please don't reinitialise class specific variables in here, but SetupClassVariables instead!
@@ -1926,6 +1963,7 @@ void CFFPlayer::SetupClassVariables()
 
 	// Capability can change even when the ammo count does not.
 	QueueHudStatusManCannonAvailabilityUpdate();
+	QueueHudStatusDetpackAvailabilityUpdate();
 }
 
 void CFFPlayer::InitialSpawn( void )

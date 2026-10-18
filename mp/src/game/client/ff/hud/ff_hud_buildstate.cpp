@@ -44,10 +44,6 @@ void CHudBuildState::VidInit()
 	m_pHudDispenser->textureId = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile(m_pHudDispenser->textureId, "vgui/hud_buildable_dispenser", true, false);
 
-	m_pHudDetpack = new CHudTexture();
-	m_pHudDetpack->textureId = surface()->CreateNewTextureID();
-	surface()->DrawSetTextureFile(m_pHudDetpack->textureId, "vgui/hud_buildable_detpack", true, false);
-
 	// Precache the strings
 	wchar_t *tempString = g_pVGuiLocalize->Find("#FF_HUD_HEALTH");
 
@@ -80,7 +76,6 @@ void CHudBuildState::Init()
 
 	HOOK_HUD_MESSAGE(CHudBuildState, DispenserMsg);
 	HOOK_HUD_MESSAGE(CHudBuildState, SentryMsg);
-	HOOK_HUD_MESSAGE(CHudBuildState, DetpackMsg);
 }
 
 void CHudBuildState::OnTick()
@@ -94,20 +89,17 @@ void CHudBuildState::OnTick()
 	if (!pPlayer)
 		return;
 
-	m_bDrawDispenser = m_bDrawSentry = m_bDrawDetpack = m_bDrawCloak = false;
+	m_bDrawDispenser = m_bDrawSentry = m_bDrawCloak = false;
 	m_iSentryLevel = 0;
 
 	C_FFDispenser *pDispenser = pPlayer->GetDispenser();
 	C_FFSentryGun *pSentryGun = pPlayer->GetSentryGun();
-	C_FFDetpack	*pDetpack = pPlayer->GetDetpack();
 
 	m_bDrawDispenser = pDispenser && pDispenser->IsBuilt();
 
 	m_bDrawSentry = pSentryGun && pSentryGun->m_iLevel > 0;
 	if (m_bDrawSentry)
 		m_iSentryLevel = pSentryGun->m_iLevel;
-
-	m_bDrawDetpack = pDetpack && pDetpack->IsBuilt();
 
 	if (pPlayer && pPlayer->GetClassSlot() == CLASS_SPY && !pPlayer->IsCloaked())
 	{
@@ -155,14 +147,9 @@ void CHudBuildState::MsgFunc_SentryMsg(bf_read &msg)
 	V_snwprintf(m_wszSentry, 127, L"Level %i - %ls: %i%% %ls: %i%% %ls", iLevel , m_wszHealth, iHealth, m_wszAmmo, iAmmo, fNoRockets ? m_wszNoRockets : L"");
 }
 
-void CHudBuildState::MsgFunc_DetpackMsg(bf_read &msg)
-{
-    m_flDetpackDetonateTime = msg.ReadFloat();
-}
-
 void CHudBuildState::Paint()
 {
-	if (!m_bDrawDispenser && !m_bDrawSentry && !m_bDrawDetpack && !m_bDrawCloak )
+	if (!m_bDrawDispenser && !m_bDrawSentry && !m_bDrawCloak )
 		return;
 
 	// Draw icons
@@ -191,12 +178,6 @@ void CHudBuildState::Paint()
 		surface()->DrawTexturedRect(icon2_xpos, icon2_ypos, icon2_xpos + icon2_width, icon2_ypos + icon2_height);
 	}
 
-	if (m_bDrawDetpack)
-	{
-		surface()->DrawSetTexture(m_pHudDetpack->textureId);
-		surface()->DrawTexturedRect(icon1_xpos, icon1_ypos, icon1_xpos + icon1_width, icon1_ypos + icon1_height);
-	}
-
 
 	// Draw text
 	surface()->DrawSetTextFont(m_hTextFont);
@@ -215,16 +196,6 @@ void CHudBuildState::Paint()
 		surface()->DrawSetTextPos(text2_xpos, text2_ypos);
 
 		for (wchar_t *wch = m_wszDispenser; *wch != 0; wch++)
-			surface()->DrawUnicodeChar(*wch);
-	}
-
-	if (m_bDrawDetpack)
-	{
-		surface()->DrawSetTextPos(text1_xpos, text1_ypos);
-
-		V_snwprintf(m_wszDetpack, 127, L"Time Left: %i seconds", (int)(m_flDetpackDetonateTime - gpGlobals->curtime + 1) );
-
-		for (wchar_t *wch = m_wszDetpack; *wch != 0; wch++)
 			surface()->DrawUnicodeChar(*wch);
 	}
 
