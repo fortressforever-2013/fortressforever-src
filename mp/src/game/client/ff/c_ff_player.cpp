@@ -239,7 +239,6 @@ bool CanStealMouseForAimSentry(void)
 //	internalCenterPrint->Print( buf );
 //}
 
-
 // Jiggles: Called 7 seconds after the first time the player spawns as a class, when
 //			a player has logged 10 minutes (total) as a Soldier, and when a player has
 //			logged 5 minutes (total) as a Pyro
@@ -708,6 +707,7 @@ RecvPropFloat(RECVINFO(m_flNextMapGuideTime)),
 
 RecvPropFloat(RECVINFO(m_flSlidingTime)),
 RecvPropFloat(RECVINFO(m_flSpeedModifier)),
+	RecvPropTime(RECVINFO(m_flNextCloak)),
 
 RecvPropInt(RECVINFO(m_iSpyDisguising)),
 
@@ -851,7 +851,6 @@ private:
 	int		m_nSkinIndex;
 };
 
-
 IMPLEMENT_CLIENTCLASS_DT_NOBASE( C_FFRagdoll, DT_FFRagdoll, CFFRagdoll )
 	RecvPropVector( RECVINFO(m_vecRagdollOrigin) ),
 	RecvPropEHandle( RECVINFO( m_hPlayer ) ),
@@ -863,8 +862,6 @@ IMPLEMENT_CLIENTCLASS_DT_NOBASE( C_FFRagdoll, DT_FFRagdoll, CFFRagdoll )
 	RecvPropInt(RECVINFO(m_fBodygroupState)),
 	RecvPropInt(RECVINFO(m_nSkinIndex)),
 END_RECV_TABLE()
-
-
 
 C_FFRagdoll::C_FFRagdoll()
 {
@@ -925,7 +922,6 @@ void C_FFRagdoll::ImpactTrace( trace_t *pTrace, int iDamageType, const char *pCu
 
 	UTIL_BloodDrips(pTrace->endpos, dir, BLOOD_COLOR_RED, 20);
 	TraceBleed(20, dir, pTrace, DMG_BLAST);
-
 
 	dir *= 4000;  // adjust impact strenght
 	if ( iDamageType & DMG_BLAST )
@@ -1068,7 +1064,6 @@ void C_FFRagdoll::CreateFFRagdoll( void )
 	m_pBloodStreamEmitter->SetDieTime(gpGlobals->curtime + 25.0);//cl_ragdolltime.GetFloat());
 }
 
-
 void C_FFRagdoll::OnDataChanged( DataUpdateType_t type )
 {
 	BaseClass::OnDataChanged( type );
@@ -1132,7 +1127,6 @@ void C_FFRagdoll::SetupWeights( const matrix3x4_t *pBoneToWorld, int nFlexWeight
 	}
 }
 
-
 IRagdoll* C_FFPlayer::GetRepresentativeRagdoll() const
 {
 	if (m_hRagdoll.Get())
@@ -1151,7 +1145,6 @@ const unsigned char* GetEncryptionKey(void)
 {
 	return NULL;
 }
-
 
 C_FFPlayer::C_FFPlayer() :
 	m_iv_angEyeAngles("C_FFPlayer::m_iv_angEyeAngles")
@@ -1631,7 +1624,6 @@ void C_FFPlayer::Spawn(void)
 	else
 		pSpyHintTimer->Pause();
 
-
 	// Event: Player goes for 10 minutes without issuing the "lastinv" weapon switch command
 	C_FFHintTimer* pLastInvHintTimer = g_FFHintTimers.FindTimer("LI");
 	if (pLastInvHintTimer == NULL) // Setup timer
@@ -1667,7 +1659,6 @@ void C_FFPlayer::Spawn(void)
 		pChangeToCTimer->Unpause();
 	else
 		pChangeToCTimer->Pause();
-
 
 	// Event: Player plays for 2 minutes -- tell the player about the Map key
 	C_FFHintTimer* pMapHintTimer = g_FFHintTimers.FindTimer("MAP");
