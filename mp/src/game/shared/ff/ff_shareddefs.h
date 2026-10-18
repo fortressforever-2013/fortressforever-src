@@ -22,6 +22,11 @@
 #define FF_PLAYER_VIEW_OFFSET	Vector( 0, 0, 53.5 )
 #define EXTRA_LOCAL_ORIGIN_ACCURACY
 
+// Maximum jetpack fuel.
+#define JETPACK_MAXFUEL 200
+#define JETPACK_RECOVERY_TIME 3.81f
+#define JETPACK_RESTART_FUEL 40
+
 // Maximum distance from the Scout's view to a Jump Pad pickup target.
 #define FF_JUMPPAD_PICKUP_RANGE 100.0f
 
