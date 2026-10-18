@@ -84,6 +84,13 @@ public:
 	int GetNails ( void ) const { return m_iNails; }
 	int GetRockets( void ) const { return m_iRockets; }
 	int GetArmor( void ) const { return m_iArmor; }
+	int GetAmmoPercent() const
+	{
+		const int iAmmo = m_iCells + m_iNails + m_iShells + m_iRockets + m_iArmor;
+		const int iMaxAmmo = m_iMaxCells + m_iMaxNails + m_iMaxShells + m_iMaxRockets + m_iMaxArmor;
+		return iMaxAmmo > 0 ? static_cast<int>((static_cast<float>(iAmmo) / iMaxAmmo) * 100) : 0;
+	}
+
 	
 	int NeedsHealth( void ) const { return m_iMaxHealth - m_iHealth; }
 	int NeedsArmor( void ) const { return m_iMaxArmor - m_iArmor; }
