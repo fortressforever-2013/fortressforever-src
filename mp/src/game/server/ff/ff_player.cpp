@@ -6614,7 +6614,7 @@ int CFFPlayer::Heal(CFFPlayer *pHealer, float flHealth, bool healToFull)
 		return 0;
 
 	// 150% max specified in the wiki
-	if( ( float )m_iHealth >= ( float )( m_iMaxHealth * 1.5f ) )
+	if( ( float )m_iHealth >= ( float )( m_iMaxHealth * FF_OVERHEAL_MULTIPLIER ) )
 		return 0;
 
 	int iOriginalHP = m_iHealth;
@@ -6625,7 +6625,7 @@ int CFFPlayer::Heal(CFFPlayer *pHealer, float flHealth, bool healToFull)
 	else if ( healToFull == true)
 	{
 		// Bug #0000467: Medic can't give over 100% health [just added in the "m_iHealth =" line...]
-		m_iHealth = min( ( float )( m_iHealth + flHealth ), ( float )( m_iMaxHealth * 1.5f ) );
+		m_iHealth = min( ( float )( m_iHealth + flHealth ), ( float )( m_iMaxHealth * FF_OVERHEAL_MULTIPLIER ) );
 	}
 	else
 		m_iHealth = max( min( ( float )( m_iHealth + flHealth ), ( float )( m_iMaxHealth ) ) , ( float )( m_iHealth ) );
