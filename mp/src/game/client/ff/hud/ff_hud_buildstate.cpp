@@ -40,10 +40,6 @@ void CHudBuildState::VidInit()
 	m_pHudSentryLevel3->textureId = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile(m_pHudSentryLevel3->textureId, "vgui/hud_buildable_sentry_level3", true, false);
 
-	m_pHudDispenser = new CHudTexture();
-	m_pHudDispenser->textureId = surface()->CreateNewTextureID();
-	surface()->DrawSetTextureFile(m_pHudDispenser->textureId, "vgui/hud_buildable_dispenser", true, false);
-
 	// Precache the strings
 	wchar_t *tempString = g_pVGuiLocalize->Find("#FF_HUD_HEALTH");
 
@@ -74,7 +70,6 @@ void CHudBuildState::Init()
 {
 	vgui::ivgui()->AddTickSignal(GetVPanel(), 100);
 
-	HOOK_HUD_MESSAGE(CHudBuildState, DispenserMsg);
 	HOOK_HUD_MESSAGE(CHudBuildState, SentryMsg);
 }
 
@@ -89,13 +84,10 @@ void CHudBuildState::OnTick()
 	if (!pPlayer)
 		return;
 
-	m_bDrawDispenser = m_bDrawSentry = m_bDrawCloak = false;
+	m_bDrawSentry = m_bDrawCloak = false;
 	m_iSentryLevel = 0;
 
-	C_FFDispenser *pDispenser = pPlayer->GetDispenser();
 	C_FFSentryGun *pSentryGun = pPlayer->GetSentryGun();
-
-	m_bDrawDispenser = pDispenser && pDispenser->IsBuilt();
 
 	m_bDrawSentry = pSentryGun && pSentryGun->m_iLevel > 0;
 	if (m_bDrawSentry)
@@ -121,14 +113,6 @@ void CHudBuildState::OnTick()
 	}
 }
 
-void CHudBuildState::MsgFunc_DispenserMsg(bf_read &msg)
-{
-    int iHealth = (int) msg.ReadByte();
-    int iAmmo = (int) msg.ReadByte();
-
-	V_snwprintf(m_wszDispenser, 127, L"%ls: %i%% %ls: %i%%", m_wszHealth, iHealth, m_wszAmmo, iAmmo);
-}
-
 void CHudBuildState::MsgFunc_SentryMsg(bf_read &msg)
 {
     int iHealth = (int) msg.ReadByte();
@@ -149,7 +133,7 @@ void CHudBuildState::MsgFunc_SentryMsg(bf_read &msg)
 
 void CHudBuildState::Paint()
 {
-	if (!m_bDrawDispenser && !m_bDrawSentry && !m_bDrawCloak )
+	if (!m_bDrawSentry && !m_bDrawCloak )
 		return;
 
 	// Draw icons
@@ -172,12 +156,6 @@ void CHudBuildState::Paint()
 		surface()->DrawTexturedRect(icon1_xpos, icon1_ypos, icon1_xpos + icon1_width, icon1_ypos + icon1_height);
 	}
 
-	if (m_bDrawDispenser)
-	{
-		surface()->DrawSetTexture(m_pHudDispenser->textureId);
-		surface()->DrawTexturedRect(icon2_xpos, icon2_ypos, icon2_xpos + icon2_width, icon2_ypos + icon2_height);
-	}
-
 
 	// Draw text
 	surface()->DrawSetTextFont(m_hTextFont);
@@ -188,14 +166,6 @@ void CHudBuildState::Paint()
 		surface()->DrawSetTextPos(text1_xpos, text1_ypos);
 
 		for (wchar_t *wch = m_wszSentry; *wch != 0; wch++)
-			surface()->DrawUnicodeChar(*wch);
-	}
-
-	if (m_bDrawDispenser)
-	{
-		surface()->DrawSetTextPos(text2_xpos, text2_ypos);
-
-		for (wchar_t *wch = m_wszDispenser; *wch != 0; wch++)
 			surface()->DrawUnicodeChar(*wch);
 	}
 
