@@ -48,10 +48,6 @@ void CHudBuildState::VidInit()
 	m_pHudDetpack->textureId = surface()->CreateNewTextureID();
 	surface()->DrawSetTextureFile(m_pHudDetpack->textureId, "vgui/hud_buildable_detpack", true, false);
 
-	m_pHudPipes = new CHudTexture();
-	m_pHudPipes->textureId = surface()->CreateNewTextureID();
-	surface()->DrawSetTextureFile(m_pHudPipes->textureId, "vgui/hud_pipe", true, false);
-
 	// Precache the strings
 	wchar_t *tempString = g_pVGuiLocalize->Find("#FF_HUD_HEALTH");
 
@@ -85,7 +81,6 @@ void CHudBuildState::Init()
 	HOOK_HUD_MESSAGE(CHudBuildState, DispenserMsg);
 	HOOK_HUD_MESSAGE(CHudBuildState, SentryMsg);
 	HOOK_HUD_MESSAGE(CHudBuildState, DetpackMsg);
-	HOOK_HUD_MESSAGE(CHudBuildState, PipeMsg);
 }
 
 void CHudBuildState::OnTick()
@@ -99,7 +94,7 @@ void CHudBuildState::OnTick()
 	if (!pPlayer)
 		return;
 
-	m_bDrawDispenser = m_bDrawSentry = m_bDrawDetpack = m_bDrawPipes = m_bDrawCloak = false;
+	m_bDrawDispenser = m_bDrawSentry = m_bDrawDetpack = m_bDrawCloak = false;
 	m_iSentryLevel = 0;
 
 	C_FFDispenser *pDispenser = pPlayer->GetDispenser();
@@ -113,10 +108,6 @@ void CHudBuildState::OnTick()
 		m_iSentryLevel = pSentryGun->m_iLevel;
 
 	m_bDrawDetpack = pDetpack && pDetpack->IsBuilt();
-
-	if (pPlayer && pPlayer->GetClassSlot() != CLASS_DEMOMAN)
-		m_iNumPipes = 0;
-	m_bDrawPipes = pPlayer && pPlayer->GetClassSlot() == CLASS_DEMOMAN && m_iNumPipes > 0;
 
 	if (pPlayer && pPlayer->GetClassSlot() == CLASS_SPY && !pPlayer->IsCloaked())
 	{
@@ -169,31 +160,9 @@ void CHudBuildState::MsgFunc_DetpackMsg(bf_read &msg)
     m_flDetpackDetonateTime = msg.ReadFloat();
 }
 
-void CHudBuildState::MsgFunc_PipeMsg(bf_read &msg)
-{
-    int iIncrementPipes = (int) msg.ReadByte();
-	switch (iIncrementPipes)
-	{
-	case INCREMENT_PIPES:
-		m_iNumPipes++;
-		//DevMsg("Incrementing pipe count (to %i)\n", m_iNumPipes);
-		break;
-	case DECREMENT_PIPES:
-		m_iNumPipes = max(0, m_iNumPipes);
-		m_iNumPipes--;
-		//DevMsg("Decrementing pipe count (to %i)\n", m_iNumPipes);
-		break;
-	case RESET_PIPES:
-	default:
-		m_iNumPipes = 0;
-		//DevMsg("Resetting pipe count (to %i)\n", m_iNumPipes);
-		break;
-	}
-}
-
 void CHudBuildState::Paint()
 {
-	if (!m_bDrawDispenser && !m_bDrawSentry && !m_bDrawDetpack && !m_bDrawPipes && !m_bDrawCloak )
+	if (!m_bDrawDispenser && !m_bDrawSentry && !m_bDrawDetpack && !m_bDrawCloak )
 		return;
 
 	// Draw icons
@@ -228,11 +197,6 @@ void CHudBuildState::Paint()
 		surface()->DrawTexturedRect(icon1_xpos, icon1_ypos, icon1_xpos + icon1_width, icon1_ypos + icon1_height);
 	}
 
-	if (m_bDrawPipes)
-	{
-		surface()->DrawSetTexture(m_pHudPipes->textureId);
-		surface()->DrawTexturedRect(icon2_xpos, icon2_ypos, icon2_xpos + icon2_width, icon2_ypos + icon2_height);
-	}
 
 	// Draw text
 	surface()->DrawSetTextFont(m_hTextFont);
@@ -264,15 +228,6 @@ void CHudBuildState::Paint()
 			surface()->DrawUnicodeChar(*wch);
 	}
 
-	if (m_bDrawPipes)
-	{
-		surface()->DrawSetTextPos(text2_xpos, text2_ypos);
-
-		V_snwprintf(m_wszPipes, 127, L"%i / %i", m_iNumPipes/*clamp(m_iNumPipes, 0, 8)*/, FF_MAX_PIPEBOMBS );
-
-		for (wchar_t *wch = m_wszPipes; *wch != 0; wch++)
-			surface()->DrawUnicodeChar(*wch);
-	}
 
 	if (m_bDrawCloak)
 	{
