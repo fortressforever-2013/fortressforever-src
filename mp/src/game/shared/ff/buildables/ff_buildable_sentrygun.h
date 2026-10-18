@@ -41,6 +41,11 @@
 
 #include "ff_buildabledefs.h"
 
+#define SG_MAXSHELLS_LEVEL1 100
+#define SG_MAXSHELLS_LEVEL2 125
+#define SG_MAXSHELLS_LEVEL3 150
+#define SG_MAXROCKETS_LEVEL3 20
+
 #define SG_BC_YAW			"aim_yaw"
 #define SG_BC_PITCH			"aim_pitch"
 #define SG_BC_BARREL_ROTATE	"barrel_rotate"
@@ -176,11 +181,12 @@ public:
 	float			m_flLastClientUpdate;
 	int				m_iLastState;
 
-
 private:
 	bool IsTargetInAimingEllipse( const Vector& vecTarget ) const;
 	bool IsTargetVisible( CBaseEntity *pTarget, int iSightDistance );
 	bool IsTargetClassTValid( Class_T cT ) const;
+
+	void SendHudStatusLevel(bool bZero = false);
 
 public:
 	CBaseEntity *GetEnemy( void	) const { return m_hEnemy; }
@@ -220,6 +226,7 @@ public:
 	virtual void Sabotage(CFFPlayer *pSaboteur);
 	virtual void MaliciouslySabotage(CFFPlayer *pSaboteur);
 	virtual void Detonate();
+	virtual void RemoveQuietly() override;
 
 	static CFFSentryGun *Create( const Vector &vecOrigin, const QAngle &vecAngles, CBaseEntity *pentOwner = NULL );
 
@@ -228,7 +235,6 @@ public:
 
 public:
 	CNetworkVar(unsigned int, m_iAmmoPercent);
-
 
 	int		m_iShellDamage;
 
