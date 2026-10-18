@@ -55,29 +55,15 @@ private:
 	CHudTexture	*m_pHudElementTexture;
 
 	// Results of localising strings
-	wchar_t m_wszHealth[32];
-	wchar_t m_wszAmmo[32];
-	wchar_t m_wszNoRockets[32];
 
 	// Icons
-	CHudTexture *m_pHudSentryLevel1;
-	CHudTexture *m_pHudSentryLevel2;
-	CHudTexture *m_pHudSentryLevel3;
 
 	// Lines of information
-	wchar_t m_wszSentry[128];
 	wchar_t m_wszCloak[128];
 
-	bool m_bDrawSentry;
 	bool m_bDrawCloak;
-
-	int m_iHealthPerc, m_iAmmoPerc;
-	bool m_fNoRockets;
-	int m_iSentryLevel;
-    float m_flDetpackDetonateTime;
 	float m_flCloakTimeLeft;
 
-	void MsgFunc_SentryMsg(bf_read &msg);
 
 public:
 	CHudBuildState(const char *pElementName);
@@ -92,4 +78,3 @@ public:
 };
 
 DECLARE_HUDELEMENT(CHudBuildState);
-DECLARE_HUD_MESSAGE(CHudBuildState, SentryMsg);
