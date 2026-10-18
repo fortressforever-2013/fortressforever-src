@@ -15,6 +15,7 @@
 
 #include "ff_playeranimstate.h"
 #include "ff_shareddefs.h"
+#include "ff_hud_status_detpack_availability.h"
 #include "ff_hud_status_mancannon_availability.h"
 #include "ff_playerclass_parse.h"
 #include "ff_esp_shared.h"
@@ -410,6 +411,10 @@ protected:
 	CNetworkHandle( CFFSentryGun, m_hSentryGun );
 	CNetworkHandle( CFFDetpack, m_hDetpack );
 	CNetworkHandle( CFFManCannon, m_hManCannon );
+
+	void QueueHudStatusDetpackAvailabilityUpdate();
+	void UpdateHudStatusDetpackAvailability();
+	FFHudStatusDetpackAvailability m_hudStatusDetpackAvailability;
 
 	void QueueHudStatusManCannonAvailabilityUpdate();
 	void UpdateHudStatusManCannonAvailability();
