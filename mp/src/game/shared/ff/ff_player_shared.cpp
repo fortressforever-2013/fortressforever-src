@@ -89,9 +89,8 @@ ConVar sv_motd_enable( "sv_motd_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "
 #define OVERPRESSURE_PUSH_HORIZONTAL 350.0f
 //ConVar ffdev_overpressure_push_vertical( "ffdev_overpressure_push_vertical", "350", FCVAR_FF_FFDEV_REPLICATED );
 #define OVERPRESSURE_PUSH_VERTICAL 350.0f
-// for release code: need to update ff_hud_overpressure.cpp #define
+// Cooldown duration is shared with the HUD in ff_shareddefs.h.
 //ConVar ffdev_overpressure_delay( "ffdev_overpressure_delay", "16", FCVAR_FF_FFDEV_REPLICATED );
-#define OVERPRESSURE_DELAY 16
 //ConVar ffdev_overpressure_cell_cost( "ffdev_overpressure_cell_cost", "10", FCVAR_FF_FFDEV_REPLICATED );
 #define OVERPRESSURE_CELL_COST 10
 //ConVar ffdev_overpressure_radius( "ffdev_overpressure_radius", "128", FCVAR_FF_FFDEV_REPLICATED );

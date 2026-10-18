@@ -22,6 +22,9 @@
 #define FF_PLAYER_VIEW_OFFSET	Vector( 0, 0, 53.5 )
 #define EXTRA_LOCAL_ORIGIN_ACCURACY
 
+// Overpressure cooldown in seconds.
+#define OVERPRESSURE_DELAY 16
+
 // Maximum jetpack fuel.
 #define JETPACK_MAXFUEL 200
 #define JETPACK_RECOVERY_TIME 3.81f
