@@ -22,6 +22,9 @@
 #define FF_PLAYER_VIEW_OFFSET	Vector( 0, 0, 53.5 )
 #define EXTRA_LOCAL_ORIGIN_ACCURACY
 
+// Standard cloak cooldown in seconds.
+#define SPY_NEXTCLOAK 5.0f
+
 // Overpressure cooldown in seconds.
 #define OVERPRESSURE_DELAY 16
 

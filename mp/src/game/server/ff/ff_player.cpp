@@ -465,6 +465,7 @@ BEGIN_SEND_TABLE_NOBASE( CFFPlayer, DT_FFLocalPlayerExclusive )
 
 	SendPropFloat(SENDINFO(m_flSlidingTime)),
 	SendPropFloat(SENDINFO(m_flSpeedModifier)),
+	SendPropTime(SENDINFO(m_flNextCloak)),
 
 	SendPropInt( SENDINFO( m_iSpyDisguising ), 4 ),
 

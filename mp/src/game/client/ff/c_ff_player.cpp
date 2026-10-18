@@ -708,6 +708,7 @@ RecvPropFloat(RECVINFO(m_flNextMapGuideTime)),
 
 RecvPropFloat(RECVINFO(m_flSlidingTime)),
 RecvPropFloat(RECVINFO(m_flSpeedModifier)),
+	RecvPropTime(RECVINFO(m_flNextCloak)),
 
 RecvPropInt(RECVINFO(m_iSpyDisguising)),
 

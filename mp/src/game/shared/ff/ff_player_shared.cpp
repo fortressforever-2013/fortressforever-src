@@ -162,7 +162,6 @@ ConVar sv_motd_enable( "sv_motd_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "
 
 // Time in seconds you have to wait until you can cloak again
 //ConVar ffdev_spy_nextcloak( "ffdev_spy_nextcloak", "5", FCVAR_FF_FFDEV_REPLICATED, "Time in seconds you have to wait until you can cloak again" );
-#define SPY_NEXTCLOAK 5.0f
 
 //ConVar ffdev_spy_scloak_minstartvelocity( "ffdev_spy_scloak_minstartvelocity", "80", FCVAR_FF_FFDEV_REPLICATED, "Spy must be moving at least this slow to scloak." );
 #define SPY_SCLOAK_MINSTARTVELOCITY 80.0f
