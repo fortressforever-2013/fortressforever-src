@@ -146,9 +146,6 @@ ConVar sv_motd_enable( "sv_motd_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "
 #define JETPACK_FUELHOVERCOST 2 //ffdev_jetpack_fuelhovercost.GetFloat()
 
 #define JETPACK_MINFUEL 2
-#define JETPACK_MAXFUEL 200
-#define JETPACK_RECOVERY_TIME 3.81f
-#define JETPACK_RESTART_FUEL 40
 
 //ConVar ffdev_ac_bulletsize( "ffdev_ac_bulletsize", "1.0", FCVAR_FF_FFDEV_REPLICATED );
 #define FF_AC_BULLETSIZE 1.0f //ffdev_ac_bulletsize.GetFloat()
