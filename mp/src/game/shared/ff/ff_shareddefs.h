@@ -42,6 +42,9 @@
 // Maximum deployed pipebombs per player.
 #define FF_MAX_PIPEBOMBS 6
 
+// Maximum health granted by medic overhealing, relative to normal maximum health.
+#define FF_OVERHEAL_MULTIPLIER 1.5f
+
 // How many cells each medpack costs
 #define FF_MEDPACK_COST 10
 
