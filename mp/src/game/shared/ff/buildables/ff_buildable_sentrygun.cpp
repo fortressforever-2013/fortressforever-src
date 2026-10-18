@@ -35,7 +35,6 @@
 //	05/10/2006, Mulchman:
 //		Cleaned this up A LOT. SG still doesn't factor in radiotagged targets, though.
 
-
 #include "cbase.h"
 #include "ff_buildableobject.h"
 #include "ff_buildable_sentrygun.h"
@@ -120,7 +119,6 @@
 //ConVar ffdev_sg_bulletdamage("ffdev_sg_bulletdamage", "14", FCVAR_FF_FFDEV_REPLICATED, "SG bullet damage");
 #define SG_BULLETDAMAGE 14.0f //ffdev_sg_bulletdamage.GetInt() // 14.0f
 
-
 //ConVar ffdev_sg_barrelrotation_speed_max("ffdev_sg_barrelrotation_speed_max", "30.0", FCVAR_REPLICATED, "Barrel max speed");
 #define SG_BARRELROTATION_SPEED_MAX 30 //ffdev_sg_barrelrotation_speed_max.GetFloat()
 //ConVar ffdev_sg_barrelrotation_speed_min("ffdev_sg_barrelrotation_speed_min", "20.0", FCVAR_REPLICATED, "Barrel min speed");
@@ -146,7 +144,6 @@
 //#define SG_SHOOT_ANGLE sg_shoot_angle.GetFloat()
 //ConVar sg_shoot_angle_distmult("ffdev_sg_shoot_angle_distmult", "0.008", FCVAR_FF_FFDEV_REPLICATED, "The angle required to shoot the target is multiplied by (distance to target * this)");
 //#define SG_SHOOT_ANGLE_DISTMULT sg_shoot_angle_distmult.GetFloat()
-
 
 //ConVar sg_health_lvl1("ffdev_sg_health_lvl1", "145", FCVAR_FF_FFDEV_REPLICATED, "Level 1 SG health");
 #define SG_HEALTH_LEVEL1 145 //sg_health_lvl1.GetInt() // 160
@@ -268,7 +265,8 @@ CFFSentryGun::CFFSentryGun()
 	m_flShotAccumulator = 0;
 	m_flNextRocket = 0;
 	m_flLastSight = 0;
-	m_iMaxShells = 200; // TODO: Get Number
+	m_iMaxHealth = SG_HEALTH_LEVEL1;
+	m_iMaxShells = SG_MAXSHELLS_LEVEL1;
 	m_iMaxRockets = 0;
 	m_iRockets = 0;
 	m_iShellDamage = 15;
@@ -1290,6 +1288,40 @@ bool CFFSentryGun::IsTargetClassTValid( Class_T cT ) const
 	return ( ( cT == CLASS_PLAYER ) || ( cT == CLASS_SENTRYGUN ) || ( cT == CLASS_DISPENSER ) || ( cT == CLASS_MANCANNON ) );
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Notify the client
+//-----------------------------------------------------------------------------
+void CFFSentryGun::SendHudStatusLevel(bool bZero)
+{
+	CFFPlayer* pPlayer
+		= ToFFPlayer(m_hOwner.Get());
+
+	if (!pPlayer)
+		return;
+
+	CSingleUserRecipientFilter user(pPlayer);
+	user.MakeReliable();
+
+	UserMessageBegin(user, "SentryLevelMsg");
+	if (bZero)
+	{
+		WRITE_BYTE(0);
+	}
+	else
+	{
+		WRITE_BYTE(GetLevel());
+		WRITE_BYTE(GetMaxHealth());
+		WRITE_BYTE(GetHealth());
+		WRITE_BYTE(m_iMaxShells);
+		WRITE_BYTE(m_iShells);
+		if (m_iMaxRockets > 0) {
+			WRITE_BYTE(m_iMaxRockets);
+			WRITE_BYTE(m_iRockets);
+		}
+	}
+	MessageEnd();
+}
+
 void CFFSentryGun::Shoot() 
 {
 	if (GetShells() <= 0)
@@ -1390,7 +1422,6 @@ void CFFSentryGun::Shoot( const Vector &vecSrc, const Vector &vecDirToEnemy, boo
 			break;
 		}
 	}
-		
 
 	// Introduce quite a big spread now if sabotaged
 	// but not if we're in malicious mode
@@ -1613,7 +1644,6 @@ bool CFFSentryGun::UpdateFacing( void )
 	float cur_yaw = m_angAiming.y - src_yaw;
 	float new_yaw = UTIL_ApproachAngle( dst_yaw, cur_yaw, MaxYawSpeed() );
 
-
 // caes: limit angular acceleration of SG in yaw
 	// find how much the SG wants to turn by
 	float delta_yaw = new_yaw - cur_yaw;
@@ -1661,7 +1691,6 @@ bool CFFSentryGun::UpdateFacing( void )
 	}
 // caes
 
-
 	m_angAiming.y = new_yaw + src_yaw;
 
 	SetPoseParameter( m_iYawPoseParameter, TO_YAW( new_yaw ) );
@@ -1697,7 +1726,6 @@ bool CFFSentryGun::UpdateFacing( void )
 
 	// Target pitch = constrained goal pitch - current pitch
 	float new_pitch = UTIL_Approach( clamp( dst_pitch, SG_MIN_PITCH, SG_MAX_PITCH ), cur_pitch, MaxPitchSpeed() );
-
 
 // caes: limit angular acceleration of SG in pitch
 	// find how much the SG wants to turn by
@@ -1740,7 +1768,6 @@ bool CFFSentryGun::UpdateFacing( void )
 	}
 // caes
 
-
 	SetPoseParameter( m_iPitchPoseParameter, ( clamp( new_pitch, SG_MIN_ANIMATED_PITCH, SG_MAX_PITCH ) / 2.0f ) ); //AfterShock: (90 + 33) / 45.. bad bad hack, seems to work tho. sgs can only look down about 33 degrees.
 
 	m_angAiming.x = FROM_PITCH( new_pitch + src_pitch );
@@ -1757,7 +1784,10 @@ void CFFSentryGun::Event_Killed( const CTakeDamageInfo &info )
 	VPROF_BUDGET( "CFFSentryGun::Event_Killed", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
 	if( m_hOwner.Get() )
+	{
 		ClientPrint( ToFFPlayer( m_hOwner.Get() ), HUD_PRINTCENTER, "#FF_SENTRYGUN_DESTROYED" );
+		SendHudStatusLevel(true);
+	}
 
 	BaseClass::Event_Killed( info );
 }
@@ -1828,7 +1858,7 @@ void CFFSentryGun::SetLevel( int iLevel, bool bEmitSounds/*=true*/ )
 		
 		m_iShells = 20;
 
-		m_iMaxShells = 100;
+		m_iMaxShells = SG_MAXSHELLS_LEVEL1;
 		m_iMaxRockets = 0;
 		m_iShellDamage = SG_BULLETDAMAGE;
 
@@ -1849,7 +1879,7 @@ void CFFSentryGun::SetLevel( int iLevel, bool bEmitSounds/*=true*/ )
 		SetSolid( SOLID_VPHYSICS );
 		EmitSound( sndFilter, entindex(), "Sentry.Two" );
 
-		m_iMaxShells = 125;
+		m_iMaxShells = SG_MAXSHELLS_LEVEL2;
 		m_iMaxRockets = 0;
 		m_iShellDamage = SG_BULLETDAMAGE;
 
@@ -1874,8 +1904,8 @@ void CFFSentryGun::SetLevel( int iLevel, bool bEmitSounds/*=true*/ )
 		SetSolid( SOLID_VPHYSICS );
 		EmitSound( sndFilter, entindex(), "Sentry.Three" );
 
-		m_iMaxShells = 150;
-		m_iMaxRockets = 20;
+		m_iMaxShells = SG_MAXSHELLS_LEVEL3;
+		m_iMaxRockets = SG_MAXROCKETS_LEVEL3;
 		m_iShellDamage = SG_BULLETDAMAGE;
 
 		//m_flShellCycleTime = 0.1f;
@@ -1913,15 +1943,17 @@ bool CFFSentryGun::Upgrade()
 {
 	VPROF_BUDGET( "CFFSentryGun::Upgrade", VPROF_BUDGETGROUP_FF_BUILDABLE );
 
-	bool bDidUpgrade = false;
-
-	if( m_iLevel < 3 ) 
+	if (m_iLevel >= 3)
 	{
-		bDidUpgrade = true;
-		SetLevel(m_iLevel+1);
+		// Can't upgrade past level 3
+		return false;
 	}
 
-	return bDidUpgrade;
+	SetLevel(m_iLevel+1);
+
+	SendHudStatusLevel();
+
+	return true;
 }
 
 void CFFSentryGun::Repair( int iCells ) 
@@ -2077,10 +2109,19 @@ void CFFSentryGun::Detonate()
 			pEvent->SetInt("userid", pOwner->GetUserID());
 			pEvent->SetInt("level", GetLevel());
 			gameeventmanager->FireEvent(pEvent, true);
+
+			SendHudStatusLevel(true);
 		}
 	}
 
 	CFFBuildableObject::Detonate();
+}
+
+void CFFSentryGun::RemoveQuietly()
+{
+	SendHudStatusLevel(true);
+
+	CFFBuildableObject::RemoveQuietly();
 }
 
 //-----------------------------------------------------------------------------
@@ -2133,39 +2174,41 @@ void CFFSentryGun::PhysicsSimulate()
 {
 	BaseClass::PhysicsSimulate();
 
+	if (!IsBuilt())
+		return;
+
 	// Update the client every 0.2 seconds
-	if (gpGlobals->curtime > m_flLastClientUpdate + 0.2f)
+	if (gpGlobals->curtime < m_flLastClientUpdate + 0.2f)
 	{
-		m_flLastClientUpdate = gpGlobals->curtime;
-
-		CFFPlayer *pPlayer = ToFFPlayer(m_hOwner.Get());
-
-		if (!pPlayer)
-			return;
-
-		int iHealth = (int) (100.0f * GetHealth() / GetMaxHealth());
-		int iAmmo = (int) (100.0f * (float) m_iShells / m_iMaxShells);
-
-		// Last bit of ammo signifies whether the SG needs rockets
-		if (m_iMaxRockets && !m_iRockets) 
-			m_iAmmoPercent += 128;
-
-		// If things haven't changed then do nothing more
-		int iState = iHealth + (iAmmo << 8);
-		if (m_iLastState == iState)
-			return;
-
-		CSingleUserRecipientFilter user(pPlayer);
-		user.MakeReliable();
-
-		UserMessageBegin(user, "SentryMsg");
-		WRITE_BYTE(iHealth);
-		WRITE_BYTE(iAmmo);
-		WRITE_BYTE(GetLevel());
-		MessageEnd();
-
-		m_iLastState = iState;
+		return;
 	}
+
+	m_flLastClientUpdate = gpGlobals->curtime;
+
+	CFFPlayer *pPlayer = ToFFPlayer(m_hOwner.Get());
+
+	if (!pPlayer)
+		return;
+
+	// Track the raw values sent to the HUD, including individual ammo changes.
+	const int iState = GetHealth() | (m_iShells << 8) | (m_iRockets << 16);
+
+	if (m_iLastState == iState)
+		return;
+
+	CSingleUserRecipientFilter user(pPlayer);
+	user.MakeReliable();
+
+	UserMessageBegin(user, "SentryStatusMsg");
+		WRITE_BYTE(GetHealth());
+		WRITE_BYTE(m_iShells);
+		if (m_iMaxRockets > 0)
+		{
+			WRITE_BYTE(m_iRockets);
+		}
+	MessageEnd();
+
+	m_iLastState = iState;
 }
 
 #endif // CLIENT_DLL : GAME_DLL
