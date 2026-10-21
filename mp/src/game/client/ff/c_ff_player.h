@@ -474,6 +474,9 @@ public:
 	virtual		float GetFOV();
 
 	float		m_flSpeedModifier;
+	bool m_bAssaultCannonAnchored;
+	float m_flAssaultCannonAnchorEndTime;
+	float m_flAssaultCannonAnchorDuration;
 
 	int			m_iHallucinationIndex;
 	float		m_flHallucinationFinish;
