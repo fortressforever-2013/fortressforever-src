@@ -708,6 +708,9 @@ RecvPropFloat(RECVINFO(m_flNextMapGuideTime)),
 
 RecvPropFloat(RECVINFO(m_flSlidingTime)),
 RecvPropFloat(RECVINFO(m_flSpeedModifier)),
+	RecvPropBool(RECVINFO(m_bAssaultCannonAnchored)),
+	RecvPropFloat(RECVINFO(m_flAssaultCannonAnchorEndTime)),
+	RecvPropFloat(RECVINFO(m_flAssaultCannonAnchorDuration)),
 	RecvPropTime(RECVINFO(m_flNextCloak)),
 
 RecvPropInt(RECVINFO(m_iSpyDisguising)),
@@ -1212,6 +1215,9 @@ C_FFPlayer::C_FFPlayer() :
 	m_bIsRampsliding = false;
 
 	m_flSpeedModifier = 1.0f;
+	m_bAssaultCannonAnchored = false;
+	m_flAssaultCannonAnchorEndTime = 0.0f;
+	m_flAssaultCannonAnchorDuration = 0.0f;
 
 	m_iHallucinationIndex = 0;
 

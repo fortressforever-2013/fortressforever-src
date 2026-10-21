@@ -465,6 +465,9 @@ BEGIN_SEND_TABLE_NOBASE( CFFPlayer, DT_FFLocalPlayerExclusive )
 
 	SendPropFloat(SENDINFO(m_flSlidingTime)),
 	SendPropFloat(SENDINFO(m_flSpeedModifier)),
+	SendPropBool(SENDINFO(m_bAssaultCannonAnchored)),
+	SendPropFloat(SENDINFO(m_flAssaultCannonAnchorEndTime), 0, SPROP_NOSCALE),
+	SendPropFloat(SENDINFO(m_flAssaultCannonAnchorDuration), 0, SPROP_NOSCALE),
 	SendPropTime(SENDINFO(m_flNextCloak)),
 
 	SendPropInt( SENDINFO( m_iSpyDisguising ), 4 ),
@@ -631,6 +634,9 @@ CFFPlayer::CFFPlayer()
 	m_flNextAutoDisguise = 0.0f;
 
 	m_flSpeedModifier = 1.0f;
+	m_bAssaultCannonAnchored = false;
+	m_flAssaultCannonAnchorEndTime = 0.0f;
+	m_flAssaultCannonAnchorDuration = 0.0f;
 	m_flSpeedModifierOld = 1.0f;
 	m_flSpeedModifierChangeTime = 0;
 
@@ -1609,6 +1615,9 @@ void CFFPlayer::Spawn( void )
 	m_flConcTime		= 0.0f;
 	m_flSlidingTime		= 0.0f;
 	m_flSpeedModifier	= 1.0f;
+	m_bAssaultCannonAnchored = false;
+	m_flAssaultCannonAnchorEndTime = 0.0f;
+	m_flAssaultCannonAnchorDuration = 0.0f;
 	m_flNextClassSpecificSkill = 0.0f;
 	m_iJetpackFuel		= 200.0f;
 	m_flJetpackNextFuelRechargeTime = 0.0f;
@@ -5106,6 +5115,8 @@ void CFFPlayer::RecalculateSpeed( void )
 
 	// need this so we can slow down the player more if using the assault cannon
 	bool bAssaultCannonIncluded = false;
+	float flAnchorEndTime = 0.0f;
+	float flAnchorDuration = 0.0f;
 
 	// go apply all speed effects
 	for (int i = 0; i < NUM_SPEED_EFFECTS; i++)
@@ -5114,10 +5125,22 @@ void CFFPlayer::RecalculateSpeed( void )
 		{
 			flSpeed -= (1 - m_vSpeedEffects[i].speed);
 
-			if( m_vSpeedEffects[i].type == SE_ASSAULTCANNON )
+			if (m_vSpeedEffects[i].type == SE_ASSAULTCANNON)
+			{
 				bAssaultCannonIncluded = true;
+
+				if (m_vSpeedEffects[i].endTime >= flAnchorEndTime)
+				{
+					flAnchorEndTime = m_vSpeedEffects[i].endTime;
+					flAnchorDuration = m_vSpeedEffects[i].duration;
+				}
+			}
 		}
 	}
+
+	m_bAssaultCannonAnchored = bAssaultCannonIncluded;
+	m_flAssaultCannonAnchorEndTime = flAnchorEndTime;
+	m_flAssaultCannonAnchorDuration = flAnchorDuration;
 
 	// No amount of effects should let you go below 40% speed unless you're firing the AC
 	if( bAssaultCannonIncluded )

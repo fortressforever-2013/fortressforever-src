@@ -10,6 +10,8 @@
 #ifndef FF_WEAPON_ASSAULTCANNON_H
 #define FF_WEAPON_ASSAULTCANNON_H
 
+#define FF_AC_WINDUPTIME 0.75f
+
 #ifdef _WIN32
 #pragma once
 #endif

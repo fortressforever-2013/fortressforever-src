@@ -21,9 +21,6 @@
 #include "ff_weapon_base.h"
 #include "c_ff_player.h"
 #include "ff_utils.h"
-#include "ff_weapon_assaultcannon.h"
-#include "ff_weapon_sniperrifle.h"
-#include "ff_weapon_jumpgun.h"
 
 #ifdef SIXENSE
 #include "sixense/in_sixense.h"
@@ -38,7 +35,6 @@
 
 ConVar crosshair( "crosshair", "1", FCVAR_ARCHIVE | FCVAR_CLIENTDLL );
 ConVar cl_observercrosshair( "cl_observercrosshair", "1", FCVAR_ARCHIVE | FCVAR_CLIENTDLL );
-ConVar cl_acchargebar("cl_acchargebar", "0", FCVAR_ARCHIVE | FCVAR_CLIENTDLL);
 
 //Tie crosshair values to cheats -GreenMushy
 ConVar cl_concaim("cl_concaim", "1", FCVAR_ARCHIVE | FCVAR_CLIENTDLL, "0 = always show crosshair in center. 1 = flash trueaim after shooting. 2 = hide crosshair when conced.");
@@ -278,7 +274,6 @@ void CHudCrosshair::Paint( void )
 	x = ScreenWidth() / 2;
 	y = ScreenHeight() / 2;
 
-	float x_chargebar = x, y_chargebar = y;
 
 	// MattB - m_vecCrossHairOffsetAngle is the autoaim angle.
 	// if we're not using autoaim, just draw in the middle of the 
@@ -298,8 +293,6 @@ void CHudCrosshair::Paint( void )
 
 		x += 0.5f * screen[0] * ScreenWidth() + 0.5f;
 		y += 0.5f * screen[1] * ScreenHeight() + 0.5f;
-		x_chargebar += 0.5f * screen[0] * ScreenWidth() + 0.5f;
-		y_chargebar += 0.5f * screen[1] * ScreenHeight() + 0.5f;
 	}
 
 	// AfterShock: Conc aim -> plot crosshair properly
@@ -319,8 +312,6 @@ void CHudCrosshair::Paint( void )
 
 		x = (screen[0] * 0.5 + 0.5f) * ScreenWidth();
 		y = (1 - (screen[1] * 0.5 + 0.5f)) * ScreenHeight();
-		x_chargebar = x;
-		y_chargebar = y;
 	}
 	// hide crosshair
 	else if ((FFDEV_CONCAIM == 2) && ((pActivePlayer->m_flConcTime > gpGlobals->curtime) || (pActivePlayer->m_flConcTime < 0)))
@@ -434,84 +425,6 @@ void CHudCrosshair::Paint( void )
 	surface()->DrawSetTextPos(x - charOffsetX, y - charOffsetY);
 	surface()->DrawUnicodeChar(unicode[0]);
 	// <-- Mirv
-
-	// Mulch: Draw charge bar!
-	if ((weaponID == FF_WEAPON_ASSAULTCANNON) && (cl_acchargebar.GetBool()))
-	{
-		CFFWeaponAssaultCannon *pAC = (CFFWeaponAssaultCannon *) pWeapon;
-
-		float flCharge =  pAC->m_flChargeTime / FF_AC_MAXCHARGETIME;
-		flCharge = 100 * clamp(flCharge, 0.01f, 1.0f);
-
-		if (flCharge <= 0.0f)
-			return;
-
-		int iLeft = x_chargebar - charOffsetX;
-		int iTop = y_chargebar + charOffsetY;
-		int iRight = iLeft + (charOffsetX * 2);
-		int iBottom = iTop + 10;
-
-		surface()->DrawSetColor(innerCol.r(), innerCol.g(), innerCol.b(), 150);
-		surface()->DrawFilledRect(iLeft, iTop, iLeft + ((float)(iRight - iLeft) * (flCharge / 100.0f)), iBottom);
-
-		surface()->DrawSetColor(outerCol.r(), outerCol.g(), outerCol.b(), 200);
-		surface()->DrawOutlinedRect(iLeft, iTop, iRight, iBottom);
-	}
-	else if (weaponID == FF_WEAPON_SNIPERRIFLE)
-	{
-		CFFWeaponSniperRifle *pSniperRifle = (CFFWeaponSniperRifle *)pWeapon;
-
-		if ( !pSniperRifle->IsInFire() )
-			return;
-
-		float flCharge = clamp( gpGlobals->curtime - pSniperRifle->GetFireStartTime(), 1.0f, FF_SNIPER_MAXCHARGE );
-		flCharge = 100.0f * ( flCharge / FF_SNIPER_MAXCHARGE );
-
-		if (flCharge <= 1.0f)
-			return;
-
-		int iLeft = x_chargebar - charOffsetX;
-		int iTop = y_chargebar + charOffsetY;
-		int iRight = iLeft + (charOffsetX * 2);
-		int iBottom = iTop + 10;
-
-		surface()->DrawSetColor(innerCol.r(), innerCol.g(), innerCol.b(), 150);
-		surface()->DrawFilledRect(iLeft, iTop, iLeft + ((float)(iRight - iLeft) * (flCharge / 100.0f)), iBottom);
-
-		surface()->DrawSetColor(outerCol.r(), outerCol.g(), outerCol.b(), 200);
-		surface()->DrawOutlinedRect(iLeft, iTop, iRight, iBottom);
-	}
-	else if (weaponID == FF_WEAPON_JUMPGUN)
-	{
-		CFFWeaponJumpgun *pJump = (CFFWeaponJumpgun *) pWeapon;
-
-		float flCharge = pJump->GetClampedCharge() / JUMPGUN_CHARGEUPTIME;
-		flCharge = clamp(flCharge, 0.01f, 1.0f);
-
-		if (flCharge <= 0.0f)
-			return;
-
-		x = ScreenWidth() / 2;
-		y = ScreenHeight() / 2;
-
-		int iLeft = x - charOffsetX;
-		int iTop = y + charOffsetY;
-		int iRight = iLeft + (charOffsetX * 2);
-		int iBottom = iTop + 10;
-
-		if (flCharge == 1.0f)
-		{
-			surface()->DrawSetColor(128, 255, 64, 150);
-		}
-		else
-		{
-			surface()->DrawSetColor(innerCol.r(), innerCol.g(), innerCol.b(), 150);
-		}
-		surface()->DrawFilledRect(iLeft, iTop, iLeft + ((float)(iRight - iLeft) * (flCharge)), iBottom);
-
-		surface()->DrawSetColor(outerCol.r(), outerCol.g(), outerCol.b(), 200);
-		surface()->DrawOutlinedRect(iLeft, iTop, iRight, iBottom);
-	}
 }
 
 //-----------------------------------------------------------------------------
