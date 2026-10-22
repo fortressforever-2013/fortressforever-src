@@ -550,6 +550,13 @@ bool Serialize( CUtlBuffer &buf, const CUtlString &src )
 bool Unserialize( CUtlBuffer &buf, CUtlString &dest )
 {
 	int nLen = buf.PeekDelimitedStringLength( s_pConv );
+	// DMX unpacking supplies an empty buffer for an empty string default.
+	// Leave the destination unchanged (the DMX temporary is already empty)
+	// and report no readable string instead of attempting a zero-size read.
+	// A serialized empty string still has a nonzero length for its terminator.
+	if ( nLen <= 0 )
+		return false;
+
 	dest.SetLength( nLen - 1 );	// -1 because the length returned includes space for \0
 	buf.GetDelimitedString( s_pConv, dest.GetForModify(), nLen );
 	return buf.IsValid();
