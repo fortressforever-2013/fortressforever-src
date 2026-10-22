@@ -46,6 +46,9 @@
 #include "nav_mesh/tf_nav_mesh.h"
 #endif
 
+#ifdef FF
+#include "ff_gamerules.h"
+#endif
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -4615,7 +4618,11 @@ public:
 			if ( !pEntity->ShouldCollide( m_collisionGroup, contentsMask ) )
 				return false;
 			
+#ifdef FF
+			if ( !FFGameRules()->ShouldCollideForTrace( m_collisionGroup, pEntity->GetCollisionGroup() ) )
+#else
 			if ( !g_pGameRules->ShouldCollide( m_collisionGroup, pEntity->GetCollisionGroup() ) )
+#endif
 				return false;
 
 			// If objects are small enough and can move, close on them

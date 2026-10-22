@@ -106,6 +106,7 @@ public:
 	DECLARE_CLASS( CFFGameRules, CTeamplayRules );
 
 	virtual bool	ShouldCollide( int collisionGroup0, int collisionGroup1 );
+	bool ShouldCollideForTrace( int traceCollisionGroup, int targetCollisionGroup );
 
 	virtual int		PlayerRelationship(CBaseEntity *pPlayer, CBaseEntity *pTarget);
 

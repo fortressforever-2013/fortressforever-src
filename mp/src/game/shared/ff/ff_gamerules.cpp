@@ -1998,7 +1998,7 @@ const char *CFFGameRules::GetGameDescription()
 }
 // --- added by YoYo178 to display game description on discord rich presence
 
-bool CFFGameRules::ShouldCollide( int collisionGroup0, int collisionGroup1 )
+bool CFFGameRules::ShouldCollideForTrace( int collisionGroup0, int collisionGroup1 )
 {
 	// HACK: bullet/hull traces use COLLISION_GROUP_NONE, so make them not collide
 	// with rockets/projectiles/weapons. Doing this before the sorting makes sure that
@@ -2033,6 +2033,32 @@ bool CFFGameRules::ShouldCollide( int collisionGroup0, int collisionGroup1 )
 	{
 		return true;
 	}
+	// Preserve ordinary traces passing through pickups such as backpacks and flags.
+	// Doors are solid scenery, not the trigger-only target in this check.
+	if ( collisionGroup0 == COLLISION_GROUP_NONE &&
+		collisionGroup1 == COLLISION_GROUP_TRIGGERONLY )
+	{
+		return false;
+	}
+
+	return ShouldCollide( collisionGroup0, collisionGroup1 );
+}
+
+bool CFFGameRules::ShouldCollide( int collisionGroup0, int collisionGroup1 )
+{
+	// A weapon touching a door must get the same collision result whether
+	// the engine checks weapon/door or door/weapon. Sort the groups first.
+	if ( collisionGroup0 > collisionGroup1 )
+	{
+		V_swap(collisionGroup0,collisionGroup1);
+	}
+
+	// Backpacks and flags must collide with the world and doors in either order.
+	if ( collisionGroup0 == COLLISION_GROUP_NONE &&
+		collisionGroup1 == COLLISION_GROUP_TRIGGERONLY )
+	{
+		return true;
+	}
 
 	// hlieb: buildables in the process of their building are not solid and should NOT be, idk who thought it would be a good idea for engie to be able to bodyblock with nonexistent buildables
 	if ( collisionGroup0 == COLLISION_GROUP_BUILDABLE_BUILDING || collisionGroup1 == COLLISION_GROUP_BUILDABLE_BUILDING )
@@ -2040,12 +2066,6 @@ bool CFFGameRules::ShouldCollide( int collisionGroup0, int collisionGroup1 )
 		bool bBuildableCollision1 = (collisionGroup0 == COLLISION_GROUP_BUILDABLE_BUILDING || collisionGroup0 == COLLISION_GROUP_BUILDABLE);
 		bool bBuildableCollision2 = (collisionGroup1 == COLLISION_GROUP_BUILDABLE_BUILDING || collisionGroup1 == COLLISION_GROUP_BUILDABLE); // so you cant build inside buildables
 		return (bBuildableCollision1 && bBuildableCollision2);
-	}
-
-	if ( collisionGroup0 > collisionGroup1 )
-	{
-		// swap so that lowest is always first
-		V_swap(collisionGroup0,collisionGroup1);
 	}
 
 	// squeek: Clientside buildables thought they could get blocked by ragdolls

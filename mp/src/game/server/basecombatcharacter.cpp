@@ -64,6 +64,9 @@
 #undef MINMAX_H
 #include "minmax.h"
 #endif
+#ifdef FF
+#include "ff_gamerules.h"
+#endif
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -1139,7 +1142,11 @@ bool CTraceFilterMelee::ShouldHitEntity( IHandleEntity *pHandleEntity, int conte
 		if ( !pEntity->ShouldCollide( m_collisionGroup, contentsMask ) )
 			return false;
 		
+#ifdef FF
+		if ( !FFGameRules()->ShouldCollideForTrace( m_collisionGroup, pEntity->GetCollisionGroup() ) )
+#else
 		if ( !g_pGameRules->ShouldCollide( m_collisionGroup, pEntity->GetCollisionGroup() ) )
+#endif
 			return false;
 
 		if ( pEntity->m_takedamage == DAMAGE_NO )
