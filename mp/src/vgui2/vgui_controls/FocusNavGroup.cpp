@@ -72,7 +72,8 @@ bool FocusNavGroup::RequestFocusPrev(VPANEL panel)
 			for (int i = 0; i < _mainPanel->GetChildCount(); i++)
 			{
 				Panel *child = _mainPanel->GetChild(i);
-				if (child && child->IsVisible() && child->IsEnabled() && child->GetTabPosition())
+				if (child && child->IsVisible() && child->IsEnabled()
+					&& child->IsKeyBoardInputEnabled() && child->GetTabPosition())
 				{
 					int tabPosition = child->GetTabPosition();
 					if (tabPosition == newPosition)
@@ -190,7 +191,8 @@ bool FocusNavGroup::RequestFocusNext(VPANEL panel)
 			if ( !child )
 				continue;
 
-			if (child && child->IsVisible() && child->IsEnabled() && child->GetTabPosition())
+			if (child && child->IsVisible() && child->IsEnabled()
+				&& child->IsKeyBoardInputEnabled() && child->GetTabPosition())
 			{
 				int tabPosition = child->GetTabPosition();
 				if (tabPosition == newPosition)
