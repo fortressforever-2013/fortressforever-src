@@ -819,13 +819,14 @@ void CFFSentryGun::OnActiveThink( void )
 			//just making sure it's smooth and fully spun up!
 			m_flBarrelRotationDelta = SG_BARRELROTATION_SPEED_MIN;
 		}
+
+		// Only levels 2 and 3 have the barrel rotation pose parameter.
+		// smoothing
+		SimpleSpline(m_flBarrelRotationDelta);
+
+		m_flBarrelRotationValue += m_flBarrelRotationDelta;
+		SetPoseParameter( SG_BC_BARREL_ROTATE, m_flBarrelRotationValue);
 	}
-
-	// smoothing
-	SimpleSpline(m_flBarrelRotationDelta);
-
-	m_flBarrelRotationValue += m_flBarrelRotationDelta;
-	SetPoseParameter( SG_BC_BARREL_ROTATE, m_flBarrelRotationValue);
 
 	// Are we rotated enough to where we can fire?
 	bool bCanFire = vecAiming.Dot( vecGoal ) > DOT_5DEGREE; 
@@ -840,16 +841,19 @@ void CFFSentryGun::OnActiveThink( void )
 
 	if( bCanFire )
 	{
-		float flBarrelRotationValue = GetPoseParameter( SG_BC_BARREL_ROTATE );
+		if ( m_iLevel > 1 )
+		{
+			float flBarrelRotationValue = GetPoseParameter( SG_BC_BARREL_ROTATE );
 
-		if(flBarrelRotationValue >= 180)
-		{
-			flBarrelRotationValue = SetPoseParameter( SG_BC_BARREL_ROTATE, -180 );
-		}
-		else
-		{
-			flBarrelRotationValue += 20;
-			flBarrelRotationValue = SetPoseParameter( SG_BC_BARREL_ROTATE, flBarrelRotationValue );
+			if(flBarrelRotationValue >= 180)
+			{
+				flBarrelRotationValue = SetPoseParameter( SG_BC_BARREL_ROTATE, -180 );
+			}
+			else
+			{
+				flBarrelRotationValue += 20;
+				flBarrelRotationValue = SetPoseParameter( SG_BC_BARREL_ROTATE, flBarrelRotationValue );
+			}
 		}
 
 		// Fire rockets
