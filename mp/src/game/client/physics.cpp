@@ -202,7 +202,35 @@ int CCollisionEvent::ShouldCollide( IPhysicsObject *pObj0, IPhysicsObject *pObj1
 {
 	int x0 = ShouldCollide_2(pObj0, pObj1, pGameData0, pGameData1);
 	int x1 = ShouldCollide_2(pObj1, pObj0, pGameData1, pGameData0);
-	Assert(x0==x1);
+	if ( x0 != x1 )
+	{
+		// Log before asserting so ignored assertions still leave useful evidence.
+		// Ragdolls can generate many contacts per frame; throttle both outputs.
+		static double s_flNextReportTime = 0.0;
+		double flNow = Plat_FloatTime();
+		if ( flNow >= s_flNextReportTime )
+		{
+			s_flNextReportTime = flNow + 2.0;
+			Warning( "[Collision symmetry] A->B=%d B->A=%d (reports limited to once every 2 seconds)\n", x0, x1 );
+			C_BaseEntity *pEntities[2] = {
+				static_cast<C_BaseEntity *>(pGameData0),
+				static_cast<C_BaseEntity *>(pGameData1)
+			};
+			IPhysicsObject *pObjects[2] = { pObj0, pObj1 };
+			for ( int i = 0; i < 2; ++i )
+			{
+				C_BaseEntity *pEntity = pEntities[i];
+				Warning( "  %c: ent=%d class=%s model=%s group=%d physicsIndex=%d flags=0x%x contents=0x%x mask=0x%x\n",
+					'A' + i, pEntity ? pEntity->entindex() : -1,
+					pEntity ? pEntity->GetClassname() : "<null>",
+					pEntity && pEntity->GetModel() ? modelinfo->GetModelName( pEntity->GetModel() ) : "<none>",
+					pEntity ? pEntity->GetCollisionGroup() : -1,
+					pObjects[i]->GetGameIndex(), pObjects[i]->GetGameFlags(),
+					pObjects[i]->GetContents(), pEntity ? pEntity->PhysicsSolidMaskForEntity() : 0 );
+			}
+			Assert(x0==x1);
+		}
+	}
 	return x0;
 }
 int CCollisionEvent::ShouldCollide_2( IPhysicsObject *pObj0, IPhysicsObject *pObj1, void *pGameData0, void *pGameData1 )
