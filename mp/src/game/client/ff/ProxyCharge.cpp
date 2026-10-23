@@ -34,22 +34,26 @@ private:
 
 void CProxyCharge::OnBind(void *pC_BaseEntity)
 {
+	Assert(m_pResult);
+	if (!m_pResult)
+		return;
+
+	// Materials can bind during class changes before the player or active
+	// weapon is available. Clear any charge left over from a previous bind.
+	SetFloatResult(0);
+
 	if (!pC_BaseEntity)
 		return;
 
 	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayerOrObserverTarget();
-	Assert(pPlayer);
 
 	if (!pPlayer)
 		return;
 
 	C_FFWeaponBase *pWeapon = pPlayer->GetActiveFFWeapon();
-	Assert(pWeapon);
 
 	if (!pWeapon || pWeapon->GetWeaponID() != FF_WEAPON_ASSAULTCANNON)
 		return;
-
-	Assert(m_pResult);
 
 	CFFWeaponAssaultCannon *pAC = (CFFWeaponAssaultCannon *) pWeapon;
 

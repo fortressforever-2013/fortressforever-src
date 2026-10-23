@@ -43,28 +43,33 @@ bool CProxyAmmo::Init(IMaterial *pMaterial, KeyValues *pKeyValues)
 	m_iModifier = (int) TextureScrollRate.GetFloat();
 
 	m_iPreviousValue = 0;
+	m_flLastTick = -1.0f;
 
 	return CResultProxy::Init(pMaterial, pKeyValues);
 }
 
 void CProxyAmmo::OnBind(void *pC_BaseEntity)
 {
+	Assert(m_pResult);
+	if (!m_pResult)
+		return;
+
+	// Materials can bind before the local player or active weapon arrives
+	// during joining and class changes. Don't retain an old ammo display.
+	SetFloatResult(0);
+
 	if (!pC_BaseEntity)
 		return;
 
 	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayerOrObserverTarget();
-	Assert(pPlayer);
 
 	if (!pPlayer)
 		return;
 
 	C_FFWeaponBase *pWeapon = pPlayer->GetActiveFFWeapon();
-	Assert(pWeapon);
 
 	if (!pWeapon)
 		return;
-
-	Assert(m_pResult);
 
 	int iAmmo;
 
