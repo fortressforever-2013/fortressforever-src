@@ -7062,15 +7062,15 @@ int CFFPlayer::LuaAddHealth(int iAmount)
 
 int CFFPlayer::LuaAddHealth(int iAmount, bool bAllowOverheal)
 {
-	if (!bAllowOverheal)
+	if (iAmount > 0 && !bAllowOverheal)
 	{
-		if (m_iHealth > m_iMaxHealth)
+		if (m_iHealth >= m_iMaxHealth)
 			return 0;
 
 		iAmount = min( iAmount, m_iMaxHealth - m_iHealth );
 	}
 
-	if (iAmount > 0)
+	if (iAmount >= 0)
 		m_iHealth += iAmount;
 	else
 	{
