@@ -14,10 +14,6 @@
 
 using namespace vgui;
 
-#define DAMAGENUMBER_ACCUMULATE_TIME	0.6f
-#define DAMAGENUMBER_FLOAT_TIME	1.0f
-#define DAMAGENUMBER_FLOAT_SPEED	12.0f
-#define DAMAGENUMBER_HEIGHT_OFFSET	64.0f
 #define DAMAGENUMBER_COLOR_ARMOR	Color( 184, 207, 239, 255 )
 #define DAMAGENUMBER_COLOR_NOARMOR	Color( 239, 184, 184, 255 )
 #define DAMAGENUMBER_COLOR_BUILDABLE	Color( 255, 255, 255, 255 )
@@ -38,9 +34,16 @@ using namespace vgui;
 #define SPECIALTEXT_TRANQED	5
 #define SPECIALTEXT_INFECTED	6
 #define SPECIALTEXT_OFFSET	24.0f
+#define SPECIALTEXT_FLOAT_TIME	1.0f
 #define SPECIALTEXT_FLOAT_SPEED	12.0f
 
 ConVar hud_damagenumbers ("hud_damagenumbers", "1", FCVAR_ARCHIVE, "Show floating damage numbers and special text as you hit someone");
+// Super shotgun has a 0.7s cycle time (time between shots).
+ConVar hud_damagenumbers_accumulate_time("hud_damagenumbers_accumulate_time", "0.75", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Seconds after the last hit to combine damage on the same target before rising and fading.", true, 0.0f, false, 0.0f);
+ConVar hud_damagenumbers_float_speed("hud_damagenumbers_float_speed", "12.0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Damage number rise speed in world units per second (0 disables movement).", true, 0.0f, false, 0.0f);
+ConVar hud_damagenumbers_float_time("hud_damagenumbers_float_time", "1.0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Seconds damage numbers rise and fade after combining ends.", true, 0.01f, false, 0.0f);
+ConVar hud_damagenumbers_height_offset("hud_damagenumbers_height_offset", "44.0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Vertical offset in world units for damage numbers and special hit text, applied on the next hit.");
+ConVar hud_damagenumbers_replacement_jump("hud_damagenumbers_replacement_jump", "16", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Screen pixels to move an older damage total upward when a new total appears on the same target (0 disables the jump).", true, 0.0f, false, 0.0f);
 
 struct SpecialTextEntry_t
 {
@@ -60,6 +63,7 @@ struct DamageNumberEntry_t
 	Vector	vecPosition;
 	bool	bFloating;
 	float	flFloatStartTime;
+	bool	bReplaced;
 };
 
 struct AirshotTextEntry_t
@@ -176,15 +180,24 @@ void CHudDamageNumber::MsgFunc_DamageNumber(bf_read& msg)
 		if (entry.bFloating)
 		continue;
 
-		if ((flNow - entry.flLastHitTime) > DAMAGENUMBER_ACCUMULATE_TIME)
+		if ((flNow - entry.flLastHitTime) > hud_damagenumbers_accumulate_time.GetFloat())
 		continue;
 
 		entry.iAccumulatedDamage += iDamage;
 		entry.iTargetType = iTargetType;
 		entry.flLastHitTime = flNow;
-		entry.vecPosition = vecPosition + Vector(0, 0, DAMAGENUMBER_HEIGHT_OFFSET);
+		entry.vecPosition = vecPosition + Vector(0, 0, hud_damagenumbers_height_offset.GetFloat());
 
 		return;
+	}
+
+	// Separate older totals from a new total on the same target.
+	// Keep their existing rise and fade progress; Paint adds the replacement jump.
+	for (int i = 0; i < m_DamageEntries.Count(); i++)
+	{
+		DamageNumberEntry_t& entry = m_DamageEntries[i];
+		if (entry.iTargetEntIndex == iTargetEntIndex)
+			entry.bReplaced = true;
 	}
 
 	DamageNumberEntry_t newEntry;
@@ -192,9 +205,10 @@ void CHudDamageNumber::MsgFunc_DamageNumber(bf_read& msg)
 	newEntry.iAccumulatedDamage = iDamage;
 	newEntry.iTargetType = iTargetType;
 	newEntry.flLastHitTime = flNow;
-	newEntry.vecPosition = vecPosition + Vector(0, 0, DAMAGENUMBER_HEIGHT_OFFSET);
+	newEntry.vecPosition = vecPosition + Vector(0, 0, hud_damagenumbers_height_offset.GetFloat());
 	newEntry.bFloating = false;
 	newEntry.flFloatStartTime = 0.0f;
+	newEntry.bReplaced = false;
 
 	m_DamageEntries.AddToTail(newEntry);
 }
@@ -214,7 +228,7 @@ void CHudDamageNumber::MsgFunc_SpecialText(bf_read& msg)
 		{
 			m_SpecialTextEntries[i].iTextType = iTextType;
 			m_SpecialTextEntries[i].iTargetType = iTargetType;
-			m_SpecialTextEntries[i].vecPosition = vecPosition + Vector(0, 0, DAMAGENUMBER_HEIGHT_OFFSET);
+			m_SpecialTextEntries[i].vecPosition = vecPosition + Vector(0, 0, hud_damagenumbers_height_offset.GetFloat());
 			m_SpecialTextEntries[i].flSpawnTime = gpGlobals->curtime;
 			return;
 		}
@@ -223,7 +237,7 @@ void CHudDamageNumber::MsgFunc_SpecialText(bf_read& msg)
 	newEntry.iTargetEntIndex = iTargetEntIndex;
 	newEntry.iTextType = iTextType;
 	newEntry.iTargetType = iTargetType;
-	newEntry.vecPosition = vecPosition + Vector(0, 0, DAMAGENUMBER_HEIGHT_OFFSET);
+	newEntry.vecPosition = vecPosition + Vector(0, 0, hud_damagenumbers_height_offset.GetFloat());
 	newEntry.flSpawnTime = gpGlobals->curtime;
 	m_SpecialTextEntries.AddToTail(newEntry);
 }
@@ -266,10 +280,10 @@ void CHudDamageNumber::Paint(void)
 
 		if (!entry.bFloating)
 		{
-			if ((flNow - entry.flLastHitTime) > DAMAGENUMBER_ACCUMULATE_TIME)
+			if ((flNow - entry.flLastHitTime) > hud_damagenumbers_accumulate_time.GetFloat())
 			{
 				entry.bFloating = true;
-				entry.flFloatStartTime = flNow;
+				entry.flFloatStartTime = entry.flLastHitTime + hud_damagenumbers_accumulate_time.GetFloat();
 			}
 		}
 
@@ -280,14 +294,14 @@ void CHudDamageNumber::Paint(void)
 		{
 			float flElapsed = flNow - entry.flFloatStartTime;
 
-			if (flElapsed > DAMAGENUMBER_FLOAT_TIME)
+			if (flElapsed > hud_damagenumbers_float_time.GetFloat())
 			{
 				m_DamageEntries.Remove(i);
 				continue;
 			}
 
-			vecDrawPos.z += flElapsed * DAMAGENUMBER_FLOAT_SPEED;
-			flAlpha = RemapValClamped(flElapsed, 0.0f, DAMAGENUMBER_FLOAT_TIME, 255.0f, 0.0f);
+			vecDrawPos.z += flElapsed * hud_damagenumbers_float_speed.GetFloat();
+			flAlpha = RemapValClamped(flElapsed, 0.0f, hud_damagenumbers_float_time.GetFloat(), 255.0f, 0.0f);
 		}
 
 		int iScreenX, iScreenY;
@@ -318,6 +332,9 @@ void CHudDamageNumber::Paint(void)
 		int iTextWide, iTextTall;
 
 		surface()->GetTextSize(m_hNumberFont, wszDamage, iTextWide, iTextTall);
+		// Separate the old total from the new one regardless of distance to the target.
+		if (entry.bReplaced)
+			iScreenY -= hud_damagenumbers_replacement_jump.GetInt();
 		surface()->DrawSetTextPos(iScreenX - (iTextWide / 2), iScreenY - (iTextTall / 2));
 		surface()->DrawUnicodeString(wszDamage);
 	}
@@ -326,7 +343,7 @@ void CHudDamageNumber::Paint(void)
 	{
 		SpecialTextEntry_t& label = m_SpecialTextEntries[i];
 		float flElapsed = flNow - label.flSpawnTime;
-		if (flElapsed > DAMAGENUMBER_FLOAT_TIME)
+		if (flElapsed > SPECIALTEXT_FLOAT_TIME)
 		{
 			m_SpecialTextEntries.Remove(i);
 			continue;
@@ -334,7 +351,7 @@ void CHudDamageNumber::Paint(void)
 
 		Vector vecLabelPos = label.vecPosition;
 		vecLabelPos.z += flElapsed * SPECIALTEXT_FLOAT_SPEED;
-		float flAlpha = RemapValClamped(flElapsed, 0.0f, DAMAGENUMBER_FLOAT_TIME, 255.0f, 0.0f);
+		float flAlpha = RemapValClamped(flElapsed, 0.0f, SPECIALTEXT_FLOAT_TIME, 255.0f, 0.0f);
 		int iLabelScreenX, iLabelScreenY;
 		if (!GetVectorInScreenSpace(vecLabelPos, iLabelScreenX, iLabelScreenY))
 		continue;
@@ -371,7 +388,7 @@ void CHudDamageNumber::Paint(void)
 	{
 		AirshotTextEntry_t& entry = m_AirshotEntries[i];
 		float flElapsed = flNow - entry.flSpawnTime;
-		if (flElapsed > DAMAGENUMBER_FLOAT_TIME)
+		if (flElapsed > SPECIALTEXT_FLOAT_TIME)
 		{
 			m_AirshotEntries.Remove(i);
 			continue;
@@ -381,7 +398,7 @@ void CHudDamageNumber::Paint(void)
 		int iScreenX, iScreenY;
 		if (!GetVectorInScreenSpace(vecDrawPos, iScreenX, iScreenY))
 		continue;
-		float flAlpha = RemapValClamped(flElapsed, 0.0f, DAMAGENUMBER_FLOAT_TIME, 255.0f, 0.0f);
+		float flAlpha = RemapValClamped(flElapsed, 0.0f, SPECIALTEXT_FLOAT_TIME, 255.0f, 0.0f);
 		Color textColor;
 		switch (entry.iTargetType)
 		{
