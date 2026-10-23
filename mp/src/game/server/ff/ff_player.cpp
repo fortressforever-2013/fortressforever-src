@@ -6263,7 +6263,11 @@ bool CFFPlayer::Event_Gibbed(const CTakeDamageInfo &info)
   	data.m_vOrigin = GetAbsOrigin();
 	data.m_vStart = info.GetDamageForce();
 	data.m_nEntIndex = entindex();
-	DispatchEffect("Gib", data);
+	// Gibs are generated only on the server. The player whose command caused
+	// the death needs this effect too, since they have no predicted copy.
+	CPASFilter filter(data.m_vOrigin);
+	filter.SetIgnorePredictionCull(true);
+	DispatchEffect("Gib", data, filter);
 
 	return true;
 }
