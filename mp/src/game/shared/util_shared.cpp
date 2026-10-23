@@ -37,6 +37,7 @@ bool NPC_CheckBrushExclude( CBaseEntity *pEntity, CBaseEntity *pBrush );
 #ifdef FF
 #include "ff_triggerclip.h"
 #include "ff_gamerules.h"
+#include "ff_buildableobject.h"
 #endif
 #ifdef FF_CLIENT_DLL
 #include "c_ff_team.h"
@@ -313,6 +314,19 @@ bool CTraceFilterSimple::ShouldHitEntity( IHandleEntity *pHandleEntity, int cont
 	// --> hlstriker: No team collisions
 	if (pPassEnt && pHandle)
 	{
+		// Deployment exceptions affect movement only, never weapons or LOS.
+		const bool bIsPlayerMovementTrace =
+			m_collisionGroup == COLLISION_GROUP_PLAYER_MOVEMENT ||
+			(m_collisionGroup == COLLISION_GROUP_PLAYER && contentsMask == MASK_PLAYERSOLID);
+		if (pPassEnt->IsPlayer() && bIsPlayerMovementTrace)
+		{
+			CFFBuildableObject *pBuildable = dynamic_cast<CFFBuildableObject *>(pHandle);
+			const bool bCanPlayerExitBuildable =
+				pBuildable && pBuildable->CanPlayerExit(const_cast<CBaseEntity *>(pPassEnt));
+			if (bCanPlayerExitBuildable)
+				return false;
+		}
+
 		if (pHandle->IsPlayer())
 		{
 			////Team orient this collision group.  Includes things like rockets, and blue pipes -Green Mushy

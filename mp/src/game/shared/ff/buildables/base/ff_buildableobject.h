@@ -82,6 +82,7 @@ public:
 	virtual int	BloodColor( void ) { return BLOOD_COLOR_MECH; } // |-- Mirv: Don't bleed
 	virtual int	GetTeamNumber();	// |-- Mirv: Easy team id accessor	
 	bool IsBuilt( void	) const { return m_bBuilt; }
+	bool CanPlayerExit( CBaseEntity *pPlayer ) const;
  
 	CNetworkHandle( CBaseEntity, m_hOwner );
 
@@ -94,6 +95,7 @@ public:
 	unsigned int GetAmmoPercent( void ) const { return m_iAmmoPercent; }
 
 protected:
+	CNetworkArray( EHANDLE, m_hExitingPlayers, MAX_PLAYERS );
 	CNetworkVarForDerived( unsigned int, m_iAmmoPercent );
 	// <-- shared
 
@@ -127,6 +129,7 @@ public:
 	virtual Vector BodyTarget( const Vector &posSrc, bool bNoisy = false ) { return WorldSpaceCenter(); }
 	
 	virtual void GoLive( void );
+	void UpdateExitingPlayers( void );
 	virtual void Detonate( void );
 	virtual void UpdateOnRemove( void );
 	virtual void RemoveSaboteur( bool bSuppressNotification = false );

@@ -69,12 +69,33 @@
 
 IMPLEMENT_NETWORKCLASS_ALIASED( FFBuildableObject, DT_FFBuildableObject )
 
+bool CFFBuildableObject::CanPlayerExit( CBaseEntity *pPlayer ) const
+{
+	if (!pPlayer || !pPlayer->IsPlayer() || !pPlayer->IsAlive())
+		return false;
+	const int slot = pPlayer->entindex() - 1;
+	if (slot < 0 || slot >= MAX_PLAYERS || m_hExitingPlayers[slot].Get() != pPlayer)
+		return false;
+
+	Vector playerMins, playerMaxs;
+	pPlayer->CollisionProp()->WorldSpaceAABB(&playerMins, &playerMaxs);
+	Vector buildMins, buildMaxs;
+	CollisionProp()->WorldSpaceAABB(&buildMins, &buildMaxs);
+	for (int axis = 0; axis < 3; ++axis)
+	{
+		if (playerMaxs[axis] <= buildMins[axis] || playerMins[axis] >= buildMaxs[axis])
+			return false;
+	}
+	return true;
+}
+
 BEGIN_NETWORK_TABLE( CFFBuildableObject, DT_FFBuildableObject )
 #ifdef CLIENT_DLL
 	RecvPropEHandle( RECVINFO( m_hOwner ) ),
 	RecvPropInt( RECVINFO( m_iHealth ) ),
 	RecvPropInt( RECVINFO( m_iMaxHealth ) ),
 	RecvPropBool( RECVINFO( m_bBuilt ) ),
+	RecvPropArray3( RECVINFO_ARRAY(m_hExitingPlayers), RecvPropEHandle( RECVINFO(m_hExitingPlayers[0]) ) ),
 	RecvPropFloat( RECVINFO( m_flSabotageTime ) ),
 	RecvPropInt( RECVINFO( m_iSaboteurTeamNumber ) ),
 #elif GAME_DLL
@@ -82,6 +103,7 @@ BEGIN_NETWORK_TABLE( CFFBuildableObject, DT_FFBuildableObject )
 	SendPropInt( SENDINFO( m_iHealth ), 10 ),	// AfterShock: this can probably be limited to ~9 bits? max 180ish health on a SG? Do we ever use hp <0 for checking death?
 	SendPropInt( SENDINFO( m_iMaxHealth ), 10 ), // The client should work this out using Classify() and getLevel() 
 	SendPropBool( SENDINFO( m_bBuilt ) ), // can we encode this in the health? perhaps when health is 0?
+	SendPropArray3( SENDINFO_ARRAY3(m_hExitingPlayers), SendPropEHandle( SENDINFO_ARRAY(m_hExitingPlayers) ) ),
 	SendPropFloat( SENDINFO( m_flSabotageTime ) ), // Do we need to send these for jumppads + detpacks? maybe make new datatables?
 	SendPropInt( SENDINFO( m_iSaboteurTeamNumber ) ),
 #endif
@@ -91,6 +113,7 @@ END_NETWORK_TABLE()
 BEGIN_DATADESC( CFFBuildableObject )
 #ifdef GAME_DLL
 	DEFINE_THINKFUNC(DetonateThink),
+	DEFINE_THINKFUNC(UpdateExitingPlayers),
 	//DEFINE_THINKFUNC( OnObjectThink ),
 #endif
 END_DATADESC( )
@@ -581,8 +604,8 @@ void CFFBuildableObject::GoLive( void )
 	{
 		Vector vecMins, vecMaxs;
 		CollisionProp()->WorldSpaceAABB(&vecMins, &vecMaxs);
-		CBaseEntity* pList[32];
-		int iCount = UTIL_EntitiesInBox(pList, 32, vecMins, vecMaxs, FL_CLIENT);
+		CBaseEntity* pList[MAX_PLAYERS];
+		int iCount = UTIL_EntitiesInBox(pList, MAX_PLAYERS, vecMins, vecMaxs, FL_CLIENT);
 		for (int i = 0; i < iCount; i++)
 		{
 			CFFPlayer* pStuckPlayer = ToFFPlayer(pList[i]);
@@ -590,8 +613,15 @@ void CFFBuildableObject::GoLive( void )
 			{
 				CTakeDamageInfo info(this, this, 450, DMG_DIRECT | DMG_ALWAYSGIB);
 				pStuckPlayer->TakeDamage(info);
+				// Only surviving teammates and allies may leave through the hull.
+				const bool bIsFriendlyPlayer = GetOwnerPlayer() &&
+					FFGameRules()->PlayerRelationship(pStuckPlayer, GetOwnerPlayer()) == GR_TEAMMATE;
+				if (pStuckPlayer->IsAlive() && bIsFriendlyPlayer)
+					m_hExitingPlayers.Set(pStuckPlayer->entindex() - 1, pStuckPlayer);
 			}
 		}
+		SetContextThink(&CFFBuildableObject::UpdateExitingPlayers,
+			gpGlobals->curtime, "BuildableExit");
 	}
 #endif
 
@@ -657,6 +687,21 @@ void CFFBuildableObject::GoLive( void )
 		//}		
 
 	SetContextThink(&CFFBuildableObject::DetonateThink, TICK_NEVER_THINK, "DetonateThink");
+}
+
+void CFFBuildableObject::UpdateExitingPlayers( void )
+{
+	bool bHasExitingPlayers = false;
+	for (int i = 0; i < MAX_PLAYERS; ++i)
+	{
+		if (!CanPlayerExit(m_hExitingPlayers[i].Get()))
+			m_hExitingPlayers.Set(i, NULL);
+		else
+			bHasExitingPlayers = true;
+	}
+	if (bHasExitingPlayers)
+		SetContextThink(&CFFBuildableObject::UpdateExitingPlayers,
+			gpGlobals->curtime + TICK_INTERVAL, "BuildableExit");
 }
 
 /**
