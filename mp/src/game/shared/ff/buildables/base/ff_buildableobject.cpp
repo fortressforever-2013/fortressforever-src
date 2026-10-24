@@ -579,8 +579,8 @@ void CFFBuildableObject::GoLive( void )
 #if !defined( CLIENT_DLL )
 	if (Classify() != CLASS_MANCANNON)
 	{
-		Vector vecMins = GetAbsOrigin() + WorldAlignMins();
-		Vector vecMaxs = GetAbsOrigin() + WorldAlignMaxs();
+		Vector vecMins, vecMaxs;
+		CollisionProp()->WorldSpaceAABB(&vecMins, &vecMaxs);
 		CBaseEntity* pList[32];
 		int iCount = UTIL_EntitiesInBox(pList, 32, vecMins, vecMaxs, FL_CLIENT);
 		for (int i = 0; i < iCount; i++)
