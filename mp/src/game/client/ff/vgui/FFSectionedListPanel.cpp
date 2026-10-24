@@ -574,7 +574,7 @@ public:
 	{
 		if (m_bSelected != state)
 		{
-            if (state)
+            if (state && IsKeyBoardInputEnabled())
             {
                 RequestFocus();
             }
