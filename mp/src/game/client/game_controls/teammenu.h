@@ -43,7 +43,7 @@ public:
 
 	virtual const char *GetName( void ) { return PANEL_TEAM; }
 	virtual void SetData(KeyValues *data) {};
-	virtual void Reset() {};
+	virtual void Reset() { m_bAutoJoinAttempted = false; };
 	virtual void Update();
 	virtual bool NeedsUpdate( void ) { return false; }
 	virtual bool HasInputElements( void ) { return true; }
@@ -83,6 +83,8 @@ protected:
 	ButtonCode_t m_iJumpKey;
 	ButtonCode_t m_iScoreBoardKey;
 	vgui::Button *m_pTeamButtons[4];
+
+	bool m_bAutoJoinAttempted = false;
 
 	char m_szMapName[ MAX_PATH ];
 };

@@ -701,6 +701,10 @@ void CBaseViewport::FireGameEvent( IGameEvent * event)
 		// hide all panels when reconnecting 
 		ShowPanel( PANEL_ALL, false );
 
+		IViewPortPanel* pTeamMenu = FindPanelByName(PANEL_TEAM);
+		if (pTeamMenu)
+			pTeamMenu->Reset();
+
 		if ( engine->IsHLTV() )
 		{
 			ShowPanel( PANEL_SPECGUI, true );

@@ -17,6 +17,8 @@
 #include <vgui_controls/ImageList.h>
 #include <filesystem.h>
 #include "c_ff_player.h"
+#include "c_ff_playerresource.h"
+#include "ff_utils.h"
 
 #include <vgui_controls/RichText.h>
 #include <vgui_controls/Label.h>
@@ -36,6 +38,12 @@
 extern IGameUIFuncs *gameuifuncs; // for key binding details
 
 using namespace vgui;
+
+ConVar cl_autojointeam(
+	"cl_autojointeam",
+	"0",
+	FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY,
+	"Select once per map for testing: 1 Blue, 2 Red, 3 Yellow, 4 Green, 5 Auto Assign, 6 Spectate. Other values disable it.");
 
 void UpdateCursorState();
 // void DuckMessage(const char *str);
@@ -138,6 +146,41 @@ void CTeamMenu::AutoAssign()
 //-----------------------------------------------------------------------------
 void CTeamMenu::ShowPanel(bool bShow)
 {
+	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if (bShow && !m_bAutoJoinAttempted && g_FF_PR && pPlayer)
+	{
+		m_bAutoJoinAttempted = true;
+
+		const char* commands[] = { "team blue", "team red", "team yellow", "team green" };
+		const int iTeam = cl_autojointeam.GetInt();
+		if (iTeam == 5 && pPlayer->GetTeamNumber() < FF_TEAM_BLUE)
+		{
+			OnCommand("team auto");
+			return;
+		}
+
+		if (iTeam == 6 && pPlayer->GetTeamNumber() < FF_TEAM_BLUE
+			&& mp_allowspectators.GetBool())
+		{
+			engine->ClientCmd("spectate");
+			m_pViewPort->ShowPanel(this, false);
+			return;
+		}
+
+		if (iTeam >= 1 && iTeam <= ARRAYSIZE(commands)
+			&& pPlayer->GetTeamNumber() < FF_TEAM_BLUE)
+		{
+			char teamSpaces[4];
+			UTIL_GetTeamSpaces(teamSpaces);
+
+			if (teamSpaces[iTeam - 1] > 0)
+			{
+				OnCommand(commands[iTeam - 1]);
+				return;
+			}
+		}
+	}
+
 	if ( BaseClass::IsVisible() == bShow )
 		return;
 
