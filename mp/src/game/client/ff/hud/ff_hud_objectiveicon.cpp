@@ -173,15 +173,15 @@ void CHudObjectiveIcon::Paint( void )
 {
 	if( engine->IsInGame() )
 	{
+		if ( !cl_objectiveicon.GetBool() )
+			return;
+
 		C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
 		if( !pPlayer )
 		{
 			Assert( 0 );
 			return;
 		}
-
-		if ( !cl_objectiveicon.GetBool() )
-			return;
 		
 		// Get the current objective entity
 		// Unfortunately, it seems certain entities (like trigger_scripts) do not network properly (they have invalid indexes)
