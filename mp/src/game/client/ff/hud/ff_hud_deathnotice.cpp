@@ -44,7 +44,7 @@ struct DeathNoticePlayer
 };
 
 // Contents of each entry in our list of death notices
-struct DeathNoticeItem 
+struct DeathNoticeItem
 {
 	DeathNoticePlayer	Killer;
 	DeathNoticePlayer   Victim;
@@ -59,7 +59,7 @@ struct DeathNoticeItem
 };
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 class CHudDeathNotice : public CHudElement, public vgui::Panel
 {
@@ -77,7 +77,7 @@ public:
 	void DrawObjectiveBackground( int xStart, int yStart, int xEnd, int yEnd );
 	void DrawHighlightBackground( int xStart, int yStart, int xEnd, int yEnd );
 	void DrawPlayerAndAssister( int &x, int &y, wchar_t* playerName, int iPlayerTeam, wchar_t* assisterName, int iAssisterTeam );
-	
+
 	virtual void FireGameEvent( IGameEvent * event );
 
 private:
@@ -105,7 +105,7 @@ using namespace vgui;
 DECLARE_HUDELEMENT( CHudDeathNotice );
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 CHudDeathNotice::CHudDeathNotice( const char *pElementName ) :
 	CHudElement( pElementName ), BaseClass( NULL, "HudDeathNotice" )
@@ -119,7 +119,7 @@ CHudDeathNotice::CHudDeathNotice( const char *pElementName ) :
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CHudDeathNotice::ApplySchemeSettings( IScheme *scheme )
 {
@@ -128,7 +128,7 @@ void CHudDeathNotice::ApplySchemeSettings( IScheme *scheme )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CHudDeathNotice::Init( void )
 {
@@ -140,7 +140,7 @@ void CHudDeathNotice::Init( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CHudDeathNotice::VidInit( void )
 {
@@ -157,7 +157,7 @@ bool CHudDeathNotice::ShouldDraw( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CHudDeathNotice::SetColorForNoticePlayer( int iTeamNumber )
 {
@@ -181,7 +181,7 @@ void CHudDeathNotice::DrawHighlightBackground( int xStart, int yStart, int xEnd,
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CHudDeathNotice::Paint()
 {
@@ -219,7 +219,7 @@ void CHudDeathNotice::Paint()
 
 			g_pVGuiLocalize->ConvertANSIToUnicode( m_DeathNotices[i].Victim.szName, victim, sizeof( victim ) );
 			g_pVGuiLocalize->ConvertANSIToUnicode( m_DeathNotices[i].objectiveText, objectivetext, sizeof( objectivetext ) );
-			
+
 			// Get the local position for this notice
 			int victimStringWidth = UTIL_ComputeStringWidth( m_hTextFont, victim ) + UTIL_ComputeStringWidth( m_hTextFont, objectivetext ) + 5;
 			int y = yStart + (m_flLineHeight * i);
@@ -238,7 +238,7 @@ void CHudDeathNotice::Paint()
 				iconWide = (int)( scale * (float)icon->Width() );
 				iconTall = (int)( scale * (float)icon->Height() );
 			}
-			
+
 			int x;
 			if ( m_bRightJustify )
 			{
@@ -248,12 +248,12 @@ void CHudDeathNotice::Paint()
 			{
 				x = 0;
 			}
-			
+
 			// --> Mirv: Shove over a bit
 			y += 16;
 			x -= 28;
 			// <--
-			
+
 #ifdef WIN32
 			int x_start = x - 5;
 			int y_start = y - (iconTall / 4) - 3;
@@ -270,7 +270,7 @@ void CHudDeathNotice::Paint()
 				DrawHighlightBackground(x_start, y_start, x_end, y_end);
 			else
 				DrawObjectiveBackground(x_start, y_start, x_end, y_end);
-			
+
 			// Draw death weapon
 			//If we're using a font char, this will ignore iconTall and iconWide
 			icon->DrawSelf( x, y - (iconTall / 4), iconWide, iconTall, DEATHNOTICE_COLOR_DEFAULT );
@@ -296,11 +296,12 @@ void CHudDeathNotice::Paint()
 		}
 		else
 		{
-			bool hasAssister = m_DeathNotices[i].Assister.iEntIndex != -1;
+			bool hasAssister = m_DeathNotices[i].Assister.iEntIndex >= 1 &&
+				m_DeathNotices[i].Assister.iEntIndex <= MAX_PLAYERS;
 			wchar_t victim[ MAX_PLAYER_NAME_LENGTH ];
 			wchar_t killer[ MAX_PLAYER_NAME_LENGTH ];
 			wchar_t assister[ MAX_PLAYER_NAME_LENGTH ];
-		
+
 			// Get the team numbers for the players involved
 			int iKillerTeam = 0;
 			int iVictimTeam = 0;
@@ -308,7 +309,10 @@ void CHudDeathNotice::Paint()
 
 			if( g_PR )
 			{
-				iKillerTeam = g_PR->GetTeam( m_DeathNotices[i].Killer.iEntIndex );
+				// World/door kills have attacker index 0, not a player slot.
+				if (m_DeathNotices[i].Killer.iEntIndex >= 1 &&
+					m_DeathNotices[i].Killer.iEntIndex <= MAX_PLAYERS)
+					iKillerTeam = g_PR->GetTeam( m_DeathNotices[i].Killer.iEntIndex );
 				iVictimTeam = g_PR->GetTeam( m_DeathNotices[i].Victim.iEntIndex );
 				if (hasAssister)
 				{
@@ -318,7 +322,7 @@ void CHudDeathNotice::Paint()
 
 			g_pVGuiLocalize->ConvertANSIToUnicode( m_DeathNotices[i].Victim.szName, victim, sizeof( victim ) );
 			g_pVGuiLocalize->ConvertANSIToUnicode( m_DeathNotices[i].Killer.szName, killer, sizeof( killer ) );
-			
+
 			if ( hasAssister )
 			{
 				g_pVGuiLocalize->ConvertANSIToUnicode( m_DeathNotices[i].Assister.szName, assister, sizeof( assister ) );
@@ -347,7 +351,7 @@ void CHudDeathNotice::Paint()
 				iconWide = (int)( scale * (float)icon->Width() );
 				iconTall = (int)( scale * (float)icon->Height() );
 			}
-			
+
 			CHudTexture *iconModifier = m_DeathNotices[i].iconDeathModifier;
 			int iconModifierWide = 0;
 			int iconModifierTall = 0;
@@ -394,7 +398,7 @@ void CHudDeathNotice::Paint()
 
 				// keep moving over for buildable icon
 				x -= iconBuildableWide ? iconBuildableWide + 5 : 0;
-				
+
 				// keep moving over for modifier icon
 				x -= iconModifierWide ? iconModifierWide + 5 : 0;
 			}
@@ -402,28 +406,28 @@ void CHudDeathNotice::Paint()
 			{
 				x = 0;
 			}
-			
+
 			// --> Mirv: Shove over a bit
 			y += 16;
 			x -= 28;
 			// <--
-			
+
 			if (hud_deathnotice_highlightself.GetBool() && selfInvolved)
 			{
 #ifdef WIN32
 				int x_start = (m_DeathNotices[i].iSuicide) ? x - 5 : x - killerAndAssisterStringWidth - 5;
-				
+
 				int y_start = y - (iconTall / 4) - 3;
                                 int y_end = y + iconTall/2 + 6;
 #else
 				int x_start = (m_DeathNotices[i].iSuicide) ? x - 14 : x - killerAndAssisterStringWidth - 14;
-				
+
 				int y_start = y - (iconTall / 4) - 6;
 				int y_end = y + iconTall/2 + 12;
 #endif
 
                                 int x_end = x + 5 + iconWide + 5 + victimAndAssisterStringWidth + 5 + ((iconBuildableWide) ? iconBuildableWide + 5 : 0) + ((iconModifierWide) ? iconModifierWide + 5 : 0);
-                                
+
 				DrawHighlightBackground(x_start, y_start, x_end, y_end);
 			}
 
@@ -440,16 +444,16 @@ void CHudDeathNotice::Paint()
 
 				x += 5;	// |-- Mirv: 5px gap
 			}
-			
+
 			// Don't include self kills when determining if teamkill
 			//bool bTeamKill = (iKillerTeam == iVictimTeam && m_DeathNotices[i].Killer.iEntIndex != m_DeathNotices[i].Victim.iEntIndex);
 			bool bTeamKill = ( ( FFGameRules()->IsTeam1AlliedToTeam2( iKillerTeam, iVictimTeam ) == GR_TEAMMATE ) && ( !m_DeathNotices[i].iSuicide ) );
-			
+
 			// Draw death weapon
 			//If we're using a font char, this will ignore iconTall and iconWide
 			icon->DrawSelf( x, y - (iconTall / 4), iconWide, iconTall, bTeamKill ? DEATHNOTICE_COLOR_TEAMKILL : DEATHNOTICE_COLOR_DEFAULT );
 			x += iconWide + 5;		// |-- Mirv: 5px gap
-			
+
 			// draw the death modifier icon
 			if (iconModifier)
 			{
@@ -484,13 +488,13 @@ void CHudDeathNotice::DrawPlayerAndAssister( int &x, int &y, wchar_t* playerName
 	{
 		surface()->DrawSetTextColor( DEATHNOTICE_COLOR_DEFAULT );
 		surface()->DrawUnicodeString( DEATHNOTICE_ASSIST_SEPARATOR );
-		
+
 		float assisterColorModifier = hud_deathnotice_assister_color_modifier.GetFloat();
 		Color assisterColor = GetCustomClientColor( -1, iAssisterTeam );
 		assisterColor.SetColor(
-			assisterColor.r() * assisterColorModifier, 
-			assisterColor.g() * assisterColorModifier, 
-			assisterColor.b() * assisterColorModifier, 
+			assisterColor.r() * assisterColorModifier,
+			assisterColor.g() * assisterColorModifier,
+			assisterColor.b() * assisterColorModifier,
 			assisterColor.a() * assisterColorModifier
 		);
 		surface()->DrawSetTextColor( assisterColor );
@@ -536,7 +540,7 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 	int bitsDamageType = event->GetInt( "damagetype" );
 	//const char *objectivename = event->GetString( "eventname" );
 	const char *objectivetext = event->GetString( "eventtext" );
-	
+
 	// Do we have too many death messages in the queue?
 	if ( m_DeathNotices.Count() > 0 &&
 		m_DeathNotices.Count() >= (int)m_flMaxDeathNotices )
@@ -544,7 +548,7 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 		// Remove the oldest one in the queue, which will always be the first
 		m_DeathNotices.Remove(0);
 	}
-	
+
 	// printed to the console
 	char sDeathMsg[512];
 
@@ -559,10 +563,10 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 
 		// Get the name of the player
 		const char *victim_name = g_PR->GetPlayerName( victim );
-		
+
 		if ( !victim_name )
 			victim_name = "";
-		
+
 		// Make a new death notice
 		DeathNoticeItem deathMsg;
 		deathMsg.Killer.iEntIndex = killer;
@@ -573,7 +577,7 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 		deathMsg.flDisplayTime = gpGlobals->curtime + hud_deathnotice_time.GetFloat();
 		deathMsg.iconObjective = gHUD.GetIcon( "death_objective" );
 		deathMsg.iconDeath = NULL;
-		
+
 		/*
 		deathMsg.iconObjective = gHUD.GetIcon( fullobjectivename );
 		if ( !deathMsg.iconObjective )
@@ -610,7 +614,7 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 			// #0001568: Falling into pitt damage shows electrocution icon, instead of falling damage icon.  Until now there was no way
 			// to identify different types of trigger_hurt deaths, so I added a "damagetype" field to the player_death event.
 			// if a trigger_hurt is the killer, check the damage type and append it to the killer's name in a temp string (post-fix append)
-			// e.g. if it's DMG_FALL, it's falling damage, so the complete string becomes death_trigger_hurt_fall.  
+			// e.g. if it's DMG_FALL, it's falling damage, so the complete string becomes death_trigger_hurt_fall.
 			// Match up the corresponding icons in scripts/ff_hud_textures.txt		-> Defrag
 
 			if( Q_stricmp( "trigger_hurt", killedwith ) == 0 )
@@ -635,7 +639,7 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 					Q_strncpy( tempTriggerHurtString, killedwith, sizeof(tempTriggerHurtString));
 					break;
 				}
-			}	
+			}
 
 			if( bTriggerHurt )	// copy different string if it's a trigger_hurt death (see above)
 			{
@@ -644,7 +648,7 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 			else
 			{
 				Q_snprintf( fullkilledwith, sizeof(fullkilledwith), "death_%s", killedwith );
-			}		
+			}
 		}
 		else
 		{
@@ -652,11 +656,14 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 		}
 
 		// Get the names of the players
-		const char *killer_name = g_PR->GetPlayerName( killer );
+		// Environmental kills (doors, world damage, etc.) have no player attacker.
+		const bool bKillerIsPlayer = killer >= 1 && killer <= MAX_PLAYERS;
+		const char *killer_name = bKillerIsPlayer ? g_PR->GetPlayerName( killer ) : "";
 		const char *victim_name = g_PR->GetPlayerName( victim );
 
 		//bool bTeamKill = (g_PR->GetTeam(killer) == g_PR->GetTeam(victim));
-		bool bTeamKill = ( ( FFGameRules()->IsTeam1AlliedToTeam2( g_PR->GetTeam( killer ), g_PR->GetTeam( victim ) ) == GR_TEAMMATE ) && ( killer != victim ) );
+		bool bTeamKill = bKillerIsPlayer && ( killer != victim ) &&
+			( FFGameRules()->IsTeam1AlliedToTeam2( g_PR->GetTeam( killer ), g_PR->GetTeam( victim ) ) == GR_TEAMMATE );
 
 		if ( !killer_name )
 			killer_name = "";
@@ -667,7 +674,7 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 	/*
 		// Buildable stuff
 		char pszVictimMod[ MAX_PLAYER_NAME_LENGTH + 24 ];
-		if( !Q_strcmp( event->GetName(), "dispenser_killed" ) ) 
+		if( !Q_strcmp( event->GetName(), "dispenser_killed" ) )
 		{
 			bBuildableKilled = true;
 			Q_snprintf( pszVictimMod, sizeof( pszVictimMod ), "%s's Dispenser", victim_name );
@@ -707,7 +714,7 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 				deathMsg.iconBuildable = gHUD.GetIcon("death_weapon_deploysentrygun");
 			bBuildableKilled = true;
 		}
-		else if( !Q_strcmp( event->GetName(), "dispenser_killed" ) ) 
+		else if( !Q_strcmp( event->GetName(), "dispenser_killed" ) )
 		{
 			deathMsg.iconBuildable = gHUD.GetIcon("death_weapon_deploydispenser");
 			bBuildableKilled = true;
@@ -719,7 +726,7 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 		}
 		else
 			deathMsg.iconBuildable = NULL;
-		
+
 		// old suicide logic:
 		deathMsg.iSuicide = ( !killer || ( ( killer == victim ) && ( !bBuildableKilled ) ) );
 
@@ -727,8 +734,13 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 		int killAssisterUserID = event->GetInt( "killassister", -1 );
 		if (killAssisterUserID != -1)
 		{
-			deathMsg.Assister.iEntIndex = engine->GetPlayerForUserID(killAssisterUserID);
-			Q_strncpy( deathMsg.Assister.szName, g_PR->GetPlayerName( deathMsg.Assister.iEntIndex ), MAX_PLAYER_NAME_LENGTH );
+			// A disconnected or unavailable assister can resolve to index 0.
+			const int assister = engine->GetPlayerForUserID(killAssisterUserID);
+			if (assister >= 1 && assister <= MAX_PLAYERS)
+			{
+				deathMsg.Assister.iEntIndex = assister;
+				Q_strncpy( deathMsg.Assister.szName, g_PR->GetPlayerName( assister ), MAX_PLAYER_NAME_LENGTH );
+			}
 		}
 
 		// only consider suicide if there was no kill assist
