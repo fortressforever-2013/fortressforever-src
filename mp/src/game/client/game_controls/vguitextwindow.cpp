@@ -34,6 +34,13 @@ extern INetworkStringTable *g_pStringTableInfoPanel;
 
 ConVar cl_disablehtmlmotd( "cl_disablehtmlmotd", "0", FCVAR_ARCHIVE, "Disable HTML motds." );
 
+ConVar cl_skipmotd(
+	"cl_skipmotd",
+	"0",
+	FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY,
+	"Skip the server information screen when testing.");
+
+
 //=============================================================================
 // HPE_BEGIN:
 // [Forrest] Replaced text window command string with TEXTWINDOW_CMD enumeration
@@ -410,6 +417,12 @@ void CTextWindow::SetData( int type, const char *title, const char *message, con
 
 void CTextWindow::ShowPanel( bool bShow )
 {
+	if (bShow && cl_skipmotd.GetBool())
+	{
+		OnCommand("okay");
+		return;
+	}
+
 	if ( BaseClass::IsVisible() == bShow )
 		return;
 
