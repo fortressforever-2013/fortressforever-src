@@ -91,11 +91,12 @@ BEGIN_NETWORK_TABLE( CBaseGrenade, DT_BaseGrenade )
 
 	SendPropExclude("DT_BaseEntity", "m_angRotation"),
 
-	SendPropFloat(SENDINFO_VECTORELEM(m_vecVelocity, 0), 13, SPROP_CHANGES_OFTEN | SPROP_ROUNDDOWN, -1024.0f, 1024.0f),
-	SendPropFloat(SENDINFO_VECTORELEM(m_vecVelocity, 1), 13, SPROP_CHANGES_OFTEN | SPROP_ROUNDDOWN, -1024.0f, 1024.0f),
-	// --> squeek: Increase negative Z bounds to match player bounds (fixes DataTable Out-of-range value warnings due to sv_maxvelocity being defaulted to 3500)
-	SendPropFloat(SENDINFO_VECTORELEM(m_vecVelocity, 2), 14, SPROP_CHANGES_OFTEN | SPROP_ROUNDDOWN, /*-3072.0f*/ -4096.0f, 1024.0f),
-	// <--
+	// Rockets travel at 1100 units/sec, exceeding the old +/-1024 component range.
+	// Cover the default sv_maxvelocity (3500) in either direction on every axis.
+	// 15 bits retain approximately 0.25 units/sec precision across this range.
+	SendPropFloat(SENDINFO_VECTORELEM(m_vecVelocity, 0), 15, SPROP_CHANGES_OFTEN | SPROP_ROUNDDOWN, -4096.0f, 4096.0f),
+	SendPropFloat(SENDINFO_VECTORELEM(m_vecVelocity, 1), 15, SPROP_CHANGES_OFTEN | SPROP_ROUNDDOWN, -4096.0f, 4096.0f),
+	SendPropFloat(SENDINFO_VECTORELEM(m_vecVelocity, 2), 15, SPROP_CHANGES_OFTEN | SPROP_ROUNDDOWN, -4096.0f, 4096.0f),
 
 	SendPropFloat(SENDINFO_VECTORELEM(m_angRotation, 0), 9, SPROP_CHANGES_OFTEN | SPROP_ROUNDDOWN, 0.0f, 360.0f, SendProxy_AngleToFloat),
 	SendPropFloat(SENDINFO_VECTORELEM(m_angRotation, 1), 9, SPROP_CHANGES_OFTEN | SPROP_ROUNDDOWN, 0.0f, 360.0f, SendProxy_AngleToFloat),
