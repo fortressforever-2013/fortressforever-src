@@ -8565,6 +8565,9 @@ void CFFPlayer::SetJetpackFuelPercent(float newPct)
 {
 	float pctClamped = max(0.0f, min(newPct, 100.0f));
 	m_iJetpackFuel = (int)(200.0f * (pctClamped / 100.0f));
+
+	if (m_iJetpackFuel >= JETPACK_RESTART_FUEL)
+		m_bJetpackDepleted = false;
 }
 
 void CFFPlayer::SetJetpackState( bool bCanUseJetpack )
