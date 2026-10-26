@@ -734,6 +734,8 @@ END_RECV_TABLE()
 BEGIN_RECV_TABLE_NOBASE(C_FFPlayer, DT_FFPlayerObserver)
 RecvPropFloat(RECVINFO(m_flNextClassSpecificSkill)),
 RecvPropInt(RECVINFO(m_iJetpackFuel)),
+	RecvPropFloat(RECVINFO(m_flJetpackCooldown)),
+	RecvPropBool(RECVINFO(m_bJetpackDepleted)),
 RecvPropFloat(RECVINFO(m_flTrueAimTime)),
 RecvPropFloat(RECVINFO(m_flHitTime)),
 RecvPropInt(RECVINFO(m_nButtons)),
@@ -791,6 +793,8 @@ BEGIN_PREDICTION_DATA(C_FFPlayer)
 DEFINE_PRED_FIELD(m_flCycle, FIELD_FLOAT, FTYPEDESC_OVERRIDE | FTYPEDESC_PRIVATE | FTYPEDESC_NOERRORCHECK),
 DEFINE_PRED_FIELD(m_iShotsFired, FIELD_INTEGER, FTYPEDESC_INSENDTABLE),
 DEFINE_PRED_FIELD(m_iJetpackFuel, FIELD_INTEGER, FTYPEDESC_INSENDTABLE),
+	DEFINE_PRED_FIELD(m_flJetpackCooldown, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
+	DEFINE_PRED_FIELD(m_bJetpackDepleted, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
 DEFINE_PRED_FIELD(m_flNextClassSpecificSkill, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
 DEFINE_PRED_FIELD(m_flJetpackNextFuelRechargeTime, FIELD_FLOAT, FTYPEDESC_OVERRIDE | FTYPEDESC_PRIVATE | FTYPEDESC_NOERRORCHECK),
 DEFINE_PRED_FIELD(m_bCanDoubleJump, FIELD_BOOLEAN, FTYPEDESC_OVERRIDE ),
@@ -1502,6 +1506,8 @@ void C_FFPlayer::Spawn(void)
 	m_flNextClassSpecificSkill = 0.0f;
 	m_iJetpackFuel = 200;
 	m_flJetpackNextFuelRechargeTime = 0.0f;
+	m_flJetpackCooldown = 0.0f;
+	m_bJetpackDepleted = false;
 
 	// Bug #0001448: Spy menu stuck on screen.  |----> Defrag
 	HudContextForceClose();

@@ -420,6 +420,8 @@ PRECACHE_REGISTER(player);
 BEGIN_SEND_TABLE_NOBASE( CFFPlayer, DT_FFPlayerObserver )
 	SendPropTime(SENDINFO(m_flNextClassSpecificSkill)),
 	SendPropInt(SENDINFO( m_iJetpackFuel )),
+	SendPropFloat(SENDINFO(m_flJetpackCooldown), 0, SPROP_NOSCALE),
+	SendPropBool(SENDINFO(m_bJetpackDepleted)),
 	SendPropTime(SENDINFO(m_flTrueAimTime)),
 	SendPropTime(SENDINFO(m_flHitTime)),
 	SendPropInt(SENDINFO(m_nButtons)),
@@ -1521,6 +1523,8 @@ void CFFPlayer::Spawn( void )
 	m_flNextClassSpecificSkill = 0.0f;
 	m_iJetpackFuel		= 200.0f;
 	m_flJetpackNextFuelRechargeTime = 0.0f;
+	m_flJetpackCooldown = 0.0f;
+	m_bJetpackDepleted = false;
 	m_hActiveSlowfield	= NULL;
 	
 	m_flSpeedModifierOld		= 1.0f;
@@ -2476,6 +2480,8 @@ void CFFPlayer::CheatImpulseCommands( int iImpulse )
 		m_iArmor = m_iMaxArmor;
 
 		m_iJetpackFuel = 200.0f;
+		m_flJetpackCooldown = 0.0f;
+		m_bJetpackDepleted = false;
 	}
 }
 

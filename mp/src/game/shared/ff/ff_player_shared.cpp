@@ -147,6 +147,8 @@ ConVar sv_motd_enable( "sv_motd_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "
 
 #define JETPACK_MINFUEL 2
 #define JETPACK_MAXFUEL 200
+#define JETPACK_RECOVERY_TIME 3.81f
+#define JETPACK_RESTART_FUEL 40
 
 //ConVar ffdev_ac_bulletsize( "ffdev_ac_bulletsize", "1.0", FCVAR_FF_FFDEV_REPLICATED );
 #define FF_AC_BULLETSIZE 1.0f //ffdev_ac_bulletsize.GetFloat()
@@ -853,7 +855,6 @@ void CFFPlayer::ClassSpecificSkillHold()
 	{
 		case CLASS_PYRO:
 			JetpackHold();
-			m_flJetpackCooldown = gpGlobals->curtime + 3.81f;
 			if (m_iJetpackFuel < JETPACK_MINFUEL)
 			{
 				m_bJetpacking = false;
@@ -881,7 +882,6 @@ void CFFPlayer::ClassSpecificSkill_Post()
 #endif
 		case CLASS_PYRO:
 			m_bJetpacking = false;
-			m_flJetpackCooldown = gpGlobals->curtime + 3.81f;
 			break;
 
 		default:
@@ -2029,6 +2029,9 @@ void CFFPlayer::JetpackRechargeThink( void )
 				// dont forget: we doubled total fuel and hover cost when converrting to int,
 				// double fuel recharge rate to match old rates here
 				m_iJetpackFuel += 2;
+
+				if (m_iJetpackFuel >= JETPACK_RESTART_FUEL)
+					m_bJetpackDepleted = false;
 			}
 		}
 }
@@ -2045,7 +2048,7 @@ bool CFFPlayer::CanJetpack()
 		return false;
 	}
 
-	if (m_iJetpackFuel < JETPACK_MINFUEL)
+	if (m_bJetpackDepleted || m_iJetpackFuel < JETPACK_MINFUEL)
 	{
 		return false;
 	}
@@ -2071,6 +2074,10 @@ void CFFPlayer::JetpackHold( void )
 
 	m_bJetpacking = true;
 	m_iJetpackFuel -= JETPACK_FUELHOVERCOST;
+	m_flJetpackCooldown = gpGlobals->curtime + JETPACK_RECOVERY_TIME;
+
+	if (m_iJetpackFuel < JETPACK_MINFUEL)
+		m_bJetpackDepleted = true;
 
 	Vector vecForward, vecRight, vecUp;
 	EyeVectors( &vecForward, &vecRight, &vecUp);
