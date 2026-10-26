@@ -1438,8 +1438,6 @@ void CFFPlayer::Command_SpyCloak(const CCommand& args)
 	// Jon: always allow uncloaking if already cloaked
 	if( IsCloaked() )
 	{
-		// Can only cloak every ffdev_spy_nextcloak seconds
-		m_flNextCloak = gpGlobals->curtime + SPY_NEXTCLOAK;
 		Cloak();
 #ifdef GAME_DLL
 		SpyCloakFadeOut();
@@ -1491,8 +1489,6 @@ void CFFPlayer::Command_SpySmartCloak(const CCommand& args)
 	// Jon: always allow uncloaking if already cloaked
 	if( IsCloaked() )
 	{
-		// Can only cloak every ffdev_spy_nextcloak seconds
-		m_flNextCloak = gpGlobals->curtime + SPY_NEXTCLOAK;
 		Cloak();
 #ifdef GAME_DLL
 		SpyCloakFadeOut();
@@ -1556,8 +1552,6 @@ void CFFPlayer::Command_SpySilentCloak(const CCommand& args)
 	// Jon: always allow uncloaking if already cloaked
 	if( IsCloaked() )
 	{
-		// Can only cloak every ffdev_spy_nextcloak seconds
-		m_flNextCloak = gpGlobals->curtime + SPY_NEXTCLOAK;
 		Cloak();
 #ifdef GAME_DLL
 		SpyCloakFadeOut();
