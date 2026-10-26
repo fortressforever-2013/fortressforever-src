@@ -16,15 +16,12 @@
 #include <vgui_controls/HTML.h>
 
 #include <igameevents.h>
-
+#include "vguitextwindow.h"
 #include <game/client/iviewport.h>
 #include <vgui/KeyCode.h>
 #include "shareddefs.h"
 
-namespace vgui
-{
-	class TextEntry;
-}
+using namespace vgui;
 
 //-----------------------------------------------------------------------------
 // Purpose: displays the MOTD
@@ -39,7 +36,6 @@ public:
 	CFFTextWindow( IViewPort *pViewPort );
 	virtual ~CFFTextWindow();
 
-	virtual const char *GetName( void ) { return PANEL_INFO; }
 	virtual void SetData(KeyValues *data);
 	virtual void Reset();
 	virtual void Update();
@@ -70,40 +66,6 @@ public:
 protected:	
 	// vgui overrides
 	virtual void OnCommand( const char *command );
-
-	IViewPort	*m_pViewPort;
-	char		m_szTitle[255];
-	char		m_szMessage[2048];
-	char		m_szMessageFallback[2048];
-	//=============================================================================
-	// HPE_BEGIN:
-	// [Forrest] Replaced text window command string with TEXTWINDOW_CMD enumeration
-	// of options.  Passing a command string is dangerous and allowed a server network
-	// message to run arbitrary commands on the client.
-	//=============================================================================
-	int			m_nExitCommand;
-	//=============================================================================
-	// HPE_END
-	//=============================================================================
-	int			m_nContentType;
-	bool		m_bShownURL;
-	bool		m_bUnloadOnDismissal;
-
-	vgui::TextEntry	*m_pTextMessage;
-	
-	class CMOTDHTML : public vgui::HTML
-	{
-	private:
-		DECLARE_CLASS_SIMPLE( CMOTDHTML, vgui::HTML );
-	
-	public:
-		CMOTDHTML( Panel *parent, const char *pchName ) : vgui::HTML( parent, pchName ) {}
-		virtual bool OnStartRequest( const char *url, const char *target, const char *pchPostData, bool bIsRedirect ) OVERRIDE;
-	};
-	CMOTDHTML		*m_pHTMLMessage;
-	
-	vgui::Button	*m_pOK;
-	vgui::Label		*m_pTitleLabel;
 };
 
 

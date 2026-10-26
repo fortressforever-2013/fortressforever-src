@@ -38,47 +38,6 @@ extern INetworkStringTable *g_pStringTableInfoPanel;
 
 ConVar cl_disablehtmlmotd( "cl_disablehtmlmotd", "0", FCVAR_ARCHIVE, "Disable HTML motds." );
 
-//=============================================================================
-// HPE_BEGIN:
-// [Forrest] Replaced text window command string with TEXTWINDOW_CMD enumeration
-// of options.  Passing a command string is dangerous and allowed a server network
-// message to run arbitrary commands on the client.
-//=============================================================================
-CON_COMMAND( showinfo, "Shows a info panel: <type> <title> <message> [<command number>]" )
-{
-	if ( !gViewPortInterface )
-		return;
-	
-	if ( args.ArgC() < 4 )
-		return;
-		
-	IViewPortPanel * panel = gViewPortInterface->FindPanelByName( PANEL_INFO );
-
-	 if ( panel )
-	 {
-		 KeyValues *kv = new KeyValues("data");
-		 kv->SetInt( "type", Q_atoi(args[ 1 ]) );
-		 kv->SetString( "title", args[ 2 ] );
-		 kv->SetString( "message", args[ 3 ] );
-
-		 if ( args.ArgC() == 5 )
-			 kv->SetString( "command", args[ 4 ] );
-
-		 panel->SetData( kv );
-
-		 gViewPortInterface->ShowPanel( panel, true );
-
-		 kv->deleteThis();
-	 }
-	 else
-	 {
-		 Msg("Couldn't find info panel.\n" );
-	 }
-}
-//=============================================================================
-// HPE_END
-//=============================================================================
-
 CON_COMMAND( hud_reloadserverinfo, "hud_reloadserverinfo" )
 {
 	IViewPortPanel *pPanel = gViewPortInterface->FindPanelByName( PANEL_INFO );
@@ -86,7 +45,7 @@ CON_COMMAND( hud_reloadserverinfo, "hud_reloadserverinfo" )
 	if( !pPanel )
 		return;
 
-	CTextWindow *pServerInfo = dynamic_cast< CTextWindow * >( pPanel );
+	CFFTextWindow *pServerInfo = dynamic_cast< CFFTextWindow * >( pPanel );
 	if( !pServerInfo )
 		return;
 
@@ -102,18 +61,6 @@ CON_COMMAND( hud_reloadserverinfo, "hud_reloadserverinfo" )
 //-----------------------------------------------------------------------------
 CFFTextWindow::CFFTextWindow( IViewPort *pViewPort ) : CTextWindow( pViewPort )
 {
-	// initialize dialog
-	m_pViewPort = pViewPort;
-
-//	SetTitle("", true);
-
-	m_szTitle[0] = '\0';
-	m_szMessage[0] = '\0';
-	m_szMessageFallback[0] = '\0';
-	m_nExitCommand = TEXTWINDOW_CMD_NONE;
-	m_bShownURL = false;
-	m_bUnloadOnDismissal = false;
-	
 	// load the new scheme early!!
 	SetScheme("ClientScheme");
 	SetMoveable(false);
@@ -181,6 +128,7 @@ void CFFTextWindow::Reset( void )
 
 void CFFTextWindow::ShowText( const char *text )
 {
+	//if ( !m_pFFTextMessage ) return;
 	m_pTextMessage->SetVisible( true );
 	m_pTextMessage->SetText( text );
 	m_pTextMessage->GotoTextStart();
