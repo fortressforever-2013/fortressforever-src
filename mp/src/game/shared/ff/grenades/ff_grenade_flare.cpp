@@ -11,7 +11,7 @@
 #include "ff_utils.h"
 
 #define FLAREGRENADE_MODEL	"models/grenades/flares/flares_holster.mdl"
-#define FLARE_SOUND			"GasGrenade.Explode"
+#define FLARE_SOUND			"FlareGrenade.Explode"
 #define FLARE_EFFECT			"GasCloud"
 
 #ifdef CLIENT_DLL
