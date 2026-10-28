@@ -37,7 +37,7 @@ $Project
 		{
 			$File "$SRCDIR\game\shared\ff\grenades\ff_grenade_base.cpp"
 			$File "$SRCDIR\game\shared\ff\grenades\ff_grenade_base.h"
-			//$File "$SRCDIR\game\shared\ff\grenades\ff_grenade_caltrop.cpp"
+			$File "$SRCDIR\game\shared\ff\grenades\ff_grenade_caltrop.cpp"
 			$File "$SRCDIR\game\shared\ff\grenades\ff_grenade_concussion.cpp"
 			$File "$SRCDIR\game\shared\ff\grenades\ff_grenade_emp.cpp"
 			$File "$SRCDIR\game\shared\ff\grenades\ff_grenade_emp.h"

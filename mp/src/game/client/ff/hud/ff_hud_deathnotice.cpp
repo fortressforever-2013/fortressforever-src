@@ -795,9 +795,11 @@ void CHudDeathNotice::FireGameEvent( IGameEvent * event )
 			else
 				deathMsg.iconDeath = gHUD.GetIcon("death_weapon_deploysentrygun");
 		}
-/*		else if (!Q_stricmp(killedwith, "caltrop")
-			deathMsg.iconDeath = gHud.GetIcon("death_grenade_caltrop");
-*/		else if (Q_stricmp(killedwith, "grenade_napalmlet") == 0)
+		else if ( !Q_stricmp(killedwith, "caltrop") )
+		{
+			deathMsg.iconDeath = gHUD.GetIcon("death_grenade_caltrop");
+		}
+		else if (Q_stricmp(killedwith, "grenade_napalmlet") == 0)
 		{
 			deathMsg.iconDeath = gHUD.GetIcon("death_grenade_napalm");
 		}

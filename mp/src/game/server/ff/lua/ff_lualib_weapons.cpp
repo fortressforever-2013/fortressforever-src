@@ -41,7 +41,7 @@ void CFFLuaLib::InitWeapons(lua_State* L)
 		// Grenade types enum
 		.beginNamespace("Grenade")
 			.addProperty("kNormal",		[]() -> int { return CLASS_GREN; })
-			//.addProperty("kCaltrop"	[]() -> int { return CLASS_GREN_CALTROP; })
+			.addProperty("kCaltrop",	[]() -> int { return CLASS_GREN_CALTROP; })
 			.addProperty("kNail",		[]() -> int { return CLASS_GREN_NAIL; })
 			.addProperty("kMirv",		[]() -> int { return CLASS_GREN_MIRV; })
 			.addProperty("kMirvlet",	[]() -> int { return CLASS_GREN_MIRVLET; })

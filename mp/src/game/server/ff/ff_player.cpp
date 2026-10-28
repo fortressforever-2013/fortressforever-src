@@ -42,7 +42,7 @@
 // added these so I could cast to check for grenades that are not derived from projectile base
 // Could probably do it more cleanly but I just went with what was already in place.  -> Defrag
 #include "ff_grenade_napalmlet.h"
-//#include "ff_caltrop.h"
+#include "ff_caltrop.h"
 #include "dt_common.h"
 
 // Lua includes
@@ -2097,7 +2097,7 @@ void CFFPlayer::Event_Killed( const CTakeDamageInfo &info )
 			case CLASS_GREN_MIRVLET:
 			case CLASS_GREN_NAPALM:
 			case CLASS_GREN_GAS:
-			//case CLASS_GREN_CALTROP:
+			case CLASS_GREN_CALTROP:
 				FF_SendHint( this, GLOBAL_GRENDEATH, 3, PRIORITY_NORMAL, "#FF_HINT_GLOBAL_GRENDEATH" );
 				break;
 		}    
@@ -3164,13 +3164,13 @@ void CFFPlayer::RemoveProjectiles( void )
 		// #0001536: napalm and caltrops become hostile after changeteam
 		// Begin changes by Defrag.  Probably could use some kind of RTTI for this instead of casting (should be cheaper)
 		// but I just went with what was currently used, instead.  This isn't called too often anyway.
-/*		else if(dynamic_cast<CFFCaltrop *>( pEnt ) != NULL )
+		else if(dynamic_cast<CFFCaltrop *>( pEnt ) != NULL )
 		{
 			pTemp =gEntList.FindEntityByOwner( pEnt, this );
 			UTIL_Remove(pEnt);
 			pEnt = pTemp;
 		}
-*/		else if(dynamic_cast<CFFGrenadeNapalmlet *>( pEnt ) != NULL )
+		else if(dynamic_cast<CFFGrenadeNapalmlet *>( pEnt ) != NULL )
 		{
 			pTemp = gEntList.FindEntityByOwner( pEnt, this );
 			UTIL_Remove(pEnt);
@@ -4695,12 +4695,12 @@ void CFFPlayer::LuaAddEffect( int iEffect, float flEffectDuration, float flIconD
 				MessageEnd();
 			}
 			break;
-/*			case LUA_EF_CALTROP:
+			case LUA_EF_CALTROP:
 			{
 				AddSpeedEffect( SE_CALTROP, flEffectDuration, flSpeed, SEM_ACCUMULATIVE | SEM_HEALABLE, FF_STATUSICON_CALTROPPED, flIconDuration, true );
 			}
 			break;
-*/			case LUA_EF_ACSPINUP: AddSpeedEffect( SE_ASSAULTCANNON, flEffectDuration, flSpeed, SEM_BOOLEAN, -1, -1.0f, true );  break;
+			case LUA_EF_ACSPINUP: AddSpeedEffect( SE_ASSAULTCANNON, flEffectDuration, flSpeed, SEM_BOOLEAN, -1, -1.0f, true );  break;
 			case LUA_EF_SNIPERRIFLE: AddSpeedEffect( SE_SNIPERRIFLE, flEffectDuration, flSpeed, SEM_BOOLEAN, -1, -1.0f, true ); break;
 			case LUA_EF_SPEED_LUA1: AddSpeedEffect( SE_LUA1, flEffectDuration, flSpeed, SEM_ACCUMULATIVE, -1, -1.0f, true ); break;
 			case LUA_EF_SPEED_LUA2: AddSpeedEffect( SE_LUA2, flEffectDuration, flSpeed, SEM_ACCUMULATIVE, -1, -1.0f, true );  break;
@@ -4736,7 +4736,7 @@ bool CFFPlayer::LuaIsEffectActive( int iEffect )
 
 		case LUA_EF_LEGSHOT: return IsSpeedEffectSet( SE_LEGSHOT ); break;
 		case LUA_EF_TRANQ: return IsSpeedEffectSet( SE_TRANQ ); break;
-		//case LUA_EF_CALTROP: return IsSpeedEffectSet( SE_CALTROP); break;
+		case LUA_EF_CALTROP: return IsSpeedEffectSet( SE_CALTROP ); break;
 		case LUA_EF_ACSPINUP: return IsSpeedEffectSet( SE_ASSAULTCANNON ); break;
 		case LUA_EF_SNIPERRIFLE: return IsSpeedEffectSet( SE_SNIPERRIFLE ); break;
 		case LUA_EF_SPEED_LUA1: return IsSpeedEffectSet( SE_LUA1 ); break;
@@ -4774,7 +4774,7 @@ void CFFPlayer::LuaRemoveEffect( int iEffect )
 
 		case LUA_EF_LEGSHOT: RemoveSpeedEffect( SE_LEGSHOT, true ); break;
 		case LUA_EF_TRANQ: RemoveSpeedEffect( SE_TRANQ, true ); break;
-		//case LUA_EF_CALTROP: RemoveSpeedEffect( SE_CALTROP, true ); break;
+		case LUA_EF_CALTROP: RemoveSpeedEffect( SE_CALTROP, true ); break;
 		case LUA_EF_ACSPINUP: RemoveSpeedEffect( SE_ASSAULTCANNON, true ); break;
 		case LUA_EF_SNIPERRIFLE: RemoveSpeedEffect( SE_SNIPERRIFLE, true ); break;
 		case LUA_EF_SPEED_LUA1: RemoveSpeedEffect( SE_LUA1, true ); break;
@@ -4926,7 +4926,7 @@ void CFFPlayer::RemoveSpeedEffectByIndex( int iSpeedEffectIndex )
 		switch( m_vSpeedEffects[ iSpeedEffectIndex ].type )
 		{
 			case SE_TRANQ: iIcon = FF_STATUSICON_TRANQUILIZED; break;
-			//case SE_CALTROP: iIcon = FF_STATUSICON_CALTROPPED; break;
+			case SE_CALTROP: iIcon = FF_STATUSICON_CALTROPPED; break;
 			case SE_LEGSHOT: iIcon = FF_STATUSICON_LEGINJURY; break;
 		}
 
@@ -5540,7 +5540,7 @@ static const char* g_ppszDistanceDamageModifierExcluded[] =
 	"ff_weapon_flamethrower", "ff_weapon_crowbar", "ff_weapon_spanner", "ff_weapon_knife",
 	"ff_weapon_medkit", "ff_grenade_normal", "ff_grenade_laser", "ff_grenade_emp",
 	"ff_grenade_gas", "ff_grenade_mirv", "ff_grenade_mirvlet", "ff_grenade_napalm",
-	"ff_grenade_napalmlet", "FF_Dispenser", "FF_SentryGun",
+	"ff_grenade_napalmlet", "FF_Dispenser", "FF_SentryGun", "ff_grenade_caltrop"
 };
 
 void CFFPlayer::DistanceDamageModifier(CTakeDamageInfo& info)
@@ -8116,7 +8116,7 @@ bool CFFPlayer::LuaRunEffect( int iEffect, CBaseEntity *pEffector, float *pflDur
 		case LUA_EF_HEADSHOT: pszEffectSuffix = "headshot"; break;
 		case LUA_EF_LEGSHOT: pszEffectSuffix = "legshot"; break;
 		case LUA_EF_TRANQ: pszEffectSuffix = "tranq"; break;
-		//case LUA_EF_CALTROP: pszEffectSuffix = "caltrop"; break;
+		case LUA_EF_CALTROP: pszEffectSuffix = "caltrop"; break;
 		case LUA_EF_ACSPINUP: pszEffectSuffix = "acspinup"; break;
 		case LUA_EF_SNIPERRIFLE: pszEffectSuffix = "sniperrifle"; break;
 		case LUA_EF_SPEED_LUA1: pszEffectSuffix = "speedlua1"; break;
@@ -8152,7 +8152,7 @@ bool CFFPlayer::LuaRunEffect( int iEffect, CBaseEntity *pEffector, float *pflDur
 		case LUA_EF_RADIOTAG:
 		case LUA_EF_LEGSHOT:
 		case LUA_EF_TRANQ:
-		//case LUA_EF_CALTROP:
+		case LUA_EF_CALTROP:
 			_scriptman.SetVar( szLuaDuration, flDuration );
 			_scriptman.SetVar( szLuaIconDuration, flIconDuration );
 			break;
@@ -8163,7 +8163,7 @@ bool CFFPlayer::LuaRunEffect( int iEffect, CBaseEntity *pEffector, float *pflDur
 	{
 		case LUA_EF_LEGSHOT:
 		case LUA_EF_TRANQ:
-		//case LUA_EF_CALTROP:
+		case LUA_EF_CALTROP:
 		case LUA_EF_ACSPINUP:
 		case LUA_EF_SNIPERRIFLE:
 		case LUA_EF_SPEED_LUA1:
@@ -8565,9 +8565,6 @@ void CFFPlayer::SetJetpackFuelPercent(float newPct)
 {
 	float pctClamped = max(0.0f, min(newPct, 100.0f));
 	m_iJetpackFuel = (int)(200.0f * (pctClamped / 100.0f));
-
-	if (m_iJetpackFuel >= JETPACK_RESTART_FUEL)
-		m_bJetpackDepleted = false;
 }
 
 void CFFPlayer::SetJetpackState( bool bCanUseJetpack )
