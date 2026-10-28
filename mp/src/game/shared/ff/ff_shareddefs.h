@@ -45,6 +45,9 @@
 // Maximum health granted by medic overhealing, relative to normal maximum health.
 #define FF_OVERHEAL_MULTIPLIER 1.5f
 
+// Cells consumed by each Scout radar scan.
+#define RADAR_COST 3
+
 // How many cells each medpack costs
 #define FF_MEDPACK_COST 10
 
