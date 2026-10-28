@@ -228,7 +228,6 @@ extern ConVar mp_friendlyfire_armorstrip;
 #define RADAR_DISTANCE	2048
 #define RADAR_TIME	0.5
 #define RADAR_MINSPEED	201
-#define RADAR_COST	3
 #define RADAR_REGEN_FREQ	4.0f
 #define RADAR_REGEN_AMOUNT	3
 
