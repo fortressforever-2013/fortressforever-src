@@ -131,17 +131,16 @@ void CFFWeaponDeployManCannon::ItemPostFrame()
 		return;
 
 	//Track the duration of the fire
-	//FIXME: Check for IN_ATTACK2 as well?
 	//FIXME: What if we're calling ItemBusyFrame?
-	m_fFireDuration = (pOwner->m_nButtons & (IN_ATTACK | IN_ATTACK2)) ? (m_fFireDuration + gpGlobals->frametime) : 0.0f;
+	m_fFireDuration = (pOwner->m_nButtons & IN_ATTACK) ? (m_fFireDuration + gpGlobals->frametime) : 0.0f;
 
 	// if just released the attack, then reset nextfiretime
-	if (pOwner->m_afButtonReleased & (IN_ATTACK | IN_ATTACK2))
+	if (pOwner->m_afButtonReleased & IN_ATTACK)
 		m_flNextPrimaryAttack = gpGlobals->curtime;
 
-	if ((pOwner->m_nButtons & (IN_ATTACK | IN_ATTACK2) || pOwner->m_afButtonPressed & (IN_ATTACK | IN_ATTACK2)) && (m_flNextPrimaryAttack <= gpGlobals->curtime))
+	if ((pOwner->m_nButtons & IN_ATTACK || pOwner->m_afButtonPressed & IN_ATTACK) && (m_flNextPrimaryAttack <= gpGlobals->curtime))
 	{
-			PrimaryAttack();
+		PrimaryAttack();
 	}
 
 	// -----------------------
@@ -157,7 +156,7 @@ void CFFWeaponDeployManCannon::ItemPostFrame()
 	// -----------------------
 	//  No buttons down
 	// -----------------------
-	if (! ((pOwner->m_nButtons & IN_ATTACK) || /* (pOwner->m_nButtons & IN_ATTACK2) ||*/ (pOwner->m_nButtons & IN_RELOAD))) // |-- Mirv: Removed attack2 so things can continue while in menu
+	if (!(pOwner->m_nButtons & (IN_ATTACK | IN_RELOAD)))
 	{
 		// no fire buttons down or reloading
 		if (!ReloadOrSwitchWeapons() && (m_bInReload == false))
