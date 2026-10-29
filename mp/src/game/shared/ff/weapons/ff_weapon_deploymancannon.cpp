@@ -297,13 +297,7 @@ bool CFFWeaponDeployManCannon::CanDeploy( void )
 		return false;
 
 	if( pPlayer->GetManCannon() )
-	{
-#ifdef CLIENT_DLL
-		ClientPrintMsg( pPlayer, HUD_PRINTCENTER, "#FF_BUILDERROR_MANCANNON_ALREADYBUILT" );
-#endif
-
 		return false;
-	}
 
 	return BaseClass::CanDeploy();
 }
