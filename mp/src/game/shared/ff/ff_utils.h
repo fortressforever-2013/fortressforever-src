@@ -56,7 +56,6 @@
 	#include "ff_player.h"
 #endif
 
-
 // Distance to trace from an entity outward when
 // trying to hit solids for placing scorch marks
 #define FF_DECALTRACE_TRACE_DIST	48.0f
@@ -165,7 +164,6 @@ void FF_HudHint(
 
 // Jiggles: Testing Hint Center
 
-
 void FF_SendHint(
 #ifndef CLIENT_DLL 
 				CFFPlayer *pPlayer,
@@ -182,7 +180,6 @@ enum HintPriority
 	PRIORITY_NORMAL,
 	PRIORITY_HIGH
 };
-
 
 // Unique Identifiers for all the hints.
 // -- So we can tell whether we've received a hint before
@@ -269,7 +266,9 @@ enum HintType
 	GLOBAL_CTOC,		// Event: Player plays for 4 minutes (tell the player how to change team and class)
 
 	// INTRO HINT
-	INTRO_HINT			// Event: Player's first spawn (introduces the Hint Center)
+	INTRO_HINT,			// Event: Player's first spawn (introduces the Hint Center)
+
+	SCOUT_JUMPPAD_BUILT	// Event: First completed Jump Pad
 };
 
 // Jiggles: End Test
