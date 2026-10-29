@@ -1795,7 +1795,6 @@ void CFFPlayer::SetupClassVariables()
 	m_bSpecialInfectedDeath = false;
 
 	m_flMancannonTime = 0.0f;
-	m_flMancannonDetTime = 0.0f;
 	// Reset Spy stuff
 	m_iCloaked = 0;
 	m_flCloakTime = 0.0f;
@@ -3668,22 +3667,6 @@ void CFFPlayer::PreBuildGenericThink( void )
 				case FF_BUILD_DISPENSER: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_DISPENSER_ALREADYBUILT"); break;
 				case FF_BUILD_SENTRYGUN: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_SENTRYGUN_ALREADYBUILT"); break;
 				case FF_BUILD_DETPACK: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_DETPACK_ALREADYSET"); break;
-				case FF_BUILD_MANCANNON:
-					// A second build request within two seconds detonates the existing jump pad.
-					if (gpGlobals->curtime > m_flMancannonDetTime)
-					{
-						m_flMancannonDetTime = gpGlobals->curtime + 2.f;
-					}
-					else
-					{
-						CFFManCannon* pJumpPadToDet = GetManCannon();
-						if (pJumpPadToDet)
-						{
-							pJumpPadToDet->DetonateNextFrame();
-							ClientPrint(this, HUD_PRINTCENTER, "#FF_MANCANNON_DESTROYED");
-						}
-					}
-					break;
 				}
 
 				// Re-initialize
