@@ -3669,11 +3669,9 @@ void CFFPlayer::PreBuildGenericThink( void )
 				case FF_BUILD_SENTRYGUN: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_SENTRYGUN_ALREADYBUILT"); break;
 				case FF_BUILD_DETPACK: ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_DETPACK_ALREADYSET"); break;
 				case FF_BUILD_MANCANNON:
-					// If the Scout right-clicks after has built a jump pad, he'll get the warning, and a message
-					// that he can click again to det it; this gives him 2 seconds to do so
+					// A second build request within two seconds detonates the existing jump pad.
 					if (gpGlobals->curtime > m_flMancannonDetTime)
 					{
-						ClientPrint(this, HUD_PRINTCENTER, "#FF_BUILDERROR_MANCANNON_ALREADYBUILT");
 						m_flMancannonDetTime = gpGlobals->curtime + 2.f;
 					}
 					else
