@@ -65,13 +65,11 @@ protected:
 	// VGUI2 overrides
 	virtual void ApplySchemeSettings(vgui::IScheme *pScheme);
 	virtual void OnKeyCodePressed(vgui::KeyCode code);
-	virtual void OnCommand( const char *command );	// BREAKINBENNY: TEMP, because I wasn't up for remaking FF's team menu to use the new command system. This is a temporary fix to get it working again!
 
 	// helper functions
 	virtual void SetLabelText(const char *textEntryName, const char *text);
 	virtual void LoadMapPage( const char *mapName );
 	// virtual void MakeTeamButtons( void );
-	void UpdateTeamButtons();
 	
 	// command callbacks
 	// MESSAGE_FUNC_INT( OnTeamButton, "TeamButton", team );
@@ -82,7 +80,6 @@ protected:
 //	int m_iNumTeams;
 	ButtonCode_t m_iJumpKey;
 	ButtonCode_t m_iScoreBoardKey;
-	vgui::Button *m_pTeamButtons[4];
 
 	bool m_bAutoJoinAttempted = false;
 

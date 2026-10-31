@@ -370,24 +370,6 @@ void CTeamMenu::LoadMapPage( const char *mapName )
 	Repaint();
 }
 
-void CTeamMenu::OnCommand( const char *command )
-{
-	if ( !Q_stricmp( command, "cancel" ) )
-	{
-		ShowPanel( false );
-		return;
-	}
-
-	ShowPanel( false );
-	if ( !Q_strcmp( command, "team spec" ) || !Q_strcmp( command, "spectate" ) )
-		return;
-
-	engine->ClientCmd( command );
-	
-	// Display the class panel now
-	gViewPortInterface->ShowPanel( PANEL_CLASS, true );
-}
-
 /*
 //-----------------------------------------------------------------------------
 // Purpose: sets the text on and displays the team buttons
