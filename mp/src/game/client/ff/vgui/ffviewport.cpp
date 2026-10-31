@@ -46,7 +46,7 @@
 
 #include "vguicenterprint.h"
 #include "text_message.h"
-//#include "ff_classmenu.h"
+#include "fortressforeverclassmenu.h"
 #include "classmenu.h"
 #include "mapscreen.h"
 #include "c_ff_player.h"
@@ -79,7 +79,7 @@ IViewPortPanel* FFViewport::CreatePanelByName(const char *szPanelName)
 	}
 	else if (Q_strcmp(PANEL_CLASS, szPanelName) == 0)
 	{
-		newpanel = new CClassMenu(this);
+		newpanel = new CFFClassMenu(this);
 	}
 	else if (Q_strcmp(PANEL_MAP, szPanelName) == 0)
 	{
