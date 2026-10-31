@@ -16,7 +16,7 @@
 
 #include <cdll_client_int.h>
 
-#include "ff_classmenu.h"
+#include "fortressforeverclassmenu.h"
 
 #include <vgui/IScheme.h>
 #include <vgui/ILocalize.h>
@@ -338,7 +338,7 @@ CFFClassMenu::CFFClassMenu( IViewPort *pViewPort ) : CClassMenu( pViewPort )
 	m_pClassInfo->SetPaintBorderEnabled(true);
 	m_pClassInfo->SetPaintBackgroundEnabled(true);
 	m_pClassInfo->SetPaintBackgroundType(2);
-
+/*
 	m_pCancelButton = new FFButton(this, "CancelButton", "#FF_CANCEL");
 	//m_pRandomButton = new MouseOverButton(this, "RandomButton", "#FF_RANDOM", this, "RandomButton");
 
@@ -387,7 +387,7 @@ CFFClassMenu::CFFClassMenu( IViewPort *pViewPort ) : CClassMenu( pViewPort )
 	// vgui items. Therefore we are sticking this right to the front so that it is
 	// rendered last.
 	m_pModelView->SetZPos(50);
-
+*/
 	LoadControlSettings("Resource/UI/ClassMenu.res");
 
 	Reset();
@@ -395,23 +395,18 @@ CFFClassMenu::CFFClassMenu( IViewPort *pViewPort ) : CClassMenu( pViewPort )
 	// Inheriting classes are responsible for calling LoadControlSettings()!
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Destructor
-//-----------------------------------------------------------------------------
-CFFClassMenu::~CFFClassMenu()
-{
-}
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
 void CFFClassMenu::Reset()
 {
-	SetClassInfoVisible(false);
+	SetClassInfoVisible( false );
 }
 
 void CFFClassMenu::SetClassInfoVisible(bool state)
 {
+/*
 	if (state == false)
 		m_pModelView->Reset();
 
@@ -431,6 +426,7 @@ void CFFClassMenu::SetClassInfoVisible(bool state)
 	m_pWeaponsSection->SetVisible(state);
 	m_pClassInfoSection->SetVisible(state);
 	m_pClassRoleSection->SetVisible(state);
+*/
 }
 
 //-----------------------------------------------------------------------------
@@ -440,7 +436,7 @@ void CFFClassMenu::Update()
 {
 	if ( !g_FF_PR ) 
 		return;
-
+/*
 	C_BasePlayer *pLocalPlayer = C_BasePlayer::GetLocalPlayer();
 
 	if (pLocalPlayer == NULL)
@@ -479,19 +475,20 @@ void CFFClassMenu::Update()
 	m_pCancelButton->SetVisible( ( g_ff_PR->GetClass( pLocalPlayer->entindex() ) != 0 ) );
 
 	m_flNextUpdate = gpGlobals->curtime + 0.2f;
+*/
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Called when the user picks a class
 //-----------------------------------------------------------------------------
 void CFFClassMenu::OnCommand( const char *command )
-{
-	if ( Q_stricmp( command, "cancel" ) )
+{/*
+	if (Q_stricmp(command, "cancel"))
 	
 		engine->ClientCmd( VarArgs("class %s", command ) );
 
 	m_pViewPort->ShowPanel( this, false );
-
+*/
 	BaseClass::OnCommand( command );
 }
 
@@ -592,6 +589,7 @@ void CFFClassMenu::OnKeyCodeReleased(KeyCode code)
 //-----------------------------------------------------------------------------
 // Purpose: Update the main display
 //-----------------------------------------------------------------------------
+/*
 void CFFClassMenu::OnMouseOverMessage(KeyValues *data)
 {
 	Button *pButton = (Button *) data->GetPtr("panel", NULL);
@@ -606,7 +604,7 @@ void CFFClassMenu::OnMouseOverMessage(KeyValues *data)
 		UpdateClassInfo( pButton->GetCommand()->GetString("command") );
 	}
 }
-
+*/
 //-----------------------------------------------------------------------------
 // Purpose: Load the correct class into the model view
 //-----------------------------------------------------------------------------
@@ -617,7 +615,7 @@ void CFFClassMenu::UpdateClassInfo(const char *pszClassName)
 		SetClassInfoVisible(false);
 		return;
 	}
-
+	/*
 	m_pModelView->SetClass(pszClassName);
 	SetClassInfoVisible(true);
 	
@@ -702,5 +700,5 @@ void CFFClassMenu::UpdateClassInfo(const char *pszClassName)
 			m_pSecondaryGren->SetText( pGrenInfo->szPrintName );
 			m_pSecondaryGren->SetVisible(true);
 		}
-	}
+	}*/
 }

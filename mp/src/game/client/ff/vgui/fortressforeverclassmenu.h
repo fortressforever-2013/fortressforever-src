@@ -42,6 +42,7 @@ public:
 
 	void Update();
 	void ShowPanel( bool bShow );
+	void Reset();
 
 	void OnKeyCodePressed( vgui::KeyCode code );
 	void OnKeyCodeReleased( vgui::KeyCode code );
