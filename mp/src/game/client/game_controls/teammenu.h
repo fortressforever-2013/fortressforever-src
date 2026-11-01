@@ -34,8 +34,6 @@ class CTeamMenu : public vgui::Frame, public IViewPortPanel
 {
 private:
 	DECLARE_CLASS_SIMPLE( CTeamMenu, vgui::Frame );
-	vgui::Button *m_pCancelButton;
-	vgui::Button *m_pSpectateButton;
 
 public:
 	CTeamMenu(IViewPort *pViewPort);
@@ -43,7 +41,7 @@ public:
 
 	virtual const char *GetName( void ) { return PANEL_TEAM; }
 	virtual void SetData(KeyValues *data) {};
-	virtual void Reset() { m_bAutoJoinAttempted = false; };
+	virtual void Reset() {};
 	virtual void Update();
 	virtual bool NeedsUpdate( void ) { return false; }
 	virtual bool HasInputElements( void ) { return true; }
@@ -80,8 +78,6 @@ protected:
 //	int m_iNumTeams;
 	ButtonCode_t m_iJumpKey;
 	ButtonCode_t m_iScoreBoardKey;
-
-	bool m_bAutoJoinAttempted = false;
 
 	char m_szMapName[ MAX_PATH ];
 };

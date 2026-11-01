@@ -21,7 +21,6 @@
 #include <vgui_controls/RichText.h>
 #include <vgui_controls/HTML.h>
 
-#include "c_ff_playerresource.h"
 #include <game/client/iviewport.h>
 #include <stdlib.h> // MAX_PATH define
 #include <stdio.h>
@@ -29,6 +28,8 @@
 
 #include <networkstringtabledefs.h>
 #include "ff_button.h"
+#include "c_ff_player.h"
+#include "c_ff_playerresource.h"
 #include "ff_utils.h"
 #include "c_ff_team.h"
 
@@ -41,6 +42,12 @@ using namespace vgui;
 extern INetworkStringTable *g_pStringTableInfoPanel;
 
 #define TEAM_BUTTON_GAP	20
+
+ConVar cl_autojointeam(
+	"cl_autojointeam",
+	"0",
+	FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY,
+	"Select once per map for testing: 1 Blue, 2 Red, 3 Yellow, 4 Green, 5 Auto Assign, 6 Spectate. Other values disable it.");
 
 //=============================================================================
 // A team button has the following components:
@@ -183,6 +190,9 @@ CFFTeamMenu::CFFTeamMenu( IViewPort *pViewPort ) : CTeamMenu( pViewPort )
 	// Mulch: Removed this
 	//new Button(this, "screenshot", "screenshot", this, "jpeg");
 */
+	m_pCancelButton = new Button( this, "CancelButton", "#FF_MENU_CANCEL" );
+	m_pSpectateButton = new Button( this, "SpectateButton", "#FF_MENU_SPECTATOR" );
+
 	// to get server name
 	gameeventmanager->AddListener( this, "server_spawn", false );
 
@@ -209,6 +219,41 @@ void CFFTeamMenu::ApplySchemeSettings( vgui::IScheme *pScheme )
 
 void CFFTeamMenu::ShowPanel( bool bShow )
 {
+	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if ( bShow && !m_bAutoJoinAttempted && g_FF_PR && pPlayer )
+	{
+		m_bAutoJoinAttempted = true;
+
+		const char *commands[] = { "team blue", "team red", "team yellow", "team green" };
+		const int iTeam = cl_autojointeam.GetInt();
+		if ( iTeam == 5 && pPlayer->GetTeamNumber() < FF_TEAM_BLUE )
+		{
+			OnCommand( "team auto" );
+			return;
+		}
+
+		if ( iTeam == 6 && pPlayer->GetTeamNumber() < FF_TEAM_BLUE
+			&& mp_allowspectators.GetBool() )
+		{
+			engine->ClientCmd( "spectate" );
+			m_pViewPort->ShowPanel( this, false );
+			return;
+		}
+
+		if ( iTeam >= 1 && iTeam <= ARRAYSIZE(commands )
+			&& pPlayer->GetTeamNumber() < FF_TEAM_BLUE )
+		{
+			char teamSpaces[ 4 ];
+			UTIL_GetTeamSpaces( teamSpaces );
+
+			if ( teamSpaces[iTeam - 1] > 0 )
+			{
+				OnCommand( commands[iTeam - 1] );
+				return;
+			}
+		}
+	}
+
 	if ( BaseClass::IsVisible() == bShow )
 		return;
 
@@ -248,8 +293,12 @@ void CFFTeamMenu::OnCommand( const char *command )
 		return;
 	}
 
-	if ( !Q_strcmp( command, "team spec" ) || !Q_strcmp( command, "spectate" ) )
+	if ( !Q_strcmp( command, "team spec" ) || !Q_strcmp( command, "spectate" ) || !Q_strcmp( command, "mapguide" ) )
+	{
+		ShowPanel( false );
+		engine->ClientCmd( command );
 		return;
+	}
 
 	engine->ClientCmd( command );
 	ShowPanel( false );
@@ -278,6 +327,15 @@ void CFFTeamMenu::FireGameEvent( IGameEvent *event )
 void CFFTeamMenu::Update()
 {
 	BaseClass::Update();
+	
+	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
+	if ( pPlayer )
+	{
+		if ( m_pCancelButton )
+			m_pCancelButton->SetVisible( pPlayer->GetTeamNumber() != TEAM_UNASSIGNED );
+		if ( m_pSpectateButton )
+			m_pSpectateButton->SetVisible( mp_allowspectators.GetBool() );
+	}
 
 	// TODO: Some of these should only happen once per map
 	UpdateMapDescriptionText();

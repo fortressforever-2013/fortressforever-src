@@ -33,11 +33,14 @@ class CFFTeamMenu : public CTeamMenu, public IGameEventListener2
 {
 private:
 	DECLARE_CLASS_SIMPLE( CFFTeamMenu, CTeamMenu );
+	vgui::Button *m_pCancelButton;
+	vgui::Button *m_pSpectateButton;
 
 public:
 	CFFTeamMenu( IViewPort *pViewPort );
 	~CFFTeamMenu();
 
+	void Reset() { m_bAutoJoinAttempted = false; };
 	void Update();
 	void ShowPanel( bool bShow );
 	
@@ -67,7 +70,9 @@ private:
 	//FFButton	*m_pFlythroughButton;
 	//FFButton	*m_pMapScreenshotButton;	// Click to display the map screenshot
 
-	char		m_szServerName[255];
+
+	bool	m_bAutoJoinAttempted = false;
+	char	m_szServerName[255];
 };
 
 #endif // FF_TEAMMENU_H
