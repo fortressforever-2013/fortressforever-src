@@ -240,7 +240,7 @@ void CFFTeamMenu::ShowPanel( bool bShow )
 			return;
 		}
 
-		if ( iTeam >= 1 && iTeam <= ARRAYSIZE(commands )
+		if ( iTeam >= 1 && iTeam <= ARRAYSIZE( commands )
 			&& pPlayer->GetTeamNumber() < FF_TEAM_BLUE )
 		{
 			char teamSpaces[ 4 ];
@@ -286,25 +286,21 @@ void CFFTeamMenu::ShowPanel( bool bShow )
 //-----------------------------------------------------------------------------
 void CFFTeamMenu::OnCommand( const char *command )
 {
-	if ( !Q_stricmp( command, "cancel" ) )
+	if ( Q_stricmp( command, "vguicancel" ) )
 	{
-		ShowPanel( false );
 		engine->ClientCmd( command );
-		return;
 	}
 
-	if ( !Q_strcmp( command, "team spec" ) || !Q_strcmp( command, "spectate" ) || !Q_strcmp( command, "mapguide" ) )
+	if ( Q_strstr( command, "team " ) )
 	{
-		ShowPanel( false );
 		engine->ClientCmd( command );
-		return;
+		
+		// Display the class panel if we have the 'team' substring, now
 	}
 
-	engine->ClientCmd( command );
-	ShowPanel( false );
-
-	// Display the class panel now
-	gViewPortInterface->ShowPanel( PANEL_CLASS, true );
+	BaseClass::OnCommand( command );
+	gViewPortInterface->ShowBackGround( false );
+	OnClose();
 }
 
 //-----------------------------------------------------------------------------
