@@ -34,8 +34,6 @@ class CTeamMenu : public vgui::Frame, public IViewPortPanel
 {
 private:
 	DECLARE_CLASS_SIMPLE( CTeamMenu, vgui::Frame );
-	vgui::Button *m_pCancelButton;
-	vgui::Button *m_pSpectateButton;
 
 public:
 	CTeamMenu(IViewPort *pViewPort);
@@ -43,7 +41,7 @@ public:
 
 	virtual const char *GetName( void ) { return PANEL_TEAM; }
 	virtual void SetData(KeyValues *data) {};
-	virtual void Reset() { m_bAutoJoinAttempted = false; };
+	virtual void Reset() {};
 	virtual void Update();
 	virtual bool NeedsUpdate( void ) { return false; }
 	virtual bool HasInputElements( void ) { return true; }
@@ -65,13 +63,11 @@ protected:
 	// VGUI2 overrides
 	virtual void ApplySchemeSettings(vgui::IScheme *pScheme);
 	virtual void OnKeyCodePressed(vgui::KeyCode code);
-	virtual void OnCommand( const char *command );	// BREAKINBENNY: TEMP, because I wasn't up for remaking FF's team menu to use the new command system. This is a temporary fix to get it working again!
 
 	// helper functions
 	virtual void SetLabelText(const char *textEntryName, const char *text);
 	virtual void LoadMapPage( const char *mapName );
 	// virtual void MakeTeamButtons( void );
-	void UpdateTeamButtons();
 	
 	// command callbacks
 	// MESSAGE_FUNC_INT( OnTeamButton, "TeamButton", team );
@@ -82,9 +78,6 @@ protected:
 //	int m_iNumTeams;
 	ButtonCode_t m_iJumpKey;
 	ButtonCode_t m_iScoreBoardKey;
-	vgui::Button *m_pTeamButtons[4];
-
-	bool m_bAutoJoinAttempted = false;
 
 	char m_szMapName[ MAX_PATH ];
 };

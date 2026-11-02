@@ -16,9 +16,6 @@
 #include <KeyValues.h>
 #include <vgui_controls/ImageList.h>
 #include <filesystem.h>
-#include "c_ff_player.h"
-#include "c_ff_playerresource.h"
-#include "ff_utils.h"
 
 #include <vgui_controls/RichText.h>
 #include <vgui_controls/Label.h>
@@ -38,12 +35,6 @@
 extern IGameUIFuncs *gameuifuncs; // for key binding details
 
 using namespace vgui;
-
-ConVar cl_autojointeam(
-	"cl_autojointeam",
-	"0",
-	FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY,
-	"Select once per map for testing: 1 Blue, 2 Red, 3 Yellow, 4 Green, 5 Auto Assign, 6 Spectate. Other values disable it.");
 
 void UpdateCursorState();
 // void DuckMessage(const char *str);
@@ -94,9 +85,6 @@ CTeamMenu::CTeamMenu(IViewPort *pViewPort) : Frame(NULL, PANEL_TEAM )
 	SetTitleBarVisible( false );
 	SetProportional(true);
 
-	m_pCancelButton = new Button( this, "CancelButton", "#FF_MENU_CANCEL" );
-	m_pSpectateButton = new Button( this, "SpectateButton", "#FF_MENU_SPECTATOR" );
-
 	// info window about this map
 	m_pMapInfo = new RichText( this, "MapInfo" );
 
@@ -146,41 +134,6 @@ void CTeamMenu::AutoAssign()
 //-----------------------------------------------------------------------------
 void CTeamMenu::ShowPanel(bool bShow)
 {
-	C_FFPlayer* pPlayer = C_FFPlayer::GetLocalFFPlayer();
-	if (bShow && !m_bAutoJoinAttempted && g_FF_PR && pPlayer)
-	{
-		m_bAutoJoinAttempted = true;
-
-		const char* commands[] = { "team blue", "team red", "team yellow", "team green" };
-		const int iTeam = cl_autojointeam.GetInt();
-		if (iTeam == 5 && pPlayer->GetTeamNumber() < FF_TEAM_BLUE)
-		{
-			OnCommand("team auto");
-			return;
-		}
-
-		if (iTeam == 6 && pPlayer->GetTeamNumber() < FF_TEAM_BLUE
-			&& mp_allowspectators.GetBool())
-		{
-			engine->ClientCmd("spectate");
-			m_pViewPort->ShowPanel(this, false);
-			return;
-		}
-
-		if (iTeam >= 1 && iTeam <= ARRAYSIZE(commands)
-			&& pPlayer->GetTeamNumber() < FF_TEAM_BLUE)
-		{
-			char teamSpaces[4];
-			UTIL_GetTeamSpaces(teamSpaces);
-
-			if (teamSpaces[iTeam - 1] > 0)
-			{
-				OnCommand(commands[iTeam - 1]);
-				return;
-			}
-		}
-	}
-
 	if ( BaseClass::IsVisible() == bShow )
 		return;
 
@@ -224,15 +177,6 @@ void CTeamMenu::Update()
 	SetLabelText( "mapname", mapname );
 
 	LoadMapPage( mapname );
-
-	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
-	if ( pPlayer )
-	{
-		if ( m_pCancelButton )
-			m_pCancelButton->SetVisible( pPlayer->GetTeamNumber() != TEAM_UNASSIGNED );
-		if ( m_pSpectateButton )
-			m_pSpectateButton->SetVisible( mp_allowspectators.GetBool() );
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -368,24 +312,6 @@ void CTeamMenu::LoadMapPage( const char *mapName )
 
 	InvalidateLayout();
 	Repaint();
-}
-
-void CTeamMenu::OnCommand( const char *command )
-{
-	if ( !Q_stricmp( command, "cancel" ) )
-	{
-		ShowPanel( false );
-		return;
-	}
-
-	ShowPanel( false );
-	if ( !Q_strcmp( command, "team spec" ) || !Q_strcmp( command, "spectate" ) )
-		return;
-
-	engine->ClientCmd( command );
-	
-	// Display the class panel now
-	gViewPortInterface->ShowPanel( PANEL_CLASS, true );
 }
 
 /*

@@ -41,12 +41,12 @@
 // viewport definitions
 #include <baseviewport.h>
 #include "ffviewport.h"
-//#include "ff_teammenu.h"
+#include "fortressforeverteammenu.h"
 #include "teammenu.h"
 
 #include "vguicenterprint.h"
 #include "text_message.h"
-//#include "ff_classmenu.h"
+#include "fortressforeverclassmenu.h"
 #include "classmenu.h"
 #include "mapscreen.h"
 #include "c_ff_player.h"
@@ -75,11 +75,11 @@ IViewPortPanel* FFViewport::CreatePanelByName(const char *szPanelName)
 	// --> Mirv: Pick up new panels
 	if (Q_strcmp(PANEL_TEAM, szPanelName) == 0)
 	{
-		newpanel = new CTeamMenu(this);
+		newpanel = new CFFTeamMenu(this);
 	}
 	else if (Q_strcmp(PANEL_CLASS, szPanelName) == 0)
 	{
-		newpanel = new CClassMenu(this);
+		newpanel = new CFFClassMenu(this);
 	}
 	else if (Q_strcmp(PANEL_MAP, szPanelName) == 0)
 	{

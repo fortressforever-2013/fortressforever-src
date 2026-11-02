@@ -3097,6 +3097,9 @@ void CFFPlayer::Command_Team(const CCommand& args)
 	// Hide team panel if it's showing
 	ShowViewPortPanel( PANEL_TEAM, false );
 
+	if ( GetTeamNumber() >= FIRST_GAME_TEAM )
+		ShowViewPortPanel( PANEL_CLASS );
+
 	Spawn();
 /*
 	if( GetTeamNumber() != TEAM_SPECTATOR && GetTeamNumber() != TEAM_UNASSIGNED )
