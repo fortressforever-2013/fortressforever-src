@@ -2013,6 +2013,10 @@ void CFFPlayer::SharedPreThink( void )
 //-----------------------------------------------------------------------------
 void CFFPlayer::JetpackRechargeThink( void )
 {
+	// Scripted restocks can bypass the normal cell-to-fuel recharge loop.
+	if (m_iJetpackFuel >= JETPACK_RESTART_FUEL)
+		m_bJetpackDepleted = false;
+
 	if (GetClassSlot() != CLASS_PYRO)
 	{
 		return;
