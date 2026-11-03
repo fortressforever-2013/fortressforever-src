@@ -25,6 +25,9 @@
 // Maximum distance from the Scout's view to a Jump Pad pickup target.
 #define FF_JUMPPAD_PICKUP_RANGE 100.0f
 
+// Fuel required to restart a depleted Pyro jetpack.
+#define JETPACK_RESTART_FUEL 40
+
 // Maximum deployed pipebombs per player.
 #define FF_MAX_PIPEBOMBS 6
 

@@ -148,7 +148,6 @@ ConVar sv_motd_enable( "sv_motd_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "
 #define JETPACK_MINFUEL 2
 #define JETPACK_MAXFUEL 200
 #define JETPACK_RECOVERY_TIME 3.81f
-#define JETPACK_RESTART_FUEL 40
 
 //ConVar ffdev_ac_bulletsize( "ffdev_ac_bulletsize", "1.0", FCVAR_FF_FFDEV_REPLICATED );
 #define FF_AC_BULLETSIZE 1.0f //ffdev_ac_bulletsize.GetFloat()
@@ -2013,6 +2012,10 @@ void CFFPlayer::SharedPreThink( void )
 //-----------------------------------------------------------------------------
 void CFFPlayer::JetpackRechargeThink( void )
 {
+	// Scripted restocks can bypass the normal cell-to-fuel recharge loop.
+	if (m_iJetpackFuel >= JETPACK_RESTART_FUEL)
+		m_bJetpackDepleted = false;
+
 	if (GetClassSlot() != CLASS_PYRO)
 	{
 		return;
