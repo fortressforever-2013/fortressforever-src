@@ -54,6 +54,8 @@ public:
 
 private:
 	
+	bool TryAutoJoin();
+	void OnThink() override;
 	void ApplySchemeSettings( vgui::IScheme *pScheme );
 	void OnKeyCodePressed( vgui::KeyCode code );
 	void OnKeyCodeReleased( vgui::KeyCode code );

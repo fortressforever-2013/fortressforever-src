@@ -7,6 +7,7 @@
 
 #include "cbase.h"
 #include "fortressforeverteammenu.h"
+#include "tier0/icommandline.h"
 
 #include <vgui/IScheme.h>
 #include <vgui/ILocalize.h>
@@ -247,42 +248,64 @@ void CFFTeamMenu::ApplySchemeSettings( vgui::IScheme *pScheme )
 	Update();
 }
 
-void CFFTeamMenu::ShowPanel( bool bShow )
+// Retry while visible: the player and team resource may arrive after ShowPanel.
+bool CFFTeamMenu::TryAutoJoin()
 {
+	// Honour testing launch options only with -dev; retain the development-only flag.
+	static bool bLaunchOptionApplied = false;
+	if (!bLaunchOptionApplied)
+	{
+		if (CommandLine()->CheckParm("-dev") && CommandLine()->FindParm("+cl_autojointeam"))
+			cl_autojointeam.SetValue(CommandLine()->ParmValue("+cl_autojointeam", 0));
+		bLaunchOptionApplied = true;
+	}
+
+	if (m_bAutoJoinAttempted)
+		return false;
+
 	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
-	if ( bShow && !m_bAutoJoinAttempted && g_FF_PR && pPlayer )
+	if (!pPlayer || !g_FF_PR)
+		return false;
+
+	const int iTeam = cl_autojointeam.GetInt();
+	if (iTeam < 1 || iTeam > 6 || pPlayer->GetTeamNumber() >= FF_TEAM_BLUE)
 	{
 		m_bAutoJoinAttempted = true;
-
-		const char *commands[] = { "team blue", "team red", "team yellow", "team green" };
-		const int iTeam = cl_autojointeam.GetInt();
-		if ( iTeam == 5 && pPlayer->GetTeamNumber() < FF_TEAM_BLUE )
-		{
-			OnCommand( "team auto" );
-			return;
-		}
-
-		if ( iTeam == 6 && pPlayer->GetTeamNumber() < FF_TEAM_BLUE
-			&& mp_allowspectators.GetBool() )
-		{
-			engine->ClientCmd( "spectate" );
-			m_pViewPort->ShowPanel( this, false );
-			return;
-		}
-
-		if ( iTeam >= 1 && iTeam <= ARRAYSIZE( commands )
-			&& pPlayer->GetTeamNumber() < FF_TEAM_BLUE )
-		{
-			char teamSpaces[ 4 ];
-			UTIL_GetTeamSpaces( teamSpaces );
-
-			if ( teamSpaces[iTeam - 1] > 0 )
-			{
-				OnCommand( commands[iTeam - 1] );
-				return;
-			}
-		}
+		return false;
 	}
+
+	if (iTeam == 6)
+	{
+		if (!mp_allowspectators.GetBool())
+			return false;
+		m_bAutoJoinAttempted = true;
+		OnCommand("spectate");
+		return true;
+	}
+
+	char teamSpaces[4];
+	const int iFreeTeams = UTIL_GetTeamSpaces(teamSpaces);
+	if ((iTeam == 5 && iFreeTeams == 0)
+		|| (iTeam <= 4 && teamSpaces[iTeam - 1] <= 0))
+		return false;
+
+	const char *commands[] = { "team blue", "team red", "team yellow", "team green", "team auto" };
+	m_bAutoJoinAttempted = true;
+	OnCommand(commands[iTeam - 1]);
+	return true;
+}
+
+void CFFTeamMenu::OnThink()
+{
+	BaseClass::OnThink();
+	if (IsVisible())
+		TryAutoJoin();
+}
+
+void CFFTeamMenu::ShowPanel( bool bShow )
+{
+	if (bShow && TryAutoJoin())
+		return;
 
 	if ( BaseClass::IsVisible() == bShow )
 		return;
@@ -316,6 +339,8 @@ void CFFTeamMenu::ShowPanel( bool bShow )
 //-----------------------------------------------------------------------------
 void CFFTeamMenu::OnCommand( const char *command )
 {
+	// A manual selection or dismissal ends automatic selection for this map.
+	m_bAutoJoinAttempted = true;
 	if ( Q_stricmp( command, "vguicancel" ) )
 	{
 		engine->ClientCmd( command );
@@ -334,7 +359,10 @@ void CFFTeamMenu::FireGameEvent( IGameEvent *event )
 	const char *type = event->GetName();
 
 	if ( !Q_strcmp(type, "server_spawn") )
-		Q_strncpy( m_szServerName, event->GetString("hostname"), 255 );
+	{
+		Reset();
+		Q_strncpy( m_szServerName, event->GetString("hostname"), sizeof(m_szServerName) );
+	}
 
 	if( IsVisible() )
 		Update();
