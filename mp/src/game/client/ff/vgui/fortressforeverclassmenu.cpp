@@ -291,7 +291,7 @@ public:
 		PostActionSignal(msg);
 	}
 };
-
+*/
 // Mulch: TODO: make this work for pheeeeeeeesh-y
 CON_COMMAND( hud_reloadclassmenu, "hud_reloadclassmenu" )
 {
@@ -310,7 +310,7 @@ CON_COMMAND( hud_reloadclassmenu, "hud_reloadclassmenu" )
 	pClassMenu->SetProportional( true );
 	pClassMenu->LoadControlSettings( "Resource/UI/ClassMenu.res" );
 }
-*/
+
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------

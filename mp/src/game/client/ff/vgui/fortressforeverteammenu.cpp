@@ -166,6 +166,25 @@ private:
 	int			m_iTeamID;
 };
 
+// Mulch: TODO: make this work for pheeeeeeeesh-y
+CON_COMMAND( hud_reloadteammenu, "hud_reloadteammenu" )
+{
+	IViewPortPanel *pPanel = gViewPortInterface->FindPanelByName( PANEL_TEAM );
+
+	if( !pPanel )
+		return;
+
+	CFFTeamMenu *pTeamMenu = dynamic_cast< CFFTeamMenu * >( pPanel );
+	if( !pTeamMenu )
+		return;
+
+	vgui::HScheme scheme = vgui::scheme()->LoadSchemeFromFileEx( enginevgui->GetPanel( PANEL_CLIENTDLL ), "resource/ClientScheme.res", "HudScheme" );
+
+	pTeamMenu->SetScheme( scheme );
+	pTeamMenu->SetProportional( true );
+	pTeamMenu->LoadControlSettings( "Resource/UI/TeamMenu.res" );
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
