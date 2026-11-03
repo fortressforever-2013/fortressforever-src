@@ -41,6 +41,8 @@
 // viewport definitions
 #include <baseviewport.h>
 #include "ffviewport.h"
+#include "vguitextwindow.h"
+#include "tier0/icommandline.h"
 #include "fortressforeverteammenu.h"
 #include "teammenu.h"
 
@@ -51,6 +53,41 @@
 #include "mapscreen.h"
 #include "c_ff_player.h"
 
+
+// Keep development MOTD controls local to FF while retaining the SDK window.
+static ConVar cl_skipmotd(
+	"cl_skipmotd",
+	"0",
+	FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY,
+	"Skip the server information screen when testing.");
+
+class CFFMOTDTextWindow : public CTextWindow
+{
+	DECLARE_CLASS_SIMPLE( CFFMOTDTextWindow, CTextWindow );
+
+public:
+	CFFMOTDTextWindow( IViewPort *pViewPort ) : CTextWindow( pViewPort ) {}
+
+	virtual void ShowPanel( bool bShow )
+	{
+		// Apply explicit development launch options once, before the first show.
+		static bool bLaunchOptionApplied = false;
+		if ( bShow && !bLaunchOptionApplied )
+		{
+			if ( CommandLine()->CheckParm( "-dev" ) && CommandLine()->FindParm( "+cl_skipmotd" ) )
+				cl_skipmotd.SetValue( CommandLine()->ParmValue( "+cl_skipmotd", 0 ) );
+			bLaunchOptionApplied = true;
+		}
+
+		if ( bShow && cl_skipmotd.GetBool() )
+		{
+			OnCommand( "okay" );
+			return;
+		}
+
+		BaseClass::ShowPanel( bShow );
+	}
+};
 
 void FFViewport::ApplySchemeSettings( vgui::IScheme *pScheme )
 {
@@ -80,6 +117,10 @@ IViewPortPanel* FFViewport::CreatePanelByName(const char *szPanelName)
 	else if (Q_strcmp(PANEL_CLASS, szPanelName) == 0)
 	{
 		newpanel = new CFFClassMenu(this);
+	}
+	else if (Q_strcmp(PANEL_INFO, szPanelName) == 0)
+	{
+		newpanel = new CFFMOTDTextWindow(this);
 	}
 	else if (Q_strcmp(PANEL_MAP, szPanelName) == 0)
 	{
