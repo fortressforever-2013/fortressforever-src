@@ -783,6 +783,7 @@ public:
 	void Overpressure( void );
 	bool CanJetpack( void );
 	void JetpackHold( void );
+	void JetpackStop( void );
 	void JetpackRechargeThink( void );
 	// for exposure to lua for cap restock
 	void SetJetpackFuelPercent( float );
@@ -845,8 +846,10 @@ public:
 	CNetworkVar( float, m_flNextClassSpecificSkill );
 	CNetworkVar( int, m_iJetpackFuel );
 	CNetworkVar( bool, m_bCanUseJetpack );
-	float m_flJetpackNextFuelRechargeTime;
+	CNetworkVar(float, m_flJetpackNextFuelRechargeTime);
+	CNetworkVar(float, m_flJetpackRefuelProgress);
 	CNetworkVar(float, m_flJetpackCooldown);
+	CNetworkVar(int, m_iJetpackBurstFuelUsed);
 	CNetworkVar(bool, m_bJetpackDepleted);
 
 	CNetworkVar( float, m_flConcTime );

@@ -420,6 +420,9 @@ BEGIN_SEND_TABLE_NOBASE( CFFPlayer, DT_FFPlayerObserver )
 	SendPropTime(SENDINFO(m_flNextClassSpecificSkill)),
 	SendPropInt(SENDINFO( m_iJetpackFuel )),
 	SendPropFloat(SENDINFO(m_flJetpackCooldown), 0, SPROP_NOSCALE),
+	SendPropInt(SENDINFO(m_iJetpackBurstFuelUsed)),
+	SendPropFloat(SENDINFO(m_flJetpackNextFuelRechargeTime), 0, SPROP_NOSCALE),
+	SendPropFloat(SENDINFO(m_flJetpackRefuelProgress), 0, SPROP_NOSCALE),
 	SendPropBool(SENDINFO(m_bJetpackDepleted)),
 	SendPropTime(SENDINFO(m_flTrueAimTime)),
 	SendPropTime(SENDINFO(m_flHitTime)),
@@ -1620,7 +1623,9 @@ void CFFPlayer::Spawn( void )
 	m_flNextClassSpecificSkill = 0.0f;
 	m_iJetpackFuel		= 200.0f;
 	m_flJetpackNextFuelRechargeTime = 0.0f;
+	m_flJetpackRefuelProgress = 0.0f;
 	m_flJetpackCooldown = 0.0f;
+	m_iJetpackBurstFuelUsed = 0;
 	m_bJetpackDepleted = false;
 	m_hActiveSlowfield	= NULL;
 
@@ -2576,6 +2581,8 @@ void CFFPlayer::CheatImpulseCommands( int iImpulse )
 
 		m_iJetpackFuel = 200.0f;
 		m_flJetpackCooldown = 0.0f;
+		m_iJetpackBurstFuelUsed = 0;
+		m_flJetpackRefuelProgress = 0.0f;
 		m_bJetpackDepleted = false;
 	}
 }

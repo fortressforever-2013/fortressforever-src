@@ -432,8 +432,10 @@ public:
 
 	CNetworkVar(float, m_flNextClassSpecificSkill);
 	CNetworkVar(int, m_iJetpackFuel);
-	float m_flJetpackNextFuelRechargeTime;
+	CNetworkVar(float, m_flJetpackNextFuelRechargeTime);
+	CNetworkVar(float, m_flJetpackRefuelProgress);
 	CNetworkVar(float, m_flJetpackCooldown);
+	CNetworkVar(int, m_iJetpackBurstFuelUsed);
 	CNetworkVar(bool, m_bJetpackDepleted);
 
 	int	  m_iSpawnInterpCounter;
@@ -623,6 +625,7 @@ public:
 	void Overpressure(void);
 	bool CanJetpack(void);
 	void JetpackHold(void);
+	void JetpackStop( void );
 	void JetpackRechargeThink(void);
 	void SharedPreThink(void);
 	void GrenadeThink(void);

@@ -130,20 +130,21 @@ ConVar sv_motd_enable( "sv_motd_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "
 //ConVar ffdev_jetpack_verticalpush_downwardslimit("ffdev_jetpack_verticalpush_downwardslimit", "1", FCVAR_REPLICATED | FCVAR_CHEAT);
 #define FFDEV_JETPACK_VERTICALPUSH_DOWNWARDSLIMIT 1.0f //ffdev_jetpack_verticalpush_downwardslimit.GetFloat()
 
-//ConVar ffdev_jetpack_verticalpush_offground("ffdev_jetpack_verticalpush_offground", "10", FCVAR_REPLICATED | FCVAR_CHEAT);
-#define JETPACK_VERTICALPUSH_OFFGROUND 10.0f //ffdev_jetpack_verticalpush_offground.GetFloat()
-//ConVar ffdev_jetpack_verticalpush_offground_downscale("ffdev_jetpack_verticalpush_offground_downscale", "0.1", FCVAR_REPLICATED | FCVAR_CHEAT);
-#define JETPACK_VERTICALPUSH_OFFGROUND_DOWNSCALE 0.1f //ffdev_jetpack_verticalpush_offground_downscale.GetFloat()
-//ConVar ffdev_jetpack_horizontalpush_offground("ffdev_jetpack_horizontalpush_offground", "2", FCVAR_REPLICATED | FCVAR_CHEAT);
-#define JETPACK_HORIZONTALPUSH_OFFGROUND 2.0f //ffdev_jetpack_horizontalpush_offground.GetFloat()
+ConVar ff_jetpack_upward_push("ff_jetpack_upward_push", "8.25", FCVAR_REPLICATED | FCVAR_NOTIFY, "Time-scaled upward thrust strength (10 matches the old impulse at the default 15 ms tick), reduced while falling.", true, 0.0f, true, 100.0f);
+ConVar ff_jetpack_falling_thrust_scale("ff_jetpack_falling_thrust_scale", "0.9", FCVAR_REPLICATED | FCVAR_NOTIFY, "Minimum upward thrust multiplier while falling (1 gives full normal thrust; values above 1 strengthen falling thrust).", true, 0.0f, true, 3.0f);
+ConVar ff_jetpack_forward_push("ff_jetpack_forward_push", "2", FCVAR_REPLICATED | FCVAR_NOTIFY, "Time-scaled forward thrust strength (2 matches the old impulse at the default 15 ms tick), following horizontal view direction.", true, 0.0f, true, 100.0f);
 
-//ConVar ffdev_jetpack_fuelrechargetime("ffdev_jetpack_fuelrechargetime", "0.08", FCVAR_REPLICATED | FCVAR_CHEAT);
-#define JETPACK_FUELRECHARGETIME 0.01f //ffdev_jetpack_fuelrechargetime.GetFloat()
-//ConVar ffdev_jetpack_fuelhovercost("ffdev_jetpack_fuelhovercost", "0.5", FCVAR_REPLICATED | FCVAR_CHEAT);
-// changed jetpack fuel to scalar, and increased to 200 to have same values
-#define JETPACK_FUELHOVERCOST 2 //ffdev_jetpack_fuelhovercost.GetFloat()
+// Fuel changes use elapsed simulation time, independently of the server tick rate.
+ConVar ff_jetpack_flight_time("ff_jetpack_flight_time", "2.25", FCVAR_REPLICATED | FCVAR_NOTIFY, "Seconds of flight per full jetpack tank.", true, 0.1f, true, 60.0f);
+ConVar ff_jetpack_cooldown("ff_jetpack_cooldown", "3.2", FCVAR_REPLICATED | FCVAR_NOTIFY, "Maximum cooling duration in seconds, scaled by fuel used in the burst, including depletion.", true, 0.0f, true, 60.0f);
+ConVar ff_jetpack_refuel_rate("ff_jetpack_refuel_rate", "20", FCVAR_REPLICATED | FCVAR_NOTIFY, "Percent of a jetpack tank refilled per second.", true, 1.0f, true, 100.0f);
+ConVar ff_jetpack_refuel_rate_using("ff_jetpack_refuel_rate_using", "2", FCVAR_REPLICATED | FCVAR_NOTIFY, "Percent of a jetpack tank refueled per second while boosting, consuming cells; 0 disables it.", true, 0.0f, true, 100.0f);
+ConVar ff_jetpack_refuel_rate_cooling("ff_jetpack_refuel_rate_cooling", "5", FCVAR_REPLICATED | FCVAR_NOTIFY, "Percent of a jetpack tank refueled per second while cooling, consuming cells; 0 disables it.", true, 0.0f, true, 100.0f);
+ConVar ff_jetpack_fuel_per_cell("ff_jetpack_fuel_per_cell", "4", FCVAR_REPLICATED | FCVAR_NOTIFY, "Jetpack fuel units restored per flamethrower cell (200 units per tank).", true, 1.0f, true, 200.0f);
 
-#define JETPACK_MINFUEL 2
+ConVar ff_jetpack_initial_push("ff_jetpack_initial_push", "0", FCVAR_REPLICATED | FCVAR_NOTIFY, "Initial upward jetpack impulse, capped at this upward speed to prevent tap stacking.", true, 0.0f, true, 300.0f);
+
+#define JETPACK_MINFUEL 1
 
 //ConVar ffdev_ac_bulletsize( "ffdev_ac_bulletsize", "1.0", FCVAR_FF_FFDEV_REPLICATED );
 #define FF_AC_BULLETSIZE 1.0f //ffdev_ac_bulletsize.GetFloat()
@@ -849,14 +850,6 @@ void CFFPlayer::ClassSpecificSkillHold()
 	{
 		case CLASS_PYRO:
 			JetpackHold();
-			if (m_iJetpackFuel < JETPACK_MINFUEL)
-			{
-				m_bJetpacking = false;
-				// note: bumped this up a little - 0.25f was too low w/ client side prediction,
-				// holding down m2 would spert it between 0/1 or 2 fuel and not play effects
-				// it can still happen on really high pings tho (150+)
-				m_flNextClassSpecificSkill = gpGlobals->curtime + 0.35f;
-			}
 			break;
 	}
 }
@@ -875,7 +868,7 @@ void CFFPlayer::ClassSpecificSkill_Post()
 			break;
 #endif
 		case CLASS_PYRO:
-			m_bJetpacking = false;
+			JetpackStop();
 			break;
 
 		default:
@@ -2000,33 +1993,66 @@ void CFFPlayer::SharedPreThink( void )
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
+void CFFPlayer::JetpackStop( void )
+{
+	if (!m_bJetpacking)
+		return;
+
+	m_bJetpacking = false;
+	const float flMaxDelay = ff_jetpack_cooldown.GetFloat();
+	const float flUsedFraction = clamp(m_iJetpackBurstFuelUsed.Get() / float(JETPACK_MAXFUEL), 0.0f, 1.0f);
+	const float flBurstDelay = flMaxDelay * flUsedFraction;
+	// Short taps add to the cooling time remaining rather than replacing it.
+	const float flPendingDelay = MAX(0.0f, m_flJetpackCooldown.Get() - gpGlobals->curtime);
+	m_flJetpackCooldown = gpGlobals->curtime + MIN(flMaxDelay, flPendingDelay + flBurstDelay);
+	m_iJetpackBurstFuelUsed = 0;
+
+}
+
 void CFFPlayer::JetpackRechargeThink( void )
 {
-	// Scripted restocks can bypass the normal cell-to-fuel recharge loop.
+	// Scripted restocks can bypass normal refueling from cells.
 	if (m_iJetpackFuel >= JETPACK_RESTART_FUEL)
 		m_bJetpackDepleted = false;
 
-	if (GetClassSlot() != CLASS_PYRO)
+	if (GetClassSlot() != CLASS_PYRO || !IsAlive() || !m_bCanUseJetpack
+		|| m_iJetpackFuel >= JETPACK_MAXFUEL || GetAmmoCount(AMMO_CELLS) <= 0)
 	{
+		// Do not bank refueling progress while full, disabled or out of cells.
+		m_flJetpackRefuelProgress = 0.0f;
 		return;
 	}
-	if (gpGlobals->curtime < m_flJetpackCooldown)
-	{
-		return;
-	}
-		if (m_flJetpackNextFuelRechargeTime < gpGlobals->curtime)
-		{
-			if (m_iJetpackFuel < JETPACK_MAXFUEL)
-			{
-				m_flJetpackNextFuelRechargeTime = gpGlobals->curtime + JETPACK_FUELRECHARGETIME;
-				// dont forget: we doubled total fuel and hover cost when converrting to int,
-				// double fuel recharge rate to match old rates here
-				m_iJetpackFuel += 2;
 
-				if (m_iJetpackFuel >= JETPACK_RESTART_FUEL)
-					m_bJetpackDepleted = false;
-			}
-		}
+	const float flStep = MAX(0.0f, gpGlobals->frametime);
+	float flFuelToRefuel;
+	if (m_bJetpacking)
+	{
+		// Boosting has its own rate even if cooling from an earlier burst.
+		flFuelToRefuel = ff_jetpack_refuel_rate_using.GetFloat() * flStep;
+	}
+	else
+	{
+		// Split a step crossing the cooling deadline between the two rates.
+		const float flCoolingStep = clamp(m_flJetpackCooldown.Get()
+			- (gpGlobals->curtime - flStep), 0.0f, flStep);
+		flFuelToRefuel = ff_jetpack_refuel_rate_cooling.GetFloat() * flCoolingStep
+			+ ff_jetpack_refuel_rate.GetFloat() * (flStep - flCoolingStep);
+	}
+	m_flJetpackRefuelProgress += JETPACK_MAXFUEL * flFuelToRefuel / 100.0f;
+
+	// Buy whole cells only; carry fractional progress across state transitions.
+	const int iFuelPerCell = ff_jetpack_fuel_per_cell.GetInt();
+	while (m_flJetpackRefuelProgress >= iFuelPerCell
+		&& m_iJetpackFuel < JETPACK_MAXFUEL && GetAmmoCount(AMMO_CELLS) > 0)
+	{
+		RemoveAmmo(1, AMMO_CELLS);
+		m_iJetpackFuel = MIN(JETPACK_MAXFUEL, m_iJetpackFuel + iFuelPerCell);
+		m_flJetpackRefuelProgress -= iFuelPerCell;
+		if (m_iJetpackFuel >= JETPACK_RESTART_FUEL)
+			m_bJetpackDepleted = false;
+	}
+	if (m_iJetpackFuel >= JETPACK_MAXFUEL || GetAmmoCount(AMMO_CELLS) <= 0)
+		m_flJetpackRefuelProgress = 0.0f;
 }
 
 bool CFFPlayer::CanJetpack()
@@ -2061,16 +2087,33 @@ void CFFPlayer::JetpackHold( void )
 {
 	if (!CanJetpack())
 	{
-		m_bJetpacking = false;
+		JetpackStop();
 		return;
 	}
 
-	m_bJetpacking = true;
-	m_iJetpackFuel -= JETPACK_FUELHOVERCOST;
-	m_flJetpackCooldown = gpGlobals->curtime + JETPACK_RECOVERY_TIME;
-
+	const float flDrainInterval = ff_jetpack_flight_time.GetFloat() / JETPACK_MAXFUEL;
+	const bool bStarting = !m_bJetpacking;
+	if (bStarting)
+	{
+		m_bJetpacking = true;
+		m_iJetpackBurstFuelUsed = 0;
+		// Charge activation too, so even a sub-tick tap consumes fuel.
+		--m_iJetpackFuel;
+		++m_iJetpackBurstFuelUsed;
+		m_flJetpackNextFuelRechargeTime = gpGlobals->curtime + flDrainInterval;
+	}
+	while (m_flJetpackNextFuelRechargeTime <= gpGlobals->curtime && m_iJetpackFuel > 0)
+	{
+		--m_iJetpackFuel;
+		++m_iJetpackBurstFuelUsed;
+		m_flJetpackNextFuelRechargeTime += flDrainInterval;
+	}
 	if (m_iJetpackFuel < JETPACK_MINFUEL)
+	{
 		m_bJetpackDepleted = true;
+		JetpackStop();
+		return;
+	}
 
 	Vector vecForward, vecRight, vecUp;
 	EyeVectors( &vecForward, &vecRight, &vecUp);
@@ -2080,7 +2123,9 @@ void CFFPlayer::JetpackHold( void )
 	// get only the direction the player is looking (ignore any z)
 	Vector horizPush = CrossProduct(Vector( 0.0f, 0.0f, 1.0f ), vecRight);
 
-	float flPercent = 1.0f;
+	// Treat the tuning values as impulses at the reference interval, then
+	// integrate acceleration over this simulation step on both client and server.
+	const float flThrustTimeScale = gpGlobals->frametime / float(DEFAULT_TICK_INTERVAL);
 
 	Vector vecLatVelocity = GetAbsVelocity() * Vector(1.0f, 1.0f, 0.0f);
 	float curVertical = GetAbsVelocity().z;
@@ -2091,20 +2136,30 @@ void CFFPlayer::JetpackHold( void )
 	}
 	else
 	{
-		horizPush *= JETPACK_HORIZONTALPUSH_OFFGROUND;
+		horizPush *= ff_jetpack_forward_push.GetFloat();
 	}
 
-	float verticalPush = JETPACK_VERTICALPUSH_OFFGROUND;
+	float verticalPush = ff_jetpack_upward_push.GetFloat();
 	if (curVertical < 0)
 	{
 		float verticalScale = (FFDEV_JETPACK_VERTICALPUSH_DOWNWARDSLIMIT + curVertical) / FFDEV_JETPACK_VERTICALPUSH_DOWNWARDSLIMIT;
-		if (verticalScale < JETPACK_VERTICALPUSH_OFFGROUND_DOWNSCALE)
-			verticalScale = JETPACK_VERTICALPUSH_OFFGROUND_DOWNSCALE;
+		verticalScale = MAX(verticalScale, ff_jetpack_falling_thrust_scale.GetFloat());
 
 		verticalPush *= verticalScale;
 	}
 
-	ApplyAbsVelocityImpulse(Vector(horizPush.x, horizPush.y, verticalPush) * flPercent);
+	horizPush *= flThrustTimeScale;
+	verticalPush *= flThrustTimeScale;
+
+	if (bStarting)
+	{
+		// Give ignition a noticeable kick even when normal falling thrust is reduced.
+		// Cap the resulting upward speed so repeated taps cannot stack this bonus.
+		const float flInitialPush = ff_jetpack_initial_push.GetFloat();
+		verticalPush = MAX(verticalPush, MIN(flInitialPush, flInitialPush - curVertical));
+	}
+
+	ApplyAbsVelocityImpulse(Vector(horizPush.x, horizPush.y, verticalPush));
 }
 
 //-----------------------------------------------------------------------------
