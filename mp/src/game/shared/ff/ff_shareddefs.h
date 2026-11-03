@@ -33,8 +33,8 @@
 
 // Maximum jetpack fuel.
 #define JETPACK_MAXFUEL 200
-#define JETPACK_RECOVERY_TIME 3.81f
 #define JETPACK_RESTART_FUEL 40
+extern ConVar ff_jetpack_cooldown;
 
 // Fuel required to restart a depleted Pyro jetpack.
 #define JETPACK_RESTART_FUEL 40

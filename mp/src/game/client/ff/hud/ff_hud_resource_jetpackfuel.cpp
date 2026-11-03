@@ -4,6 +4,7 @@
 #include "c_ff_player.h"
 #include "ff_shareddefs.h"
 #include "ff_utils.h"
+#include "ff_playerclass_parse.h"
 
 using namespace vgui;
 
@@ -56,6 +57,10 @@ void CHudResourceJetpackFuel::ApplySchemeSettings(
 	localized = g_pVGuiLocalize->Find("#HudPanel_Cooling");
 	if (localized)
 		m_wsCooling = localized;
+
+	localized = g_pVGuiLocalize->Find("#HudPanel_CellsNeeded");
+	if (localized)
+		m_wsCellsNeeded = localized;
 }
 
 void CHudResourceJetpackFuel::AddPanelSpecificOptions(
@@ -66,6 +71,25 @@ void CHudResourceJetpackFuel::AddPanelSpecificOptions(
 	AddShowTextOption(kvPanelSpecificOptions);
 
 	AddHideWhenFullOption(kvPanelSpecificOptions);
+
+	AddItemOption(
+		kvPanelSpecificOptions,
+		"Cells",
+		"#FF_ITEM_CELLS",
+		{
+			{
+				ITEM_VISIBILITY,
+				"DisableCells",
+				GetQuantityVisibilityOptions(),
+				false
+			},
+			{
+				ITEM_FORMAT,
+				"CellsFormat",
+				s_kvAmountFormatOptions->MakeCopy(),
+				FORMAT_OVER_MAX
+			}
+		});
 
 	AddItemOption(
 		kvPanelSpecificOptions,
@@ -109,6 +133,8 @@ KeyValues* CHudResourceJetpackFuel::GetDefaultStyleData()
 
 	kvPanelSpecificValues->SetInt("ValueFormat", FORMAT_OVER_MAX);
 	kvPanelSpecificValues->SetBool("DisableRecovery", false);
+	kvPanelSpecificValues->SetBool("DisableCells", false);
+	kvPanelSpecificValues->SetInt("CellsFormat", FORMAT_OVER_MAX);
 
 	kvPreset->AddSubKey(kvPanelSpecificValues);
 
@@ -180,6 +206,18 @@ void CHudResourceJetpackFuel::ApplyStyleData(
 	else
 		DisableItem(m_qiCooling);
 
+	const int iDisableCells = GetInt(
+		"DisableCells", kvPanelSpecificValues, kvDefaultPanelSpecificValues);
+	if (iDisableCells == 1)
+		DisableItem(m_qiCells);
+	else if (iDisableCells == 0)
+		EnableItem(m_qiCells);
+
+	const std::optional<AmountFormat> cellsFormat = GetAmountFormat(
+		"CellsFormat", kvPanelSpecificValues, kvDefaultPanelSpecificValues);
+	if (cellsFormat.has_value())
+		m_qiCells->SetAmountFormat(cellsFormat.value());
+
 	if (m_bShowPanel)
 	{
 		if (IsInPreviewMode())
@@ -203,13 +241,19 @@ void CHudResourceJetpackFuel::Init()
 	m_qiJetpackFuel->SetAmountFormat(FORMAT_OVER_MAX);
 	m_qiJetpackFuel->SetAmountMax(JETPACK_MAXFUEL);
 
+	m_qiCells = AddItem("Cells");
+	m_qiCells->SetLabel("#FF_ITEM_CELLS");
+	m_qiCells->SetIcon('p');
+	m_qiCells->SetAmountFormat(FORMAT_OVER_MAX);
+	m_qiCells->SetAmount(100);
+
 	m_qiCooling = AddItem("Recovery");
 	m_qiCooling->SetLabel("#HudPanel_Cooling");
 	m_qiCooling->SetIcon('f');
 	m_qiCooling->SetAmountFormat(FORMAT_RAW);
 	m_qiCooling->SetAmountDecimalPlaces(1);
-	m_qiCooling->SetAmountMax(JETPACK_RECOVERY_TIME);
-	m_qiCooling->SetAmount(JETPACK_RECOVERY_TIME * 0.6f);
+	m_qiCooling->SetAmountMax(ff_jetpack_cooldown.GetFloat());
+	m_qiCooling->SetAmount(ff_jetpack_cooldown.GetFloat() * 0.6f);
 
 	AddPanelToHudOptions(
 		"JetpackFuel",
@@ -221,6 +265,7 @@ void CHudResourceJetpackFuel::Init()
 void CHudResourceJetpackFuel::VidInit()
 {
 	m_qiJetpackFuel->SetAmount(0);
+	m_qiCells->SetAmount(0);
 	m_qiCooling->SetAmount(0);
 	SetText(m_wsRefueling);
 }
@@ -250,8 +295,23 @@ bool CHudResourceJetpackFuel::ShouldDraw()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Refresh fuel, cooling time and status before drawing, leaving sample values intact during preview
+// Purpose: Update cell capacity before layout so the fuel panel reserves the correct text width
 //-----------------------------------------------------------------------------
+void CHudResourceJetpackFuel::OnThink()
+{
+	// Class records are indexed by script basename, including the prefix.
+	// Update before layout so the amount reserves space for the actual capacity.
+	const PLAYERCLASS_FILE_INFO_HANDLE hClassInfo = LookupPlayerClassInfoSlot("ff_playerclass_pyro");
+	if (hClassInfo != GetInvalidPlayerClassInfoHandle())
+	{
+		const CFFPlayerClassInfo* pClassInfo = GetFilePlayerClassInfoFromHandle(hClassInfo);
+		if (pClassInfo)
+			m_qiCells->SetAmountMax(pClassInfo->m_iMaxCells);
+	}
+	BaseClass::OnThink();
+}
+
+// Refresh fuel, cells, cooling time and status while preserving preview samples.
 void CHudResourceJetpackFuel::Paint()
 {
 	if (!IsInPreviewMode())
@@ -261,19 +321,23 @@ void CHudResourceJetpackFuel::Paint()
 			return;
 
 		m_qiJetpackFuel->SetAmount(pPlayer->m_iJetpackFuel);
+		m_qiCells->SetAmount(pPlayer->GetAmmoCount(AMMO_CELLS));
 
 		const float flCoolingTime = Max(
 			0.0f,
 			pPlayer->m_flJetpackCooldown - gpGlobals->curtime);
 
+		m_qiCooling->SetAmountMax(ff_jetpack_cooldown.GetFloat());
 		m_qiCooling->SetAmount(flCoolingTime);
 
 		if (pPlayer->IsJetpacking())
 			SetText(m_wsInUse);
 		else if (pPlayer->m_iJetpackFuel >= JETPACK_MAXFUEL)
 			SetText(m_wsFull);
-		else if (flCoolingTime > 0.0f || pPlayer->m_bJetpackDepleted)
+		else if (flCoolingTime > 0.0f)
 			SetText(m_wsCooling);
+		else if (pPlayer->GetAmmoCount(AMMO_CELLS) <= 0)
+			SetText(m_wsCellsNeeded);
 		else
 			SetText(m_wsRefueling);
 	}

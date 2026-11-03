@@ -20,11 +20,13 @@ private:
 
 	vgui::FFQuantityItem* m_qiJetpackFuel;
 	vgui::FFQuantityItem* m_qiCooling = nullptr;
+	vgui::FFQuantityItem* m_qiCells = nullptr;
 
 	std::wstring m_wsFull;
 	std::wstring m_wsRefueling;
 	std::wstring m_wsInUse = L"In Use";
 	std::wstring m_wsCooling = L"Cooling...";
+	std::wstring m_wsCellsNeeded = L"Need cells";
 
 	bool m_bShowPanel = false;
 	bool m_bHideWhenFull = false;
@@ -42,6 +44,7 @@ private:
 
 	void Init();
 	void VidInit();
+	void OnThink() override;
 
 	bool ShouldDraw() override;
 	void Paint() override;
