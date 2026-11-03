@@ -7,6 +7,7 @@
 
 #include "cbase.h"
 #include "vguitextwindow.h"
+#include "tier0/icommandline.h"
 #include <networkstringtabledefs.h>
 #include <cdll_client_int.h>
 #include <clientmode_shared.h>
@@ -417,6 +418,16 @@ void CTextWindow::SetData( int type, const char *title, const char *message, con
 
 void CTextWindow::ShowPanel( bool bShow )
 {
+	// Release keeps these cvars development-only. Accept explicit testing launch
+	// options with -dev without exposing them to ordinary Release sessions.
+	static bool bLaunchOptionApplied = false;
+	if (bShow && !bLaunchOptionApplied)
+	{
+		if (CommandLine()->CheckParm("-dev") && CommandLine()->FindParm("+cl_skipmotd"))
+			cl_skipmotd.SetValue(CommandLine()->ParmValue("+cl_skipmotd", 0));
+		bLaunchOptionApplied = true;
+	}
+
 	if (bShow && cl_skipmotd.GetBool())
 	{
 		OnCommand("okay");
