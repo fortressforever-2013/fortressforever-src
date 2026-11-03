@@ -738,6 +738,9 @@ BEGIN_RECV_TABLE_NOBASE(C_FFPlayer, DT_FFPlayerObserver)
 RecvPropFloat(RECVINFO(m_flNextClassSpecificSkill)),
 RecvPropInt(RECVINFO(m_iJetpackFuel)),
 	RecvPropFloat(RECVINFO(m_flJetpackCooldown)),
+	RecvPropInt(RECVINFO(m_iJetpackBurstFuelUsed)),
+	RecvPropFloat(RECVINFO(m_flJetpackNextFuelRechargeTime)),
+	RecvPropFloat(RECVINFO(m_flJetpackRefuelProgress)),
 	RecvPropBool(RECVINFO(m_bJetpackDepleted)),
 RecvPropFloat(RECVINFO(m_flTrueAimTime)),
 RecvPropFloat(RECVINFO(m_flHitTime)),
@@ -797,9 +800,12 @@ DEFINE_PRED_FIELD(m_flCycle, FIELD_FLOAT, FTYPEDESC_OVERRIDE | FTYPEDESC_PRIVATE
 DEFINE_PRED_FIELD(m_iShotsFired, FIELD_INTEGER, FTYPEDESC_INSENDTABLE),
 DEFINE_PRED_FIELD(m_iJetpackFuel, FIELD_INTEGER, FTYPEDESC_INSENDTABLE),
 	DEFINE_PRED_FIELD(m_flJetpackCooldown, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
+	DEFINE_PRED_FIELD(m_iJetpackBurstFuelUsed, FIELD_INTEGER, FTYPEDESC_INSENDTABLE),
 	DEFINE_PRED_FIELD(m_bJetpackDepleted, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
 DEFINE_PRED_FIELD(m_flNextClassSpecificSkill, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
-DEFINE_PRED_FIELD(m_flJetpackNextFuelRechargeTime, FIELD_FLOAT, FTYPEDESC_OVERRIDE | FTYPEDESC_PRIVATE | FTYPEDESC_NOERRORCHECK),
+DEFINE_PRED_FIELD(m_flJetpackNextFuelRechargeTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
+DEFINE_PRED_FIELD(m_flJetpackRefuelProgress, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
+DEFINE_PRED_FIELD(m_bJetpacking, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
 DEFINE_PRED_FIELD(m_bCanDoubleJump, FIELD_BOOLEAN, FTYPEDESC_OVERRIDE ),
 DEFINE_PRED_FIELD_TOL(m_flNextJumpTimeForDouble, FIELD_FLOAT, FTYPEDESC_OVERRIDE | FTYPEDESC_NOERRORCHECK, TD_MSECTOLERANCE),
 //DEFINE_PRED_FIELD(m_flPrimeTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
@@ -1505,7 +1511,9 @@ void C_FFPlayer::Spawn(void)
 	m_flNextClassSpecificSkill = 0.0f;
 	m_iJetpackFuel = 200;
 	m_flJetpackNextFuelRechargeTime = 0.0f;
+	m_flJetpackRefuelProgress = 0.0f;
 	m_flJetpackCooldown = 0.0f;
+	m_iJetpackBurstFuelUsed = 0;
 	m_bJetpackDepleted = false;
 
 	// Bug #0001448: Spy menu stuck on screen.  |----> Defrag
