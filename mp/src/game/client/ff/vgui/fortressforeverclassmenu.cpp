@@ -331,14 +331,14 @@ CFFClassMenu::CFFClassMenu( IViewPort *pViewPort ) : CClassMenu( pViewPort )
 
 	// hide the system buttons
 	SetTitleBarVisible( false );
-
+/*
 	m_pClassInfo = new RichText(this, "ClassInfo");
 	m_pClassInfo->SetVerticalScrollbar(false);
 	m_pClassInfo->SetBgColor(Color(0, 0, 0, 50));
 	m_pClassInfo->SetPaintBorderEnabled(true);
 	m_pClassInfo->SetPaintBackgroundEnabled(true);
 	m_pClassInfo->SetPaintBackgroundType(2);
-/*
+
 	m_pCancelButton = new FFButton(this, "CancelButton", "#FF_CANCEL");
 	//m_pRandomButton = new MouseOverButton(this, "RandomButton", "#FF_RANDOM", this, "RandomButton");
 
