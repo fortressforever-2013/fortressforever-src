@@ -60,7 +60,7 @@ protected:
 	int			m_iTeam;
 	vgui::EditablePanel *m_pPanel;
 
-	vgui::RichText* m_pClassInfo;
+	//vgui::RichText	*m_pClassInfo;
 
 	float			m_flNextUpdate;
 /*

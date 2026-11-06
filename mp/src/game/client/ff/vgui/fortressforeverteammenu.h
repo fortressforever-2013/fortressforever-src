@@ -62,7 +62,11 @@ private:
 	// ServerInfo elements
 	//FFButton	*m_pServerInfoButton;
 	//vgui::HTML	*m_pServerInfoHost;
-
+/*
+	// MapDescription elements
+	Label		*m_pMapDescriptionHead;
+	RichText		*m_pMapDescriptionText;
+*/
 	// ClassSelection elements
 	//TeamButton	*m_pTeamButtons[4];
 

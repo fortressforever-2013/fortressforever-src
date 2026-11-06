@@ -209,6 +209,12 @@ CFFTeamMenu::CFFTeamMenu( IViewPort *pViewPort ) : CTeamMenu( pViewPort )
 	// Mulch: Removed this
 	//new Button(this, "screenshot", "screenshot", this, "jpeg");
 */
+/*
+	// MapDescription elements
+	m_pMapDescriptionHead = new Label(this, "MapDescriptionHead", "");
+	m_pMapDescriptionText = new RichText(this, "MapDescriptionText");
+	m_pMapDescriptionText->SetDrawOffsets( 10, 0 );
+*/
 	m_pCancelButton = new Button( this, "CancelButton", "#FF_MENU_CANCEL" );
 	m_pSpectateButton = new Button( this, "SpectateButton", "#FF_MENU_SPECTATOR" );
 
