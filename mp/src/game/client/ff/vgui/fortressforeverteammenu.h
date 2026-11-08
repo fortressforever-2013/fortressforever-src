@@ -35,6 +35,11 @@ private:
 	DECLARE_CLASS_SIMPLE( CFFTeamMenu, CTeamMenu );
 	vgui::Button *m_pCancelButton;
 	vgui::Button *m_pSpectateButton;
+	
+	vgui::Button *m_pBlueTeamButton;
+	vgui::Button *m_pRedTeamButton;
+	vgui::Button *m_pYellowTeamButton;
+	vgui::Button *m_pGreenTeamButton;
 
 public:
 	CFFTeamMenu( IViewPort *pViewPort );

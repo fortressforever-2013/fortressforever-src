@@ -215,8 +215,13 @@ CFFTeamMenu::CFFTeamMenu( IViewPort *pViewPort ) : CTeamMenu( pViewPort )
 	m_pMapDescriptionText = new RichText(this, "MapDescriptionText");
 	m_pMapDescriptionText->SetDrawOffsets( 10, 0 );
 */
+	m_pMapInfo->SetDrawOffsets( 10, 0 );
 	m_pCancelButton = new Button( this, "CancelButton", "#FF_MENU_CANCEL" );
 	m_pSpectateButton = new Button( this, "SpectateButton", "#FF_MENU_SPECTATOR" );
+	m_pBlueTeamButton = new Button( this, "BlueTeamButton", "#FF_MENU_BLUE" );
+	m_pRedTeamButton = new Button( this, "RedTeamButton", "#FF_MENU_RED" );
+	m_pYellowTeamButton = new Button( this, "YellowTeamButton", "#FF_MENU_YELLOW" );
+	m_pGreenTeamButton = new Button( this, "GreenTeamButton", "#FF_MENU_GREEN" );
 
 	// to get server name
 	gameeventmanager->AddListener( this, "server_spawn", false );
@@ -316,13 +321,6 @@ void CFFTeamMenu::OnCommand( const char *command )
 		engine->ClientCmd( command );
 	}
 
-	if ( Q_strstr( command, "team " ) )
-	{
-		engine->ClientCmd( command );
-		
-		// Display the class panel if we have the 'team' substring, now
-	}
-
 	BaseClass::OnCommand( command );
 	gViewPortInterface->ShowBackGround( false );
 	OnClose();
@@ -352,10 +350,13 @@ void CFFTeamMenu::Update()
 	C_FFPlayer *pPlayer = C_FFPlayer::GetLocalFFPlayer();
 	if ( pPlayer )
 	{
-		if ( m_pCancelButton )
-			m_pCancelButton->SetVisible( pPlayer->GetTeamNumber() != TEAM_UNASSIGNED );
-		if ( m_pSpectateButton )
-			m_pSpectateButton->SetVisible( mp_allowspectators.GetBool() );
+		if ( m_pCancelButton ) m_pCancelButton->SetVisible( pPlayer->GetTeamNumber() != TEAM_UNASSIGNED );
+		if ( m_pSpectateButton ) m_pSpectateButton->SetVisible( mp_allowspectators.GetBool() );
+
+		if ( m_pBlueTeamButton ) m_pBlueTeamButton->SetVisible( g_FF_PR->GetTeamLimits( FF_TEAM_BLUE ) > -1 );
+		if ( m_pRedTeamButton ) m_pRedTeamButton->SetVisible( g_FF_PR->GetTeamLimits( FF_TEAM_RED ) > -1 );
+		if ( m_pYellowTeamButton ) m_pYellowTeamButton->SetVisible( g_FF_PR->GetTeamLimits( FF_TEAM_YELLOW ) > -1 );
+		if ( m_pGreenTeamButton ) m_pGreenTeamButton->SetVisible( g_FF_PR->GetTeamLimits( FF_TEAM_GREEN ) > -1 );
 	}
 
 	// TODO: Some of these should only happen once per map
