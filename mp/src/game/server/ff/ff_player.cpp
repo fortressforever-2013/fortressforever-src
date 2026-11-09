@@ -3548,49 +3548,9 @@ void CFFPlayer::ScoutRadarThink(void)
 	MessageEnd();
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Silently reclaim an owned, built Jump Pad in the pickup trace and return it to the player inventory
-//-----------------------------------------------------------------------------
-bool CFFPlayer::TryPickupJumpPad()
-{
-	CFFManCannon* pJumpPad = GetManCannon();
-	if (!IsAlive() || IsBuilding() || !pJumpPad
-		|| !pJumpPad->IsBuilt() || !pJumpPad->IsAlive()
-		|| pJumpPad->IsMarkedForDeletion()
-		|| pJumpPad->GetOwnerPlayer() != this)
-		return false;
-
-	Vector vecForward;
-	EyeVectors(&vecForward);
-
-	const Vector vecStart = EyePosition();
-	trace_t trace;
-	UTIL_TraceLine(
-		vecStart,
-		vecStart + vecForward * FF_JUMPPAD_PICKUP_RANGE,
-		MASK_PLAYERSOLID,
-		this,
-		COLLISION_GROUP_NONE,
-		&trace);
-
-	if (trace.startsolid || trace.m_pEnt != pJumpPad)
-		return false;
-
-	if (GiveAmmo(1, AMMO_MANCANNON, true) != 1)
-		return false;
-
-	pJumpPad->RemoveQuietly();
-	m_hManCannon = NULL;
-	return true;
-}
-
 void CFFPlayer::Command_Radar(const CCommand& args)
 {
 	if (GetClassSlot() != CLASS_SCOUT)
-		return;
-
-	// Reclaiming the aimed-at pad consumes this press without a radar ping.
-	if (TryPickupJumpPad())
 		return;
 
 	ScoutRadarThink();

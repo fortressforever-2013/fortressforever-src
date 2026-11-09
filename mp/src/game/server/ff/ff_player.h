@@ -664,7 +664,6 @@ public:
 	void ScoutRadarThink(void);
 	void Command_Radar(const CCommand& args);
 protected:
-	bool TryPickupJumpPad();
 	float m_flLastRadarUpdate;
 
 public:
