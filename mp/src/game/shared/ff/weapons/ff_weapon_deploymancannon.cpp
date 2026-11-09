@@ -248,7 +248,7 @@ bool CFFWeaponDeployManCannon::CanDeploy( void )
 	if( !pPlayer )
 		return false;
 
-	if( pPlayer->GetManCannon() )
+	if( pPlayer->GetAmmoCount( AMMO_MANCANNON ) < 1 )
 		return false;
 
 	return BaseClass::CanDeploy();
@@ -264,7 +264,7 @@ bool CFFWeaponDeployManCannon::CanBeSelected( void )
 	if( !pPlayer )
 		return false;
 
-	if( pPlayer->GetManCannon() )
+	if( pPlayer->GetAmmoCount( AMMO_MANCANNON ) < 1 )
 	{
 		return false;
 	}

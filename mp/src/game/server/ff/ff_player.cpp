@@ -3656,8 +3656,7 @@ void CFFPlayer::PreBuildGenericThink( void )
 		// See if the user has already built this item
 		if( ( (m_iWantBuild == FF_BUILD_DISPENSER) && GetDispenser()) ||
 			( (m_iWantBuild == FF_BUILD_SENTRYGUN) && GetSentryGun()) ||
-			( (m_iWantBuild == FF_BUILD_DETPACK) && GetDetpack()) ||
-			( (m_iWantBuild == FF_BUILD_MANCANNON) && GetManCannon()) )
+			( (m_iWantBuild == FF_BUILD_DETPACK) && GetDetpack()) )
 		{
 			if (!m_bRequireRePressBuildable)
 			{
@@ -3846,6 +3845,14 @@ void CFFPlayer::PreBuildGenericThink( void )
 
 				case FF_BUILD_MANCANNON:
 				{
+					// Replace only after placement checks pass, before the new pad sends HUD updates.
+					if (CFFManCannon *pOldManCannon = GetManCannon())
+					{
+						pOldManCannon->Detonate();
+						m_hManCannon = NULL;
+						ClientPrint(this, HUD_PRINTCENTER, "#FF_MANCANNON_DESTROYED");
+					}
+
 					CFFManCannon *pManCannon = CFFManCannon::Create( hBuildInfo.GetBuildOrigin(), hBuildInfo.GetBuildAngles(), this );
 
 					pManCannon->SetLocation( g_pGameRules->GetChatLocation( true, this ) );

@@ -1170,6 +1170,10 @@ void CFFBuildableObject::DoExplosion( void )
 
 	Vector vecAbsOrigin = GetAbsOrigin() + Vector( 0, 0, 32.0f ); // Bring off the ground a little 
 	CPASFilter filter( vecAbsOrigin );
+	// Replacement pads detonate during predicted weapon input, but their
+	// explosion is server-only. Keep the builder in the effect recipients.
+	if (Classify() == CLASS_MANCANNON)
+		filter.SetIgnorePredictionCull(true);
 	te->Explosion( filter,			// Filter
 		0.0f,						// Delay
 		&vecAbsOrigin,				// Origin (position)

@@ -266,7 +266,9 @@ enum HintType
 	GLOBAL_CTOC,		// Event: Player plays for 4 minutes (tell the player how to change team and class)
 
 	// INTRO HINT
-	INTRO_HINT			// Event: Player's first spawn (introduces the Hint Center)
+	INTRO_HINT,			// Event: Player's first spawn (introduces the Hint Center)
+
+	SCOUT_JUMPPAD_BUILT	// Event: First completed Jump Pad
 };
 
 // Jiggles: End Test

@@ -176,9 +176,7 @@ CFFBuildableInfo::CFFBuildableInfo( CFFPlayer *pPlayer, int iBuildObject )
 			break;
 		return;
 	case FF_BUILD_MANCANNON:
-		if( pPlayer->GetManCannon() )
-			m_BuildResult = BUILD_ALREADYBUILT;
-		else if( pPlayer->GetAmmoCount( AMMO_MANCANNON ) < 1 )
+		if( pPlayer->GetAmmoCount( AMMO_MANCANNON ) < 1 )
 			m_BuildResult = BUILD_NEEDAMMO;
 		else
 			break;

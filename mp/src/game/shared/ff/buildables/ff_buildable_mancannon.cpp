@@ -247,6 +247,16 @@ void CFFManCannon::GoLive( void )
 		SetContextThink( &CFFManCannon::OnJumpPadThink, gpGlobals->curtime, "JumpPadThink" );
 	}
 	// caes
+
+	if (pOwner)
+	{
+		FF_SendHint(
+			pOwner,
+			SCOUT_JUMPPAD_BUILT,
+			1,
+			PRIORITY_NORMAL,
+			"#FF_HINT_SCOUT_JUMPPAD_BUILT");
+	}
 }
 
 //-----------------------------------------------------------------------------
