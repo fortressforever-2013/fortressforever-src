@@ -54,12 +54,12 @@
 #include "c_ff_player.h"
 
 
-// Keep development MOTD controls local to FF while retaining the SDK window.
+// Keep MOTD controls local to FF while retaining the SDK window.
 static ConVar cl_skipmotd(
 	"cl_skipmotd",
 	"0",
-	FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY,
-	"Skip the server information screen when testing.");
+	FCVAR_ARCHIVE,
+	"Skip the server information screen.");
 
 class CFFMOTDTextWindow : public CTextWindow
 {
@@ -70,11 +70,11 @@ public:
 
 	virtual void ShowPanel( bool bShow )
 	{
-		// Apply explicit development launch options once, before the first show.
+		// Apply the explicit launch option once, before the first show.
 		static bool bLaunchOptionApplied = false;
 		if ( bShow && !bLaunchOptionApplied )
 		{
-			if ( CommandLine()->CheckParm( "-dev" ) && CommandLine()->FindParm( "+cl_skipmotd" ) )
+			if ( CommandLine()->FindParm( "+cl_skipmotd" ) )
 				cl_skipmotd.SetValue( CommandLine()->ParmValue( "+cl_skipmotd", 0 ) );
 			bLaunchOptionApplied = true;
 		}
