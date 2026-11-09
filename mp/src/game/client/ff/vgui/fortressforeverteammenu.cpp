@@ -47,8 +47,8 @@ extern INetworkStringTable *g_pStringTableInfoPanel;
 ConVar cl_autojointeam(
 	"cl_autojointeam",
 	"0",
-	FCVAR_ARCHIVE | FCVAR_DEVELOPMENTONLY,
-	"Select once per map for testing: 1 Blue, 2 Red, 3 Yellow, 4 Green, 5 Auto Assign, 6 Spectate. Other values disable it.");
+	FCVAR_ARCHIVE,
+	"Select once per map: 1 Blue, 2 Red, 3 Yellow, 4 Green, 5 Auto Assign, 6 Spectate. Other values disable it.");
 
 //=============================================================================
 // A team button has the following components:
@@ -251,11 +251,11 @@ void CFFTeamMenu::ApplySchemeSettings( vgui::IScheme *pScheme )
 // Retry while visible: the player and team resource may arrive after ShowPanel.
 bool CFFTeamMenu::TryAutoJoin()
 {
-	// Honour testing launch options only with -dev; retain the development-only flag.
+	// Apply the explicit launch option once, before attempting automatic selection.
 	static bool bLaunchOptionApplied = false;
 	if (!bLaunchOptionApplied)
 	{
-		if (CommandLine()->CheckParm("-dev") && CommandLine()->FindParm("+cl_autojointeam"))
+		if (CommandLine()->FindParm("+cl_autojointeam"))
 			cl_autojointeam.SetValue(CommandLine()->ParmValue("+cl_autojointeam", 0));
 		bLaunchOptionApplied = true;
 	}
