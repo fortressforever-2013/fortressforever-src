@@ -33,6 +33,7 @@
 #else
 
 	#include "ff_player.h"
+#include "ff_grenade_emp.h"
 	#include "iservervehicle.h"
 	#include "decals.h"
 	#include "ilagcompensationmanager.h"
@@ -1938,12 +1939,10 @@ void CFFPlayer::SharedPreThink( void )
 			{
 				FF_SendHint(GLOBAL_NOPRIME2, 2, PRIORITY_NORMAL, "#FF_HINT_GLOBAL_NOPRIME2");
 				m_iUnthrownGrenCount = 0;
-				m_bLastPrimed = false;
 			}
 		}
-		else
 #endif
-			m_bLastPrimed = true;
+		m_bLastPrimed = true;
 	}
 	else if ( m_afButtonPressed & IN_TOGGLEGRENADE2 )
 	{
@@ -1959,12 +1958,10 @@ void CFFPlayer::SharedPreThink( void )
 			{
 				FF_SendHint(GLOBAL_NOPRIME2, 2, PRIORITY_NORMAL, "#FF_HINT_GLOBAL_NOPRIME2");
 				m_iUnthrownGrenCount = 0;
-				m_bLastPrimed = false;
 			}
 		}
-		else
 #endif
-			m_bLastPrimed = true;
+		m_bLastPrimed = true;
 	}
 
 	// hold binds
@@ -2428,13 +2425,19 @@ void CFFPlayer::PrimeGrenade1( void )
 	m_flPrimeTime = gpGlobals->curtime;
 	m_iGrenadeState = FF_GREN_PRIMEONE;
 
-	EmitSoundShared("Grenade.Prime");
+	// State and ammo must replay, but the prime click is heard only once.
+#ifdef CLIENT_DLL
+	if (!prediction->InPrediction() || prediction->IsFirstTimePredicted())
+#endif
+		EmitSoundShared("Grenade.Prime");
 
 #ifndef _DEBUG
 	m_iPrimary--;
 #endif
 
 #ifdef CLIENT_DLL
+	if (prediction->InPrediction() && !prediction->IsFirstTimePredicted())
+		return;
 	// dexter: if g_szTimerFile hasnt been set yet, force update to default. this happens first run of a new install etc
 	ConVarRef cl_timerwav("cl_grenadetimer");
 
@@ -2515,13 +2518,19 @@ void CFFPlayer::PrimeGrenade2( void )
 	m_flPrimeTime = gpGlobals->curtime;
 	m_iGrenadeState = FF_GREN_PRIMETWO;
 
-	EmitSoundShared("Grenade.Prime");
+	// State and ammo must replay, but the prime click is heard only once.
+#ifdef CLIENT_DLL
+	if (!prediction->InPrediction() || prediction->IsFirstTimePredicted())
+#endif
+		EmitSoundShared("Grenade.Prime");
 
 #ifndef _DEBUG
 	m_iSecondary--;
 #endif
 
 #ifdef CLIENT_DLL
+	if (prediction->InPrediction() && !prediction->IsFirstTimePredicted())
+		return;
 	// dexter: if g_szTimerFile hasnt been set yet, force update to default. this happens first run of a new install etc
 	ConVarRef cl_timerwav("cl_grenadetimer");
 
@@ -2579,6 +2588,40 @@ void CFFPlayer::PrimeGrenade2( void )
 #endif
 }
 
+void CFFPlayer::GrenadeThink(void)
+{
+	if (!IsGrenadePrimed())
+		return;
+
+#ifdef GAME_DLL
+	// Bug #0000993: Holding(HHing) an emp bugs the pre-det sound
+	// Because the grenade doesn't actually exist yet for the bug,
+	// we've gotta play the sound here if applicable
+	if( ( GetClassSlot() == CLASS_ENGINEER ) && ( m_iGrenadeState == FF_GREN_PRIMETWO ) )
+	{
+		if( !m_bEngyGrenWarned && ( gpGlobals->curtime > ( m_flPrimeTime + GREN_TIMER - 0.685f ) ) )
+		{
+			m_bEngyGrenWarned = true;
+			EmitSound( EMP_SOUND );
+		}
+	}
+
+#endif
+	if(m_bWantToThrowGrenade && gpGlobals->curtime - m_flPrimeTime >= GREN_THROW_DELAY)
+	{
+		ThrowPrimedGrenade();
+		return;
+	}
+
+	if ( (m_flPrimeTime != 0 ) && ( ( gpGlobals->curtime - m_flPrimeTime ) >= GREN_TIMER ) )
+	{
+#ifdef GAME_DLL
+		ThrowGrenade(0); // "throw" a grenade that immediately explodes at the player's origin
+#endif
+		ResetGrenadeState();
+	}
+}
+
 void CFFPlayer::ResetGrenadeState(void)
 {
 	m_bWantToThrowGrenade = false;
@@ -2605,7 +2648,7 @@ void CFFPlayer::ThrowPrimedGrenade( void )
 
 	// Jiggles: Hint Code
 	// Let's see if the player is throwing an "unprimed" grenade
-	if ( ( gpGlobals->curtime - m_flPrimeTime ) <= GREN_THROW_DELAY)
+	if ( ( gpGlobals->curtime - m_flPrimeTime ) < GREN_THROW_DELAY)
 	{
 #ifdef CLIENT_DLL
 		m_iUnprimedGrenCount++;

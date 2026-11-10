@@ -538,11 +538,10 @@ private:
 	CNetworkVar(int, m_iSecondary);
 	CNetworkVar(int, m_iPrimedGrenadeColor);
 	CNetworkVar(bool, m_bPrimingVisibleDLight);
-	//CNetworkVar(float, m_flPrimeTime);
-	float m_flPrimeTime;
+	CNetworkVar(float, m_flPrimeTime);
 	CNetworkVar(bool, m_bWantToThrowGrenade);			// does the client want to throw this grenade as soon as possible?
 	bool m_bEngyGrenWarned;
-	bool m_bLastPrimed;
+	CNetworkVar(bool, m_bLastPrimed);
 	// Backpacks
 public:
 	void PackDeadPlayerItems( void );

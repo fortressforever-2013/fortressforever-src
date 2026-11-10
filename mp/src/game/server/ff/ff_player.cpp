@@ -454,7 +454,8 @@ BEGIN_SEND_TABLE_NOBASE( CFFPlayer, DT_FFLocalPlayerExclusive )
 	SendPropInt( SENDINFO( m_iGrenadeState ), 2, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_iPrimary ), 4 ),		// Not unsigned because can be -1
 	SendPropInt( SENDINFO( m_iSecondary ), 4 ),
-	//SendPropTime( SENDINFO( m_flPrimeTime ) ),
+	SendPropTime( SENDINFO( m_flPrimeTime ) ),
+	SendPropBool( SENDINFO( m_bLastPrimed ) ),
 	SendPropBool( SENDINFO( m_bWantToThrowGrenade ) ),
 
 	// Map guide
@@ -5450,36 +5451,6 @@ int CFFPlayer::AddSecondaryGrenades( int iNewCount )
 	int ret = clamp(info.m_iSecondaryMax - m_iSecondary, 0, iNewCount);
 	m_iSecondary = clamp(m_iSecondary+iNewCount, 0, info.m_iSecondaryMax);
 	return ret;
-}
-
-void CFFPlayer::GrenadeThink(void)
-{
-	if (!IsGrenadePrimed())
-		return;
-
-	// Bug #0000993: Holding(HHing) an emp bugs the pre-det sound
-	// Because the grenade doesn't actually exist yet for the bug,
-	// we've gotta play the sound here if applicable
-	if( ( GetClassSlot() == CLASS_ENGINEER ) && ( m_iGrenadeState == FF_GREN_PRIMETWO ) )
-	{
-		if( !m_bEngyGrenWarned && ( gpGlobals->curtime > ( m_flPrimeTime + GREN_TIMER - 0.685f ) ) )
-		{
-			m_bEngyGrenWarned = true;
-			EmitSound( EMP_SOUND );
-		}
-	}
-
-	if(m_bWantToThrowGrenade && gpGlobals->curtime - m_flPrimeTime >= GREN_THROW_DELAY)
-	{
-		ThrowPrimedGrenade();
-		return;
-	}
-
-	if ( (m_flPrimeTime != 0 ) && ( ( gpGlobals->curtime - m_flPrimeTime ) >= GREN_TIMER ) )
-	{
-		ThrowGrenade(0); // "throw" a grenade that immediately explodes at the player's origin
-		ResetGrenadeState();
-	}
 }
 
 void CFFPlayer::ThrowGrenade(float fTimer, float flSpeed)

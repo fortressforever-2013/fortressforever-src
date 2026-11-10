@@ -321,7 +321,7 @@ public:
 	int m_iUnprimedGrenCount;
 
 	int m_iUnthrownGrenCount;
-	bool m_bLastPrimed;
+	CNetworkVar(bool, m_bLastPrimed);
 	// ---> end
 
 	// --> mulch
@@ -391,8 +391,7 @@ public:
 	CNetworkVar(int, m_iPrimedGrenadeColor);
 	CNetworkVar(bool, m_bPrimingVisibleDLight);
 
-	//CNetworkVar(float, m_flPrimeTime);
-	float m_flPrimeTime;
+	CNetworkVar(float, m_flPrimeTime);
 	CNetworkVar(bool, m_bWantToThrowGrenade);			// does the client want to throw this grenade as soon as possible?
 	// End: Added by L0ki for grenade stuff
 
@@ -626,6 +625,7 @@ public:
 	void JetpackHold(void);
 	void JetpackRechargeThink(void);
 	void SharedPreThink(void);
+	void GrenadeThink(void);
 
 	CNetworkVar( bool, m_bCanUseJetpack );
 	// ----------------------------------
