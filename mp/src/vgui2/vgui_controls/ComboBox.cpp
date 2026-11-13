@@ -901,21 +901,35 @@ void ComboBox::OnKeyCodeTyped(KeyCode code)
 		case KEY_UP:
 		case KEY_DOWN:
 			{
-				int itemSelected = m_pDropDown->GetCurrentlyHighlightedItem();
-				m_pDropDown->OnKeyCodeTyped(code);				
+				// Use the dropdown to select a new item (in the background)
+				m_pDropDown->OnKeyCodeTyped(code);
+
+				// Get the newly highlighted item
 				int itemToSelect = m_pDropDown->GetCurrentlyHighlightedItem();
 
-				if ( itemToSelect != itemSelected )
-				{
-					SelectMenuItem(itemToSelect);
-				}
+				// Now set the text in the combo box to match
+				SelectMenuItem(itemToSelect);
 				break;
 			}
 
 		case KEY_ENTER:
 			{
-				int itemToSelect = m_pDropDown->GetCurrentlyHighlightedItem();
-				m_pDropDown->ActivateItem(itemToSelect);
+				// Get the currently highlighted item before the dropdown processes the key
+				int preActiveItem = m_pDropDown->GetActiveItem();
+
+				// Use the dropdown to activate a new item (in the background)
+				m_pDropDown->OnKeyCodeTyped(code);
+
+				// Get the newly activated item
+				int postActiveItem = m_pDropDown->GetActiveItem();
+
+				// If the active item changed, send a TextChanged message
+				if (preActiveItem != postActiveItem)
+				{
+					wchar_t text[255];
+					GetText(text, 254);
+					PostActionSignal(new KeyValues("TextChanged", "text", text));
+				}
 				break;
 			}
 

@@ -497,7 +497,8 @@ RecvPropInt(RECVINFO(m_iLastSpyDisguise)),
 RecvPropInt(RECVINFO(m_iPrimary)),
 RecvPropInt(RECVINFO(m_iSecondary)),
 RecvPropInt(RECVINFO(m_iGrenadeState)),
-//RecvPropTime(RECVINFO(m_flPrimeTime)),
+RecvPropTime(RECVINFO(m_flPrimeTime)),
+RecvPropBool(RECVINFO(m_bLastPrimed)),
 RecvPropBool(RECVINFO(m_bWantToThrowGrenade)),
 // End: Added by L0ki
 
@@ -592,7 +593,8 @@ DEFINE_PRED_FIELD(m_flNextClassSpecificSkill, FIELD_FLOAT, FTYPEDESC_INSENDTABLE
 DEFINE_PRED_FIELD(m_flJetpackNextFuelRechargeTime, FIELD_FLOAT, FTYPEDESC_OVERRIDE | FTYPEDESC_PRIVATE | FTYPEDESC_NOERRORCHECK),
 DEFINE_PRED_FIELD(m_bCanDoubleJump, FIELD_BOOLEAN, FTYPEDESC_OVERRIDE ),
 DEFINE_PRED_FIELD_TOL(m_flNextJumpTimeForDouble, FIELD_FLOAT, FTYPEDESC_OVERRIDE | FTYPEDESC_NOERRORCHECK, TD_MSECTOLERANCE),
-//DEFINE_PRED_FIELD(m_flPrimeTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE),
+DEFINE_PRED_FIELD_TOL(m_flPrimeTime, FIELD_FLOAT, FTYPEDESC_INSENDTABLE, TD_MSECTOLERANCE),
+DEFINE_PRED_FIELD(m_bLastPrimed, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE),
 DEFINE_PRED_FIELD(m_iGrenadeState, FIELD_INTEGER, FTYPEDESC_INSENDTABLE),
 DEFINE_PRED_FIELD(m_iPrimary, FIELD_INTEGER, FTYPEDESC_INSENDTABLE),
 DEFINE_PRED_FIELD(m_iSecondary, FIELD_INTEGER, FTYPEDESC_INSENDTABLE),
@@ -1222,6 +1224,7 @@ void C_FFPlayer::PreThink(void)
 	//	We really don't need per-frame accuracy here
 	g_FFHintTimers.SimulateTimers();
 
+	GrenadeThink();
 	SharedPreThink();
 
 	// New possible fix
@@ -2433,22 +2436,6 @@ void C_FFPlayer::ClientThink(void)
 
 	_mathackman.Update();
 
-	// see CFFPlayer::GrenadeThink()
-	if ( IsGrenadePrimed() && m_flPrimeTime > 0 )
-	{
-		// it's been 0.5s since priming and the player wants to throw the grenade
-		if ( ( gpGlobals->curtime - m_flPrimeTime ) >= GREN_THROW_DELAY && m_bWantToThrowGrenade )
-		{
-			ThrowPrimedGrenade();
-		}
-
-		// it's been 3.81s (grenade timer) since priming and the player hasn't thrown the grenade yet (wut?)
-		// this should also fix silent grenades
-		if ( ( gpGlobals->curtime - m_flPrimeTime ) >= GREN_TIMER )
-		{
-			ThrowPrimedGrenade();
-		}
-	}
 
 	BaseClass::ClientThink();
 }

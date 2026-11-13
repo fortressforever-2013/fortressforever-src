@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //===========================================================================//
@@ -26,7 +26,8 @@ class ToggleButton : public Button
 	DECLARE_CLASS_SIMPLE( ToggleButton, Button );
 
 public:
-	ToggleButton(Panel *parent, const char *panelName, const char *text);
+	ToggleButton(Panel* parent, const char* panelName, const char* text);
+	ToggleButton(Panel* parent, const char* panelName, const wchar_t* wszText);
 
 	virtual void DoClick();
 
