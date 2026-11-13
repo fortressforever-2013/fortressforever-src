@@ -133,8 +133,9 @@ HTML::HTML(Panel *parent, const char *name, bool allowJavaScript, bool bPopupWin
 	}
 	else
 	{
-		Warning("Unable to access SteamHTMLSurface");
+		Warning( "Unable to access SteamHTMLSurface\n" );
 	}
+
 	m_iScrollBorderX=m_iScrollBorderY=0;
 	m_bScrollBarEnabled = true;
 	m_bContextMenuEnabled = true; 
@@ -176,7 +177,34 @@ HTML::HTML(Panel *parent, const char *name, bool allowJavaScript, bool bPopupWin
 //-----------------------------------------------------------------------------
 void HTML::OnBrowserReady( HTML_BrowserReady_t *pBrowserReady, bool bIOFailure )
 {
+	if ( bIOFailure || !pBrowserReady || pBrowserReady->unBrowserHandle == INVALID_HTMLBROWSER )
+	{
+		return;
+	}
 	m_unBrowserHandle = pBrowserReady->unBrowserHandle;
+
+	// Manual Steam callbacks must be registered before loading the pending URL.
+	m_NeedsPaint.Register( this, &HTML::BrowserNeedsPaint );
+	m_StartRequest.Register( this, &HTML::BrowserStartRequest );
+	m_URLChanged.Register( this, &HTML::BrowserURLChanged );
+	m_FinishedRequest.Register( this, &HTML::BrowserFinishedRequest );
+	m_LinkInNewTab.Register( this, &HTML::BrowserOpenNewTab );
+	m_ChangeTitle.Register( this, &HTML::BrowserSetHTMLTitle );
+	m_NewWindow.Register( this, &HTML::BrowserPopupHTMLWindow );
+	m_FileLoadDialog.Register( this, &HTML::BrowserFileLoadDialog );
+	m_SearchResults.Register( this, &HTML::BrowserSearchResults );
+	m_CloseBrowser.Register( this, &HTML::BrowserClose );
+	m_HorizScroll.Register( this, &HTML::BrowserHorizontalScrollBarSizeResponse );
+	m_VertScroll.Register( this, &HTML::BrowserVerticalScrollBarSizeResponse );
+	m_LinkAtPosResp.Register( this, &HTML::BrowserLinkAtPositionResponse );
+	m_JSAlert.Register( this, &HTML::BrowserJSAlert );
+	m_JSConfirm.Register( this, &HTML::BrowserJSConfirm );
+	m_CanGoBackForward.Register( this, &HTML::BrowserCanGoBackandForward );
+	m_SetCursor.Register( this, &HTML::BrowserSetCursor );
+	m_StatusText.Register( this, &HTML::BrowserStatusText );
+	m_ShowTooltip.Register( this, &HTML::BrowserShowToolTip );
+	m_UpdateTooltip.Register( this, &HTML::BrowserUpdateToolTip );
+	m_HideTooltip.Register( this, &HTML::BrowserHideToolTip );
 	BrowserResize();
 
 	if (!m_sPendingURLLoad.IsEmpty())
@@ -1202,6 +1230,9 @@ void HTML::CHTMLFindBar::OnCommand( const char *pchCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserNeedsPaint( HTML_NeedsPaint_t *pCallback )
 {
+	if ( pCallback->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	int tw = 0, tt = 0;
 	if ( m_iHTMLTextureID != 0 )
 	{
@@ -1303,6 +1334,9 @@ bool HTML::OnStartRequest( const char *url, const char *target, const char *pchP
 //-----------------------------------------------------------------------------
 void HTML::BrowserStartRequest( HTML_StartRequest_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	bool bRes = OnStartRequest( pCmd->pchURL, pCmd->pchTarget, pCmd->pchPostData, pCmd->bIsRedirect );
 
 	if (SteamHTMLSurface())
@@ -1315,6 +1349,9 @@ void HTML::BrowserStartRequest( HTML_StartRequest_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserURLChanged( HTML_URLChanged_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	m_sCurrentURL = pCmd->pchURL;
 
 	KeyValues *pMessage = new KeyValues( "OnURLChanged" );
@@ -1333,6 +1370,9 @@ void HTML::BrowserURLChanged( HTML_URLChanged_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserFinishedRequest( HTML_FinishedRequest_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	PostActionSignal( new KeyValues( "OnFinishRequest", "url", pCmd->pchURL ) );
 	if (  pCmd->pchPageTitle && pCmd->pchPageTitle[0] )
 		PostActionSignal( new KeyValues( "PageTitleChange", "title", pCmd->pchPageTitle ) );
@@ -1349,6 +1389,9 @@ void HTML::BrowserFinishedRequest( HTML_FinishedRequest_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserOpenNewTab( HTML_OpenLinkInNewTab_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	(pCmd);
 	// Not suppored by default, if a child class overrides us and knows how to handle tabs, then it can do this.
 }
@@ -1358,6 +1401,9 @@ void HTML::BrowserOpenNewTab( HTML_OpenLinkInNewTab_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserPopupHTMLWindow( HTML_NewWindow_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	HTMLPopup *p = new HTMLPopup( this, pCmd->pchURL, "" );
 	int wide = pCmd->unWide;
 	int tall = pCmd->unTall;
@@ -1381,6 +1427,9 @@ void HTML::BrowserPopupHTMLWindow( HTML_NewWindow_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserSetHTMLTitle( HTML_ChangedTitle_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	PostMessage( GetParent(), new KeyValues( "OnSetHTMLTitle", "title", pCmd->pchTitle ) );
 	OnSetHTMLTitle( pCmd->pchTitle );
 }
@@ -1391,6 +1440,9 @@ void HTML::BrowserSetHTMLTitle( HTML_ChangedTitle_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserStatusText( HTML_StatusText_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	PostActionSignal( new KeyValues( "OnSetStatusText", "status", pCmd->pchMsg ) );
 }
 
@@ -1400,6 +1452,9 @@ void HTML::BrowserStatusText( HTML_StatusText_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserSetCursor( HTML_SetCursor_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	vgui::CursorCode cursor = dc_last;
 
 	switch ( pCmd->eMouseCursor )
@@ -1545,6 +1600,9 @@ void HTML::BrowserSetCursor( HTML_SetCursor_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserFileLoadDialog( HTML_FileOpenDialog_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	// couldn't access an OS-specific dialog, use the internal one
 	if ( m_hFileOpenDialog.Get() )
 	{
@@ -1564,6 +1622,9 @@ void HTML::BrowserFileLoadDialog( HTML_FileOpenDialog_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserShowToolTip( HTML_ShowToolTip_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 /*	
 	BR FIXME
 	Tooltip *tip = GetTooltip();
@@ -1582,6 +1643,9 @@ void HTML::BrowserShowToolTip( HTML_ShowToolTip_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserUpdateToolTip( HTML_UpdateToolTip_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 //	GetTooltip()->SetText( pCmd->text().c_str() );
 }
 
@@ -1591,6 +1655,9 @@ void HTML::BrowserUpdateToolTip( HTML_UpdateToolTip_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserHideToolTip( HTML_HideToolTip_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 //	GetTooltip()->HideTooltip();
 //	DeleteToolTip();
 }
@@ -1601,6 +1668,9 @@ void HTML::BrowserHideToolTip( HTML_HideToolTip_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserSearchResults( HTML_SearchResults_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	if ( pCmd->unResults == 0 )
 		m_pFindBar->HideCountLabel();
 	else
@@ -1619,6 +1689,9 @@ void HTML::BrowserSearchResults( HTML_SearchResults_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserClose( HTML_CloseBrowser_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	PostActionSignal( new KeyValues( "OnCloseWindow" ) );
 }
 
@@ -1628,6 +1701,9 @@ void HTML::BrowserClose( HTML_CloseBrowser_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserHorizontalScrollBarSizeResponse( HTML_HorizontalScroll_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	ScrollData_t scrollHorizontal;
 	scrollHorizontal.m_nScroll = pCmd->unScrollCurrent;
 	scrollHorizontal.m_nMax = pCmd->unScrollMax;
@@ -1650,6 +1726,9 @@ void HTML::BrowserHorizontalScrollBarSizeResponse( HTML_HorizontalScroll_t *pCmd
 //-----------------------------------------------------------------------------
 void HTML::BrowserVerticalScrollBarSizeResponse( HTML_VerticalScroll_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	ScrollData_t scrollVertical;
 	scrollVertical.m_nScroll = pCmd->unScrollCurrent;
 	scrollVertical.m_nMax = pCmd->unScrollMax;
@@ -1672,6 +1751,9 @@ void HTML::BrowserVerticalScrollBarSizeResponse( HTML_VerticalScroll_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserLinkAtPositionResponse( HTML_LinkAtPosition_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	m_LinkAtPos.m_sURL = pCmd->pchURL;
 	m_LinkAtPos.m_nX = pCmd->x;
 	m_LinkAtPos.m_nY = pCmd->y;
@@ -1706,6 +1788,9 @@ void HTML::BrowserLinkAtPositionResponse( HTML_LinkAtPosition_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserJSAlert( HTML_JSAlert_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	MessageBox *pDlg = new MessageBox( m_sCurrentURL, (const char *)pCmd->pchMessage, this );
 	pDlg->AddActionSignalTarget( this );
 	pDlg->SetCommand( new KeyValues( "DismissJSDialog", "result", false ) );
@@ -1718,6 +1803,9 @@ void HTML::BrowserJSAlert( HTML_JSAlert_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserJSConfirm( HTML_JSConfirm_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	QueryBox *pDlg = new QueryBox( m_sCurrentURL, (const char *)pCmd->pchMessage, this );
 	pDlg->AddActionSignalTarget( this );
 	pDlg->SetOKCommand( new KeyValues( "DismissJSDialog", "result", true ) );
@@ -1741,6 +1829,9 @@ void HTML::DismissJSDialog( int bResult )
 //-----------------------------------------------------------------------------
 void HTML::BrowserCanGoBackandForward( HTML_CanGoBackAndForward_t *pCmd )
 {
+	if ( pCmd->unBrowserHandle != m_unBrowserHandle )
+		return;
+
 	m_bCanGoBack = pCmd->bCanGoBack;
 	m_bCanGoForward = pCmd->bCanGoForward;
 }
