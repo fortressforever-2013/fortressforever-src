@@ -82,9 +82,9 @@ private:
 
 protected:
 // column widths at 640
-	enum { NAME_WIDTH = 140, SCORE_WIDTH = 35, DEATH_WIDTH = 35, PING_WIDTH = 30, VOICE_WIDTH = 30, FRIENDS_WIDTH = 0,
+	enum { NAME_WIDTH = 145, SCORE_WIDTH = 40, DEATH_WIDTH = 40, PING_WIDTH = 30, FRIENDS_WIDTH = 0,
 		AVATAR_WIDTH = 14, // unfinished avatar implementation
-		CLASS_WIDTH = 60, FORTPOINTS_WIDTH = 60, ASSIST_WIDTH = 35,
+		CLASS_WIDTH = 65, FORTPOINTS_WIDTH = 65, ASSIST_WIDTH = 40,
 		CHANNEL_WIDTH = 0 };
 	// total = 439
 
@@ -156,14 +156,12 @@ protected:
 	// BEG: Added by Mulchman
 	// finds the player in the scoreboard
 	int FindItemIDForPlayerIndex(int playerIndex);
-	int FindPlayerIndexForItemID( int iItemID );
 	// END: Added by Mulchman
 
 	//int m_iNumTeams;
 
 	vgui::SectionedListPanel *m_pPlayerList;
 
-	int s_VoiceImage[7];
 	int s_ChannelImage[5];	// |-- Mirv: Channel Images
 	int TrackerImage;
 	int	m_HLTVSpectators;
@@ -195,7 +193,7 @@ private:
 	ButtonCode_t m_nJumpKey;
 
 	// methods
-	void FillScoreBoard();
+	void FillScoreBoard(void);
 	bool NeedToSortTeams(void) const;
 	int  FindSectionByTeam(int iTeam) const;
 
@@ -204,9 +202,6 @@ protected:
 
 	virtual void OnKeyCodePressed(vgui::KeyCode code);
 
-private:
-	MESSAGE_FUNC_PARAMS(OnItemSelected, "ItemSelected", data);
-	// END: Added by Mulchman for stuff
 };
 
 

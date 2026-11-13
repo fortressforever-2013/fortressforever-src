@@ -49,8 +49,6 @@ bool AvatarIndexLessFunc( const int &lhs, const int &rhs )
 	return lhs < rhs; 
 }
 
-extern bool g_fBlockedStatus[256];	// |-- Mirv: The blocked status of people's text
-
 CClientScoreBoardDialog *g_pScoreboard = NULL;
 
 //ConVar row_alpha("ffdev_row_alpha", "0.55", FCVAR_REPLICATED);
@@ -135,7 +133,6 @@ CClientScoreBoardDialog::CClientScoreBoardDialog(IViewPort *pViewPort) : Frame( 
 	m_iPlayerIndexSymbol = KeyValuesSystem()->GetSymbolForString("playerIndex");
 	m_nCloseKey = BUTTON_CODE_INVALID;
 
-	memset(s_VoiceImage, 0x0, sizeof( s_VoiceImage ));
 	//memset( s_ChannelImage, 0x0, sizeof( s_ChannelImage ) ); // |-- Mirv: Voice channels
 	TrackerImage = 0;
 	m_pViewPort = pViewPort;
@@ -292,14 +289,6 @@ void CClientScoreBoardDialog::ApplySchemeSettings( IScheme *pScheme )
 	if ( m_pImageList )
 		delete m_pImageList;
 	m_pImageList = new ImageList( false );
-
-	s_VoiceImage[ 0 ] = 0;	// index 0 is always blank
-	s_VoiceImage[ CVoiceStatus::VOICE_NEVERSPOKEN ] = m_pImageList->AddImage( scheme( )->GetImage( "640_speaker1", true ) );
-	s_VoiceImage[ CVoiceStatus::VOICE_NOTTALKING ] = m_pImageList->AddImage( scheme( )->GetImage( "640_speaker2", true ) );
-	s_VoiceImage[ CVoiceStatus::VOICE_TALKING ] = m_pImageList->AddImage( scheme( )->GetImage( "640_speaker3", true ) );
-	s_VoiceImage[ CVoiceStatus::VOICE_BANNED ] = m_pImageList->AddImage( scheme( )->GetImage( "640_voiceblocked", true ) );
-	s_VoiceImage[ CVoiceStatus::VOICE_BANNEDTEXT ] = m_pImageList->AddImage( scheme( )->GetImage( "640_textblocked", true ) );		// |-- Mirv: Text ban
-	s_VoiceImage[ CVoiceStatus::VOICE_ALLOWEDTEXT ] = m_pImageList->AddImage( scheme( )->GetImage( "640_textallowed", true ) );		// |-- DrEvil: Text allowed
 
 	// --> Mirv: Channel images
 	//s_ChannelImage[0] = 0;
@@ -639,7 +628,6 @@ int CClientScoreBoardDialog::AddSection(int iType, int iSection)
 			m_pPlayerList->AddColumnToSection( iSection, "deaths" , "#FF_PlayerDeath" , 0, scheme()->GetProportionalScaledValue( DEATH_WIDTH ) );
 			m_pPlayerList->AddColumnToSection( iSection, "assists" , "#FF_PlayerAssist" , 0, scheme()->GetProportionalScaledValue( ASSIST_WIDTH ) );
 			m_pPlayerList->AddColumnToSection( iSection, "ping" , "#FF_PlayerPing" , 0, scheme()->GetProportionalScaledValue( PING_WIDTH ) );
-			m_pPlayerList->AddColumnToSection( iSection, "voice" , "#FF_PlayerVoice" , SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_CENTER, scheme( )->GetProportionalScaledValue( VOICE_WIDTH ) );
 			//m_pPlayerList->AddColumnToSection( iSection, "channel" , "#FF_PlayerChannel" , SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_CENTER, /*scheme( )->GetProportionalScaledValue(*/ CHANNEL_WIDTH /*)*/ );	// |-- Mirv: This should fix the messed up gfx settings
 			break;
 		}
@@ -661,11 +649,6 @@ int CClientScoreBoardDialog::AddSection(int iType, int iSection)
 			m_pPlayerList->AddColumnToSection( iSection, "deaths", "", 0, scheme()->GetProportionalScaledValue( DEATH_WIDTH ) );
 			m_pPlayerList->AddColumnToSection( iSection, "assists", "", 0, scheme()->GetProportionalScaledValue( ASSIST_WIDTH ) );
 			m_pPlayerList->AddColumnToSection( iSection, "ping", "", 0, scheme()->GetProportionalScaledValue( PING_WIDTH ) );
-
-			// --> Mirv: Voice and channel images
-			m_pPlayerList->AddColumnToSection( iSection, "voice", "", SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_CENTER, VOICE_WIDTH );
-			//m_pPlayerList->AddColumnToSection( iSection, "channel", "", SectionedListPanel::COLUMN_IMAGE | SectionedListPanel::COLUMN_CENTER, CHANNEL_WIDTH );
-			// <-- Mirv: Voice and channel images
 
 			iRetval = iSection;
 			break;
@@ -892,25 +875,6 @@ bool CClientScoreBoardDialog::GetPlayerScoreInfo(int playerIndex, KeyValues *kv)
 
 	kv->SetInt( "playerIndex", playerIndex );
 
-	// --> Mirv: Fixed for an extra setting
-	// kv->SetInt( "voice", s_VoiceImage[ GetClientVoiceMgr()->GetSpeakerStatus( playerIndex - 1 ) ] );	
-
-	if( bFriendly )
-	{
-		kv->SetInt( "voice", s_VoiceImage[ GetClientVoiceMgr()->GetSpeakerStatus( playerIndex ) ] + ( g_fBlockedStatus[ playerIndex ] ? 1 : 0 ) );	
-		//kv->SetInt( "channel", s_ChannelImage[ g_FF_PR->GetChannel( playerIndex ) ] + 1 );
-	}
-	else
-	{
-		if(g_fBlockedStatus[playerIndex])
-			kv->SetInt( "voice", s_VoiceImage[ CVoiceStatus::VOICE_BANNEDTEXT ] );
-		else
-			kv->SetInt( "voice", s_VoiceImage[ CVoiceStatus::VOICE_ALLOWEDTEXT ] );
-		//kv->SetInt( "channel", 0 );
-	}
-
-	// <-- Mirv: Fixed for an extra setting
-
 	return true;
 }
 
@@ -1111,75 +1075,6 @@ void CClientScoreBoardDialog::OnKeyCodePressed( KeyCode code )
 	{
 		BaseClass::OnKeyCodePressed( code );
 	}
-}
-
-int CClientScoreBoardDialog::FindPlayerIndexForItemID( int iItemID )
-{
-	if( m_pPlayerList->IsItemIDValid( iItemID ) ) 
-	{
-		KeyValues *kv = m_pPlayerList->GetItemData( iItemID );
-		kv = kv->FindKey( m_iPlayerIndexSymbol );
-		if( kv )
-			return kv->GetInt();
-	}
-
-    return -1;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Scroll between different block modes
-//-----------------------------------------------------------------------------
-void CClientScoreBoardDialog::OnItemSelected(KeyValues *data)
-{  
-	int iRowId = data->GetInt("itemID");
-	int playerIndex = FindPlayerIndexForItemID(iRowId);
-
-	IGameResources *pGR = GameResources();
-
-	// Don't change local player info
-	if (pGR && pGR->IsLocalPlayer(playerIndex))
-		return;
-
-	// No valid player selected, do nothing!
-	if( playerIndex == -1 )
-		return;
-
-	// This line was causing one of the
-	// Assert(i >= 0 && i < GetNumBits());
-	// bugs! It's fixed now!
-
-	// If player is not audible, only toggle text block
-	if (!GetClientVoiceMgr()->IsPlayerAudible(playerIndex))
-	{
-		g_fBlockedStatus[playerIndex] = !g_fBlockedStatus[playerIndex];
-		return;
-	}
-
-	// Get some current states
-	bool fVBlock = GetClientVoiceMgr()->GetSpeakerStatus(playerIndex) == CVoiceStatus::VOICE_BANNED;
-	bool fTBlock = g_fBlockedStatus[playerIndex];
-
-	// We have everything blocked, so go onto nothing blocked
-	if (fVBlock && fTBlock)
-	{
-		g_fBlockedStatus[playerIndex] = false;
-		GetClientVoiceMgr()->SetPlayerBlockedState(playerIndex, false);
-	}
-	// We just have voice blocked, so go onto everything blocked
-	else if (fVBlock)
-	{
-		g_fBlockedStatus[playerIndex] = true;
-		GetClientVoiceMgr()->SetPlayerBlockedState(playerIndex, true);
-	}
-	// We have nothing blocked, so just block voice
-	else
-	{
-		g_fBlockedStatus[playerIndex] = false;
-		GetClientVoiceMgr()->SetPlayerBlockedState(playerIndex, true);
-	}
-
-	// Update right away to show voice icon change
-	Update();
 }
 
 void CClientScoreBoardDialog::PaintBackground()
