@@ -575,7 +575,11 @@ namespace vgui
 		kvPreset->SetInt("showPanelBorder", m_pShowPanelBorder->IsSelected());
 		kvPreset->SetInt("panelBorderWidth", m_pPanelBorderWidth->GetValue());
 		kvPreset->SetInt("panelBorderColorMode", m_pPanelBorderColor->GetColorMode());
-		kvPreset->SetInt("panelType", m_pPanelType->GetActiveItem() == 0 ? 2 : 0);
+		kvPreset->SetInt(
+			"panelType",
+			m_pPanelType->GetActiveItem() == 0
+				? FFQuantityPanel::CORNERS_ROUND
+				: FFQuantityPanel::CORNERS_SQUARE);
 
 		kvPreset->SetInt("headerTextX", m_pHeaderTextX->GetValue());
 		kvPreset->SetInt("headerTextY", m_pHeaderTextY->GetValue());
@@ -790,7 +794,9 @@ namespace vgui
 			kvPreset->GetInt("panelBorderGreen", 219),
 			kvPreset->GetInt("panelBorderBlue", 255),
 			kvPreset->GetInt("panelBorderAlpha", 215));
-		m_pPanelType->ActivateItemByRow(kvPreset->GetInt("panelType", -1));
+		// Corner values are paint background types, not dropdown row numbers.
+		const int iPanelType = kvPreset->GetInt("panelType", FFQuantityPanel::CORNERS_ROUND);
+		m_pPanelType->ActivateItemByRow(iPanelType == FFQuantityPanel::CORNERS_SQUARE ? 1 : 0);
 
 		m_pShowPanel->SetSelected(kvPreset->GetInt("showPanel", 1));
 		m_pShowHeaderText->SetSelected(kvPreset->GetInt("showHeaderText", 1));
