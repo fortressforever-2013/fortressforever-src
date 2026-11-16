@@ -647,7 +647,7 @@ $Project
 			$File	"game_controls\basemodelpanel.h"
 			$File	"game_controls\basemodel_panel.cpp"
 			$File	"game_controls\basemodel_panel.h"
-			$File	"game_controls\ClientScoreBoardDialog.cpp"
+			$File	"game_controls\clientscoreboarddialog.cpp"
 			$File	"game_controls\commandmenu.cpp"
 			$File	"game_controls\intromenu.cpp"
 			$File	"game_controls\MapOverview.cpp"
