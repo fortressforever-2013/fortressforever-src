@@ -538,7 +538,10 @@ void CSlowedEffect::Render( int x, int y, int w, int h )
 	IMaterialVar *pVar = NULL;
 	bool bFound = false;
 
-	pVar = m_Material->FindVar("$refracttint", &bFound, false);
+	// The proxy must multiply a stable team colour, not its previous output.
+	pVar = m_Material->FindVar("$basetint", &bFound, false);
+	if (!bFound)
+		pVar = m_Material->FindVar("$refracttint", &bFound, false);
 
 	if (pVar)
 	{
@@ -553,13 +556,13 @@ void CSlowedEffect::Render( int x, int y, int w, int h )
 		switch (pSlowfield->GetTeamNumber())
 		{
 		case FF_TEAM_BLUE:
-			vColor = Vector(.56, .72, .9);
+			vColor = Vector(.46, .68, 1.2);
 			break;
 		case FF_TEAM_RED:
 			vColor = Vector(.9, .56, .56);
 			break;
 		case FF_TEAM_YELLOW:
-			vColor = Vector(.9, .83, .56);
+			vColor = Vector(.94, .88, .52);
 			break;
 		case FF_TEAM_GREEN:
 			vColor = Vector(.6, .9, .56);
@@ -569,7 +572,7 @@ void CSlowedEffect::Render( int x, int y, int w, int h )
 			break;
 		}
 
-		//Msg("VarType: %i\n", pVar->GetType());
+		vColor *= 0.9f; // Keep the internal tint gentler than the exterior shell.
 		pVar->SetVecValue(vColor.x, vColor.y, vColor.z);
 	}
 
