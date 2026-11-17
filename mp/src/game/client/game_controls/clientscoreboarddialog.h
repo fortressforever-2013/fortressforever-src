@@ -84,18 +84,17 @@ protected:
 // column widths at 640
 	enum {
 		AVATAR_WIDTH		= 14, // unfinished avatar implementation
-		NAME_WIDTH			= 140, 
-		CLASS_WIDTH			= 60, 
-		FORTPOINTS_WIDTH	= 60, 
-		SCORE_WIDTH			= 35,  
-		DEATH_WIDTH			= 35, 
-		ASSIST_WIDTH		= 35,
-		PING_WIDTH			= 30, 
-		VOICE_WIDTH			= 30, 
-		CHANNEL_WIDTH		= 0, 
+		NAME_WIDTH			= 145,
+		CLASS_WIDTH			= 65,
+		FORTPOINTS_WIDTH	= 65,
+		SCORE_WIDTH			= 40,
+		DEATH_WIDTH			= 40,
+		ASSIST_WIDTH		= 40,
+		PING_WIDTH			= 30,
+		CHANNEL_WIDTH		= 0,
 		FRIENDS_WIDTH		= 0,
 	};
-	// total			   = 439  
+	// total = 439
 
 public:
 	CClientScoreBoardDialog( IViewPort *pViewPort );
@@ -164,14 +163,12 @@ protected:
 	// BEG: Added by Mulchman
 	// finds the player in the scoreboard
 	int FindItemIDForPlayerIndex( int playerIndex );
-	int FindPlayerIndexForItemID( int iItemID );
 	// END: Added by Mulchman
 
 	//int m_iNumTeams;
 
 	vgui::SectionedListPanel *m_pPlayerList;
 
-	int s_VoiceImage[7];
 	int s_ChannelImage[5];	// |-- Mirv: Channel Images
 	int TrackerImage;
 	int	m_HLTVSpectators;
@@ -212,9 +209,6 @@ protected:
 
 	virtual void OnKeyCodePressed(vgui::KeyCode code);
 
-private:
-	MESSAGE_FUNC_PARAMS(OnItemSelected, "ItemSelected", data);
-	// END: Added by Mulchman for stuff
 };
 
 
