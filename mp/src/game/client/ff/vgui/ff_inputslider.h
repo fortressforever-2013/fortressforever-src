@@ -175,7 +175,7 @@ namespace vgui
 		void SetRange(int min, int max) override
 		{
 			BaseClass::SetRange(min, max);
-			// Unset custom text bounds; text will follow slider range (but still ±9999 capped)
+			// Unset custom text bounds; text will follow slider range (but still Â±9999 capped)
 			m_bUseInputBounds = false;
 			// Ensure text shows something valid if current text is out-of-range
 			int tv = ClampToBounds(GetInputValue());
@@ -197,7 +197,7 @@ namespace vgui
 		}
 
 		//-----------------------------------------------------------------------------
-		// Purpose: Helper to clamp to text-bounds (±9999 and optional custom bounds)
+		// Purpose: Helper to clamp to text-bounds (Â±9999 and optional custom bounds)
 		//			When m_bUseInputBounds == false, also clamp to the slider's range.
 		//-----------------------------------------------------------------------------
 		int ClampToBounds(int v)

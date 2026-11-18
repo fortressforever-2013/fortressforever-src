@@ -38,7 +38,7 @@ BaseInputDialog::BaseInputDialog( vgui::Panel *parent, const char *title ) :
 	m_pOKButton = new Button(this, "OKButton", "#VGui_OK");
 	m_pCancelButton->SetCommand("Cancel");
 	m_pOKButton->SetCommand("OK");
-	m_pOKButton->SetAsDefaultButton( true );
+	m_pOKButton->SetAsDefaultButton(true);
 
 	if ( parent )
 	{
@@ -231,7 +231,7 @@ void InputDialog::PerformLayout( int x, int y, int w, int h )
 //-----------------------------------------------------------------------------
 // Purpose: handles button commands
 //-----------------------------------------------------------------------------
-void InputDialog::OnCommand(const char *command)
+void InputDialog::OnCommand(const char* command)
 {
 	// overriding OnCommand for backwards compatibility
 	// it'd be nice at some point to find all uses of InputDialog and just use BaseInputDialog's OnCommand
@@ -249,18 +249,18 @@ void InputDialog::OnCommand(const char *command)
 			kv->AddSubKey( m_pContextKeyValues );
 			m_pContextKeyValues = NULL;
 		}
-		PostActionSignal( kv );
+		PostActionSignal(kv);
 		CloseModal();
 	}
 	else if (!stricmp(command, "Cancel"))
 	{
-		KeyValues *kv = new KeyValues( "InputCanceled" );
-		if ( m_pContextKeyValues )
+		KeyValues* kv = new KeyValues("InputCanceled");
+		if (m_pContextKeyValues)
 		{
-			kv->AddSubKey( m_pContextKeyValues );
+			kv->AddSubKey(m_pContextKeyValues);
 			m_pContextKeyValues = NULL;
 		}
-		PostActionSignal( kv );
+		PostActionSignal(kv);
 		CloseModal();
 	}
 	else

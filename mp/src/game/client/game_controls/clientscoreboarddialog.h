@@ -82,10 +82,18 @@ private:
 
 protected:
 // column widths at 640
-	enum { NAME_WIDTH = 145, SCORE_WIDTH = 40, DEATH_WIDTH = 40, PING_WIDTH = 30, FRIENDS_WIDTH = 0,
-		AVATAR_WIDTH = 14, // unfinished avatar implementation
-		CLASS_WIDTH = 65, FORTPOINTS_WIDTH = 65, ASSIST_WIDTH = 40,
-		CHANNEL_WIDTH = 0 };
+	enum {
+		AVATAR_WIDTH		= 14, // unfinished avatar implementation
+		NAME_WIDTH			= 145,
+		CLASS_WIDTH			= 65,
+		FORTPOINTS_WIDTH	= 65,
+		SCORE_WIDTH			= 40,
+		DEATH_WIDTH			= 40,
+		ASSIST_WIDTH		= 40,
+		PING_WIDTH			= 30,
+		CHANNEL_WIDTH		= 0,
+		FRIENDS_WIDTH		= 0,
+	};
 	// total = 439
 
 public:
