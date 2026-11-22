@@ -50,6 +50,7 @@ public:
 	virtual void OnKeyCodePressed( vgui::KeyCode code );
 	virtual void OnKeyCodeTyped( vgui::KeyCode code );
 
+
 public:
 	virtual void OnClose();
 

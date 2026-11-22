@@ -52,6 +52,7 @@ public:
   	virtual bool IsVisible() { return BaseClass::IsVisible(); }
 	virtual void SetParent( vgui::VPANEL parent ) { BaseClass::SetParent( parent ); }
 
+
 public:
 	
 	void AutoAssign();

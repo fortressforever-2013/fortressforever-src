@@ -390,6 +390,7 @@ void CModelPanel::SetupModel( void )
 		pEnt->m_nSkin = m_pModelInfo->m_nSkin;
 	}
 
+
 	// do we have any animation information?
 	if ( m_pModelInfo->m_Animations.Count() > 0 && m_pModelInfo->m_Animations.IsValidIndex( m_iDefaultAnimation ) )
 	{

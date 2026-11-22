@@ -59,6 +59,7 @@ void CBaseModelPanel::ApplySettings( KeyValues *inResourceData )
 	// Do we allow full manipulation on these panels.
 	m_bAllowFullManipulation = inResourceData->GetBool( "allow_manip", false );
 
+
 	// Parse our resource file and apply all necessary updates to the MDL.
  	for ( KeyValues *pData = inResourceData->GetFirstSubKey() ; pData != NULL ; pData = pData->GetNextKey() )
  	{
@@ -101,6 +102,7 @@ void CBaseModelPanel::ParseModelResInfo( KeyValues *inResourceData )
 			ParseModelAttachInfo( pData );
 		}
 	}
+
 }
 
 //-----------------------------------------------------------------------------

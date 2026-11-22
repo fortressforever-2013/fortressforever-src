@@ -52,6 +52,7 @@ public:
 	virtual bool IsVisible() { return BaseClass::IsVisible(); }
 	virtual void SetParent( vgui::VPANEL parent ) { BaseClass::SetParent( parent ); }
 
+
 protected:
 
 	virtual vgui::Panel *CreateControlByName(const char *controlName);

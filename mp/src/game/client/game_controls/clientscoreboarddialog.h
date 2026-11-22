@@ -16,7 +16,6 @@
 #include "GameEventListener.h"
 
 #define TYPE_NOTEAM			0	// NOTEAM must be zero :)
-#define TYPE_UNASSIGNED		0
 #define TYPE_TEAM			1	// a section for a single team	
 #define TYPE_SPECTATORS		2	// a section for a spectator group
 #define TYPE_BLANK			3	// a blank section
@@ -78,7 +77,7 @@ struct ScoreboardSection_s
 class CClientScoreBoardDialog : public vgui::Frame, public IViewPortPanel, public CGameEventListener
 {
 private:
-	DECLARE_CLASS_SIMPLE( CClientScoreBoardDialog, vgui::Frame);
+	DECLARE_CLASS_SIMPLE( CClientScoreBoardDialog, vgui::Frame );
 
 protected:
 // column widths at 640
@@ -113,11 +112,7 @@ public:
 #ifdef CSS_PERF_TEST
 		return false;
 #endif
-#ifdef FF_SCOREBOARD_AVATARS
-		return true;
-#endif
-		return false;
-		//return IsPC(); 
+		return IsPC(); 
 	}
 
 	// both vgui::Frame and IViewPortPanel define these, so explicitly define them here as passthroughs to vgui
@@ -141,10 +136,7 @@ protected:
 	virtual void InitScoreboardSections();
 	virtual void UpdateTeamInfo();
 	virtual void UpdatePlayerInfo();
-
 	virtual void OnThink();
-
-	// Add sections to the scoreboard
 	virtual void AddHeader(); // add the start header of the scoreboard
 	virtual int AddSection(int iType, int iSection); // add a new section header for a team
 	virtual void UpdateHeaders(void);
@@ -152,8 +144,8 @@ protected:
 	virtual int GetAdditionalHeight() { return 0; }
 
 	// sorts players within a section
-	static bool StaticPlayerSortFunc_Score( vgui::SectionedListPanel *list, int itemID1, int itemID2 );
-	static bool StaticPlayerSortFunc_Name( vgui::SectionedListPanel *list, int itemID1, int itemID2 );
+	static bool StaticPlayerSortFunc_Score(vgui::SectionedListPanel *list, int itemID1, int itemID2);
+	static bool StaticPlayerSortFunc_Name(vgui::SectionedListPanel *list, int itemID1, int itemID2);
 
 	virtual void ApplySchemeSettings(vgui::IScheme *pScheme);
 
@@ -161,13 +153,11 @@ protected:
 
 	void PaintBackground();
 
-	// BEG: Added by Mulchman
 	// finds the player in the scoreboard
 	int FindItemIDForPlayerIndex(int playerIndex);
-	// END: Added by Mulchman
-
-	//int m_iNumTeams;
-
+#ifndef FF
+	int m_iNumTeams;
+#endif
 	vgui::SectionedListPanel *m_pPlayerList;
 
 	int s_ChannelImage[5];	// |-- Mirv: Channel Images

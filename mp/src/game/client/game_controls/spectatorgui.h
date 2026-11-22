@@ -99,6 +99,7 @@ protected:
 	// bool m_bHelpShown;
 	// bool m_bInsetVisible;
 	bool m_bSpecScoreboard;
+
 };
 
 
@@ -128,6 +129,7 @@ public:
 	virtual bool IsVisible();
 	vgui::VPANEL GetVPanel( void ) { return BaseClass::GetVPanel(); }
 	virtual void SetParent(vgui::VPANEL parent) { BaseClass::SetParent(parent); }
+
 
 private:
 	// VGUI2 overrides

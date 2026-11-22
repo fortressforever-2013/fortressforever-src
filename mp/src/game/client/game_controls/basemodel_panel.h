@@ -188,6 +188,7 @@ public:
 	Vector		GetPlayerPos() const;
 	QAngle		GetPlayerAngles() const;
 
+
 	void LookAtBounds( const Vector &vecBoundsMin, const Vector &vecBoundsMax );
 
 	// Set to true if external code has set a specific camera position that shouldn't be clobbered by layout

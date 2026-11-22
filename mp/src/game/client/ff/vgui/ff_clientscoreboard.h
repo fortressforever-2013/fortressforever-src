@@ -15,9 +15,6 @@
 #include <game/client/iviewport.h>
 #include "GameEventListener.h"
 
-#define TYPE_NOTEAM			0	// NOTEAM must be zero :)
-#define TYPE_UNASSIGNED		0
-#define TYPE_TEAM			1	// a section for a single team	
 #define TYPE_SPECTATORS		2	// a section for a spectator group
 #define TYPE_BLANK			3	// a blank section
 #define TYPE_HEADER			4	// the main header
@@ -92,7 +89,6 @@ public:
 	CFFClientScoreBoardDialog( IViewPort *pViewPort );
 	~CFFClientScoreBoardDialog();
 
-	virtual const char *GetName( void ) { return PANEL_SCOREBOARD; }
 	virtual void SetData(KeyValues *data) {};
 	virtual void Reset();
 	virtual void Update();
@@ -100,25 +96,8 @@ public:
 	virtual bool HasInputElements( void ) { return true; }
 	virtual void ShowPanel( bool bShow );
 
-	virtual bool ShowAvatars() 
-	{ 
-#ifdef CSS_PERF_TEST
-		return false;
-#endif
-#ifdef FF_SCOREBOARD_AVATARS
-		return true;
-#endif
-		return false;
-		//return IsPC(); 
-	}
-
-	// both vgui::Frame and IViewPortPanel define these, so explicitly define them here as passthroughs to vgui
-	vgui::VPANEL GetVPanel( void ) { return BaseClass::GetVPanel(); }
-  	virtual bool IsVisible() { return BaseClass::IsVisible(); }
-  	virtual void SetParent( vgui::VPANEL parent ) { BaseClass::SetParent( parent ); }
- 	
 	// IGameEventListener interface:
-	virtual void FireGameEvent( IGameEvent *event);
+	virtual void FireGameEvent( IGameEvent *event );
 	virtual void OnCommand( const char *command ); // |-- Mirv: Catch channel changing
 
 	virtual void UpdatePlayerAvatar( int playerIndex, KeyValues *kv );
@@ -188,7 +167,6 @@ protected:
 private:
 	int			m_iPlayerIndexSymbol;
 	int			m_iDesiredHeight;
-	IViewPort	*m_pViewPort;
 	ButtonCode_t m_nCloseKey;
 
 	// BEG: Added by Mulchman for stuff

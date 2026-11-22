@@ -46,6 +46,7 @@ public:
   	virtual bool IsVisible() { return BaseClass::IsVisible(); }
   	virtual void SetParent( vgui::VPANEL parent ) { BaseClass::SetParent( parent ); }
 
+
 protected:	
 	// vgui overrides
 	virtual void OnCommand( const char *command );

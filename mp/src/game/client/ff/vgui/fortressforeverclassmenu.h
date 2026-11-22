@@ -55,12 +55,11 @@ protected:
 	// command callbacks
 	void OnCommand( const char *command );
 
-	IViewPort	*m_pViewPort;
 	ButtonCode_t m_iScoreBoardKey;
 	int			m_iTeam;
 	vgui::EditablePanel *m_pPanel;
 
-	//vgui::RichText	*m_pClassInfo;
+	vgui::RichText	*m_pClassInfo;
 
 	float			m_flNextUpdate;
 /*
@@ -73,21 +72,23 @@ protected:
 
 	LoadoutLabel* m_WepSlots[8];
 
-	ClassPropertiesLabel* m_pSpeed;
-	ClassPropertiesLabel* m_pFirepower;
-	ClassPropertiesLabel* m_pHealth;
+	LoadoutLabel *m_WepSlots[8];
 
-	vgui::PlayerModelPanel* m_pModelView;
+	ClassPropertiesLabel *m_pSpeed;
+	ClassPropertiesLabel *m_pFirepower;
+	ClassPropertiesLabel *m_pHealth;
 
-	vgui::Label* m_pClassRole;
+	vgui::PlayerModelPanel *m_pModelView;
 
-	vgui::Section* m_pGrenadesSection;
-	vgui::Section* m_pWeaponsSection;
-	vgui::Section* m_pClassInfoSection;
-	vgui::Section* m_pClassRoleSection;
+	vgui::Label *m_pClassRole;
+/*
+	Section *m_pGrenadesSection;
+	Section *m_pWeaponsSection;
+	Section *m_pClassInfoSection;
+	Section *m_pClassRoleSection;
 */
-	//virtual vgui::Panel* CreateControlByName(const char* controlName);
-	//virtual MouseOverPanelButton* CreateNewMouseOverPanelButton(vgui::EditablePanel* panel);
+	//virtual vgui::Panel *CreateControlByName(const char* controlName);
+	//virtual MouseOverPanelButton *CreateNewMouseOverPanelButton(vgui::EditablePanel *panel);
 };
 
 

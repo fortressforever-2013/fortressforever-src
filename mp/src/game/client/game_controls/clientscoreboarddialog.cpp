@@ -133,7 +133,8 @@ CClientScoreBoardDialog::CClientScoreBoardDialog(IViewPort *pViewPort) : Frame( 
 	m_iPlayerIndexSymbol = KeyValuesSystem()->GetSymbolForString("playerIndex");
 	m_nCloseKey = BUTTON_CODE_INVALID;
 
-	//memset( s_ChannelImage, 0x0, sizeof( s_ChannelImage ) ); // |-- Mirv: Voice channels
+	//memset(s_VoiceImage, 0x0, sizeof( s_VoiceImage ));
+	//memset(s_ChannelImage, 0x0, sizeof( s_ChannelImage ) ); // |-- Mirv: Voice channels
 	TrackerImage = 0;
 	m_pViewPort = pViewPort;
 
@@ -157,8 +158,9 @@ CClientScoreBoardDialog::CClientScoreBoardDialog(IViewPort *pViewPort) : Frame( 
 	m_pMapName = new Label(this, "MapName", GetFormattedMapName());
 
 	m_pPlayerList = new SectionedListPanel(this, "PlayerList");
-	//m_pPlayerList->SetVerticalScrollbar(false);
-
+#ifndef FF
+	m_pPlayerList->SetVerticalScrollbar(false);
+#endif
 	LoadControlSettings("Resource/UI/ScoreBoard.res");
 	m_iDesiredHeight = GetTall();
 	m_pPlayerList->SetVisible( false ); // hide this until we load the images in applyschemesettings
@@ -258,8 +260,9 @@ void CClientScoreBoardDialog::Reset()
 	// clear
 	m_pPlayerList->DeleteAllItems();
 	m_pPlayerList->RemoveAllSections();
-
-	//m_iSectionId = 0;
+#ifndef FF
+	m_iSectionId = 0;
+#endif
 	m_fNextUpdateTime = 0;
 	// add all the sections
 	InitScoreboardSections();
@@ -537,15 +540,12 @@ void CClientScoreBoardDialog::UpdatePlayerInfo()
 				// modify the current row
 				m_pPlayerList->ModifyItem( itemID, sectionID, playerData );
 			}
-
 			Color cCol = gr->GetTeamColor( iPlayerTeam );
-
-			// Set the row color based on players team
+			// set the row color based on the players team
 			if( gr->IsLocalPlayer( i ) )
 				m_pPlayerList->SetItemFgColor( itemID, Color( cCol.r() * 0.6f, cCol.g() * 0.6f, cCol.b() * 0.6f, cCol.a() * 0.9/*local_row_alpha.GetFloat()*/ ), true );
 			else
 				m_pPlayerList->SetItemFgColor( itemID, Color( cCol.r() * 0.6f, cCol.g() * 0.6f, cCol.b() * 0.6f, cCol.a() * 0.55/*row_alpha.GetFloat()*/ ) );
-
 
 			playerData->deleteThis();
 		}
@@ -597,7 +597,7 @@ void CClientScoreBoardDialog::AddHeader()
 	m_hSections[ iSection ].m_iTeam = AddSection( TYPE_SPECTATORS, iSection );	// 6
 
 	iSection++;
-	m_hSections[ iSection ].m_iTeam = AddSection( TYPE_UNASSIGNED, iSection );	// 7
+	m_hSections[ iSection ].m_iTeam = AddSection( TYPE_NOTEAM, iSection );	// 7
 }
 
 //-----------------------------------------------------------------------------
@@ -674,7 +674,7 @@ int CClientScoreBoardDialog::AddSection(int iType, int iSection)
 			iRetval = TEAM_SPECTATOR;
 			break;
 		}
-		case TYPE_UNASSIGNED:
+		case TYPE_NOTEAM: default:
 		{
 			m_pPlayerList->AddSection( iSection, "" );
 			//m_pPlayerList->SetSectionAlwaysVisible( iSection );
@@ -983,16 +983,16 @@ void CClientScoreBoardDialog::FillScoreBoard()
 		// the team header doesn't change color until
 		// you hide the scoreboard then bring it back up
 		m_pPlayerList->RemoveAll();
-		m_pPlayerList->RemoveAllSections();		
+		m_pPlayerList->RemoveAllSections();
 
 		// Re-add all headers and sections
-		AddHeader();		
+		AddHeader();
 	}
-	
+
 	// Update team headers
 	UpdateHeaders();
 
-	// Update player info
+	// update player info
 	UpdatePlayerInfo();
 }
 

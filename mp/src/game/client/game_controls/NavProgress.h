@@ -37,6 +37,7 @@ public:
   	virtual bool IsVisible() { return BaseClass::IsVisible(); }
   	virtual void SetParent( vgui::VPANEL parent ) { BaseClass::SetParent( parent ); }
 
+
 public:
 
 	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );

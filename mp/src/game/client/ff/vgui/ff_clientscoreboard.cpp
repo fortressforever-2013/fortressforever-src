@@ -690,7 +690,7 @@ int CClientScoreBoardDialog::AddSection(int iType, int iSection)
 			iRetval = TEAM_SPECTATOR;
 			break;
 		}
-		case TYPE_UNASSIGNED:
+		case TYPE_NOTEAM: default:
 		{
 			m_pPlayerList->AddSection( iSection, "" );
 			//m_pPlayerList->SetSectionAlwaysVisible( iSection );
@@ -702,7 +702,7 @@ int CClientScoreBoardDialog::AddSection(int iType, int iSection)
 			m_pPlayerList->AddColumnToSection( iSection, "assists", "", 0, scheme()->GetProportionalScaledValue( ASSIST_WIDTH ) );
 			m_pPlayerList->AddColumnToSection( iSection, "ping", "", 0, scheme()->GetProportionalScaledValue( PING_WIDTH ) );
 
-			iRetval = TEAM_UNASSIGNED;
+			iRetval = TEAM_NOTEAM;
 			break;
 		}
 	}
