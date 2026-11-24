@@ -300,7 +300,7 @@ CON_COMMAND( hud_reloadclassmenu, "hud_reloadclassmenu" )
 	if( !pPanel )
 		return;
 
-	CClassMenu *pClassMenu = dynamic_cast< CClassMenu * >( pPanel );
+	CFFClassMenu *pClassMenu = dynamic_cast< CFFClassMenu * >( pPanel );
 	if( !pClassMenu )
 		return;
 
@@ -345,13 +345,13 @@ CFFClassMenu::CFFClassMenu( IViewPort *pViewPort ) : CClassMenu( pViewPort )
 	m_pPrimaryGren = new LoadoutLabel(this, "PrimaryGren", "Primary");
 	m_pSecondaryGren = new LoadoutLabel(this, "SecondaryGren", "Secondary");
 
-	m_pGrenadesSection = new Section(this, "GrenadesSection");
-	m_pWeaponsSection = new Section(this, "WeaponsSection");
-	m_pClassInfoSection = new Section(this, "ClassInfoSection");
-	m_pClassRoleSection = new Section(this, "ClassRoleSection");
+	m_pGrenadesSection = new vgui::Section(this, "GrenadesSection");
+	m_pWeaponsSection = new vgui::Section(this, "WeaponsSection");
+	m_pClassInfoSection = new vgui::Section(this, "ClassInfoSection");
+	m_pClassRoleSection = new vgui::Section(this, "ClassRoleSection");
 
 	m_pClassRole = new Label(this, "ClassRole", "");
-	
+
 	char panelName[12];
 	char text[12];
 

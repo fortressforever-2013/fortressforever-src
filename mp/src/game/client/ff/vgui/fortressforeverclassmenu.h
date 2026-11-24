@@ -25,8 +25,6 @@
 #include <vgui/KeyCode.h>
 #include <game/client/iviewport.h>
 
-#include "mouseoverpanelbutton.h"
-
 using namespace vgui;
 
 //-----------------------------------------------------------------------------
@@ -55,10 +53,6 @@ protected:
 	// command callbacks
 	void OnCommand( const char *command );
 
-	ButtonCode_t m_iScoreBoardKey;
-	int			m_iTeam;
-	vgui::EditablePanel *m_pPanel;
-
 	vgui::RichText	*m_pClassInfo;
 
 	float			m_flNextUpdate;
@@ -81,14 +75,12 @@ protected:
 	vgui::PlayerModelPanel *m_pModelView;
 
 	vgui::Label *m_pClassRole;
-/*
-	Section *m_pGrenadesSection;
-	Section *m_pWeaponsSection;
-	Section *m_pClassInfoSection;
-	Section *m_pClassRoleSection;
+
+	vgui::Section *m_pGrenadesSection;
+	vgui::Section *m_pWeaponsSection;
+	vgui::Section *m_pClassInfoSection;
+	vgui::Section *m_pClassRoleSection;
 */
-	//virtual vgui::Panel *CreateControlByName(const char* controlName);
-	//virtual MouseOverPanelButton *CreateNewMouseOverPanelButton(vgui::EditablePanel *panel);
 };
 
 
