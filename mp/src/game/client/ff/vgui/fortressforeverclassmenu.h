@@ -16,16 +16,21 @@
 #pragma once
 #endif
 
-#include <classmenu.h>
-#include <vgui_controls/Frame.h>
-#include <vgui_controls/Button.h>
-#include <vgui_controls/HTML.h>
-#include <utlvector.h>
-#include <vgui/ILocalize.h>
-#include <vgui/KeyCode.h>
-#include <game/client/iviewport.h>
+#include "classmenu.h"
 
-using namespace vgui;
+class FFClassMenuButton;
+class LoadoutLabel;
+class ClassPropertiesLabel;
+
+namespace vgui
+{
+	class TextEntry;
+	class PlayerModelPanel;
+	class FFButton;
+	class ProgressBar;
+	class Section;
+	class RichText;
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Draws the class menu
@@ -36,14 +41,18 @@ private:
 	DECLARE_CLASS_SIMPLE( CFFClassMenu, CClassMenu );
 
 public:
-	CFFClassMenu( IViewPort *pViewPort );
+	CFFClassMenu(IViewPort *pViewPort);
 
-	void Update();
-	void ShowPanel( bool bShow );
-	void Reset();
+	virtual void Reset();
+	virtual void Update();
+	virtual bool NeedsUpdate( void ) { return gpGlobals->curtime > m_flNextUpdate; }
+	virtual bool HasInputElements( void ) { return true; }
+	virtual void ShowPanel( bool bShow );
 
-	void OnKeyCodePressed( vgui::KeyCode code );
-	void OnKeyCodeReleased( vgui::KeyCode code );
+	virtual void OnKeyCodePressed(vgui::KeyCode code);
+	virtual void OnKeyCodeReleased(vgui::KeyCode code);
+
+	MESSAGE_FUNC_PARAMS(OnMouseOverMessage, "MouseOverEvent", data);
 
 protected:
 
@@ -53,34 +62,32 @@ protected:
 	// command callbacks
 	void OnCommand( const char *command );
 
-	vgui::RichText	*m_pClassInfo;
+	vgui::RichText* m_pClassInfo;
 
 	float			m_flNextUpdate;
-/*
-	MouseOverButton* m_pClassButtons[10];
+
+	FFClassMenuButton* m_pClassButtons[10];
 	vgui::FFButton* m_pCancelButton;
-	MouseOverButton* m_pRandomButton;
+	FFClassMenuButton* m_pRandomButton;
 
 	LoadoutLabel* m_pPrimaryGren;
 	LoadoutLabel* m_pSecondaryGren;
 
 	LoadoutLabel* m_WepSlots[8];
 
-	LoadoutLabel *m_WepSlots[8];
+	ClassPropertiesLabel* m_pSpeed;
+	ClassPropertiesLabel* m_pFirepower;
+	ClassPropertiesLabel* m_pHealth;
 
-	ClassPropertiesLabel *m_pSpeed;
-	ClassPropertiesLabel *m_pFirepower;
-	ClassPropertiesLabel *m_pHealth;
+	vgui::PlayerModelPanel* m_pModelView;
 
-	vgui::PlayerModelPanel *m_pModelView;
+	vgui::Label* m_pClassRole;
 
-	vgui::Label *m_pClassRole;
+	vgui::Section* m_pGrenadesSection;
+	vgui::Section* m_pWeaponsSection;
+	vgui::Section* m_pClassInfoSection;
+	vgui::Section* m_pClassRoleSection;
 
-	vgui::Section *m_pGrenadesSection;
-	vgui::Section *m_pWeaponsSection;
-	vgui::Section *m_pClassInfoSection;
-	vgui::Section *m_pClassRoleSection;
-*/
 };
 
 
