@@ -16,7 +16,7 @@
 
 #include <cdll_client_int.h>
 
-#include "classmenu.h"
+#include "ff_classmenu.h"
 
 #include <vgui/IScheme.h>
 #include <vgui/ILocalize.h>
@@ -60,20 +60,12 @@ extern IGameUIFuncs *gameuifuncs; // for key binding details
 
 using namespace vgui;
 extern IFileSystem** pFilesystem;
-extern INetworkStringTable* g_pStringTableInfoPanel;
-extern IGameUIFuncs* gameuifuncs;
 
-#ifdef TF_CLIENT_DLL
-#define HUD_CLASSAUTOKILL_FLAGS		( FCVAR_CLIENTDLL | FCVAR_ARCHIVE | FCVAR_USERINFO )
-#else
-#define HUD_CLASSAUTOKILL_FLAGS		( FCVAR_CLIENTDLL | FCVAR_ARCHIVE )
-#endif // !TF_CLIENT_DLL
-
-// Button names
-const char* szClassButtons[] = { "scoutbutton", "sniperbutton", "soldierbutton",
-								 "demomanbutton", "medicbutton", "hwguybutton",
-								 "pyrobutton", "spybutton", "engineerbutton",
-								 "civilianbutton" };
+// Class commands in the same order as the selection buttons.
+static const char* szClassNames[] = { "scout", "sniper", "soldier",
+								 "demoman", "medic", "hwguy",
+								 "pyro", "spy", "engineer",
+								 "civilian" };
 
 //=============================================================================
 // A team button has the following components:
@@ -102,7 +94,7 @@ public:
 	{
 		if (!pIcon)
 			return;
-		
+
 		m_Icons.AddToTail(pIcon);
 		m_IconFonts.AddToTail(pIcon->hFont);
 	}
@@ -112,7 +104,7 @@ public:
 		m_Icons.AddToTail(pIcon);
 		m_IconFonts.AddToTail(hFont);
 	}
-	
+
 	void RemoveAllIcons()
 	{
 		m_Icons.RemoveAll();
@@ -222,8 +214,9 @@ public:
 
 		//SetTextInset(10, 7);
 		SetContentAlignment(a_west);
-		m_pProgressBar->SetSize( GetWide() - 100, GetTall() );
-		m_pProgressBar->SetPos( 100, 0 );
+		const int inset = scheme()->GetProportionalScaledValueEx(GetScheme(), 100);
+		m_pProgressBar->SetSize( max(0, GetWide() - inset), GetTall() );
+		m_pProgressBar->SetPos( inset, 0 );
 	}
 
 	void SetMaxValue( float flMaxValue )
@@ -238,9 +231,9 @@ public:
 
 	virtual void Paint()
 	{
-		m_pProgressBar->SetProgress( clamp( m_flValue / m_flMax, 0.0f, 1.0f ) );
+		m_pProgressBar->SetProgress( clamp( (m_flMax > 0 ? m_flValue / m_flMax : 0.0f), 0.0f, 1.0f ) );
 		m_pProgressBar->SetBgColor( Color( 0,0,0, 100 ) );
-		m_pProgressBar->SetFgColor( GetIntensityColor((int)(m_flValue/m_flMax * 100), 2, 100, 25, 50, 75, 100) );
+		m_pProgressBar->SetFgColor( GetIntensityColor((int)((m_flMax > 0 ? m_flValue/m_flMax : 0.0f) * 100), 2, 100, 25, 50, 75, 100) );
 
 		BaseClass::Paint();
 	}
@@ -254,15 +247,15 @@ private:
 };
 
 /////////////////////////////////////////////
-// MouseOverButton
+// FFClassMenuButton
 /////////////////////////////////////////////
-class MouseOverButton : public FFButton
+class FFClassMenuButton : public FFButton
 {
-	DECLARE_CLASS_SIMPLE(MouseOverButton, FFButton);
+	DECLARE_CLASS_SIMPLE(FFClassMenuButton, FFButton);
 
 public:
 
-	MouseOverButton(Panel *parent, const char *panelName, const char *text, Panel *pActionSignalTarget = NULL, const char *pCmd = NULL) : BaseClass(parent, panelName, text, pActionSignalTarget, pCmd)
+	FFClassMenuButton(Panel *parent, const char *panelName, const char *text, Panel *pActionSignalTarget = NULL, const char *pCmd = NULL) : BaseClass(parent, panelName, text, pActionSignalTarget, pCmd)
 	{
 	}
 
@@ -272,26 +265,21 @@ public:
 		MOUSE_EXITED,
 	};
 
-	virtual void OnCursorEntered() 
+	// Both mouse hover and SDK keyboard navigation arm the button.
+	virtual void SetArmed(bool state)
 	{
-		BaseClass::OnCursorEntered();
-
-		KeyValues *msg = new KeyValues("MouseOverEvent");
-		msg->SetInt("event", MOUSE_ENTERED);
-		PostActionSignal(msg);
+		const bool changed = IsArmed() != state;
+		BaseClass::SetArmed(state);
+		if (state && changed)
+		{
+			KeyValues *msg = new KeyValues("MouseOverEvent");
+			msg->SetInt("event", MOUSE_ENTERED);
+			PostActionSignal(msg);
+		}
 	}
 
-	virtual void OnCursorExited()
-	{
-		BaseClass::OnCursorExited();
-
-		KeyValues *msg = new KeyValues("MouseOverEvent");
-		msg->SetInt("event", MOUSE_EXITED);
-		PostActionSignal(msg);
-	}
 };
 
-// Mulch: TODO: make this work for pheeeeeeeesh-y
 CON_COMMAND( hud_reloadclassmenu, "hud_reloadclassmenu" )
 {
 	IViewPortPanel *pPanel = gViewPortInterface->FindPanelByName( PANEL_CLASS );
@@ -299,7 +287,7 @@ CON_COMMAND( hud_reloadclassmenu, "hud_reloadclassmenu" )
 	if( !pPanel )
 		return;
 
-	CClassMenu *pClassMenu = dynamic_cast< CClassMenu * >( pPanel );
+	CFFClassMenu *pClassMenu = dynamic_cast< CFFClassMenu * >( pPanel );
 	if( !pClassMenu )
 		return;
 
@@ -313,23 +301,12 @@ CON_COMMAND( hud_reloadclassmenu, "hud_reloadclassmenu" )
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-CFFClassMenu::CFFClassMenu( IViewPort *pViewPort ) : CClassMenu( pViewPort )
+CFFClassMenu::CFFClassMenu( IViewPort *pViewPort ) : CClassMenu( pViewPort, PANEL_CLASS )
 {
-	m_pViewPort = pViewPort;
-	m_iScoreBoardKey = BUTTON_CODE_INVALID; // this is looked up in Activate()
-	m_iTeam = 0;
-
-	// initialize dialog
-	SetTitle("", true);
-
-	// load the new scheme early!!
-	SetScheme("ClientScheme");
-	SetMoveable(false);
-	SetSizeable(false);
-	SetProportional(true);
-
-	// hide the system buttons
-	SetTitleBarVisible( false );
+	m_flNextUpdate = 0.0f;
+	// Separate SDK mouseover pages from the FF description.
+	m_pPanel->SetName("ClassPages");
+	m_pPanel->SetVisible(false);
 
 	m_pClassInfo = new RichText(this, "ClassInfo");
 	m_pClassInfo->SetVerticalScrollbar(false);
@@ -339,7 +316,7 @@ CFFClassMenu::CFFClassMenu( IViewPort *pViewPort ) : CClassMenu( pViewPort )
 	m_pClassInfo->SetPaintBackgroundType(2);
 
 	m_pCancelButton = new FFButton(this, "CancelButton", "#FF_CANCEL");
-	m_pRandomButton = new MouseOverButton(this, "RandomButton", "#FF_RANDOM", this, "RandomButton");
+	m_pRandomButton = new FFClassMenuButton(this, "RandomButton", "#FF_RANDOM", this, "class random");
 
 	m_pPrimaryGren = new LoadoutLabel(this, "PrimaryGren", "Primary");
 	m_pSecondaryGren = new LoadoutLabel(this, "SecondaryGren", "Secondary");
@@ -350,26 +327,26 @@ CFFClassMenu::CFFClassMenu( IViewPort *pViewPort ) : CClassMenu( pViewPort )
 	m_pClassRoleSection = new Section(this, "ClassRoleSection");
 
 	m_pClassRole = new Label(this, "ClassRole", "");
-	
+
 	char panelName[12];
 	char text[12];
 
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < ARRAYSIZE(m_WepSlots); i++)
 	{
 		memset(&panelName, 0, sizeof(panelName));
 		memset(&text, 0, sizeof(text));
-		
+
 		V_snprintf(panelName, sizeof(panelName), "WepSlot%i", i + 1);
 		V_snprintf(text, sizeof(text), "Weapon %i", i + 1);
-		
+
 		m_WepSlots[i] = new LoadoutLabel(this, panelName, text);
 	}
 
-	char* pszButtons[] = { "ScoutButton", "SniperButton", "SoldierButton", "DemomanButton", "MedicButton", "HwguyButton", "PyroButton", "SpyButton", "EngineerButton", "CivilianButton" };
+	const char* pszButtons[] = { "ScoutButton", "SniperButton", "SoldierButton", "DemomanButton", "MedicButton", "HwguyButton", "PyroButton", "SpyButton", "EngineerButton", "CivilianButton" };
 
 	for (int iClassIndex = 0; iClassIndex < ARRAYSIZE(pszButtons); iClassIndex++)
 	{
-		m_pClassButtons[iClassIndex] = new MouseOverButton(this, pszButtons[iClassIndex], (const char*)NULL, this, pszButtons[iClassIndex]);
+		m_pClassButtons[iClassIndex] = new FFClassMenuButton(this, pszButtons[iClassIndex], (const char*)NULL, this, VarArgs("class %s", szClassNames[iClassIndex]));
 	}
 
 	m_pSpeed = new ClassPropertiesLabel(this, "SpeedLabel", "Speed");
@@ -390,19 +367,10 @@ CFFClassMenu::CFFClassMenu( IViewPort *pViewPort ) : CClassMenu( pViewPort )
 	LoadControlSettings("Resource/UI/ClassMenu.res");
 
 	Reset();
-
-	// Inheriting classes are responsible for calling LoadControlSettings()!
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Destructor
-//-----------------------------------------------------------------------------
-CFFClassMenu::~CFFClassMenu()
-{
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CFFClassMenu::Reset()
 {
@@ -417,7 +385,7 @@ void CFFClassMenu::SetClassInfoVisible(bool state)
 	m_pPrimaryGren->SetVisible(state);
 	m_pSecondaryGren->SetVisible(state);
 
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < ARRAYSIZE(m_WepSlots); i++)
 		m_WepSlots[i]->SetVisible(state);
 
 	m_pSpeed->SetVisible(state);
@@ -435,14 +403,16 @@ void CFFClassMenu::SetClassInfoVisible(bool state)
 //-----------------------------------------------------------------------------
 // Purpose: Update the menu with everything
 //-----------------------------------------------------------------------------
-void CFFClassMenu::Update() 
+void CFFClassMenu::Update()
 {
-	if ( !g_FF_PR ) 
+	m_flNextUpdate = gpGlobals->curtime + 0.2f;
+	if ( !g_FF_PR )
 		return;
 
 	C_BasePlayer *pLocalPlayer = C_BasePlayer::GetLocalPlayer();
 
-	if (pLocalPlayer == NULL)
+	if (pLocalPlayer == NULL || pLocalPlayer->GetTeamNumber() < FF_TEAM_BLUE ||
+		pLocalPlayer->GetTeamNumber() > FF_TEAM_GREEN)
 		return;
 
 	char nSpacesRemaining[10];
@@ -450,15 +420,13 @@ void CFFClassMenu::Update()
 
 	int nOptions = 0;
 
-	for (int iClassIndex = 0; iClassIndex < 10; iClassIndex++) 
+	for (int iClassIndex = 0; iClassIndex < 10; iClassIndex++)
 	{
 		Button *pClassButton = m_pClassButtons[iClassIndex];
 
 		switch (nSpacesRemaining[iClassIndex])
 		{
 		case -1:
-//			pClassButton->SetVisible(false);
-//			break;
 		case 0:
 			pClassButton->SetVisible(true);
 			pClassButton->SetEnabled(false);
@@ -466,7 +434,7 @@ void CFFClassMenu::Update()
 		default:
 			pClassButton->SetVisible(true);
 			pClassButton->SetEnabled(true);
-			
+
 			nOptions++;
 		}
 	}
@@ -475,9 +443,8 @@ void CFFClassMenu::Update()
 	m_pRandomButton->SetVisible((nOptions > 1));
 
 	// Cancel only visible if they already have a class
-	m_pCancelButton->SetVisible( ( g_ff_PR->GetClass( pLocalPlayer->entindex() ) != 0 ) );
+	m_pCancelButton->SetVisible( ( g_FF_PR->GetClass( pLocalPlayer->entindex() ) != 0 ) );
 
-	m_flNextUpdate = gpGlobals->curtime + 0.2f;
 }
 
 //-----------------------------------------------------------------------------
@@ -485,12 +452,8 @@ void CFFClassMenu::Update()
 //-----------------------------------------------------------------------------
 void CFFClassMenu::OnCommand( const char *command )
 {
-	if ( Q_stricmp( command, "cancel" ) )
-	
-		engine->ClientCmd( VarArgs("class %s", command ) );
-
+	// SDK resource commands already contain the class prefix. Execute once.
 	m_pViewPort->ShowPanel( this, false );
-
 	BaseClass::OnCommand( command );
 }
 
@@ -506,8 +469,10 @@ void CFFClassMenu::ShowPanel(bool bShow)
 
 	if ( bShow )
 	{
+		m_iScoreBoardKey = gameuifuncs->GetButtonCodeForBind("showscores");
 		Activate();
 		SetMouseInputEnabled( true );
+		SetKeyBoardInputEnabled( true );
 
 		// Update straight away
 		Update();
@@ -520,89 +485,41 @@ void CFFClassMenu::ShowPanel(bool bShow)
 	{
 		SetVisible( false );
 		SetMouseInputEnabled( false );
+		SetKeyBoardInputEnabled( false );
 		Reset();
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Nothing
-//-----------------------------------------------------------------------------
-void CFFClassMenu::SetData(KeyValues *data)
-{
-	// do nothing
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Sets the text of a control by name
-//-----------------------------------------------------------------------------
-void CFFClassMenu::SetLabelText(const char *textEntryName, const char *text)
-{
-	Label *entry = dynamic_cast<Label *>(FindChildByName(textEntryName));
-	if (entry)
-	{
-		entry->SetText(text);
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Sets the visibility of a button by name
-//-----------------------------------------------------------------------------
-void CFFClassMenu::SetVisibleButton(const char *textEntryName, bool state)
-{
-	Button *entry = dynamic_cast<Button *>(FindChildByName(textEntryName));
-	if (entry)
-	{
-		entry->SetVisible(state);
 	}
 }
 
 void CFFClassMenu::OnKeyCodePressed(KeyCode code)
 {
-	int nDir = 0;
-
-	switch ( code )
-	{
-	case KEY_XBUTTON_UP:
-	case KEY_XSTICK1_UP:
-	case KEY_XSTICK2_UP:
-	case KEY_UP:
-	case KEY_XBUTTON_LEFT:
-	case KEY_XSTICK1_LEFT:
-	case KEY_XSTICK2_LEFT:
-	case KEY_LEFT:
-		nDir = -1;
-		break;
-
-	case KEY_XBUTTON_DOWN:
-	case KEY_XSTICK1_DOWN:
-	case KEY_XSTICK2_DOWN:
-	case KEY_DOWN:
-	case KEY_XBUTTON_RIGHT:
-	case KEY_XSTICK1_RIGHT:
-	case KEY_XSTICK2_RIGHT:
-	case KEY_RIGHT:
-		nDir = 1;
-		break;
-	}
-
 	// Show the scoreboard over this if needed
 	if (gameuifuncs->GetButtonCodeForBind("showscores") == code)
-		gViewPortInterface->ShowPanel(PANEL_SCOREBOARD, true);
+	{
+		BaseClass::OnKeyCodePressed(code);
+		return;
+	}
 
 	if (gameuifuncs->GetButtonCodeForBind("serverinfo") == code)
+	{
 		engine->ClientCmd("serverinfo");
+		return;
+	}
 
 	// Support hiding the class menu by hitting your changeclass button again like TFC
 	// 0001232: Or if the user presses escape, kill the menu
-	if (gameuifuncs->GetButtonCodeForBind("changeclass") == code ||
+	if (code == KEY_ESCAPE || gameuifuncs->GetButtonCodeForBind("changeclass") == code ||
 		gameuifuncs->GetButtonCodeForBind("cancelselect") == code)
+	{
 		gViewPortInterface->ShowPanel(this, false);
+		return;
+	}
 
 	// Support bring the team menu back up if the class menu is showing
 	if (gameuifuncs->GetButtonCodeForBind("changeteam") == code)
 	{
 		m_pViewPort->ShowPanel( this, false );
 		engine->ClientCmd("changeteam");
+		return;
 	}
 
 	BaseClass::OnKeyCodePressed(code);
@@ -628,13 +545,15 @@ void CFFClassMenu::OnMouseOverMessage(KeyValues *data)
 	Button *pButton = (Button *) data->GetPtr("panel", NULL);
 
 	// Could not determine where this came from
-	if (pButton == NULL)
+	if (pButton == NULL || pButton->GetCommand() == NULL || !IsVisible())
 		return;
 
 	// Get the command from this button and parse accordingly
-	if (data->GetInt("event") == MouseOverButton::MOUSE_ENTERED)
+	if (data->GetInt("event") == FFClassMenuButton::MOUSE_ENTERED)
 	{
-		UpdateClassInfo( pButton->GetCommand()->GetString("command") );
+		const char *command = pButton->GetCommand()->GetString("command");
+		if (!Q_strnicmp(command, "class ", 6))
+			UpdateClassInfo(command + 6);
 	}
 }
 
@@ -649,13 +568,13 @@ void CFFClassMenu::UpdateClassInfo(const char *pszClassName)
 		return;
 	}
 
-	m_pModelView->SetClass(pszClassName);
-	SetClassInfoVisible(true);
-	
+	// Clear the previous class before attempting to read a new one.
+	SetClassInfoVisible(false);
+
 	// First get the class
 	CBasePlayer *pLocalPlayer = CBasePlayer::GetLocalPlayer();
 
-	if (pLocalPlayer == NULL)
+	if (pLocalPlayer == NULL || !g_pGameRules)
 		return;
 
 	PLAYERCLASS_FILE_INFO_HANDLE hClassInfo;
@@ -669,6 +588,9 @@ void CFFClassMenu::UpdateClassInfo(const char *pszClassName)
 	if (!pClassInfo)
 		return;
 
+	m_pModelView->SetClass(pszClassName);
+	SetClassInfoVisible(true);
+
 	m_pSpeed->SetValue( pClassInfo->m_iSpeed - 180 );
 	m_pHealth->SetValue( pClassInfo->m_iHealth + pClassInfo->m_iMaxArmour );
 	m_pFirepower->SetValue( pClassInfo->m_iFirepower );
@@ -677,10 +599,10 @@ void CFFClassMenu::UpdateClassInfo(const char *pszClassName)
 
 	m_pClassRole->SetText( pClassInfo->m_szRole );
 
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < ARRAYSIZE(m_WepSlots); i++)
 		m_WepSlots[i]->SetVisible(false);
 
-	for (int i=0; i<pClassInfo->m_iNumWeapons && i<8; i++)
+	for (int i=0; i<pClassInfo->m_iNumWeapons && i<ARRAYSIZE(m_WepSlots); i++)
 	{
 		// Use the last weapon as their primary
 		const char *pszWeapon = pClassInfo->m_aWeapons[i];

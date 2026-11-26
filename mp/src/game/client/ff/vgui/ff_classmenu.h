@@ -16,17 +16,9 @@
 #pragma once
 #endif
 
-#include <vgui_controls/Frame.h>
-#include <vgui_controls/Button.h>
-#include <vgui_controls/HTML.h>
-#include <utlvector.h>
-#include <vgui/ILocalize.h>
-#include <vgui/KeyCode.h>
-#include <game/client/iviewport.h>
+#include "classmenu.h"
 
-#include "mouseoverpanelbutton.h"
-
-class MouseOverButton;
+class FFClassMenuButton;
 class LoadoutLabel;
 class ClassPropertiesLabel;
 
@@ -43,27 +35,19 @@ namespace vgui
 //-----------------------------------------------------------------------------
 // Purpose: Draws the class menu
 //-----------------------------------------------------------------------------
-class CFFClassMenu : public vgui::Frame, public IViewPortPanel
+class CFFClassMenu : public CClassMenu
 {
 private:
-	DECLARE_CLASS_SIMPLE( CClassMenu, vgui::Frame );
+	DECLARE_CLASS_SIMPLE( CFFClassMenu, CClassMenu );
 
 public:
 	CFFClassMenu(IViewPort *pViewPort);
-	virtual ~CFFClassMenu();
 
-	virtual const char *GetName( void ) { return PANEL_CLASS; }
-	virtual void SetData(KeyValues *data);
 	virtual void Reset();
 	virtual void Update();
 	virtual bool NeedsUpdate( void ) { return gpGlobals->curtime > m_flNextUpdate; }
 	virtual bool HasInputElements( void ) { return true; }
 	virtual void ShowPanel( bool bShow );
-
-	// both vgui::Frame and IViewPortPanel define these, so explicitly define them here as passthroughs to vgui
-	vgui::VPANEL GetVPanel( void ) { return BaseClass::GetVPanel(); }
-	virtual bool IsVisible() { return BaseClass::IsVisible(); }
-	virtual void SetParent( vgui::VPANEL parent ) { BaseClass::SetParent( parent ); }
 
 	virtual void OnKeyCodePressed(vgui::KeyCode code);
 	virtual void OnKeyCodeReleased(vgui::KeyCode code);
@@ -75,25 +59,16 @@ protected:
 	void UpdateClassInfo(const char* pszClassName);
 	void SetClassInfoVisible(bool state);
 
-	// helper functions
-	void SetLabelText(const char *textEntryName, const char *text);
-	void SetVisibleButton(const char *textEntryName, bool state);
-
 	// command callbacks
 	void OnCommand( const char *command );
-
-	IViewPort	*m_pViewPort;
-	ButtonCode_t m_iScoreBoardKey;
-	int			m_iTeam;
-	vgui::EditablePanel *m_pPanel;
 
 	vgui::RichText* m_pClassInfo;
 
 	float			m_flNextUpdate;
 
-	MouseOverButton* m_pClassButtons[10];
+	FFClassMenuButton* m_pClassButtons[10];
 	vgui::FFButton* m_pCancelButton;
-	MouseOverButton* m_pRandomButton;
+	FFClassMenuButton* m_pRandomButton;
 
 	LoadoutLabel* m_pPrimaryGren;
 	LoadoutLabel* m_pSecondaryGren;
@@ -113,8 +88,6 @@ protected:
 	vgui::Section* m_pClassInfoSection;
 	vgui::Section* m_pClassRoleSection;
 
-	//virtual vgui::Panel* CreateControlByName(const char* controlName);
-	//virtual MouseOverPanelButton* CreateNewMouseOverPanelButton(vgui::EditablePanel* panel);
 };
 
 

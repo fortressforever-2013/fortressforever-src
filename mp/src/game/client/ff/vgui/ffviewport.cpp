@@ -48,7 +48,7 @@
 
 #include "vguicenterprint.h"
 #include "text_message.h"
-#include "fortressforeverclassmenu.h"
+#include "ff_classmenu.h"
 #include "classmenu.h"
 #include "mapscreen.h"
 #include "c_ff_player.h"
