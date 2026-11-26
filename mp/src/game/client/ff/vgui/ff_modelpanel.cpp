@@ -127,7 +127,8 @@ void ModelPanel::DoRendering(Vector vecOrigin)
 	int x, y, width, height;
 
 	GetBounds(x, y, width, height);
-	//LocalToScreen(x, y);
+	// Push3DView expects screen coordinates, including the menu position.
+	ParentLocalToScreen(x, y);
 
 	CViewSetup view;
 	view.x = x;
@@ -150,9 +151,9 @@ void ModelPanel::DoRendering(Vector vecOrigin)
 
 	//render->Get
 	Frustum dummyFrustum;
-	render->Push3DView(view, 0, NULL, ::view->GetFrustum());
+	render->Push3DView(view, 0, NULL, dummyFrustum);
 	DrawModels();
-	render->PopView(::view->GetFrustum());
+	render->PopView(dummyFrustum);
 }
 
 //-----------------------------------------------------------------------------

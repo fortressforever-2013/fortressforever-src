@@ -214,8 +214,9 @@ public:
 
 		//SetTextInset(10, 7);
 		SetContentAlignment(a_west);
-		m_pProgressBar->SetSize( GetWide() - 100, GetTall() );
-		m_pProgressBar->SetPos( 100, 0 );
+		const int inset = scheme()->GetProportionalScaledValueEx(GetScheme(), 100);
+		m_pProgressBar->SetSize( max(0, GetWide() - inset), GetTall() );
+		m_pProgressBar->SetPos( inset, 0 );
 	}
 
 	void SetMaxValue( float flMaxValue )
