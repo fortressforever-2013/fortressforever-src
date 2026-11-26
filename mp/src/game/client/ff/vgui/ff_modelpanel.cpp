@@ -116,7 +116,7 @@ void ModelPanel::SetupPositioningAndLighting(Vector &vecOrigin)
 
 	// Move model in front of our view
 	m_hModel->SetAbsOrigin(vecOrigin);
-	m_hModel->SetAbsAngles(QAngle(0, /*210*/ 100.0f * gpGlobals->curtime, 0));
+	m_hModel->SetAbsAngles(QAngle(0, /*210*/ 50.0f * gpGlobals->curtime, 0));
 }
 
 //-----------------------------------------------------------------------------
