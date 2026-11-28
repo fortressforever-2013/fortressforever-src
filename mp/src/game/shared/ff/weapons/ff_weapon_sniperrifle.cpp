@@ -206,7 +206,7 @@ void CFFWeaponLaserDot::SetLaserPosition(const Vector &origin)
 			// Okay so beams. yes.
 			if (!pOwner->IsLocalPlayer()) 
 			{
-				Vector v1 = tr.endpos - tr.startpos;
+/*				Vector v1 = tr.endpos - tr.startpos;
 				Vector v2 = C_BasePlayer::GetLocalPlayer()->EyePosition() - tr.startpos;
 
 #if 1
@@ -242,8 +242,11 @@ void CFFWeaponLaserDot::SetLaserPosition(const Vector &origin)
 					color32 colour = { 255, 0, 0, alpha * flVisibility };
 
 					FX_DrawLine(tr.startpos, tr.endpos, flVisibility, m_pMaterial, colour);
-				}
-#endif
+				} */
+				float flWidth = max(1.0f, CalcDistanceToLineSegment (CurrentViewOrigin(), tr.startpos, tr.endpos) * 0.002f);
+				color32 colour = {255, 0, 0, alpha};
+
+				FX_DrawLine(tr.startpos, tr.endpos, flWidth, m_pMaterial, colour);
 			}
 		}
 		else
