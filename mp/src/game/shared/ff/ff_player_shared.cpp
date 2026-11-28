@@ -72,9 +72,11 @@ ConVar sv_motd_enable( "sv_motd_enable", "1", FCVAR_REPLICATED | FCVAR_NOTIFY, "
 //ConVar ffdev_snipertracesize("ffdev_snipertracesize", "0.25", FCVAR_FF_FFDEV_REPLICATED);
 //ConVar ffdev_mancannon_commandtime( "ffdev_mancannon_commandtime", "0.3", FCVAR_FF_FFDEV_REPLICATED );
 //ConVar ffdev_sniper_headshotmod( "ffdev_sniper_headshotmod", "2.0", FCVAR_FF_FFDEV_REPLICATED );
-#define HEADSHOT_MOD 2.0f //ffdev_sniper_headshotmod.GetFloat()
+#define HEADSHOT_MOD 3.0f //ffdev_sniper_headshotmod.GetFloat()
 //ConVar ffdev_sniper_legshotmod( "ffdev_sniper_legshotmod", "1.0", FCVAR_FF_FFDEV_REPLICATED );
-#define LEGSHOT_MOD 1.0f //ffdev_sniper_legshotmod.GetFloat()
+#define HEADSHOT_MOD_PARTIAL 1.5f
+// hlieb: doesnt deal full headshot damage if the sr is not fully charged
+#define LEGSHOT_MOD 0.5f //ffdev_sniper_legshotmod.GetFloat()
 //ConVar ffdev_sniper_legshot_time( "ffdev_sniper_legshot_time", "5.0", FCVAR_FF_FFDEV_REPLICATED );
 #define LEGSHOT_TIME 5.0f //ffdev_sniper_legshot_time.GetFloat()
 //AfterShock: radiotag time is in ff_player.cpp under RADIOTAG_DURATION
@@ -229,10 +231,10 @@ bool CFFPlayer::FFAnim_CanMove()
 }
 
 //ConVar sniperrifle_basedamage( "ffdev_sniperrifle_basedamage", "45", FCVAR_FF_FFDEV_REPLICATED, "Base Damage for Sniper Rifle" );
-#define	SR_BASE_DAMAGE 25.0f // sniperrifle_basedamage.GetFloat()
+#define	SR_BASE_DAMAGE 50.0f // sniperrifle_basedamage.GetFloat()
 
 //ConVar sniperrifle_basedamagemax( "ffdev_sniperrifle_basedamagemax", "275", FCVAR_FF_FFDEV_REPLICATED, "Base Max Damage for Sniper Rifle" );
-#define	SR_BASE_DAMAGE_MAX 225.0f // sniperrifle_basedamagemax.GetFloat()
+#define	SR_BASE_DAMAGE_MAX 150.0f // sniperrifle_basedamagemax.GetFloat()
 
 void CFFPlayer::FireBullet(
 						   Vector vecSrc, 	// shooting postion
@@ -353,6 +355,10 @@ void CFFPlayer::FireBullet(
 		{
 			DevMsg("Headshot, damage multiplied by %f\n", HEADSHOT_MOD );
 			flCurrentDamage *= HEADSHOT_MOD;
+
+			float flHeadshotMod = (flSniperRifleCharge >= FF_SNIPER_MAXCHARGE)?HEADSHOT_MOD : HEADSHOT_MOD_PARTIAL;
+			DevMsg("Headshot, damage multiplied by %f\n", flHeadshotMod);
+			flCurrentDamage*= flHeadshotMod;
 
 			bHeadshot = true;
 
@@ -533,7 +539,7 @@ void CFFPlayer::FireBullet(
 
 	if (tr.m_pEnt->IsPlayer())
 	{
-		info.ScaleDamageForce(0.01f);
+		info.ScaleDamageForce(0.0f);
 	}
 
 	if (bHeadshot)
