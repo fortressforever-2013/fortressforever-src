@@ -1221,9 +1221,9 @@ int CFFBuildableObject::OnTakeDamage( const CTakeDamageInfo &info )
 	adjustedDamage.SetDamage( adjustedDamage.GetDamage() * 1.0f );
 
 	// Sniper Rifle nerf
-	CFFWeaponBase *pInflictorWeapon = dynamic_cast<CFFWeaponBase*>(adjustedDamage.GetInflictor());
-	if (pInflictorWeapon && pInflictorWeapon->GetWeaponID() == FF_WEAPON_SNIPERRIFLE)
-	adjustedDamage.SetDamage(adjustedDamage.GetDamage() * 0.5f);
+	//CFFWeaponBase *pInflictorWeapon = dynamic_cast<CFFWeaponBase*>(adjustedDamage.GetInflictor());
+	//if (pInflictorWeapon && pInflictorWeapon->GetWeaponID() == FF_WEAPON_SNIPERRIFLE)
+	//adjustedDamage.SetDamage(adjustedDamage.GetDamage() * 0.5f);
 
 	// Sorry trepids, not putting this one check in LUA
 	// Bug #0000333: Buildable Behavior (non build slot) while building
